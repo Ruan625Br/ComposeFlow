@@ -1,6 +1,8 @@
 ---
 title: Overview
-description: Overview of the ComposeFlow 
+description: Overview of the ComposeFlow
+sidebar:
+  order: 0
 ---
 
 Welcome to **ComposeFlow**, the ultimate visual development platform for creating modern, cross-platform applications. With ComposeFlow, you can effortlessly build apps targeting **Android**, **iOS**, and the **Web** using a powerful drag-and-drop **UI builder** based on **Compose Multiplatform**.
@@ -34,10 +36,7 @@ Enhance your apps with powerful backend capabilities through built-in **Firebase
 - **Cloud Firestore Support**: Leverage Firestore for scalable and flexible database solutions.
 - **Push Notifications**: Engage your users with targeted push notifications.
 
-:::tip
-aaaa
+:::caution
+ComposeFlow is still in an alpha stage, some Firebase integrations are not implemented at this stage.
 :::
 
-## Further reading
-
-- Read [about how-to guides](https://diataxis.fr/how-to-guides/) in the Diátaxis framework

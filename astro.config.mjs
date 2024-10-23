@@ -15,19 +15,19 @@ export default defineConfig({
 				src: '/logo.png',
 				alt: 'ComposeFlow Logo',
 			},
-			sidebar: [
-                {
+			sidebar: [{
                 	label: 'Getting started',
                 	autogenerate: { directory: 'getting_started' },
-                },
-				{
+                }, {
+                    label: 'Basics',
+                    autogenerate: { directory: 'basics' },
+                }, {
+                    label: 'Firebase',
+                    autogenerate: { directory: 'firebase' },
+                }, {
 					label: 'Guides',
-					items: [
-						// Each item here is one entry in the navigation menu.
-						{ label: 'Example Guide', slug: 'guides/example' },
-					],
-				},
-				{
+                	autogenerate: { directory: 'guides' },
+				}, {
 					label: 'Reference',
 					autogenerate: { directory: 'reference' },
 				},
