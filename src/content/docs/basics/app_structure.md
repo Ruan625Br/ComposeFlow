@@ -88,12 +88,18 @@ Each component plays a vital role in the development process. Below is a detaile
 
 ---
 
-### 5. Assets and Resources
+### 5. Themes
+
+**Themes** allow you to manage the overall look and feel of your application, including colors, typography, and other stylistic elements. By defining themes, you can ensure a consistent user interface across your app and easily make global style changes.
+
+- **Color Scheme**: Define a set of colors for primary, secondary, background, surface, error, and other elements. This helps maintain visual consistency and supports features like dark mode.
+- **Typography**: Customize fonts, sizes, weights, and styles for various text elements such as headings, body text, captions, and buttons.
+
+### 6. Assets and Resources
 
 Manage your app's assets and resources within the project.
 
 - **Images and Icons**: Include visual assets like logos, background images, and icons.
-- **Fonts and Styles**: Customize the typography and styling of your application.
 - **Localization Files**: Support multiple languages by providing localized strings.
 
 **Example**:
@@ -103,13 +109,13 @@ Manage your app's assets and resources within the project.
 
 ---
 
-### 6. Settings and Configurations
+### 7. Settings and Configurations
 
 Configure global settings that affect the entire application.
 
 - **App Metadata**: Define app name, version, and package identifiers.
+- **Firebase configuration**: Define the Firebase project ID and other configuration settings.
 - **Platform-Specific Settings**: Configure settings unique to Android, iOS, or Web platforms.
-- **Build Configurations**: Set up build variants, environments, and deployment options.
 
 **Example**:
 

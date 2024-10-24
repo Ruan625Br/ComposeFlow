@@ -5,10 +5,121 @@ sidebar:
   order: 0
 ---
 
-## UI builder
+import { Steps } from '@astrojs/starlight/components';
+
+# UI Basics in ComposeFlow
+
+Understanding the fundamental UI building blocks in ComposeFlow is essential for designing intuitive and engaging user interfaces. This document provides an overview of the UI basics, focusing on:
+
+- **Composables**
+- **Components**
+- **Screens**
+
+## Composables
+
+**Composables** are the primitive UI building blocks in ComposeFlow. They represent the smallest units of UI that you can use to construct your application's interface. Composables are analogous to widgets or views in other frameworks and are based on the concept of composable functions from Jetpack Compose.
+
+### Examples of Composables:
+
+- **Text**: Displays textual content.
+- **Icon**: Shows an icon from a predefined set or custom assets.
+- **Image**: Renders an image from local resources or remote URLs.
+- **Button**: An interactive element that triggers actions when clicked.
+- **TextField**: Allows user input of text data.
+- **Checkbox**: Represents a binary choice, either checked or unchecked.
+
+### Usage in ComposeFlow:
+
+- **Drag-and-Drop Interface**: Add composables to your screens by dragging them from the components library onto the design canvas.
+- **Modifier Configuration**: Customize composables by setting `Modifier` such as color, size, text content, and more through the inspector panel.
+- **Event Handling**: Assign actions to composables like buttons by defining event handlers that respond to user interactions.
 
 <video controls>
-  <source src="/video/uibuilder_drop_button.webm" type="video/webm" />
+  <source src="/video/drag_drop_composables.webm" type="video/webm" />
 </video>
 
-## Layout basics
+---
+
+## Components
+
+**Components** are collections of composables grouped together to create reusable UI elements. They encapsulate complex UI patterns or functionalities, allowing you to maintain consistency and streamline your development process.
+
+### Characteristics:
+
+- **Modular Design**: Components promote modularity by encapsulating related UI elements and logic.
+- **Reusability**: Once created, components can be reused across multiple screens and projects.
+- **Parameterization**: Components can accept input parameters to customize their behavior and appearance when reused.
+
+### Examples of Components:
+
+- **User Profile Card**:
+
+  - Composed of an `Image` for the avatar, `Text` for the username, and additional `Text` or `Icon` composables for status indicators.
+  - Used in lists of users, messages, or social feeds.
+
+- **Product Item**:
+
+  - Combines an `Image` of the product, `Text` for the name and price, and a `Button` to add to cart.
+  - Utilized in shopping apps to display items in a catalog.
+
+### Creating Components in ComposeFlow:
+
+<Steps>
+1. **Select a Composable**: Select a composable you want to conovert to a component.
+2. **Right click**: Open the context menu by Performing the right click.
+2. **Select `Convert to Component`**: Use the "Create Component" option to encapsulate them.
+3. **Add name to the component**: Add name to the component.
+4. **Reuse**: Drag the newly created component from the components library onto any screen.
+</Steps>
+
+<video controls>
+  <source src="/video/component_example.webm" type="video/webm" />
+</video>
+
+---
+
+## Screens
+
+**Screens** are the top-level containers that represent distinct views or pages within your application. Each screen is a composition of composables and components arranged to deliver specific functionality or content to the user.
+
+### Characteristics:
+
+- **Entry Points**: Screens are accessed through navigation and represent different sections of your app.
+- **Layout Structure**: Define the arrangement of UI elements using layout composables like `Column`, `Row`, or `Box`.
+
+### Examples of Screens:
+
+- **Home Screen**:
+
+  - Provides an overview or dashboard with key information and navigation options.
+  - May include components like a welcome message, featured content, or quick actions.
+
+- **Login Screen**:
+
+  - Allows users to authenticate with credentials.
+  - Contains `TextField` composables for username and password, and a `Button` for submission.
+
+- **Settings Screen**:
+
+  - Offers configurable options for the app.
+  - Utilizes components like toggles, sliders, and dropdown menus.
+
+### Building Screens in ComposeFlow:
+
+1. **Start with a Layout**: Choose a suitable layout composable to structure your screen (e.g., `Column` for vertical stacking).
+2. **Add Composables and Components**: Drag and drop elements onto the canvas, arranging them within the layout.
+3. **Configure Modifiers**: Customize the modifiers of each element to suit your design.
+4. **Implement Navigation**: Use navigation components or event handlers to link screens together.
+5. **Test Responsiveness**: Preview the screen on different devices to ensure it adapts well to various screen sizes.
+
+---
+
+## Relationships Between UI Building Blocks
+
+- **Composables** are the fundamental elements used to build **Components**.
+- **Components** are higher-level constructs made up of multiple composables, designed for reuse and encapsulation.
+- **Screens** are composed of composables and components, forming the complete user interface for a particular view in your app.
+
+This hierarchical structure allows you to build complex interfaces efficiently by reusing and nesting elements.
+
+---
