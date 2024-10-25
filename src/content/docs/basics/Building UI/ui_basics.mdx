@@ -38,6 +38,34 @@ Understanding the fundamental UI building blocks in ComposeFlow is essential for
   <source src="/video/drag_drop_composables.webm" type="video/webm" />
 </video>
 
+### Layout Composables
+
+Some composables are designed to have child composables, enabling you to build hierarchical UI structures. These are known as **Layout Composables**, and they determine how their child composables are arranged on the screen.
+
+#### Key Points:
+
+- **Hierarchical Structure**: Layout composables allow you to nest composables within each other, creating a tree-like UI hierarchy.
+- **Parent-Child Relationship**: How child composables are laid out depends on the parent layout composable.
+- **Common Layout Composables**:
+
+  - **Column**:
+    - Arranges child composables vertically, one after another.
+    - Useful for stacking elements from top to bottom.
+  - **Row**:
+    - Arranges child composables horizontally, side by side.
+    - Ideal for placing elements next to each other.
+  - **Box**:
+    - Stacks child composables on top of each other.
+    - Useful for creating overlays or backgrounds.
+
+![composable_layout](/image/composable_layout.jpeg)
+
+#### Usage in ComposeFlow:
+
+- **Adding Child Composables**: Drag and drop composables into a layout composable to build your UI hierarchy.
+- **Customizing Layouts**: Adjust properties like alignment, spacing, and padding to fine-tune how child composables are displayed.
+- **Combining Layouts**: Nest different layout composables within each other to create complex and responsive UI designs.
+
 ---
 
 ## Components
@@ -106,11 +134,15 @@ Understanding the fundamental UI building blocks in ComposeFlow is essential for
 
 ### Building Screens in ComposeFlow:
 
-1. **Start with a Layout**: Choose a suitable layout composable to structure your screen (e.g., `Column` for vertical stacking).
-2. **Add Composables and Components**: Drag and drop elements onto the canvas, arranging them within the layout.
-3. **Configure Modifiers**: Customize the modifiers of each element to suit your design.
-4. **Implement Navigation**: Use navigation components or event handlers to link screens together.
-5. **Test Responsiveness**: Preview the screen on different devices to ensure it adapts well to various screen sizes.
+<Steps>
+1. **Click new screen button**: Click the new screen button at the top-left corner of the canvas area.
+2. **Select the screen template**: Select the screen template from the built-in list of screens.
+3. **Name the screen**: Add the name to the screen.
+</Steps>
+
+<video controls>
+  <source src="/video/new_screen.webm" type="video/webm" />
+</video>
 
 ---
 
