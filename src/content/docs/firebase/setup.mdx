@@ -1,0 +1,59 @@
+---
+title: Set up Firebase integration
+description: Explains how to set up the Firebase integration 
+sidebar:
+  order: 0
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+Integrating Firebase with ComposeFlow allows you to add powerful backend services to your app, such as authentication, real-time databases, cloud storage, and more. This guide will walk you through the basic steps to set up Firebase in your ComposeFlow project.
+
+## Prerequisites
+
+- **ComposeFlow Installed**: Ensure you have the latest version of ComposeFlow.
+- **Firebase Account**: You have a Google account and access to the Firebase Console.
+
+---
+
+## Steps to Set Up Firebase in ComposeFlow
+
+### Step 1: Create a Firebase Project
+
+<Steps>
+1. Go to the [Firebase Console](https://console.firebase.google.com/).
+2. Click on **"Add project"** or **"Create a project"**.
+3. Enter a project name and follow the on-screen instructions to create your Firebase project.
+</Steps>
+
+### Step 2: Obtain Your Firebase Project ID
+
+<Steps>
+1. In the Firebase Console, navigate to your project's **Settings**:
+    - Click on the **gear icon** next to **"Project Overview"**.
+    - Select **"Project settings"** from the dropdown.
+2. Under the **"Your project"** section, locate and copy your **Project ID**.
+</Steps>
+
+### Step 3: Configure Firebase in ComposeFlow
+
+<Steps>
+1. Open your **ComposeFlow** project.
+2. Navigate to **Settings** > **Firebase** in the ComposeFlow menu.
+3. Paste the **Project ID** you copied from Firebase into the **Project ID** field.
+4. Click **"Connect"** to link your ComposeFlow project with Firebase.
+</Steps>
+
+:::note
+Connecting to the Firebase project may require additional permission browder than signing in with
+ComposeFlow. This step may require you to grant additional scope by opening the browser.
+:::
+
+![After setup firebase integration](/image/firebase_after_setup.png)
+
+---
+
+## Next Steps
+
+- **Enable Firebase Services**: In the Firebase Console, enable the services you want to use (e.g., Authentication, Firestore, Storage).
+- **Configure in ComposeFlow**: Use ComposeFlow's tools to integrate Firebase services into your app, such as adding authentication flows or database interactions.

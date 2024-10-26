@@ -1,0 +1,165 @@
+---
+title: Authentication
+description: Explains how to incorporate Firebase authentication
+sidebar:
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Authentication in ComposeFlow
+
+Integrating authentication into your ComposeFlow app allows you to manage user access and personalize user experiences. ComposeFlow leverages Firebase Authentication to provide secure and easy-to-implement authentication methods.
+
+---
+
+## Prerequisites
+
+Before you begin, ensure the following steps are completed:
+
+1. **Firebase Integration**: Your ComposeFlow project is connected to Firebase. If not, follow the [Firebase Setup Guide](/firebase/setup) to integrate Firebase with your ComposeFlow project.
+
+2. **Enable Authentication Providers**:
+
+    - Navigate to the [Firebase Console](https://console.firebase.google.com/) for your project.
+    - Go to **Authentication** > **Sign-in method**.
+    - Enable the authentication providers you wish to use (e.g., Email/Password, Google, Facebook).
+    - Configure any required settings for each provider.
+
+![firebase authentication is enabled](/image/firebase_authentication_enabled.png)
+
+---
+
+## Enabling Authentication in ComposeFlow
+
+Once Firebase Authentication is enabled and configured, ComposeFlow automatically provides access to user authentication features:
+
+- **User Properties as States**: Signed-in user properties such as **email**, **display name**, and **user ID** become available as states within your app. You can use these states to personalize content or manage user sessions.
+
+![signed in user properties](/image/signed_in_user_properties.png)
+
+- **Authentication Actions**: A set of authentication-related actions becomes available, including:
+
+    - **Sign in with Email/Password**
+    - **Sign in with Google**
+    - **Sign Out User**
+
+![Auth actions](/image/auth_actions.png)
+
+:::note
+At the moment, only Google social login is enabled as a auth provider. But they'll be added in the future release.
+:::
+
+---
+
+## Using the Login Screen Template
+
+ComposeFlow offers a **Login Screen** template that simplifies the process of setting up user authentication.
+
+### Step 1: Add the Login Screen Template
+
+1. **Add a New Screen**:
+
+    - Go to **Screens** in the **Project Explorer**.
+    - Click **"+"** to add a new screen.
+    - Choose **"Login Screen"** from the list of templates.
+    - Name the screen (such as **"LoginScreen"**).
+
+![Login screen template](/image/login_screen_template.png)
+
+2. **Review the Pre-built Design**:
+
+    - The template includes the necessary UI elements such as **Email** and **Password** fields, **Login** button, and options for third-party sign-in providers if enabled.
+    - Authentication actions are already assigned to the appropriate triggers.
+
+### Step 2: Customize the Login Screen
+
+1. **Modify UI Elements**:
+
+    - Adjust the design to match your app's theme.
+    - Add or remove fields as necessary.
+
+2. **Check Assigned Actions**:
+
+    - Select the **Login** button.
+    - In the **Inspector panel**, verify that the `onClick` trigger has the **"Sign in with Email/Password"** action assigned.
+
+3. **Configure Third-Party Sign-In** (Optional):
+
+    - If you have enabled providers like Google Sign-In, ensure the corresponding buttons have the **"Sign in with Google"** action assigned.
+
+---
+
+## Setting the Initial Screen
+
+ComposeFlow allows you to set the initial screen of your app based on the user's authentication status.
+
+### Step 1: Navigate to Preferences
+
+1. In ComposeFlow, go to **Settings** > **Preferences**.
+
+### Step 2: Configure the Initial Screen
+
+1. **Initial Screen Dropdown**:
+
+    - Locate the **"Initial Screen"** setting.
+    - Here you can specify which screen should be displayed when the app launches.
+
+2. **Set Conditional Navigation**:
+
+    - Choose **"LoginScreen"** as the initial screen for users who are not signed in.
+
+![Initial screen](/image/initial_screen_setting.png)
+
+---
+
+## Implementing Authentication Actions Manually
+
+If you prefer to build your authentication flow from scratch, you can manually assign authentication actions.
+
+### Step 1: Design the Authentication UI
+
+1. **Create a Custom Login Screen**:
+
+    - Add a new screen and design your own layout with **TextField** composables for email and password, and a **Button** for login.
+
+### Step 2: Assign Authentication Actions
+
+1. **Select the Login Button**:
+
+    - Click on the **Login** button on your canvas.
+
+2. **Add Sign-In Action**:
+
+    - In the **Inspector panel**, under **Events**, find the `onClick` trigger.
+    - Click **"Add Action"** and select **"Sign in with Email/Password"**.
+
+3. **Configure the Action**:
+
+    - **Email Field**: Bind the action to the email input field.
+    - **Password Field**: Bind the action to the password input field.
+
+---
+
+## Additional Authentication Features
+
+### Sign Out
+
+- **Implement a Sign-Out Button**:
+
+    - Add a **Button** for signing out.
+    - Assign the **"Sign Out User"** action to the `onClick` trigger.
+
+### Password Reset
+
+- **Provide Password Reset Option**:
+
+    - Add a **"Forgot Password"** link.
+    - Assign the **"Reset Password"** action to initiate a password reset email.
+
+### Third-Party Sign-In
+
+- **Enable Social Login**:
+
+    - Add buttons for providers like Google or Facebook.
+    - Assign actions like **"Sign in with Google"** to the `onClick` triggers.
