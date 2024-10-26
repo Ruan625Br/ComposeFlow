@@ -1,0 +1,122 @@
+---
+title: Understanding states
+description: Explains how to deal with states in ComposeFlow
+sidebar:
+  order: 2
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Understanding States in ComposeFlow
+
+In ComposeFlow, **state** is a fundamental concept that drives the dynamic behavior of your application. Managing state effectively allows your UI to react to data changes seamlessly, providing a responsive and interactive user experience. This document will help you understand the basics of state in ComposeFlow and how to work with state hierarchies.
+
+---
+
+## State Basics
+
+### What is State?
+
+- **State** refers to any value in your app that can change over time.
+- It represents the current data or conditions that determine how your app behaves and what it displays.
+
+### How State Works in ComposeFlow
+
+- **Declarative UI**: ComposeFlow generates apps using Compose Multiplatform, following the same principles as Jetpack Compose, which is built on a declarative UI approach. This means the UI is a reflection of the current state.
+- **Automatic Updates**: When the state changes, the UI automatically updates to reflect those changes.
+
+### Assigning State to Values
+
+- **Binding State to UI Elements**: You can assign a state to a property of a composable. For example, the value of a `TextField` composable can be bound to a state variable.
+- **Reactive Updates**: Once a state is assigned, any change in the state will be immediately reflected in all bound UI elements due to the declarative nature of ComposeFlow.
+
+### Example: TextField and Text Binding
+
+- **User Input Handling**: When you have a `TextField` composable where users can input text, you can bind its state to display the input elsewhere in your app.
+- **Real-Time Reflection**: As the user types in the `TextField`, any `Text` composable bound to the same state will update in real-time to display the current input.
+
+---
+
+## States Hierarchy
+
+State management in ComposeFlow is organized hierarchically to provide scope and control over where and how states are used.
+
+### Types of States
+
+1. **App States**:
+    - **Global Scope**: Visible and accessible throughout the entire application.
+    - **Use Cases**: Ideal for data that needs to be shared across multiple screens or components, such as user authentication status or global settings.
+
+2. **Local States**:
+    - **Scoped Visibility**: Visible only within the screen or component where they are defined.
+    - **Use Cases**: Suitable for data that is relevant only to a specific part of the UI, like form inputs or toggle states.
+
+### Understanding State Scope
+
+- **App States**:
+    - **Global Access**: Any screen or component can access and modify app states.
+    - **Consistency**: Ensures that all parts of the app reflect the same data for shared values.
+
+- **Local States**:
+    - **Encapsulation**: Keeps state management localized, preventing unintended side effects on other parts of the app.
+    - **Independence**: Screens and components manage their own states without interfering with each other.
+
+### State Hierarchy Structure
+
+- In ComposeFlow, components do not belong to any specific screen, and both screens and components can have their own local states.
+- The state hierarchy is essentially two levels:
+    - **App State**: Global level.
+    - **Local State**: Includes both screen states and component states at the same level.
+
+### Automatic Creation of Local States
+
+- **Implicit State Creation**:
+    - ComposeFlow simplifies state management by automatically creating local states when certain composables are added to the canvas.
+- **Example**: TextField Composable
+    - When you drag a `TextField` onto the canvas, ComposeFlow automatically creates a local state variable to hold the input text.
+- **Benefits**:
+    - **Ease of Use**: Reduces the need for manual state setup.
+    - **Encapsulation**: Keeps the state localized to the composable, promoting cleaner state management.
+
+---
+
+## Practical Examples
+
+### Example 1: Binding a TextField to a Text Composable
+
+- **Scenario**: You want to display user input from a `TextField` elsewhere on the screen.
+- **Implementation**:
+    - The `TextField` has an automatically created local state representing its input value.
+    - You can bind a `Text` composable to the same state to display the input in real-time.
+
+<video controls>
+  <source src="/video/state_demo_textfield_text.webm" type="video/webm" />
+</video>
+
+### Example 2: Managing Toggle States in a composable
+
+- **Scenario**: You have a custom toggle switch composable that changes appearance when toggled.
+- **Implementation**:
+    - The composable has its own local state to track whether it's on or off.
+    - The state change affects only the composable, without impacting other parts of the app.
+
+<video controls>
+  <source src="/video/state_toggle_visibility.webm" type="video/webm" />
+</video>
+
+
+### Example 3: Sharing Data Across Components with App State
+
+- **Scenario**: Multiple components need to display the user's current score in a game.
+- **Implementation**:
+    - An app state variable holds the user's score.
+    - All relevant components and screens bind to this app state to display the updated score consistently.
+
+---
+
+## Key Takeaways
+
+- **State Drives UI**: In ComposeFlow, the UI is a direct reflection of the current state. Changes in state automatically trigger UI updates.
+- **Two-Level Hierarchy**: States are organized into app states (global) and local states (specific to screens or components).
+- **Automatic State Management**: ComposeFlow simplifies state handling by automatically creating local states for certain composables.
+- **Declarative Advantage**: Leveraging the declarative nature of ComposeFlow allows for more predictable and maintainable applications.
