@@ -1,0 +1,215 @@
+---
+title: Actions
+description: Explains how to deal with actions in ComposeFlow
+sidebar:
+  order: 3
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Understanding Actions in ComposeFlow
+
+In ComposeFlow, **Actions** are predefined behaviors that are triggered primarily by user interactions or specific events within your application. Actions enable you to define how your app responds to user inputs, navigational changes, or other events, allowing you to create interactive and dynamic user experiences without writing code.
+
+---
+
+## What are Actions?
+
+- **Actions** are predefined operations that can be assigned to UI elements or triggered by certain events in your app.
+- They allow you to specify what should happen in response to user interactions, such as clicks, swipes, or screen loads.
+- Actions can perform a variety of tasks, including navigating between screens, displaying messages, updating states, or calling external APIs.
+
+---
+
+## How Actions Work in ComposeFlow
+
+### Triggers
+
+- **Triggers** are events that initiate an action. They are associated with composables (UI elements) and depend on the type of the composable.
+- Common triggers include:
+  - **onClick**: Triggered when a user clicks on a button or clickable element.
+  - **onValueChange**: Triggered when the value of an input field changes.
+  - **onInitialLoad**: Triggered when a screen becomes visible for the first time.
+
+### Assigning Actions to Triggers
+
+- You can assign one or more actions to a trigger associated with a composable.
+- When the trigger event occurs, the assigned actions are executed in the order they were added.
+- This allows you to define complex behaviors in response to a single user interaction.
+
+---
+
+## Examples of Actions and Triggers
+
+### Example 1: Showing a Snackbar on Button Click
+
+- **Trigger**: `onClick` event of a **Button** composable.
+- **Action**: Show a **Snackbar** message to the user.
+
+**How to Implement:**
+
+<Steps>
+
+1. **Add a Button Composable**: Place a button on your screen from the components library.
+2. **Assign an Action**:
+   - Select the button and navigate to the **Inspector panel**.
+   - Under the **"Actions"** tab, find the `onClick` trigger.
+   - Click **"Add Action"** and choose **"Show Snackbar"** from the list of actions.
+   - Enter the message you want to display, e.g., **"Button clicked!"**.
+3. **Test the Action**:
+   - Run your app and click the button to see the snackbar appear.
+
+</Steps>
+
+<video controls>
+  <source src="/video/action_demo_snackbar.webm" type="video/webm" />
+</video>
+
+### Example 2: Navigating to a Screen When an Item is Selected
+
+- **Trigger**: `onItemSelected` event of a **List** or **Dropdown** composable.
+- **Action**: Navigate to a different screen based on the selected item.
+
+**How to Implement:**
+
+1. **Add a List Composable**: Place a list on your screen containing selectable items.
+2. **Assign an Action**:
+   - Select the list and locate the `onItemSelected` trigger in the **Inspector panel**.
+   - Click **"Add Action"** and choose **"Navigate to Screen"**.
+   - Select the target screen you want to navigate to.
+3. **Configure Navigation**:
+   - Optionally pass parameters or data to the target screen if needed.
+4. **Test the Action**:
+   - Run your app and select an item from the list to navigate to the new screen.
+
+### Example 3: Calling an External API on Screen Load
+
+- **Trigger**: `onInitialLoad` event of a **Screen**.
+- **Action**: Fetch data from an external API and display it.
+
+**How to Implement:**
+
+1. **Select the Screen**: Open the screen where you want to fetch data upon loading.
+2. **Assign an Action**:
+   - In the **Inspector panel**, find the `onInitialLoad` trigger.
+   - Click **"Add Action"** and choose **"Call External API"**.
+   - Configure the API endpoint, request method, and any necessary headers or parameters.
+3. **Bind Data to UI**:
+   - Use the data returned from the API to populate composables on your screen.
+4. **Test the Action**:
+   - Run your app and navigate to the screen to see the data fetched and displayed.
+
+---
+
+## Types of Actions
+
+ComposeFlow provides a variety of actions that you can use to define your app's behavior:
+
+- **Navigation Actions**:
+  - **Navigate to Screen**: Switch to a different screen within your app.
+  - **Go Back**: Return to the previous screen.
+
+- **Display Actions**:
+  - **Show Snackbar**: Display a brief message at the bottom of the screen.
+  - **Show Dialog**: Present a modal dialog with custom content.
+
+- **State Management Actions**:
+  - **Update State**: Modify the value of a state variable.
+  - **Reset State**: Reset a state variable to its default value.
+
+- **Data Actions**:
+  - **Call External API**: Make HTTP requests to external services.
+  - **Load Data**: Retrieve data from a local or remote source.
+
+- **Media Actions**:
+  - **Play Sound**: Play an audio clip.
+  - **Open URL**: Launch a web browser to a specified URL.
+
+- **Miscellaneous Actions**:
+  - **Trigger Animation**: Start an animation sequence.
+  - **Custom Action**: Define custom behaviors using integrations or extensions.
+
+:::note
+Some actions are not implemented in the alpha version of ComposeFlow, such as media actions or
+custom actions. Stay tuned for updates.
+:::
+
+---
+
+## Associating Actions with Composables
+
+### Understanding Composable Triggers
+
+- Different composables support different sets of triggers based on their functionality.
+- **Button**:
+  - Trigger: `onClick`
+- **TextField**:
+  - Trigger: `onSubmit`, `onChange`, `onFocused`, `onUnfocused`
+- **Switch**:
+  - Trigger: `onChange`
+- **Screen**:
+  - Trigger: `onInitialLoad`
+
+### Steps to Assign Actions
+
+1. **Select the Composable**: Click on the UI element in the design canvas.
+2. **Access the Inspector panel**: On the right side of the interface.
+3. **Locate the Actions Section**: Find the list of available triggers for the selected composable.
+4. **Add an Action**:
+   - Click on the desired trigger event.
+   - Click **"Add Action"** and choose from the list of predefined actions.
+5. **Configure the Action**: Set any required parameters or options for the action.
+
+---
+
+## Best Practices for Using Actions
+
+- **Keep It Simple**: Start with basic actions to understand how they work before combining multiple actions.
+- **Order Matters**: When assigning multiple actions to a single trigger, the order in which they are executed can affect the outcome.
+- **Test Thoroughly**: Always test your actions to ensure they behave as expected in different scenarios.
+- **Manage Dependencies**: Be cautious of actions that depend on the results of previous actions. Ensure data is available when needed.
+
+---
+
+## Advanced Usage
+
+### Combining Multiple Actions
+
+- You can assign multiple actions to a single trigger to perform a sequence of operations.
+- **Example**:
+  - **Trigger**: `onClick` of a **Submit** button.
+  - **Actions**:
+    1. **Validate Input**: Check if the required fields are filled.
+    2. **Call External API**: Submit the data to a server.
+    3. **Navigate to Screen**: Move to a confirmation screen upon success.
+    4. **Show Snackbar**: Display a success or error message.
+
+### Conditional Actions
+
+- Some actions may allow you to set conditions under which they are executed.
+- **Example**:
+  - Only navigate to the next screen if the API call returns a success response.
+
+### Custom Actions
+
+- For advanced users, ComposeFlow may offer the ability to create custom actions through integrations or by using scripting capabilities.
+- **Note**: This depends on the features provided by ComposeFlow and may require additional setup.
+
+:::warn
+As of the alpha version of ComposeFlow, custom actions are not implemented, but it's on the roadmap.
+:::
+---
+
+## Understanding Limitations
+
+- **Composable-Specific Triggers**: Not all composables support all types of triggers. Familiarize yourself with the triggers available for each composable.
+- **Platform Constraints**: Some actions may behave differently across platforms (Android, iOS, Web). Test your app on all target platforms.
+- **Performance Considerations**: Excessive or complex actions may impact app performance. Optimize where necessary.
+
+---
+
+## Conclusion
+
+Actions in ComposeFlow empower you to define interactive behaviors in your app without writing code. By understanding how to assign actions to triggers and leveraging the variety of available actions, you can create rich, dynamic user experiences that respond intuitively to user interactions.
+
+---
