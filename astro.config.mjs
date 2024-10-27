@@ -5,12 +5,10 @@ import mdx from '@astrojs/mdx';
 
 // https://astro.build/config
 export default defineConfig({
+    site: 'https://composeflow.github.io',
 	integrations: [
 		starlight({
 			title: 'ComposeFlow docs',
-			social: {
-				github: 'https://github.com/withastro/starlight',
-			},
 			logo: {
 				src: '/logo.png',
 				alt: 'ComposeFlow Logo',
