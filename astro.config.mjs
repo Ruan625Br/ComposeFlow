@@ -28,6 +28,9 @@ export default defineConfig({
 					label: 'Guides',
                 	autogenerate: { directory: 'guides' },
 				}, {
+                   	label: 'Advanced UI',
+                    autogenerate: { directory: 'advanced_ui' },
+                }, {
 					label: 'Reference',
 					autogenerate: { directory: 'reference' },
 				},

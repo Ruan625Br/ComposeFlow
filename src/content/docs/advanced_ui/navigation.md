@@ -2,7 +2,7 @@
 title: Navigation
 description: Explains the navigation in ComposeFlow
 sidebar:
-  order: 2
+  order: 1
 ---
 
 ## Understanding the navigation

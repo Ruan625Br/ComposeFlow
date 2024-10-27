@@ -40,14 +40,16 @@ Once Firebase Authentication is enabled and configured, ComposeFlow automaticall
 
 - **Authentication Actions**: A set of authentication-related actions becomes available, including:
 
-    - **Sign in with Email/Password**
+    - **Sign in with email/password**
     - **Sign in with Google**
+    - **Crate user with email/password**
     - **Sign Out User**
 
 ![Auth actions](/image/auth_actions.png)
 
 :::note
-At the moment, only Google social login is enabled as a auth provider. But they'll be added in the future release.
+At the moment, only Google social login is enabled as a third party auth provider.
+But they'll be added in the future release.
 :::
 
 ---
@@ -149,13 +151,6 @@ If you prefer to build your authentication flow from scratch, you can manually a
 
     - Add a **Button** for signing out.
     - Assign the **"Sign Out User"** action to the `onClick` trigger.
-
-### Password Reset
-
-- **Provide Password Reset Option**:
-
-    - Add a **"Forgot Password"** link.
-    - Assign the **"Reset Password"** action to initiate a password reset email.
 
 ### Third-Party Sign-In
 
