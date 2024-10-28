@@ -1,0 +1,129 @@
+---
+title: App state
+description: Explains app states in ComposeFlow
+sidebar:
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# App State in ComposeFlow
+
+App states in ComposeFlow are essential for managing and maintaining data that persists locally on the user's device. They enable you to represent and manage values or configurations throughout your app, such as user preferences, settings, and other dynamic data that needs to be accessible from any screen within the application.
+
+---
+
+## Overview
+
+- **App States**: Localized data storage mechanisms that hold values or configurations accessible across all screens in your ComposeFlow app.
+- **Persistent Storage**: Ensures that data remains available even when the app is closed or restarted.
+- **Global Accessibility**: Allows any screen within the app to read from or write to the app states, facilitating consistent data management and user experience.
+
+
+See [state management](/basics/state_management) for how states are treated in ComposeFlow.
+
+---
+
+## Defining an App State
+
+To create and manage app states in ComposeFlow, follow these steps:
+
+<Steps>
+1. **Navigate to the App State Menu**
+    - In your ComposeFlow project, go to **Settings** > **App State**.
+
+2. **Add a New App State**
+    - Click the **"Add App State"** button to initiate the creation of a new app state.
+
+3. **Fill in the App State Details**
+    - **Name**:
+        - Enter a descriptive name for your app state (e.g., `userPreferences`, `isLoggedIn`, `userProfile`).
+    - **Type of the State**:
+        - Select the appropriate data type for the state. Options include:
+            - **Primitive Types**: `String`, `Int`, `Boolean`, `Float`, etc.
+            - **Custom Data Types**: Any defined data type within your project (e.g., `UserProfile`, `Settings`).
+              See [data type guide](/guides/data_type) for how to define a custom data type.
+    - **Is List**:
+        - Toggle this flag if the app state should hold a list of items (e.g., `List<String>`, `List<UserProfile>`).
+    - **Default Value (Optional)**:
+        - Specify a default value for the app state to initialize it with a predefined value upon creation.
+
+4. **Save the App State**
+    - After filling in all necessary fields, click the **"Save"** button to finalize the creation of the app state.
+</Steps>
+
+![add new app state](/image/add_new_app_state.png)
+![new app state is added](/image/after_app_state_added.png)
+
+---
+
+## Using App States in the UI Builder
+
+Once an app state is defined, you can bind it to UI components within the UI Builder or manipulate it using actions.
+
+### **1. Binding App States to UI Components**
+
+App states can be bound to various UI elements to display dynamic data or reflect user preferences.
+
+**Steps to Bind an App State:**
+
+<Steps>
+1. **Open the UI Builder**
+    - Navigate to the screen where you want to use the app state.
+
+2. **Select a UI Component**
+    - Choose a composable that supports data binding, such as **Text**, **Switch**, **Checkbox**, **Image**, etc.
+
+3. **Bind the App State**
+    - With the composable selected, navigate to the **Inspector Panel** on the right.
+    - Locate the property you want to bind (e.g., the **Text** property of a **Text** composable).
+    - Click **"Set from State"** icon next to the text property input.
+    - In the **"Set from State"** dialog, select the desired app state from the list.
+    - Confirm the binding to link the app state to the UI component.
+</Steps>
+
+**Example: Displaying a User's Name**
+
+- **App State**: `nickName` (Type: `String`)
+- **UI Component**: **Text**
+- **Binding**: Bind the **Text** property to `userName` to display the user's name dynamically.
+
+<video controls>
+  <source src="/video/bind_app_state_to_text.webm" type="video/webm" />
+</video>
+
+:::note
+When previewing the app, the text where the `nickName` app state is bound looks empty because
+no value is assigned to the `nickName` app state at this moment.
+:::
+
+### **2. Setting App States via Actions**
+
+You can update app states in response to user interactions or other events using the **"Set State"** action.
+
+**Steps to Set an App State:**
+
+1. **Select the Triggering UI Component**
+    - Choose the UI element that will trigger the state change (e.g., a **Button**, **Switch**, **Slider**).
+
+2. **Assign the "Set State" Action**
+    - In the **Inspector Panel**, navigate to the **"Events"** section.
+    - Click **"Add Action"** and select **"Set State"** from the list of available actions.
+
+3. **Configure the "Set State" Action**
+    - **Select the App State**:
+        - Choose the app state you want to update from the dropdown menu.
+    - **Define the New Value**:
+        - Specify the new value for the app state. This can be a static value, a value derived from another state, or input from the user.
+
+**Example: Set a string App State from the user's TextField input**
+
+- **App State**: `nickName` (Type: `String`)
+- **Triggering UI Component**: **Button** that reads the text in **TextField**
+- **Action**: When the button is clicked, use the **"Set State"** action to update `nickName` app state accordingly.
+
+<video controls>
+  <source src="/video/update_app_state.webm" type="video/webm" />
+</video>
+
+---
