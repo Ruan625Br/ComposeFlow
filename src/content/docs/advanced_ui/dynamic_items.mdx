@@ -1,0 +1,187 @@
+---
+title: Dynamic number of items
+description: Explains how to generate the dynamic number of items in ComposeFlow
+sidebar:
+  order: 0
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Dynamic Number of Items in ComposeFlow
+
+In ComposeFlow, certain composables like **`LazyColumn`**, **`LazyRow`**, and **`LazyVerticalGrid`** allow you to generate a dynamic number of child items based on your data sources. This is particularly useful when you want to display lists or grids of data that can change in size, such as:
+
+- Binding to app states that contain lists of a data type.
+- Displaying results from external APIs that return JSON responses with variable lengths.
+
+---
+
+## Overview
+
+- **Lazy Composables**: Special composables that efficiently display large or dynamic datasets by only rendering items currently visible on the screen.
+- **Data Sources**: Lists or collections of data that you bind to lazy composables to generate UI elements dynamically.
+- **Dynamic Items**: The individual UI elements that represent each item in your data source.
+
+---
+
+## Steps to Implement Dynamic Items
+
+Follow these steps to create a dynamic list or grid in your ComposeFlow app:
+
+### **Step 1: Define a List Type State**
+
+<Steps>
+1. **Create or Import a Data Type**:
+
+    - Navigate to "Data Type" in the ComposeFlow menu.
+    - Create a data type, for example, define a data type called `Plant` with properties like `name`, `description`, and `imageUrl`.
+
+2. **Create a List State**:
+
+    - Navigate to the **App state** in the ComposeFlow menu.
+    - Add a new state of type `List<Plant>`.
+    - Initialize it with sample data (assuming the initial data is created by a [json like found as in Sunflower app](https://github.com/android/sunflower/blob/main/app/src/main/assets/plants.json)).
+</Steps>
+
+<video controls>
+  <source src="/video/create_list_data_type.webm" type="video/webm" />
+</video>
+
+:::note
+Alternatively, you can define other types of a list state such as the list of json response by
+calling an external API.
+:::
+
+### **Step 2: Add a Lazy Composable to Your Screen**
+
+<Steps>
+1. **Open the UI Builder**:
+
+    - Go to the screen where you want to display the dynamic list or grid.
+
+2. **Add a Lazy Composable**:
+
+    - From the **Components Library**, drag and drop a **`LazyColumn`**, **`LazyRow`**, or **`LazyVerticalGrid`** onto your canvas.
+    - **`LazyColumn`**: For vertical lists.
+    - **`LazyRow`**: For horizontal lists.
+    - **`LazyVerticalGrid`**: For grid layouts.
+</Steps>
+
+### **Step 3: Focus on the Lazy Composable**
+
+- Click on the lazy composable you just added to select it.
+- Ensure it is highlighted in the **Canvas Area** and that its properties are visible in the **Inspector panel**.
+
+![Lazy column focuseed](/image/lazy_column_focused.png)
+
+### **Step 4: Bind the Data Source**
+
+<Steps>
+1. **Access the Dynamic Items Section**:
+
+    - In the **Inspector panel**, locate the **"Dynamic Items"** section.
+
+2. **Add a Data Source**:
+
+    - Click the **"+"** button in the **"Dynamic Items"** section.
+    - A dialog will appear prompting you to select a data source.
+
+3. **Select the Data Source**:
+
+    - Choose the list state you created earlier (e.g., `List<Plant>`).
+    - Confirm your selection to bind the data source to the lazy composable.
+</Steps>
+
+### **Step 5: Add a Child Composable**
+
+<Steps>
+1. **Add an Item Template**:
+
+    - Drag and drop a composable (e.g., **Card**, **Row**, **Column**) into the lazy composable.
+    - This composable will serve as the template for each item in your list.
+
+   **Note**: Only **one direct child** of the lazy composable can be bound to the dynamic item.
+
+2. **Design the Item Layout**:
+
+    - Inside the item template, add the necessary UI elements to display the data.
+    - For example, add an **Image** for `imageUrl` and **Text** composables for `name` and `species`.
+</Steps>
+
+### **Step 6: Bind Item Properties to Data Fields**
+
+<Steps>
+1. **Select UI Elements**:
+
+    - Click on each composable inside your item template (e.g., **Text**, **Image**).
+
+2. **Bind to Dynamic Item Properties**:
+
+    - In the **Inspector panel**, find the property you want to bind (e.g., **"Text"** for a **Text** composable).
+    - Click **"Set from State"** or the binding icon next to the property.
+    - A dialog will appear showing available states.
+
+3. **Select Dynamic Item Properties**:
+
+    - You'll see the properties of the data type (e.g., `Plant.name`, `Plant.species`).
+    - Select the appropriate property to bind it to the UI element.
+</Steps>
+
+<video controls>
+  <source src="/video/binding_properties_from_dynamic_items.webm" type="video/webm" />
+</video>
+
+:::note
+Only one direct child is able to be bound with the dynamic items.
+
+For example, this is a valid case
+```
+LazyColumn
+ - Row (as header)
+ - Row (dynamic items are assigned and generates dynamic number of items)
+ - Row (as footer)
+```
+
+but this is invalid
+```
+LazyColumn
+ - Row (as header)
+ - Row (dynamic items are assigned)
+ - Row (dynamic items are assigned for different properties)
+ - Row (as footer)
+```
+:::
+
+### **Step 7: Configure and Test**
+
+<Steps>
+1. **Adjust Modifiers and Styling**:
+
+    - Apply any necessary modifiers to style your item template (e.g., padding, background color).
+
+2. **Preview the List**:
+
+    - Use the **Preview** feature to see how your dynamic list or grid looks with the bound data.
+
+3. **Test Interactions**:
+
+    - If your items are interactive, add actions as needed and test them in the preview or on a device.
+</Steps>
+
+---
+
+## Important Notes
+
+- **Single Direct Child Rule**:
+
+    - The lazy composable can have only **one direct child** that is bound to the dynamic item.
+    - This child serves as the template for each item in the data source.
+
+- **Modifiers and Layouts**:
+
+    - Apply modifiers to the child composable to control spacing, alignment, and styling.
+    - Use layouts like **Row** or **Column** inside the item template to organize content.
+
+- **Data Updates**:
+
+    - If the data source list updates (e.g., items are added or removed), the UI will automatically reflect these changes due to ComposeFlow's declarative nature.
