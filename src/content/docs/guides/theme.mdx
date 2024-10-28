@@ -1,0 +1,112 @@
+---
+title: Theme
+description: Explains how to define themes in ComposeFlow
+sidebar:
+  order: 3
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Themes in ComposeFlow
+
+Themes in ComposeFlow allow you to customize and unify the appearance of your entire application. By configuring themes, you can ensure a consistent look and feel across all screens and components, enhancing the user experience and aligning with your brand identity.
+
+---
+
+## Overview
+
+- **Themes**: Centralized configurations that define the visual aspects of your app, including colors and fonts.
+- **Customization**: Easily modify the app’s appearance by adjusting theme settings.
+- **Consistency**: Maintain a uniform design language across all parts of your application.
+
+---
+
+## Configuring Themes
+
+ComposeFlow provides intuitive tools to configure themes, allowing you to tailor the app’s appearance to your preferences or branding requirements. Themes can be customized by defining color palettes and selecting fonts for various typographic elements.
+
+### **1. Colors**
+
+Colors play a pivotal role in the visual identity of your app. ComposeFlow enables you to define a comprehensive set of colors that will be consistently applied throughout your app's UI components.
+
+#### **Generate Theme Colors from a Seed Color**
+
+To streamline the theming process, ComposeFlow offers the ability to generate a complete color palette based on a single seed color and a selected palette style.
+
+<Steps>
+1. **Click "Update colors" button**
+2. **Pick a Seed Color**:
+    - Choose a primary color that represents your brand or the desired aesthetic of your app.
+
+3. **Select Palette Style**:
+    - From the dropdown menu, select a palette style that best fits your design needs. Options include:
+        - **TonalSpot**: Provides a balanced and harmonious color scheme.
+        - **Neutral**: Focuses on muted and subdued colors for a minimalist look.
+        - **Vibrant**: Features bright and vivid colors for a lively appearance.
+        - **Expressive**: Offers bold and dynamic colors to make a strong visual impact.
+        - **Additional styles as applicable**.
+
+4. **Generate and Review**:
+    - Click the **"Generate from Seed"** button to automatically create a harmonious set of theme colors based on your selected seed color and palette style.
+    - Review the generated colors and make manual adjustments if necessary to better fit your design requirements.
+</Steps>
+
+<video controls>
+  <source src="/video/update_theme_colors.webm" type="video/webm" />
+</video>
+
+
+**Benefits**:
+
+- **Efficiency**: Quickly generate a cohesive color scheme without manually selecting each color.
+- **Harmony**: Ensures that all colors work well together, maintaining visual consistency.
+
+### **2. Fonts**
+
+Typography is essential for readability and conveying the right tone in your app. ComposeFlow allows you to define and assign fonts to various typographic elements, ensuring a consistent text style throughout your application.
+
+#### **Define the Fonts Used in the App**
+
+<Steps>
+1. **Navigate to the Fonts Section**:
+    - Within the **Themes** settings, locate the **"Fonts"** tab or section.
+
+2. **Choose Font Families**:
+    - Select up to two font families that will be used across different typographic elements.
+    - For example, choose one font for headings and another for body text.
+</Steps>
+
+:::note
+Uploading a custom font isn't supported at the moment, but it's on the roadmap.
+:::
+
+#### **Assign Fonts to Typography Styles**
+
+<Steps>
+1. **Access Fonts Settings**:
+    - Within the **Fonts** section, navigate to **"Typography"**.
+
+2. **Assign Fonts to Predefined Styles**:
+    - ComposeFlow provides predefined typography styles such as **Display Large**, **Display Medium**, **Body Large**, **Body Medium**, etc.
+    - Assign one of your selected fonts to each typography style.
+
+   **Example**:
+    - **Display Large**: Assign primary font.
+    - **Body Large (Body Text)**: Assign secondary font.
+
+3. **Customize Font Attributes**:
+    - Adjust font size, weight, and other attributes as needed for each typography style.
+</Steps>
+
+<video controls>
+  <source src="/video/update_typography.webm" type="video/webm" />
+</video>
+
+:::note
+While you can select up to two font families, each typography style can only be assigned one of these fonts to maintain consistency.
+:::
+
+# Other resources
+
+- ComposeFlow generally follows the Material3 guidelines.
+  Check out the [official documentation](https://m3.material.io/)

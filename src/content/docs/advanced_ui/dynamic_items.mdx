@@ -185,3 +185,31 @@ LazyColumn
 - **Data Updates**:
 
     - If the data source list updates (e.g., items are added or removed), the UI will automatically reflect these changes due to ComposeFlow's declarative nature.
+
+:::tip
+
+Once a dynamic item is assigned to a lazy composable, the **index** of each item in the list becomes available as a state variable. You can use this index to change the appearance of items based on their position in the list.
+
+**Example: Alternate Item Backgrounds**
+
+- **Objective**: Change the background color of items alternately (e.g., even items have one color, odd items have another).
+- **How to Implement**:
+  - Access the `LazyColumnProperties -> Index at` state within your item template.
+  - Use conditional logic or filters to apply different modifiers based on whether the index is even or odd.
+- **Steps**:
+<Steps>
+  1. **Select the Item Template**:
+     - Click on the child composable inside your lazy composable.
+  2. **Access the Index State**:
+     - In the **Inspector panel**, the `Index` state is available.
+  3. **Apply Conditional Styling**:
+     - Use the index to set background colors:
+       - If `Index % 2 == 0`, set background to Color A by using **filters**.
+       - Else, set background to Color B.
+</Steps>
+
+<video controls>
+  <source src="/video/lazy_item_index_demo.webm" type="video/webm" />
+</video>
+
+:::

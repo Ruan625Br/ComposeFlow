@@ -1,0 +1,90 @@
+---
+title: Navigation
+description: Explains the navigation in ComposeFlow
+sidebar:
+  order: 1
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Navigation in ComposeFlow
+
+ComposeFlow provides a built-in navigation system that allows users to move between different screens within your app. The navigation adapts to the size of the screen to optimize the user experience and utilize available screen space effectively.
+
+---
+
+## Adaptive Navigation Appearance
+
+- **Small Screens**:
+  - On smaller devices like mobile phones, a **Bottom Navigation** bar appears at the bottom of the screen.
+  - This provides easy access to primary destinations with minimal screen space.
+
+- **Medium and Large Screens**:
+  - On tablets, desktops, or larger devices, a **Navigation Rail** is displayed on the left side of the app.
+  - This layout leverages the additional screen space to offer a more immersive navigation experience.
+
+<video controls>
+  <source src="/video/adaptive_navigation.webm" type="video/webm" />
+</video>
+
+---
+
+## Configuring Screens in Navigation
+
+You can control which screens appear in the navigation menu. By default, screens may not be included in the navigation. Follow these steps to include a screen:
+
+<Steps>
+1. **Open the UI Builder**:
+   - In your ComposeFlow project, navigate to the **UI Builder**.
+
+2. **Access the Screens Tab**:
+   - Locate the **"Screens"** tab within the UI Builder.
+   - This tab displays a list of all the screens in your project.
+
+3. **Select the Desired Screen**:
+   - Click on the screen you want to include in the navigation.
+   - The screen's properties will appear in the **Inspector panel** on the right side.
+
+4. **Toggle "Show on Navigation"**:
+   - In the **Inspector panel**, find the **"Show on Navigation"** option.
+   - Toggle this option **on** to include the screen in the navigation menu.
+   - Optionally, you can set an **icon** and **label** for the screen as it appears in the navigation.
+</Steps>
+
+<video controls>
+  <source src="/video/toggle_screen_part_of_navigation.webm" type="video/webm" />
+</video>
+
+---
+
+## Enabling or Disabling Navigation in the App
+
+ComposeFlow allows you to enable or disable the navigation component in your app. Here's how to do it:
+
+<Steps>
+1. **Locate the Navigation Toggle**:
+   - At the bottom of the **Canvas Area** in the UI Builder, you will find a **toggle button** for navigation.
+   - This button controls the visibility of the navigation component in your app.
+
+2. **Toggle Navigation On or Off**:
+   - **Enable Navigation**:
+     - Click the toggle button to turn **on** the navigation.
+     - The navigation bar (either Bottom Navigation or Navigation Rail, depending on screen size) will appear in your app.
+   - **Disable Navigation**:
+     - Click the toggle button again to turn **off** the navigation.
+     - The navigation component will be removed from your app's UI.
+</Steps>
+---
+
+## Summary
+
+- **Built-in Navigation**:
+  - ComposeFlow apps come with a built-in navigation system that adapts to different screen sizes.
+- **Adaptive UI**:
+  - Small screens use **Bottom Navigation**.
+  - Medium and large screens use a **Navigation Rail**.
+- **Configuring Screens**:
+  - Use the **"Show on Navigation"** toggle in the **Inspector panel** to include screens in the navigation.
+- **Enabling Navigation**:
+  - Use the **toggle button** at the bottom of the **Canvas Area** to enable or disable the navigation component in your app.
+
