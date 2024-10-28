@@ -1,0 +1,69 @@
+---
+title: Custom assets
+description: Explains how to deal with custom assets in ComposeFlow
+sidebar:
+  order: 4
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Custom Assets in ComposeFlow
+
+ComposeFlow allows you to enhance your application's visual appeal by incorporating custom assets, such as images and icons. By uploading your own assets, you can ensure that your app aligns perfectly with your brand identity and design preferences.
+
+## Uploading Custom Assets
+
+<Steps>
+1. Navigate to **Custom asset** menu in ComposeFlow.
+2. **Choose Asset Type**:
+    - Decide whether you're uploading an **Image** or an **Icon**.
+
+3. **Upload the Asset**:
+    - Click on the **"Upload Image"** or **"Upload Icon""** button.
+    - Select the desired file from your computer.
+        - **Supported Formats**:
+            - **Images**: PNG, JPEG, SVG
+            - **Icons**: PNG, XML vector drawables
+</Steps>
+
+   ![Upload custom image](/image/custom_image_uploaded.png))
+   ![Upload custom icon](/image/custom_icon_uploaded.png))
+
+---
+
+## Using Custom Assets in the UI Builder
+
+Once your custom assets are uploaded, you can easily incorporate them into your application's UI using the **Image** and **Icon** composables.
+
+### **Using Custom Assets in an Image Composable**
+
+<Steps>
+1. **Add an Image Composable**:
+    - In the **UI Builder**, drag and drop an **Image** composable onto the **Canvas Area**.
+
+2. **Configure the Image Type**:
+    - With the **Image** composable selected, navigate to the **Inspector panel** on the right.
+    - Under the **"Image Type"** dropdown, select **"Asset"**.
+
+3. **Select Your Custom Asset**:
+    - A dropdown will appear listing all your uploaded custom assets.
+    - Choose the desired image from the list.
+
+   ![Custom image in UI builder](/image/custom_image_in_uibuilder.png)
+
+</Steps>
+
+### **Using Custom Assets in an Icon Composable**
+
+1. **Add an Icon Composable**:
+    - In the **UI Builder**, drag and drop an **Icon** composable onto the **Canvas Area**.
+
+2. **Configure the Icon Type**:
+    - With the **Icon** composable selected, navigate to the **Inspector panel** on the right.
+    - Under the **"Icon Type"** dropdown, select **"Custom Asset"**.
+
+3. **Select Your Custom Asset**:
+    - A dropdown will appear listing all your uploaded custom icons.
+    - Choose the desired icon from the list.
+
+   ![Custom icon in UI builder](/image/custom_icon_in_uibuilder.png)
