@@ -86,10 +86,13 @@ State management in ComposeFlow is organized hierarchically to provide scope and
 
 ### Example 2: Managing Toggle States in a composable
 
-- **Scenario**: You have a custom toggle switch composable that changes appearance when toggled.
+- **Scenario**: You have a custom toggle switch composable that changes appearance of another composable
+when toggled.
 - **Implementation**:
-    - The composable has its own local state to track whether it's on or off.
-    - The state change affects only the composable, without impacting other parts of the app.
+    - The `Switch` composable creates a local boolean state to track whether it's on or off.
+    - Drop a `Card` composable into the canvas area
+    - Bind the `Switch`'s state to the `Visibility` property of the `Card`
+    - The state change affects the visibility of the `Card`, without impacting other parts of the app.
 
 <video controls>
   <source src="/video/state_toggle_visibility.webm" type="video/webm" />
