@@ -52,16 +52,6 @@ State management in ComposeFlow is organized hierarchically to provide scope and
     - **Scoped Visibility**: Visible only within the screen or component where they are defined.
     - **Use Cases**: Suitable for data that is relevant only to a specific part of the UI, like form inputs or toggle states.
 
-### Understanding State Scope
-
-- **App States**:
-    - **Global Access**: Any screen or component can access and modify app states.
-    - **Consistency**: Ensures that all parts of the app reflect the same data for shared values.
-
-- **Local States**:
-    - **Encapsulation**: Keeps state management localized, preventing unintended side effects on other parts of the app.
-    - **Independence**: Screens and components manage their own states without interfering with each other.
-
 ### State Hierarchy Structure
 
 - In ComposeFlow, components do not belong to any specific screen, and both screens and components can have their own local states.
@@ -120,4 +110,3 @@ State management in ComposeFlow is organized hierarchically to provide scope and
 - **State Drives UI**: In ComposeFlow, the UI is a direct reflection of the current state. Changes in state automatically trigger UI updates.
 - **Two-Level Hierarchy**: States are organized into app states (global) and local states (specific to screens or components).
 - **Automatic State Management**: ComposeFlow simplifies state handling by automatically creating local states for certain composables.
-- **Declarative Advantage**: Leveraging the declarative nature of ComposeFlow allows for more predictable and maintainable applications.
