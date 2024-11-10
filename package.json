@@ -13,7 +13,7 @@
     "@astrojs/check": "^0.9.4",
     "@astrojs/mdx": "^3.1.8",
     "@astrojs/starlight": "^0.28.3",
-    "astro": "^4.15.3",
+    "astro": "^4.16.10",
     "remark-admonitions": "^1.2.1",
     "sharp": "^0.32.5",
     "typescript": "^5.6.3"
