@@ -73,7 +73,11 @@ In ComposeFlow, **Actions** are predefined behaviors that are triggered primaril
 **How to Implement:**
 
 1. **Add a List Composable**: Place a `LazyColumn` on your screen containing selectable items.
-   - Bind the data source to the `LazyColumn`. See [dynamic items](/advanced_ui/dynamic_items) on how to
+   - Bind the data source to the `LazyColumn`.
+   - Drop a `Row` composable to the `LazyColumn` and adjust other composables to represent a
+     selectable item.
+
+     See [dynamic items](/advanced_ui/dynamic_items) on how to
      generate dynamic number of children in the LazyColumn for more details.
 2. **Assign an Action**:
    - Select the `Row` as the direct child of the `LazyColumn` and locate the `onClick` trigger in the **Inspector panel**.
