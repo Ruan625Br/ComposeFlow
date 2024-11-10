@@ -1,0 +1,46 @@
+---
+title: State transformers
+description: Explains the state transformers in ComposeFlow
+sidebar:
+  order: 2
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+State transformers in ComposeFlow provide a powerful way to manipulate and transform states selected in the "Set from state" dialog. They allow for on-the-fly modifications, checks, and conversions of states before using them, giving you flexibility and control over your data flow in ComposeFlow.
+
+## Features
+
+### Transforming Selected States
+After selecting a state in the "Set from state" dialog, you can apply one or more transformers to modify or evaluate the data in that state. This can be especially useful for conditional logic, data formatting, and other transformations directly within the ComposeFlow environment.
+
+### Example Use Case
+Suppose you have a state that stores a string, such as `"Hello, ComposeFlow!"`. If you want to check whether this string contains the word `"ComposeFlow"`, you can apply the `contains` transformer to evaluate it and use the result in your logic.
+
+![state_transformer_example](/image/state_transformer_example.png)
+
+### Type-Specific Transformers
+ComposeFlow offers different transformers depending on the data type of the selected state. For example:
+
+- **String Transformers**: Includes operations like:
+   - Transform a `String` into another `String`
+     - `Add string before`, `Add string after`
+   - Transform a `String` into `Boolean`
+     - `Contains`, `Starts with`, and `Ends with`.
+- **Boolean Transformers**: Permits logical operations, such as `Toggle value` (for inverting a boolean).
+- **Int Transformers**: Includes operations like:
+   - Transform a `Int` into another `Int`
+     - `Plus`, `Multiplied by`
+   - Transform a `Int` into `Boolean`
+     - `Less than`, `Less than or equal to`, `Equals`, `Greater than`, `Greater than or equal to` and `Mod equal to`.
+
+The availability of specific transformers will depend on the type of data in the selected state.
+
+### Chaining Transformers
+ComposeFlow enables you to chain multiple transformers to perform complex transformations in sequence.
+For example, you can first check if a string contains "ComposeFlow" then negate the boolean value.
+This is done by selecting the first transformer and then applying additional transformers to the result of each transformation.
+
+![transformers_chained](/image/transformers_chained.png)
+
+This ability to chain multiple transformers in ComposeFlow allows you to perform complex logic transformations on the data in a straightforward manner.
