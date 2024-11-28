@@ -1,0 +1,93 @@
+---
+title: Firestore
+description: Explains how to integrate Firebase Firestore
+sidebar:
+  order: 2
+---
+
+import { Steps } from '@astrojs/starlight/components';
+
+# Firestore Integration in ComposeFlow
+
+Firestore integration in ComposeFlow allows you to seamlessly manage and interact with your Firestore database within your ComposeFlow projects. This guide will walk you through setting up and using Firestore in ComposeFlow.
+
+---
+
+:::note
+### Prerequisites
+
+Before you begin, ensure that Firebase integration is properly configured for your project. For detailed instructions, refer to the [Firebase Setup Guide](/firebase/setup).
+:::
+
+---
+
+## Using Firestore in ComposeFlow
+
+### 1. Associating a Data Type with a Firestore Collection
+
+<Steps>
+1. Navigate to the **Firestore** section in the top-level navigation of ComposeFlow. This is your entry point for managing Firestore collections and their associations with data types.
+
+2. **Tap the "Associate a Data Type" Button**
+   This button allows you to associate a Firestore collection with a specific data type in ComposeFlow.
+  ![Firestore association button](/image/firestore_associate_button.png)
+
+3. **Fill in the Association Details**
+   - **Firestore Collection Name**: Enter the name of the Firestore collection you want to link.
+   - **Data Type**: Choose an existing data type from your project or create a new one to represent the entities stored in the Firestore collection.
+   See [Data type](/guides/data_type) for more details about Data type.
+  ![Firestore association dialog](/image/firestore_associate_dialog.png)
+
+4. **Save the Association**
+   Once saved, ComposeFlow will recognize the documents in the Firestore collection as a list of entities of the specified data type.
+
+5. **Edit Data Type Fields (Optional)**
+   You can customize the fields of the associated data type by editing them in the right-hand pane after creating the association.
+  ![Firestore data type](/image/firestore_data_type.png)
+</Steps>
+
+---
+
+### 2. What Happens After Association
+
+Once you associate a Firestore collection with a data type, two key features become available:
+
+#### A. "Firestore" Actions
+
+- **Visibility**:
+  The set of Firestore related actions such as "Save to Firestore" becomes visible in the list of available actions.
+
+![Firestore actions](/image/firestore_actions.png)
+
+- **Usage**:
+  You can save an entity to the associated Firestore collection by invoking this action.
+
+![Save to firestore action](/image/save_to_firestore_action.png)
+
+#### B. Firestore Collection as a State
+
+- **Visibility**:
+  The associated Firestore collection is now accessible as part of the ComposeFlow states.
+![Firestore collection as state](/image/firestore_collection_as_state.png)
+
+- **Usage**:
+  Assign the Firestore collection state to any value to query and retrieve the entities stored in the collection.
+![Firestore collection as state assigned](/image/firestore_collection_as_state_assigned.png)
+
+---
+
+## Example Workflow
+
+1. Navigate to **Firestore** and associate the `ToDo` collection with a data type `Todo`.
+2. Customize the `ToDo` data type to include fields like `name`, `done`.
+3. Use the "Save to Firestore" action to add new ToDo item to the Firestore collection.
+4. Query the `ToDo` collection by assigning its state as dynamic items in the `LazyColumn`.
+5. After running the app, you can observe invoking the "Save to Firestore" action or adding a document from the Firestore console directly is instantly reflected in the running app
+
+---
+
+## Key takeaways
+
+- Firestore integration in ComposeFlow simplifies the management of Firestore collections by directly linking them with structured data types.
+- Changes to data types or actions are instantly reflected in your project, ensuring consistency with your Firestore database.
+
