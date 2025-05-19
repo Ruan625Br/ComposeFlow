@@ -1,0 +1,317 @@
+package io.composeflow.model.parameter
+
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.DefaultAlpha
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.MemberName
+import com.valentinilk.shimmer.shimmer
+import io.composeflow.Res
+import io.composeflow.asVariableName
+import io.composeflow.auth.LocalFirebaseIdToken
+import io.composeflow.cloud.storage.BlobInfoWrapper
+import io.composeflow.image_from_network
+import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.model.enumwrapper.ContentScaleWrapper
+import io.composeflow.model.modifier.ModifierWrapper
+import io.composeflow.model.modifier.generateModifierCode
+import io.composeflow.model.modifier.toModifierChain
+import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.parameter.wrapper.AlignmentWrapper
+import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
+import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.model.property.AssignableProperty
+import io.composeflow.model.property.EnumProperty
+import io.composeflow.model.property.PropertyContainer
+import io.composeflow.model.property.StringProperty
+import io.composeflow.model.type.ComposeFlowType
+import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.testing.isTest
+import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.image.AsyncImage
+import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.utils.asImageComposable
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.stringResource
+
+@Serializable
+@SerialName("ImageTrait")
+data class ImageTrait(
+    val assetType: ImageAssetType = ImageAssetType.Network,
+    /**
+     * The url of the image effective only when [assetType] is [ImageAssetType.Network]
+     */
+    val url: AssignableProperty = StringProperty.StringIntrinsicValue(DefaultUrl),
+    /**
+     * The asset information of the image effective only when [assetType] is [ImageAssetType.Asset]
+     */
+    val blobInfoWrapper: BlobInfoWrapper? = null,
+    val placeholderUrl: PlaceholderUrl = PlaceholderUrl.NoUsage,
+    val alignmentWrapper: AlignmentWrapper? = null,
+    val contentScaleWrapper: AssignableProperty? = null,
+    val alpha: Float? = null,
+) : ComposeTrait {
+
+    override fun getPropertyContainers(): List<PropertyContainer> {
+        return listOf(
+            PropertyContainer("Url", url, ComposeFlowType.StringType()),
+            PropertyContainer(
+                "Content scale",
+                contentScaleWrapper, ComposeFlowType.Enum(
+                    isList = false,
+                    enumClass = ContentScaleWrapper::class.java,
+                )
+            ),
+        )
+    }
+
+    fun contentScaleValue(): ContentScale? {
+        return when (contentScaleWrapper) {
+            is EnumProperty -> {
+                ContentScaleWrapper.entries[contentScaleWrapper.value.enumValue().ordinal].contentScale
+            }
+
+            else -> null
+        }
+    }
+
+    private fun generateParamsCode(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val codeBlockBuilder = CodeBlock.builder()
+        when (assetType) {
+            ImageAssetType.Network -> {
+                codeBlockBuilder.add("url = ")
+                codeBlockBuilder.add(
+                    url.transformedCodeBlock(
+                        project,
+                        context,
+                        ComposeFlowType.StringType(),
+                        dryRun = dryRun
+                    )
+                )
+                codeBlockBuilder.addStatement(",")
+            }
+
+            ImageAssetType.Asset -> {
+                blobInfoWrapper?.let { blob ->
+                    codeBlockBuilder.add(
+                        CodeBlock.of(
+                            "bitmap = %M(%M.drawable.%M),",
+                            MemberHolder.JetBrains.imageResource,
+                            MemberHolder.ComposeFlow.Res,
+                            MemberName(
+                                COMPOSEFLOW_PACKAGE,
+                                blob.fileName.asVariableName().substringBeforeLast(".")
+                            )
+                        )
+                    )
+                }
+            }
+        }
+
+        codeBlockBuilder.addStatement("""contentDescription = "",""")
+        alignmentWrapper?.let {
+            val alignmentMember = MemberName("androidx.compose.ui", "Alignment")
+            codeBlockBuilder.addStatement("alignment = %M.${it.name},", alignmentMember)
+        }
+        contentScaleWrapper?.let {
+            codeBlockBuilder.add("contentScale = ")
+            codeBlockBuilder.add(it.transformedCodeBlock(project, context, dryRun = dryRun))
+            codeBlockBuilder.addStatement(",")
+        }
+        alpha?.let {
+            codeBlockBuilder.addStatement("alpha = ${it}f,")
+        }
+        return codeBlockBuilder.build()
+    }
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
+            modifierList = defaultModifierList(),
+            trait = mutableStateOf(ImageTrait(url = StringProperty.StringIntrinsicValue(DefaultUrl))),
+        )
+
+    override fun defaultModifierList(): MutableList<ModifierWrapper> =
+        mutableStateListEqualsOverrideOf(
+            ModifierWrapper.Padding(all = 8.dp),
+            ModifierWrapper.Width(width = 160.dp),
+            ModifierWrapper.Height(height = 160.dp),
+        )
+
+    override fun icon(): ImageVector = Icons.Outlined.Image
+    override fun iconText(): String = "Image"
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
+    @Composable
+    override fun RenderedNode(
+        project: Project,
+        node: ComposeNode,
+        canvasNodeCallbacks: CanvasNodeCallbacks,
+        paletteRenderParams: PaletteRenderParams,
+        modifier: Modifier,
+    ) {
+        val modifierForCanvas = if (paletteRenderParams.isShadowNode) {
+            Modifier
+        } else {
+            Modifier.modifierForCanvas(
+                project = project,
+                node = node,
+                canvasNodeCallbacks = canvasNodeCallbacks,
+                paletteRenderParams = paletteRenderParams,
+            )
+        }
+        if (isTest()) {
+            LoadedImage(
+                painter = rememberVectorPainter(Icons.Outlined.Image),
+                imageTrait = node.trait.value as ImageTrait,
+                modifierList = node.modifierList,
+                modifierForCanvas = modifierForCanvas,
+            )
+        } else {
+            when (assetType) {
+                ImageAssetType.Network -> {
+                    val imageUrl = when (val usage = placeholderUrl) {
+                        PlaceholderUrl.NoUsage -> url.transformedValueExpression(
+                            project
+                        )
+
+                        is PlaceholderUrl.Used -> usage.url.transformedValueExpression(project)
+                    }
+                    AsyncImage(
+                        url = imageUrl,
+                        contentDescription = stringResource(Res.string.image_from_network),
+                        alignment = alignmentWrapper?.alignment
+                            ?: Alignment.Center,
+                        contentScale = contentScaleValue()
+                            ?: ContentScale.Fit,
+                        alpha = alpha ?: DefaultAlpha,
+                        modifier = node.modifierChainForCanvas().then(modifierForCanvas),
+                    )
+                }
+
+                ImageAssetType.Asset -> {
+                    blobInfoWrapper?.let { blob ->
+                        val userId = LocalFirebaseIdToken.current.user_id
+                        blob.asImageComposable(
+                            userId = userId,
+                            projectId = project.id.toString(),
+                            alignment = alignmentWrapper?.alignment
+                                ?: Alignment.Center,
+                            contentScale = contentScaleValue()
+                                ?: ContentScale.Fit,
+                            alpha = alpha ?: DefaultAlpha,
+                            modifier = node.modifierChainForCanvas().then(modifierForCanvas)
+                        )
+                    } ?: Box(
+                        modifier = Modifier.shimmer()
+                            .background(
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                    )
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun LoadedImage(
+        painter: Painter,
+        imageTrait: ImageTrait,
+        modifierList: List<ModifierWrapper>,
+        modifierForCanvas: Modifier,
+    ) {
+        Image(
+            painter = painter,
+            contentDescription = stringResource(Res.string.image_from_network),
+            alignment = imageTrait.alignmentWrapper?.alignment ?: Alignment.Center,
+            contentScale = imageTrait.contentScaleValue()
+                ?: ContentScale.Fit,
+            alpha = imageTrait.alpha ?: DefaultAlpha,
+            modifier = modifierList.toModifierChain().then(modifierForCanvas),
+        )
+    }
+
+    override fun generateCode(
+        project: Project,
+        node: ComposeNode,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val codeBlockBuilder = CodeBlock.builder()
+        if (assetType == ImageAssetType.Asset && blobInfoWrapper?.mediaLink == null) {
+            return codeBlockBuilder.build()
+        }
+
+        val imageMember = when (assetType) {
+            ImageAssetType.Network -> MemberName("${COMPOSEFLOW_PACKAGE}.ui", "AsyncImage")
+            ImageAssetType.Asset -> MemberHolder.AndroidX.Foundation.Image
+        }
+        codeBlockBuilder.addStatement(
+            "%M(",
+            imageMember,
+        )
+        codeBlockBuilder.add(
+            generateParamsCode(
+                project = project,
+                context = context,
+                dryRun = dryRun
+            )
+        )
+        codeBlockBuilder.add(
+            node.generateModifierCode(project, context, dryRun = dryRun)
+        )
+        codeBlockBuilder.addStatement(")")
+        return codeBlockBuilder.build()
+    }
+}
+
+const val DefaultUrl = "https://picsum.photos/480"
+
+object ImageAssetTypeSerializer : FallbackEnumSerializer<ImageAssetType>(ImageAssetType::class)
+
+@Serializable(ImageAssetTypeSerializer::class)
+enum class ImageAssetType {
+    Network,
+    Asset
+    ;
+}
+
+/**
+ * Represents the url of the image only visible in the editor as a placeholder.
+ */
+@Serializable
+sealed interface PlaceholderUrl {
+
+    @Serializable
+    @SerialName("NoUsage")
+    data object NoUsage : PlaceholderUrl
+
+    @Serializable
+    @SerialName("Used")
+    data class Used(
+        val url: StringProperty = StringProperty.StringIntrinsicValue(DefaultUrl),
+    ) : PlaceholderUrl
+}

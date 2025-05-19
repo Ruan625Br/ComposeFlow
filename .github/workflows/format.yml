@@ -1,0 +1,25 @@
+name: Apply Spotless
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  spotlessApply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write # For commiting formatted files
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/setup-java
+      - name: Apply spotless formatting
+        run: ./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache spotlessApply
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: 🤖 Apply Spotless

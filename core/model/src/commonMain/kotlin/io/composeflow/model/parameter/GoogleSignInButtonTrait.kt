@@ -1,0 +1,143 @@
+package io.composeflow.model.parameter
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
+import com.mmk.kmpauth.uihelper.google.GoogleSignInButtonIconOnly
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.MemberName
+import io.composeflow.custom.ComposeFlowIcons
+import io.composeflow.custom.composeflowicons.Google
+import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.model.action.ActionType
+import io.composeflow.model.modifier.ModifierWrapper
+import io.composeflow.model.modifier.generateModifierCode
+import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.modifierForCanvas
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+@SerialName("GoogleSignInButtonTrait")
+data class GoogleSignInButtonTrait(
+    val iconOnly: Boolean = false,
+) : ComposeTrait {
+
+    private fun generateParamsCode(
+        project: Project,
+        node: ComposeNode,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val codeBlockBuilder = CodeBlock.builder()
+        codeBlockBuilder.addStatement("onClick = {")
+        node.actionsMap[ActionType.OnClick]?.forEach {
+            codeBlockBuilder.add(it.generateCodeBlock(project, context, dryRun = dryRun))
+        }
+        codeBlockBuilder.addStatement("},")
+
+        val validateResultBuilder = CodeBlock.builder()
+        val validatorNodes =
+            node.getDependentValidatorNodesForActionType(project, ActionType.OnClick)
+        validatorNodes.forEachIndexed { index, validatorNode ->
+            val validateResultName =
+                validatorNode.getCompanionStateOrNull(project)?.getValidateResultName()
+            validateResultBuilder.add(
+                CodeBlock.of(
+                    "${validateResultName}.%M()",
+                    MemberHolder.ComposeFlow.isSuccess
+                )
+            )
+            if (index != validatorNodes.lastIndex) {
+                validateResultBuilder.add(" && ")
+            }
+        }
+
+
+        return codeBlockBuilder.build()
+    }
+
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
+            trait = mutableStateOf(GoogleSignInButtonTrait()),
+            modifierList = mutableStateListEqualsOverrideOf(
+                ModifierWrapper.Padding(8.dp),
+            )
+        )
+
+    override fun iconText(): String = "GoogleSignIn"
+    override fun icon(): ImageVector = ComposeFlowIcons.Google
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Auth)
+    override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)
+    override fun onClickIncludedInParams(): Boolean = true
+    override fun isResizeable(): Boolean = false
+
+    @Composable
+    override fun RenderedNode(
+        project: Project,
+        node: ComposeNode,
+        canvasNodeCallbacks: CanvasNodeCallbacks,
+        paletteRenderParams: PaletteRenderParams,
+        modifier: Modifier,
+    ) {
+        val modifierForCanvas = modifier.then(
+            node.modifierChainForCanvas()
+                .modifierForCanvas(
+                    project = project,
+                    node = node,
+                    canvasNodeCallbacks = canvasNodeCallbacks,
+                    paletteRenderParams = paletteRenderParams,
+                ),
+        )
+        if (iconOnly) {
+            GoogleSignInButtonIconOnly(
+                onClick = {},
+                modifier = modifierForCanvas,
+            )
+        } else {
+            GoogleSignInButton(
+                onClick = {},
+                fontSize = 18.sp,
+                modifier = modifierForCanvas
+            )
+        }
+    }
+
+    override fun generateCode(
+        project: Project,
+        node: ComposeNode,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val buttonMember = if (iconOnly) {
+            MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButtonIconOnly")
+        } else {
+            MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButton")
+        }
+        val builder = CodeBlock.builder()
+        builder.add("%M(", buttonMember)
+        builder.add(
+            generateParamsCode(
+                project = project,
+                node = node,
+                context = context,
+                dryRun = dryRun,
+            )
+        )
+        builder.add(node.generateModifierCode(project, context, dryRun = dryRun))
+        builder.addStatement(")")
+        return builder.build()
+    }
+}
+

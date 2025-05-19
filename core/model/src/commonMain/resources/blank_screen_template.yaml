@@ -1,0 +1,71 @@
+id: "blankScreen"
+name: "Blank"
+rootNode:
+  id: "blankScreen"
+  trait: !<ScreenTrait> { }
+  label: "Blank"
+  children:
+    - id: "rootColumn"
+      trait: !<ColumnTrait> { }
+      label: "Root"
+      level: 1
+      modifierList:
+        - !<FillMaxWidth> { }
+        - !<Weight> { }
+      lazyListChildParams: !<FixedNumber>
+        numOfItems: 1
+      dynamicItems: null
+      actionHandler: !<ActionHandlerImpl>
+        actionsMap:
+          "OnDoubleClick": [ ]
+          "OnLongClick": [ ]
+          "OnClick": [ ]
+      inspectable: false
+      visibilityParams: { }
+  lazyListChildParams: !<FixedNumber>
+    numOfItems: 1
+  dynamicItems: null
+  actionHandler: !<ActionHandlerImpl>
+    actionsMap:
+      "OnInitialLoad": [ ]
+  visibilityParams: { }
+showOnNavigation: false
+title: "Blank"
+label: "Blank"
+icon: !<Filled> "ExitToApp"
+isDefault: false
+isSelected: false
+topAppBarNode:
+  id: "topAppBar"
+  trait: !<TopAppBarTrait>
+    title: !<StringIntrinsicValue>
+      value: "Blank"
+    topAppBarType: "CenterAligned"
+  label: "TopAppBar"
+  children:
+    - id: "navIcon"
+      trait: !<IconTrait>
+        imageVectorHolder: null
+      label: "Nav Icon"
+      level: 1
+      lazyListChildParams: !<FixedNumber>
+        numOfItems: 1
+      dynamicItems: null
+      actionHandler: !<ActionHandlerImpl>
+        actionsMap:
+          "OnDoubleClick": [ ]
+          "OnLongClick": [ ]
+          "OnClick": [ ]
+      visibilityParams: { }
+  lazyListChildParams: !<FixedNumber>
+    numOfItems: 1
+  dynamicItems: null
+  actionHandler: !<ActionHandlerImpl>
+    actionsMap:
+      "OnDoubleClick": [ ]
+      "OnLongClick": [ ]
+      "OnClick": [ ]
+  visibilityParams: { }
+bottomAppBarNode: null
+navigationDrawerNode: null
+fabNode: null

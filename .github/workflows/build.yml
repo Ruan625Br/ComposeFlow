@@ -1,0 +1,41 @@
+ name: Run all tests
+
+ on:
+   push:
+     branches:
+       - main
+     paths-ignore:
+       - server/**
+       - gradle/server.libs.versions.toml
+       - infrastructure/**
+       - gradle/infrastructure.libs.versions.toml
+   pull_request:
+     paths-ignore:
+       - server/**
+       - gradle/server.libs.versions.toml
+       - infrastructure/**
+       - gradle/infrastructure.libs.versions.toml
+
+ jobs:
+   build:
+     runs-on: warp-ubuntu-2204-x64-16x-spot
+     timeout-minutes: 45
+     steps:
+       - uses: actions/checkout@v2
+       - uses: ./.github/actions/setup-java
+       - name: Build and run tests with Gradle
+         run: ./gradlew build --no-daemon -Dorg.gradle.jvmargs="-Xmx8g -XX:MaxMetaspaceSize=756m -XX:+HeapDumpOnOutOfMemoryError"
+       - uses: actions/upload-artifact@v4
+         if: ${{ always() }}
+         with:
+           name: test-reports
+           path: |
+             **/build/reports
+           retention-days: 7
+       - uses: actions/upload-artifact@v4
+         if: ${{ always() }}
+         with:
+           name: golden-screenshot
+           path: |
+             **/build/outputs/roborazzi
+           retention-days: 14

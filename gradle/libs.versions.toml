@@ -1,0 +1,170 @@
+[versions]
+activity-compose = "1.10.1"
+agp = "8.7.3"
+androidx-credentials = "1.5.0"
+appcompat = "1.7.0"
+atomicfu = "0.27.0"
+compose-adaptive-layout = "1.0.0-alpha01"
+compose-color-picker = "0.7.0"
+compose-multiplatform = "1.8.0"
+compose-navigation = "2.8.0-alpha10"
+coil = "3.1.0"
+coroutine = "1.10.1"
+dataStore = "1.1.4"
+gitlive-firebase = "2.1.0"
+google-services = "4.4.2"
+google-cloud-bom = "26.51.0"
+google-cloud-firebase = "9.3.0"
+gradle = "8.4"
+jewel = "0.9.0"
+kermit = "2.0.5"
+kmpauth = "2.1.0-alpha02"
+koin = "4.0.0-RC1"
+kotlin = "2.1.21"
+kotlinpoet = "2.1.0"
+kotlinx-serialization = "1.8.0"
+# Intentionall keeping this version to run format that takes a String
+ktlint = "0.39.0"
+ktor = "3.1.2"
+logback = "1.4.14"
+multiplatform-settings = "1.2.0"
+okhttp = "4.12.0"
+paging-multiplatform = "3.3.0-alpha02-0.5.1"
+precompose = "1.6.2"
+reorderable = "0.9.6"
+roborazzi = "1.26.0"
+sentry = "8.5.0"
+testparameterinjector = "1.18"
+
+[libraries]
+# AndroidX
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+
+# com.google
+testparameterinjector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "testparameterinjector" }
+
+# Jewel
+jewel-int-ui-standalone = { module = "org.jetbrains.jewel:jewel-int-ui-standalone", version.ref = "jewel" }
+jewel-int-ui-decorated-window = { module = "org.jetbrains.jewel:jewel-int-ui-decorated-window", version.ref = "jewel" }
+
+# JetBrains
+compose-adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "compose-adaptive-layout" }
+compose-adaptive-layout = { module = "org.jetbrains.compose.material3.adaptive:adaptive-layout", version.ref = "compose-adaptive-layout" }
+compose-adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation", version.ref = "compose-adaptive-layout" }
+coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutine" }
+compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
+
+# precompose
+precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }
+precompose-koin = { module = "moe.tlaster:precompose-koin", version.ref = "precompose" }
+precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
+
+# UI
+compose-color-picker = { module = "com.godaddy.android.colorpicker:compose-color-picker", version.ref = "compose-color-picker" }
+# Coil has an issue that images are not displayed on web https://github.com/coil-kt/coil/issues/2786
+# Using alternative until that is fixed.
+compose-image-loader = "io.github.qdsfdhvh:image-loader:1.10.0"
+paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging-multiplatform" }
+paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging-multiplatform" }
+reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable" }
+richeditor-compose = "com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc05-k2"
+
+# Coil
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coil" }
+
+# Data
+datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStore" }
+datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
+datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "dataStore" }
+http4k-core = { group = "org.http4k", name = "http4k-core" }
+http4k-server-netty = { module = "org.http4k:http4k-server-netty" }
+ktor-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-client-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
+ktor-client-darwin = { module = "io.ktor:ktor-client-darwin", version.ref = "ktor" }
+ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-jsonpath = "io.github.nomisrev:kotlinx-serialization-jsonpath:0.2.0"
+kotlin-result = "com.michael-bull.kotlin-result:kotlin-result:1.1.18"
+kaml = "com.charleskorn.kaml:kaml:0.55.0"
+okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
+multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
+multiplatform-settings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatform-settings" }
+multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatform-settings" }
+multiplatform-settings-datastore = { module = "com.russhwolf:multiplatform-settings-datastore", version.ref = "multiplatform-settings" }
+
+# App Build
+compose-code-editor = "com.github.qawaz.compose-code-editor:codeeditor:v3.1.1"
+gradle-tooling-api = { module = "org.gradle:gradle-tooling-api", version.ref = "gradle" }
+ktlint-core = { module = "com.pinterest.ktlint:ktlint-core", version.ref = "ktlint" }
+ktlint-ruleset-standard = { module = "com.pinterest.ktlint:ktlint-ruleset-standard", version.ref = "ktlint" }
+kotlinpoet = { module = "com.squareup:kotlinpoet", version.ref = "kotlinpoet" }
+
+# Auth
+androidx-credentials-play-services-auth = { module = "androidx.credentials:credentials-play-services-auth", version.ref = "androidx-credentials" }
+kmpauth-firebase = { module = "io.github.mirzemehdi:kmpauth-firebase", version.ref = "kmpauth" }
+kmpauth-google = { module = "io.github.mirzemehdi:kmpauth-google", version.ref = "kmpauth" }
+kmpauth-uihelper = { module = "io.github.mirzemehdi:kmpauth-uihelper", version.ref = "kmpauth" }
+
+# Firebase
+gitlive-firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "gitlive-firebase" }
+gitlive-firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "gitlive-firebase" }
+
+# Test
+roborazzi-desktop = { module = "io.github.takahirom.roborazzi:roborazzi-compose-desktop", version.ref = "roborazzi" }
+
+# Plugins
+kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
+compose-multiplatform-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
+buildconfig-plugin = "com.github.gmazzo.buildconfig:plugin:4.2.0"
+
+# Monitoring
+sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
+sentry-compose = { module = "io.sentry:sentry-compose", version.ref = "sentry" }
+sentry-compose-desktop = { module = "io.sentry:sentry-compose-desktop", version.ref = "sentry" }
+
+# Logging
+slf4j-api = "org.slf4j:slf4j-api:2.0.16"
+logback-classic = { module = "ch.qos.logback:logback-classic", version.ref = "logback" }
+logback-core = { module = "ch.qos.logback:logback-core", version.ref = "logback" }
+kermit = { module = "co.touchlab:kermit", version.ref = "kermit" }
+kermit-test = { module = "co.touchlab:kermit-test", version.ref = "kermit" }
+
+# Koin
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+
+# MaterialKolor
+material-kolor = "com.materialkolor:material-kolor:1.6.1"
+
+# Google Cloud
+google-cloud-bom = { module = "com.google.cloud:libraries-bom", version.ref = "google-cloud-bom" }
+google-cloud-storage = { module = "com.google.cloud:google-cloud-storage" }
+google-firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "google-cloud-firebase" }
+
+commons-compress = "org.apache.commons:commons-compress:1.21"
+compose-shimmer = "com.valentinilk.shimmer:compose-shimmer:1.3.0"
+filekit-compose = "io.github.vinceglb:filekit-compose:0.6.3"
+kotlin-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.1"
+kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
+conveyor-control = "dev.hydraulic.conveyor:conveyor-control:1.1"
+
+[plugins]
+roborazzi = { id = "io.github.takahirom.roborazzi", version = "1.6.0" }
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+jetbrains-compose = { id = "org.jetbrains.compose", version.ref = "compose-multiplatform" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
+
+[bundles]
+gradle-plugins = [
+    "kotlin-plugin",
+    "compose-multiplatform-plugin",
+]

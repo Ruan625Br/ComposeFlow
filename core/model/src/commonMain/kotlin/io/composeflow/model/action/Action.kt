@@ -1,0 +1,3089 @@
+package io.composeflow.model.action
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.FunSpec
+import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.LambdaTypeName
+import com.squareup.kotlinpoet.MemberName
+import com.squareup.kotlinpoet.ParameterSpec
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.squareup.kotlinpoet.PropertySpec
+import com.squareup.kotlinpoet.UNIT
+import com.squareup.kotlinpoet.asTypeName
+import io.composeflow.ComposeScreenConstant
+import io.composeflow.Res
+import io.composeflow.ViewModelConstant
+import io.composeflow.call_api
+import io.composeflow.confirmation
+import io.composeflow.create_user_with
+import io.composeflow.custom
+import io.composeflow.dialog_bottom_sheet_drawer
+import io.composeflow.email_and_password
+import io.composeflow.firestore_delete_document
+import io.composeflow.firestore_save_to_firestore
+import io.composeflow.firestore_update_document
+import io.composeflow.information
+import io.composeflow.kotlinpoet.ClassHolder
+import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.model.InspectorTabDestination
+import io.composeflow.model.apieditor.ApiId
+import io.composeflow.model.datatype.FilterExpression
+import io.composeflow.model.datatype.SingleFilter
+import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
+import io.composeflow.model.project.ParameterId
+import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.model.project.appscreen.screenRoute
+import io.composeflow.model.project.appscreen.screenRouteClass
+import io.composeflow.model.project.component.Component
+import io.composeflow.model.project.component.ComponentId
+import io.composeflow.model.project.component.componentKeyName
+import io.composeflow.model.project.findApiDefinitionOrNull
+import io.composeflow.model.project.findComponentOrNull
+import io.composeflow.model.project.findDataTypeOrNull
+import io.composeflow.model.project.findFirestoreCollectionOrNull
+import io.composeflow.model.project.findLocalStateOrNull
+import io.composeflow.model.project.findParameterOrThrow
+import io.composeflow.model.project.findScreenOrNull
+import io.composeflow.model.project.firebase.CollectionId
+import io.composeflow.model.project.issue.Issue
+import io.composeflow.model.project.issue.NavigatableDestination
+import io.composeflow.model.project.removeLocalState
+import io.composeflow.model.property.AssignableProperty
+import io.composeflow.model.property.IntrinsicProperty
+import io.composeflow.model.property.StringProperty
+import io.composeflow.model.state.ScreenState
+import io.composeflow.model.state.StateId
+import io.composeflow.model.state.WriteableState
+import io.composeflow.model.type.ComposeFlowType
+import io.composeflow.model.type.convertCodeFromType
+import io.composeflow.navigate_back
+import io.composeflow.navigate_to
+import io.composeflow.open_date_picker
+import io.composeflow.open_date_plus_time_picker
+import io.composeflow.open_url
+import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.serializer.FallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.set_state
+import io.composeflow.show_bottom_sheet
+import io.composeflow.show_nav_drawer
+import io.composeflow.show_snackbar
+import io.composeflow.sign_in_with
+import io.composeflow.sign_out
+import io.composeflow.util.generateUniqueName
+import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.stringResource
+import kotlin.uuid.Uuid
+
+typealias ActionId = String
+
+@Serializable
+sealed interface Action {
+
+    val id: ActionId
+
+    @Composable
+    fun SimplifiedContent(project: Project)
+
+    val name: String
+    fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock? = null
+
+    fun generateInitializationCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock? = null
+
+    fun argumentName(project: Project): String? = null
+    fun generateArgumentParameterSpec(project: Project): ParameterSpec? = null
+    fun generateNavigationInitializationBlock(): CodeBlock? = null
+
+    /**
+     * Generates the CodeBlock if the action that triggers the action needs to be wrapped with
+     * some code.
+     * E.g. Sign in With Google needs to be wrapped with the following code so that the
+     * action that triggers sign in is within the expexted scope.
+     *
+     * GoogleButtonUiContainerFirebase(onResult = {}) {
+     *      // Composable that triggers the action
+     * }
+     */
+    fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock? = null
+
+    /**
+     * Adds methods or properties to the given [context].
+     *
+     * For example, [SetValueToState] action adds the methods and properties to update the states
+     */
+    fun addUpdateMethodAndReadProperty(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ) {
+    }
+
+    fun isDependent(sourceId: String): Boolean = false
+    fun asActionNode(actionNodeId: ActionNodeId? = null): ActionNode
+
+    /**
+     * Post process after the action is added
+     */
+    fun onActionAdded(project: Project) {}
+
+    /**
+     * Post process after the action is removed
+     */
+    fun onActionRemoved(project: Project) {}
+    fun hasSuspendFunction(): Boolean = false
+    fun getDependentComposeNodes(project: Project): List<ComposeNode> = emptyList()
+
+    fun generateIssues(project: Project): List<Issue> = emptyList()
+}
+
+/**
+ * Placeholder to be replaced by action blocks for the true condition
+ */
+const val TRUE_ACTIONS_PLACEHOLDER = "[trueActionsPlaceholder]"
+
+/**
+ * Placeholder to be replaced by action blocks for the false condition
+ */
+const val FALSE_ACTIONS_PLACEHOLDER = "[falseActionsPlaceholder]"
+
+/**
+ * Action that has action blocks depending on the result of the action.
+ * E.g. Confirmation dialog action:
+ *        - true blocks : Executed when the user selects the positive button
+ *        - false blocks : Executed when the user selects the negative button
+ */
+@Serializable
+sealed interface ForkedAction : Action
+
+@Serializable
+sealed interface Navigation : Action {
+
+    @Serializable
+    @SerialName("NavigateTo")
+    data class NavigateTo(
+        override val id: String = Uuid.random().toString(),
+        val screenId: String,
+        val paramsMap: MutableMap<ParameterId, AssignableProperty> =
+            mutableStateMapOf(),
+        @Transient
+        override val name: String = "Navigate to",
+    ) : Navigation {
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                val screen = project.findScreenOrNull(screenId)
+                if (screen == null) {
+                    add(
+                        Issue.InvalidScreenReference(
+                            screenId,
+                            destination = NavigatableDestination.UiBuilderScreen(
+                                inspectorTabDestination = InspectorTabDestination.Action
+                            ),
+                            issueContext = this@NavigateTo,
+                        )
+                    )
+                }
+                screen?.let {
+                    paramsMap.forEach { entry ->
+                        val parameter = screen.parameters.firstOrNull { it.id == entry.key }
+                        parameter?.let {
+
+                            val transformedValueType = entry.value.transformedValueType(project)
+                            if (transformedValueType is ComposeFlowType.UnknownType) {
+                                add(
+                                    Issue.ResolvedToUnknownType(
+                                        property = entry.value,
+                                        destination = NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action
+                                        ),
+                                        issueContext = this@NavigateTo,
+                                    )
+                                )
+                            }
+
+                            if (!parameter.parameterType.isAbleToAssign(transformedValueType)) {
+                                add(
+                                    Issue.ResolvedToTypeNotAssignable(
+                                        property = entry.value,
+                                        acceptableType = parameter.parameterType,
+                                        destination = NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action
+                                        ),
+                                        issueContext = this@NavigateTo,
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            val screen = project.screenHolder.screens.firstOrNull { it.id == screenId }
+            Column {
+                Text(
+                    stringResource(Res.string.navigate_to),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    screen?.name ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project, context: GenerationContext, dryRun: Boolean,
+        ): CodeBlock {
+            val targetScreen = project.screenHolder.screens.firstOrNull { it.id == screenId }
+            val builder = CodeBlock.builder()
+            targetScreen?.let {
+                val argString = if (targetScreen.parameters.isEmpty()) {
+                    // ScreenRoute is data object. No parameters are needed
+                    ""
+                } else {
+                    buildString {
+                        append("(")
+                        paramsMap.entries.forEachIndexed { index, (key, value) ->
+                            val parameter = targetScreen.parameters.firstOrNull { parameter ->
+                                parameter.id == key
+                            }
+
+                            parameter?.let {
+                                if (value is IntrinsicProperty<*>) {
+                                    append(
+                                        "${parameter.variableName} = ${
+                                            value.transformedCodeBlock(
+                                                project,
+                                                context,
+                                                parameter.parameterType,
+                                                dryRun = dryRun,
+                                            )
+                                        }"
+                                    )
+                                } else {
+                                    append(
+                                        "${parameter.variableName} = ${
+                                            value.transformedCodeBlock(
+                                                project,
+                                                context,
+                                                parameter.parameterType,
+                                                dryRun = dryRun,
+                                            )
+                                        }"
+                                    )
+                                }
+                            }
+                            if (index != paramsMap.entries.size - 1) {
+                                append(",\n")
+                            }
+                        }
+                        append(")")
+                    }
+                }
+                builder.addStatement(
+                    """${argumentName(project)}($screenRoute.${it.routeName}$argString)""",
+                )
+            }
+            return builder.build()
+        }
+
+        override fun argumentName(project: Project): String =
+            ComposeScreenConstant.onNavigateToRoute.name
+
+        override fun generateArgumentParameterSpec(project: Project): ParameterSpec {
+            return argumentName(project).let { argumentName ->
+                ParameterSpec.builder(
+                    argumentName,
+                    LambdaTypeName.get(
+                        parameters = arrayOf(
+                            ParameterSpec.unnamed(screenRouteClass),
+                        ),
+                        returnType = UNIT,
+                    ),
+                ).build()
+            }
+        }
+
+        override fun generateNavigationInitializationBlock(): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.addStatement(
+                """{ 
+                navController.navigate(it)
+            }
+            """,
+            )
+            return builder.build()
+        }
+
+        override fun isDependent(sourceId: String): Boolean =
+            paramsMap.any { it.value.isDependent(sourceId) }
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+
+    @Serializable
+    @SerialName("NavigateBack")
+    data object NavigateBack : Navigation {
+        //        
+        override val id: String = Uuid.random().toString().toString()
+
+        @Transient
+        override val name: String = "Navigate back"
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.navigate_back),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.addStatement("${argumentName(project)}()")
+            return builder.build()
+        }
+
+        override fun argumentName(project: Project): String =
+            ComposeScreenConstant.onNavigateBack.name
+
+        override fun generateArgumentParameterSpec(project: Project): ParameterSpec {
+            return argumentName(project).let { argumentName ->
+                ParameterSpec.builder(
+                    argumentName,
+                    LambdaTypeName.get(
+                        returnType = UNIT,
+                    ),
+                ).build()
+            }
+        }
+
+        override fun generateNavigationInitializationBlock(): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.add(
+                """{
+                navController.navigateUp()
+            }""",
+            )
+            return builder.build()
+        }
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+}
+
+@Serializable
+sealed interface StateAction : Action {
+
+    @Serializable
+    @SerialName("SetAppStateValue")
+    data class SetAppStateValue(
+//        
+        override val id: String = Uuid.random().toString().toString(),
+        @Serializable(FallbackMutableStateListSerializer::class)
+        val setValueToStates: MutableList<SetValueToState> = mutableStateListEqualsOverrideOf(),
+        @Transient
+        override val name: String = "Set state",
+    ) : StateAction {
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return setValueToStates.flatMap { it.operation.getDependentComposeNodes(project) }
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                setValueToStates.forEach { setValueToState ->
+                    project.findLocalStateOrNull(setValueToState.writeToStateId)?.let {
+                        setValueToState.operation.getAssignableProperties().forEach {
+                            if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                                add(
+                                    Issue.ResolvedToUnknownType(
+                                        property = it,
+                                        destination = NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action
+                                        ),
+                                        issueContext = this@SetAppStateValue,
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        override fun isDependent(sourceId: String): Boolean {
+            return setValueToStates.any {
+                it.isDependent(sourceId)
+            } ||
+                    setValueToStates.any {
+                        it.writeToStateId == sourceId
+                    }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.set_state),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (setValueToStates.size == 1) {
+                    val writeState =
+                        project.findLocalStateOrNull(setValueToStates.first().writeToStateId)
+                    Text(
+                        writeState?.name ?: "",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                } else if (setValueToStates.size > 1) {
+                    Text(
+                        "${setValueToStates.size} states",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            }
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            // CanvasEditable that has this action
+            val editable = project.getAllCanvasEditable()
+                .firstOrNull {
+                    it.getAllComposeNodes()
+                        .any { node -> node.allActions().any { action -> action == this } }
+                }
+                ?: throw IllegalStateException("No CanvasEditable has State $this")
+            setValueToStates.forEach {
+                it.getUpdateMethodName(project)?.let { updateMethodName ->
+                    builder.addStatement(
+                        "${editable.viewModelName}.${updateMethodName}(${
+                            it.operation.getUpdateMethodParamsAsString(
+                                project, context, dryRun = dryRun
+                            )
+                        })"
+                    )
+                }
+            }
+            return builder.build()
+        }
+
+        override fun addUpdateMethodAndReadProperty(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ) {
+            setValueToStates.forEach { setValueToState ->
+                setValueToState.addUpdateMethodAndReadProperty(
+                    project,
+                    context = context,
+                    dryRun = dryRun,
+                )
+            }
+        }
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+}
+
+@Serializable
+@SerialName("SetValueToState")
+data class SetValueToState(
+    val writeToStateId: StateId,
+    val operation: StateOperation,
+) {
+    fun isDependent(sourceId: String): Boolean {
+        return operation.isDependent(sourceId)
+    }
+
+    fun getUpdateMethodName(project: Project): String? {
+        val state = project.findLocalStateOrNull(writeToStateId) ?: return null
+        val writeState = state as? WriteableState ?: return null
+        return operation.getUpdateMethodName(project, writeState)
+    }
+
+    fun addUpdateMethodAndReadProperty(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ) {
+        val state = project.findLocalStateOrNull(writeToStateId) ?: return
+        val writeState = state as? WriteableState ?: return
+        operation.addUpdateMethodAndReadProperty(
+            project = project,
+            context = context,
+            writeState = writeState,
+            dryRun = dryRun,
+        )
+    }
+}
+
+@Serializable
+@SerialName("CallApi")
+data class CallApi(
+    override val id: String = Uuid.random().toString(),
+    val apiId: ApiId,
+    val paramsMap: MutableMap<ParameterId, AssignableProperty> =
+        mutableStateMapOf(),
+    @Transient
+    override val name: String = "Call API",
+) : Action {
+
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+        return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
+    }
+
+    override fun generateIssues(project: Project): List<Issue> {
+        return buildList {
+            val api = project.findApiDefinitionOrNull(apiId)
+            if (api == null) {
+                add(
+                    Issue.InvalidApiReference(
+                        apiId = apiId,
+                        destination = NavigatableDestination.UiBuilderScreen(
+                            inspectorTabDestination = InspectorTabDestination.Action
+                        ),
+                        issueContext = this@CallApi,
+                    )
+                )
+            }
+            api?.let {
+                paramsMap.entries.forEach { entry ->
+                    api.parameters.firstOrNull { it.parameterId == entry.key }?.let {
+                        val transformedValueType = entry.value.transformedValueType(project)
+                        if (transformedValueType is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = entry.value,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@CallApi,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    override fun SimplifiedContent(project: Project) {
+        Column {
+            val api = project.findApiDefinitionOrNull(apiId)
+            Text(
+                stringResource(Res.string.call_api),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+
+            Text(
+                api?.name ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+                overflow = TextOverflow.Ellipsis,
+                maxLines = 1,
+            )
+        }
+    }
+
+    override fun isDependent(sourceId: String): Boolean =
+        paramsMap.any { it.value.isDependent(sourceId) }
+
+    override fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        val apiDefinition = project.findApiDefinitionOrNull(apiId)
+        apiDefinition?.let {
+            val argumentString = buildString {
+                paramsMap.entries.forEachIndexed { index, (parameterId, value) ->
+                    val parameter =
+                        apiDefinition.parameters.firstOrNull { it.parameterId == parameterId }
+                    parameter?.let {
+                        append("${parameter.variableName} = ")
+                        append("${value.transformedCodeBlock(project, context, dryRun = dryRun)}")
+                        if (index != paramsMap.entries.size - 1) {
+                            append(",")
+                        }
+                    }
+                }
+            }
+            builder.addStatement(
+                """${context.currentEditable.viewModelName}.${apiDefinition.callApiFunName()}($argumentString)""",
+            )
+        }
+        return builder.build()
+    }
+
+    override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+        ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+}
+
+sealed interface ShowModal : Action {
+
+    companion object {
+        fun entries(): List<ShowModal> = listOf(
+            ShowInformationDialog(),
+            ShowConfirmationDialog(),
+            ShowCustomDialog(),
+            ShowBottomSheet(),
+            ShowNavigationDrawer(),
+        )
+    }
+}
+
+@Serializable
+@SerialName("ShowConfirmationDialog")
+data class ShowConfirmationDialog(
+//    
+    override val id: String = Uuid.random().toString().toString(),
+    val title: AssignableProperty? = null,
+    val message: AssignableProperty? = null,
+    val negativeText: AssignableProperty = StringProperty.StringIntrinsicValue("Cancel"),
+    val positiveText: AssignableProperty = StringProperty.StringIntrinsicValue("Confirm"),
+    @Transient
+    override val name: String = "Show confirmation dialog",
+    var dialogOpenVariableName: String = "openConfirmationDialog",
+) : ShowModal, ForkedAction {
+
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+        return (title?.getDependentComposeNodes(project) ?: emptyList()) +
+                (message?.getDependentComposeNodes(project) ?: emptyList()) +
+                negativeText.getDependentComposeNodes(project) +
+                positiveText.getDependentComposeNodes(project)
+    }
+
+    override fun generateIssues(project: Project): List<Issue> {
+        return buildList {
+            listOf(title, message, negativeText, positiveText).forEach {
+                if (it?.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                    add(
+                        Issue.ResolvedToUnknownType(
+                            property = it,
+                            destination = NavigatableDestination.UiBuilderScreen(
+                                inspectorTabDestination = InspectorTabDestination.Action
+                            ),
+                            issueContext = this@ShowConfirmationDialog,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+        ActionNode.Forked(id = actionNodeId ?: Uuid.random().toString(), forkedAction = this)
+
+    @Composable
+    override fun SimplifiedContent(project: Project) {
+        Column {
+            Text(
+                stringResource(Res.string.dialog_bottom_sheet_drawer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(Res.string.confirmation),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+    }
+
+    override fun generateInitializationCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        val composableContext = context.getCurrentComposableContext()
+        val variableName =
+            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
+        dialogOpenVariableName = variableName
+        val titleArg = title?.let {
+            "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+        } ?: ""
+        val messageArg = message?.let {
+            "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+        } ?: ""
+        builder.addStatement(
+            """
+                var $dialogOpenVariableName by %M { %M(false) }    
+                if ($dialogOpenVariableName) {
+                    %M(
+                        positiveText = ${
+                positiveText.transformedCodeBlock(
+                    project,
+                    context,
+                    dryRun = dryRun
+                )
+            },
+                        negativeText = ${
+                negativeText.transformedCodeBlock(
+                    project,
+                    context,
+                    dryRun = dryRun
+                )
+            },
+                        positiveBlock = {
+                            $TRUE_ACTIONS_PLACEHOLDER
+                        }, 
+                        negativeBlock = {
+                            $FALSE_ACTIONS_PLACEHOLDER
+                        },
+                        onDismissRequest = {
+                            $dialogOpenVariableName = false
+                        },
+                        $titleArg
+                        $messageArg
+                    )
+                }
+            """,
+            MemberHolder.AndroidX.Runtime.remember,
+            MemberHolder.AndroidX.Runtime.mutableStateOf,
+            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "ConfirmationDialog"),
+        )
+        return builder.build()
+    }
+
+    override fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        builder.addStatement("$dialogOpenVariableName = true")
+        return builder.build()
+    }
+}
+
+@Serializable
+@SerialName("ShowInformationDialog")
+data class ShowInformationDialog(
+    override val id: ActionId = Uuid.random().toString(),
+    val title: AssignableProperty? = null,
+    val message: AssignableProperty? = null,
+    val confirmText: AssignableProperty = StringProperty.StringIntrinsicValue("Ok"),
+    @Transient
+    override val name: String = "Show information dialog",
+    var dialogOpenVariableName: String = "openInformationDialog",
+) : ShowModal {
+
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+        return (title?.getDependentComposeNodes(project) ?: emptyList()) +
+                (message?.getDependentComposeNodes(project) ?: emptyList()) +
+                confirmText.getDependentComposeNodes(project)
+    }
+
+    override fun generateIssues(project: Project): List<Issue> {
+        return buildList {
+            listOf(title, message, confirmText).forEach {
+                if (it?.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                    add(
+                        Issue.ResolvedToUnknownType(
+                            property = it,
+                            destination = NavigatableDestination.UiBuilderScreen(
+                                inspectorTabDestination = InspectorTabDestination.Action
+                            ),
+                            issueContext = this@ShowInformationDialog,
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+        ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+    @Composable
+    override fun SimplifiedContent(project: Project) {
+        Column {
+            Text(
+                stringResource(Res.string.dialog_bottom_sheet_drawer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(Res.string.information),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+    }
+
+    override fun generateInitializationCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        val composableContext = context.getCurrentComposableContext()
+        val variableName =
+            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
+        dialogOpenVariableName = variableName
+        val titleArg = title?.let {
+            "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+        } ?: ""
+        val messageArg = message?.let {
+            "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+        } ?: ""
+        builder.addStatement(
+            """
+                var $dialogOpenVariableName by %M { %M(false) }    
+                if ($dialogOpenVariableName) {
+                    %M(
+                        confirmText = ${
+                confirmText.transformedCodeBlock(
+                    project,
+                    context,
+                    dryRun = dryRun
+                )
+            },
+                        onDismissRequest = {
+                            $dialogOpenVariableName = false
+                        },
+                        $titleArg
+                        $messageArg
+                    )
+                }
+            """,
+            MemberHolder.AndroidX.Runtime.remember,
+            MemberHolder.AndroidX.Runtime.mutableStateOf,
+            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "InformationDialog")
+        )
+        return builder.build()
+    }
+
+    override fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        builder.addStatement("$dialogOpenVariableName = true")
+        return builder.build()
+    }
+}
+
+@Serializable
+@SerialName("ShowModalWithComponent")
+sealed interface ShowModalWithComponent : ShowModal {
+    val componentId: ComponentId?
+    val paramsMap: MutableMap<ParameterId, AssignableProperty>
+    fun copy(
+        paramsMap:
+        MutableMap<ParameterId,
+                AssignableProperty>,
+    ): ShowModalWithComponent
+
+    fun findComponentOrNull(project: Project): Component? {
+        return if (componentId != null) {
+            componentId?.let { project.findComponentOrNull(it) }
+        } else if (project.componentHolder.components.isNotEmpty()) {
+            project.componentHolder.components[0]
+        } else {
+            null
+        }
+    }
+
+    override fun generateIssues(project: Project): List<Issue> {
+        val component = findComponentOrNull(project) ?: return emptyList()
+        return buildList {
+            paramsMap.entries.forEach { entry ->
+                component.parameters.firstOrNull { it.id == entry.key }?.let { parameter ->
+                    val transformedValueType = entry.value.transformedValueType(project)
+                    if (transformedValueType is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = entry.value,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@ShowModalWithComponent,
+                            )
+                        )
+                    }
+                    if (!parameter.parameterType.isAbleToAssign(transformedValueType)) {
+                        add(
+                            Issue.ResolvedToTypeNotAssignable(
+                                property = entry.value,
+                                acceptableType = parameter.parameterType,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@ShowModalWithComponent,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Serializable
+@SerialName("ShowCustomDialog")
+data class ShowCustomDialog(
+    override val id: ActionId = Uuid.random().toString(),
+    override val componentId: ComponentId? = null,
+    @Serializable(FallbackMutableStateMapSerializer::class)
+    override val paramsMap: MutableMap<ParameterId, AssignableProperty> =
+        mutableStateMapOf(),
+    @Transient
+    override val name: String = "Show custom dialog",
+    var dialogOpenVariableName: String = "openCustomDialog",
+) : ShowModalWithComponent {
+
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent {
+        return this.copy(paramsMap = paramsMap)
+    }
+
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+        return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
+    }
+
+    override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+        ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+    @Composable
+    override fun SimplifiedContent(project: Project) {
+        Column {
+            Text(
+                stringResource(Res.string.dialog_bottom_sheet_drawer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(Res.string.custom),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+    }
+
+    override fun generateInitializationCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val component = findComponentOrNull(project) ?: return CodeBlock.of("")
+        val composableContext = context.getCurrentComposableContext()
+        val variableName =
+            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
+        dialogOpenVariableName = variableName
+
+        val paramBuilder = CodeBlock.builder()
+        paramsMap.forEach {
+            val parameter = project.findParameterOrThrow(it.key)
+            val assignableProperty = it.value
+            paramBuilder.add("${parameter.variableName} = ")
+            paramBuilder.add(
+                assignableProperty.transformedCodeBlock(
+                    project,
+                    context,
+                    dryRun = dryRun
+                )
+            )
+            paramBuilder.addStatement(",")
+        }
+        val componentBuilder = CodeBlock.builder()
+        val componentInvocationCount = context.componentCountMap[component.name] ?: 0
+        context.componentCountMap[component.name] = componentInvocationCount + 1
+        componentBuilder.addStatement(
+            """
+                %M(
+                    ${paramBuilder.build()}
+                    $componentKeyName = "${component.name}-$componentInvocationCount" 
+                )""",
+            component.asMemberName(project)
+        )
+
+        val builder = CodeBlock.builder()
+        builder.addStatement(
+            """
+                var $dialogOpenVariableName by %M { %M(false) }    
+                if ($dialogOpenVariableName) {
+                    %M(
+                        onDismissRequest = {
+                            $dialogOpenVariableName = false
+                        },
+                        content = {
+                            ${componentBuilder.build()}
+                        }
+                    )
+                }
+            """,
+            MemberHolder.AndroidX.Runtime.remember,
+            MemberHolder.AndroidX.Runtime.mutableStateOf,
+            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "CustomDialog")
+        )
+        return builder.build()
+    }
+
+    override fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        findComponentOrNull(project) ?: builder.build()
+
+        builder.addStatement("$dialogOpenVariableName = true")
+        return builder.build()
+    }
+}
+
+@Serializable
+@SerialName("ShowBottomSheet")
+data class ShowBottomSheet(
+    override val id: ActionId = Uuid.random().toString(),
+    override val componentId: ComponentId? = null,
+    @Serializable(FallbackMutableStateMapSerializer::class)
+    override val paramsMap: MutableMap<ParameterId, AssignableProperty> =
+        mutableStateMapOf(),
+    @Transient
+    override val name: String = "Show bottom sheet",
+    var bottomSheetOpenVariableName: String = "openBottomSheet",
+) : ShowModalWithComponent {
+
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent {
+        return this.copy(paramsMap = paramsMap)
+    }
+
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+        return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
+    }
+
+    override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+        ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+    @Composable
+    override fun SimplifiedContent(project: Project) {
+        Column {
+            Text(
+                stringResource(Res.string.dialog_bottom_sheet_drawer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(Res.string.show_bottom_sheet),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+    }
+
+    override fun generateInitializationCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val component = findComponentOrNull(project) ?: return CodeBlock.of("")
+
+        val composableContext = context.getCurrentComposableContext()
+        val variableName =
+            composableContext.addComposeFileVariable(bottomSheetOpenVariableName, dryRun = dryRun)
+        bottomSheetOpenVariableName = variableName
+        val bottomSheetStateVariable =
+            composableContext.addComposeFileVariable("bottomSheetState", dryRun = dryRun)
+
+        val paramBuilder = CodeBlock.builder()
+        paramsMap.forEach {
+            val parameter = project.findParameterOrThrow(it.key)
+            val assignableProperty = it.value
+            paramBuilder.add("${parameter.variableName} = ")
+            paramBuilder.add(
+                assignableProperty.transformedCodeBlock(
+                    project,
+                    context,
+                    dryRun = dryRun
+                )
+            )
+            paramBuilder.addStatement(",")
+        }
+        val componentBuilder = CodeBlock.builder()
+        val componentInvocationCount = context.componentCountMap[component.name] ?: 0
+        context.componentCountMap[component.name] = componentInvocationCount + 1
+        componentBuilder.addStatement(
+            """
+                %M(
+                    ${paramBuilder.build()}
+                    $componentKeyName = "${component.name}-$componentInvocationCount" 
+                )""",
+            component.asMemberName(project)
+        )
+
+        val builder = CodeBlock.builder()
+        builder.addStatement(
+            """
+                var $bottomSheetOpenVariableName by %M { %M(false) }    
+                val $bottomSheetStateVariable = %M()
+                if ($bottomSheetOpenVariableName) {
+                    %M(
+                        onDismissRequest = {
+                            $bottomSheetOpenVariableName = false
+                        },
+                        sheetState = $bottomSheetStateVariable
+                    ) {
+                        ${componentBuilder.build()}
+                    }
+                }
+            """,
+            MemberHolder.AndroidX.Runtime.remember,
+            MemberHolder.AndroidX.Runtime.mutableStateOf,
+            MemberName("androidx.compose.material3", "rememberModalBottomSheetState"),
+            MemberName("androidx.compose.material3", "ModalBottomSheet")
+        )
+        return builder.build()
+    }
+
+    override fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        findComponentOrNull(project) ?: return builder.build()
+
+        builder.addStatement("$bottomSheetOpenVariableName = true")
+        return builder.build()
+    }
+}
+
+@Serializable
+@SerialName("ShowNavigationDrawer")
+data class ShowNavigationDrawer(
+
+    override val id: ActionId = Uuid.random().toString(),
+    @Transient
+    override val name: String = "Show nav drawer",
+) : ShowModal {
+
+    override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+        ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+    @Composable
+    override fun SimplifiedContent(project: Project) {
+        Column {
+            Text(
+                stringResource(Res.string.dialog_bottom_sheet_drawer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                stringResource(Res.string.show_nav_drawer),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.tertiary,
+                modifier = Modifier.padding(top = 8.dp),
+            )
+        }
+    }
+
+    override fun generateIssues(project: Project): List<Issue> {
+        val screenHavingThisAction = project.screenHolder.screens.firstOrNull { screen ->
+            screen.getAllComposeNodes().firstOrNull { node ->
+                node.allActions().any { action ->
+                    action.id == this.id
+                }
+            } != null
+        }
+        return if (screenHavingThisAction?.navigationDrawerNode?.value == null) {
+            listOf(Issue.NavigationDrawerIsNotSet())
+        } else {
+            emptyList()
+        }
+    }
+
+    override fun generateActionTriggerCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val screenHavingThisAction = project.screenHolder.screens.firstOrNull { screen ->
+            screen.getAllComposeNodes().firstOrNull { node ->
+                node.allActions().any { action ->
+                    action.id == this.id
+                }
+            } != null
+        }
+        if (screenHavingThisAction?.navigationDrawerNode?.value == null) return CodeBlock.of("")
+
+        val builder = CodeBlock.builder()
+        screenHavingThisAction.let {
+            builder.addStatement(
+                """
+           ${ComposeScreenConstant.coroutineScope.name}.%M {
+               ${ComposeScreenConstant.navDrawerState}.apply {
+                   if (isClosed) { open() } else {}
+               }
+           } 
+        """, MemberHolder.Coroutines.launch
+            )
+        }
+        return builder.build()
+    }
+}
+
+@Serializable
+sealed interface ShowMessaging : Action {
+
+    @Serializable
+    @SerialName("Snackbar")
+    data class Snackbar(
+
+        override val id: ActionId = Uuid.random().toString(),
+        val message: AssignableProperty = StringProperty.StringIntrinsicValue("Snackbar message"),
+        val actionLabel: AssignableProperty? = null,
+        @Transient
+        override val name: String = "Show Snackbar",
+        var snackbarOpenVariableName: String = "onShowSnackbar",
+    ) : ShowMessaging {
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return message.getDependentComposeNodes(project) +
+                    (actionLabel?.getDependentComposeNodes(project) ?: emptyList())
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                listOf(message, actionLabel).forEach {
+                    if (it?.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@Snackbar,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.show_snackbar),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    message.displayText(project),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (message is IntrinsicProperty<*>) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        override fun generateInitializationCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            snackbarOpenVariableName =
+                context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                    snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
+                )
+            // Initialize the uriHandler once in the compose file instead of initializing it in
+            // every action
+            return CodeBlock.of("")
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val actionLabel =
+                actionLabel?.transformedCodeBlock(project, context, dryRun = dryRun) ?: "null"
+            return CodeBlock.of(
+                """${ComposeScreenConstant.coroutineScope.name}.%M {
+                ${snackbarOpenVariableName}(${
+                    message.transformedCodeBlock(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                    )
+                }, ${actionLabel})
+            }
+        """, MemberHolder.Coroutines.launch
+            )
+        }
+
+        override fun hasSuspendFunction(): Boolean = true
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+
+    companion object {
+        fun entries(): List<ShowMessaging> = listOf(Snackbar())
+    }
+}
+
+sealed interface YearRangeSelectableAction : Action {
+    var minSelectableYear: MutableState<AssignableProperty?>
+    var maxSelectableYear: MutableState<AssignableProperty?>
+    var onlyPastDates: MutableState<Boolean>
+    var onlyFutureDates: MutableState<Boolean>
+    var outputStateName: MutableState<String>
+
+    fun generateRememberDatePickerState(
+        stateVariableName: String,
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        builder.addStatement(
+            "val $stateVariableName = %M(",
+            MemberHolder.Material3.rememberDatePickerState
+        )
+        val minYear = minSelectableYear.value
+        val maxYear = maxSelectableYear.value
+        if (minYear != null && maxYear != null) {
+            builder.add(
+                CodeBlock.of(
+                    "yearRange = %T(${
+                        minYear.transformedCodeBlock(
+                            project,
+                            context,
+                            dryRun = dryRun
+                        )
+                    }, ${maxYear.transformedCodeBlock(project, context, dryRun = dryRun)}),",
+                    IntRange::class.asTypeName()
+                )
+            )
+        }
+        if (onlyPastDates.value) {
+            builder.add(
+                CodeBlock.of(
+                    """
+            selectableDates = object : %M {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis <= %T.System.now().toEpochMilliseconds()
+                }
+            },""", MemberHolder.Material3.SelectableDates,
+                    ClassHolder.Kotlinx.DateTime.Clock
+                )
+            )
+        }
+        if (!onlyPastDates.value && onlyFutureDates.value) {
+            builder.add(
+                CodeBlock.of(
+                    """
+            selectableDates = object : %M {
+                override fun isSelectableDate(utcTimeMillis: Long): Boolean {
+                    return utcTimeMillis >= %T.System.now().toEpochMilliseconds()
+                }
+            },""", MemberHolder.Material3.SelectableDates,
+                    ClassHolder.Kotlinx.DateTime.Clock
+                )
+            )
+        }
+        builder.add(")")
+        return builder.build()
+    }
+}
+
+@Serializable
+sealed interface DateOrTimePicker : Action {
+
+    @Serializable
+    @SerialName("OpenDatePicker")
+    data class OpenDatePicker(
+
+        override val id: ActionId = Uuid.random().toString(),
+        @Serializable(MutableStateSerializer::class)
+        override var minSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
+        @Serializable(MutableStateSerializer::class)
+        override var maxSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
+        @Serializable(MutableStateSerializer::class)
+        override var onlyPastDates: MutableState<Boolean> = mutableStateOf(false),
+        @Serializable(MutableStateSerializer::class)
+        override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
+
+        var companionStateId: StateId = Uuid.random().toString(),
+        @Transient
+        override val name: String = "Date picker",
+        var dialogOpenVariableName: String = "openDatePicker",
+        @Serializable(MutableStateSerializer::class)
+        override var outputStateName: MutableState<String> = mutableStateOf("datePickerState"),
+    ) : DateOrTimePicker, YearRangeSelectableAction {
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                listOf(minSelectableYear, maxSelectableYear).forEach {
+                    it.value?.let { value ->
+                        if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = value,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@OpenDatePicker,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.open_date_picker),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+
+        override fun onActionAdded(project: Project) {
+            val canvasEditable = project.screenHolder.currentEditable()
+            val states = canvasEditable.getStates(project)
+            val stateName = generateUniqueName(
+                initial = "pickedDate",
+                existing = states.map { it.name }.toSet(),
+            )
+            val instantState = ScreenState.InstantScreenState(
+                name = stateName,
+                userWritable = false // This state can be only changed from the Open date picker action
+            )
+            this.companionStateId = instantState.id
+            canvasEditable.addState(instantState)
+        }
+
+        override fun onActionRemoved(project: Project) {
+            project.removeLocalState(companionStateId)
+        }
+
+        override fun generateInitializationCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            val composableContext = context.getCurrentComposableContext()
+            dialogOpenVariableName =
+                composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
+            outputStateName.value =
+                composableContext.addComposeFileVariable(outputStateName.value, dryRun = dryRun)
+
+            val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
+            if (state !is WriteableState) return builder.build()
+            builder.add(
+                generateRememberDatePickerState(
+                    stateVariableName = outputStateName.value,
+                    project, context, dryRun = dryRun
+                )
+            )
+            builder.addStatement(
+                """
+                var $dialogOpenVariableName by %M { %M(false) }
+                if ($dialogOpenVariableName) {
+                    %M(
+                        onDismissRequest = {
+                            $dialogOpenVariableName = false
+                        },
+                        confirmButton = {
+                            %M {
+                                %M {
+                                    %M(
+                                        onClick = {
+                                            $dialogOpenVariableName = false
+                                            ${outputStateName.value}.selectedDateMillis?.let {
+                                                ${composableContext.canvasEditable.viewModelName}.${state.getUpdateMethodName()}(%T.fromEpochMilliseconds(it))
+                                            }
+                                        },
+                                        enabled = ${outputStateName.value}.selectedDateMillis != null
+                                    ) {
+                                        %M(%M(%M.string.%M))
+                                    }
+                                    %M(%M.%M(8.dp))
+                                }
+                                %M(%M.%M(8.dp))
+                            }
+                        }, 
+                        dismissButton = {
+                            %M(
+                                onClick = {
+                                    $dialogOpenVariableName = false
+                                }
+                            ) {
+                                %M(%M(%M.string.%M))
+                            }
+                        },
+                    ) {
+                        %M(${outputStateName.value})
+                    }
+                }
+            """,
+                MemberHolder.AndroidX.Runtime.remember,
+                MemberHolder.AndroidX.Runtime.mutableStateOf,
+                MemberHolder.Material3.DatePickerDialog,
+                MemberHolder.AndroidX.Layout.Column,
+                MemberHolder.AndroidX.Layout.Row,
+                MemberHolder.Material3.OutlinedButton,
+                Instant::class.asTypeName(),
+                MemberHolder.Material3.Text,
+                MemberHolder.JetBrains.stringResource,
+                MemberHolder.ComposeFlow.Res,
+                MemberHolder.ComposeFlow.String.confirm,
+                MemberHolder.AndroidX.Layout.Spacer,
+                MemberHolder.AndroidX.Ui.Modifier,
+                MemberHolder.AndroidX.Layout.size,
+                MemberHolder.AndroidX.Layout.Spacer,
+                MemberHolder.AndroidX.Ui.Modifier,
+                MemberHolder.AndroidX.Layout.size,
+                MemberHolder.Material3.TextButton,
+                MemberHolder.Material3.Text,
+                MemberHolder.JetBrains.stringResource,
+                MemberHolder.ComposeFlow.Res,
+                MemberHolder.ComposeFlow.String.cancel,
+                MemberHolder.Material3.DatePicker,
+            )
+            return builder.build()
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.addStatement("$dialogOpenVariableName = true")
+            return builder.build()
+        }
+    }
+
+    @Serializable
+    @SerialName("OpenDateAndTimePicker")
+    data class OpenDateAndTimePicker(
+
+        override val id: ActionId = Uuid.random().toString(),
+        @Serializable(MutableStateSerializer::class)
+        override var minSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
+        @Serializable(MutableStateSerializer::class)
+        override var maxSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
+        @Serializable(MutableStateSerializer::class)
+        override var onlyPastDates: MutableState<Boolean> = mutableStateOf(false),
+        @Serializable(MutableStateSerializer::class)
+        override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
+
+        var companionStateId: StateId = Uuid.random().toString(),
+        @Transient
+        override val name: String = "Date+Time picker",
+        var dateDialogOpenVariableName: String = "openDatePicker",
+        var datePickerStateName: String = "datePickerState",
+        var timeDialogOpenVariableName: String = "openTimePicker",
+        var timePickerStateName: String = "timePickerState",
+        @Serializable(MutableStateSerializer::class)
+        override var outputStateName: MutableState<String> = mutableStateOf("pickedDateTime"),
+    ) : DateOrTimePicker, YearRangeSelectableAction {
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                listOf(minSelectableYear, maxSelectableYear).forEach {
+                    it.value?.let { value ->
+                        if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = value,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@OpenDateAndTimePicker,
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.open_date_plus_time_picker),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+
+        override fun onActionAdded(project: Project) {
+            val canvasEditable = project.screenHolder.currentEditable()
+            val states = canvasEditable.getStates(project)
+            val stateName = generateUniqueName(
+                initial = outputStateName.value,
+                existing = states.map { it.name }.toSet(),
+            )
+            val instantState = ScreenState.InstantScreenState(
+                name = stateName,
+                userWritable = false // This state can be only changed from the Open date picker action
+            )
+            this.companionStateId = instantState.id
+            canvasEditable.addState(instantState)
+        }
+
+        override fun onActionRemoved(project: Project) {
+            project.removeLocalState(companionStateId)
+        }
+
+        override fun generateInitializationCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            val composableContext = context.getCurrentComposableContext()
+            dateDialogOpenVariableName = composableContext.addComposeFileVariable(
+                dateDialogOpenVariableName,
+                dryRun = dryRun
+            )
+            datePickerStateName =
+                composableContext.addComposeFileVariable(datePickerStateName, dryRun = dryRun)
+            timeDialogOpenVariableName = composableContext.addComposeFileVariable(
+                timeDialogOpenVariableName,
+                dryRun = dryRun
+            )
+            timePickerStateName =
+                composableContext.addComposeFileVariable(timePickerStateName, dryRun = dryRun)
+
+            val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
+            if (state !is WriteableState) return builder.build()
+
+            builder.add(
+                generateRememberDatePickerState(
+                    stateVariableName = datePickerStateName,
+                    project, context, dryRun = dryRun,
+                )
+            )
+            // Code to open DatePicker
+            builder.addStatement(
+                """
+                val $timePickerStateName = %M()
+                var $dateDialogOpenVariableName by %M { %M(false) }
+                var $timeDialogOpenVariableName by %M { %M(false) }
+                if ($dateDialogOpenVariableName) {
+                    %M(
+                        onDismissRequest = {
+                            $dateDialogOpenVariableName = false
+                        },
+                        confirmButton = {
+                            %M {
+                                %M {
+                                    %M(
+                                        onClick = {
+                                            $dateDialogOpenVariableName = false
+                                            $timeDialogOpenVariableName = true
+                                        },
+                                        enabled = ${datePickerStateName}.selectedDateMillis != null
+                                    ) {
+                                        %M(%M(%M.string.%M))
+                                    }
+                                    %M(%M.%M(8.dp))
+                                }
+                                %M(%M.%M(8.dp))
+                            }
+                        }, 
+                        dismissButton = {
+                            %M(
+                                onClick = {
+                                    $dateDialogOpenVariableName = false
+                                }
+                            ) {
+                                %M(%M(%M.string.%M))
+                            }
+                        },
+                    ) {
+                        %M($datePickerStateName)
+                    }
+                }
+            """,
+                MemberHolder.Material3.rememberTimePickerState,
+                MemberHolder.AndroidX.Runtime.remember,
+                MemberHolder.AndroidX.Runtime.mutableStateOf,
+                MemberHolder.AndroidX.Runtime.remember,
+                MemberHolder.AndroidX.Runtime.mutableStateOf,
+                MemberHolder.Material3.DatePickerDialog,
+                MemberHolder.AndroidX.Layout.Column,
+                MemberHolder.AndroidX.Layout.Row,
+                MemberHolder.Material3.OutlinedButton,
+                MemberHolder.Material3.Text,
+                MemberHolder.JetBrains.stringResource,
+                MemberHolder.ComposeFlow.Res,
+                MemberHolder.ComposeFlow.String.confirm,
+                MemberHolder.AndroidX.Layout.Spacer,
+                MemberHolder.AndroidX.Ui.Modifier,
+                MemberHolder.AndroidX.Layout.size,
+                MemberHolder.AndroidX.Layout.Spacer,
+                MemberHolder.AndroidX.Ui.Modifier,
+                MemberHolder.AndroidX.Layout.size,
+                MemberHolder.Material3.TextButton,
+                MemberHolder.Material3.Text,
+                MemberHolder.JetBrains.stringResource,
+                MemberHolder.ComposeFlow.Res,
+                MemberHolder.ComposeFlow.String.cancel,
+                MemberHolder.Material3.DatePicker,
+            )
+
+            // Code to open TimePicker
+            builder.add(
+                CodeBlock.of(
+                    """
+    if ($timeDialogOpenVariableName) {
+        %M(
+            onDismissRequest = {
+                $timeDialogOpenVariableName = false
+            }
+        ) {
+            %M(shape = %M.shapes.extraLarge) {
+                %M(modifier = %M.%M(16.dp)) {
+                    %M(
+                        state = $timePickerStateName,
+                        modifier = %M.align(%M.CenterHorizontally)
+                    )
+                    %M(
+                        horizontalArrangement = %M.End
+                    ) {
+                        %M(%M.weight(1f))
+                        %M(onClick = { $timeDialogOpenVariableName = false }) {
+                            %M(%M(%M.string.%M))
+                        }
+                        %M(modifier = %M.%M(32.dp))
+                        %M(onClick = {
+                            $timeDialogOpenVariableName = false
+                            $datePickerStateName.selectedDateMillis?.let {
+                                ${composableContext.canvasEditable.viewModelName}.${state.getUpdateMethodName()}(
+                                    %T.fromEpochMilliseconds(it).%M(
+                                        ${timePickerStateName}.hour
+                                    ).%M(
+                                        ${timePickerStateName}.minute
+                                    )
+                                )
+                            }
+                        }) {
+                            %M(%M(%M.string.%M))
+                        }
+                    }
+                }
+            }
+        }
+    } 
+                """,
+                    MemberHolder.AndroidX.Ui.Dialog,
+                    MemberHolder.Material3.Card,
+                    MemberHolder.Material3.MaterialTheme,
+                    MemberHolder.AndroidX.Layout.Column,
+                    MemberHolder.AndroidX.Ui.Modifier,
+                    MemberHolder.AndroidX.Layout.padding,
+                    MemberHolder.Material3.TimePicker,
+                    MemberHolder.AndroidX.Ui.Modifier,
+                    MemberHolder.AndroidX.Ui.Alignment,
+                    MemberHolder.AndroidX.Layout.Row,
+                    MemberHolder.AndroidX.Layout.Arrangement,
+                    MemberHolder.AndroidX.Layout.Spacer,
+                    MemberHolder.AndroidX.Ui.Modifier,
+                    MemberHolder.Material3.TextButton,
+                    MemberHolder.Material3.Text,
+                    MemberHolder.JetBrains.stringResource,
+                    MemberHolder.ComposeFlow.Res,
+                    MemberHolder.ComposeFlow.String.cancel,
+                    MemberHolder.AndroidX.Layout.Spacer,
+                    MemberHolder.AndroidX.Ui.Modifier,
+                    MemberHolder.AndroidX.Layout.width,
+                    MemberHolder.Material3.OutlinedButton,
+                    Instant::class.asTypeName(),
+                    MemberName("${COMPOSEFLOW_PACKAGE}.util", "setHour", isExtension = true),
+                    MemberName("${COMPOSEFLOW_PACKAGE}.util", "setMinute", isExtension = true),
+                    MemberHolder.Material3.Text,
+                    MemberHolder.JetBrains.stringResource,
+                    MemberHolder.ComposeFlow.Res,
+                    MemberHolder.ComposeFlow.String.confirm,
+                )
+            )
+
+            return builder.build()
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.addStatement("$dateDialogOpenVariableName = true")
+            return builder.build()
+        }
+    }
+
+    companion object {
+        fun entries(): List<DateOrTimePicker> = listOf(
+            OpenDatePicker(),
+            OpenDateAndTimePicker(),
+        )
+    }
+}
+
+@Serializable
+sealed interface Share : Action {
+
+    @Serializable
+    @SerialName("OpenUrl")
+    data class OpenUrl(
+
+        override val id: ActionId = Uuid.random().toString(),
+        @Transient
+        override val name: String = "Open URL",
+        val url: AssignableProperty = StringProperty.StringIntrinsicValue(""),
+        var uriHandlerName: String = "uriHandler",
+    ) : Share {
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return url.getDependentComposeNodes(project)
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                listOf(url).forEach {
+                    if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@OpenUrl,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.open_url),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    url.displayText(project),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = if (url is IntrinsicProperty<*>) MaterialTheme.colorScheme.secondary
+                    else MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
+        }
+
+        override fun generateInitializationCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            uriHandlerName =
+                context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                    uriHandlerName, MemberHolder.AndroidX.Platform.LocalUriHandler
+                )
+            // Initialize the uriHandler once in the compose file instead of initializing it in
+            // every action
+            return CodeBlock.of("")
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            return CodeBlock.of(
+                """${uriHandlerName}.openUri(${
+                    url.transformedCodeBlock(
+                        project,
+                        context,
+                        dryRun = dryRun
+                    )
+                })"""
+            )
+        }
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+
+    companion object {
+        fun entries(): List<Share> = listOf(OpenUrl())
+    }
+}
+
+@Serializable
+sealed interface Auth : Action {
+
+    @Serializable
+    @SerialName("SignInWithGoogle")
+    data object SignInWithGoogle : Auth {
+
+        override val id: ActionId = Uuid.random().toString()
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.sign_in_with),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    "Google",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        @Transient
+        override val name: String = "Sign in with Google"
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            return CodeBlock.of("this@GoogleButtonUiContainerFirebase.onClick()")
+        }
+
+        override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
+            val builder = CodeBlock.builder()
+
+            // The signed in user is managed by dev.gitlive.firebase.Firebase.auth.
+            // So onResult doesn't have to do anything
+            builder.add(
+                """
+                %M(onResult = {}) {
+            """, MemberName("com.mmk.kmpauth.firebase.google", "GoogleButtonUiContainerFirebase")
+            )
+            builder.add(insideContent)
+            builder.addStatement("}")
+            return builder.build()
+        }
+    }
+
+    @Serializable
+    @SerialName("SignInWithEmailAndPassword")
+    data class SignInWithEmailAndPassword(
+
+        override val id: ActionId = Uuid.random().toString(),
+        val email: AssignableProperty = StringProperty.StringIntrinsicValue(""),
+        val password: AssignableProperty = StringProperty.StringIntrinsicValue(""),
+        var signInStateViewModelFunName: String = "onSignInWithEmailAndPassword",
+        var signInStateName: String = "signInUserState",
+        var snackbarOpenVariableName: String = "onShowSnackbar",
+        var resetEventResultFunName: String = "resetSignInEventResultState",
+    ) : Auth {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return email.getDependentComposeNodes(project) +
+                    password.getDependentComposeNodes(project)
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                listOf(email, password).forEach {
+                    if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@SignInWithEmailAndPassword,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.sign_in_with),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    stringResource(Res.string.email_and_password),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        @Transient
+        override val name: String = "Sign in with email/password"
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+        private fun generateCreateUserFlowProperties(): List<PropertySpec> {
+            val backingProperty = PropertySpec.builder(
+                "_${signInStateName}",
+                ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
+                    ClassHolder.ComposeFlow.EventResultState
+                )
+            )
+                .addModifiers(KModifier.PRIVATE)
+                .initializer(
+                    "%T(%T.NotStarted)",
+                    ClassHolder.Coroutines.Flow.MutableStateFlow,
+                    ClassHolder.ComposeFlow.EventResultState,
+                )
+                .build()
+            val property = PropertySpec.builder(
+                signInStateName,
+                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                    ClassHolder.ComposeFlow.EventResultState
+                )
+            )
+                .initializer("_${signInStateName}")
+                .build()
+            return listOf(
+                backingProperty,
+                property
+            )
+        }
+
+        override fun generateInitializationCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            snackbarOpenVariableName =
+                context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                    snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
+                )
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+
+            signInStateName = context.getCurrentComposableContext()
+                .addComposeFileVariable(signInStateName, dryRun = dryRun)
+
+            context.getCurrentComposableContext().addFunction(
+                FunSpec.builder(signInStateViewModelFunName)
+                    .addParameter(ParameterSpec.builder("email", String::class).build())
+                    .addParameter(ParameterSpec.builder("password", String::class).build())
+                    .addCode(
+                        """%M.%M {   
+            _${signInStateName}.value = %T.Loading
+            try {
+                val authResult = %M.%M.signInWithEmailAndPassword(email, password)
+                _${signInStateName}.value = %T.Success(
+                    message = "User signed in with email: ${'$'}{authResult.user?.email}")
+            } catch (e: Exception) {
+                _${signInStateName}.value = %T.Error(e.message ?: "Unknown error")
+            }
+        }""",
+                        MemberHolder.PreCompose.viewModelScope,
+                        MemberHolder.Coroutines.launch,
+                        ClassHolder.ComposeFlow.EventResultState,
+                        MemberHolder.Firebase.Firebase,
+                        MemberHolder.Firebase.auth,
+                        ClassHolder.ComposeFlow.EventResultState,
+                        ClassHolder.ComposeFlow.EventResultState,
+                    )
+                    .build(),
+                dryRun = dryRun
+            )
+
+            context.getCurrentComposableContext().addFunction(
+                FunSpec.builder(resetEventResultFunName)
+                    .addCode(
+                        "_${signInStateName}.value = %T.NotStarted",
+                        ClassHolder.ComposeFlow.EventResultState
+                    )
+                    .build(),
+                dryRun = dryRun,
+            )
+
+            generateCreateUserFlowProperties().forEach {
+                context.getCurrentComposableContext().addProperty(it, dryRun = dryRun)
+            }
+
+            val builder = CodeBlock.builder()
+            builder.add(
+                """
+    val $signInStateName by ${currentEditable.viewModelName}.${signInStateName}.%M()
+    when (val state = ${signInStateName}) {
+        is %T.Error -> {
+            ${ComposeScreenConstant.coroutineScope.name}.%M {
+                ${snackbarOpenVariableName}(state.message, null)
+                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+            }
+        }
+        %T.Loading -> {}
+        %T.NotStarted -> {}
+        is %T.Success -> {
+            ${ComposeScreenConstant.coroutineScope.name}.%M {
+                ${snackbarOpenVariableName}(state.message, null)
+                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+            }
+        }
+    }
+            """,
+                MemberHolder.AndroidX.Runtime.collectAsState,
+                ClassHolder.ComposeFlow.EventResultState,
+                MemberHolder.Coroutines.launch,
+                ClassHolder.ComposeFlow.EventResultState,
+                ClassHolder.ComposeFlow.EventResultState,
+                ClassHolder.ComposeFlow.EventResultState,
+                MemberHolder.Coroutines.launch,
+            )
+            return builder.build()
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+            return CodeBlock.of(
+                """${currentEditable.viewModelName}.${signInStateViewModelFunName}(
+                ${email.transformedCodeBlock(project, context, dryRun = dryRun)},
+                ${password.transformedCodeBlock(project, context, dryRun = dryRun)})"""
+            )
+        }
+
+        override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.add(
+                """
+                if (${signInStateName} == %T.Loading) {
+                    %M(modifier = %M.%M(24.%M))
+                } else {
+            """,
+                ClassHolder.ComposeFlow.EventResultState,
+                MemberHolder.Material3.CircularProgressIndicator,
+                MemberHolder.AndroidX.Ui.Modifier,
+                MemberHolder.AndroidX.Layout.size,
+                MemberHolder.AndroidX.Ui.dp,
+            )
+            builder.add(insideContent)
+            builder.add(
+                """
+                }
+            """
+            )
+            return builder.build()
+        }
+
+        override fun hasSuspendFunction(): Boolean = true
+    }
+
+    @Serializable
+    @SerialName("CreateUserWithEmailAndPassword")
+    data class CreateUserWithEmailAndPassword(
+
+        override val id: ActionId = Uuid.random().toString(),
+        val email: AssignableProperty = StringProperty.StringIntrinsicValue(""),
+        val password: AssignableProperty = StringProperty.StringIntrinsicValue(""),
+        var createStateViewModelFunName: String = "onCreateUserWithEmailAndPassword",
+        var createStateName: String = "createUserState",
+        var snackbarOpenVariableName: String = "onShowSnackbar",
+        var resetEventResultFunName: String = "resetCreateUserEventResultState",
+    ) : Auth {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return email.getDependentComposeNodes(project) +
+                    password.getDependentComposeNodes(project)
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return buildList {
+                listOf(email, password).forEach {
+                    if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@CreateUserWithEmailAndPassword,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.create_user_with),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    stringResource(Res.string.email_and_password),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        @Transient
+        override val name: String = "Create user with email/password"
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+        private fun generateCreateUserFlowProperties(): List<PropertySpec> {
+            val backingProperty = PropertySpec.builder(
+                "_${createStateName}",
+                ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
+                    ClassHolder.ComposeFlow.EventResultState
+                )
+            )
+                .addModifiers(KModifier.PRIVATE)
+                .initializer(
+                    "%T(%T.NotStarted)",
+                    ClassHolder.Coroutines.Flow.MutableStateFlow,
+                    ClassHolder.ComposeFlow.EventResultState,
+                )
+                .build()
+            val property = PropertySpec.builder(
+                createStateName,
+                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                    ClassHolder.ComposeFlow.EventResultState
+                )
+            )
+                .initializer("_${createStateName}")
+                .build()
+            return listOf(
+                backingProperty,
+                property
+            )
+        }
+
+        override fun generateInitializationCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            snackbarOpenVariableName =
+                context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                    snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
+                )
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+
+            createStateName = context.getCurrentComposableContext()
+                .addComposeFileVariable(createStateName, dryRun = dryRun)
+
+            context.getCurrentComposableContext().addFunction(
+                FunSpec.builder(createStateViewModelFunName)
+                    .addParameter(ParameterSpec.builder("email", String::class).build())
+                    .addParameter(ParameterSpec.builder("password", String::class).build())
+                    .addCode(
+                        """%M.%M {   
+            _${createStateName}.value = %T.Loading
+            try {
+                val authResult = %M.%M.createUserWithEmailAndPassword(email, password)
+                _${createStateName}.value = %T.Success(
+                    message = "Created user with email: ${'$'}{authResult.user?.email}")
+            } catch (e: Exception) {
+                _${createStateName}.value = %T.Error(e.message ?: "Unknown error")
+            }
+        }""",
+                        MemberHolder.PreCompose.viewModelScope,
+                        MemberHolder.Coroutines.launch,
+                        ClassHolder.ComposeFlow.EventResultState,
+                        MemberHolder.Firebase.Firebase,
+                        MemberHolder.Firebase.auth,
+                        ClassHolder.ComposeFlow.EventResultState,
+                        ClassHolder.ComposeFlow.EventResultState,
+                    )
+                    .build(),
+                dryRun = dryRun
+            )
+
+            context.getCurrentComposableContext().addFunction(
+                FunSpec.builder(resetEventResultFunName)
+                    .addCode(
+                        "_${createStateName}.value = %T.NotStarted",
+                        ClassHolder.ComposeFlow.EventResultState
+                    )
+                    .build(),
+                dryRun = dryRun,
+            )
+
+            generateCreateUserFlowProperties().forEach {
+                context.getCurrentComposableContext().addProperty(it, dryRun = dryRun)
+            }
+
+            val builder = CodeBlock.builder()
+            builder.add(
+                """
+    val $createStateName by ${currentEditable.viewModelName}.${createStateName}.%M()
+    when (val state = ${createStateName}) {
+        is %T.Error -> {
+            ${ComposeScreenConstant.coroutineScope.name}.%M {
+                ${snackbarOpenVariableName}(state.message, null)
+                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+            }
+        }
+        %T.Loading -> {}
+        %T.NotStarted -> {}
+        is %T.Success -> {
+            ${ComposeScreenConstant.coroutineScope.name}.%M {
+                ${snackbarOpenVariableName}(state.message, null)
+                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+            }
+        }
+    }
+            """,
+                MemberHolder.AndroidX.Runtime.collectAsState,
+                ClassHolder.ComposeFlow.EventResultState,
+                MemberHolder.Coroutines.launch,
+                ClassHolder.ComposeFlow.EventResultState,
+                ClassHolder.ComposeFlow.EventResultState,
+                ClassHolder.ComposeFlow.EventResultState,
+                MemberHolder.Coroutines.launch,
+            )
+            return builder.build()
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+            return CodeBlock.of(
+                """${currentEditable.viewModelName}.${createStateViewModelFunName}(
+                ${email.transformedCodeBlock(project, context, dryRun = dryRun)},
+                ${password.transformedCodeBlock(project, context, dryRun = dryRun)})"""
+            )
+        }
+
+        override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.add(
+                """
+                if (${createStateName} == %T.Loading) {
+                    %M(modifier = %M.%M(24.%M))
+                } else {
+            """,
+                ClassHolder.ComposeFlow.EventResultState,
+                MemberHolder.Material3.CircularProgressIndicator,
+                MemberHolder.AndroidX.Ui.Modifier,
+                MemberHolder.AndroidX.Layout.size,
+                MemberHolder.AndroidX.Ui.dp,
+            )
+            builder.add(insideContent)
+            builder.add(
+                """
+                }
+            """
+            )
+            return builder.build()
+        }
+
+        override fun hasSuspendFunction(): Boolean = true
+    }
+
+    @Serializable
+    @SerialName("SignOut")
+    data object SignOut : Auth {
+
+        override val id: ActionId = Uuid.random().toString()
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.sign_out),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+            }
+        }
+
+        @Transient
+        override val name: String = "Sign out"
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            return CodeBlock.of(
+                """${ComposeScreenConstant.coroutineScope.name}.%M {
+            %M.%M.signOut()
+        }
+        """,
+                MemberHolder.Coroutines.launch,
+                MemberHolder.Firebase.Firebase,
+                MemberHolder.Firebase.auth,
+            )
+        }
+
+        override fun hasSuspendFunction(): Boolean = true
+    }
+
+    companion object {
+        fun entries(): List<Auth> = listOf(
+            SignInWithGoogle,
+            SignInWithEmailAndPassword(),
+            CreateUserWithEmailAndPassword(),
+            SignOut,
+        )
+    }
+}
+
+@Serializable
+sealed interface FirestoreAction : Action {
+
+    fun generateIssues(
+        project: Project,
+        collectionId: CollectionId?,
+        dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty>,
+    ): List<Issue> {
+        val firestoreCollection =
+            collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+        val dataType =
+            firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
+                ?: return emptyList()
+        return buildList {
+            dataFieldUpdateProperties.forEach { entry ->
+                val dataField = dataType.fields.firstOrNull { it.id == entry.dataFieldId }
+                dataField?.let {
+                    val transformedValueType =
+                        entry.assignableProperty.transformedValueType(project)
+                    if (transformedValueType is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = entry.assignableProperty,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@FirestoreAction,
+                            )
+                        )
+                    }
+
+                    if (!dataField.fieldType.type().isAbleToAssign(transformedValueType)) {
+                        add(
+                            Issue.ResolvedToTypeNotAssignable(
+                                property = entry.assignableProperty,
+                                acceptableType = dataField.fieldType.type(),
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@FirestoreAction,
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Serializable
+    @SerialName("SaveToFirestore")
+    data class SaveToFirestore(
+
+        override val id: ActionId = Uuid.random().toString(),
+
+        val collectionId: CollectionId? = null,
+        val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
+        @Transient
+        override val name: String = "Save to Firestore",
+        var updateMethodName: String = "onSaveToFirestore",
+    ) : FirestoreAction {
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.firestore_save_to_firestore),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                val collection = collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+                Text(
+                    collection?.name ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        override fun generateIssues(project: Project): List<Issue> {
+            return generateIssues(
+                project = project,
+                collectionId = collectionId,
+                dataFieldUpdateProperties = dataFieldUpdateProperties
+            )
+        }
+
+        override fun addUpdateMethodAndReadProperty(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ) {
+            val firestoreCollection =
+                collectionId?.let { project.findFirestoreCollectionOrNull(it) } ?: return
+            val dataType =
+                firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) } ?: return
+
+            val composableContext = context.getCurrentComposableContext()
+            updateMethodName =
+                composableContext.generateUniqueFunName(initial = "onSave${dataType.className}ToFirestore")
+
+            val funSpecBuilder = FunSpec.builder(updateMethodName)
+
+            context.getCurrentComposableContext()
+                .addDependency(viewModelConstant = ViewModelConstant.firestore)
+            val updateString = buildString {
+                dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
+                    val dataField = dataType.findDataFieldOrNull(dataFieldId)
+                    dataField?.let {
+                        readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+                            .let { codeBlock ->
+                                val expression = dataField.fieldType.type().convertCodeFromType(
+                                    inputType = readProperty.valueType(project),
+                                    codeBlock = codeBlock,
+                                )
+                                append("${dataField.variableName} = $expression,\n")
+                            }
+                    }
+
+                    readProperty.generateParameterSpec(project)?.let {
+                        funSpecBuilder.addParameter(it)
+                    }
+                }
+            }
+
+            funSpecBuilder.addCode(
+                """val document = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}").document 
+                val updated = %T($updateString)
+                %M.%M {
+                    document.set(updated)
+                }
+            """,
+                dataType.asKotlinPoetClassName(project),
+                MemberHolder.PreCompose.viewModelScope,
+                MemberHolder.Coroutines.launch,
+            )
+            context.addFunction(funSpecBuilder.build(), dryRun = dryRun)
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            val firestoreCollection =
+                collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+                    ?: return builder.build()
+            firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) }
+                ?: return builder.build()
+
+            val paramString = buildString {
+                dataFieldUpdateProperties.forEach { (_, readProperty) ->
+                    readProperty.generateParameterSpec(project)?.let {
+                        append(
+                            "${it.name} = ${
+                                readProperty.transformedCodeBlock(
+                                    project,
+                                    context,
+                                    dryRun = dryRun
+                                )
+                            },"
+                        )
+                    }
+                }
+            }
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+            builder.add("""${currentEditable.viewModelName}.${updateMethodName}($paramString)""")
+            return builder.build()
+        }
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return dataFieldUpdateProperties.flatMap {
+                it.assignableProperty.getDependentComposeNodes(
+                    project
+                )
+            }
+        }
+
+        override fun isDependent(sourceId: String): Boolean =
+            dataFieldUpdateProperties.any {
+                it.assignableProperty.isDependent(
+                    sourceId
+                )
+            }
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+
+    @Serializable
+    @SerialName("UpdateDocument")
+    data class UpdateDocument(
+
+        override val id: ActionId = Uuid.random().toString(),
+
+        val collectionId: CollectionId? = null,
+        val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
+        val filterExpression: FilterExpression? = SingleFilter(),
+        @Transient
+        override val name: String = "Update document",
+        var updateMethodName: String = "onUpdateDocument",
+    ) : FirestoreAction {
+
+        override fun generateIssues(project: Project): List<Issue> {
+            val parameterIssues = generateIssues(
+                project = project,
+                collectionId = collectionId,
+                dataFieldUpdateProperties = dataFieldUpdateProperties
+            )
+            val filterIssues = buildList {
+                filterExpression?.getAssignableProperties()?.forEach {
+                    val transformedValueType = it.transformedValueType(project)
+                    if (transformedValueType is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@UpdateDocument,
+                            )
+                        )
+                    }
+                }
+            }
+            return parameterIssues + filterIssues
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.firestore_update_document),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                val collection = collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+                Text(
+                    collection?.name ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        override fun addUpdateMethodAndReadProperty(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ) {
+            val firestoreCollection =
+                collectionId?.let { project.findFirestoreCollectionOrNull(it) } ?: return
+            val dataType =
+                firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) } ?: return
+            val composableContext = context.getCurrentComposableContext()
+
+            updateMethodName =
+                composableContext.generateUniqueFunName(initial = "onUpdate${dataType.className}Document")
+            val funSpecBuilder = FunSpec.builder(updateMethodName)
+
+            context.getCurrentComposableContext()
+                .addDependency(viewModelConstant = ViewModelConstant.firestore)
+
+            filterExpression?.getAssignableProperties()?.forEach {
+                it.generateParameterSpec(project)?.let { param ->
+                    funSpecBuilder.addParameter(param)
+                }
+            }
+
+            val updateString = buildString {
+                dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
+                    val dataField = dataType.findDataFieldOrNull(dataFieldId)
+                    dataField?.let {
+                        readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+                            .let { codeBlock ->
+                                val expression = dataField.fieldType.type().convertCodeFromType(
+                                    inputType = readProperty.valueType(project),
+                                    codeBlock = codeBlock,
+                                )
+                                append("${dataField.variableName} = $expression,\n")
+                            }
+                    }
+
+                    readProperty.generateParameterSpec(project)?.let {
+                        funSpecBuilder.addParameter(it)
+                    }
+                }
+            }
+
+            funSpecBuilder.addCode(
+                """val collection = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}")"""
+            )
+            filterExpression?.let {
+                funSpecBuilder.addStatement(".where {")
+                funSpecBuilder.addCode(it.generateCodeBlock(project, context, dryRun = dryRun))
+                funSpecBuilder.addStatement("}")
+
+                funSpecBuilder.addCode(
+                    CodeBlock.of(
+                        """%M.%M {
+                    collection.snapshots.%M().documents.forEach { document ->
+                        val entity = document.data(%T.serializer()) 
+                        document.reference.set(entity.copy(${updateString}))
+                    }
+                }
+                """,
+                        MemberHolder.PreCompose.viewModelScope,
+                        MemberHolder.Coroutines.launch,
+                        MemberHolder.Coroutines.Flow.first,
+                        dataType.asKotlinPoetClassName(project),
+                    )
+                )
+            }
+            context.addFunction(funSpecBuilder.build(), dryRun = dryRun)
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            val firestoreCollection =
+                collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+            firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
+                ?: return builder.build()
+
+            val paramStringFromFilter = buildString {
+                filterExpression?.getAssignableProperties()?.forEach { readProperty ->
+                    readProperty.generateParameterSpec(project)?.let {
+                        append(
+                            "${it.name} = ${
+                                readProperty.transformedCodeBlock(
+                                    project,
+                                    context,
+                                    dryRun = dryRun
+                                )
+                            },"
+                        )
+                    }
+                }
+            }
+            val paramStringFromUpdateProperties = buildString {
+                dataFieldUpdateProperties.forEach { (_, readProperty) ->
+                    readProperty.generateParameterSpec(project)?.let {
+                        append(
+                            "${it.name} = ${
+                                readProperty.transformedCodeBlock(
+                                    project,
+                                    context,
+                                    dryRun = dryRun
+                                )
+                            },"
+                        )
+                    }
+                }
+            }
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+            builder.add("""${currentEditable.viewModelName}.${updateMethodName}(${paramStringFromFilter}${paramStringFromUpdateProperties})""")
+            return builder.build()
+        }
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            val nodesFromFilter = filterExpression?.getAssignableProperties()?.flatMap {
+                it.getDependentComposeNodes(
+                    project
+                )
+            } ?: emptyList()
+
+            val nodesFromUpdate = dataFieldUpdateProperties.flatMap {
+                it.assignableProperty.getDependentComposeNodes(
+                    project
+                )
+            }
+            return nodesFromUpdate + nodesFromFilter
+        }
+
+        override fun isDependent(sourceId: String): Boolean {
+            val dependsOnFilter = filterExpression?.getAssignableProperties()?.any {
+                it.isDependent(
+                    sourceId
+                )
+            } == true
+            val dependsOnUpdateProperties = dataFieldUpdateProperties.any {
+                it.assignableProperty.isDependent(
+                    sourceId
+                )
+            }
+            return dependsOnFilter || dependsOnUpdateProperties
+        }
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+
+    @Serializable
+    @SerialName("DeleteDocument")
+    data class DeleteDocument(
+
+        override val id: ActionId = Uuid.random().toString(),
+
+        val collectionId: CollectionId? = null,
+        val filterExpression: FilterExpression? = SingleFilter(),
+        @Transient
+        override val name: String = "Delete document",
+        var updateMethodName: String = "onDeleteDocument",
+    ) : FirestoreAction {
+
+        override fun generateIssues(project: Project): List<Issue> {
+            val filterIssues = buildList {
+                filterExpression?.getAssignableProperties()?.forEach {
+                    val transformedValueType = it.transformedValueType(project)
+                    if (transformedValueType is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@DeleteDocument,
+                            )
+                        )
+                    }
+                }
+            }
+            return filterIssues
+        }
+
+        @Composable
+        override fun SimplifiedContent(project: Project) {
+            Column {
+                Text(
+                    stringResource(Res.string.firestore_delete_document),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                val collection = collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+                Text(
+                    collection?.name ?: "",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    modifier = Modifier.padding(top = 8.dp),
+                )
+            }
+        }
+
+        override fun addUpdateMethodAndReadProperty(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ) {
+            val firestoreCollection =
+                collectionId?.let { project.findFirestoreCollectionOrNull(it) } ?: return
+            val dataType =
+                firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) } ?: return
+
+            updateMethodName = "onDelete${dataType.className}Document"
+            val funSpecBuilder = FunSpec.builder(updateMethodName)
+
+            context.getCurrentComposableContext()
+                .addDependency(viewModelConstant = ViewModelConstant.firestore)
+
+            filterExpression?.getAssignableProperties()?.forEach {
+                it.generateParameterSpec(project)?.let { param ->
+                    funSpecBuilder.addParameter(param)
+                }
+            }
+
+            funSpecBuilder.addCode(
+                """val collection = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}")"""
+            )
+            filterExpression?.let {
+                funSpecBuilder.addStatement(".where {")
+                funSpecBuilder.addCode(it.generateCodeBlock(project, context, dryRun = dryRun))
+                funSpecBuilder.addStatement("}")
+
+                funSpecBuilder.addCode(
+                    CodeBlock.of(
+                        """%M.%M {
+                    collection.snapshots.%M().documents.forEach { document ->
+                        document.reference.delete()
+                    }
+                }
+                """,
+                        MemberHolder.PreCompose.viewModelScope,
+                        MemberHolder.Coroutines.launch,
+                        MemberHolder.Coroutines.Flow.first,
+                    )
+                )
+            }
+            context.addFunction(funSpecBuilder.build(), dryRun = dryRun)
+        }
+
+        override fun generateActionTriggerCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val firestoreCollection =
+                collectionId?.let { project.findFirestoreCollectionOrNull(it) }
+            firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
+                ?: return CodeBlock.of("")
+
+            val paramString = buildString {
+                filterExpression?.getAssignableProperties()?.forEach { readProperty ->
+                    readProperty.generateParameterSpec(project)?.let {
+                        append(
+                            "${it.name} = ${
+                                readProperty.transformedCodeBlock(
+                                    project,
+                                    context,
+                                    dryRun = dryRun
+                                )
+                            },"
+                        )
+                    }
+                }
+            }
+            val builder = CodeBlock.builder()
+            val currentEditable = context.getCurrentComposableContext().canvasEditable
+            builder.add("""${currentEditable.viewModelName}.${updateMethodName}($paramString)""")
+            return builder.build()
+        }
+
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+            return filterExpression?.getAssignableProperties()?.flatMap {
+                it.getDependentComposeNodes(
+                    project
+                )
+            } ?: emptyList()
+        }
+
+        override fun isDependent(sourceId: String): Boolean =
+            filterExpression?.getAssignableProperties()?.any {
+                it.isDependent(
+                    sourceId
+                )
+            } == true
+
+        override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
+            ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
+    }
+
+    companion object {
+        fun entries(): List<FirestoreAction> = listOf(
+            SaveToFirestore(),
+            UpdateDocument(),
+            DeleteDocument(),
+        )
+    }
+}

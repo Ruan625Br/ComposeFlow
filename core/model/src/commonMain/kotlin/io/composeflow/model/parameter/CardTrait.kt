@@ -1,0 +1,218 @@
+package io.composeflow.model.parameter
+
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Assessment
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.OutlinedCard
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.MemberName
+import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.materialicons.Outlined
+import io.composeflow.model.modifier.ModifierWrapper
+import io.composeflow.model.modifier.generateModifierCode
+import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.parameter.wrapper.AlignmentWrapper
+import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.model.property.StringProperty
+import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.modifierForCanvas
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+@SerialName("CardTrait")
+data class CardTrait(
+    val cardType: CardType = CardType.Default,
+) : ComposeTrait {
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
+            modifierList = defaultModifierList(),
+            trait = mutableStateOf(CardTrait()),
+        ).apply {
+            addChild(
+                ComposeNode(
+                    trait = mutableStateOf(BoxTrait()),
+                    modifierList = mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.FillMaxSize(),
+                        ModifierWrapper.Padding(16.dp)
+                    )
+                ).apply {
+                    addChild(
+                        ComposeNode(
+                            trait = mutableStateOf(
+                                TextTrait(
+                                    text = StringProperty.StringIntrinsicValue("Card content")
+                                )
+                            ),
+                            modifierList = mutableStateListEqualsOverrideOf(
+                                ModifierWrapper.Align(AlignmentWrapper.BottomStart)
+                            )
+                        )
+                    )
+                    addChild(
+                        ComposeNode(
+                            trait = mutableStateOf(
+                                IconTrait(imageVectorHolder = Outlined.MoreVert)
+                            ),
+                            modifierList = mutableStateListEqualsOverrideOf(
+                                ModifierWrapper.Align(AlignmentWrapper.TopEnd)
+                            )
+                        )
+                    )
+                }
+            )
+        }
+
+    override fun icon(): ImageVector = Icons.Outlined.Assessment
+    override fun iconText(): String = "Card"
+    override fun paletteCategories(): List<TraitCategory> = listOf(
+        TraitCategory.Basic,
+        TraitCategory.Container,
+    )
+
+    override fun defaultModifierList(): MutableList<ModifierWrapper> =
+        mutableStateListEqualsOverrideOf(
+            ModifierWrapper.Width(200.dp),
+            ModifierWrapper.Height(200.dp),
+            ModifierWrapper.Padding(all = 8.dp),
+        )
+
+    @Composable
+    override fun RenderedNode(
+        project: Project,
+        node: ComposeNode,
+        canvasNodeCallbacks: CanvasNodeCallbacks,
+        paletteRenderParams: PaletteRenderParams,
+        modifier: Modifier,
+    ) {
+        when (cardType) {
+            CardType.Default -> {
+                Card(
+                    modifier = modifier.then(
+                        node.modifierChainForCanvas()
+                            .modifierForCanvas(
+                                project = project,
+                                node = node,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                paletteRenderParams = paletteRenderParams,
+                            ),
+                    ),
+                ) {
+                    node.children.forEach { child ->
+                        child.RenderedNodeInCanvas(
+                            project = project,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                        )
+                    }
+                }
+            }
+
+            CardType.Elevated -> {
+                ElevatedCard(
+                    modifier = modifier.then(
+                        node.modifierChainForCanvas()
+                            .modifierForCanvas(
+                                project = project,
+                                node = node,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                paletteRenderParams = paletteRenderParams,
+                            ),
+                    ),
+                ) {
+                    node.children.forEach { child ->
+                        child.RenderedNodeInCanvas(
+                            project = project,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                        )
+                    }
+                }
+            }
+
+            CardType.Outlined -> {
+                OutlinedCard(
+                    modifier = modifier.then(
+                        node.modifierChainForCanvas()
+                            .modifierForCanvas(
+                                project = project,
+                                node = node,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                paletteRenderParams = paletteRenderParams,
+                            ),
+                    ),
+                ) {
+                    node.children.forEach { child ->
+                        child.RenderedNodeInCanvas(
+                            project = project,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                        )
+                    }
+                }
+            }
+        }
+
+    }
+
+    override fun generateCode(
+        project: Project,
+        node: ComposeNode,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val codeBlockBuilder = CodeBlock.builder()
+        val allParamsEmpty = areAllParamsEmpty() && node.modifierList.isEmpty()
+        if (allParamsEmpty) {
+            codeBlockBuilder.addStatement("%M {", cardType.toMemberName())
+        } else {
+            codeBlockBuilder.addStatement("%M(", cardType.toMemberName())
+            codeBlockBuilder.add(
+                node.generateModifierCode(project, context, dryRun = dryRun)
+            )
+            codeBlockBuilder.addStatement(") {")
+        }
+        node.children.forEach {
+            codeBlockBuilder.add(
+                it.generateCode(
+                    project = project,
+                    context = context,
+                    dryRun = dryRun,
+                )
+            )
+        }
+        codeBlockBuilder.addStatement("}")
+        return codeBlockBuilder.build()
+    }
+}
+
+object CardTypeSerializer : FallbackEnumSerializer<CardType>(CardType::class)
+
+@Serializable(CardTypeSerializer::class)
+enum class CardType {
+    Default {
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "Card")
+    },
+    Elevated {
+        override fun toMemberName(): MemberName =
+            MemberName("androidx.compose.material3", "ElevatedCard")
+    },
+    Outlined {
+        override fun toMemberName(): MemberName =
+            MemberName("androidx.compose.material3", "OutlinedCard")
+    },
+    ;
+
+    abstract fun toMemberName(): MemberName
+}

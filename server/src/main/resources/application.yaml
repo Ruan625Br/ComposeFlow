@@ -1,0 +1,12 @@
+ktor:
+    application:
+        modules:
+            - io.composeflow.ApplicationKt.module
+    deployment:
+        port: "$PORT:8080"
+composeflow:
+    auth:
+        google:
+            client:
+                id: "$GOOGLE_CLIENT_ID:none"
+                secret: "$GOOGLE_CLIENT_SECRET:none"

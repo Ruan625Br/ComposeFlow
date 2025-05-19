@@ -1,0 +1,150 @@
+ name: Comment screenshot comparison
+
+ on:
+   pull_request:
+
+ concurrency:
+   group: ${{ github.workflow }}-${{ github.ref }}
+   cancel-in-progress: true
+
+ jobs:
+   comment_screenshot_comparison:
+     runs-on: ubuntu-latest
+     timeout-minutes: 45
+     permissions:
+       actions: read # for downloading artifacts
+       contents: write # for pushing screenshot-diff to companion branch
+       pull-requests: write # for creating a comment on pull requests
+     steps:
+       - uses: actions/checkout@v2
+       - uses: ./.github/actions/setup-java
+       - uses: dawidd6/action-download-artifact@v2
+         continue-on-error: true
+         with:
+           name: golden-screenshot
+           workflow: build.yml
+           branch: ${{ github.event.pull_request.base.ref }}
+       - name: Run compare screenshot
+         run: |
+           ./gradlew compareRoborazziJvm
+       - uses: actions/upload-artifact@v3
+         if: ${{ always() }}
+         with:
+           name: screenshot-test-reports
+           path: |
+             **/build/reports
+           retention-days: 3
+       - id: check-if-there-are-valid-files
+         name: Check if there are valid files
+         shell: bash
+         run: |
+           # Find all the files ending with _compare.png
+           mapfile -t files_to_add < <(find . -path '*/outputs/roborazzi/*' -type f -name "*_compare.png")
+           
+           # Check for invalid file names and add only valid ones
+           exist_valid_files="false"
+           for file in "${files_to_add[@]}"; do
+             if [[ $file =~ ^([a-zA-Z0-9_\./\[]|])+$ ]]; then
+               exist_valid_files="true"
+               break
+             fi
+           done
+           if [ "$exist_valid_files" == "true" ]; then
+             echo "Valid compare files are found!"
+           else
+             echo "Valid compare files are not found"
+           fi
+           echo "exist_valid_files=$exist_valid_files" >> "$GITHUB_OUTPUT"
+       - id: switch-companion-branch
+         if: steps.check-if-there-are-valid-files.outputs.exist_valid_files == 'true'
+         env:
+           BRANCH_NAME: companion_${{ github.head_ref }}
+         run: |
+           git add -f "**/outputs/roborazzi/**_compare.png" --verbose
+           git stash
+           # orphan means it will create no history branch
+           git branch -D "$BRANCH_NAME" || true
+           git checkout --orphan "$BRANCH_NAME"
+           git rm -rf .
+           git stash pop
+       - id: push-screenshot-diff
+         if: steps.check-if-there-are-valid-files.outputs.exist_valid_files == 'true'
+         shell: bash
+         env:
+           BRANCH_NAME: companion_${{ github.head_ref }}
+         run: |
+           # Find all the files ending with _compare.png
+           files_to_add=$(find . -path '*/outputs/roborazzi/*' -type f -name "*_compare.png")
+           
+           # Check for invalid file names and add only valid ones
+           for file in $files_to_add; do
+             if [[ "$file" =~ ^([a-zA-Z0-9_\./\[]|])+$ ]]; then
+               git add "$file"
+             fi
+           done
+           git config --local user.email "github-actions[bot]@users.noreply.github.com"
+           git config --local user.name "github-actions[bot]"
+           git commit -m "Add screenshot diff"
+           git push origin HEAD:"$BRANCH_NAME" -f
+       - id: generate-diff-reports
+         name: Generate diff reports
+         if: steps.check-if-there-are-valid-files.outputs.exist_valid_files == 'true'
+         env:
+           BRANCH_NAME: companion_${{ github.head_ref }}
+         shell: bash
+         run: |
+           # Find all the files ending with _compare.png in roborazzi folder
+           files=$(find . -path '*/outputs/roborazzi/*' -type f -name "*_compare.png" | grep "roborazzi/" | grep -E "^([a-zA-Z0-9_\./\[]|])+$")
+           delimiter="$(openssl rand -hex 8)"
+           {
+             echo "reports<<${delimiter}"
+           
+             # Create markdown table header
+             echo "Snapshot diff report from main"
+             echo "<!-- data-meta=\"snapshot-diff-report\" -->"
+             echo "| File name | Image |"
+             echo "|-------|-------|"
+           } >> "$GITHUB_OUTPUT"
+           
+           # Iterate over the files and create table rows
+           for file in $files; do
+             # Get the file name and insert newlines every 20 characters
+             fileName=$(basename "$file" | sed -r 's/(.{20})/\1<br>/g')
+             echo "| [$fileName](https://github.com/${{ github.repository }}/blob/$BRANCH_NAME/$file) | ![](https://github.com/${{ github.repository }}/blob/$BRANCH_NAME/$file?raw=true) |" >> "$GITHUB_OUTPUT"
+           done
+           echo "${delimiter}" >> "$GITHUB_OUTPUT"
+       - name: Find Comment
+         uses: peter-evans/find-comment@v2
+         id: fc
+         if: steps.generate-diff-reports.outputs.reports != ''
+         with:
+           issue-number: ${{ github.event.number }}
+           comment-author: 'github-actions[bot]'
+           body-includes: 'data-meta="snapshot-diff-report"'
+
+       - name: Add or update comment on PR
+         uses: peter-evans/create-or-update-comment@v3
+         if: steps.generate-diff-reports.outputs.reports != ''
+         with:
+           comment-id: ${{ steps.fc.outputs.comment-id }}
+           issue-number: ${{ github.event.number }}
+           body: ${{ steps.generate-diff-reports.outputs.reports }}
+           edit-mode: replace
+
+       - name: Cleanup outdated companion branches
+         run: |
+           # Find outdated companion branches with last commit date
+           git branch -r --format="%(refname:lstrip=3)" | grep companion_ | while read -r branch; do
+             last_commit_date_timestamp=$(git log -1 --format=%ct "origin/$branch")
+             now_timestamp=$(date +%s)
+             # Delete branch if it's older than 1 month
+             echo "branch: $branch now_timestamp: $now_timestamp last_commit_date_timestamp: $last_commit_date_timestamp"
+             if [ $((now_timestamp - last_commit_date_timestamp)) -gt 2592000 ]; then
+               # Comment out for demonstration purpose
+               echo "Deleting $branch"
+           
+               git push origin --delete "$branch"
+             fi
+           done
+       - name: Checkout # for setup-gradle cache
+         uses: actions/checkout@v3

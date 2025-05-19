@@ -1,0 +1,561 @@
+id: "loginRoot"
+name: "Login"
+rootNode:
+  id: "loginScreen"
+  trait: !<ScreenTrait> { }
+  label: "Login"
+  children:
+    - id: "rootColumn"
+      trait: !<ColumnTrait> { }
+      label: "Root"
+      level: 1
+      modifierList:
+        - !<FillMaxWidth> { }
+        - !<Weight> { }
+      children:
+        - id: "mainContentColumn"
+          trait: !<ColumnTrait> { }
+          label: "Column"
+          level: 2
+          modifierList:
+            - !<FillMaxHeight> { }
+            - !<FillMaxWidth> { }
+          children:
+            - id: "topSpacer"
+              trait: !<SpacerTrait> { }
+              label: "Spacer"
+              level: 3
+              modifierList:
+                - !<Width>
+                  width: 48.0
+                - !<Height>
+                  height: 48.0
+              lazyListChildParams: !<FixedNumber>
+                numOfItems: 1
+              dynamicItems: null
+              actionHandler: !<ActionHandlerImpl>
+                actionsMap:
+                  "OnDoubleClick": [ ]
+                  "OnLongClick": [ ]
+                  "OnClick": [ ]
+              visibilityParams: { }
+            - id: "titleRow"
+              trait: !<RowTrait>
+                horizontalArrangement: "Center"
+                verticalAlignment: "CenterVertically"
+              label: "Row"
+              level: 3
+              modifierList:
+                - !<FillMaxWidth> { }
+                - !<Height>
+                  height: 120.0
+                - !<Padding>
+                  start: 8.0
+                  top: 8.0
+                  end: 8.0
+                  bottom: 8.0
+              children:
+                - id: "titleText"
+                  trait: !<TextTrait>
+                    text: !<StringIntrinsicValue>
+                      value: "App template"
+                    colorWrapper: !<ColorIntrinsicValue>
+                      value:
+                        themeColor: "OnSurface"
+                    textStyleWrapper: !<EnumProperty>
+                      value: !<TextStyleWrapper> "DisplayMedium"
+                  label: "Text"
+                  level: 4
+                  modifierList:
+                    - !<Padding>
+                      start: 8.0
+                      top: 8.0
+                      end: 8.0
+                      bottom: 8.0
+                  lazyListChildParams: !<FixedNumber>
+                    numOfItems: 1
+                  dynamicItems: null
+                  actionHandler: !<ActionHandlerImpl>
+                    actionsMap:
+                      "OnDoubleClick": [ ]
+                      "OnLongClick": [ ]
+                      "OnClick": [ ]
+                  visibilityParams: { }
+              lazyListChildParams: !<FixedNumber>
+                numOfItems: 1
+              dynamicItems: null
+              actionHandler: !<ActionHandlerImpl>
+                actionsMap:
+                  "OnDoubleClick": [ ]
+                  "OnLongClick": [ ]
+                  "OnClick": [ ]
+              visibilityParams: { }
+            - id: "authTabs"
+              trait: !<TabsTrait> { }
+              label: "Tabs"
+              level: 3
+              modifierList:
+                - !<FillMaxSize> { }
+              children:
+                - id: "authTabRow"
+                  trait: !<TabRowTrait> { }
+                  label: "TabRow"
+                  level: 4
+                  children:
+                    - id: "signInTab"
+                      trait: !<TabTrait>
+                        text: !<StringIntrinsicValue>
+                          value: "Sign In"
+                        index: 1
+                      label: "Tab"
+                      level: 5
+                      lazyListChildParams: !<FixedNumber>
+                        numOfItems: 1
+                      dynamicItems: null
+                      actionHandler: !<ActionHandlerImpl>
+                        actionsMap:
+                          "OnDoubleClick": [ ]
+                          "OnLongClick": [ ]
+                          "OnClick": [ ]
+                      visibilityParams: { }
+                    - id: "signUpTab"
+                      trait: !<TabTrait>
+                        text: !<StringIntrinsicValue>
+                          value: "Sign Up"
+                        index: 1
+                      label: "Tab"
+                      level: 5
+                      lazyListChildParams: !<FixedNumber>
+                        numOfItems: 1
+                      dynamicItems: null
+                      actionHandler: !<ActionHandlerImpl>
+                        actionsMap:
+                          "OnDoubleClick": [ ]
+                          "OnLongClick": [ ]
+                          "OnClick": [ ]
+                      visibilityParams: { }
+                  lazyListChildParams: !<FixedNumber>
+                    numOfItems: 1
+                  dynamicItems: null
+                  actionHandler: !<ActionHandlerImpl>
+                    actionsMap:
+                      "OnDoubleClick": [ ]
+                      "OnLongClick": [ ]
+                      "OnClick": [ ]
+                  visibilityParams: { }
+                - id: "signInTabContent"
+                  trait: !<TabContentTrait> { }
+                  label: "TabContent"
+                  level: 4
+                  modifierList:
+                    - !<FillMaxSize> { }
+                  children:
+                    - id: "signInColumn"
+                      trait: !<ColumnTrait>
+                        horizontalAlignmentWrapper: "CenterHorizontally"
+                      label: "Column"
+                      level: 5
+                      modifierList:
+                        - !<FillMaxHeight> { }
+                        - !<FillMaxWidth> { }
+                      children:
+                        - id: "signInSpacer"
+                          trait: !<SpacerTrait> { }
+                          label: "Spacer"
+                          level: 6
+                          modifierList:
+                            - !<Width>
+                              width: 48.0
+                            - !<Height>
+                              height: 48.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnDoubleClick": [ ]
+                              "OnLongClick": [ ]
+                              "OnClick": [ ]
+                          visibilityParams: { }
+                        - id: "signInEmailTextField"
+                          trait: !<TextFieldTrait>
+                            value: !<ValueFromState>
+                              readFromStateId: "signInEmailState"
+                            label: !<StringIntrinsicValue>
+                              value: "email"
+                            shapeWrapper: !<Circle> { }
+                            textFieldType: "Outlined"
+                            enableValidator: true
+                            textFieldValidator: !<EmailValidator> { }
+                          label: "email"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 8.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnChange": [ ]
+                              "OnUnfocused": [ ]
+                              "OnSubmit": [ ]
+                              "OnFocused": [ ]
+                          visibilityParams: { }
+                          companionStateId: "signInEmailState"
+                        - id: "signInPasswordTextField"
+                          trait: !<TextFieldTrait>
+                            value: !<ValueFromState>
+                              readFromStateId: "signInPasswordState"
+                            label: !<StringIntrinsicValue>
+                              value: "password"
+                            trailingIcon: !<Outlined> "VisibilityOff"
+                            shapeWrapper: !<Circle> { }
+                            textFieldType: "Outlined"
+                            enableValidator: true
+                          label: "password"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 8.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnChange": [ ]
+                              "OnUnfocused": [ ]
+                              "OnSubmit": [ ]
+                              "OnFocused": [ ]
+                          visibilityParams: { }
+                          companionStateId: "signInPasswordState"
+                        - id: "signInButton"
+                          trait: !<ButtonTrait>
+                            textProperty: !<StringIntrinsicValue>
+                              value: "Sign In"
+                            buttonType: "Elevated"
+                          label: "Button"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 16.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnClick":
+                                - !<Simple>
+                                  id: "signInActionWrapper"
+                                  action: !<SignInWithEmailAndPassword>
+                                    id: "signInWithEmailAction"
+                                    email: !<ValueFromState>
+                                      readFromStateId: "signInEmailState"
+                                    password: !<ValueFromState>
+                                      readFromStateId: "signInPasswordState"
+                          visibilityParams: { }
+                        - id: "orSignUpWithText"
+                          trait: !<TextTrait>
+                            text: !<StringIntrinsicValue>
+                              value: "Or sign up with"
+                            colorWrapper: !<ColorIntrinsicValue>
+                              value:
+                                themeColor: "Secondary"
+                            textStyleWrapper: !<EnumProperty>
+                              value: !<TextStyleWrapper> "BodyMedium"
+                          label: "Text"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 8.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnDoubleClick": [ ]
+                              "OnLongClick": [ ]
+                              "OnClick": [ ]
+                          visibilityParams: { }
+                        - id: "googleSignInButton"
+                          trait: !<GoogleSignInButtonTrait> { }
+                          label: "GoogleSignInButton"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 8.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnClick":
+                                - !<Simple>
+                                  id: "googleSignInActionWrapper"
+                                  action: !<SignInWithGoogle> { }
+                          visibilityParams: { }
+                      lazyListChildParams: !<FixedNumber>
+                        numOfItems: 1
+                      dynamicItems: null
+                      actionHandler: !<ActionHandlerImpl>
+                        actionsMap:
+                          "OnDoubleClick": [ ]
+                          "OnLongClick": [ ]
+                          "OnClick": [ ]
+                      visibilityParams: { }
+                  lazyListChildParams: !<FixedNumber>
+                    numOfItems: 1
+                  dynamicItems: null
+                  actionHandler: !<ActionHandlerImpl>
+                    actionsMap:
+                      "OnDoubleClick": [ ]
+                      "OnLongClick": [ ]
+                      "OnClick": [ ]
+                  visibilityParams: { }
+                - id: "signUpTabContent"
+                  trait: !<TabContentTrait> { }
+                  label: "TabContent"
+                  level: 4
+                  modifierList:
+                    - !<FillMaxSize> { }
+                  children:
+                    - id: "signUpColumn"
+                      trait: !<ColumnTrait>
+                        horizontalAlignmentWrapper: "CenterHorizontally"
+                      label: "Column"
+                      level: 5
+                      modifierList:
+                        - !<FillMaxHeight> { }
+                        - !<FillMaxWidth> { }
+                      children:
+                        - id: "signUpSpacer"
+                          trait: !<SpacerTrait> { }
+                          label: "Spacer"
+                          level: 6
+                          modifierList:
+                            - !<Width>
+                              width: 48.0
+                            - !<Height>
+                              height: 48.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnDoubleClick": [ ]
+                              "OnLongClick": [ ]
+                              "OnClick": [ ]
+                          visibilityParams: { }
+                        - id: "signUpEmailTextField"
+                          trait: !<TextFieldTrait>
+                            value: !<ValueFromState>
+                              readFromStateId: "signUpEmailState"
+                            label: !<StringIntrinsicValue>
+                              value: "email"
+                            shapeWrapper: !<Circle> { }
+                            textFieldType: "Outlined"
+                          label: "create_email"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 8.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnChange": [ ]
+                              "OnUnfocused": [ ]
+                              "OnSubmit": [ ]
+                              "OnFocused": [ ]
+                          visibilityParams: { }
+                          companionStateId: "signUpEmailState"
+                        - id: "signUpPasswordTextField"
+                          trait: !<TextFieldTrait>
+                            value: !<ValueFromState>
+                              readFromStateId: "signUpPasswordState"
+                            label: !<StringIntrinsicValue>
+                              value: "password"
+                            trailingIcon: !<Outlined> "VisibilityOff"
+                            shapeWrapper: !<Circle> { }
+                            textFieldType: "Outlined"
+                            passwordField: true
+                          label: "create_password"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 8.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnChange": [ ]
+                              "OnUnfocused": [ ]
+                              "OnSubmit": [ ]
+                              "OnFocused": [ ]
+                          visibilityParams: { }
+                          companionStateId: "signUpPasswordState"
+                        - id: "createAccountButton"
+                          trait: !<ButtonTrait>
+                            textProperty: !<StringIntrinsicValue>
+                              value: "Create account"
+                            buttonType: "Elevated"
+                          label: "Button"
+                          level: 6
+                          modifierList:
+                            - !<Padding>
+                              start: 8.0
+                              top: 16.0
+                              end: 8.0
+                              bottom: 8.0
+                          lazyListChildParams: !<FixedNumber>
+                            numOfItems: 1
+                          dynamicItems: null
+                          actionHandler: !<ActionHandlerImpl>
+                            actionsMap:
+                              "OnClick":
+                                - !<Simple>
+                                  id: "createAccountActionWrapper"
+                                  action: !<CreateUserWithEmailAndPassword>
+                                    id: "createAccountAction"
+                                    email: !<ValueFromState>
+                                      readFromStateId: "signUpEmailState"
+                                    password: !<ValueFromState>
+                                      readFromStateId: "signUpPasswordState"
+                          visibilityParams: { }
+                      lazyListChildParams: !<FixedNumber>
+                        numOfItems: 1
+                      dynamicItems: null
+                      actionHandler: !<ActionHandlerImpl>
+                        actionsMap:
+                          "OnDoubleClick": [ ]
+                          "OnLongClick": [ ]
+                          "OnClick": [ ]
+                      visibilityParams: { }
+                  lazyListChildParams: !<FixedNumber>
+                    numOfItems: 1
+                  dynamicItems: null
+                  actionHandler: !<ActionHandlerImpl>
+                    actionsMap:
+                      "OnDoubleClick": [ ]
+                      "OnLongClick": [ ]
+                      "OnClick": [ ]
+                  visibilityParams: { }
+              lazyListChildParams: !<FixedNumber>
+                numOfItems: 1
+              dynamicItems: null
+              actionHandler: !<ActionHandlerImpl>
+                actionsMap:
+                  "OnDoubleClick": [ ]
+                  "OnLongClick": [ ]
+                  "OnClick": [ ]
+              visibilityParams: { }
+          lazyListChildParams: !<FixedNumber>
+            numOfItems: 1
+          dynamicItems: null
+          actionHandler: !<ActionHandlerImpl>
+            actionsMap:
+              "OnDoubleClick": [ ]
+              "OnLongClick": [ ]
+              "OnClick": [ ]
+          visibilityParams: { }
+      lazyListChildParams: !<FixedNumber>
+        numOfItems: 1
+      dynamicItems: null
+      actionHandler: !<ActionHandlerImpl>
+        actionsMap:
+          "OnDoubleClick": [ ]
+          "OnLongClick": [ ]
+          "OnClick": [ ]
+      inspectable: false
+      visibilityParams: { }
+  lazyListChildParams: !<FixedNumber>
+    numOfItems: 1
+  dynamicItems: null
+  actionHandler: !<ActionHandlerImpl>
+    actionsMap:
+      "OnInitialLoad": [ ]
+  visibilityParams: { }
+showOnNavigation: false
+title: "Login"
+label: "Login"
+icon: !<Filled> "KeyboardArrowUp"
+isDefault: false
+isSelected: false
+topAppBarNode:
+  id: "topAppBar"
+  trait: !<TopAppBarTrait>
+    title: !<StringIntrinsicValue>
+      value: "Blank"
+    topAppBarType: "CenterAligned"
+  label: "TopAppBar"
+  children:
+    - id: "navIconBack"
+      trait: !<IconTrait>
+        imageVectorHolder: !<Outlined> "ArrowBack"
+      label: "Nav Icon"
+      level: 1
+      lazyListChildParams: !<FixedNumber>
+        numOfItems: 1
+      dynamicItems: null
+      actionHandler: !<ActionHandlerImpl>
+        actionsMap:
+          "OnDoubleClick": [ ]
+          "OnLongClick": [ ]
+          "OnClick":
+            - !<Simple>
+              id: "navigateBackActionWrapper"
+              action: !<NavigateBack> { }
+      visibilityParams: { }
+  lazyListChildParams: !<FixedNumber>
+    numOfItems: 1
+  dynamicItems: null
+  actionHandler: !<ActionHandlerImpl>
+    actionsMap:
+      "OnDoubleClick": [ ]
+      "OnLongClick": [ ]
+      "OnClick": [ ]
+  visibilityParams: { }
+bottomAppBarNode: null
+navigationDrawerNode: null
+fabNode: null
+stateHolderImpl:
+  states:
+    - !<StringScreenState>
+      id: "signInEmailState"
+      name: "email"
+      companionNodeId: "signInEmailTextField"
+    - !<StringScreenState>
+      id: "signInPasswordState"
+      name: "password"
+      companionNodeId: "signInPasswordTextField"
+    - !<StringScreenState>
+      id: "signUpEmailState"
+      name: "create_email"
+      companionNodeId: "signUpEmailTextField"
+    - !<StringScreenState>
+      id: "signUpPasswordState"
+      name: "create_password"
+      companionNodeId: "signUpPasswordTextField" 

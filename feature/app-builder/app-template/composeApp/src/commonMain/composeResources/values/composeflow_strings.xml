@@ -1,0 +1,14 @@
+<resources>
+    <string name="cancel">Cancel</string>
+    <string name="confirm">Confirm</string>
+    <string name="invalid_email_address">Invalid email address</string>
+    <string name="invalid_input">Invalid input</string>
+    <string name="invalid_int_format">Invalid integer format</string>
+    <string name="invalid_float_format">Invalid float format</string>
+    <string name="must_not_be_blank">Must not be blank</string>
+    <string name="must_be_greater_than_zero">Value must be greater than 0</string>
+    <string name="must_be_smaller_than_or_equal_to">Must be smaller than or equal to %1$d</string>
+    <string name="must_be_greater_than_or_equal_to">Must be greater than or equal to %1$d</string>
+    <string name="must_be_shorter_than_or_equal_to">Must be shorter than or equal to %1$d</string>
+    <string name="must_be_longer_than_or_equal_to">Must be longer than or equal to %1$d</string>
+</resources>

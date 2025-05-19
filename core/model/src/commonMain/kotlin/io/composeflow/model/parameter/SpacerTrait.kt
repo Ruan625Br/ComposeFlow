@@ -1,0 +1,84 @@
+package io.composeflow.model.parameter
+
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.SpaceBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
+import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.MemberName
+import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.model.modifier.ModifierWrapper
+import io.composeflow.model.modifier.generateModifierCode
+import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.modifierForCanvas
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+@SerialName("SpacerTrait")
+data object SpacerTrait : ComposeTrait {
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
+            trait = mutableStateOf(SpacerTrait),
+            modifierList = defaultModifierList(),
+        )
+
+    override fun defaultModifierList(): MutableList<ModifierWrapper> =
+        mutableStateListEqualsOverrideOf(
+            ModifierWrapper.Width(48.dp),
+            ModifierWrapper.Height(48.dp),
+        )
+
+    override fun icon(): ImageVector = Icons.Outlined.SpaceBar
+    override fun iconText(): String = "Spacer"
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
+    @Composable
+    override fun RenderedNode(
+        project: Project,
+        node: ComposeNode,
+        canvasNodeCallbacks: CanvasNodeCallbacks,
+        paletteRenderParams: PaletteRenderParams,
+        modifier: Modifier,
+    ) {
+        Spacer(
+            modifier = modifier.then(
+                node.modifierChainForCanvas()
+                    .modifierForCanvas(
+                        project = project,
+                        node = node,
+                        paletteRenderParams = paletteRenderParams,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                    ),
+            ),
+        )
+    }
+
+    override fun generateCode(
+        project: Project,
+        node: ComposeNode,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val codeBlockBuilder = CodeBlock.builder()
+        codeBlockBuilder.addStatement(
+            "%M(",
+            MemberName("androidx.compose.foundation.layout", "Spacer"),
+        )
+        codeBlockBuilder.add(
+            node.generateModifierCode(project, context, dryRun = dryRun)
+        )
+        codeBlockBuilder.addStatement(")")
+        return codeBlockBuilder.build()
+    }
+}

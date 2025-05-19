@@ -1,0 +1,40 @@
+-keep class org.slf4j.impl.** { *; }
+-keep class ch.qos.logback.** { *; }
+-keep class org.apache.logging.log4j.** { *; }
+
+-dontwarn jakarta.servlet.**
+-dontwarn ch.qos.logback.classic.servlet.**
+-dontwarn java.lang.Module
+-dontwarn java.lang.module.ModuleDescriptor
+
+-dontwarn jakarta.mail.Address
+-dontwarn jakarta.mail.Authenticator
+-dontwarn jakarta.mail.BodyPart
+-dontwarn jakarta.mail.Message$RecipientType
+-dontwarn jakarta.mail.Message
+-dontwarn jakarta.mail.Multipart
+-dontwarn jakarta.mail.PasswordAuthentication
+-dontwarn jakarta.mail.Session
+-dontwarn jakarta.mail.Transport
+-dontwarn jakarta.mail.internet.AddressException
+-dontwarn jakarta.mail.internet.InternetAddress
+-dontwarn jakarta.mail.internet.MimeBodyPart
+-dontwarn jakarta.mail.internet.MimeMessage
+-dontwarn jakarta.mail.internet.MimeMultipart
+-dontwarn java.io.ObjectInputFilter$Config
+-dontwarn java.io.ObjectInputFilter
+-dontwarn javax.naming.Context
+-dontwarn javax.naming.InitialContext
+-dontwarn javax.naming.NamingException
+-dontwarn javax.naming.spi.InitialContextFactory
+-dontwarn javax.xml.stream.Location
+-dontwarn javax.xml.stream.XMLEventReader
+-dontwarn javax.xml.stream.XMLInputFactory
+-dontwarn javax.xml.stream.XMLStreamException
+-dontwarn javax.xml.stream.events.Attribute
+-dontwarn javax.xml.stream.events.Characters
+-dontwarn javax.xml.stream.events.EndElement
+-dontwarn javax.xml.stream.events.StartElement
+-dontwarn javax.xml.stream.events.XMLEvent
+-dontwarn org.codehaus.janino.ClassBodyEvaluator
+-dontwarn org.codehaus.janino.ScriptEvaluator

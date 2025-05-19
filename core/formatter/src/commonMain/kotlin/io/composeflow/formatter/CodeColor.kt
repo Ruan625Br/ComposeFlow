@@ -1,0 +1,31 @@
+package io.composeflow.formatter
+
+import androidx.compose.ui.graphics.Color
+
+val dark_type = Color(0xFF56C1D6)
+val dark_keyword = Color(0xFFCF8E6D)
+val dark_literal = Color(0xFFC77DBB)
+val dark_comment = Color(0xFF5F826B)
+val dark_string = Color(0xFF6AAB73)
+val dark_punctuation = Color(0xFFB3AE60)
+val dark_plain = Color(0xFFBCBEC4)
+val dark_tag = Color(0xFF859900)
+val dark_declaration = Color(0xFFC77DBB)
+val dark_source = Color(0xFF586E75)
+val dark_attrName = Color(0xFF268BD2)
+val dark_attrValue = Color(0xFF269186)
+val dark_noCode = Color(0xFF586E75)
+
+val light_type = Color(0xFF006877)
+val light_keyword = Color(0xFF984716)
+val light_literal = Color(0xFF8B4483)
+val light_comment = Color(0xFF006D42)
+val light_string = Color(0xFF166D32)
+val light_punctuation = Color(0xFF656100)
+val light_plain = Color(0xFF080808)
+val light_tag = Color(0xFF576500)
+val light_declaration = Color(0xFF8B4483)
+val light_source = Color(0xFF00687B)
+val light_attrName = Color(0xFF00639B)
+val light_attrValue = Color(0xFF006A61)
+val light_noCode = Color(0xFF00687B)
