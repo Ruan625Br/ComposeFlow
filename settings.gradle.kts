@@ -1,3 +1,43 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+
+val sourceVersionCatalogPath = file("$settingsDir/gradle/libs.versions.toml").toPath()
+val targetAppTemplateGradleDir =
+    file("$settingsDir/feature/app-builder/app-template/gradle").toPath()
+val targetVersionCatalogPath = targetAppTemplateGradleDir.resolve("libs.versions.toml")
+
+// Ensure the target directory exists
+if (!Files.exists(targetAppTemplateGradleDir)) {
+    try {
+        Files.createDirectories(targetAppTemplateGradleDir)
+    } catch (e: Exception) {
+        throw GradleException(
+            "Failed to create directory $targetAppTemplateGradleDir: ${e.message}",
+            e
+        )
+    }
+}
+
+// This is to copy the version catalog file from ComposeFlow to the generated apps.
+// We used to use symlink for the same purpose, but it has an issue on Windows.
+if (Files.exists(sourceVersionCatalogPath)) {
+    try {
+        Files.copy(
+            sourceVersionCatalogPath,
+            targetVersionCatalogPath,
+            StandardCopyOption.REPLACE_EXISTING
+        )
+        println("INFO: Copied $sourceVersionCatalogPath to $targetVersionCatalogPath during initialization.")
+    } catch (e: Exception) {
+        throw GradleException(
+            "Failed to copy $sourceVersionCatalogPath to $targetVersionCatalogPath: ${e.message}",
+            e
+        )
+    }
+} else {
+    println("WARNING: Source versions file not found at $sourceVersionCatalogPath. Skipping copy.")
+}
+
 pluginManagement {
     repositories {
         gradlePluginPortal()

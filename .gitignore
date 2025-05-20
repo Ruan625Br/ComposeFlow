@@ -43,3 +43,6 @@ output/
 cdktf.out
 
 node_modules/
+
+# This is copied as part of the initialization of Gradle
+feature/app-builder/app-template/gradle/libs.versions.toml
