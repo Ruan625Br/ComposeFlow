@@ -1,6 +1,5 @@
 package io.composeflow.common
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
@@ -87,7 +86,7 @@ val LocalUseDarkTheme = compositionLocalOf { false }
 
 @Composable
 fun AppTheme(
-    useDarkTheme: Boolean = isSystemInDarkTheme() || LocalUseDarkTheme.current,
+    useDarkTheme: Boolean = LocalUseDarkTheme.current,
     content: @Composable () -> Unit,
 ) {
     val colors = if (!useDarkTheme) {
