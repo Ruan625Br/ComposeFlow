@@ -65,7 +65,7 @@ fun NewProjectDialog(
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
                 modifier = Modifier.padding(16.dp)
-                    .size(700.dp, 400.dp)
+                    .size(700.dp, 480.dp)
             ) {
                 AiAssistedCreationInputs(
                     onConfirmProject = onConfirmProject,
@@ -122,7 +122,9 @@ private fun AiAssistedCreationInputs(
             },
             singleLine = false,
             minLines = 7,
-            modifier = Modifier.fillMaxWidth().focusRequester(first).moveFocusOnTab()
+            modifier = Modifier.fillMaxWidth()
+                .weight(1f)
+                .focusRequester(first).moveFocusOnTab()
         )
         Spacer(Modifier.size(16.dp))
         TextButton(
@@ -133,7 +135,7 @@ private fun AiAssistedCreationInputs(
         ) {
             Text(stringResource(Res.string.ai_create_project_alternative_manually))
         }
-        Spacer(Modifier.weight(1f))
+        Spacer(Modifier.size(16.dp))
         Row(
             modifier = Modifier.padding(top = 16.dp),
         ) {
