@@ -6,6 +6,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -63,6 +64,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -134,6 +136,8 @@ import io.composeflow.ui.background.DotPatternBackground
 import io.composeflow.ui.common.AppTheme
 import io.composeflow.ui.common.ProvideAppThemeTokens
 import io.composeflow.ui.component.ComponentBuilderTab
+import io.composeflow.ui.deviceframe.IPadTabletFrame
+import io.composeflow.ui.deviceframe.PixelPhoneFrame
 import io.composeflow.ui.drawLabel
 import io.composeflow.ui.handleMessages
 import io.composeflow.ui.icon.ComposeFlowIcon
@@ -145,7 +149,6 @@ import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.nodetree.ComposeNodeTree
 import io.composeflow.ui.palette.PaletteIcon
 import io.composeflow.ui.palette.PaletteTab
-import io.composeflow.ui.placeholder.PlaceholderContainer
 import io.composeflow.ui.popup.SingleTextInputDialog
 import io.composeflow.ui.screenbuilder.ScreenBuilderTab
 import io.composeflow.ui.screenbuilder.ScreenNameDialog
@@ -686,23 +689,9 @@ private fun BoxScope.DeviceInCanvas(
     var actualDeviceSize by remember { mutableStateOf(IntSize.Zero) }
     val density = LocalDensity.current
     var contextMenuExpanded by remember { mutableStateOf(false) }
-    Column(
-        modifier = Modifier
-            .testTag(DeviceCanvasTestTag)
-            .width(formFactorDeviceSize.width.dp)
-            .height(formFactorDeviceSize.height.dp)
-            .align(Alignment.Center)
-            .clip(shape = RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.background)
-            .onKeyEvent {
-                if (isPlusPressed(it)) {
-                    onOpenAddModifierDialog()
-                    true
-                } else {
-                    false
-                }
-            },
-    ) {
+
+    @Composable
+    fun ColumnScope.DrawEditorContents() {
         Column(
             modifier = screen.rootNode.value
                 .modifierChainForCanvas()
@@ -817,6 +806,39 @@ private fun BoxScope.DeviceInCanvas(
             } ?: run {
                 CallRenderedDevice()
             }
+        }
+    }
+    Column(
+        modifier = Modifier
+            .testTag(DeviceCanvasTestTag)
+            .width(formFactorDeviceSize.width.dp + (currentFormFactor.vesselSize * 2).dp)
+            .height(formFactorDeviceSize.height.dp + (currentFormFactor.vesselSize * 2).dp)
+            .align(Alignment.Center)
+            .clip(shape = RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.background)
+            .onKeyEvent {
+                if (isPlusPressed(it)) {
+                    onOpenAddModifierDialog()
+                    true
+                } else {
+                    false
+                }
+            },
+    ) {
+        if (currentFormFactor is FormFactor.Phone) {
+            PixelPhoneFrame(
+                contentPadding = currentFormFactor.vesselSize.dp,
+            ) {
+                DrawEditorContents()
+            }
+        } else if (currentFormFactor is FormFactor.Tablet) {
+            IPadTabletFrame(
+                contentPadding = currentFormFactor.vesselSize.dp,
+            ) {
+                DrawEditorContents()
+            }
+        } else {
+            DrawEditorContents()
         }
     }
 }
