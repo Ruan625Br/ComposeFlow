@@ -7,8 +7,26 @@ these [instructions](https://github.com/JetBrains/compose-multiplatform-template
 
 ## Prerequisites
 
-You need to install the [JBR](https://github.com/JetBrains/JetBrainsRuntime) (JetBrain's Runtime) to run ComposeFlow since ComposeFlow depends
+You need to install the [JBR](https://github.com/JetBrains/JetBrainsRuntime) (JetBrain's Runtime) to
+run ComposeFlow since ComposeFlow depends
 on [jewel](https://github.com/JetBrains/jewel)
+
+### Prerequisites On Windows (Only Windows users need to follow this section)
+
+You need to create a following file to run the tests successfully otherwise the gradle process in
+tests is not able to detect the Android SdK location.
+
+<Project-root>/feature/app-builder/app-template/local.properties
+
+```
+sdk.dir=<Path to Android SDK>
+```
+
+e.g.
+
+```
+sdk.dir=C:\\Users\\thagikura\\AppData\\Local\\Android\\Sdk
+```
 
 ## How to run
 
