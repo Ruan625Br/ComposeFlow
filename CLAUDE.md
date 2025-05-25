@@ -66,6 +66,15 @@ bash scripts/generate_system_prompts.sh     # Generate AI system prompts
 - Composite builds for server, infrastructure, and app-template
 - Spotless formatting with ktlint (configured in `gradle/init.gradle.kts`)
 
+### String resources
+- String resource file is located at `core/model/resources/src/commonMain/composeResources/values/strings.xml`
+  When adding texts that are shown to the user, add an entry to that file and use it as
+  ```
+import org.jetbrains.compose.resources.stringResource
+
+stringResource(Res.string.name_of_the_resource)
+  ```
+
 ## Testing
 
 ### Test Execution
