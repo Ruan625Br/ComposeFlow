@@ -11,6 +11,15 @@
     <string name="ai_failed_to_generate_response">Failed to generate the response. Please try again later.</string>
     <string name="ai_failed_to_generate_response_timeout">Failed to generate the response. Maximum timeout reached. Please try again later.</string>
     <string name="ai_title_prompt_dialog">Describe your app's purpose or features</string>
+    <string name="ai_prompt_suggestions_label">Try these suggestions:</string>
+    <string name="ai_prompt_suggestion_social_media">A social media app with user profiles, posts, and comments</string>
+    <string name="ai_prompt_suggestion_task_management">A task management app with categories, due dates, and priorities</string>
+    <string name="ai_prompt_suggestion_ecommerce">An e-commerce app with product catalog, shopping cart, and checkout</string>
+    <string name="ai_prompt_suggestion_weather">A weather app with current conditions and forecast</string>
+    <string name="ai_prompt_suggestion_fitness">A fitness tracking app with workouts and progress charts</string>
+    <string name="ai_prompt_suggestion_notes">A note-taking app with folders and rich text editing</string>
+    <string name="ai_prompt_suggestion_recipes">A recipe app with ingredients, instructions, and ratings</string>
+    <string name="ai_prompt_suggestion_chat">A chat messaging app with groups and media sharing</string>
     <string name="add_action">Add action</string>
     <string name="add_action_icon">Add a Action icon</string>
     <string name="add_app_state">Add app state</string>

@@ -1,14 +1,20 @@
 package io.composeflow.ui.project
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -30,6 +36,15 @@ import io.composeflow.Res
 import io.composeflow.ai.AiAssistantDialog
 import io.composeflow.ai_create_project_alternative_manually
 import io.composeflow.ai_create_project_placeholder
+import io.composeflow.ai_prompt_suggestion_chat
+import io.composeflow.ai_prompt_suggestion_ecommerce
+import io.composeflow.ai_prompt_suggestion_fitness
+import io.composeflow.ai_prompt_suggestion_notes
+import io.composeflow.ai_prompt_suggestion_recipes
+import io.composeflow.ai_prompt_suggestion_social_media
+import io.composeflow.ai_prompt_suggestion_task_management
+import io.composeflow.ai_prompt_suggestion_weather
+import io.composeflow.ai_prompt_suggestions_label
 import io.composeflow.ai_title_prompt_dialog
 import io.composeflow.cancel
 import io.composeflow.confirm
@@ -65,7 +80,7 @@ fun NewProjectDialog(
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
                 modifier = Modifier.padding(16.dp)
-                    .size(700.dp, 480.dp)
+                    .size(700.dp, 580.dp)
             ) {
                 AiAssistedCreationInputs(
                     onConfirmProject = onConfirmProject,
@@ -87,6 +102,17 @@ private fun AiAssistedCreationInputs(
     var openAiAssistantDialog by remember { mutableStateOf(false) }
     var openProjectDialogManually by remember { mutableStateOf(false) }
 
+    val promptSuggestions = listOf(
+        stringResource(Res.string.ai_prompt_suggestion_social_media),
+        stringResource(Res.string.ai_prompt_suggestion_task_management),
+        stringResource(Res.string.ai_prompt_suggestion_ecommerce),
+        stringResource(Res.string.ai_prompt_suggestion_weather),
+        stringResource(Res.string.ai_prompt_suggestion_fitness),
+        stringResource(Res.string.ai_prompt_suggestion_notes),
+        stringResource(Res.string.ai_prompt_suggestion_recipes),
+        stringResource(Res.string.ai_prompt_suggestion_chat)
+    )
+
     Column(
         modifier = Modifier.padding(16.dp)
     ) {
@@ -107,7 +133,35 @@ private fun AiAssistedCreationInputs(
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
         )
-        Spacer(Modifier.size(32.dp))
+        Spacer(Modifier.size(16.dp))
+        Text(
+            text = stringResource(Res.string.ai_prompt_suggestions_label),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+        )
+        Spacer(Modifier.size(8.dp))
+        LazyHorizontalGrid(
+            rows = GridCells.Fixed(2),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxWidth().height(80.dp)
+        ) {
+            items(promptSuggestions) { suggestion ->
+                SuggestionChip(
+                    onClick = {
+                        userQuery = suggestion
+                        queryValidator = NonEmptyStringValidator().validate(suggestion)
+                    },
+                    label = {
+                        Text(
+                            text = suggestion,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                )
+            }
+        }
+        Spacer(Modifier.size(16.dp))
         OutlinedTextField(
             value = userQuery,
             onValueChange = {
