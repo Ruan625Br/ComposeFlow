@@ -35,9 +35,3 @@ jobs:
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
 
-          allowed_tools: [
-            "bash",
-            "git",
-            "gh"
-          ]
-
