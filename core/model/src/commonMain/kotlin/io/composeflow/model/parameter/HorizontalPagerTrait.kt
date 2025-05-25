@@ -28,8 +28,8 @@ import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.palette.Constraint
 import io.composeflow.model.palette.Orientation
 import io.composeflow.model.palette.PagerTraitNode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.lazylist.DefaultNumOfItems
 import io.composeflow.model.parameter.lazylist.LazyListChildParams
 import io.composeflow.model.parameter.wrapper.AlignmentVerticalWrapper
@@ -44,6 +44,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.DpSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -141,6 +142,7 @@ data class HorizontalPagerTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         val childrenDependOnDynamicItems = node.children.any {
@@ -160,6 +162,7 @@ data class HorizontalPagerTrait(
                             node = node,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         ),
                 ),
             ) {
@@ -185,12 +188,14 @@ data class HorizontalPagerTrait(
                             project = project,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
                     } else {
                         child.RenderedNodeInCanvas(
                             project = project,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams.copy(isShadowNode = true),
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
                     }
                 }
@@ -235,6 +240,7 @@ data class HorizontalPagerTrait(
                             node = node,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         ),
                 )
             ) {
@@ -261,6 +267,7 @@ data class HorizontalPagerTrait(
                         project = project,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     )
                 }
 

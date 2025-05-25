@@ -84,6 +84,7 @@ import io.composeflow.ui.emptyCanvasNodeCallbacks
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.propertyeditor.DropdownItem
 import io.composeflow.ui.switchByHovered
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.util.toKotlinFileName
 import io.composeflow.util.toPackageName
 import kotlinx.serialization.SerialName
@@ -813,6 +814,7 @@ data class Screen(
                             project = project,
                             canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                             paletteRenderParams = PaletteRenderParams(isThumbnail = true),
+                            zoomableContainerStateHolder = ZoomableContainerStateHolder(),
                             modifier = Modifier
                                 .onClick(enabled = true, onClick = {})
                                 .size(width = 330.dp, height = 460.dp),

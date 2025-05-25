@@ -17,13 +17,14 @@ import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -89,6 +90,7 @@ data class GoogleSignInButtonTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         val modifierForCanvas = modifier.then(
@@ -97,6 +99,7 @@ data class GoogleSignInButtonTrait(
                     project = project,
                     node = node,
                     canvasNodeCallbacks = canvasNodeCallbacks,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                     paletteRenderParams = paletteRenderParams,
                 ),
         )

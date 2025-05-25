@@ -19,8 +19,8 @@ import io.composeflow.materialicons.ImageVectorHolder
 import io.composeflow.materialicons.Outlined
 import io.composeflow.materialicons.asCodeBlock
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
@@ -35,6 +35,7 @@ import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.utils.asIconComposable
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -97,6 +98,7 @@ data class IconTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         when (assetType) {
@@ -114,6 +116,7 @@ data class IconTrait(
                                     node = node,
                                     canvasNodeCallbacks = canvasNodeCallbacks,
                                     paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 ),
                         ),
                     )
@@ -134,6 +137,7 @@ data class IconTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                             ),
                     ),
                 )

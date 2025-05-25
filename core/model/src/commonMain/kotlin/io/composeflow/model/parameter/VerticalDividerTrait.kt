@@ -24,6 +24,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.DpSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -55,6 +56,7 @@ data class VerticalDividerTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         VerticalDivider(
@@ -68,6 +70,7 @@ data class VerticalDividerTrait(
                         node = node,
                         paletteRenderParams = paletteRenderParams,
                         canvasNodeCallbacks = canvasNodeCallbacks,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         )

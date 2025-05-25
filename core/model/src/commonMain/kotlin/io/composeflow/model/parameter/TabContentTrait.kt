@@ -8,12 +8,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.kotlinpoet.GenerationContext
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -35,6 +36,7 @@ data object TabContentTrait : ComposeTrait {
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         Column(
@@ -46,6 +48,7 @@ data object TabContentTrait : ComposeTrait {
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         isDraggable = false,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         ) {
@@ -54,6 +57,7 @@ data object TabContentTrait : ComposeTrait {
                     project = project,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     paletteRenderParams = paletteRenderParams,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                 )
             }
         }

@@ -16,8 +16,8 @@ import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.materialicons.Outlined
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.AlignmentWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -26,6 +26,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -94,6 +95,7 @@ data class CardTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         when (cardType) {
@@ -106,6 +108,7 @@ data class CardTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder
                             ),
                     ),
                 ) {
@@ -114,6 +117,7 @@ data class CardTrait(
                             project = project,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
                     }
                 }
@@ -128,6 +132,7 @@ data class CardTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                             ),
                     ),
                 ) {
@@ -136,6 +141,7 @@ data class CardTrait(
                             project = project,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
                     }
                 }
@@ -150,6 +156,7 @@ data class CardTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                             ),
                     ),
                 ) {
@@ -158,6 +165,7 @@ data class CardTrait(
                             project = project,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
                     }
                 }

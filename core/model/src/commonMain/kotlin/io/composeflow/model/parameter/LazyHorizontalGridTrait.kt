@@ -19,8 +19,8 @@ import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.palette.Constraint
 import io.composeflow.model.palette.LazyListTraitNode
 import io.composeflow.model.palette.Orientation
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.lazylist.LazyGridCells
 import io.composeflow.model.parameter.wrapper.ArrangementHorizontalWrapper
 import io.composeflow.model.project.Project
@@ -29,6 +29,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.DpSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -116,6 +117,7 @@ data class LazyHorizontalGridTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         LazyHorizontalGrid(
@@ -136,6 +138,7 @@ data class LazyHorizontalGridTrait(
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         ) {
@@ -145,6 +148,7 @@ data class LazyHorizontalGridTrait(
                         project = project,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     )
                 }
                 items(
@@ -157,6 +161,7 @@ data class LazyHorizontalGridTrait(
                         project = project,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams.copy(isShadowNode = true),
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     )
                 }
             }

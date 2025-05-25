@@ -67,6 +67,8 @@ import io.composeflow.model.parameter.TabContentTrait
 import io.composeflow.model.parameter.TopAppBarTrait
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
+import io.composeflow.ui.zoomablecontainer.calculateAdjustedBoundsInZoomableContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -77,11 +79,13 @@ const val DeviceCanvasTestTag = "DeviceCanvas"
  *
  * @param node the [ComposeNode] representing the Composable
  * @param isDraggable set to false if this node isn't draggable
+ * @param zoomableContainerStateHolder the [ZoomableContainerStateHolder] used to control the zoom and offset of the canvas.
  */
 fun Modifier.modifierForCanvas(
     project: Project,
     node: ComposeNode,
     canvasNodeCallbacks: CanvasNodeCallbacks,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
     paletteRenderParams: PaletteRenderParams = PaletteRenderParams(),
     isDraggable: Boolean = true,
 ) = composed {
@@ -120,7 +124,11 @@ fun Modifier.modifierForCanvas(
         Modifier
             .testTag("$DeviceCanvasTestTag/" + node.displayName(project))
             .onGloballyPositioned {
-                canvasNodeCallbacks.onBoundsInNodeUpdated(node, it.boundsInWindow())
+                canvasNodeCallbacks.onBoundsInNodeUpdated(
+                    node,
+                    it.boundsInWindow()
+                        .calculateAdjustedBoundsInZoomableContainer(zoomableContainerStateHolder)
+                )
             }
             .drawComposableLabel(project, node)
             .drawDropIndicator(node)
@@ -136,6 +144,7 @@ fun Modifier.modifierForCanvas(
                 canvasNodeCallbacks = canvasNodeCallbacks,
                 coroutineScope = coroutineScope,
                 isDraggable = isDraggable,
+                zoomableContainerStateHolder = zoomableContainerStateHolder,
             )
     }
 }
@@ -165,6 +174,7 @@ private fun Modifier.dragHandlerAndTapGestures(
     canvasNodeCallbacks: CanvasNodeCallbacks,
     coroutineScope: CoroutineScope,
     isDraggable: Boolean = true,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
 ): Modifier = composed {
     val density = LocalDensity.current
     with(density) {
@@ -786,7 +796,6 @@ fun Modifier.drawLabel(
             )
         }
     }
-//    }
 }
 
 fun Modifier.drawBorder(
@@ -926,6 +935,7 @@ fun Modifier.draggableFromPalette(
     project: Project,
     paletteNodeCallbacks: PaletteNodeCallbacks,
     paletteDraggable: PaletteDraggable,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
 ) = composed {
     // Pointer position relative to container where the drag event is dispatched
     var pointerPosition by remember { mutableStateOf(Offset.Zero) }
@@ -947,7 +957,7 @@ fun Modifier.draggableFromPalette(
                     )
                     change.consume()
                     paletteNodeCallbacks.onDraggedPositionUpdated(
-                        pointerPosition + localToRoot,
+                        localToRoot + (pointerPosition - zoomableContainerStateHolder.offset) / zoomableContainerStateHolder.scale,
                         paletteDraggable,
                     )
                 },
@@ -959,7 +969,7 @@ fun Modifier.draggableFromPalette(
                 onDragEnd = {
                     paletteDraggable.defaultComposeNode(project)?.let {
                         paletteNodeCallbacks.onComposableDroppedToTarget(
-                            pointerPosition + localToRoot,
+                            localToRoot + (pointerPosition - zoomableContainerStateHolder.offset) / zoomableContainerStateHolder.scale,
                             it,
                         )
                     }

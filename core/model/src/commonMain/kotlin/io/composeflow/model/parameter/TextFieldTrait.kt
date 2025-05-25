@@ -44,6 +44,7 @@ import io.composeflow.model.validator.TextFieldValidator
 import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -350,6 +351,7 @@ data class TextFieldTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         val colors = if (shouldUseTransparentIndicator()) {
@@ -420,6 +422,7 @@ data class TextFieldTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                             ),
                     ),
                 )
@@ -475,6 +478,7 @@ data class TextFieldTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                             ),
                     ),
                 )

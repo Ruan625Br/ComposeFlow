@@ -11,9 +11,9 @@ import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.palette.Constraint
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteDraggable
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.lazylist.LazyGridCells
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -25,6 +25,7 @@ import io.composeflow.model.state.StateHolder
 import io.composeflow.model.validator.ComposeStateValidator
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -100,6 +101,7 @@ sealed interface ComposeTrait : PaletteDraggable {
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) = Unit
 

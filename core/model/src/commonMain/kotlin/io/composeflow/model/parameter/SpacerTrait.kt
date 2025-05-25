@@ -13,13 +13,14 @@ import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -49,6 +50,7 @@ data object SpacerTrait : ComposeTrait {
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         Spacer(
@@ -59,6 +61,7 @@ data object SpacerTrait : ComposeTrait {
                         node = node,
                         paletteRenderParams = paletteRenderParams,
                         canvasNodeCallbacks = canvasNodeCallbacks,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         )

@@ -60,7 +60,7 @@ import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
 import io.composeflow.ui.common.buildUiState
 import io.composeflow.ui.uibuilder.CanvasAreaUiState
 import io.composeflow.ui.uibuilder.CanvasTopToolbarUiState
-import io.composeflow.ui.uibuilder.ZoomableContainerStateHolder
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.util.generateUniqueName
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

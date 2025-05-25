@@ -91,6 +91,7 @@ import io.composeflow.ui.popup.PositionCustomizablePopup
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import io.composeflow.ui.propertyeditor.BasicDropdownPropertyEditor
 import io.composeflow.ui.propertyeditor.ColorPreviewInfo
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.update_colors
 import io.composeflow.updated_color_schemes
 import kotlinx.coroutines.launch
@@ -1160,6 +1161,7 @@ private fun CanvasPreview(
                                             project = project,
                                             canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                                             paletteRenderParams = PaletteRenderParams(isThumbnail = true),
+                                            zoomableContainerStateHolder = ZoomableContainerStateHolder(),
                                             modifier = Modifier
                                                 .onClick(enabled = false, onClick = {})
                                                 .align(Alignment.CenterHorizontally)

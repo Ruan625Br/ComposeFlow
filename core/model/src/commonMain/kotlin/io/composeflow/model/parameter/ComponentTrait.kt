@@ -23,6 +23,7 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.serializer.FallbackMutableStateMapSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -72,6 +73,7 @@ data class ComponentTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         Column(modifier = modifier) {
@@ -80,11 +82,13 @@ data class ComponentTrait(
                     project = project,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     paletteRenderParams = paletteRenderParams,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                     modifier = Modifier.modifierForCanvas(
                         project = project,
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
                 )
             }

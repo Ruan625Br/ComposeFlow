@@ -28,6 +28,7 @@ import io.composeflow.model.state.WriteableState
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -133,6 +134,7 @@ data class CheckboxTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         Checkbox(
@@ -147,6 +149,7 @@ data class CheckboxTrait(
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         )

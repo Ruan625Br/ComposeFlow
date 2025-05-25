@@ -16,8 +16,8 @@ import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.AlignmentHorizontalWrapper
 import io.composeflow.model.parameter.wrapper.ArrangementVerticalWrapper
 import io.composeflow.model.project.Project
@@ -25,6 +25,7 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -82,6 +83,7 @@ data class ColumnTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         Column(
@@ -92,6 +94,7 @@ data class ColumnTrait(
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
             verticalArrangement = verticalArrangementWrapper?.arrangement
@@ -104,6 +107,7 @@ data class ColumnTrait(
                     project = project,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     paletteRenderParams = paletteRenderParams,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                 )
             }
         }

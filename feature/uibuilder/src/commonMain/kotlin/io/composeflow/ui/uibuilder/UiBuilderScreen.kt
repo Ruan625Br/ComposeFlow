@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +29,7 @@ import androidx.compose.material.icons.filled.BorderClear
 import androidx.compose.material.icons.filled.BorderOuter
 import androidx.compose.material.icons.filled.ModeNight
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material.icons.outlined.CenterFocusStrong
 import androidx.compose.material.icons.outlined.DesktopMac
 import androidx.compose.material.icons.outlined.Monitor
 import androidx.compose.material.icons.outlined.Palette
@@ -122,6 +122,7 @@ import io.composeflow.model.project.issue.NavigatableDestination
 import io.composeflow.palette
 import io.composeflow.platform.AsyncImage
 import io.composeflow.remove_navigation
+import io.composeflow.reset_position_and_zoom
 import io.composeflow.show_navigation
 import io.composeflow.template.ScreenTemplatePair
 import io.composeflow.ui.CanvasNodeCallbacks
@@ -155,6 +156,8 @@ import io.composeflow.ui.screenbuilder.ScreenNameDialog
 import io.composeflow.ui.screenbuilder.SelectNewScreenDialog
 import io.composeflow.ui.tab.ComposeFlowTab
 import io.composeflow.ui.utils.isPlusPressed
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
+import io.composeflow.ui.zoomablecontainer.calculateAdjustedBoundsInZoomableContainer
 import io.composeflow.zoom_in
 import io.composeflow.zoom_out
 import kotlinx.coroutines.CoroutineScope
@@ -357,6 +360,7 @@ fun UiBuilderScreen(
                             PaletteTab(
                                 project = project,
                                 paletteNodeCallbacks = paletteNodeCallbacks,
+                                zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
                                 modifier = Modifier.weight(1f),
                             )
                         }
@@ -497,6 +501,7 @@ private fun CanvasArea(
 
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
     val density = LocalDensity.current
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -504,11 +509,15 @@ private fun CanvasArea(
             .backgroundContainerNeutral()
             .onPointerEvent(PointerEventType.Press) {
                 it.changes.firstOrNull()?.let { change ->
-                    onMousePressedAt(change.position + canvasAreaPosition)
+                    onMousePressedAt(
+                        canvasAreaPosition + (change.position - zoomableContainerStateHolder.offset) / zoomableContainerStateHolder.scale
+                    )
                 }
             }.onPointerEvent(PointerEventType.Move) {
                 it.changes.firstOrNull()?.let { change ->
-                    onMouseHoveredAt(change.position + canvasAreaPosition)
+                    onMouseHoveredAt(
+                        canvasAreaPosition + (change.position - zoomableContainerStateHolder.offset) / zoomableContainerStateHolder.scale
+                    )
                 }
             }.onGloballyPositioned {
                 canvasAreaPosition = it.boundsInWindow().topLeft
@@ -528,6 +537,7 @@ private fun CanvasArea(
             dotMargin = 12.dp,
             dotColor = Color.Black,
             modifier = Modifier.fillMaxSize(),
+            onDrag = zoomableContainerStateHolder::panBy,
         ) {
             ZoomableContainer(
                 zoomableContainerStateHolder,
@@ -553,6 +563,7 @@ private fun CanvasArea(
                                 addModifierDialogVisible = true
                             },
                             toolbarUiState = canvasAreaUiState.topToolbarUiState,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder
                         )
                     } else if (canvasEditable is Component) {
                         ComponentInCanvas(
@@ -573,6 +584,7 @@ private fun CanvasArea(
                                 addModifierDialogVisible = true
                             },
                             toolbarUiState = canvasAreaUiState.topToolbarUiState,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
                     }
                 }
@@ -684,6 +696,7 @@ private fun BoxScope.DeviceInCanvas(
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
     onOpenAddModifierDialog: () -> Unit,
     toolbarUiState: CanvasTopToolbarUiState,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
 ) {
     val formFactorDeviceSize = currentFormFactor.deviceSize
     var actualDeviceSize by remember { mutableStateOf(IntSize.Zero) }
@@ -691,7 +704,7 @@ private fun BoxScope.DeviceInCanvas(
     var contextMenuExpanded by remember { mutableStateOf(false) }
 
     @Composable
-    fun ColumnScope.DrawEditorContents() {
+    fun DrawEditorContents() {
         Column(
             modifier = screen.rootNode.value
                 .modifierChainForCanvas()
@@ -700,6 +713,7 @@ private fun BoxScope.DeviceInCanvas(
                     // Should be PaletteNode.Screen
                     node = screen.rootNode.value,
                     canvasNodeCallbacks = canvasNodeCallbacks,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                     isDraggable = false
                 )
                 .onGloballyPositioned {
@@ -731,7 +745,8 @@ private fun BoxScope.DeviceInCanvas(
                     onConvertToComponent = onConvertToComponent,
                     onCloseContextMenu = {
                         contextMenuExpanded = false
-                    }
+                    },
+                    zoomableContainerStateHolder = zoomableContainerStateHolder
                 )
             }
 
@@ -764,10 +779,14 @@ private fun BoxScope.DeviceInCanvas(
                                     paletteRenderParams = PaletteRenderParams(
                                         showBorder = toolbarUiState.showBorders
                                     ),
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                                     modifier = Modifier.onGloballyPositioned {
                                         canvasNodeCallbacks.onBoundsInNodeUpdated(
                                             navDrawer,
                                             it.boundsInWindow()
+                                                .calculateAdjustedBoundsInZoomableContainer(
+                                                    zoomableContainerStateHolder
+                                                )
                                         )
                                     },
                                 )
@@ -789,10 +808,14 @@ private fun BoxScope.DeviceInCanvas(
                                     paletteRenderParams = PaletteRenderParams(
                                         showBorder = toolbarUiState.showBorders
                                     ),
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                                     modifier = Modifier.onGloballyPositioned {
                                         canvasNodeCallbacks.onBoundsInNodeUpdated(
                                             navDrawer,
                                             it.boundsInWindow()
+                                                .calculateAdjustedBoundsInZoomableContainer(
+                                                    zoomableContainerStateHolder
+                                                )
                                         )
                                     },
                                 )
@@ -860,6 +883,7 @@ private fun RenderedDevice(
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
     onConvertToComponent: (ComposeNode) -> Unit,
     onCloseContextMenu: () -> Unit,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
 ) {
     NavigationSuiteScaffold(
         navigationSuiteItems = {
@@ -905,6 +929,7 @@ private fun RenderedDevice(
                                     node = topAppBarNode,
                                     canvasNodeCallbacks = canvasNodeCallbacks,
                                     paletteRenderParams = PaletteRenderParams(),
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                                     modifier = topAppBarNode
                                         .modifierList
                                         .toModifierChain(),
@@ -918,6 +943,7 @@ private fun RenderedDevice(
                                     node = fabNode,
                                     canvasNodeCallbacks = canvasNodeCallbacks,
                                     paletteRenderParams = PaletteRenderParams(),
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                                     modifier = fabNode
                                         .modifierList
                                         .toModifierChain(),
@@ -939,6 +965,7 @@ private fun RenderedDevice(
                                 project = project,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 modifier = Modifier
                                     .padding(innerScaffoldPadding)
                             )
@@ -947,6 +974,7 @@ private fun RenderedDevice(
                                 node = bottomAppBar,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 modifier = bottomAppBar
                                     .modifierList
                                     .toModifierChain(),
@@ -997,6 +1025,7 @@ private fun BoxScope.ComponentInCanvas(
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
     onOpenAddModifierDialog: () -> Unit,
     toolbarUiState: CanvasTopToolbarUiState,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
 ) {
     val componentSize = 550.dp to 400.dp
     Column(
@@ -1041,6 +1070,7 @@ private fun BoxScope.ComponentInCanvas(
                     paletteRenderParams = PaletteRenderParams(
                         showBorder = toolbarUiState.showBorders
                     ),
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                 )
             }
         }
@@ -1080,8 +1110,8 @@ fun BoxScope.ToggleBottomNavButton(
         modifier = Modifier
             .align(Alignment.BottomStart)
             .offset(
-                x = 96.dp,
-                y = (-16).dp,
+                x = 32.dp,
+                y = (-32).dp,
             )
             .size(40.dp, 32.dp)
             .hoverIconClickable()
@@ -1092,17 +1122,20 @@ fun BoxScope.ToggleBottomNavButton(
         } else {
             stringResource(Res.string.show_navigation)
         }
-        Icon(
-            imageVector = if (project.screenHolder.showNavigation.value) Icons.Default.BorderBottom else Icons.Default.BorderClear,
-            contentDescription = contentDesc,
-            modifier = Modifier
-                .clickable {
-                    project.screenHolder.showNavigation.value =
-                        !project.screenHolder.showNavigation.value
-                }
-                .padding(8.dp)
-                .size(24.dp),
-        )
+
+        Tooltip(contentDesc) {
+            Icon(
+                imageVector = if (project.screenHolder.showNavigation.value) Icons.Default.BorderBottom else Icons.Default.BorderClear,
+                contentDescription = contentDesc,
+                modifier = Modifier
+                    .clickable {
+                        project.screenHolder.showNavigation.value =
+                            !project.screenHolder.showNavigation.value
+                    }
+                    .padding(8.dp)
+                    .size(24.dp),
+            )
+        }
     }
 }
 
@@ -1111,6 +1144,8 @@ const val CanvasTopToolbarDarkModeSwitchTestTag = "$CanvasTopToolbarTestTag/Dark
 const val CanvasTopToolbarShowBordersSwitchTestTag = "$CanvasTopToolbarTestTag/ShowBordersSwitch"
 const val CanvasTopToolbarZoomInTestTag = "$CanvasTopToolbarTestTag/ZoomIn"
 const val CanvasTopToolbarZoomOutTestTag = "$CanvasTopToolbarTestTag/ZoomOut"
+const val CanvasTopToolbarPositionAndZoomResetTestTag =
+    "$CanvasTopToolbarTestTag/PositionAndZoomReset"
 const val UiBuilderTabTestTag = "UiBuilderTab"
 const val UiBuilderPaletteTabTestTag = "$UiBuilderTabTestTag/Palette"
 const val UiBuilderComponentTabTestTag = "$UiBuilderTabTestTag/Component"
@@ -1163,6 +1198,26 @@ fun CanvasTopToolbar(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 Row {
+                    val contentDesc = stringResource(Res.string.reset_position_and_zoom)
+                    Tooltip(contentDesc) {
+                        Icon(
+                            modifier = Modifier
+                                .testTag(CanvasTopToolbarPositionAndZoomResetTestTag)
+                                .clickable {
+                                    onResetZoom()
+                                }
+                                .hoverIconClickable()
+                                .padding(8.dp)
+                                .size(24.dp),
+                            imageVector = Icons.Outlined.CenterFocusStrong,
+                            contentDescription = contentDesc,
+                        )
+                    }
+                    Box(
+                        modifier = Modifier.fillMaxHeight()
+                            .width(1.dp)
+                            .background(MaterialTheme.colorScheme.outline),
+                    )
                     Tooltip(stringResource(Res.string.zoom_out)) {
                         Text(
                             modifier = Modifier
@@ -1186,9 +1241,6 @@ fun CanvasTopToolbar(
                     )
                     Text(
                         modifier = Modifier
-                            .clickable {
-                                onResetZoom()
-                            }
                             .fillMaxHeight()
                             .wrapContentHeight(Alignment.CenterVertically)
                             .width(40.dp),

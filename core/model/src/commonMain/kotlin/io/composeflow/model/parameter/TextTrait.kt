@@ -24,8 +24,8 @@ import io.composeflow.model.enumwrapper.TextDecorationWrapper
 import io.composeflow.model.enumwrapper.TextOverflowWrapper
 import io.composeflow.model.enumwrapper.TextStyleWrapper
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
@@ -40,6 +40,7 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.toRichHtmlString
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -243,6 +244,7 @@ data class TextTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         val textWithPlaceholder = when (val usage = placeholderText) {
@@ -272,6 +274,7 @@ data class TextTrait(
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         )

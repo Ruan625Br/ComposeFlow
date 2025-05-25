@@ -34,6 +34,7 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -88,6 +89,7 @@ data class TopAppBarTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         @Composable
@@ -104,6 +106,7 @@ data class TopAppBarTrait(
                                 node = iconNode,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     )
@@ -158,6 +161,7 @@ data class TopAppBarTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),
@@ -187,6 +191,7 @@ data class TopAppBarTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),
@@ -216,6 +221,7 @@ data class TopAppBarTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),
@@ -245,6 +251,7 @@ data class TopAppBarTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),

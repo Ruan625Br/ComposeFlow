@@ -22,8 +22,8 @@ import io.composeflow.materialicons.Outlined
 import io.composeflow.materialicons.asCodeBlock
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.project.Project
@@ -35,6 +35,7 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -88,9 +89,9 @@ data class FabTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-//        val fabParams = node.params.value.toFabParams()
         when (fabType) {
             FabType.Default -> {
                 FloatingActionButton(
@@ -111,6 +112,7 @@ data class FabTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),
@@ -140,6 +142,7 @@ data class FabTrait(
                                 project = project,
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 paletteRenderParams = paletteRenderParams,
                                 isDraggable = false,
                             ),
@@ -171,6 +174,7 @@ data class FabTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),
@@ -201,6 +205,7 @@ data class FabTrait(
                                 node = node,
                                 canvasNodeCallbacks = canvasNodeCallbacks,
                                 paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 isDraggable = false,
                             ),
                     ),
@@ -221,7 +226,6 @@ data class FabTrait(
         dryRun: Boolean,
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
-//        val fabParams = node.params.value.toFabParams()
         codeBlockBuilder.addStatement(
             "%M(",
             fabType.toMemberName(),

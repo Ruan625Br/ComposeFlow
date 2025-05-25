@@ -26,6 +26,7 @@ import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -124,6 +125,7 @@ data class NavigationDrawerItemTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         NavigationDrawerItem(
@@ -148,6 +150,7 @@ data class NavigationDrawerItemTrait(
                     node = node,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     paletteRenderParams = paletteRenderParams,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                     isDraggable = true,
                 ),
         )

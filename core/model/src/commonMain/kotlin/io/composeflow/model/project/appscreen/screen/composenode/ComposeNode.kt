@@ -61,6 +61,7 @@ import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.serializer.yamlSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.adaptive.computeWindowAdaptiveInfo
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -709,6 +710,7 @@ data class ComposeNode(
         project: Project,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier = Modifier,
     ) {
         val visibilityParams = visibilityParams.value
@@ -750,6 +752,7 @@ data class ComposeNode(
                     node = copiedComponentWrapper,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     paletteRenderParams = paletteRenderParams,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                     modifier = copiedComponentWrapper.modifierChainForCanvas(),
                 )
             } else {
@@ -770,6 +773,7 @@ data class ComposeNode(
                 node = this,
                 canvasNodeCallbacks = canvasNodeCallbacks,
                 paletteRenderParams = paletteRenderParams,
+                zoomableContainerStateHolder = zoomableContainerStateHolder,
                 modifier = modifier,
             )
         }

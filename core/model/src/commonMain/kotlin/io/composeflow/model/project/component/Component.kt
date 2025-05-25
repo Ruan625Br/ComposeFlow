@@ -82,6 +82,7 @@ import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import io.composeflow.ui.switchByHovered
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.util.toKotlinFileName
 import io.composeflow.util.toPackageName
 import kotlinx.serialization.SerialName
@@ -159,6 +160,7 @@ data class Component(
                     project = project,
                     paletteNodeCallbacks = paletteNodeCallbacks,
                     paletteDraggable = this,
+                    zoomableContainerStateHolder = ZoomableContainerStateHolder(),
                 )
                 .combinedClickable(
                     enabled = true,
@@ -217,6 +219,7 @@ data class Component(
                         project = project,
                         canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                         paletteRenderParams = PaletteRenderParams(isThumbnail = true),
+                        zoomableContainerStateHolder = ZoomableContainerStateHolder(),
                         modifier = Modifier
                             .size(width = 330.dp, height = 460.dp),
                     )

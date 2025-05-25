@@ -31,8 +31,8 @@ import io.composeflow.model.enumwrapper.ContentScaleWrapper
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
 import io.composeflow.model.modifier.toModifierChain
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteRenderParams
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.AlignmentWrapper
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.Project
@@ -49,6 +49,7 @@ import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.image.AsyncImage
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.utils.asImageComposable
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.stringResource
@@ -170,6 +171,7 @@ data class ImageTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         val modifierForCanvas = if (paletteRenderParams.isShadowNode) {
@@ -180,6 +182,7 @@ data class ImageTrait(
                 node = node,
                 canvasNodeCallbacks = canvasNodeCallbacks,
                 paletteRenderParams = paletteRenderParams,
+                zoomableContainerStateHolder = zoomableContainerStateHolder,
             )
         }
         if (isTest()) {

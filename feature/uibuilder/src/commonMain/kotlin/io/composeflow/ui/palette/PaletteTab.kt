@@ -49,6 +49,7 @@ import io.composeflow.ui.draggableFromPalette
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.switchByHovered
 import io.composeflow.ui.utils.TreeExpanderInverse
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -58,6 +59,7 @@ const val PaletteTestTag = "Palette"
 fun PaletteTab(
     project: Project,
     paletteNodeCallbacks: PaletteNodeCallbacks,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
     modifier: Modifier = Modifier,
 ) {
     @Composable
@@ -91,6 +93,7 @@ fun PaletteTab(
                         project = project,
                         paletteNodeCallbacks = paletteNodeCallbacks,
                         paletteDraggable = paletteDraggable,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             )
         }

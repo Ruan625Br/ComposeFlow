@@ -27,6 +27,7 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -76,6 +77,7 @@ data object TabsTrait : ComposeTrait {
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         if (!hasValidChildren(node)) {
@@ -89,6 +91,7 @@ data object TabsTrait : ComposeTrait {
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     ),
             ),
         ) {
@@ -129,6 +132,7 @@ data object TabsTrait : ComposeTrait {
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             isDraggable = false,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         ),
                 )
             }
@@ -144,6 +148,7 @@ data object TabsTrait : ComposeTrait {
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             isDraggable = false,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         ),
                 ) {
                     tabs.forEachIndexed { i, tab ->
@@ -160,6 +165,7 @@ data object TabsTrait : ComposeTrait {
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             isDraggable = false,
                             paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
                         ),
                 ) {
                     tabs.forEachIndexed { i, tab ->
@@ -174,6 +180,7 @@ data object TabsTrait : ComposeTrait {
                         project = project,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                     )
                 }
             }

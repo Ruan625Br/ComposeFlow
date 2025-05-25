@@ -48,6 +48,7 @@ import io.composeflow.ui.emptyCanvasNodeCallbacks
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.placeholder.PlaceholderContainer
 import io.composeflow.ui.text.EditableText
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 
 @Composable
 fun ScreenPromptsCreatedContent(
@@ -229,6 +230,7 @@ private fun ScreenPromptItemScreenGenerated(
                                 project = Project(),
                                 canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                                 paletteRenderParams = PaletteRenderParams(isThumbnail = true),
+                                zoomableContainerStateHolder = ZoomableContainerStateHolder(),
                                 modifier = Modifier
                                     .onClick(enabled = false, onClick = {})
                                     .align(Alignment.CenterHorizontally)

@@ -53,6 +53,7 @@ import io.composeflow.ui.adaptive.ProvideDeviceSizeDp
 import io.composeflow.ui.common.AppTheme
 import io.composeflow.ui.emptyCanvasNodeCallbacks
 import io.composeflow.ui.popup.PositionCustomizablePopup
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
@@ -364,6 +365,7 @@ private fun AiWorkspaceArea(
                                             project = project,
                                             canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                                             paletteRenderParams = PaletteRenderParams(isThumbnail = true),
+                                            zoomableContainerStateHolder = ZoomableContainerStateHolder(),
                                             modifier = Modifier
                                                 .onClick(enabled = false, onClick = {})
                                                 .align(Alignment.CenterHorizontally)

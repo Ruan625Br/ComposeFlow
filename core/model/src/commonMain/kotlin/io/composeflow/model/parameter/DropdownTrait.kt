@@ -32,6 +32,7 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.textfield.DropdownMenuTextField
+import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -146,6 +147,7 @@ data class DropdownTrait(
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,
         paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
         val items = when (val items = items) {
@@ -169,6 +171,7 @@ data class DropdownTrait(
                         project = project,
                         node = node,
                         canvasNodeCallbacks = canvasNodeCallbacks,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
                         paletteRenderParams = paletteRenderParams,
                     ),
             ),
