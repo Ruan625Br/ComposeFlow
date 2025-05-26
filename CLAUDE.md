@@ -111,8 +111,9 @@ stringResource(Res.string.name_of_the_resource)
 1. **Setup:** Install JBR, configure `local.properties`
 2. **Development:** Use `./gradlew desktopApp:run` for quick iteration
 3. **Testing:** Run `./gradlew allTests` before commits
-4. **Formatting:** Apply `spotlessApply` before submitting
-5. **Release:** Use Conveyor for distribution builds
+4. **Compilation:** Run `./gradlew assemble` before commits to verify compilation
+5. **Formatting:** Apply `spotlessApply` before submitting
+6. **Release:** Use Conveyor for distribution builds
 
 ## Important Patterns
 
