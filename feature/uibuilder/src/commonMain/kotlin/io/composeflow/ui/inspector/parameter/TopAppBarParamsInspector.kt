@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.add_action_icon
 import io.composeflow.model.parameter.IconTrait
+import io.composeflow.model.parameter.PlaceholderText
 import io.composeflow.model.parameter.ScrollBehaviorWrapper
 import io.composeflow.model.parameter.TopAppBarTrait
 import io.composeflow.model.parameter.TopAppBarTypeWrapper
@@ -24,7 +25,9 @@ import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNodeCallbacks
 import io.composeflow.model.project.appscreen.screen.composenode.TopAppBarNode
+import io.composeflow.model.property.IntrinsicProperty
 import io.composeflow.model.property.StringProperty
+import io.composeflow.placeholder_content_desc
 import io.composeflow.scroll_behavior_supporting_text
 import io.composeflow.ui.Tooltip
 import io.composeflow.ui.icon.ComposeFlowIcon
@@ -34,6 +37,8 @@ import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.propertyeditor.AssignableEditableTextPropertyEditor
 import io.composeflow.ui.propertyeditor.BasicDropdownPropertyEditor
+import io.composeflow.ui.propertyeditor.BooleanPropertyEditor
+import io.composeflow.ui.propertyeditor.EditableTextProperty
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -94,6 +99,57 @@ fun TopAppBarParamsInspector(
             // The variable is only visible if the TopAppBar is
             variableAssignable = !currentEditable.showOnNavigation.value
         )
+
+        if (topAppBarTrait.title !is IntrinsicProperty<*>) {
+            val placeholderContentDesc = stringResource(Res.string.placeholder_content_desc)
+            Tooltip(placeholderContentDesc) {
+                BooleanPropertyEditor(
+                    checked = topAppBarTrait.titlePlaceholderText is PlaceholderText.Used,
+                    onCheckedChange = { placeHolderUsed ->
+                        val usage = if (placeHolderUsed) {
+                            PlaceholderText.Used()
+                        } else {
+                            PlaceholderText.NoUsage
+                        }
+                        composeNodeCallbacks.onTraitUpdated(
+                            node,
+                            topAppBarTrait.copy(titlePlaceholderText = usage),
+                        )
+                    },
+                    label = "Use placeholder text",
+                    modifier = Modifier
+                        .hoverOverlay()
+                )
+            }
+
+            when (val usage = topAppBarTrait.titlePlaceholderText) {
+                PlaceholderText.NoUsage -> {}
+                is PlaceholderText.Used -> {
+                    EditableTextProperty(
+                        initialValue = usage.value.transformedValueExpression(project),
+                        onValidValueChanged = {
+                            composeNodeCallbacks.onTraitUpdated(
+                                node,
+                                topAppBarTrait.copy(
+                                    titlePlaceholderText = PlaceholderText.Used(
+                                        StringProperty.StringIntrinsicValue(
+                                            it
+                                        )
+                                    )
+                                )
+                            )
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                            .hoverOverlay(),
+                        label = "Placeholder text",
+                        placeholder = "placeholder text",
+                        singleLine = true,
+                        valueSetFromVariable = false,
+                    )
+                }
+            }
+        }
+
         val navIcon = topAppBarNode.getTopAppBarNavigationIcon()
         IconPropertyEditor(
             label = "Navigation Icon",

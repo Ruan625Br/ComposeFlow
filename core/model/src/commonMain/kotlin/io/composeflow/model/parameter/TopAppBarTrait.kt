@@ -42,6 +42,7 @@ import kotlinx.serialization.Serializable
 @SerialName("TopAppBarTrait")
 data class TopAppBarTrait(
     val title: AssignableProperty = StringProperty.StringIntrinsicValue(),
+    val titlePlaceholderText: PlaceholderText = PlaceholderText.NoUsage,
     val topAppBarType: TopAppBarTypeWrapper = TopAppBarTypeWrapper.Default,
     val scrollBehaviorWrapper: ScrollBehaviorWrapper = ScrollBehaviorWrapper.EnterAlways,
 ) : ComposeTrait {
@@ -137,11 +138,15 @@ data class TopAppBarTrait(
         val topAppBarNode = node as TopAppBarNode
         val navIcon = topAppBarNode.getTopAppBarNavigationIcon()
         val navIconTrait = navIcon?.trait?.value as? IconTrait
+        val textWithPlaceholder = when (val usage = titlePlaceholderText) {
+            PlaceholderText.NoUsage -> title.transformedValueExpression(project)
+            is PlaceholderText.Used -> usage.value.transformedValueExpression(project)
+        }
         when (topAppBarType) {
             TopAppBarTypeWrapper.Default -> {
                 TopAppBar(
                     title = {
-                        Text(text = title.transformedValueExpression(project))
+                        Text(text = textWithPlaceholder)
                     },
                     navigationIcon = navIconTrait?.imageVectorHolder?.let {
                         {
@@ -171,7 +176,7 @@ data class TopAppBarTrait(
             TopAppBarTypeWrapper.CenterAligned -> {
                 CenterAlignedTopAppBar(
                     title = {
-                        Text(text = title.transformedValueExpression(project))
+                        Text(text = textWithPlaceholder)
                     },
                     navigationIcon = navIconTrait?.imageVectorHolder?.let {
                         {
@@ -201,7 +206,7 @@ data class TopAppBarTrait(
             TopAppBarTypeWrapper.Medium -> {
                 MediumTopAppBar(
                     title = {
-                        Text(text = title.transformedValueExpression(project))
+                        Text(text = textWithPlaceholder)
                     },
                     navigationIcon = navIconTrait?.imageVectorHolder?.let {
                         {
@@ -231,7 +236,7 @@ data class TopAppBarTrait(
             TopAppBarTypeWrapper.Large -> {
                 LargeTopAppBar(
                     title = {
-                        Text(text = title.transformedValueExpression(project))
+                        Text(text = textWithPlaceholder)
                     },
                     navigationIcon = navIconTrait?.imageVectorHolder?.let {
                         {
@@ -304,6 +309,7 @@ data class TopAppBarTrait(
                 title.transformedCodeBlock(
                     project,
                     context,
+                    writeType = ComposeFlowType.StringType(),
                     dryRun = dryRun
                 )
             )
