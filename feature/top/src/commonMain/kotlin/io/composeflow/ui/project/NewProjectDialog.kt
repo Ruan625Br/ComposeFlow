@@ -2,6 +2,7 @@ package io.composeflow.ui.project
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -79,8 +80,8 @@ fun NewProjectDialog(
     ) {
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier.padding(16.dp)
-                    .size(700.dp, 580.dp)
+                modifier = Modifier.padding(vertical = 32.dp)
+                    .size(820.dp, 580.dp)
             ) {
                 AiAssistedCreationInputs(
                     onConfirmProject = onConfirmProject,
@@ -113,9 +114,7 @@ private fun AiAssistedCreationInputs(
         stringResource(Res.string.ai_prompt_suggestion_chat)
     )
 
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
+    Column {
         var queryValidator by remember {
             mutableStateOf(NonEmptyStringValidator().validate(userQuery))
         }
@@ -132,18 +131,21 @@ private fun AiAssistedCreationInputs(
             text = stringResource(Res.string.ai_title_prompt_dialog),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(horizontal = 32.dp)
         )
         Spacer(Modifier.size(16.dp))
         Text(
             text = stringResource(Res.string.ai_prompt_suggestions_label),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+            modifier = Modifier.padding(horizontal = 32.dp)
         )
         Spacer(Modifier.size(8.dp))
         LazyHorizontalGrid(
             rows = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
+            contentPadding = PaddingValues(horizontal = 32.dp),
             modifier = Modifier.fillMaxWidth().height(80.dp)
         ) {
             items(promptSuggestions) { suggestion ->
@@ -176,7 +178,9 @@ private fun AiAssistedCreationInputs(
             },
             singleLine = false,
             minLines = 7,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 32.dp)
                 .weight(1f)
                 .focusRequester(first).moveFocusOnTab()
         )
@@ -186,12 +190,14 @@ private fun AiAssistedCreationInputs(
                 openProjectDialogManually = true
             },
             modifier = Modifier.align(Alignment.End).focusRequester(third)
+                .padding(horizontal = 32.dp)
         ) {
             Text(stringResource(Res.string.ai_create_project_alternative_manually))
         }
         Spacer(Modifier.size(16.dp))
         Row(
-            modifier = Modifier.padding(top = 16.dp),
+            modifier = Modifier.padding(top = 16.dp)
+                .padding(horizontal = 32.dp),
         ) {
             Spacer(modifier = Modifier.weight(1f))
             TextButton(
