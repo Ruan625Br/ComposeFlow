@@ -115,7 +115,7 @@ data class Screen(
      * If set to true, this Screen is visible in the Navigation.
      */
     @Serializable(with = MutableStateSerializer::class)
-    val showOnNavigation: MutableState<Boolean> = mutableStateOf(false),
+    val showOnNavigation: MutableState<Boolean> = mutableStateOf(true),
 
     /**
      * Title in the TopAppBar
