@@ -17,7 +17,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import org.http4k.core.Method
@@ -31,21 +30,34 @@ import org.http4k.server.asServer
 import java.io.IOException
 import java.net.ServerSocket
 import java.net.URI
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 class AuthRepository {
 
+    @OptIn(ExperimentalTime::class)
     val firebaseIdToken: Flow<FirebaseIdToken?> = dataStore.data.map { preferences ->
         preferences[serializedFirebaseUserInfoKey]?.let {
             val firebaseIdToken = jsonSerializer.decodeFromString<FirebaseIdToken>(it)
-            if (firebaseIdToken.exp > System.currentTimeMillis() / 1000) {
+            val expirationTime = Instant.fromEpochSeconds(firebaseIdToken.exp)
+            val currentTime = Clock.System.now()
+            
+            if (expirationTime > currentTime) {
                 Logger.i("New firebaseIdToken detected. ${firebaseIdToken.user_id}")
                 firebaseIdToken
             } else {
-                Logger.i("FirebaseIdToken expired. ${firebaseIdToken.user_id}")
+                Logger.i("FirebaseIdToken expired. ${firebaseIdToken.user_id}, expirationTime: ${expirationTime}, currentTime: ${Clock.System.now()}")
                 if (firebaseIdToken.googleTokenResponse != null && firebaseIdToken.googleTokenResponse.refresh_token !== "") {
                     googleOAuth2.refreshToken(firebaseIdToken.googleTokenResponse)
-                        .mapBoth({ token ->
-                            return@let token
+                        .mapBoth({ refreshedToken ->
+
+                            // Save refreshed token into DataStore
+                            dataStore.edit { prefs ->
+                                prefs[serializedFirebaseUserInfoKey] =
+                                    jsonSerializer.encodeToString(refreshedToken)
+                            }
+                            return@let refreshedToken
                         }, { error ->
                             Logger.e("Failed to refresh token. ", error)
                             null
