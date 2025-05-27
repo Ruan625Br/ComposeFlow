@@ -3,6 +3,7 @@ package io.composeflow.ui.uibuilder
 import androidx.compose.foundation.PointerMatcher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
@@ -64,15 +65,16 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -257,6 +259,7 @@ fun UiBuilderScreen(
     }
 
     val colorSchemeHolder = viewModel.project.themeHolder.colorSchemeHolder
+    var addModifierDialogVisible by remember { mutableStateOf(false) }
     ProvideAppThemeTokens(
         isDarkTheme = mainViewUiState.appDarkTheme,
         lightScheme = colorSchemeHolder.lightColorScheme.value.toColorScheme(),
@@ -265,6 +268,16 @@ fun UiBuilderScreen(
     ) {
         Box(
             modifier = Modifier
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = {
+                        // To make sure the UI builder screen area has the proper focus.
+                        // Otherwise it doesn't often receive key events such as delete, or
+                        // plus (which opens the add modifier dialog)
+                        focusRequester.requestFocus()
+                    }
+                )
                 .onPointerEvent(PointerEventType.Move) {
                     it.changes.firstOrNull()?.let { change ->
                         dragStartPosition = change.position
@@ -273,13 +286,18 @@ fun UiBuilderScreen(
                 .focusProperties { canFocus = true }
                 .focusRequester(focusRequester)
                 .onKeyEvent {
-                    if (it.type == KeyEventType.KeyDown) {
-                        val eventResult = canvasNodeCallbacks.onKeyPressed(it)
-                        eventResult.handleMessages(onShowSnackbar, coroutineScope)
-                        eventResult.consumed
+                    var consumed = false
+                    if (isPlusPressed(it)) {
+                        addModifierDialogVisible = true
+                        consumed = true
                     } else {
-                        false
+                        if (it.type == KeyEventType.KeyDown) {
+                            val eventResult = canvasNodeCallbacks.onKeyPressed(it)
+                            eventResult.handleMessages(onShowSnackbar, coroutineScope)
+                            consumed = eventResult.consumed
+                        }
                     }
+                    consumed
                 }
         ) {
             Row(
@@ -423,6 +441,7 @@ fun UiBuilderScreen(
                     onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
                     onHoveredStatusUpdated =
                         { node, isHovered -> viewModel.onHoveredStatusUpdated(node, isHovered) },
+                    onOpenAddModifierDialog = { addModifierDialogVisible = true },
                     onShowSnackbar = onShowSnackbar,
                     zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
                     modifier = Modifier.weight(1f),
@@ -463,6 +482,34 @@ fun UiBuilderScreen(
             contentDescription = "Palette icon for ${it.trait.value.iconText()}",
         )
     }
+
+    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+    if (addModifierDialogVisible) {
+        onAnyDialogIsShown()
+        project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
+            val modifiers = ModifierWrapper.values().filter { m ->
+                focused.parentNode?.let {
+                    m.hasValidParent(it.trait.value)
+                } ?: true
+            }.mapIndexed { i, modifierWrapper ->
+                i to modifierWrapper
+            }
+
+            AddModifierDialog(
+                modifiers = modifiers,
+                onModifierSelected = {
+                    addModifierDialogVisible = false
+                    composeNodeCallbacks.onModifierAdded(focused, modifiers[it].second)
+                    onAllDialogsClosed()
+                },
+                onCloseClick = {
+                    addModifierDialogVisible = false
+                    onAllDialogsClosed()
+                },
+            )
+        }
+    }
 }
 
 const val DeviceCanvasTestTag = "DeviceCanvas"
@@ -491,12 +538,12 @@ private fun CanvasArea(
     onShowSnackbar: suspend (String, String?) -> Boolean,
     onFocusedStatusUpdated: (ComposeNode) -> Unit,
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
+    onOpenAddModifierDialog: () -> Unit,
     zoomableContainerStateHolder: ZoomableContainerStateHolder,
     modifier: Modifier = Modifier,
 ) {
     var canvasAreaPosition by remember { mutableStateOf(Offset.Zero) }
 
-    var addModifierDialogVisible by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
@@ -559,9 +606,7 @@ private fun CanvasArea(
                             },
                             onFocusedStatusUpdated = onFocusedStatusUpdated,
                             onHoveredStatusUpdated = onHoveredStatusUpdated,
-                            onOpenAddModifierDialog = {
-                                addModifierDialogVisible = true
-                            },
+                            onOpenAddModifierDialog = onOpenAddModifierDialog,
                             toolbarUiState = canvasAreaUiState.topToolbarUiState,
                             zoomableContainerStateHolder = zoomableContainerStateHolder
                         )
@@ -580,9 +625,7 @@ private fun CanvasArea(
                             },
                             onFocusedStatusUpdated = onFocusedStatusUpdated,
                             onHoveredStatusUpdated = onHoveredStatusUpdated,
-                            onOpenAddModifierDialog = {
-                                addModifierDialogVisible = true
-                            },
+                            onOpenAddModifierDialog = onOpenAddModifierDialog,
                             toolbarUiState = canvasAreaUiState.topToolbarUiState,
                             zoomableContainerStateHolder = zoomableContainerStateHolder,
                         )
@@ -638,32 +681,6 @@ private fun CanvasArea(
 
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    if (addModifierDialogVisible) {
-        onAnyDialogIsShown()
-        project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
-            val modifiers = ModifierWrapper.values().filter { m ->
-                focused.parentNode?.let {
-                    m.hasValidParent(it.trait.value)
-                } ?: true
-            }.mapIndexed { i, modifierWrapper ->
-                i to modifierWrapper
-            }
-
-            AddModifierDialog(
-                modifiers = modifiers,
-                onModifierSelected = {
-                    addModifierDialogVisible = false
-                    composeNodeCallbacks.onModifierAdded(focused, modifiers[it].second)
-                    onAllDialogsClosed()
-                },
-                onCloseClick = {
-                    addModifierDialogVisible = false
-                    onAllDialogsClosed()
-                },
-            )
-        }
-    }
-
     convertToComponentNode?.let { nodeToConvert ->
         onAnyDialogIsShown()
         SingleTextInputDialog(
@@ -839,14 +856,6 @@ private fun BoxScope.DeviceInCanvas(
             .align(Alignment.Center)
             .clip(shape = RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.background)
-            .onKeyEvent {
-                if (isPlusPressed(it)) {
-                    onOpenAddModifierDialog()
-                    true
-                } else {
-                    false
-                }
-            },
     ) {
         if (currentFormFactor is FormFactor.Phone) {
             PixelPhoneFrame(
@@ -1036,14 +1045,6 @@ private fun BoxScope.ComponentInCanvas(
             .height(componentSize.second)
             .wrapContentSize()
             .align(Alignment.Center)
-            .onKeyEvent {
-                if (isPlusPressed(it)) {
-                    onOpenAddModifierDialog()
-                    true
-                } else {
-                    false
-                }
-            },
     ) {
         var contextMenuExpanded by remember { mutableStateOf(false) }
         Box(
