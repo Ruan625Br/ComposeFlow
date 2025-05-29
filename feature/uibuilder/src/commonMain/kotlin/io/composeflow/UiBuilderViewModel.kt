@@ -182,7 +182,7 @@ class UiBuilderViewModel(
         formFactor = newFormFactor
         val maximumAvailableWidth = uiBuilderCanvasSizeDp.width
         // Subtract the size of the TopToolbar and the bottom card
-        val maximumAvailableHeight = uiBuilderCanvasSizeDp.height - 56 - 56
+        val maximumAvailableHeight = uiBuilderCanvasSizeDp.height - 80 - 80
 
         var widthScale = 1f
         val minimumScale = 0.3f
