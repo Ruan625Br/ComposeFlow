@@ -1,5 +1,9 @@
 package io.composeflow.ui.uibuilder
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.keyframes
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.PointerMatcher
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,14 +71,12 @@ import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
@@ -848,11 +850,23 @@ private fun BoxScope.DeviceInCanvas(
             }
         }
     }
+
+    val targetWidth = formFactorDeviceSize.width.dp + (currentFormFactor.vesselSize * 2).dp
+    val targetHeight = formFactorDeviceSize.height.dp + (currentFormFactor.vesselSize * 2).dp
+
+    val animatedWidth by animateDpAsState(
+        targetValue = targetWidth,
+        animationSpec = tween(durationMillis = 200)
+    )
+    val animatedHeight by animateDpAsState(
+        targetValue = targetHeight,
+        animationSpec = tween(durationMillis = 200)
+    )
     Column(
         modifier = Modifier
             .testTag(DeviceCanvasTestTag)
-            .width(formFactorDeviceSize.width.dp + (currentFormFactor.vesselSize * 2).dp)
-            .height(formFactorDeviceSize.height.dp + (currentFormFactor.vesselSize * 2).dp)
+            .width(animatedWidth)
+            .height(animatedHeight)
             .align(Alignment.Center)
             .clip(shape = RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.background)
