@@ -1,8 +1,6 @@
 package io.composeflow.ui.uibuilder
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.keyframes
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.PointerMatcher
 import androidx.compose.foundation.background

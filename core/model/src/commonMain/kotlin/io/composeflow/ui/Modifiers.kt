@@ -144,7 +144,6 @@ fun Modifier.modifierForCanvas(
                 canvasNodeCallbacks = canvasNodeCallbacks,
                 coroutineScope = coroutineScope,
                 isDraggable = isDraggable,
-                zoomableContainerStateHolder = zoomableContainerStateHolder,
             )
     }
 }
@@ -174,7 +173,6 @@ private fun Modifier.dragHandlerAndTapGestures(
     canvasNodeCallbacks: CanvasNodeCallbacks,
     coroutineScope: CoroutineScope,
     isDraggable: Boolean = true,
-    zoomableContainerStateHolder: ZoomableContainerStateHolder,
 ): Modifier = composed {
     val density = LocalDensity.current
     with(density) {
