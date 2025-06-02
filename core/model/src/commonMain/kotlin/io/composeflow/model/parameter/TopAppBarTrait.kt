@@ -4,6 +4,7 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -28,6 +29,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.TopAppBarNode
 import io.composeflow.model.property.AssignableProperty
+import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
@@ -101,6 +103,8 @@ data class TopAppBarTrait(
                     Icon(
                         imageVector = it.imageVector,
                         contentDescription = null,
+                        tint = (iconTrait.tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: MaterialTheme.colorScheme.onBackground,
                         modifier = iconNode.modifierChainForCanvas()
                             .modifierForCanvas(
                                 project = project,
@@ -340,11 +344,24 @@ data class TopAppBarTrait(
                 }
                 builder.addStatement("}) {")
                 builder.addStatement(
-                    "%M(imageVector = %M.${imageVectorHolder.memberDescriptor}.%M, contentDescription = null)",
+                    "%M(imageVector = %M.${imageVectorHolder.memberDescriptor}.%M, contentDescription = null,",
                     iconMember,
                     iconsMember,
                     imageVectorMember,
                 )
+                iconTrait.tint?.let {
+                    codeBlockBuilder.add("tint = ")
+                    codeBlockBuilder.add(
+                        it.transformedCodeBlock(
+                            project,
+                            context,
+                            ComposeFlowType.Color(),
+                            dryRun = dryRun
+                        )
+                    )
+                    codeBlockBuilder.addStatement(",")
+                }
+                builder.addStatement(")")
                 builder.addStatement("}")
             }
         }

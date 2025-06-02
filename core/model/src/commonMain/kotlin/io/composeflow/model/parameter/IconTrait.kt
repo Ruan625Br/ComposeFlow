@@ -127,7 +127,7 @@ data class IconTrait(
                 val userId = LocalFirebaseIdToken.current.user_id
                 blobInfoWrapper?.asIconComposable(
                     userId = userId,
-                    projectId = project.id.toString(),
+                    projectId = project.id,
                     tint = (tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
                         ?: MaterialTheme.colorScheme.onBackground,
                     modifier = modifier.then(
