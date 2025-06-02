@@ -882,9 +882,6 @@ class UiBuilderViewModel(
     fun onDoubleTap(composeNode: ComposeNode): EventResult {
         composeNode.componentId?.let {
             project.screenHolder.editedComponent.value = project.findComponentOrThrow(it)
-            onUpdateProject(
-                project.copy(screenHolder = project.screenHolder)
-            )
         }
         return EventResult()
     }
@@ -914,9 +911,6 @@ class UiBuilderViewModel(
             project.screenHolder.editedComponent.value = null
         }
         project.componentHolder.components.remove(component)
-        onUpdateProject(
-            project.copy(screenHolder = project.screenHolder)
-        )
         saveProject(project)
         return result
     }
@@ -976,9 +970,6 @@ class UiBuilderViewModel(
 
     fun onPopEditedComponent() {
         project.screenHolder.editedComponent.value = null
-        onUpdateProject(
-            project.copy(screenHolder = project.screenHolder)
-        )
         saveProject(project)
     }
 
