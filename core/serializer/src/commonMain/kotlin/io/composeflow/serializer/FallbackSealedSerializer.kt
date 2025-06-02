@@ -8,7 +8,6 @@ import kotlinx.serialization.encoding.Encoder
 import kotlin.reflect.KClass
 
 class FallbackSealedSerializer<T : Any>(
-    private val baseClass: KClass<T>,
     private val defaultInstance: T,
     private val serializer: KSerializer<T>
 ) : KSerializer<T> {
@@ -19,7 +18,6 @@ class FallbackSealedSerializer<T : Any>(
         return try {
             serializer.deserialize(decoder)
         } catch (e: SerializationException) {
-            println("⚠️ Fallback triggered for ${baseClass.simpleName}: ${e.message}")
             defaultInstance
         }
     }

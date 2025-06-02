@@ -86,6 +86,7 @@ import io.composeflow.model.apieditor.Authorization
 import io.composeflow.model.apieditor.JsonWithJsonPath
 import io.composeflow.model.apieditor.Method
 import io.composeflow.model.apieditor.asDisplayText
+import io.composeflow.model.project.Project
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.remove_header
 import io.composeflow.toggle_visibility
@@ -113,13 +114,13 @@ import org.jetbrains.jewel.foundation.lazy.tree.rememberTreeState
 
 @Composable
 fun ApiEditorScreen(
-    projectId: String,
+    project: Project,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel =
         viewModel(modelClass = ApiEditorViewModel::class) {
             ApiEditorViewModel(
-                projectId = projectId,
+                project = project,
                 firebaseIdToken = firebaseIdToken,
             )
         }
@@ -146,7 +147,7 @@ fun ApiEditorScreen(
                     Text("+ " + stringResource(Res.string.add_api))
                 }
                 LazyColumn {
-                    itemsIndexed(viewModel.project.apiHolder.apiDefinitions) { index, item ->
+                    itemsIndexed(project.apiHolder.apiDefinitions) { index, item ->
                         ApiRow(
                             apiDefinition = item,
                             index = index,
@@ -164,7 +165,7 @@ fun ApiEditorScreen(
 
             ApiEditorPane(
                 viewModel,
-                allApiDefinitions = viewModel.project.apiHolder.apiDefinitions,
+                allApiDefinitions = project.apiHolder.apiDefinitions,
             )
         }
     }

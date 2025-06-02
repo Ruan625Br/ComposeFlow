@@ -23,8 +23,11 @@ class TitleBarViewModel(
      * (e.g. download the code, play the app buttons). Thus hoisting the lambada to set the content
      * of the title bar and pass it down to the Composable where the content is produced.
      */
-    private var _titleBarContent = MutableStateFlow<TitleBarContent>({})
-    val titleBarContent: StateFlow<TitleBarContent> = _titleBarContent
+    private var _titleBarRightContent = MutableStateFlow<TitleBarContent>({})
+    val titleBarRightContent: StateFlow<TitleBarContent> = _titleBarRightContent
+
+    private var _titleBarLeftContent = MutableStateFlow<TitleBarContent>({})
+    val titleBarLeftContent: StateFlow<TitleBarContent> = _titleBarLeftContent
 
     private val settings = settingsRepository.settings.stateIn(
         scope = viewModelScope,
@@ -41,8 +44,12 @@ class TitleBarViewModel(
             initialValue = VersionAskedToUpdate.NotReady,
         )
 
-    fun onTitleBarContentSet(content: TitleBarContent) {
-        _titleBarContent.value = content
+    fun onTitleBarRightContentSet(content: TitleBarContent) {
+        _titleBarRightContent.value = content
+    }
+
+    fun onTitleBarLeftContentSet(content: TitleBarContent) {
+        _titleBarLeftContent.value = content
     }
 
     fun onSaveVersionAskedToUpdate(versionAskedToUpdate: String) {

@@ -1,11 +1,12 @@
 package io.composeflow.ui.asset
 
 import io.composeflow.model.assetEditorRoute
+import io.composeflow.model.project.Project
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
 
 fun RouteBuilder.assetEditorScreen(
-    projectId: String,
+    project: Project,
     navTransition: NavTransition? = null,
 ) {
     scene(
@@ -13,7 +14,7 @@ fun RouteBuilder.assetEditorScreen(
         navTransition = navTransition,
     ) {
         AssetEditorScreen(
-            projectId = projectId,
+            project = project,
         )
     }
 }

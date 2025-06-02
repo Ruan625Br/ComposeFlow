@@ -9,6 +9,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -16,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
+import io.composeflow.ai.claude.ToolResponseWrapper
 import io.composeflow.ai.subaction.GeneratedScreenPrompt
 import io.composeflow.ai_action_add_screen
 import io.composeflow.ai_action_confirm_to_create_project
@@ -27,11 +29,11 @@ import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import org.jetbrains.compose.resources.stringResource
 
-sealed class AiAssistantState {
+sealed class AiAssistantUiState {
 
-    data object Idle : AiAssistantState()
+    data object Idle : AiAssistantUiState()
 
-    var isGenerating: Boolean = false
+    var isGenerating: MutableState<Boolean> = mutableStateOf(false)
 
     @Composable
     open fun ActionContent(
@@ -41,7 +43,7 @@ sealed class AiAssistantState {
     ) {
     }
 
-    sealed class Success : AiAssistantState() {
+    sealed class Success : AiAssistantUiState() {
 
         data class NewScreenCreated(
             val screen: Screen,
@@ -164,7 +166,10 @@ sealed class AiAssistantState {
             }
         }
 
+        data class ToolResponseProcessed(
+            val result: ToolResponseWrapper,
+        ) : Success()
     }
 
-    data class Error(val message: String) : AiAssistantState()
+    data class Error(val message: String) : AiAssistantUiState()
 }

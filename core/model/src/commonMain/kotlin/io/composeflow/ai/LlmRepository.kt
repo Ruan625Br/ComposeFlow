@@ -2,13 +2,14 @@ package io.composeflow.ai
 
 import co.touchlab.kermit.Logger
 import com.github.michaelbull.result.mapBoth
+import io.composeflow.ai.openrouter.tools.ToolArgs
+import io.composeflow.ai.openrouter.tools.ToolExecutionStatus
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.createCopyOfNewName
 import io.composeflow.serializer.yamlSerializer
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.decodeFromString
 import kotlin.time.Duration.Companion.minutes
-import kotlin.uuid.Uuid
 
 class LlmRepository(
     private val client: LlmClient = LlmClient()
@@ -106,6 +107,47 @@ class LlmRepository(
                         Logger.e(message)
                     }
                     throw it
+                }
+            )
+        }
+    }
+
+    suspend fun handleToolRequest(
+        promptString: String,
+        projectContext: String,
+        previousToolArgs: List<ToolArgs> = emptyList(),
+        retryCount: Int = 0,
+    ): ToolResponse {
+        return withTimeout(5.minutes) {
+            if (previousToolArgs.size >= 3 && previousToolArgs.take(3)
+                    .all { it.status == ToolExecutionStatus.Error }
+            ) {
+                Logger.e("Failed to handle request. Tried maximum number of attempts.")
+                throw IllegalStateException("Failed to handle request. Tried maximum number of attempts.")
+            }
+
+            Logger.i("$promptString,  Retry count: $retryCount")
+            val response = client.invokeHandleGeneralRequest(
+                promptString = promptString,
+                projectContextString = projectContext,
+                previousToolArgs = previousToolArgs,
+            )
+            response.mapBoth(
+                success = {
+                    ToolResponse.Success(
+                        originalPrompt = promptString,
+                        message = it.message ?: "Executed successfully",
+                        response = it,
+                        previousToolArgs = previousToolArgs,
+                    )
+                },
+                failure = {
+                    ToolResponse.Error(
+                        originalPrompt = promptString,
+                        throwable = it,
+                        message = it.message ?: "Unknown error",
+                        previousToolArgs = previousToolArgs,
+                    )
                 }
             )
         }

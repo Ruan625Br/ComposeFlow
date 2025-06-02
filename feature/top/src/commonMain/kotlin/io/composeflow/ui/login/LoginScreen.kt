@@ -33,7 +33,8 @@ import org.jetbrains.compose.resources.stringResource
 fun LoginScreen(
     onGoogleSignInClicked: () -> Unit,
     onLogOut: () -> Unit,
-    onTitleBarContentSet: (TitleBarContent) -> Unit,
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit,
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
     val appViewModel =
         viewModel(modelClass = ComposeFlowAppViewModel::class) { ComposeFlowAppViewModel() }
@@ -52,7 +53,8 @@ fun LoginScreen(
                     ProvideFirebaseIdToken(state.firebaseIdToken) {
                         TopScreen(
                             onLogOut = onLogOut,
-                            onTitleBarContentSet = onTitleBarContentSet,
+                            onTitleBarRightContentSet = onTitleBarRightContentSet,
+                            onTitleBarLeftContentSet = onTitleBarLeftContentSet,
                         )
                     }
                 }

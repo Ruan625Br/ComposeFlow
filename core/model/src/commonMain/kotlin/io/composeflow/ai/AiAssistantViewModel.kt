@@ -27,8 +27,8 @@ class AiAssistantViewModel(
     private val repository: LlmRepository = LlmRepository(),
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<AiAssistantState>(AiAssistantState.Idle)
-    val uiState: StateFlow<AiAssistantState> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<AiAssistantUiState>(AiAssistantUiState.Idle)
+    val uiState: StateFlow<AiAssistantUiState> = _uiState.asStateFlow()
 
     private val _messages = MutableStateFlow<List<MessageModel>>(emptyList())
     val messages = _messages.asStateFlow()
@@ -46,7 +46,7 @@ class AiAssistantViewModel(
                 message = projectCreationQuery,
                 createdAt = Clock.System.now()
             )
-            _uiState.value.isGenerating = true
+            _uiState.value.isGenerating.value = true
 
             val result = repository.createProject(promptString = projectCreationQuery)
 
@@ -55,9 +55,9 @@ class AiAssistantViewModel(
                 message = result.message,
                 createdAt = Clock.System.now()
             )
-            _uiState.value.isGenerating = false
+            _uiState.value.isGenerating.value = false
 
-            _uiState.value = AiAssistantState.Success.ScreenPromptsCreated(
+            _uiState.value = AiAssistantUiState.Success.ScreenPromptsCreated(
                 projectName = result.projectName,
                 packageName = result.packageName,
                 screenPrompts = result.prompts.map {
@@ -72,7 +72,7 @@ class AiAssistantViewModel(
 
     fun onScreenTitleUpdated(id: String, newTitle: String) {
         when (val state = _uiState.value) {
-            is AiAssistantState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                 val updatedPrompts =
                     state.screenPrompts.map { prompt ->
                         when (prompt) {
@@ -102,7 +102,7 @@ class AiAssistantViewModel(
 
     fun onScreenPromptDeleted(id: String) {
         when (val state = _uiState.value) {
-            is AiAssistantState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                 val updatedPrompts =
                     state.screenPrompts.filter { prompt -> prompt.id != id }
                 _uiState.value = state.copy(screenPrompts = updatedPrompts.toList())
@@ -114,7 +114,7 @@ class AiAssistantViewModel(
 
     fun onScreenPromptUpdated(id: String, newPrompt: String) {
         when (val state = _uiState.value) {
-            is AiAssistantState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                 val updatedPrompts =
                     state.screenPrompts.map { prompt ->
                         when (prompt) {
@@ -145,7 +145,7 @@ class AiAssistantViewModel(
     fun onProceedToGenerateScreens() {
         viewModelScope.launch {
             when (val state = _uiState.value) {
-                is AiAssistantState.Success.ScreenPromptsCreated -> {
+                is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                     val originalPrompts = state.screenPrompts
                     val updatedPrompts = originalPrompts.toMutableList()
 
@@ -164,7 +164,7 @@ class AiAssistantViewModel(
                                         )
                                     _uiState.value =
                                         state.copy(screenPrompts = updatedPrompts.toList())
-                                    _uiState.value.isGenerating = true
+                                    _uiState.value.isGenerating.value = true
 
                                     var result: CreateScreenResponse =
                                         CreateScreenResponse.BeforeRequest(prompt.id)
@@ -240,7 +240,7 @@ class AiAssistantViewModel(
                     }
 
                     jobs.forEach { it.await() }
-                    _uiState.value.isGenerating = false
+                    _uiState.value.isGenerating.value = false
                 }
 
                 else -> Unit
@@ -250,7 +250,7 @@ class AiAssistantViewModel(
 
     fun onRenderedErrorDetected(errorPrompt: GeneratedScreenPrompt.Error) {
         when (val state = _uiState.value) {
-            is AiAssistantState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                 val originalPrompts = state.screenPrompts
                 val updatedPrompts = originalPrompts.toMutableList()
                 val indexOfScreen =
@@ -267,18 +267,18 @@ class AiAssistantViewModel(
         }
     }
 
-    fun onSendUserInput(userInput: String) {
+    fun onSendCreateScreenRequest(userInput: String) {
         viewModelScope.launch {
             // If already generated content exists, include it in the prompt.
             val existingContext = when (val state = uiState.value) {
-                is AiAssistantState.Success.NewScreenCreated -> {
+                is AiAssistantUiState.Success.NewScreenCreated -> {
                     yamlSerializer.encodeToString(Screen.serializer(), state.screen) + " "
                 }
 
                 else -> ""
             }
 
-            _uiState.value.isGenerating = true
+            _uiState.value.isGenerating.value = true
 
             _messages.value += MessageModel(
                 messageOwner = MessageOwner.User,
@@ -314,18 +314,18 @@ class AiAssistantViewModel(
                             message = result.message,
                             createdAt = Clock.System.now()
                         )
-                        _uiState.value = AiAssistantState.Success.NewScreenCreated(result.screen)
+                        _uiState.value = AiAssistantUiState.Success.NewScreenCreated(result.screen)
                     }
 
                     else -> {
                         // We care only the success state here
                     }
                 }
-                _uiState.value.isGenerating = false
+                _uiState.value.isGenerating.value = false
             } catch (timeoutException: TimeoutCancellationException) {
                 val message = getString(Res.string.ai_failed_to_generate_response_timeout)
                 _uiState.value =
-                    AiAssistantState.Error(message = message)
+                    AiAssistantUiState.Error(message = message)
                 _messages.value += MessageModel(
                     messageOwner = MessageOwner.Ai,
                     message = message,
@@ -335,7 +335,7 @@ class AiAssistantViewModel(
             } catch (e: Exception) {
                 val message = getString(Res.string.ai_failed_to_generate_response)
                 _uiState.value =
-                    AiAssistantState.Error(message = message)
+                    AiAssistantUiState.Error(message = message)
                 _messages.value += MessageModel(
                     messageOwner = MessageOwner.Ai,
                     message = message,
@@ -347,7 +347,7 @@ class AiAssistantViewModel(
     }
 
     fun onDiscardResult() {
-        _uiState.value = AiAssistantState.Idle
-        _uiState.value.isGenerating = false
+        _uiState.value = AiAssistantUiState.Idle
+        _uiState.value.isGenerating.value = false
     }
 }

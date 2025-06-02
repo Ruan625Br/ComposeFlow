@@ -59,7 +59,6 @@ private fun prefixYamlIdsWithKaml(yamlString: String, screenId: String): String?
         yamlSerializer.encodeToString(modifiedScreen)
     } catch (e: Exception) {
         // Catch potential parsing or processing errors
-        println("Error processing YAML with kaml: ${e.message}")
         e.printStackTrace()
         null // Return null on error
     }

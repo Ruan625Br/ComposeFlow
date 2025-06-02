@@ -24,13 +24,14 @@ interface StateHolder {
      * @return true if the state is successfully removed.
      */
     fun removeState(stateId: StateId): Boolean
+    fun copyContents(other: StateHolder)
 }
 
 @Serializable
 @SerialName("StateHolderImpl")
 data class StateHolderImpl(
     @Serializable(FallbackMutableStateListSerializer::class)
-    private val states: MutableList<ReadableState> = mutableStateListEqualsOverrideOf(),
+    val states: MutableList<ReadableState> = mutableStateListEqualsOverrideOf(),
 ) : StateHolder {
 
     override fun getStates(project: Project): List<ReadableState> = states
@@ -62,4 +63,10 @@ data class StateHolderImpl(
             states[index] = readableState
         }
     }
+
+    override fun copyContents(other: StateHolder) {
+        states.clear()
+        states.addAll((other as? StateHolderImpl)?.states ?: emptyList())
+    }
 }
+

@@ -10,8 +10,6 @@ import io.composeflow.model.datatype.DataType
 import io.composeflow.model.datatype.firestoreDocumentId
 import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
-import io.composeflow.model.project.asLoadedProjectUiState
-import io.composeflow.model.project.asProjectStateFlow
 import io.composeflow.model.project.custom_enum.CustomEnum
 import io.composeflow.repository.ProjectRepository
 import io.composeflow.swap
@@ -24,40 +22,17 @@ import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class DataTypeEditorViewModel(
     firebaseIdToken: FirebaseIdToken,
-    projectId: String,
+    private val project: Project,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
     private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
         MutableStateFlow(LoadedProjectUiState.Success(Project()))
     val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState
 
-    private var project by mutableStateOf(_projectUiState.asProjectStateFlow(viewModelScope).value)
-
     var focusedDataTypeIndex by mutableStateOf<Int?>(null)
         private set
     var focusedEnumIndex by mutableStateOf<Int?>(null)
         private set
-
-    init {
-        viewModelScope.launch {
-            _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value = projectRepository.loadProject(projectId)
-                .asLoadedProjectUiState(projectId)
-            when (val state = _projectUiState.value) {
-                is LoadedProjectUiState.Success -> {
-                    project = state.project
-                    if (project.dataTypeHolder.dataTypes.isNotEmpty()) {
-                        focusedDataTypeIndex = 0
-                    }
-                    if (project.customEnumHolder.enumList.isNotEmpty()) {
-                        focusedEnumIndex = 0
-                    }
-                }
-
-                else -> {}
-            }
-        }
-    }
 
     fun onDataTypeAdded(dataTypeName: String) {
         val newName = generateUniqueName(

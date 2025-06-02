@@ -118,7 +118,7 @@ fun AiAssistantDialog(
                     onDiscardResult = viewModel::onDiscardResult,
                     messages = messages,
                     uiState = uiState,
-                    onSendUserInput = viewModel::onSendUserInput,
+                    onSendUserInput = viewModel::onSendCreateScreenRequest,
                     modifier = Modifier.weight(4f)
                         .fillMaxSize()
                 )
@@ -141,7 +141,7 @@ private fun AiConversationArea(
     onCloseClick: () -> Unit,
     onDiscardResult: () -> Unit,
     messages: List<MessageModel>,
-    uiState: AiAssistantState,
+    uiState: AiAssistantUiState,
     onSendUserInput: (String) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -179,7 +179,7 @@ private fun AiConversationArea(
                 onDiscardResult = onDiscardResult,
             )
 
-            if (uiState.isGenerating) {
+            if (uiState.isGenerating.value) {
                 Text(
                     text = stringResource(Res.string.ai_generating_response),
                     color = MaterialTheme.colorScheme.secondary,
@@ -313,7 +313,7 @@ private fun ChatMessage(
 @Composable
 private fun AiWorkspaceArea(
     project: Project,
-    uiState: AiAssistantState,
+    uiState: AiAssistantUiState,
     callbacks: AiAssistantDialogCallbacks,
     modifier: Modifier = Modifier,
 ) {
@@ -334,7 +334,7 @@ private fun AiWorkspaceArea(
                 )
         ) {
             when (uiState) {
-                is AiAssistantState.Success.NewScreenCreated -> {
+                is AiAssistantUiState.Success.NewScreenCreated -> {
                     var deviceSizeDp by remember { mutableStateOf(IntSize.Zero) }
                     val density = LocalDensity.current
                     Column(
@@ -384,18 +384,20 @@ private fun AiWorkspaceArea(
                     }
                 }
 
-                is AiAssistantState.Success.ScreenPromptsCreated -> {
+                is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                     ScreenPromptsCreatedContent(
                         callbacks = callbacks,
                         uiState = uiState
                     )
                 }
 
-                is AiAssistantState.Error -> {
+                is AiAssistantUiState.Error -> {
 
                 }
 
-                AiAssistantState.Idle -> {}
+                AiAssistantUiState.Idle -> {}
+                is AiAssistantUiState.Success.ToolResponseProcessed -> {
+                }
             }
         }
     }

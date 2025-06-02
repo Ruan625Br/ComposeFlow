@@ -8,49 +8,20 @@ import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.firestore_collection_same_name_exists
 import io.composeflow.model.datatype.DataField
 import io.composeflow.model.datatype.DataType
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
-import io.composeflow.model.project.asLoadedProjectUiState
-import io.composeflow.model.project.asProjectStateFlow
 import io.composeflow.model.project.firebase.FirestoreCollection
 import io.composeflow.repository.ProjectRepository
 import io.composeflow.util.generateUniqueName
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class FirestoreEditorViewModel(
     firebaseIdToken: FirebaseIdToken,
-    projectId: String,
+    private val project: Project,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
-    private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
-        MutableStateFlow(LoadedProjectUiState.Success(Project()))
-    val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState
-
-    private var project by mutableStateOf(_projectUiState.asProjectStateFlow(viewModelScope).value)
-
     var focusedFirestoreCollectionIndex by mutableStateOf<Int?>(null)
-
-    init {
-        viewModelScope.launch {
-            _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value =
-                projectRepository.loadProject(projectId).asLoadedProjectUiState(projectId)
-            when (val state = _projectUiState.value) {
-                is LoadedProjectUiState.Success -> {
-                    project = state.project
-                    if (project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.isNotEmpty()) {
-                        focusedFirestoreCollectionIndex = 0
-                    }
-                }
-
-                else -> {}
-            }
-        }
-    }
 
     internal fun onFirestoreCollectionAdded(
         collectionName: String,

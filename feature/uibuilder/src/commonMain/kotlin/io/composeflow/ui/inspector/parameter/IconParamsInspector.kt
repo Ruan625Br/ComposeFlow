@@ -138,7 +138,7 @@ fun IconParamsInspector(
                     iconTrait.copy(tint = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }

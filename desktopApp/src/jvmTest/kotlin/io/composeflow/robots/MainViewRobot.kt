@@ -58,6 +58,8 @@ class MainViewRobot(
                         IntUiTheme {
                             ProjectEditorView(
                                 projectId = "testId",
+                                onTitleBarLeftContentSet = {},
+                                onTitleBarRightContentSet = {},
                             )
                         }
                     }

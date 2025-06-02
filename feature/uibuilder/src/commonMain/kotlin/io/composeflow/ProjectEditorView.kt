@@ -20,8 +20,16 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import io.composeflow.ai.AiChatDialog
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.model.ProvideNavigator
 import io.composeflow.model.TopLevelDestination
@@ -29,7 +37,8 @@ import io.composeflow.ui.Tooltip
 import io.composeflow.ui.jewel.TitleBarContent
 import io.composeflow.ui.statusbar.StatusBar
 import io.composeflow.ui.statusbar.StatusBarViewModel
-import io.composeflow.ui.toolbar.Toolbar
+import io.composeflow.ui.toolbar.LeftToolbar
+import io.composeflow.ui.toolbar.RightToolbar
 import moe.tlaster.precompose.navigation.NavOptions
 import moe.tlaster.precompose.navigation.PopUpTo
 import moe.tlaster.precompose.navigation.rememberNavigator
@@ -46,11 +55,13 @@ const val MainViewTestTag = "MainView"
 @Composable
 fun ProjectEditorView(
     projectId: String,
-    onTitleBarContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit,
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
     Column(modifier = Modifier.testTag(MainViewTestTag)) {
         ProjectEditorContent(
-            onTitleBarContentSet = onTitleBarContentSet,
+            onTitleBarRightContentSet = onTitleBarRightContentSet,
+            onTitleBarLeftContentSet = onTitleBarLeftContentSet,
             projectId = projectId,
         )
     }
@@ -65,14 +76,35 @@ class MainViewUiState(
 @Composable
 fun ProjectEditorContent(
     projectId: String,
-    onTitleBarContentSet: (TitleBarContent) -> Unit,
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit,
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
+    val firebaseIdToken = LocalFirebaseIdToken.current
+    val viewModel = viewModel(modelClass = ProjectEditorViewModel::class) {
+        ProjectEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
+    }
+    val project = viewModel.project.collectAsState().value
+    val aiAssistantUiState by viewModel.aiAssistantUiState.collectAsState()
+
     val projectEditorNavigator = rememberNavigator()
     val currentDestination = TopLevelDestination.entries.firstOrNull {
         it.route == projectEditorNavigator.currentEntry.collectAsState(null).value?.route?.route
     }
-    Surface {
-        val firebaseIdToken = LocalFirebaseIdToken.current
+    val showAiChatDialog = viewModel.showAiChatDialog.collectAsState().value
+    val aiChatToggleVisibilityModifier = Modifier.onPreviewKeyEvent { event ->
+        if (event.type == KeyEventType.KeyDown &&
+            event.key == Key.K &&
+            (event.isMetaPressed || event.isCtrlPressed)
+        ) {
+            viewModel.onToggleShowAiChatDialog()
+            true
+        } else {
+            false
+        }
+    }
+    Surface(
+        modifier = aiChatToggleVisibilityModifier
+    ) {
         val statusBarViewModel =
             viewModel(modelClass = StatusBarViewModel::class) {
                 StatusBarViewModel()
@@ -80,8 +112,15 @@ fun ProjectEditorContent(
         val statusBarUiState by statusBarViewModel.uiState.collectAsState()
         ProvideNavigator(navigator = projectEditorNavigator) {
             Column {
-                onTitleBarContentSet {
-                    Toolbar(
+                onTitleBarLeftContentSet {
+                    LeftToolbar(
+                        onToggleVisibilityOfAiChatDialog = {
+                            viewModel.onToggleShowAiChatDialog()
+                        },
+                    )
+                }
+                onTitleBarRightContentSet {
+                    RightToolbar(
                         firebaseIdToken = firebaseIdToken,
                         projectFileName = projectId,
                         onStatusBarUiStateChanged = statusBarViewModel::onStatusBarUiStateChanged,
@@ -144,12 +183,24 @@ fun ProjectEditorContent(
                     )
                     ProjectEditorNavHost(
                         navigator = projectEditorNavigator,
-                        projectId = projectId,
+                        project = project,
+                        aiAssistantUiState = aiAssistantUiState,
+                        onUpdateProject = viewModel::onUpdateProject,
                     )
                 }
                 HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
                 StatusBar(uiState = statusBarUiState)
             }
         }
+    }
+    if (showAiChatDialog) {
+        AiChatDialog(
+            project = project,
+            aiAssistantUiState = aiAssistantUiState,
+            firebaseIdToken = firebaseIdToken,
+            onDismissDialog = { viewModel.onToggleShowAiChatDialog() },
+            onAiAssistantUiStateUpdated = viewModel::onUpdateAiAssistantState,
+            modifier = aiChatToggleVisibilityModifier,
+        )
     }
 }

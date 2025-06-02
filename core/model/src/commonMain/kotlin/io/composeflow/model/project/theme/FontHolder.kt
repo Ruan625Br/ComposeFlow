@@ -22,6 +22,13 @@ typealias TextStyleOverrides = MutableMap<TextStyleWrapper, TextStyleOverride>
 
 val defaultFontFamily = FontFamilyWrapper.NotoSansJP
 
+fun FontHolder.copyContents(args: FontHolder) {
+    textStyleOverrides.clear()
+    textStyleOverrides.putAll(args.textStyleOverrides)
+    primaryFontFamily = args.primaryFontFamily
+    secondaryFontFamily = args.secondaryFontFamily
+}
+
 @Serializable
 @SerialName("FontHolder")
 data class FontHolder(

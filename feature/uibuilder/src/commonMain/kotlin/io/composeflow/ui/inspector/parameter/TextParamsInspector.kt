@@ -66,7 +66,7 @@ fun TextParamsInspector(
                     textTrait.copy(text = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }

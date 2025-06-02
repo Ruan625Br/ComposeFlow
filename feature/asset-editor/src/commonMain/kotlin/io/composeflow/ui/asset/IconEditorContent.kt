@@ -44,7 +44,6 @@ import io.composeflow.Res
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.cloud.storage.asDateString
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.pick_icon_description
 import io.composeflow.remove
@@ -66,7 +65,7 @@ import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun IconAssetDetails(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     assetEditorCallbacks: AssetEditorCallbacks,
     removeResult: RemoveResult,
     uploadResult: UploadResult,
@@ -79,7 +78,7 @@ fun IconAssetDetails(
     ) {
         Spacer(Modifier.width(128.dp))
         IconAssetDetailsContent(
-            projectUiState = projectUiState,
+            project = project,
             assetEditorCallbacks = assetEditorCallbacks,
             removeResult = removeResult,
             uploadResult = uploadResult,
@@ -91,7 +90,7 @@ fun IconAssetDetails(
 
 @Composable
 private fun IconAssetDetailsContent(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     assetEditorCallbacks: AssetEditorCallbacks,
     removeResult: RemoveResult,
     uploadResult: UploadResult,
@@ -142,30 +141,20 @@ private fun IconAssetDetailsContent(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
 
-                when (projectUiState) {
-                    is LoadedProjectUiState.Error -> {}
-                    LoadedProjectUiState.Loading -> {
-                        CircularProgressIndicator()
-                    }
-
-                    LoadedProjectUiState.NotFound -> {}
-                    is LoadedProjectUiState.Success -> {
-                        val assets = projectUiState.project.assetHolder.icons
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(220.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(16.dp),
-                        ) {
-                            items(assets) {
-                                IconAssetItem(
-                                    project = projectUiState.project,
-                                    blobInfoWrapper = it,
-                                    onDeleteAsset = assetEditorCallbacks.onDeleteIconAsset,
-                                    removeResult = removeResult,
-                                )
-                            }
-                        }
+                val assets = project.assetHolder.icons
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(220.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(16.dp),
+                ) {
+                    items(assets) {
+                        IconAssetItem(
+                            project = project,
+                            blobInfoWrapper = it,
+                            onDeleteAsset = assetEditorCallbacks.onDeleteIconAsset,
+                            removeResult = removeResult,
+                        )
                     }
                 }
             }
@@ -217,7 +206,7 @@ private fun IconAssetItem(
                 } else {
                     blobInfoWrapper.asIconComposable(
                         userId = LocalFirebaseIdToken.current.user_id,
-                        projectId = project.id.toString(),
+                        projectId = project.id,
                         modifier = Modifier.heightIn(max = 72.dp)
                     )
                 }

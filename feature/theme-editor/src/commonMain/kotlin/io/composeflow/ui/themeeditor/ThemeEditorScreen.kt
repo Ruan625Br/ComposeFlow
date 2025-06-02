@@ -1,6 +1,5 @@
 package io.composeflow.ui.themeeditor
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -9,7 +8,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Palette
 import androidx.compose.material.icons.outlined.TextFields
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
@@ -17,7 +15,6 @@ import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,7 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import io.composeflow.auth.LocalFirebaseIdToken
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.ui.icon.ComposeFlowIcon
 import moe.tlaster.precompose.viewmodel.viewModel
@@ -47,13 +43,13 @@ enum class ThemeEditorNavigationDestination(
 
 @Composable
 fun ThemeEditorScreen(
-    projectId: String,
+    project: Project,
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = ThemeEditorViewModel::class) {
         ThemeEditorViewModel(
-            firebaseIdToken = firebaseIdToken, projectId = projectId
+            firebaseIdToken = firebaseIdToken, project = project
         )
     }
     val callbacks = ThemeEditorCallbacks(
@@ -70,39 +66,12 @@ fun ThemeEditorScreen(
         secondaryFontFamily = viewModel.secondaryFontFamily,
         textStyleOverrides = viewModel.textStyleOverrides,
     )
-    val projectUiState by viewModel.projectUiState.collectAsState()
-    when (val state = projectUiState) {
-        is LoadedProjectUiState.Error -> {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Failed to load project",
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-
-        LoadedProjectUiState.Loading -> {
-            CircularProgressIndicator()
-        }
-
-        LoadedProjectUiState.NotFound -> {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    text = "Failed to load project",
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
-        }
-
-        is LoadedProjectUiState.Success -> {
-            ThemeEditorContent(
-                project = state.project,
-                callbacks = callbacks,
-                fontEditableParams = fontEditableParams,
-                modifier = modifier
-            )
-        }
-    }
+    ThemeEditorContent(
+        project = project,
+        callbacks = callbacks,
+        fontEditableParams = fontEditableParams,
+        modifier = modifier
+    )
 }
 
 @Composable

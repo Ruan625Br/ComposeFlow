@@ -14,3 +14,8 @@ class ThemeHolder(
         return listOf(colorSchemeHolder.generateColorFile(), fontHolder.generateFontFile())
     }
 }
+
+fun ThemeHolder.copyContents(other: ThemeHolder) {
+    colorSchemeHolder.copyContents(other.colorSchemeHolder)
+    fontHolder.copyContents(other.fontHolder)
+}

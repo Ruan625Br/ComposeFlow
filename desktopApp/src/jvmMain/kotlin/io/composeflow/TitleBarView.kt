@@ -29,7 +29,8 @@ import org.jetbrains.jewel.window.newFullscreenControls
 @Composable
 fun DecoratedWindowScope.TitleBarView(
     onComposeFlowLogoClicked: () -> Unit,
-    titleBarContent: TitleBarContent
+    titleBarLeftContent: TitleBarContent,
+    titleBarRightContent: TitleBarContent,
 ) {
     TitleBar(
         Modifier.newFullscreenControls(newControls = true),
@@ -63,10 +64,12 @@ fun DecoratedWindowScope.TitleBarView(
                     modifier = Modifier.padding(4.dp)
                 )
             }
-            Spacer(Modifier.weight(1f))
+            Row(modifier = Modifier.weight(1f)) {
+                titleBarLeftContent()
+            }
             Text(title)
             Row(modifier = Modifier.weight(1f)) {
-                titleBarContent()
+                titleBarRightContent()
             }
         }
     }

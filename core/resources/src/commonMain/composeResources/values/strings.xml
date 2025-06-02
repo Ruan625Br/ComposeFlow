@@ -7,9 +7,11 @@
     <string name="ai_action_create_project">Create project</string>
     <string name="ai_action_confirm_to_create_project">Do you want to create the project? Some screens are still being generated.</string>
     <string name="ai_action_discard_result">Discard result</string>
+    <string name="ai_open_assistant">Open AI assistant</string>
     <string name="ai_failed_to_generate_screen">Failed to generate screen. Please try again later.</string>
     <string name="ai_failed_to_generate_response">Failed to generate the response. Please try again later.</string>
     <string name="ai_failed_to_generate_response_timeout">Failed to generate the response. Maximum timeout reached. Please try again later.</string>
+    <string name="ai_response_stopped_by_user">Interrupted by the user</string>
     <string name="ai_title_prompt_dialog">Describe your app's purpose or features</string>
     <string name="ai_prompt_suggestions_label">Try these suggestions:</string>
     <string name="ai_prompt_suggestion_social_media">A social media app with user profiles, posts, and comments</string>

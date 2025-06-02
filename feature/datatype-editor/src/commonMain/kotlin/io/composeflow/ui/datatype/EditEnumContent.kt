@@ -22,7 +22,6 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.DragIndicator
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -39,7 +38,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import io.composeflow.model.project.LoadedProjectUiState
+import io.composeflow.Res
+import io.composeflow.add_enum
+import io.composeflow.add_enum_entry
+import io.composeflow.delete_data_type
+import io.composeflow.delete_enum_value
+import io.composeflow.edit_value
+import io.composeflow.editor.validator.KotlinVariableNameValidator
+import io.composeflow.enum
+import io.composeflow.enum_tooltip
+import io.composeflow.model.project.Project
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.Tooltip
@@ -50,15 +58,6 @@ import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import io.composeflow.ui.popup.SingleTextInputDialog
 import io.composeflow.ui.reorderable.ComposeFlowReorderableItem
-import io.composeflow.editor.validator.KotlinVariableNameValidator
-import io.composeflow.Res
-import io.composeflow.add_enum
-import io.composeflow.add_enum_entry
-import io.composeflow.delete_data_type
-import io.composeflow.delete_enum_value
-import io.composeflow.edit_value
-import io.composeflow.enum
-import io.composeflow.enum_tooltip
 import io.composeflow.value
 import org.burnoutcrew.reorderable.detectReorder
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
@@ -137,7 +136,7 @@ fun EnumListHeader(
 
 @Composable
 fun EnumList(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     enumFocusedIndex: Int?,
     onFocusedEnumIndexUpdated: (Int) -> Unit,
 ) {
@@ -145,48 +144,36 @@ fun EnumList(
         Modifier
             .padding(16.dp)
     ) {
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    CircularProgressIndicator()
+        val dataTypes = project.customEnumHolder.enumList
+        LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
+            itemsIndexed(dataTypes) { i, enum ->
+                val focusedModifier = if (i == enumFocusedIndex) {
+                    Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(
+                            MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                alpha = 0.8f,
+                            ),
+                        )
+                } else {
+                    Modifier.alpha(0.4f)
                 }
-            }
-
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                val dataTypes = projectUiState.project.customEnumHolder.enumList
-                LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
-                    itemsIndexed(dataTypes) { i, enum ->
-                        val focusedModifier = if (i == enumFocusedIndex) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                        alpha = 0.8f,
-                                    ),
-                                )
-                        } else {
-                            Modifier.alpha(0.4f)
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp)
-                                .hoverIconClickable()
-                                .then(focusedModifier)
-                                .clickable {
-                                    onFocusedEnumIndexUpdated(i)
-                                },
-                        ) {
-                            Text(
-                                enum.enumName,
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .hoverIconClickable()
+                        .then(focusedModifier)
+                        .clickable {
+                            onFocusedEnumIndexUpdated(i)
+                        },
+                ) {
+                    Text(
+                        enum.enumName,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
         }
@@ -210,7 +197,7 @@ private fun EnumDetailContentHeader() {
 
 @Composable
 fun EnumDetail(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     focusedEnumIndex: Int?,
     onEnumValueAdded: (String) -> Unit,
     onEnumValueUpdated: (Int, String) -> Unit,
@@ -226,7 +213,7 @@ fun EnumDetail(
     ) {
         Spacer(Modifier.weight(1f))
         EnumDetailContent(
-            projectUiState = projectUiState,
+            project = project,
             focusedEnumIndex = focusedEnumIndex,
             onEnumValueAdded = onEnumValueAdded,
             onEnumValueUpdated = onEnumValueUpdated,
@@ -241,7 +228,7 @@ fun EnumDetail(
 
 @Composable
 private fun EnumDetailContent(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     focusedEnumIndex: Int?,
     onEnumValueAdded: (String) -> Unit,
     onEnumValueUpdated: (Int, String) -> Unit,
@@ -262,131 +249,121 @@ private fun EnumDetailContent(
             .background(color = MaterialTheme.colorScheme.surface),
     ) {
 
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                val enum =
-                    focusedEnumIndex?.let { projectUiState.project.customEnumHolder.enumList[it] }
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                ) {
-                    enum?.let {
-                        Row {
-                            Text(
-                                it.enumName,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(top = 8.dp).padding(bottom = 16.dp),
+        val enum =
+            focusedEnumIndex?.let { project.customEnumHolder.enumList[it] }
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            enum?.let {
+                Row {
+                    Text(
+                        it.enumName,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 8.dp).padding(bottom = 16.dp),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    val contentDesc = stringResource(Res.string.delete_data_type)
+                    Tooltip(contentDesc) {
+                        IconButton(onClick = {
+                            onDeleteEnumIconClicked()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = contentDesc,
+                                tint = MaterialTheme.colorScheme.error,
                             )
-                            Spacer(Modifier.weight(1f))
-                            val contentDesc = stringResource(Res.string.delete_data_type)
-                            Tooltip(contentDesc) {
-                                IconButton(onClick = {
-                                    onDeleteEnumIconClicked()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = contentDesc,
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-                            }
-                        }
-
-                        val reorderableLazyListState =
-                            rememberReorderableLazyListState(onMove = { from, to ->
-                                onSwapEnumValueIndexes(from.index, to.index)
-                            })
-                        EnumDetailContentHeader()
-                        LazyColumn(
-                            state = reorderableLazyListState.listState,
-                            modifier = Modifier.heightIn(max = 800.dp)
-                                .detectReorder(reorderableLazyListState)
-                                .reorderable(reorderableLazyListState)
-                        ) {
-                            itemsIndexed(enum.values) { i, value ->
-                                ComposeFlowReorderableItem(
-                                    index = i,
-                                    reorderableLazyListState = reorderableLazyListState,
-                                ) {
-                                    EnumFieldRow(
-                                        value = value,
-                                        index = i,
-                                        onEditEnumValueDialogOpen = {
-                                            indexOfEnumToBeEdited = i
-                                            addEnumValueDialogOpen = true
-                                        },
-                                        onDeleteEnumDialogOpen = {
-                                            indexOfEnumToBeDeleted = i
-                                        },
-                                    )
-                                }
-                            }
-                        }
-                        TextButton(
-                            onClick = {
-                                addEnumValueDialogOpen = true
-                            },
-                            modifier = Modifier.padding(top = 8.dp),
-                        ) {
-                            Text("+ ${stringResource(Res.string.add_enum_entry)}")
                         }
                     }
                 }
 
-                val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
-                val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-                if (addEnumValueDialogOpen) {
-                    onAnyDialogIsOpen()
-                    val dialogClosed = {
-                        addEnumValueDialogOpen = false
-                        onAllDialogsClosed()
-                    }
-                    val initialValue = indexOfEnumToBeEdited?.let {
-                        enum?.values?.get(it)
-                    }
-
-                    SingleTextInputDialog(
-                        textLabel = "Enum value",
-                        onDismissDialog = {
-                            dialogClosed()
-                        },
-                        onTextConfirmed = {
-                            indexOfEnumToBeEdited?.let { enumIndex ->
-                                onEnumValueUpdated(enumIndex, it)
-                                indexOfEnumToBeEdited = null
-                            } ?: onEnumValueAdded(it)
-
-                            dialogClosed()
-                        },
-                        initialValue = initialValue,
-                        validator = KotlinVariableNameValidator()::validate
-                    )
-                }
-
-                indexOfEnumToBeDeleted?.let { indexToBeDeleted ->
-                    onAnyDialogIsOpen()
-                    val closeDialog = {
-                        indexOfEnumToBeDeleted = null
-                        onAllDialogsClosed()
-                    }
-                    SimpleConfirmationDialog(
-                        text = stringResource(Res.string.delete_enum_value) + "?",
-                        onConfirmClick = {
-                            onDeleteEnumValueOfIndex(indexToBeDeleted)
-                            closeDialog()
-                        },
-                        onCloseClick = {
-                            closeDialog()
+                val reorderableLazyListState =
+                    rememberReorderableLazyListState(onMove = { from, to ->
+                        onSwapEnumValueIndexes(from.index, to.index)
+                    })
+                EnumDetailContentHeader()
+                LazyColumn(
+                    state = reorderableLazyListState.listState,
+                    modifier = Modifier.heightIn(max = 800.dp)
+                        .detectReorder(reorderableLazyListState)
+                        .reorderable(reorderableLazyListState)
+                ) {
+                    itemsIndexed(enum.values) { i, value ->
+                        ComposeFlowReorderableItem(
+                            index = i,
+                            reorderableLazyListState = reorderableLazyListState,
+                        ) {
+                            EnumFieldRow(
+                                value = value,
+                                index = i,
+                                onEditEnumValueDialogOpen = {
+                                    indexOfEnumToBeEdited = i
+                                    addEnumValueDialogOpen = true
+                                },
+                                onDeleteEnumDialogOpen = {
+                                    indexOfEnumToBeDeleted = i
+                                },
+                            )
                         }
-                    )
+                    }
+                }
+                TextButton(
+                    onClick = {
+                        addEnumValueDialogOpen = true
+                    },
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
+                    Text("+ ${stringResource(Res.string.add_enum_entry)}")
                 }
             }
+        }
+
+        val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
+        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+        if (addEnumValueDialogOpen) {
+            onAnyDialogIsOpen()
+            val dialogClosed = {
+                addEnumValueDialogOpen = false
+                onAllDialogsClosed()
+            }
+            val initialValue = indexOfEnumToBeEdited?.let {
+                enum?.values?.get(it)
+            }
+
+            SingleTextInputDialog(
+                textLabel = "Enum value",
+                onDismissDialog = {
+                    dialogClosed()
+                },
+                onTextConfirmed = {
+                    indexOfEnumToBeEdited?.let { enumIndex ->
+                        onEnumValueUpdated(enumIndex, it)
+                        indexOfEnumToBeEdited = null
+                    } ?: onEnumValueAdded(it)
+
+                    dialogClosed()
+                },
+                initialValue = initialValue,
+                validator = KotlinVariableNameValidator()::validate
+            )
+        }
+
+        indexOfEnumToBeDeleted?.let { indexToBeDeleted ->
+            onAnyDialogIsOpen()
+            val closeDialog = {
+                indexOfEnumToBeDeleted = null
+                onAllDialogsClosed()
+            }
+            SimpleConfirmationDialog(
+                text = stringResource(Res.string.delete_enum_value) + "?",
+                onConfirmClick = {
+                    onDeleteEnumValueOfIndex(indexToBeDeleted)
+                    closeDialog()
+                },
+                onCloseClick = {
+                    closeDialog()
+                }
+            )
         }
     }
 }

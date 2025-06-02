@@ -23,7 +23,6 @@ import kotlinx.serialization.modules.polymorphic
 
 object ShapeWrapperSerializer : KSerializer<ShapeWrapper> {
     private val delegate = FallbackSealedSerializer(
-        baseClass = ShapeWrapper::class,
         defaultInstance = ShapeWrapper.Rectangle,
         serializer = PolymorphicSerializer(ShapeWrapper::class)
     )
@@ -32,7 +31,8 @@ object ShapeWrapperSerializer : KSerializer<ShapeWrapper> {
         get() = delegate.descriptor
 
     override fun deserialize(decoder: Decoder): ShapeWrapper = delegate.deserialize(decoder)
-    override fun serialize(encoder: Encoder, value: ShapeWrapper) = delegate.serialize(encoder, value)
+    override fun serialize(encoder: Encoder, value: ShapeWrapper) =
+        delegate.serialize(encoder, value)
 }
 
 
@@ -170,9 +170,9 @@ sealed interface ShapeWrapper {
         }
     }
 
-    abstract fun toShape(): Shape
+    fun toShape(): Shape
 
-    abstract fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder
+    fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder
 
 }
 

@@ -99,7 +99,6 @@ typealias ScreenId = String
 @Serializable
 @SerialName("Screen")
 data class Screen(
-//    @Serializable(with = UuidSerializer::class)
     override val id: String = Uuid.random().toString(),
     override val name: String,
     @Serializable(with = MutableStateSerializer::class)
@@ -710,6 +709,17 @@ data class Screen(
             return bottomAppBar
         }
         return rootNode.value.findDeepestChildAtOrNull(position)
+    }
+
+    override fun findNodeById(id: String): ComposeNode? {
+        if (id == this.id) {
+            if (rootNode.value.trait.value is ScreenTrait) {
+                return rootNode.value
+            }
+        }
+        return getAllComposeNodes().firstOrNull {
+            it.id == id
+        }
     }
 
     private fun getAllRootNodes(): List<ComposeNode?> = listOf(

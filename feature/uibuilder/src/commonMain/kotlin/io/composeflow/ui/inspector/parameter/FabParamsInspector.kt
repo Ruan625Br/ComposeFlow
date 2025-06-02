@@ -63,7 +63,7 @@ fun FabParamsInspector(
                     fabTrait.copy(containerColorWrapper = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }
@@ -98,7 +98,7 @@ fun FabParamsInspector(
                     fabTrait.copy(contentColorWrapper = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }

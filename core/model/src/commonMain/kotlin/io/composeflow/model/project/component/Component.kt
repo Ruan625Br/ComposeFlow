@@ -51,6 +51,7 @@ import io.composeflow.model.palette.PaletteDraggable
 import io.composeflow.model.palette.PaletteNodeCallbacks
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.parameter.ComponentTrait
 import io.composeflow.model.project.CanvasEditable
 import io.composeflow.model.project.ParameterWrapper
 import io.composeflow.model.project.Project
@@ -98,7 +99,6 @@ const val componentKeyName = "componentKey"
 @Serializable
 @SerialName("Component")
 data class Component(
-//    @Serializable(UuidSerializer::class)
     override val id: ComponentId = Uuid.random().toString(),
     override val name: String,
     @Serializable(MutableStateSerializer::class)
@@ -263,6 +263,15 @@ data class Component(
 
     override fun findFocusedNodeOrNull(): ComposeNode? {
         return componentRoot.value.findFirstFocusedNodeOrNull()
+    }
+
+    override fun findNodeById(id: String): ComposeNode? {
+        if (id == this.id) {
+            if (getRootNode().trait.value is ComponentTrait) {
+                return getRootNode()
+            }
+        }
+        return getAllComposeNodes().firstOrNull { it.id == id }
     }
 
     override fun clearIsHoveredRecursively() {

@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.PermanentDrawerSheet
@@ -28,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import io.composeflow.auth.LocalFirebaseIdToken
-import io.composeflow.model.project.LoadedProjectUiState
+import io.composeflow.model.project.Project
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.modifier.backgroundContainerNeutral
 import io.composeflow.ui.settings.firebase.FirebaseApiAppResultState
@@ -39,19 +38,18 @@ import moe.tlaster.precompose.viewmodel.viewModel
 
 @Composable
 fun SettingsScreen(
-    projectId: String,
+    project: Project,
     modifier: Modifier = Modifier,
     initialDestination: SettingsScreenDestination? = null,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = SettingsViewModel::class) {
         SettingsViewModel(
-            projectId = projectId,
+            project = project,
             firebaseIdTokenArg = firebaseIdToken,
         )
     }
     val darkThemeSettingUiState = viewModel.darkThemeSettingsUiState.collectAsState()
-    val projectUiState by viewModel.projectUiState.collectAsState()
     val firebaseApiResultState by viewModel.firebaseApiResultState.collectAsState()
     val firebaseApiAppResultState = FirebaseApiAppResultState(
         androidApp = viewModel.firebaseAndroidAppApiResultState.collectAsState().value,
@@ -93,32 +91,22 @@ fun SettingsScreen(
                         .background(color = MaterialTheme.colorScheme.surface),
                 ) {
 
-                    when (val uiState = projectUiState) {
-                        is LoadedProjectUiState.Error -> {}
-                        LoadedProjectUiState.Loading -> {
-                            CircularProgressIndicator()
+                    when (selectedDestination) {
+                        SettingsScreenDestination.Preferences -> {
+                            PreferencesContent(
+                                project = project,
+                                darkThemeSettingsUiState = darkThemeSettingUiState.value.darkThemeSettingSetterUiState,
+                                settingsCallbacks = settingsCallbacks,
+                            )
                         }
 
-                        LoadedProjectUiState.NotFound -> {}
-                        is LoadedProjectUiState.Success -> {
-                            when (selectedDestination) {
-                                SettingsScreenDestination.Preferences -> {
-                                    PreferencesContent(
-                                        project = uiState.project,
-                                        darkThemeSettingsUiState = darkThemeSettingUiState.value.darkThemeSettingSetterUiState,
-                                        settingsCallbacks = settingsCallbacks,
-                                    )
-                                }
-
-                                SettingsScreenDestination.Firebase -> {
-                                    FirebaseSettingsContent(
-                                        project = uiState.project,
-                                        firebaseApiResultState = firebaseApiResultState,
-                                        firebaseApiAppResultState = firebaseApiAppResultState,
-                                        settingsCallbacks = settingsCallbacks
-                                    )
-                                }
-                            }
+                        SettingsScreenDestination.Firebase -> {
+                            FirebaseSettingsContent(
+                                project = project,
+                                firebaseApiResultState = firebaseApiResultState,
+                                firebaseApiAppResultState = firebaseApiAppResultState,
+                                settingsCallbacks = settingsCallbacks
+                            )
                         }
                     }
                 }

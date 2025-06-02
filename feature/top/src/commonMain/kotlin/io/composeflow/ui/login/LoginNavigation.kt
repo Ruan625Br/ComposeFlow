@@ -9,7 +9,8 @@ const val loginRoute = "login_route"
 fun RouteBuilder.loginScreen(
     onGoogleSignInClicked: () -> Unit,
     onLogOut: () -> Unit,
-    onTitleBarContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit = {},
     navTransition: NavTransition? = null,
 ) {
     scene(
@@ -19,7 +20,8 @@ fun RouteBuilder.loginScreen(
         LoginScreen(
             onGoogleSignInClicked = onGoogleSignInClicked,
             onLogOut = onLogOut,
-            onTitleBarContentSet = onTitleBarContentSet,
+            onTitleBarRightContentSet = onTitleBarRightContentSet,
+            onTitleBarLeftContentSet = onTitleBarLeftContentSet,
         )
     }
 }

@@ -13,9 +13,9 @@ import io.composeflow.di.ServiceLocator
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.serialize
 import io.composeflow.platform.getOrCreateDataStore
+import io.composeflow.serializer.yamlSerializer
 import io.composeflow.util.toKotlinFileName
 import io.composeflow.util.toPackageName
-import io.composeflow.serializer.yamlSerializer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.decodeFromString
@@ -40,7 +40,7 @@ class ProjectRepository(
         )
         projectSaver.saveProjectYaml(
             userId = firebaseIdToken.user_id,
-            projectId = project.id.toString(),
+            projectId = project.id,
             yamlContent = project.serialize()
         )
         return project
@@ -68,7 +68,7 @@ class ProjectRepository(
     suspend fun updateProject(project: Project) {
         projectSaver.saveProjectYaml(
             userId = firebaseIdToken.user_id,
-            projectId = project.id.toString(),
+            projectId = project.id,
             yamlContent = project.serialize()
         )
 

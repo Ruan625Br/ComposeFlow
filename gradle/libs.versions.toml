@@ -4,6 +4,9 @@ agp = "8.7.3"
 androidx-credentials = "1.5.0"
 appcompat = "1.7.0"
 atomicfu = "0.27.0"
+kotlinCompileTesting = "1.5.0"
+kotlinCompileTestingKsp = "1.5.0"
+ksp = "2.1.20-1.0.32"
 compose-adaptive-layout = "1.0.0-alpha01"
 compose-color-picker = "0.7.0"
 compose-multiplatform = "1.8.0"
@@ -22,18 +25,18 @@ kmpauth = "2.1.0-alpha02"
 koin = "4.0.0-RC1"
 kotlin = "2.1.21"
 kotlinpoet = "2.1.0"
-kotlinx-serialization = "1.8.0"
+kotlinx-serialization = "1.8.1"
 # Intentionall keeping this version to run format that takes a String
 ktlint = "0.39.0"
 ktor = "3.1.2"
 logback = "1.4.14"
-multiplatform-settings = "1.2.0"
+multiplatform-settings = "1.3.0"
 okhttp = "4.12.0"
 paging-multiplatform = "3.3.0-alpha02-0.5.1"
 precompose = "1.6.2"
 reorderable = "0.9.6"
 roborazzi = "1.26.0"
-sentry = "8.5.0"
+sentry = "8.7.0"
 testparameterinjector = "1.18"
 
 [libraries]
@@ -42,6 +45,9 @@ androidx-activity-compose = { group = "androidx.activity", name = "activity-comp
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 
 # com.google
+kotlin-compile-testing = { module = "com.github.tschuchortdev:kotlin-compile-testing", version.ref = "kotlinCompileTesting" }
+kotlin-compile-testing-ksp = { module = "com.github.tschuchortdev:kotlin-compile-testing-ksp", version.ref = "kotlinCompileTestingKsp" }
+symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 testparameterinjector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "testparameterinjector" }
 
 # Jewel
@@ -150,7 +156,7 @@ google-firebase-admin = { module = "com.google.firebase:firebase-admin", version
 commons-compress = "org.apache.commons:commons-compress:1.21"
 compose-shimmer = "com.valentinilk.shimmer:compose-shimmer:1.3.0"
 filekit-compose = "io.github.vinceglb:filekit-compose:0.6.3"
-kotlin-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.1"
+kotlin-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.2"
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 conveyor-control = "dev.hydraulic.conveyor:conveyor-control:1.1"
 

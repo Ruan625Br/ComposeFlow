@@ -64,7 +64,7 @@ fun TextFieldParamsInspector(
                     textFieldTrait.copy(value = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }
@@ -129,7 +129,7 @@ fun TextFieldParamsInspector(
                     textFieldTrait.copy(label = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }
@@ -155,7 +155,7 @@ fun TextFieldParamsInspector(
                     textFieldTrait.copy(placeholder = property),
                     lazyListSource,
                 )
-                result.messages.forEach {
+                result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
                     }

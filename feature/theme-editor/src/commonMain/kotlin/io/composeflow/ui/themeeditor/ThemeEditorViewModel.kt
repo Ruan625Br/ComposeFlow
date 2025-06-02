@@ -12,10 +12,7 @@ import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.font.FontFamilyWrapper
 import io.composeflow.model.color.ColorSchemeWrapper
 import io.composeflow.model.enumwrapper.TextStyleWrapper
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
-import io.composeflow.model.project.asLoadedProjectUiState
-import io.composeflow.model.project.asProjectStateFlow
 import io.composeflow.model.project.theme.TextStyleOverride
 import io.composeflow.model.project.theme.TextStyleOverrides
 import io.composeflow.model.useroperation.OperationHistory
@@ -23,23 +20,15 @@ import io.composeflow.model.useroperation.UserOperation
 import io.composeflow.repository.ProjectRepository
 import io.composeflow.ui.common.defaultDarkScheme
 import io.composeflow.ui.common.defaultLightScheme
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class ThemeEditorViewModel(
     firebaseIdToken: FirebaseIdToken,
-    projectId: String,
+    private val project: Project,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
-    private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
-        MutableStateFlow(LoadedProjectUiState.Success(Project()))
-    val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState
-
-    var project by mutableStateOf(_projectUiState.asProjectStateFlow(viewModelScope).value)
-        private set
 
     // Primary font family edited in the ThemeEditorScreen. This isn't reflected to the persisted project
     var primaryFontFamily by mutableStateOf(
@@ -57,25 +46,6 @@ class ThemeEditorViewModel(
 
     // Text overrides edited in the ThemeEditorScreen. This isn't reflected to the persisted project
     val textStyleOverrides: TextStyleOverrides = mutableStateMapOf()
-
-    init {
-        viewModelScope.launch {
-            _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value =
-                projectRepository.loadProject(projectId).asLoadedProjectUiState(projectId)
-            when (val state = _projectUiState.value) {
-                is LoadedProjectUiState.Success -> {
-                    project = state.project
-
-                    primaryFontFamily = project.themeHolder.fontHolder.primaryFontFamily
-                    secondaryFontFamily = project.themeHolder.fontHolder.secondaryFontFamily
-                    textStyleOverrides.putAll(project.themeHolder.fontHolder.textStyleOverrides)
-                }
-
-                else -> {}
-            }
-        }
-    }
 
     fun onColorSchemeUpdated(
         sourceColor: Color,

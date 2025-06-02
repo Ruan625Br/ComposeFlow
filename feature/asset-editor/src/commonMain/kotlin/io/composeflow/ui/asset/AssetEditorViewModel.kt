@@ -1,8 +1,5 @@
 package io.composeflow.ui.asset
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import com.github.michaelbull.result.get
 import com.github.michaelbull.result.mapBoth
 import io.composeflow.auth.FirebaseIdToken
@@ -10,10 +7,7 @@ import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.cloud.storage.GoogleCloudStorageWrapper
 import io.composeflow.datastore.LocalAssetSaver
 import io.composeflow.di.ServiceLocator
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
-import io.composeflow.model.project.asLoadedProjectUiState
-import io.composeflow.model.project.asProjectStateFlow
 import io.composeflow.repository.ProjectRepository
 import io.github.vinceglb.filekit.core.PlatformFile
 import kotlinx.coroutines.CoroutineDispatcher
@@ -25,8 +19,8 @@ import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 
 class AssetEditorViewModel(
-    projectId: String,
-    val firebaseIdToken: FirebaseIdToken,
+    private val firebaseIdToken: FirebaseIdToken,
+    private val project: Project,
     private val ioDispatcher: CoroutineDispatcher =
         ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
             Dispatchers.IO
@@ -35,12 +29,6 @@ class AssetEditorViewModel(
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
     private val localAssetSaver: LocalAssetSaver = LocalAssetSaver(),
 ) : ViewModel() {
-    private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
-        MutableStateFlow(LoadedProjectUiState.Success(Project()))
-    val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState
-
-    var project by mutableStateOf(_projectUiState.asProjectStateFlow(viewModelScope).value)
-        private set
 
     private val _uploadResult: MutableStateFlow<UploadResult> =
         MutableStateFlow(UploadResult.NotStarted)
@@ -49,21 +37,6 @@ class AssetEditorViewModel(
     private val _removeResult: MutableStateFlow<RemoveResult> =
         MutableStateFlow(RemoveResult.NotStarted)
     val removeResult: StateFlow<RemoveResult> = _removeResult
-
-    init {
-        viewModelScope.launch {
-            _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value =
-                projectRepository.loadProject(projectId).asLoadedProjectUiState(projectId)
-            when (val state = _projectUiState.value) {
-                is LoadedProjectUiState.Success -> {
-                    project = state.project
-                }
-
-                else -> {}
-            }
-        }
-    }
 
     fun onDeleteImageAsset(blobInfoWrapper: BlobInfoWrapper) {
         viewModelScope.launch {
@@ -75,7 +48,7 @@ class AssetEditorViewModel(
                     project.assetHolder.images.remove(blobInfoWrapper)
                     localAssetSaver.deleteAsset(
                         userId = firebaseIdToken.user_id,
-                        projectId = project.id.toString(),
+                        projectId = project.id,
                         blobInfoWrapper = blobInfoWrapper,
                     )
                     saveProject()
@@ -92,7 +65,7 @@ class AssetEditorViewModel(
             _uploadResult.value = UploadResult.Uploading
             val result = storageWrapper.uploadAsset(
                 userId = firebaseIdToken.user_id,
-                projectId = project.id.toString(),
+                projectId = project.id,
                 file,
             )
             result.mapBoth(
@@ -102,7 +75,7 @@ class AssetEditorViewModel(
                         project.assetHolder.images.add(blobInfo)
                         localAssetSaver.saveAsset(
                             firebaseIdToken.user_id,
-                            project.id.toString(),
+                            project.id,
                             blobInfo
                         )
                         saveProject()
@@ -120,7 +93,7 @@ class AssetEditorViewModel(
             _uploadResult.value = UploadResult.Uploading
             val result = storageWrapper.uploadAsset(
                 userId = firebaseIdToken.user_id,
-                projectId = project.id.toString(),
+                projectId = project.id,
                 file,
             )
             result.mapBoth(
@@ -131,7 +104,7 @@ class AssetEditorViewModel(
 
                         localAssetSaver.saveAsset(
                             firebaseIdToken.user_id,
-                            project.id.toString(),
+                            project.id,
                             blobInfo
                         )
                         saveProject()
@@ -154,7 +127,7 @@ class AssetEditorViewModel(
                     project.assetHolder.icons.remove(blobInfoWrapper)
                     localAssetSaver.deleteAsset(
                         userId = firebaseIdToken.user_id,
-                        projectId = project.id.toString(),
+                        projectId = project.id,
                         blobInfoWrapper = blobInfoWrapper,
                     )
                     saveProject()

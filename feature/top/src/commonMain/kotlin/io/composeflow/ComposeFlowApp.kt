@@ -19,7 +19,8 @@ import moe.tlaster.precompose.viewmodel.viewModel
 @Composable
 fun ComposeFlowApp(
     navigator: Navigator,
-    onTitleBarContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit = {},
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutine = rememberCoroutineScope()
@@ -46,7 +47,8 @@ fun ComposeFlowApp(
                             navigator.navigate(loginRoute)
                         }
                     },
-                    onTitleBarContentSet = onTitleBarContentSet,
+                    onTitleBarRightContentSet = onTitleBarRightContentSet,
+                    onTitleBarLeftContentSet = onTitleBarLeftContentSet,
                 )
             }
         }

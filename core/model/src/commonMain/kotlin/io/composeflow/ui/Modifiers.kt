@@ -344,11 +344,11 @@ private fun Modifier.dragHandlerAndTapGestures(
                         },
                         onDragEnd = {
                             if (isDragging) {
-                                val errorMessages = canvasNodeCallbacks.onNodeDropToPosition(
+                                val eventResult = canvasNodeCallbacks.onNodeDropToPosition(
                                     pointerPosition + node.boundsInWindow.value.topLeft,
                                     node,
                                 )
-                                errorMessages.forEach {
+                                eventResult.errorMessages.forEach {
                                     coroutineScope.launch {
                                         onShowSnackbar(it, null)
                                     }

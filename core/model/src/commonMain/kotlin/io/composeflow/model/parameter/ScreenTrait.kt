@@ -20,7 +20,7 @@ data object ScreenTrait : ComposeTrait {
     override fun iconText(): String = "Screen"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
     override fun visibleInPalette(): Boolean = false
-    override fun isDroppable(): Boolean = false
+    override fun isDroppable(): Boolean = true
     override fun isVisibilityConditional(): Boolean = false
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnInitialLoad)
     override fun generateCode(

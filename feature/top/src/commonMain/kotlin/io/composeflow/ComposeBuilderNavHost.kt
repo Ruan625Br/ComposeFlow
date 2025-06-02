@@ -12,7 +12,8 @@ fun ComposeBuilderNavHost(
     navigator: Navigator,
     onGoogleSignInClicked: () -> Unit,
     onLogOut: () -> Unit,
-    onTitleBarContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit = {},
 ) {
     NavHost(
         navigator = navigator,
@@ -21,7 +22,8 @@ fun ComposeBuilderNavHost(
         loginScreen(
             onGoogleSignInClicked = onGoogleSignInClicked,
             onLogOut = onLogOut,
-            onTitleBarContentSet = onTitleBarContentSet,
+            onTitleBarRightContentSet = onTitleBarRightContentSet,
+            onTitleBarLeftContentSet = onTitleBarLeftContentSet,
         )
     }
 }

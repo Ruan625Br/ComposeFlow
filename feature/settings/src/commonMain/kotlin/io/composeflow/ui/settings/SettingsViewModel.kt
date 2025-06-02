@@ -1,8 +1,6 @@
 package io.composeflow.ui.settings
 
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import co.touchlab.kermit.Logger
 import com.github.michaelbull.result.mapBoth
 import com.github.michaelbull.result.onFailure
@@ -15,11 +13,8 @@ import io.composeflow.firebase.FirebaseApiCaller
 import io.composeflow.firebase.WebAppWrapper
 import io.composeflow.firebase.management.AndroidAppWrapper
 import io.composeflow.firebase.management.IosAppWrapper
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
-import io.composeflow.model.project.asLoadedProjectUiState
-import io.composeflow.model.project.asProjectStateFlow
 import io.composeflow.model.project.firebase.FirebaseAppInfo
 import io.composeflow.model.project.firebase.prepareFirebaseApiCall
 import io.composeflow.model.settings.ComposeBuilderSettings
@@ -50,19 +45,13 @@ import org.jetbrains.compose.resources.getString
 import java.time.Duration
 
 class SettingsViewModel(
-    projectId: String,
+    private val project: Project,
     private val firebaseIdTokenArg: FirebaseIdToken,
     private val firebaseApiCaller: FirebaseApiCaller = FirebaseApiCaller(),
     private val authRepository: AuthRepository = AuthRepository(),
     private val settingsRepository: SettingsRepository = SettingsRepository(),
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdTokenArg),
 ) : ViewModel() {
-    private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
-        MutableStateFlow(LoadedProjectUiState.Success(Project()))
-    val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState
-
-    var project by mutableStateOf(_projectUiState.asProjectStateFlow(viewModelScope).value)
-        private set
 
     private val _firebaseApiResultState: MutableStateFlow<FirebaseApiResultState> =
         MutableStateFlow(FirebaseApiResultState.Initial)
@@ -96,30 +85,21 @@ class SettingsViewModel(
 
     init {
         viewModelScope.launch {
-            _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value =
-                projectRepository.loadProject(projectId).asLoadedProjectUiState(projectId)
-            when (val state = _projectUiState.value) {
-                is LoadedProjectUiState.Success -> {
-                    project = state.project
 
-                    project.firebaseAppInfoHolder.firebaseAppInfo.run {
-                        androidApp?.let {
-                            _firebaseAndroidAppApiResultState.value =
-                                FirebaseAndroidAppApiResultState(androidApp = it)
-                        }
-                        iOSApp?.let {
-                            _firebaseIosAppApiResultState.value =
-                                FirebaseIosAppApiResultState(iOSApp = it)
-                        }
-                        webApp?.let {
-                            _firebaseWebAppApiResultState.value =
-                                FirebaseWebAppApiResultState(webApp = it)
-                        }
-                    }
+            project.firebaseAppInfoHolder.firebaseAppInfo.run {
+                androidApp?.let {
+                    _firebaseAndroidAppApiResultState.value =
+                        FirebaseAndroidAppApiResultState(androidApp = it)
+                }
+                iOSApp?.let {
+                    _firebaseIosAppApiResultState.value =
+                        FirebaseIosAppApiResultState(iOSApp = it)
+                }
+                webApp?.let {
+                    _firebaseWebAppApiResultState.value =
+                        FirebaseWebAppApiResultState(webApp = it)
                 }
 
-                else -> {}
             }
         }
 

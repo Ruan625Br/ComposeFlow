@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -46,17 +44,36 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.composeflow.Res
+import io.composeflow.add_app_state
+import io.composeflow.app_state
+import io.composeflow.app_state_tooltip
 import io.composeflow.auth.LocalFirebaseIdToken
+import io.composeflow.cancel
+import io.composeflow.confirm
+import io.composeflow.data_type
+import io.composeflow.default_value
+import io.composeflow.delete_app_state
+import io.composeflow.editor.validator.FloatValidator
+import io.composeflow.editor.validator.IntValidator
+import io.composeflow.editor.validator.KotlinVariableNameValidator
+import io.composeflow.editor.validator.ValidateResult
+import io.composeflow.field_name
+import io.composeflow.is_list
 import io.composeflow.model.datatype.DataType
 import io.composeflow.model.datatype.DataTypeDefaultValue
 import io.composeflow.model.datatype.DefaultValuesParseResult
 import io.composeflow.model.datatype.ParseDefaultValuesJsonTextField
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.findDataTypeOrNull
 import io.composeflow.model.state.AppState
 import io.composeflow.model.state.AppStateWithDataTypeId
 import io.composeflow.model.state.copy
+import io.composeflow.no_data_type_defined
+import io.composeflow.set_default_values_from_json
+import io.composeflow.set_from_json
+import io.composeflow.state_name
+import io.composeflow.type
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.Tooltip
@@ -68,44 +85,23 @@ import io.composeflow.ui.propertyeditor.BasicDropdownPropertyEditor
 import io.composeflow.ui.propertyeditor.BooleanPropertyEditor
 import io.composeflow.ui.text.EditableText
 import io.composeflow.ui.textfield.SmallOutlinedTextField
-import io.composeflow.editor.validator.FloatValidator
-import io.composeflow.editor.validator.IntValidator
-import io.composeflow.editor.validator.KotlinVariableNameValidator
-import io.composeflow.editor.validator.ValidateResult
-import io.composeflow.Res
-import io.composeflow.add_app_state
-import io.composeflow.app_state
-import io.composeflow.app_state_tooltip
-import io.composeflow.cancel
-import io.composeflow.confirm
-import io.composeflow.data_type
-import io.composeflow.default_value
-import io.composeflow.delete_app_state
-import io.composeflow.field_name
-import io.composeflow.is_list
-import io.composeflow.no_data_type_defined
-import io.composeflow.set_default_values_from_json
-import io.composeflow.set_from_json
-import io.composeflow.state_name
-import io.composeflow.type
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun AppStateEditor(
-    projectId: String,
+    project: Project,
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = AppStateEditorViewModel::class) {
-        AppStateEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
+        AppStateEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
     }
     Surface(modifier = modifier.fillMaxSize()) {
         Row {
-            val projectUiState by viewModel.projectUiState.collectAsState()
             AppStateHeaderContainer()
             AppStateDetail(
-                projectUiState = projectUiState,
+                project = project,
                 onAppStateAdded = viewModel::onAppStateAdded,
                 onAppStateDeleted = viewModel::onAppStateDeleted,
                 onAppStateUpdated = viewModel::onAppStateUpdated,
@@ -152,7 +148,7 @@ private fun AppStateHeader() {
 
 @Composable
 private fun AppStateDetail(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     onAppStateAdded: (AppState<*>) -> Unit,
     onAppStateDeleted: (AppState<*>) -> Unit,
     onAppStateUpdated: (AppState<*>) -> Unit,
@@ -166,7 +162,7 @@ private fun AppStateDetail(
     ) {
         Spacer(Modifier.weight(1f))
         AppStateDetailContent(
-            projectUiState = projectUiState,
+            project = project,
             onAppStateAdded = onAppStateAdded,
             onAppStateDeleted = onAppStateDeleted,
             onAppStateUpdated = onAppStateUpdated,
@@ -178,7 +174,7 @@ private fun AppStateDetail(
 
 @Composable
 private fun AppStateDetailContent(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     onAppStateAdded: (AppState<*>) -> Unit,
     onAppStateDeleted: (AppState<*>) -> Unit,
     onAppStateUpdated: (AppState<*>) -> Unit,
@@ -210,82 +206,71 @@ private fun AppStateDetailContent(
 
             AppStateDetailContentHeader()
 
-            when (projectUiState) {
-                is LoadedProjectUiState.Error -> {}
-                LoadedProjectUiState.Loading -> {
-                    CircularProgressIndicator()
-                }
-
-                LoadedProjectUiState.NotFound -> {}
-                is LoadedProjectUiState.Success -> {
-                    val project = projectUiState.project
-                    val appStates =
-                        project.globalStateHolder.getStates(project).map { it as AppState<*> }
-                    LazyColumn(modifier = Modifier.heightIn(max = 800.dp)) {
-                        items(appStates) { appState ->
-                            AppStateDetailRow(
-                                project = project,
-                                appState = appState,
-                                onAppStateUpdated = onAppStateUpdated,
-                                onDeleteAppStateDialogOpen = {
-                                    appStateToBeDeleted = it
-                                },
-                                onDataTypeListDefaultValueUpdated = onDataTypeListDefaultValueUpdated
-                            )
-                        }
-                    }
-                    TextButton(
-                        onClick = {
-                            addAppStateDialogOpen = true
+            val appStates =
+                project.globalStateHolder.getStates(project).map { it as AppState<*> }
+            LazyColumn(modifier = Modifier.heightIn(max = 800.dp)) {
+                items(appStates) { appState ->
+                    AppStateDetailRow(
+                        project = project,
+                        appState = appState,
+                        onAppStateUpdated = onAppStateUpdated,
+                        onDeleteAppStateDialogOpen = {
+                            appStateToBeDeleted = it
                         },
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text("+ ${stringResource(Res.string.add_app_state)}")
-                    }
-
-                    val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
-                    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-                    if (addAppStateDialogOpen) {
-                        onAnyDialogIsOpen()
-                        val dialogClosed = {
-                            addAppStateDialogOpen = false
-                            appStateToBeUpdated = null
-                            onAllDialogsClosed()
-                        }
-
-                        AddAppStateDialog(
-                            project = project,
-                            initialValue = appStateToBeUpdated,
-                            onAppStateAdded = {
-                                onAppStateAdded(it)
-                                dialogClosed()
-                            },
-                            onAppStateUpdated = { appState: AppState<*> ->
-                                dialogClosed()
-                                onAppStateUpdated(appState)
-                            },
-                            onDialogClosed = dialogClosed,
-                        )
-                    }
-
-                    appStateToBeDeleted?.let { toBeDeleted ->
-                        onAnyDialogIsOpen()
-                        val closeDialog = {
-                            appStateToBeDeleted = null
-                            onAllDialogsClosed()
-                        }
-                        SimpleConfirmationDialog(
-                            text = stringResource(Res.string.delete_app_state) + "?",
-                            onCloseClick = {
-                                closeDialog()
-                            },
-                            onConfirmClick = {
-                                closeDialog()
-                                onAppStateDeleted(toBeDeleted)
-                            },
-                        )
-                    }
+                        onDataTypeListDefaultValueUpdated = onDataTypeListDefaultValueUpdated
+                    )
                 }
+            }
+            TextButton(
+                onClick = {
+                    addAppStateDialogOpen = true
+                },
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                Text("+ ${stringResource(Res.string.add_app_state)}")
+            }
+
+            val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
+            val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+            if (addAppStateDialogOpen) {
+                onAnyDialogIsOpen()
+                val dialogClosed = {
+                    addAppStateDialogOpen = false
+                    appStateToBeUpdated = null
+                    onAllDialogsClosed()
+                }
+
+                AddAppStateDialog(
+                    project = project,
+                    initialValue = appStateToBeUpdated,
+                    onAppStateAdded = {
+                        onAppStateAdded(it)
+                        dialogClosed()
+                    },
+                    onAppStateUpdated = { appState: AppState<*> ->
+                        dialogClosed()
+                        onAppStateUpdated(appState)
+                    },
+                    onDialogClosed = dialogClosed,
+                )
+            }
+
+            appStateToBeDeleted?.let { toBeDeleted ->
+                onAnyDialogIsOpen()
+                val closeDialog = {
+                    appStateToBeDeleted = null
+                    onAllDialogsClosed()
+                }
+                SimpleConfirmationDialog(
+                    text = stringResource(Res.string.delete_app_state) + "?",
+                    onCloseClick = {
+                        closeDialog()
+                    },
+                    onConfirmClick = {
+                        closeDialog()
+                        onAppStateDeleted(toBeDeleted)
+                    },
+                )
             }
         }
     }

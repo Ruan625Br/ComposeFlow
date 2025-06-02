@@ -107,7 +107,7 @@ fun ImageParamsInspector(
                             imageTrait.copy(url = property),
                             lazyListSource,
                         )
-                        result.messages.forEach {
+                        result.errorMessages.forEach {
                             coroutineScope.launch {
                                 onShowSnackbar(it, null)
                             }

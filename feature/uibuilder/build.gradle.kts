@@ -2,6 +2,7 @@ plugins {
     id("io.compose.flow.kmp.library")
     kotlin("plugin.serialization")
     id("io.compose.flow.compose.multiplatform")
+    id("com.google.devtools.ksp") version "2.1.20-1.0.32"
 }
 
 version = "1.0-SNAPSHOT"
@@ -11,6 +12,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":ksp-llm-tools"))
+            implementation(project(":core:ai"))
             implementation(project(":core:di"))
             implementation(project(":core:icons"))
             implementation(project(":core:formatter"))
@@ -34,6 +37,7 @@ kotlin {
             implementation(libs.kotlinpoet)
             implementation(libs.ktor.core)
             implementation(libs.ktor.kotlinx.json)
+            implementation(libs.kotlin.datetime)
             implementation(libs.kotlin.result)
             implementation(libs.kotlinx.serialization.jsonpath)
             implementation(libs.jewel.int.ui.standalone)
@@ -44,6 +48,16 @@ kotlin {
             api(libs.precompose.viewmodel)
         }
 
+        // Configure KSP for LLM tools
+        dependencies {
+            add("kspDesktop", project(":ksp-llm-tools"))
+        }
+
+        // Configure KSP options
+        ksp {
+            // Set output directory for LLM tool JSON files
+            arg("llmToolsOutputDir", "${project.buildDir}/generated/llm-tools")
+        }
         named("desktopMain") {
             dependencies {
                 implementation(compose.desktop.common)
@@ -59,6 +73,28 @@ kotlin {
             optInComposeExperimentalApis()
             optInKotlinExperimentalApis()
         }
+    }
+}
+
+// Add a specific task to run KSP
+tasks.register("runKsp") {
+    group = "ksp"
+    description = "Run KSP to generate LLM tool JSON files"
+
+    // Create the output directory
+    doFirst {
+        mkdir("${project.buildDir}/generated/llm-tools")
+    }
+
+    // Depend on the KSP task for the desktop target
+    dependsOn("kspKotlinDesktop")
+}
+
+// Make sure the KSP tasks run
+afterEvaluate {
+    tasks.withType<com.google.devtools.ksp.gradle.KspTask>().configureEach {
+        // Ensure the KSP task runs
+        outputs.upToDateWhen { false }
     }
 }
 

@@ -70,7 +70,8 @@ import org.jetbrains.jewel.intui.standalone.theme.IntUiTheme
 @Composable
 fun TopScreen(
     onLogOut: () -> Unit,
-    onTitleBarContentSet: (TitleBarContent) -> Unit = {},
+    onTitleBarRightContentSet: (TitleBarContent) -> Unit,
+    onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel =
@@ -134,8 +135,9 @@ fun TopScreen(
 
                                         is ProjectUiState.Selected -> {
                                             ProjectEditorView(
-                                                projectId = projectUiState.project.id.toString(),
-                                                onTitleBarContentSet = onTitleBarContentSet,
+                                                projectId = projectUiState.project.id,
+                                                onTitleBarRightContentSet = onTitleBarRightContentSet,
+                                                onTitleBarLeftContentSet = onTitleBarLeftContentSet
                                             )
                                         }
                                     }

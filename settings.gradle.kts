@@ -76,6 +76,7 @@ include(":feature:uibuilder")
 include(":feature:theme-editor")
 include(":feature:settings")
 include(":feature:top")
+include(":ksp-llm-tools")
 
 
 includeBuild("build-logic")

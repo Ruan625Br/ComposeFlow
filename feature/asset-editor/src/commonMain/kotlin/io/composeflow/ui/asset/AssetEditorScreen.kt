@@ -55,7 +55,6 @@ import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.cloud.storage.GoogleCloudStorageWrapper
 import io.composeflow.cloud.storage.asDateString
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.remove
 import io.composeflow.remove_asset
@@ -94,18 +93,17 @@ enum class AssetEditorNavigationDestination(
 
 @Composable
 fun AssetEditorScreen(
-    projectId: String,
+    project: Project,
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = AssetEditorViewModel::class) {
         AssetEditorViewModel(
             firebaseIdToken = firebaseIdToken,
-            projectId = projectId,
+            project = project,
             storageWrapper = GoogleCloudStorageWrapper()
         )
     }
-    val projectUiState by viewModel.projectUiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val uploadResult by viewModel.uploadResult.collectAsState()
     val removeResult by viewModel.removeResult.collectAsState()
@@ -164,7 +162,7 @@ fun AssetEditorScreen(
             when (selectedDestination) {
                 AssetEditorNavigationDestination.ImageEditor -> {
                     ImageAssetDetails(
-                        projectUiState = projectUiState,
+                        project = project,
                         assetEditorCallbacks = assetEditorCallbacks,
                         removeResult = removeResult,
                         uploadResult = uploadResult,
@@ -173,7 +171,7 @@ fun AssetEditorScreen(
 
                 AssetEditorNavigationDestination.IconEditor -> {
                     IconAssetDetails(
-                        projectUiState = projectUiState,
+                        project = project,
                         assetEditorCallbacks = assetEditorCallbacks,
                         removeResult = removeResult,
                         uploadResult = uploadResult,
@@ -228,7 +226,7 @@ fun AssetEditorContentNavigation(
 
 @Composable
 private fun ImageAssetDetails(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     assetEditorCallbacks: AssetEditorCallbacks,
     removeResult: RemoveResult,
     uploadResult: UploadResult,
@@ -241,7 +239,7 @@ private fun ImageAssetDetails(
     ) {
         Spacer(Modifier.width(128.dp))
         ImageAssetDetailsContent(
-            projectUiState = projectUiState,
+            project = project,
             assetEditorCallbacks = assetEditorCallbacks,
             removeResult = removeResult,
             uploadResult = uploadResult,
@@ -253,7 +251,7 @@ private fun ImageAssetDetails(
 
 @Composable
 private fun ImageAssetDetailsContent(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     assetEditorCallbacks: AssetEditorCallbacks,
     removeResult: RemoveResult,
     uploadResult: UploadResult,
@@ -303,30 +301,20 @@ private fun ImageAssetDetailsContent(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
 
-                when (projectUiState) {
-                    is LoadedProjectUiState.Error -> {}
-                    LoadedProjectUiState.Loading -> {
-                        CircularProgressIndicator()
-                    }
-
-                    LoadedProjectUiState.NotFound -> {}
-                    is LoadedProjectUiState.Success -> {
-                        val assets = projectUiState.project.assetHolder.images
-                        LazyVerticalGrid(
-                            columns = GridCells.Adaptive(220.dp),
-                            horizontalArrangement = Arrangement.spacedBy(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp),
-                            contentPadding = PaddingValues(16.dp),
-                        ) {
-                            items(assets) {
-                                AssetItem(
-                                    project = projectUiState.project,
-                                    blobInfoWrapper = it,
-                                    onDeleteAsset = assetEditorCallbacks.onDeleteImageAsset,
-                                    removeResult = removeResult,
-                                )
-                            }
-                        }
+                val assets = project.assetHolder.images
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(220.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    contentPadding = PaddingValues(16.dp),
+                ) {
+                    items(assets) {
+                        AssetItem(
+                            project = project,
+                            blobInfoWrapper = it,
+                            onDeleteAsset = assetEditorCallbacks.onDeleteImageAsset,
+                            removeResult = removeResult,
+                        )
                     }
                 }
             }

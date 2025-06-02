@@ -20,7 +20,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,7 +66,6 @@ import io.composeflow.firestore_collection_delete_data_type_relationship_confirm
 import io.composeflow.firestore_collection_name_warning
 import io.composeflow.firestore_collection_tooltip
 import io.composeflow.model.LocalNavigator
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.firebase.FirebaseAppInfo
 import io.composeflow.model.settingsRoute
@@ -101,17 +98,16 @@ import java.net.URI
 
 @Composable
 fun FirestoreEditorScreen(
-    projectId: String,
+    project: Project,
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = FirestoreEditorViewModel::class) {
-        FirestoreEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
+        FirestoreEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
     }
 
     Surface(modifier = modifier.fillMaxSize()) {
         Row {
-            val projectUiState by viewModel.projectUiState.collectAsState()
             val callbacks = FirestoreCollectionScreenCallbacks(
                 onFirestoreCollectionAdded = viewModel::onFirestoreCollectionAdded,
                 onFocusedFirestoreCollectionIndexUpdated = viewModel::onFocusedFirestoreCollectionIndexUpdated,
@@ -121,12 +117,12 @@ fun FirestoreEditorScreen(
                 onDeleteFirestoreCollectionRelationship = viewModel::onDeleteFirestoreCollectionRelationship,
             )
             FirestoreHeaderContainer(
-                projectUiState = projectUiState,
+                project = project,
                 callbacks = callbacks,
                 focusedFirestoreCollectionIndex = viewModel.focusedFirestoreCollectionIndex,
             )
             FirestoreCollectionToDataTypeRelationshipDetail(
-                projectUiState = projectUiState,
+                project = project,
                 callbacks = callbacks,
                 focusedFirestoreCollectionIndex = viewModel.focusedFirestoreCollectionIndex,
             )
@@ -136,7 +132,7 @@ fun FirestoreEditorScreen(
 
 @Composable
 private fun FirestoreHeaderContainer(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     callbacks: FirestoreCollectionScreenCallbacks,
     focusedFirestoreCollectionIndex: Int?,
 ) {
@@ -145,32 +141,22 @@ private fun FirestoreHeaderContainer(
             .padding(16.dp)
             .width(240.dp),
     ) {
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                if (projectUiState.project.firebaseAppInfoHolder.firebaseAppInfo.firebaseProjectId == null) {
-                    ConnectWithFirebaseMessage()
-                } else {
-                    FirestoreHeader(
-                        project = projectUiState.project,
-                        callbacks = callbacks,
-                    )
-                    Spacer(Modifier.size(8.dp))
-                    FirebaseFirestoreContent(
-                        firebaseAppInfo = projectUiState.project.firebaseAppInfoHolder.firebaseAppInfo,
-                    )
-                    FirestoreCollectionList(
-                        project = projectUiState.project,
-                        callbacks = callbacks,
-                        focusedFirestoreCollectionIndex = focusedFirestoreCollectionIndex,
-                    )
-                }
-            }
+        if (project.firebaseAppInfoHolder.firebaseAppInfo.firebaseProjectId == null) {
+            ConnectWithFirebaseMessage()
+        } else {
+            FirestoreHeader(
+                project = project,
+                callbacks = callbacks,
+            )
+            Spacer(Modifier.size(8.dp))
+            FirebaseFirestoreContent(
+                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
+            )
+            FirestoreCollectionList(
+                project = project,
+                callbacks = callbacks,
+                focusedFirestoreCollectionIndex = focusedFirestoreCollectionIndex,
+            )
         }
     }
 }
@@ -539,7 +525,7 @@ fun NewFirestoreCollectionDialog(
 
 @Composable
 private fun FirestoreCollectionRelationshipDetailContent(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     focusedFirestoreCollectionIndex: Int?,
     callbacks: FirestoreCollectionScreenCallbacks,
 ) {
@@ -557,168 +543,157 @@ private fun FirestoreCollectionRelationshipDetailContent(
             .background(color = MaterialTheme.colorScheme.surface),
     ) {
 
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                CircularProgressIndicator()
-            }
+        focusedFirestoreCollectionIndex ?: return
 
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                focusedFirestoreCollectionIndex ?: return
-                val project = projectUiState.project
+        val firestoreCollection =
+            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex]
+        val dataTypeId =
+            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex].dataTypeId
+        val dataType =
+            project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Column {
+                    Text(
+                        "Firestore collection name",
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        firestoreCollection.name,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 2.dp).padding(bottom = 16.dp),
+                    )
+                }
+                Spacer(Modifier.width(32.dp))
+                Text(
+                    "->",
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.width(32.dp))
+                Column {
+                    Text(
+                        "Data type",
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.bodySmall,
+                    )
+                    Text(
+                        dataType.className,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 2.dp).padding(bottom = 16.dp),
+                    )
+                }
 
-                val firestoreCollection =
-                    projectUiState.project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex]
-                val dataTypeId =
-                    project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex].dataTypeId
-                val dataType =
-                    project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Column {
-                            Text(
-                                "Firestore collection name",
-                                color = MaterialTheme.colorScheme.secondary,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                            Text(
-                                firestoreCollection.name,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(top = 2.dp).padding(bottom = 16.dp),
-                            )
-                        }
-                        Spacer(Modifier.width(32.dp))
-                        Text(
-                            "->",
-                            color = MaterialTheme.colorScheme.onSurface,
+                Spacer(Modifier.weight(1f))
+                val contentDesc = stringResource(Res.string.delete_data_type)
+                Tooltip(contentDesc) {
+                    IconButton(onClick = {
+                        deleteRelationshipDialogOpen = true
+                    }) {
+                        Icon(
+                            imageVector = Icons.Outlined.Delete,
+                            contentDescription = contentDesc,
+                            tint = MaterialTheme.colorScheme.error,
                         )
-                        Spacer(Modifier.width(32.dp))
-                        Column {
-                            Text(
-                                "Data type",
-                                color = MaterialTheme.colorScheme.secondary,
-                                style = MaterialTheme.typography.bodySmall,
-                            )
-                            Text(
-                                dataType.className,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(top = 2.dp).padding(bottom = 16.dp),
-                            )
-                        }
-
-                        Spacer(Modifier.weight(1f))
-                        val contentDesc = stringResource(Res.string.delete_data_type)
-                        Tooltip(contentDesc) {
-                            IconButton(onClick = {
-                                deleteRelationshipDialogOpen = true
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Outlined.Delete,
-                                    contentDescription = contentDesc,
-                                    tint = MaterialTheme.colorScheme.error,
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.size(16.dp))
-
-                    DataTypeDetailContentHeader()
-                    LazyColumn(modifier = Modifier.heightIn(max = 800.dp)) {
-                        itemsIndexed(dataType.fields) { i, dataField ->
-                            DataTypeDetailFieldRow(
-                                dataField = dataField,
-                                index = i,
-                                onDataFieldNameUpdated = callbacks.onDataFieldNameUpdated,
-                                onDeleteDataFieldDialogOpen = {
-                                    indexOfDataFieldToBeDeleted = i
-                                },
-                            )
-                        }
-                    }
-                    TextButton(
-                        onClick = {
-                            addDataFieldDialogOpen = true
-                        },
-                        modifier = Modifier.padding(top = 8.dp),
-                    ) {
-                        Text("+ ${stringResource(Res.string.add_field)}")
                     }
                 }
+            }
+            Spacer(Modifier.size(16.dp))
 
-                val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
-                val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-                if (addDataFieldDialogOpen) {
-                    onAnyDialogIsOpen()
-                    val dialogClosed = {
-                        addDataFieldDialogOpen = false
-                        onAllDialogsClosed()
-                    }
-                    val initialValue = indexOfDataFieldToBeEdited?.let {
-                        dataType.fields[it]
-                    }
-                    AddDataFieldDialog(
-                        initialValue = initialValue,
-                        updateIndex = indexOfDataFieldToBeEdited,
-                        onDataFieldAdded = {
-                            callbacks.onDataFieldAdded(it)
-                            dialogClosed()
-                        },
-                        onDataFieldNameUpdated = { i, inputName ->
-                            callbacks.onDataFieldNameUpdated(i, inputName)
-                            dialogClosed()
-                            indexOfDataFieldToBeEdited = null
-                        },
-                        onDialogClosed = dialogClosed,
-                    )
-                }
-
-                indexOfDataFieldToBeDeleted?.let { indexToBeDeleted ->
-                    onAnyDialogIsOpen()
-                    DeleteDataFieldDialog(
-                        index = indexToBeDeleted,
-                        onCloseClick = {
-                            indexOfDataFieldToBeDeleted = null
-                            onAllDialogsClosed()
-                        },
-                        onDeleteDataFieldOfIndex = {
-                            callbacks.onDeleteDataField(it)
-                            onAllDialogsClosed()
-                            indexOfDataFieldToBeDeleted = null
-                        },
-                    )
-                }
-
-                val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-                val onAllDialogClosed = LocalOnAllDialogsClosed.current
-                if (deleteRelationshipDialogOpen) {
-                    onAnyDialogIsShown()
-                    val closeDeleteDataTypeDialog = {
-                        deleteRelationshipDialogOpen = false
-                        onAllDialogClosed()
-                    }
-                    DeleteFirestoreCollectionRelationshipDialog(
-                        onCloseClick = {
-                            closeDeleteDataTypeDialog()
-                        },
-                        onDeleteRelationship = {
-                            callbacks.onDeleteFirestoreCollectionRelationship()
-                            closeDeleteDataTypeDialog()
+            DataTypeDetailContentHeader()
+            LazyColumn(modifier = Modifier.heightIn(max = 800.dp)) {
+                itemsIndexed(dataType.fields) { i, dataField ->
+                    DataTypeDetailFieldRow(
+                        dataField = dataField,
+                        index = i,
+                        onDataFieldNameUpdated = callbacks.onDataFieldNameUpdated,
+                        onDeleteDataFieldDialogOpen = {
+                            indexOfDataFieldToBeDeleted = i
                         },
                     )
                 }
             }
+            TextButton(
+                onClick = {
+                    addDataFieldDialogOpen = true
+                },
+                modifier = Modifier.padding(top = 8.dp),
+            ) {
+                Text("+ ${stringResource(Res.string.add_field)}")
+            }
+        }
+
+        val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
+        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+        if (addDataFieldDialogOpen) {
+            onAnyDialogIsOpen()
+            val dialogClosed = {
+                addDataFieldDialogOpen = false
+                onAllDialogsClosed()
+            }
+            val initialValue = indexOfDataFieldToBeEdited?.let {
+                dataType.fields[it]
+            }
+            AddDataFieldDialog(
+                initialValue = initialValue,
+                updateIndex = indexOfDataFieldToBeEdited,
+                onDataFieldAdded = {
+                    callbacks.onDataFieldAdded(it)
+                    dialogClosed()
+                },
+                onDataFieldNameUpdated = { i, inputName ->
+                    callbacks.onDataFieldNameUpdated(i, inputName)
+                    dialogClosed()
+                    indexOfDataFieldToBeEdited = null
+                },
+                onDialogClosed = dialogClosed,
+            )
+        }
+
+        indexOfDataFieldToBeDeleted?.let { indexToBeDeleted ->
+            onAnyDialogIsOpen()
+            DeleteDataFieldDialog(
+                index = indexToBeDeleted,
+                onCloseClick = {
+                    indexOfDataFieldToBeDeleted = null
+                    onAllDialogsClosed()
+                },
+                onDeleteDataFieldOfIndex = {
+                    callbacks.onDeleteDataField(it)
+                    onAllDialogsClosed()
+                    indexOfDataFieldToBeDeleted = null
+                },
+            )
+        }
+
+        val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+        val onAllDialogClosed = LocalOnAllDialogsClosed.current
+        if (deleteRelationshipDialogOpen) {
+            onAnyDialogIsShown()
+            val closeDeleteDataTypeDialog = {
+                deleteRelationshipDialogOpen = false
+                onAllDialogClosed()
+            }
+            DeleteFirestoreCollectionRelationshipDialog(
+                onCloseClick = {
+                    closeDeleteDataTypeDialog()
+                },
+                onDeleteRelationship = {
+                    callbacks.onDeleteFirestoreCollectionRelationship()
+                    closeDeleteDataTypeDialog()
+                },
+            )
         }
     }
 }
 
 @Composable
 private fun FirestoreCollectionToDataTypeRelationshipDetail(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     callbacks: FirestoreCollectionScreenCallbacks,
     focusedFirestoreCollectionIndex: Int?,
 ) {
@@ -729,21 +704,11 @@ private fun FirestoreCollectionToDataTypeRelationshipDetail(
             .padding(16.dp),
     ) {
         Spacer(Modifier.weight(1f))
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                FirestoreCollectionRelationshipDetailContent(
-                    projectUiState = projectUiState,
-                    callbacks = callbacks,
-                    focusedFirestoreCollectionIndex = focusedFirestoreCollectionIndex,
-                )
-            }
-        }
+        FirestoreCollectionRelationshipDetailContent(
+            project = project,
+            callbacks = callbacks,
+            focusedFirestoreCollectionIndex = focusedFirestoreCollectionIndex,
+        )
         Spacer(Modifier.weight(1f))
     }
 }

@@ -41,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
-import io.composeflow.UiBuilderViewModel
+import io.composeflow.ui.uibuilder.UiBuilderViewModel
 import io.composeflow.add_screen
 import io.composeflow.appears_in_navigation
 import io.composeflow.cancel

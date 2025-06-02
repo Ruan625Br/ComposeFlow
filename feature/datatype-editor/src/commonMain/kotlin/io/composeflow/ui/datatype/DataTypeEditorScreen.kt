@@ -96,6 +96,7 @@ import io.composeflow.enum
 import io.composeflow.enum_tooltip
 import io.composeflow.field_name
 import io.composeflow.field_type
+import io.composeflow.model.project.Project
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -106,14 +107,14 @@ enum class DataTypeTab {
 
 @Composable
 fun DataTypeEditor(
-    projectId: String,
+    project: Project,
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = DataTypeEditorViewModel::class) {
-        DataTypeEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
+        DataTypeEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
     }
-    val projectUiState by viewModel.projectUiState.collectAsState()
+//    val projectUiState by viewModel.projectUiState.collectAsState()
 
     var deleteDataTypeDialogOpen by remember { mutableStateOf(false) }
     var deleteEnumDialogOpen by remember { mutableStateOf(false) }
@@ -122,7 +123,7 @@ fun DataTypeEditor(
     Surface(modifier = modifier.fillMaxSize()) {
         Row {
             LeftPane(
-                projectUiState = projectUiState,
+                project = project,
                 focusedDataTypeIndex = viewModel.focusedDataTypeIndex,
                 focusedEnumIndex = viewModel.focusedEnumIndex,
                 onDataTypeAdded = viewModel::onDataTypeAdded,
@@ -138,7 +139,7 @@ fun DataTypeEditor(
             when (selectedTab) {
                 DataTypeTab.DataType -> {
                     DataTypeDetail(
-                        projectUiState,
+                        project = project,
                         focusedDataTypeIndex = viewModel.focusedDataTypeIndex,
                         onDataFieldAdded = viewModel::onDataFieldAdded,
                         onDataFieldNameUpdated = viewModel::onDataFieldNameUpdated,
@@ -151,7 +152,7 @@ fun DataTypeEditor(
 
                 DataTypeTab.Enum -> {
                     EnumDetail(
-                        projectUiState,
+                        project = project,
                         focusedEnumIndex = viewModel.focusedEnumIndex,
                         onEnumValueAdded = viewModel::onEnumValueAdded,
                         onEnumValueUpdated = viewModel::onEnumValueUpdated,
@@ -205,7 +206,7 @@ fun DataTypeEditor(
 
 @Composable
 private fun LeftPane(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     focusedDataTypeIndex: Int?,
     focusedEnumIndex: Int?,
     onDataTypeAdded: (String) -> Unit,
@@ -274,7 +275,7 @@ private fun LeftPane(
         when (selectedTab) {
             DataTypeTab.DataType -> {
                 DataTypeList(
-                    projectUiState = projectUiState,
+                    project = project,
                     dataTypeFocusedIndex = focusedDataTypeIndex,
                     onFocusedIndexUpdated = onDataTypeFocusedIndexUpdated,
                 )
@@ -282,7 +283,7 @@ private fun LeftPane(
 
             DataTypeTab.Enum -> {
                 EnumList(
-                    projectUiState = projectUiState,
+                    project = project,
                     enumFocusedIndex = focusedEnumIndex,
                     onFocusedEnumIndexUpdated = onEnumFocusedIndexUpdated,
                 )
@@ -293,7 +294,7 @@ private fun LeftPane(
 
 @Composable
 private fun DataTypeList(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     dataTypeFocusedIndex: Int?,
     onFocusedIndexUpdated: (Int) -> Unit,
 ) {
@@ -301,48 +302,36 @@ private fun DataTypeList(
         Modifier
             .padding(16.dp)
     ) {
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    CircularProgressIndicator()
+        val dataTypes = project.dataTypeHolder.dataTypes
+        LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
+            itemsIndexed(dataTypes) { i, dataType ->
+                val focusedModifier = if (i == dataTypeFocusedIndex) {
+                    Modifier
+                        .clip(RoundedCornerShape(8.dp))
+                        .background(
+                            MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                alpha = 0.8f,
+                            ),
+                        )
+                } else {
+                    Modifier.alpha(0.4f)
                 }
-            }
-
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                val dataTypes = projectUiState.project.dataTypeHolder.dataTypes
-                LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
-                    itemsIndexed(dataTypes) { i, dataType ->
-                        val focusedModifier = if (i == dataTypeFocusedIndex) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                        alpha = 0.8f,
-                                    ),
-                                )
-                        } else {
-                            Modifier.alpha(0.4f)
-                        }
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp)
-                                .hoverIconClickable()
-                                .then(focusedModifier)
-                                .clickable {
-                                    onFocusedIndexUpdated(i)
-                                },
-                        ) {
-                            Text(
-                                dataType.className,
-                                modifier = Modifier.padding(horizontal = 8.dp),
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                    }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .hoverIconClickable()
+                        .then(focusedModifier)
+                        .clickable {
+                            onFocusedIndexUpdated(i)
+                        },
+                ) {
+                    Text(
+                        dataType.className,
+                        modifier = Modifier.padding(horizontal = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
         }
@@ -706,7 +695,7 @@ private fun DataTypeFromJsonDialog(
 
 @Composable
 private fun DataTypeDetail(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     focusedDataTypeIndex: Int?,
     onDataFieldAdded: (DataField) -> Unit,
     onDataFieldNameUpdated: (Int, String) -> Unit,
@@ -721,7 +710,7 @@ private fun DataTypeDetail(
     ) {
         Spacer(Modifier.weight(1f))
         DataTypeDetailContent(
-            projectUiState = projectUiState,
+            project = project,
             focusedDataTypeIndex = focusedDataTypeIndex,
             onDataFieldAdded = onDataFieldAdded,
             onDataFieldNameUpdated = onDataFieldNameUpdated,
@@ -734,7 +723,7 @@ private fun DataTypeDetail(
 
 @Composable
 private fun DataTypeDetailContent(
-    projectUiState: LoadedProjectUiState,
+    project: Project,
     focusedDataTypeIndex: Int?,
     onDataFieldAdded: (DataField) -> Unit,
     onDataFieldNameUpdated: (Int, String) -> Unit,
@@ -754,109 +743,99 @@ private fun DataTypeDetailContent(
             .background(color = MaterialTheme.colorScheme.surface),
     ) {
 
-        when (projectUiState) {
-            is LoadedProjectUiState.Error -> {}
-            LoadedProjectUiState.Loading -> {
-                CircularProgressIndicator()
-            }
-
-            LoadedProjectUiState.NotFound -> {}
-            is LoadedProjectUiState.Success -> {
-                val dataType =
-                    focusedDataTypeIndex?.let { projectUiState.project.dataTypeHolder.dataTypes[it] }
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                ) {
-                    dataType?.let {
-                        Row {
-                            Text(
-                                it.className,
-                                color = MaterialTheme.colorScheme.onSurface,
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(top = 8.dp).padding(bottom = 16.dp),
+        val dataType =
+            focusedDataTypeIndex?.let { project.dataTypeHolder.dataTypes[it] }
+        Column(
+            modifier = Modifier.padding(16.dp),
+        ) {
+            dataType?.let {
+                Row {
+                    Text(
+                        it.className,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleLarge,
+                        modifier = Modifier.padding(top = 8.dp).padding(bottom = 16.dp),
+                    )
+                    Spacer(Modifier.weight(1f))
+                    val contentDesc = stringResource(Res.string.delete_data_type)
+                    Tooltip(contentDesc) {
+                        IconButton(onClick = {
+                            onDeleteDataTypeIconClicked()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Outlined.Delete,
+                                contentDescription = contentDesc,
+                                tint = MaterialTheme.colorScheme.error,
                             )
-                            Spacer(Modifier.weight(1f))
-                            val contentDesc = stringResource(Res.string.delete_data_type)
-                            Tooltip(contentDesc) {
-                                IconButton(onClick = {
-                                    onDeleteDataTypeIconClicked()
-                                }) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = contentDesc,
-                                        tint = MaterialTheme.colorScheme.error,
-                                    )
-                                }
-                            }
                         }
+                    }
+                }
 
-                        DataTypeDetailContentHeader()
-                        LazyColumn(modifier = Modifier.heightIn(max = 800.dp)) {
-                            itemsIndexed(dataType.fields) { i, dataField ->
-                                DataTypeDetailFieldRow(
-                                    dataField = dataField,
-                                    index = i,
-                                    onDataFieldNameUpdated = onDataFieldNameUpdated,
-                                    onDeleteDataFieldDialogOpen = {
-                                        indexOfDataFieldToBeDeleted = i
-                                    },
-                                )
-                            }
-                        }
-                        TextButton(
-                            onClick = {
-                                addDataFieldDialogOpen = true
+                DataTypeDetailContentHeader()
+                LazyColumn(modifier = Modifier.heightIn(max = 800.dp)) {
+                    itemsIndexed(dataType.fields) { i, dataField ->
+                        DataTypeDetailFieldRow(
+                            dataField = dataField,
+                            index = i,
+                            onDataFieldNameUpdated = onDataFieldNameUpdated,
+                            onDeleteDataFieldDialogOpen = {
+                                indexOfDataFieldToBeDeleted = i
                             },
-                            modifier = Modifier.padding(top = 8.dp),
-                        ) {
-                            Text("+ ${stringResource(Res.string.add_field)}")
-                        }
+                        )
                     }
                 }
-
-                val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
-                val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-                if (addDataFieldDialogOpen) {
-                    onAnyDialogIsOpen()
-                    val dialogClosed = {
-                        addDataFieldDialogOpen = false
-                        onAllDialogsClosed()
-                    }
-                    val initialValue = indexOfDataFieldToBeEdited?.let {
-                        dataType?.fields?.get(it)
-                    }
-                    AddDataFieldDialog(
-                        initialValue = initialValue,
-                        updateIndex = indexOfDataFieldToBeEdited,
-                        onDataFieldAdded = {
-                            onDataFieldAdded(it)
-                            dialogClosed()
-                        },
-                        onDataFieldNameUpdated = { i, inputName ->
-                            onDataFieldNameUpdated(i, inputName)
-                            dialogClosed()
-                            indexOfDataFieldToBeEdited = null
-                        },
-                        onDialogClosed = dialogClosed,
-                    )
-                }
-
-                indexOfDataFieldToBeDeleted?.let { indexToBeDeleted ->
-                    onAnyDialogIsOpen()
-                    DeleteDataFieldDialog(
-                        index = indexToBeDeleted,
-                        onCloseClick = {
-                            indexOfDataFieldToBeDeleted = null
-                            onAllDialogsClosed()
-                        },
-                        onDeleteDataFieldOfIndex = {
-                            onDeleteDataFieldOfIndex(it)
-                            onAllDialogsClosed()
-                            indexOfDataFieldToBeDeleted = null
-                        },
-                    )
+                TextButton(
+                    onClick = {
+                        addDataFieldDialogOpen = true
+                    },
+                    modifier = Modifier.padding(top = 8.dp),
+                ) {
+                    Text("+ ${stringResource(Res.string.add_field)}")
                 }
             }
+        }
+
+        val onAnyDialogIsOpen = LocalOnAnyDialogIsShown.current
+        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+        if (addDataFieldDialogOpen) {
+            onAnyDialogIsOpen()
+            val dialogClosed = {
+                addDataFieldDialogOpen = false
+                onAllDialogsClosed()
+            }
+            val initialValue = indexOfDataFieldToBeEdited?.let {
+                dataType?.fields?.get(it)
+            }
+            AddDataFieldDialog(
+                initialValue = initialValue,
+                updateIndex = indexOfDataFieldToBeEdited,
+                onDataFieldAdded = {
+                    onDataFieldAdded(it)
+                    dialogClosed()
+                },
+                onDataFieldNameUpdated = { i, inputName ->
+                    onDataFieldNameUpdated(i, inputName)
+                    dialogClosed()
+                    indexOfDataFieldToBeEdited = null
+                },
+                onDialogClosed = dialogClosed,
+            )
+        }
+
+        indexOfDataFieldToBeDeleted?.let { indexToBeDeleted ->
+            onAnyDialogIsOpen()
+            DeleteDataFieldDialog(
+                index = indexToBeDeleted,
+                onCloseClick = {
+                    indexOfDataFieldToBeDeleted = null
+                    onAllDialogsClosed()
+                },
+                onDeleteDataFieldOfIndex = {
+                    onDeleteDataFieldOfIndex(it)
+                    onAllDialogsClosed()
+                    indexOfDataFieldToBeDeleted = null
+                },
+            )
         }
     }
 }

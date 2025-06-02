@@ -1,12 +1,13 @@
 package io.composeflow.ui.settings
 
+import io.composeflow.model.project.Project
 import io.composeflow.model.settingsRoute
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.query
 import moe.tlaster.precompose.navigation.transition.NavTransition
 
 fun RouteBuilder.settingsScreen(
-    projectId: String,
+    project: Project,
     navTransition: NavTransition? = null,
 ) {
     scene(
@@ -21,7 +22,7 @@ fun RouteBuilder.settingsScreen(
             }
         }
         SettingsScreen(
-            projectId = projectId,
+            project = project,
             initialDestination = initialDestination
         )
     }

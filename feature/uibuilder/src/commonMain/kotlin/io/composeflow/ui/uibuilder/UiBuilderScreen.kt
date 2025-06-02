@@ -90,10 +90,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import com.valentinilk.shimmer.shimmer
 import io.composeflow.Res
-import io.composeflow.UiBuilderViewModel
 import io.composeflow.ai.AiAssistantDialog
 import io.composeflow.ai.AiAssistantDialogCallbacks
+import io.composeflow.ai.AiAssistantUiState
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.back_to_screen
 import io.composeflow.borders_hide
@@ -169,11 +170,17 @@ import kotlin.math.roundToInt
 
 @Composable
 fun UiBuilderScreen(
-    projectId: String,
+    project: Project,
+    aiAssistantUiState: AiAssistantUiState,
+    onUpdateProject: (Project) -> Unit,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = UiBuilderViewModel::class) {
-        UiBuilderViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
+        UiBuilderViewModel(
+            firebaseIdToken = firebaseIdToken,
+            project = project,
+            onUpdateProject = onUpdateProject
+        )
     }
     val editingProject = viewModel.editingProject.collectAsState().value
     editingProject.screenHolder.pendingDestinationContext?.let {
@@ -183,7 +190,6 @@ fun UiBuilderScreen(
     }
 
     val coroutineScope = rememberCoroutineScope()
-    val project = viewModel.project
     val currentEditable = project.screenHolder.currentEditable()
     val draggedNode = viewModel.draggedNode
     val copiedNode = viewModel.copiedNode
@@ -258,7 +264,7 @@ fun UiBuilderScreen(
         focusRequester.requestFocus()
     }
 
-    val colorSchemeHolder = viewModel.project.themeHolder.colorSchemeHolder
+    val colorSchemeHolder = project.themeHolder.colorSchemeHolder
     var addModifierDialogVisible by remember { mutableStateOf(false) }
     ProvideAppThemeTokens(
         isDarkTheme = mainViewUiState.appDarkTheme,
@@ -428,6 +434,7 @@ fun UiBuilderScreen(
                 }
                 CanvasArea(
                     project = project,
+                    aiAssistantUiState = aiAssistantUiState,
                     canvasEditable = currentEditable,
                     copiedNode = copiedNode,
                     currentFormFactor = currentFormFactor,
@@ -525,6 +532,7 @@ const val ToggleNavButtonTestTag = "ToggleNavButton"
 @Composable
 private fun CanvasArea(
     project: Project,
+    aiAssistantUiState: AiAssistantUiState,
     canvasEditable: CanvasEditable,
     copiedNode: ComposeNode?,
     currentFormFactor: FormFactor,
@@ -594,6 +602,7 @@ private fun CanvasArea(
                     if (canvasEditable is Screen) {
                         DeviceInCanvas(
                             project = project,
+                            aiAssistantUiState = aiAssistantUiState,
                             screen = canvasEditable,
                             currentFormFactor = currentFormFactor,
                             canvasNodeCallbacks = canvasNodeCallbacks,
@@ -701,6 +710,7 @@ private fun CanvasArea(
 @Composable
 private fun BoxScope.DeviceInCanvas(
     project: Project,
+    aiAssistantUiState: AiAssistantUiState,
     screen: Screen,
     currentFormFactor: FormFactor,
     canvasNodeCallbacks: CanvasNodeCallbacks,
@@ -722,129 +732,140 @@ private fun BoxScope.DeviceInCanvas(
 
     @Composable
     fun DrawEditorContents() {
-        Column(
-            modifier = screen.rootNode.value
-                .modifierChainForCanvas()
-                .modifierForCanvas(
-                    project,
-                    // Should be PaletteNode.Screen
-                    node = screen.rootNode.value,
-                    canvasNodeCallbacks = canvasNodeCallbacks,
-                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    isDraggable = false
-                )
-                .onGloballyPositioned {
-                    actualDeviceSize = it.size / density.density.toInt()
-                }
-                .onClick(
-                    matcher = PointerMatcher.mouse(PointerButton.Secondary),
-                ) {
-                    contextMenuExpanded = true
-                }
-        ) {
-
-            @Composable
-            fun CallRenderedDevice() {
-                RenderedDevice(
-                    project = project,
-                    screen = screen,
-                    actualDeviceSize = actualDeviceSize,
-                    canvasNodeCallbacks = canvasNodeCallbacks,
-                    toolbarUiState = toolbarUiState,
-                    contextMenuExpanded = contextMenuExpanded,
-                    composeNodeCallbacks = composeNodeCallbacks,
-                    copiedNode = copiedNode,
-                    onOpenAddModifierDialog = onOpenAddModifierDialog,
-                    onShowSnackbar = onShowSnackbar,
-                    coroutineScope = coroutineScope,
-                    onFocusedStatusUpdated = onFocusedStatusUpdated,
-                    onHoveredStatusUpdated = onHoveredStatusUpdated,
-                    onConvertToComponent = onConvertToComponent,
-                    onCloseContextMenu = {
-                        contextMenuExpanded = false
-                    },
-                    zoomableContainerStateHolder = zoomableContainerStateHolder
-                )
+        Box(
+            modifier = if (aiAssistantUiState.isGenerating.value) {
+                Modifier
+                    .fillMaxSize()
+                    .alpha(0.85f)
+                    .shimmer()
+            } else {
+                Modifier
             }
-
-            screen.navigationDrawerNode.value?.let { navDrawer ->
-                val drawerTrait = navDrawer.trait.value as NavigationDrawerTrait
-                val drawerState =
-                    rememberDrawerState(
-                        if (drawerTrait.expandedInCanvas.value) DrawerValue.Open else DrawerValue.Closed
+        ) {
+            Column(
+                modifier = screen.rootNode.value
+                    .modifierChainForCanvas()
+                    .modifierForCanvas(
+                        project,
+                        // Should be PaletteNode.Screen
+                        node = screen.rootNode.value,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        isDraggable = false
                     )
-
-                LaunchedEffect(Unit) { drawerState.open() }
-
-                LaunchedEffect(drawerTrait.expandedInCanvas.value) {
-                    if (drawerTrait.expandedInCanvas.value) {
-                        drawerState.open()
-                    } else {
-                        drawerState.close()
+                    .onGloballyPositioned {
+                        actualDeviceSize = it.size / density.density.toInt()
                     }
+                    .onClick(
+                        matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                    ) {
+                        contextMenuExpanded = true
+                    }
+            ) {
+
+                @Composable
+                fun CallRenderedDevice() {
+                    RenderedDevice(
+                        project = project,
+                        screen = screen,
+                        actualDeviceSize = actualDeviceSize,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        toolbarUiState = toolbarUiState,
+                        contextMenuExpanded = contextMenuExpanded,
+                        composeNodeCallbacks = composeNodeCallbacks,
+                        copiedNode = copiedNode,
+                        onOpenAddModifierDialog = onOpenAddModifierDialog,
+                        onShowSnackbar = onShowSnackbar,
+                        coroutineScope = coroutineScope,
+                        onFocusedStatusUpdated = onFocusedStatusUpdated,
+                        onHoveredStatusUpdated = onHoveredStatusUpdated,
+                        onConvertToComponent = onConvertToComponent,
+                        onCloseContextMenu = {
+                            contextMenuExpanded = false
+                        },
+                        zoomableContainerStateHolder = zoomableContainerStateHolder
+                    )
                 }
 
-                when (drawerTrait.navigationDrawerType) {
-                    NavigationDrawerType.Default -> {
-                        ModalNavigationDrawer(
-                            drawerState = drawerState,
-                            drawerContent = {
-                                drawerTrait.RenderedNode(
-                                    project = project,
-                                    node = navDrawer,
-                                    canvasNodeCallbacks = canvasNodeCallbacks,
-                                    paletteRenderParams = PaletteRenderParams(
-                                        showBorder = toolbarUiState.showBorders
-                                    ),
-                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                    modifier = Modifier.onGloballyPositioned {
-                                        canvasNodeCallbacks.onBoundsInNodeUpdated(
-                                            navDrawer,
-                                            it.boundsInWindow()
-                                                .calculateAdjustedBoundsInZoomableContainer(
-                                                    zoomableContainerStateHolder
-                                                )
-                                        )
-                                    },
-                                )
-                            },
-                            gesturesEnabled = false,
-                        ) {
-                            CallRenderedDevice()
+                screen.navigationDrawerNode.value?.let { navDrawer ->
+                    val drawerTrait = navDrawer.trait.value as NavigationDrawerTrait
+                    val drawerState =
+                        rememberDrawerState(
+                            if (drawerTrait.expandedInCanvas.value) DrawerValue.Open else DrawerValue.Closed
+                        )
+
+                    LaunchedEffect(Unit) { drawerState.open() }
+
+                    LaunchedEffect(drawerTrait.expandedInCanvas.value) {
+                        if (drawerTrait.expandedInCanvas.value) {
+                            drawerState.open()
+                        } else {
+                            drawerState.close()
                         }
                     }
 
-                    NavigationDrawerType.Dismissible -> {
-                        DismissibleNavigationDrawer(
-                            drawerState = drawerState,
-                            drawerContent = {
-                                NavigationDrawerTrait().RenderedNode(
-                                    project = project,
-                                    node = navDrawer,
-                                    canvasNodeCallbacks = canvasNodeCallbacks,
-                                    paletteRenderParams = PaletteRenderParams(
-                                        showBorder = toolbarUiState.showBorders
-                                    ),
-                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                    modifier = Modifier.onGloballyPositioned {
-                                        canvasNodeCallbacks.onBoundsInNodeUpdated(
-                                            navDrawer,
-                                            it.boundsInWindow()
-                                                .calculateAdjustedBoundsInZoomableContainer(
-                                                    zoomableContainerStateHolder
-                                                )
-                                        )
-                                    },
-                                )
-                            },
-                            gesturesEnabled = false
-                        ) {
-                            CallRenderedDevice()
+                    when (drawerTrait.navigationDrawerType) {
+                        NavigationDrawerType.Default -> {
+                            ModalNavigationDrawer(
+                                drawerState = drawerState,
+                                drawerContent = {
+                                    drawerTrait.RenderedNode(
+                                        project = project,
+                                        node = navDrawer,
+                                        canvasNodeCallbacks = canvasNodeCallbacks,
+                                        paletteRenderParams = PaletteRenderParams(
+                                            showBorder = toolbarUiState.showBorders
+                                        ),
+                                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                        modifier = Modifier.onGloballyPositioned {
+                                            canvasNodeCallbacks.onBoundsInNodeUpdated(
+                                                navDrawer,
+                                                it.boundsInWindow()
+                                                    .calculateAdjustedBoundsInZoomableContainer(
+                                                        zoomableContainerStateHolder
+                                                    )
+                                            )
+                                        },
+                                    )
+                                },
+                                gesturesEnabled = false,
+                            ) {
+                                CallRenderedDevice()
+                            }
+                        }
+
+                        NavigationDrawerType.Dismissible -> {
+                            DismissibleNavigationDrawer(
+                                drawerState = drawerState,
+                                drawerContent = {
+                                    NavigationDrawerTrait().RenderedNode(
+                                        project = project,
+                                        node = navDrawer,
+                                        canvasNodeCallbacks = canvasNodeCallbacks,
+                                        paletteRenderParams = PaletteRenderParams(
+                                            showBorder = toolbarUiState.showBorders
+                                        ),
+                                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                        modifier = Modifier.onGloballyPositioned {
+                                            canvasNodeCallbacks.onBoundsInNodeUpdated(
+                                                navDrawer,
+                                                it.boundsInWindow()
+                                                    .calculateAdjustedBoundsInZoomableContainer(
+                                                        zoomableContainerStateHolder
+                                                    )
+                                            )
+                                        },
+                                    )
+                                },
+                                gesturesEnabled = false
+                            ) {
+                                CallRenderedDevice()
+                            }
                         }
                     }
+                } ?: run {
+                    CallRenderedDevice()
                 }
-            } ?: run {
-                CallRenderedDevice()
             }
         }
     }

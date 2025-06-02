@@ -6,10 +6,7 @@ import androidx.compose.runtime.setValue
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.apieditor.ApiDefinition
 import io.composeflow.model.apieditor.JsonWithJsonPath
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
-import io.composeflow.model.project.asLoadedProjectUiState
-import io.composeflow.model.project.asProjectStateFlow
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.repository.ProjectRepository
 import io.composeflow.ui.apieditor.model.ApiResponseUiState
@@ -31,18 +28,12 @@ import moe.tlaster.precompose.viewmodel.viewModelScope
 import kotlin.uuid.Uuid
 
 class ApiEditorViewModel(
-    projectId: String,
     firebaseIdToken: FirebaseIdToken,
+    private val project: Project,
     private val apiCallRepository: ApiCallRepository = ApiCallRepository(),
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
-
-    private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
-        MutableStateFlow(LoadedProjectUiState.Success(Project()))
-
-    var project by mutableStateOf(_projectUiState.asProjectStateFlow(viewModelScope).value)
-        private set
 
     // Project that is updated when the the project that is being edited.
     // This may conflicts with the [project] field in this ViewModel, but to detect the real time
@@ -53,21 +44,6 @@ class ApiEditorViewModel(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = Project(),
     )
-
-    init {
-        viewModelScope.launch {
-            _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value =
-                projectRepository.loadProject(projectId).asLoadedProjectUiState(projectId)
-            when (val state = _projectUiState.value) {
-                is LoadedProjectUiState.Success -> {
-                    project = state.project
-                }
-
-                else -> {}
-            }
-        }
-    }
 
     var focusedApiIndex by mutableStateOf<Int?>(null)
         private set

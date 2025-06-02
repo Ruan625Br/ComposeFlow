@@ -46,3 +46,10 @@ data class ColorSchemeHolder(
         return fileSpecBuilder.build()
     }
 }
+
+fun ColorSchemeHolder.copyContents(arg: ColorSchemeHolder) {
+    sourceColor = arg.sourceColor
+    paletteStyle = arg.paletteStyle
+    lightColorScheme.value = arg.lightColorScheme.value
+    darkColorScheme.value = arg.darkColorScheme.value
+}

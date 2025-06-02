@@ -1,0 +1,417 @@
+package io.composeflow.ui.uibuilder
+
+import co.touchlab.kermit.Logger
+import io.composeflow.ksp.LlmParam
+import io.composeflow.ksp.LlmTool
+import io.composeflow.model.modifier.ModifierWrapper
+import io.composeflow.model.palette.Constraint.Companion.CANT_DROP_NODE
+import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.parameter.BottomAppBarTrait
+import io.composeflow.model.parameter.FabTrait
+import io.composeflow.model.parameter.NavigationDrawerTrait
+import io.composeflow.model.parameter.TopAppBarTrait
+import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.Screen
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.model.project.appscreen.screen.composenode.getOperationTargetNode
+import io.composeflow.serializer.yamlSerializer
+import io.composeflow.swap
+import io.composeflow.ui.EventResult
+import io.composeflow.ui.UiBuilderHelper
+import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
+import kotlinx.serialization.decodeFromString
+
+/**
+ * Handles operations related to UI builder, such as adding or removing nodes.
+ * Operations in this class are exposed to the LLM to allow them call it as tools as well as used
+ * from the GUI in ComposeFlow.
+ */
+class UiBuilderOperator {
+
+    /**
+     * Pre operations before adding a node to a container node to validate if the node can be added.
+     */
+    fun onPreAddComposeNodeToContainerNode(
+        project: Project,
+        containerNodeId: String,
+        composeNode: ComposeNode,
+    ): EventResult {
+        val eventResult = EventResult()
+        val containerNode = project.screenHolder.currentEditable().findNodeById(containerNodeId)
+        if (containerNode == null) {
+            eventResult.errorMessages.add(
+                String.format(
+                    "Container node with ID %s not found.",
+                    containerNodeId
+                )
+            )
+            return eventResult
+        }
+        val errorMessages = composeNode.checkConstraints(containerNode)
+        if (errorMessages.isNotEmpty()) {
+            eventResult.errorMessages.addAll(errorMessages)
+            return eventResult
+        }
+        if (!containerNode.trait.value.isDroppable()) {
+            eventResult.errorMessages.add(
+                String.format(
+                    CANT_DROP_NODE,
+                    containerNode.trait.value.iconText()
+                )
+            )
+            return eventResult
+        }
+        if (TraitCategory.ScreenOnly in composeNode.trait.value.paletteCategories()) {
+            val error = UiBuilderHelper.checkIfNodeCanBeAddedDueToScreenOnlyNode(
+                currentEditable = project.screenHolder.currentEditable(),
+                composeNode = composeNode,
+            )
+            error?.let {
+                eventResult.errorMessages.add(error)
+                return eventResult
+            }
+        }
+
+        if (TraitCategory.ScreenOnly !in composeNode.trait.value.paletteCategories()) {
+            composeNode.parentNode = containerNode
+        }
+        return eventResult
+    }
+
+    fun onAddComposeNodeToContainerNode(
+        project: Project,
+        containerNodeId: String,
+        composeNode: ComposeNode,
+        indexToDrop: Int,
+    ) {
+        val containerNode = project.screenHolder.currentEditable().findNodeById(containerNodeId)
+        containerNode?.let {
+            addNodeToCanvasEditable(
+                project = project,
+                containerNode = containerNode,
+                composeNode = composeNode,
+                canvasEditable = project.screenHolder.currentEditable(),
+                indexToDrop = indexToDrop,
+            )
+        }
+    }
+
+    @LlmTool(
+        name = "add_compose_node_to_container",
+        description = "Adds a Compose UI component to a container node in the UI builder. This allows placing UI elements inside containers like Column, Row, or Box."
+    )
+    fun onAddComposeNodeToContainerNode(
+        project: Project,
+        @LlmParam(description = "The ID of the container node where the component will be added. Must be a node that can contain other components.")
+        containerNodeId: String,
+        @LlmParam(description = "The YAML representation of the ComposeNode node to be added to the container.")
+        composeNodeYaml: String,
+        @LlmParam(
+            description = "The position index where the component should be inserted in the container.",
+        )
+        indexToDrop: Int,
+    ): EventResult {
+        val result = EventResult()
+        try {
+            val composeNode: ComposeNode = yamlSerializer.decodeFromString(composeNodeYaml)
+            val eventResult = onPreAddComposeNodeToContainerNode(
+                project, containerNodeId, composeNode
+            )
+            if (eventResult.errorMessages.isNotEmpty()) {
+                eventResult.errorMessages.forEach {
+                    Logger.e(it)
+                }
+            } else {
+                onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNodeId,
+                    composeNode = composeNode,
+                    indexToDrop = indexToDrop,
+                )
+            }
+        } catch (e: Exception) {
+            Logger.e(e) { "Error adding compose node to container" }
+        }
+        return result
+    }
+
+    fun onPreRemoveComposeNode(
+        composeNode: ComposeNode?,
+    ): EventResult {
+        val result = EventResult()
+        val errorMessage = composeNode?.checkIfNodeIsDeletable()
+        if (errorMessage != null) {
+            result.errorMessages.add(errorMessage)
+            return result
+        }
+        return result
+    }
+
+    @LlmTool(
+        name = "remove_compose_node",
+        description = "Removes a Compose UI component from the UI builder."
+    )
+    fun onRemoveComposeNode(
+        project: Project,
+        @LlmParam(description = "The ID of the node to be removed.")
+        composeNodeId: String
+    ): EventResult {
+        val nodeToRemove = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+
+        val eventResult = onPreRemoveComposeNode(nodeToRemove)
+        if (eventResult.errorMessages.isNotEmpty()) {
+            eventResult.errorMessages.forEach {
+                Logger.e(it)
+            }
+        } else {
+            if (TraitCategory.ScreenOnly in (nodeToRemove?.trait?.value?.paletteCategories()
+                    ?: emptyList())
+            ) {
+                val canvasEditable = project.screenHolder.currentEditable()
+                when (nodeToRemove?.trait?.value) {
+                    is FabTrait -> {
+                        (canvasEditable as? Screen)?.fabNode?.value = null
+                    }
+
+                    is TopAppBarTrait -> {
+                        (canvasEditable as? Screen)?.topAppBarNode?.value = null
+                    }
+
+                    is BottomAppBarTrait -> {
+                        (canvasEditable as? Screen)?.bottomAppBarNode?.value = null
+                    }
+
+                    is NavigationDrawerTrait -> {
+                        (canvasEditable as? Screen)?.navigationDrawerNode?.value = null
+                    }
+
+                    else -> {}
+                }
+            } else {
+                val operationTarget = nodeToRemove?.getOperationTargetNode(project)
+                operationTarget?.onRemoveNode(project)
+                operationTarget?.removeFromParent()
+            }
+        }
+        return eventResult
+    }
+
+    @LlmTool(
+        name = "add_modifier",
+        description = "Adds a new modifier to a Compose UI component. Modifiers are used to change the appearance or behavior of components, such as adding padding, setting size, or changing colors."
+    )
+    fun onAddModifier(
+        project: Project,
+        @LlmParam(description = "The ID of the node to add the modifier to.")
+        composeNodeId: String,
+        @LlmParam(description = "The YAML representation of the modifier to add.")
+        modifierYaml: String
+    ): EventResult {
+        val result = EventResult()
+        try {
+            val node = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+            if (node == null) {
+                Logger.e { "Node with ID $composeNodeId not found." }
+                result.errorMessages.add("Node with ID $composeNodeId not found.")
+                return result
+            }
+
+            val modifier: ModifierWrapper = yamlSerializer.decodeFromString(modifierYaml)
+            onAddModifier(
+                project, composeNodeId, modifier
+            )
+        } catch (e: Exception) {
+            Logger.e(e) { "Error adding modifier to node" }
+        }
+        return result
+    }
+
+    fun onAddModifier(
+        project: Project,
+        composeNodeId: String,
+        modifier: ModifierWrapper
+    ) {
+        val node = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+        node?.modifierList?.add(modifier)
+    }
+
+    @LlmTool(
+        name = "update_modifier",
+        description = "Updates an existing modifier on a Compose UI component at a specific index."
+    )
+    fun onUpdateModifier(
+        project: Project,
+        @LlmParam(description = "The ID of the node whose modifier will be updated.")
+        composeNodeId: String,
+        @LlmParam(description = "The index of the modifier to update.")
+        index: Int,
+        @LlmParam(description = "The YAML representation of the new modifier.")
+        modifierYaml: String
+    ): EventResult {
+        val result = EventResult()
+        try {
+            val node = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+            if (node == null) {
+                Logger.e { "Node with ID $composeNodeId not found." }
+                result.errorMessages.add("Node with ID $composeNodeId not found.")
+                return result
+            }
+
+            if (index < 0 || index >= node.modifierList.size) {
+                Logger.e { "Invalid modifier index: $index. Node has ${node.modifierList.size} modifiers." }
+                result.errorMessages.add("Invalid modifier index: $index. Node has ${node.modifierList.size} modifiers.")
+                return result
+            }
+
+            val modifier: ModifierWrapper = yamlSerializer.decodeFromString(modifierYaml)
+            onUpdateModifier(project, composeNodeId, index, modifier)
+        } catch (e: Exception) {
+            Logger.e(e) { "Error updating modifier at index $index" }
+        }
+        return result
+    }
+
+    fun onUpdateModifier(
+        project: Project,
+        composeNodeId: String,
+        index: Int,
+        modifier: ModifierWrapper
+    ) {
+        val node = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+        node?.modifierList?.set(index, modifier)
+    }
+
+    @LlmTool(
+        name = "remove_modifier",
+        description = "Removes a modifier from a Compose UI component at a specific index."
+    )
+    fun onRemoveModifier(
+        project: Project,
+        @LlmParam(description = "The ID of the node whose modifier will be removed.")
+        composeNodeId: String,
+        @LlmParam(description = "The index of the modifier to remove.")
+        index: Int
+    ): EventResult {
+        val result = EventResult()
+        try {
+            val node = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+            if (node == null) {
+                Logger.e { "Node with ID $composeNodeId not found." }
+                result.errorMessages.add("Node with ID $composeNodeId not found.")
+                return result
+            }
+
+            if (index < 0 || index >= node.modifierList.size) {
+                Logger.e { "Invalid modifier index: $index. Node has ${node.modifierList.size} modifiers." }
+                result.errorMessages.add("Invalid modifier index: $index. Node has ${node.modifierList.size} modifiers.")
+                return result
+            }
+
+            node.modifierList.removeAt(index)
+
+        } catch (e: Exception) {
+            Logger.e(e) { "Error removing modifier at index $index" }
+        }
+        return result
+    }
+
+    @LlmTool(
+        name = "swap_modifiers",
+        description = "Swaps the positions of two modifiers on a Compose UI component."
+    )
+    fun onSwapModifiers(
+        project: Project,
+        @LlmParam(description = "The ID of the node whose modifiers will be swapped.")
+        composeNodeId: String,
+        @LlmParam(description = "The index of the first modifier to swap.")
+        fromIndex: Int,
+        @LlmParam(description = "The index of the second modifier to swap.")
+        toIndex: Int
+    ): EventResult {
+        val result = EventResult()
+        try {
+            val node = project.screenHolder.currentEditable().findNodeById(composeNodeId)
+            if (node == null) {
+                Logger.e { "Node with ID $composeNodeId not found." }
+                result.errorMessages.add("Node with ID $composeNodeId not found.")
+                return result
+            }
+
+            if (fromIndex < 0 || fromIndex >= node.modifierList.size ||
+                toIndex < 0 || toIndex >= node.modifierList.size
+            ) {
+                Logger.e { "Invalid modifier indices: from=$fromIndex, to=$toIndex. Node has ${node.modifierList.size} modifiers." }
+                result.errorMessages.add("Invalid modifier indices: from=$fromIndex, to=$toIndex. Node has ${node.modifierList.size} modifiers.")
+                return result
+            }
+
+            node.modifierList.swap(fromIndex, toIndex)
+
+        } catch (e: Exception) {
+            Logger.e(e) { "Error swapping modifiers at indices $fromIndex and $toIndex" }
+        }
+        return result
+    }
+
+    @LlmTool(
+        name = "move_compose_node_to_container",
+        description = "Moves a UI component to a specific position within a container component. This allows reordering components within their parent container or moving them to a different container."
+    )
+    fun onMoveComposeNodeToContainer(
+        project: Project,
+        @LlmParam(description = "The ID of the node to be moved.")
+        composeNodeId: String,
+        @LlmParam(description = "The ID of the container where the component should be moved to.")
+        containerNodeId: String,
+        @LlmParam(description = "The index where the component should be inserted in the container (0-based).")
+        index: Int
+    ): EventResult {
+        val eventResult = onPreMoveComposeNodeToPosition(project, composeNodeId, containerNodeId)
+        if (eventResult.errorMessages.isNotEmpty()) {
+            eventResult.errorMessages.forEach {
+                Logger.w { it }
+            }
+            return eventResult
+        }
+        try {
+            val composeNode =
+                project.screenHolder.currentEditable().findNodeById(composeNodeId)
+                    ?: return EventResult().also { it.errorMessages.add("Node '${composeNodeId}' not found") }
+            val containerNode =
+                project.screenHolder.currentEditable().findNodeById(containerNodeId)
+                    ?: return EventResult().also { it.errorMessages.add("Container '${containerNodeId}' not found") }
+            containerNode.insertChildAt(index = index, child = composeNode)
+            if (containerNode == composeNode.parentNode) {
+                // This means two identical nodes exist at the same time before the old node is
+                // removed in the same parent. In that case, we want to make sure the original
+                // node that originated the drag is removed.
+                composeNode.removeFromParent(excludeIndex = index)
+            } else {
+                composeNode.removeFromParent()
+            }
+
+        } catch (e: Exception) {
+            Logger.e(e) { "Error moving component to position" }
+        }
+        return eventResult
+    }
+
+    fun onPreMoveComposeNodeToPosition(
+        project: Project,
+        composeNodeId: String,
+        containerNodeId: String,
+    ): EventResult {
+        val result = EventResult()
+        val composeNode =
+            project.screenHolder.currentEditable().findNodeById(composeNodeId)
+                ?: return result.also { it.errorMessages.add("Node '${composeNodeId}' not found") }
+        val containerNode =
+            project.screenHolder.currentEditable().findNodeById(containerNodeId)
+                ?: return result.also { it.errorMessages.add("Node '${containerNodeId}' not found") }
+        val errorMessages = composeNode.checkConstraints(containerNode)
+        if (errorMessages.isNotEmpty()) {
+            result.errorMessages.addAll(errorMessages)
+        }
+        return result
+    }
+}

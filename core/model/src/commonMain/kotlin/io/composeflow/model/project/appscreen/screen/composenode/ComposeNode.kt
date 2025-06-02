@@ -73,7 +73,6 @@ import kotlin.uuid.Uuid
 @Serializable
 @SerialName("ComposeNode")
 data class ComposeNode(
-//    @Serializable(UuidSerializer::class)
     val id: String = Uuid.random().toString(),
     @Serializable(with = MutableStateSerializer::class)
     val trait: MutableState<ComposeTrait> = mutableStateOf(EmptyTrait),
@@ -430,8 +429,18 @@ data class ComposeNode(
     fun insertChildAt(index: Int = children.size, child: ComposeNode) {
         val parent = this
         check(parent.isContainer())
+
+        // Fallback to the index that doesn't throw exception to mitigate the chance of ignoring the
+        // AI generated content with the index
+        val fallbackIndex = if (index < 0) {
+            0
+        } else if (index >= parent.children.size) {
+            parent.children.size
+        } else {
+            index
+        }
         children.add(
-            index,
+            fallbackIndex,
             child.copy().apply {
                 parentNode = parent
                 level = parent.level + 1
@@ -870,9 +879,9 @@ data class ComposeNode(
     }
 
     @Suppress("unused")
-    fun printRecursively(project: Project) {
+    fun printRecursively(project: Project? = null) {
         doRecursively { self, _, level ->
-            println("  ".repeat(level) + "name: ${self.displayName(project)}, id: ${self.id}")
+            println("  ".repeat(level) + "name: ${project?.let { self.displayName(it) } ?: self.label.value}, id: ${self.id}, isFocused: ${self.isFocused.value}, isHovered: ${self.isHovered.value}")
         }
     }
 

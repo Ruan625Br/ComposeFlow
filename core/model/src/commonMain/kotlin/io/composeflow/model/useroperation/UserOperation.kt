@@ -2,6 +2,7 @@ package io.composeflow.model.useroperation
 
 import androidx.compose.ui.graphics.Color
 import com.materialkolor.PaletteStyle
+import io.composeflow.ai.openrouter.tools.ToolArgs
 import io.composeflow.model.action.ActionNode
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.apieditor.ApiDefinition
@@ -84,6 +85,7 @@ sealed interface UserOperation {
     ) : UserOperation
 
     data class UpdateApi(val updatedApi: ApiDefinition) : UserOperation
+    data class ExecuteAiTool(val toolArgs: ToolArgs) : UserOperation
     data object ResetColorSchemes : UserOperation
     data object Undo : UserOperation
     data object Redo : UserOperation

@@ -1,6 +1,8 @@
 package io.composeflow
 
 import androidx.compose.runtime.Composable
+import io.composeflow.ai.AiAssistantUiState
+import io.composeflow.model.project.Project
 import io.composeflow.ui.apieditor.apiEditorScreen
 import io.composeflow.ui.appstate.appStateEditorScreen
 import io.composeflow.ui.asset.assetEditorScreen
@@ -16,35 +18,39 @@ import moe.tlaster.precompose.navigation.Navigator
 @Composable
 fun ProjectEditorNavHost(
     navigator: Navigator,
-    projectId: String,
+    project: Project,
+    aiAssistantUiState: AiAssistantUiState,
+    onUpdateProject: (Project) -> Unit,
 ) {
     NavHost(
         navigator = navigator,
         initialRoute = uiBuilderRoute,
     ) {
         uiBuilderScreen(
-            projectId = projectId,
+            project = project,
+            aiAssistantUiState = aiAssistantUiState,
+            onUpdateProject = onUpdateProject,
         )
         dataTypeEditorScreen(
-            projectId = projectId,
+            project = project,
         )
         appStateEditorScreen(
-            projectId = projectId,
+            project = project,
         )
         firestoreEditorScreen(
-            projectId = projectId,
+            project = project,
         )
         apiEditorScreen(
-            projectId = projectId,
+            project = project,
         )
         themeEditorScreen(
-            projectId = projectId,
+            project = project,
         )
         assetEditorScreen(
-            projectId = projectId,
+            project = project,
         )
         settingsScreen(
-            projectId = projectId,
+            project = project,
         )
     }
 }

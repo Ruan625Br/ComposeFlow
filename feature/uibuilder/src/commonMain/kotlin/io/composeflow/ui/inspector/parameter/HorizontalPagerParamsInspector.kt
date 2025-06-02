@@ -132,7 +132,7 @@ fun HorizontalPagerParamsInspector(
                         trait.copy(indicatorSelectedColor = property),
                         lazyListSource,
                     )
-                    result.messages.forEach {
+                    result.errorMessages.forEach {
                         coroutineScope.launch {
                             onShowSnackbar(it, null)
                         }
@@ -164,7 +164,7 @@ fun HorizontalPagerParamsInspector(
                         trait.copy(indicatorUnselectedColor = property),
                         lazyListSource,
                     )
-                    result.messages.forEach {
+                    result.errorMessages.forEach {
                         coroutineScope.launch {
                             onShowSnackbar(it, null)
                         }

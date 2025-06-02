@@ -21,6 +21,7 @@ import io.composeflow.model.project.firebase.FirebaseAppInfoHolder
 import io.composeflow.model.project.firebase.FirestoreCollection
 import io.composeflow.model.project.issue.TrackableIssue
 import io.composeflow.model.project.theme.ThemeHolder
+import io.composeflow.model.project.theme.copyContents
 import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.StateHolderImpl
@@ -98,7 +99,7 @@ data class Project(
     fun generateCopyLocalFileInstructions(userId: String): Map<String, String> {
         return assetHolder.generateCopyLocalFileInstructions(
             userId = userId,
-            projectId = id.toString(),
+            projectId = id,
         )
     }
 
@@ -244,4 +245,27 @@ fun Project.findApiDefinitionOrNull(apiId: ApiId): ApiDefinition? =
 
 fun Project.findFirestoreCollectionOrNull(collectionId: CollectionId): FirestoreCollection? {
     return firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.firstOrNull { it.id == collectionId }
+}
+
+/**
+ * Utility function to copy contents from another project.
+ */
+fun Project.copyProjectContents(other: Project) {
+    screenHolder.screens.clear()
+    screenHolder.screens.addAll(other.screenHolder.screens)
+    componentHolder.components.clear()
+    componentHolder.components.addAll(other.componentHolder.components)
+    apiHolder.apiDefinitions.clear()
+    apiHolder.apiDefinitions.addAll(other.apiHolder.apiDefinitions)
+    dataTypeHolder.dataTypes.clear()
+    dataTypeHolder.dataTypes.addAll(other.dataTypeHolder.dataTypes)
+    customEnumHolder.enumList.clear()
+    customEnumHolder.enumList.addAll(other.customEnumHolder.enumList)
+    themeHolder.copyContents(other.themeHolder)
+    assetHolder.images.clear()
+    assetHolder.images.addAll(other.assetHolder.images)
+    assetHolder.icons.clear()
+    assetHolder.icons.addAll(other.assetHolder.icons)
+    firebaseAppInfoHolder.firebaseAppInfo = other.firebaseAppInfoHolder.firebaseAppInfo
+    globalStateHolder.copyContents(other.globalStateHolder)
 }

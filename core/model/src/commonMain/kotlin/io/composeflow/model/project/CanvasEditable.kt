@@ -27,7 +27,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import moe.tlaster.precompose.viewmodel.ViewModel
 import org.koin.core.component.KoinComponent
-import kotlin.uuid.Uuid
 
 /**
  * Represents that classes that implement this interface are editable in the canvas in the
@@ -50,6 +49,7 @@ interface CanvasEditable : StateHolder {
     fun getContentRootNode(): ComposeNode
 
     fun findFocusedNodeOrNull(): ComposeNode?
+    fun findNodeById(id: String): ComposeNode?
 
     fun clearIsHoveredRecursively()
 
