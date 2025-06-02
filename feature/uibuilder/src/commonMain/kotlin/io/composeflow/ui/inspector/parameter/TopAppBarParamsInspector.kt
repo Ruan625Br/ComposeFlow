@@ -10,6 +10,7 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -163,13 +164,17 @@ fun TopAppBarParamsInspector(
                 }
             },
             onIconSelected = {
-                val navIconTrait = navIcon?.trait?.value as? IconTrait
-                navIconTrait?.let {
-                    composeNodeCallbacks.onTraitUpdated(
-                        navIcon,
-                        navIconTrait.copy(imageVectorHolder = navIconTrait.imageVectorHolder),
-                    )
-                }
+                val navIconTrait = (navIcon?.trait?.value as? IconTrait) ?: IconTrait()
+                val navIconComposeNode = navIcon ?: ComposeNode(
+                    label = mutableStateOf("Nav Icon"),
+                    trait = mutableStateOf(
+                        IconTrait(imageVectorHolder = null),
+                    ),
+                )
+                composeNodeCallbacks.onTraitUpdated(
+                    navIconComposeNode,
+                    navIconTrait.copy(imageVectorHolder = it),
+                )
             },
             currentIcon = (navIcon?.trait?.value as? IconTrait)?.imageVectorHolder?.imageVector,
             modifier = Modifier
