@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.NavigationDrawer
 import io.composeflow.kotlinpoet.GenerationContext
@@ -17,12 +18,14 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_navigation_drawer_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("NavigationDrawerTrait")
@@ -41,6 +44,8 @@ data class NavigationDrawerTrait(
     override fun iconText(): String = "Nav Drawer"
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_navigation_drawer_trait
 
     override fun isVisibilityConditional(): Boolean = false
     override fun defaultComposeNode(project: Project): ComposeNode {

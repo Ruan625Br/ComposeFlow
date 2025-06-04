@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.Row
 import io.composeflow.kotlinpoet.GenerationContext
@@ -22,11 +23,13 @@ import io.composeflow.model.parameter.wrapper.ArrangementHorizontalWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.tooltip_row_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("RowTrait")
@@ -71,6 +74,8 @@ data class RowTrait(
         TraitCategory.WrapContainer,
         TraitCategory.Layout
     )
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_row_trait
 
     override fun defaultModifierList(): MutableList<ModifierWrapper> =
         mutableStateListEqualsOverrideOf(

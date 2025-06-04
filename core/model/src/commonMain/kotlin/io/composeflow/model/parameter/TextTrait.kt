@@ -17,6 +17,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.enumwrapper.FontStyleWrapper
 import io.composeflow.model.enumwrapper.TextAlignWrapper
@@ -38,11 +39,13 @@ import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.toRichHtmlString
+import io.composeflow.tooltip_text_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("TextTrait")
@@ -282,6 +285,8 @@ data class TextTrait(
 
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Common, TraitCategory.Basic)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_text_trait
 
     override fun generateCode(
         project: Project,

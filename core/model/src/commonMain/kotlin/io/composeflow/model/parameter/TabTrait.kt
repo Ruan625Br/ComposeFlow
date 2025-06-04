@@ -5,6 +5,7 @@ import androidx.compose.material.icons.automirrored.outlined.Notes
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.materialicons.ImageVectorHolder
 import io.composeflow.model.modifier.generateModifierCode
@@ -13,8 +14,10 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
+import io.composeflow.tooltip_tab_trait
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("TabTrait")
@@ -80,6 +83,8 @@ data class TabTrait(
     override fun icon(): ImageVector = Icons.AutoMirrored.Outlined.Notes
     override fun iconText(): String = "Tab"
     override fun paletteCategories(): List<TraitCategory> = listOf()
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_tab_trait
     override fun visibleInPalette(): Boolean = false
     override fun isResizeable(): Boolean = false
     override fun isEditable(): Boolean = false

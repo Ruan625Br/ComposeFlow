@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.model.modifier.ModifierWrapper
@@ -25,11 +26,13 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.tooltip_tabs_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("TabsTrait")
@@ -63,6 +66,8 @@ data object TabsTrait : ComposeTrait {
     override fun iconText(): String = "Tabs"
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Container, TraitCategory.Basic)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_tabs_trait
 
     override fun onClickIncludedInParams(): Boolean = true
 

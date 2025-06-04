@@ -15,6 +15,8 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.Res
+import org.jetbrains.compose.resources.StringResource
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.palette.Constraint
 import io.composeflow.model.palette.LazyListTraitNode
@@ -27,6 +29,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.DpSerializer
+import io.composeflow.tooltip_lazy_vertical_grid_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
@@ -98,6 +101,8 @@ data class LazyVerticalGridTrait(
         TraitCategory.WrapContainer,
         TraitCategory.Layout
     )
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_lazy_vertical_grid_trait
 
     override fun defaultModifierList(): MutableList<ModifierWrapper> =
         mutableStateListEqualsOverrideOf(

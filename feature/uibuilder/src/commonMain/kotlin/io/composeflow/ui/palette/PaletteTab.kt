@@ -37,9 +37,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
-import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.palette.PaletteDraggable
 import io.composeflow.model.palette.PaletteNodeCallbacks
+import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.ComposeTrait
 import io.composeflow.model.parameter.entries
 import io.composeflow.model.project.Project
@@ -75,6 +75,8 @@ fun PaletteTab(
             )
         }
 
+        val tooltipText = stringResource(paletteDraggable.tooltipResource())
+
         Box(
             modifier = Modifier
                 .width(68.dp)
@@ -86,16 +88,18 @@ fun PaletteTab(
                     notHovered = Modifier.alpha(0.7f),
                 ),
         ) {
-            Icon(
-                modifier = Modifier
-                    .testTag("$PaletteTestTag/${paletteDraggable.iconText()}")
-                    .draggableFromPalette(
-                        project = project,
-                        paletteNodeCallbacks = paletteNodeCallbacks,
-                        paletteDraggable = paletteDraggable,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            )
+            Tooltip(tooltipText) {
+                Icon(
+                    modifier = Modifier
+                        .testTag("$PaletteTestTag/${paletteDraggable.iconText()}")
+                        .draggableFromPalette(
+                            project = project,
+                            paletteNodeCallbacks = paletteNodeCallbacks,
+                            paletteDraggable = paletteDraggable,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                )
+            }
         }
     }
 

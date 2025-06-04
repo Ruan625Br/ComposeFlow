@@ -3,6 +3,7 @@ package io.composeflow.model.palette
 import androidx.compose.ui.graphics.vector.ImageVector
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import org.jetbrains.compose.resources.StringResource
 
 interface PaletteDraggable {
     /**
@@ -21,4 +22,9 @@ interface PaletteDraggable {
     fun iconText(): String
 
     fun paletteCategories(): List<TraitCategory>
+
+    /**
+     * Tooltip resource for this palette item explaining its purpose and usage
+     */
+    fun tooltipResource(): StringResource
 }

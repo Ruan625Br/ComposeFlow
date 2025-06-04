@@ -72,6 +72,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.remove_component
 import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.tooltip_component_trait
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.Tooltip
@@ -89,6 +90,7 @@ import io.composeflow.util.toPackageName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import kotlin.uuid.Uuid
 
@@ -253,6 +255,7 @@ data class Component(
     }
 
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_component_trait
 
     override fun icon(): ImageVector = ComposeFlowIcons.ComposeLogo
 

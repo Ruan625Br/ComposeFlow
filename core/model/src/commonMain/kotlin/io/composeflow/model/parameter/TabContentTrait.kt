@@ -7,16 +7,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.tooltip_tab_content_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("TabContentTrait")
@@ -25,6 +28,8 @@ data object TabContentTrait : ComposeTrait {
     override fun iconText(): String = "TabContent"
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Container, TraitCategory.TabContent)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_tab_content_trait
 
     override fun visibleInPalette(): Boolean = false
     override fun isResizeable(): Boolean = false

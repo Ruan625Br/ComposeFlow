@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.modifier.ModifierWrapper
@@ -24,10 +25,12 @@ import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.validator.ComposeStateValidator
 import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.tooltip_column_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 sealed interface ComposeTrait : PaletteDraggable {
@@ -231,6 +234,8 @@ data object EmptyTrait : ComposeTrait {
     override fun iconText(): String = "Empty"
 
     override fun paletteCategories(): List<TraitCategory> = emptyList()
+    override fun tooltipResource(): StringResource = Res.string.tooltip_column_trait
+
     override fun generateCode(
         project: Project,
         node: ComposeNode,

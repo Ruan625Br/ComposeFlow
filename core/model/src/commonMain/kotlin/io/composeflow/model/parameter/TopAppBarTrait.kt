@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.TopHeader
 import io.composeflow.kotlinpoet.GenerationContext
@@ -34,11 +35,13 @@ import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_top_app_bar_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("TopAppBarTrait")
@@ -59,6 +62,8 @@ data class TopAppBarTrait(
     override fun iconText(): String = "TopAppBar"
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_top_app_bar_trait
 
     override fun visibleInPalette(): Boolean = true
     override fun isDroppable(): Boolean = false

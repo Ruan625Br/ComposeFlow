@@ -6,6 +6,7 @@ import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.ComposeLogo
 import io.composeflow.kotlinpoet.GenerationContext
@@ -21,11 +22,13 @@ import io.composeflow.model.project.findComponentOrNull
 import io.composeflow.model.project.findParameterOrThrow
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.tooltip_component_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("ComponentTrait")
@@ -61,6 +64,7 @@ data class ComponentTrait(
     override fun icon(): ImageVector = ComposeFlowIcons.ComposeLogo
     override fun iconText(): String = "Component"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_component_trait
 
     override fun visibleInPalette(): Boolean = false
     override fun isDroppable(): Boolean = false

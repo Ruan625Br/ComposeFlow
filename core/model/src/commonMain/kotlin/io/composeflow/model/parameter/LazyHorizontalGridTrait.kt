@@ -11,6 +11,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.Grid3x2Gap
 import io.composeflow.kotlinpoet.GenerationContext
@@ -27,11 +28,13 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.DpSerializer
+import io.composeflow.tooltip_lazy_horizontal_grid_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("LazyHorizontalGridTrait")
@@ -98,6 +101,8 @@ data class LazyHorizontalGridTrait(
         TraitCategory.WrapContainer,
         TraitCategory.Layout
     )
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_lazy_horizontal_grid_trait
 
     override fun defaultModifierList(): MutableList<ModifierWrapper> =
         mutableStateListEqualsOverrideOf(

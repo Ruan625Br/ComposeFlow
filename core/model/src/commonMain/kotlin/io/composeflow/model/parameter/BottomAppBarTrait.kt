@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.BottomAppBar
 import io.composeflow.kotlinpoet.GenerationContext
@@ -21,11 +22,13 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.BottomAppBarNode
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.tooltip_bottom_app_bar_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("BottomAppBarTrait")
@@ -37,6 +40,8 @@ data class BottomAppBarTrait(
     override fun iconText(): String = "Bottom bar"
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_bottom_app_bar_trait
 
     override fun visibleInPalette(): Boolean = true
     override fun isDroppable(): Boolean = false

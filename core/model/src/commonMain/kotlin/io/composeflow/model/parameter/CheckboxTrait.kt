@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.modifier.generateModifierCode
@@ -26,11 +27,13 @@ import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.WriteableState
 import io.composeflow.model.type.ComposeFlowType
+import io.composeflow.tooltip_checkbox_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("CheckboxTrait")
@@ -110,6 +113,7 @@ data class CheckboxTrait(
     override fun icon(): ImageVector = Icons.Outlined.CheckBox
     override fun iconText(): String = "Checkbox"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_checkbox_trait
     override fun isResizeable(): Boolean = false
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
     override fun onAttachStateToNode(

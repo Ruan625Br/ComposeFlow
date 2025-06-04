@@ -407,4 +407,40 @@ instead of in the canvas.</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="reset_position_and_zoom">Reset position and zoom</string>
+    
+    <!-- Palette tooltips for ComposeTrait items -->
+    <string name="tooltip_box_trait">A layout container that positions children relative to its edges. Useful for overlapping elements.</string>
+    <string name="tooltip_column_trait">A vertical layout container that arranges children in a single column from top to bottom.</string>
+    <string name="tooltip_row_trait">A horizontal layout container that arranges children in a single row from left to right.</string>
+    <string name="tooltip_text_trait">Displays static or dynamic text with customizable styling, font, and formatting options.</string>
+    <string name="tooltip_button_trait">An interactive element that triggers actions when pressed. Supports various styles and states.</string>
+    <string name="tooltip_icon_trait">Displays vector icons using Material Design icons or custom vector graphics.</string>
+    <string name="tooltip_image_trait">Displays images from assets, network URLs, or other sources with scaling and styling options.</string>
+    <string name="tooltip_textfield_trait">An input field for collecting text from users with validation and formatting support.</string>
+    <string name="tooltip_checkbox_trait">A toggleable input that allows users to select or deselect an option with checked/unchecked states.</string>
+    <string name="tooltip_switch_trait">A toggle control that switches between two states, commonly used for settings and preferences.</string>
+    <string name="tooltip_slider_trait">An input control for selecting numeric values within a specified range using a draggable thumb.</string>
+    <string name="tooltip_dropdown_trait">A selection control that displays a list of options when activated, allowing single selection.</string>
+    <string name="tooltip_lazy_column_trait">A vertically scrolling list that efficiently renders only visible items, ideal for large datasets.</string>
+    <string name="tooltip_lazy_row_trait">A horizontally scrolling list that efficiently renders only visible items for side-to-side navigation.</string>
+    <string name="tooltip_lazy_vertical_grid_trait">A vertically scrolling grid layout that efficiently displays items in columns with lazy loading.</string>
+    <string name="tooltip_lazy_horizontal_grid_trait">A horizontally scrolling grid layout that efficiently displays items in rows with lazy loading.</string>
+    <string name="tooltip_card_trait">A Material Design card container with elevation and rounded corners for grouping related content.</string>
+    <string name="tooltip_chip_group_trait">A container for organizing multiple chips, allowing single or multiple selection modes.</string>
+    <string name="tooltip_top_app_bar_trait">A top navigation bar with title, navigation icon, and action buttons following Material Design.</string>
+    <string name="tooltip_bottom_app_bar_trait">A bottom navigation bar for primary actions and navigation, positioned at screen bottom.</string>
+    <string name="tooltip_navigation_drawer_trait">A slide-out navigation panel that provides access to app destinations and functionality.</string>
+    <string name="tooltip_navigation_drawer_item_trait">An individual item within a navigation drawer for navigating to specific destinations.</string>
+    <string name="tooltip_fab_trait">A floating action button for the primary action on a screen, following Material Design guidelines.</string>
+    <string name="tooltip_tabs_trait">A container for organizing content into tabs, allowing users to switch between different views.</string>
+    <string name="tooltip_tab_row_trait">A horizontal container that displays tab items for navigation between content sections.</string>
+    <string name="tooltip_tab_trait">An individual tab item within a tab row for switching between different content panels.</string>
+    <string name="tooltip_tab_content_trait">The content area that displays different content based on the selected tab.</string>
+    <string name="tooltip_horizontal_pager_trait">A swipeable container that allows horizontal navigation between pages of content.</string>
+    <string name="tooltip_horizontal_divider_trait">A horizontal line element used to visually separate content sections or groups.</string>
+    <string name="tooltip_vertical_divider_trait">A vertical line element used to visually separate content sections or groups.</string>
+    <string name="tooltip_spacer_trait">An invisible element that adds spacing between components for layout purposes.</string>
+    <string name="tooltip_screen_trait">A complete screen container that serves as the root for all UI elements on a page.</string>
+    <string name="tooltip_google_sign_in_button_trait">A pre-styled button for Google Sign-In integration with proper branding and functionality.</string>
+    <string name="tooltip_component_trait">A reusable custom component that encapsulates UI elements and logic for multiple uses.</string>
 </resources>

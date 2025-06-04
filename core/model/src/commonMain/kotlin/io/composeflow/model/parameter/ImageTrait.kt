@@ -45,6 +45,7 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.testing.isTest
+import io.composeflow.tooltip_image_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.image.AsyncImage
 import io.composeflow.ui.modifierForCanvas
@@ -52,6 +53,7 @@ import io.composeflow.ui.utils.asImageComposable
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
 @Serializable
@@ -164,6 +166,7 @@ data class ImageTrait(
     override fun icon(): ImageVector = Icons.Outlined.Image
     override fun iconText(): String = "Image"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_image_trait
 
     @Composable
     override fun RenderedNode(

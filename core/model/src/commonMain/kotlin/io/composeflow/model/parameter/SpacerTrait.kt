@@ -10,6 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
@@ -18,11 +19,13 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.tooltip_spacer_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("SpacerTrait")
@@ -43,6 +46,7 @@ data object SpacerTrait : ComposeTrait {
     override fun icon(): ImageVector = Icons.Outlined.SpaceBar
     override fun iconText(): String = "Spacer"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_spacer_trait
 
     @Composable
     override fun RenderedNode(

@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.materialicons.ImageVectorHolder
@@ -42,11 +43,13 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.model.validator.ComposeStateValidator
 import io.composeflow.model.validator.TextFieldValidator
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_textfield_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("TextFieldTrait")
@@ -337,6 +340,7 @@ data class TextFieldTrait(
     override fun icon(): ImageVector = Icons.Outlined.EditNote
     override fun iconText(): String = "TextField"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_textfield_trait
 
     override fun actionTypes(): List<ActionType> = listOf(
         ActionType.OnSubmit,

@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.asVariableName
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.cloud.storage.BlobInfoWrapper
@@ -32,12 +33,14 @@ import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_icon_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.utils.asIconComposable
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("IconTrait")
@@ -90,6 +93,7 @@ data class IconTrait(
 
     override fun icon(): ImageVector = Icons.Outlined.Add
     override fun iconText(): String = "Icon"
+    override fun tooltipResource(): StringResource = Res.string.tooltip_icon_trait
     override fun isResizeable(): Boolean = false
 
     @Composable

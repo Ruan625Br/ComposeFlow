@@ -10,6 +10,7 @@ import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
 import com.mmk.kmpauth.uihelper.google.GoogleSignInButtonIconOnly
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.Google
 import io.composeflow.kotlinpoet.GenerationContext
@@ -22,11 +23,13 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.tooltip_google_sign_in_button_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("GoogleSignInButtonTrait")
@@ -80,6 +83,7 @@ data class GoogleSignInButtonTrait(
     override fun iconText(): String = "GoogleSignIn"
     override fun icon(): ImageVector = ComposeFlowIcons.Google
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Auth)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_google_sign_in_button_trait
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)
     override fun onClickIncludedInParams(): Boolean = true
     override fun isResizeable(): Boolean = false

@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.materialicons.ImageVectorHolder
@@ -33,11 +34,13 @@ import io.composeflow.model.property.StringProperty
 import io.composeflow.model.property.asBooleanValue
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_button_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("ButtonTrait")
@@ -121,6 +124,7 @@ data class ButtonTrait(
     override fun icon(): ImageVector = Icons.Outlined.SmartButton
     override fun iconText(): String = "Button"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_button_trait
     override fun isDroppable(): Boolean = false
     override fun onClickIncludedInParams(): Boolean = true
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)

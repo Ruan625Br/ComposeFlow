@@ -12,6 +12,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.materialicons.Outlined
 import io.composeflow.model.modifier.ModifierWrapper
@@ -24,11 +25,13 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.StringProperty
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_card_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("CardTrait")
@@ -81,6 +84,8 @@ data class CardTrait(
         TraitCategory.Basic,
         TraitCategory.Container,
     )
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_card_trait
 
     override fun defaultModifierList(): MutableList<ModifierWrapper> =
         mutableStateListEqualsOverrideOf(

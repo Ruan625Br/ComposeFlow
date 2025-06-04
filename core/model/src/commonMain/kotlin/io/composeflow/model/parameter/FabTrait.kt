@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.materialicons.ImageVectorHolder
 import io.composeflow.materialicons.Outlined
@@ -33,11 +34,13 @@ import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.tooltip_fab_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("FabTrait")
@@ -70,6 +73,7 @@ data class FabTrait(
     override fun icon(): ImageVector = Icons.Outlined.AddCircle
     override fun iconText(): String = "Fab"
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.ScreenOnly)
+    override fun tooltipResource(): StringResource = Res.string.tooltip_fab_trait
     override fun visibleInPalette(): Boolean = true
     override fun isResizeable(): Boolean = false
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)

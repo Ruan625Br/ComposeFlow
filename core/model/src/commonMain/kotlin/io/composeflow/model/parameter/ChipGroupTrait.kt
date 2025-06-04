@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.Choice
 import io.composeflow.kotlinpoet.GenerationContext
@@ -38,11 +39,13 @@ import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.WriteableState
 import io.composeflow.model.type.ComposeFlowType
+import io.composeflow.tooltip_chip_group_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("ChipGroupTrait")
@@ -94,6 +97,8 @@ data class ChipGroupTrait(
     override fun iconText(): String = "ChipGroup"
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Basic, TraitCategory.Container)
+
+    override fun tooltipResource(): StringResource = Res.string.tooltip_chip_group_trait
 
     override fun isDroppable(): Boolean = false
     override fun isResizeable(): Boolean = false
