@@ -81,6 +81,3 @@ include(":ksp-llm-tools")
 
 includeBuild("build-logic")
 includeBuild("feature/app-builder/app-template")
-
-includeBuild("server")
-includeBuild("infrastructure")

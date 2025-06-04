@@ -1,6 +1,0 @@
-{
-  "language": "java",
-  "app": "../gradlew run",
-  "output": "build/cdktf",
-  "projectId": "e3b862fb-575d-4847-bca2-186eae978f0f"
-}

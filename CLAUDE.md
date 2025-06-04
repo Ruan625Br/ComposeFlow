@@ -21,11 +21,6 @@ ComposeFlow is a **Compose Multiplatform visual UI builder** that allows develop
 conveyor make copied-site                   # Build distributable (requires Conveyor)
 ```
 
-### Server Development
-```bash
-cd server && ./gradlew run                  # Start backend server
-```
-
 ### AI Schema Generation
 ```bash
 bash scripts/generate_system_prompts.sh     # Generate AI system prompts
@@ -47,8 +42,6 @@ bash scripts/generate_system_prompts.sh     # Generate AI system prompts
 - **`core/`** - Shared modules (ai, model, ui, platform, di, logger, config, formatter, icons, resources)
 - **`feature/`** - Feature modules (uibuilder, app-builder, theme-editor, settings, api-editor, firestore-editor, etc.)
 - **`desktopApp/`** - Desktop application entry point
-- **`server/`** - Backend services (Ktor-based)
-- **`infrastructure/`** - Cloud deployment (CDKTF/Terraform)
 - **`build-logic/`** - Custom Gradle plugins
 
 ### Key Technologies
@@ -63,7 +56,6 @@ bash scripts/generate_system_prompts.sh     # Generate AI system prompts
 ### Build System
 - Multi-module Gradle project with custom plugins
 - Version catalogs in `gradle/libs.versions.toml`
-- Composite builds for server, infrastructure, and app-template
 - Spotless formatting with ktlint (configured in `gradle/init.gradle.kts`)
 
 ### String resources
