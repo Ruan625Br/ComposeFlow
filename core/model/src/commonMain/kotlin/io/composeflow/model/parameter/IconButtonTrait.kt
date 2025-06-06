@@ -1,7 +1,8 @@
 package io.composeflow.model.parameter
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Add
+import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
@@ -24,14 +25,20 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.tooltip_icon_trait
 import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.StringResource
 
+/**
+ * Trait for rendering an IconButton.
+ * This is not visible in the palette, but exists to minimize the serializer error produced by LLM.
+ * Has almost the same functionality as IconTrait except that it renders an IconButton.
+ */
 @Serializable
-@SerialName("IconTrait")
-data class IconTrait(
+@SerialName("IconButtonTrait")
+data class IconButtonTrait(
     override val assetType: IconAssetType = IconAssetType.Material,
     override val imageVectorHolder: ImageVectorHolder? = Outlined.Add,
     override val blobInfoWrapper: BlobInfoWrapper? = null,
@@ -46,14 +53,20 @@ data class IconTrait(
 
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
-            trait = mutableStateOf(defaultTrait()),
-            modifierList = defaultModifierList(),
-        )
+            trait = mutableStateOf(IconButtonTrait(imageVectorHolder = Outlined.Add)),
+        ).apply {
+            addChild(
+                ComposeNode(
+                    trait = mutableStateOf(IconTrait.defaultTrait()),
+                )
+            )
+        }
 
-    override fun icon(): ImageVector = Icons.Outlined.Add
-    override fun iconText(): String = "Icon"
+    override fun icon(): ImageVector = Icons.Outlined.AddCircle
+    override fun iconText(): String = "IconButton"
     override fun tooltipResource(): StringResource = Res.string.tooltip_icon_trait
     override fun isResizeable(): Boolean = false
+    override fun visibleInPalette(): Boolean = false
 
     @Composable
     override fun RenderedNode(
@@ -64,18 +77,35 @@ data class IconTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        super<AbstractIconTrait>.RenderedNode(
-            project,
-            node,
-            canvasNodeCallbacks,
-            paletteRenderParams,
-            zoomableContainerStateHolder,
-            modifier
-        )
+        IconButton(
+            onClick = {},
+            modifier = modifier.then(
+                node.modifierChainForCanvas()
+                    .modifierForCanvas(
+                        project = project,
+                        node = node,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                    ),
+            )
+        ) {
+            node.children.forEach { child ->
+                super<AbstractIconTrait>.RenderedNode(
+                    project,
+                    child,
+                    canvasNodeCallbacks,
+                    paletteRenderParams,
+                    zoomableContainerStateHolder,
+                    Modifier
+                )
+            }
+        }
     }
 
+    // Has Container category as it can hold icons as its children
     override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Common, TraitCategory.Basic)
+        listOf(TraitCategory.Common, TraitCategory.Basic, TraitCategory.Container)
 
     override fun generateCode(
         project: Project,
@@ -84,23 +114,17 @@ data class IconTrait(
         dryRun: Boolean,
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
-        val iconMember = MemberName("androidx.compose.material3", "Icon")
-        codeBlockBuilder.addStatement("%M(", iconMember)
-        codeBlockBuilder.add(
-            generateIconParamsCode(
-                project = project,
-                context = context,
-                dryRun,
-            )
-        )
+        val iconButtonMember = MemberName("androidx.compose.material3", "IconButton")
+        // Click handler should be set in the modifier of the IconTrait
+        codeBlockBuilder.addStatement("%M(onClick = {},", iconButtonMember)
         codeBlockBuilder.add(
             node.generateModifierCode(project, context, dryRun = dryRun)
         )
-        codeBlockBuilder.addStatement(")")
+        codeBlockBuilder.addStatement(") {", iconButtonMember)
+        node.children.forEach { child ->
+            codeBlockBuilder.add(child.generateCode(project, context, dryRun))
+        }
+        codeBlockBuilder.addStatement("}", iconButtonMember)
         return codeBlockBuilder.build()
-    }
-
-    companion object {
-        fun defaultTrait(): IconTrait = IconTrait(imageVectorHolder = Outlined.Add)
     }
 }

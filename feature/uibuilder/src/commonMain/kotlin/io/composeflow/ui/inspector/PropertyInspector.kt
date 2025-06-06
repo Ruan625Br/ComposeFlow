@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import io.composeflow.model.parameter.AbstractIconTrait
 import io.composeflow.model.parameter.BottomAppBarTrait
 import io.composeflow.model.parameter.BoxTrait
 import io.composeflow.model.parameter.ButtonTrait
@@ -41,6 +42,7 @@ import io.composeflow.model.parameter.FabTrait
 import io.composeflow.model.parameter.GoogleSignInButtonTrait
 import io.composeflow.model.parameter.HorizontalDividerTrait
 import io.composeflow.model.parameter.HorizontalPagerTrait
+import io.composeflow.model.parameter.IconButtonTrait
 import io.composeflow.model.parameter.IconTrait
 import io.composeflow.model.parameter.ImageTrait
 import io.composeflow.model.parameter.LazyColumnTrait
@@ -511,6 +513,8 @@ fun ParamsInspector(
                     EmptyTrait -> {}
                     is LazyListTrait -> {}
                     is PagerTrait -> {}
+                    is IconButtonTrait -> {}
+                    is AbstractIconTrait -> {}
                 }
             }
         }
