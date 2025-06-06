@@ -56,6 +56,7 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateId
 import io.composeflow.override.mutableStateListEqualsOverrideOf
+import io.composeflow.serializer.FallbackActionHandlerSerializer
 import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.serializer.yamlSerializer
@@ -111,6 +112,7 @@ data class ComposeNode(
     @Serializable(with = MutableStateSerializer::class)
     val dynamicItems: MutableState<AssignableProperty?> = mutableStateOf(null),
 
+    @Serializable(with = FallbackActionHandlerSerializer::class)
     val actionHandler: ActionHandler = ActionHandlerImpl(),
 
     val inspectable: Boolean = true,
