@@ -1,7 +1,11 @@
 package io.composeflow.ai
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
@@ -55,25 +59,31 @@ sealed class AiAssistantUiState {
                 onCloseClick: () -> Unit,
                 onDiscardResult: () -> Unit,
             ) {
-                Row(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.padding(16.dp).height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val buttonModifier = Modifier.weight(1f).fillMaxHeight()
+                    OutlinedButton(
+                        onClick = {
+                            onDiscardResult()
+                        },
+                        modifier = buttonModifier,
+                    ) {
+                        Text(
+                            stringResource(Res.string.ai_action_discard_result)
+                        )
+                    }
                     Button(
                         onClick = {
                             callbacks.onAddNewScreen(screen)
                             onDiscardResult()
                             onCloseClick()
-                        }
+                        },
+                        modifier = buttonModifier,
                     ) {
                         Text(
                             stringResource(Res.string.ai_action_add_screen)
-                        )
-                    }
-
-                    Spacer(Modifier.size(16.dp))
-                    OutlinedButton(onClick = {
-                        onDiscardResult()
-                    }) {
-                        Text(
-                            stringResource(Res.string.ai_action_discard_result)
                         )
                     }
                 }
@@ -93,12 +103,28 @@ sealed class AiAssistantUiState {
             ) {
                 var openCreateProjectDialog by remember { mutableStateOf(false) }
 
-                Row(modifier = Modifier.padding(16.dp)) {
+                Row(
+                    modifier = Modifier.padding(16.dp).height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val buttonModifier = Modifier.weight(1f).fillMaxHeight()
+                    OutlinedButton(
+                        onClick = {
+                            onDiscardResult()
+                        },
+                        modifier = buttonModifier,
+                    ) {
+                        Text(
+                            stringResource(Res.string.ai_action_discard_result)
+                        )
+                    }
+
                     if (screenPrompts.all { it is GeneratedScreenPrompt.BeforeGeneration }) {
                         Button(
                             onClick = {
                                 callbacks.onProceedToGenerateScreens()
-                            }
+                            },
+                            modifier = buttonModifier,
                         ) {
                             Text(
                                 stringResource(Res.string.ai_action_proceed_to_generate_screens)
@@ -116,7 +142,8 @@ sealed class AiAssistantUiState {
                                         (it as? GeneratedScreenPrompt.ScreenGenerated)?.screen
                                     }
                                 )
-                            }
+                            },
+                            modifier = buttonModifier,
                         ) {
                             Text(
                                 stringResource(Res.string.ai_action_create_project)
@@ -126,21 +153,13 @@ sealed class AiAssistantUiState {
                         Button(
                             onClick = {
                                 openCreateProjectDialog = true
-                            }
+                            },
+                            modifier = buttonModifier,
                         ) {
                             Text(
                                 stringResource(Res.string.ai_action_create_project)
                             )
                         }
-                    }
-
-                    Spacer(Modifier.size(16.dp))
-                    OutlinedButton(onClick = {
-                        onDiscardResult()
-                    }) {
-                        Text(
-                            stringResource(Res.string.ai_action_discard_result)
-                        )
                     }
                 }
 
