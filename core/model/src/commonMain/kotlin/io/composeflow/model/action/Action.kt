@@ -164,12 +164,12 @@ sealed interface Action {
 /**
  * Placeholder to be replaced by action blocks for the true condition
  */
-const val TRUE_ACTIONS_PLACEHOLDER = "[trueActionsPlaceholder]"
+const val TRUE_ACTIONS_PLACEHOLDER = "//[trueActionsPlaceholder]"
 
 /**
  * Placeholder to be replaced by action blocks for the false condition
  */
-const val FALSE_ACTIONS_PLACEHOLDER = "[falseActionsPlaceholder]"
+const val FALSE_ACTIONS_PLACEHOLDER = "//[falseActionsPlaceholder]"
 
 /**
  * Action that has action blocks depending on the result of the action.
@@ -693,8 +693,7 @@ sealed interface ShowModal : Action {
 @Serializable
 @SerialName("ShowConfirmationDialog")
 data class ShowConfirmationDialog(
-//    
-    override val id: String = Uuid.random().toString().toString(),
+    override val id: String = Uuid.random().toString(),
     val title: AssignableProperty? = null,
     val message: AssignableProperty? = null,
     val negativeText: AssignableProperty = StringProperty.StringIntrinsicValue("Cancel"),
