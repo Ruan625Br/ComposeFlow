@@ -430,8 +430,10 @@ fun <P : AssignableProperty> SetFromStateDialog(
                     horizontalArrangement = Arrangement.End,
                     modifier = Modifier.padding(top = 16.dp),
                 ) {
+                    val issues = node.generateTrackableIssues(project)
                     if (initialProperty !is IntrinsicProperty<*> ||
-                        initialProperty.propertyTransformers.isNotEmpty()
+                        initialProperty.propertyTransformers.isNotEmpty() ||
+                        issues.isNotEmpty()
                     ) {
                         OutlinedButton(
                             onClick = {
@@ -1683,17 +1685,18 @@ private fun DynamicItemsListContent(
                 } else {
                     Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                 }
-            Row(modifier = Modifier
-                .then(selectedModifier)
-                .clickable {
-                    onAssignablePropertyChanged(
-                        ValueFromDynamicItem(
-                            composeNodeId = composeNode.id,
-                            fieldType = DataFieldType.DataType(dataTypeId = dataType.id),
-                        ),
-                        LazyListChildParams.DynamicItemsSource(composeNode.id)
-                    )
-                }
+            Row(
+                modifier = Modifier
+                    .then(selectedModifier)
+                    .clickable {
+                        onAssignablePropertyChanged(
+                            ValueFromDynamicItem(
+                                composeNodeId = composeNode.id,
+                                fieldType = DataFieldType.DataType(dataTypeId = dataType.id),
+                            ),
+                            LazyListChildParams.DynamicItemsSource(composeNode.id)
+                        )
+                    }
             ) {
                 Text(
                     text = dynamicItem.displayText(project),
