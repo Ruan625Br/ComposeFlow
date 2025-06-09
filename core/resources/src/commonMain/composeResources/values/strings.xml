@@ -443,4 +443,6 @@ instead of in the canvas.</string>
     <string name="tooltip_screen_trait">A complete screen container that serves as the root for all UI elements on a page.</string>
     <string name="tooltip_google_sign_in_button_trait">A pre-styled button for Google Sign-In integration with proper branding and functionality.</string>
     <string name="tooltip_component_trait">A reusable custom component that encapsulates UI elements and logic for multiple uses.</string>
+    <string name="open_source_licenses">Open Source Licenses</string>
+    <string name="close">Close</string>
 </resources>

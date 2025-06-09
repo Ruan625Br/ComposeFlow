@@ -30,9 +30,11 @@ import io.composeflow.ComposeFlow_Logo_Symbol
 import io.composeflow.Res
 import io.composeflow.check_for_update
 import io.composeflow.no_updates_available
+import io.composeflow.open_source_licenses
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.openInBrowser
+import io.composeflow.ui.popup.LicenseDialog
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,6 +52,8 @@ fun AboutScreen(
 ) {
     val density = LocalDensity.current
     val scale = density.density / 2
+    var showLicenseDialog by remember { mutableStateOf(false) }
+    
     Column(modifier = modifier) {
         Image(
             painterResource(Res.drawable.ComposeFlow_Logo_Symbol),
@@ -63,6 +67,29 @@ fun AboutScreen(
         )
 
         VersionCell()
+        
+        // License button
+        TextButton(
+            onClick = { showLicenseDialog = true },
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text(stringResource(Res.string.open_source_licenses))
+        }
+    }
+    
+    // License dialog
+    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+    if (showLicenseDialog) {
+        onAnyDialogIsShown()
+        
+        LicenseDialog(
+            libraries = LibraryData.libraries,
+            onCloseClick = {
+                showLicenseDialog = false
+                onAllDialogsClosed()
+            }
+        )
     }
 }
 
