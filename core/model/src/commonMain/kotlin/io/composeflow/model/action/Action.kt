@@ -360,8 +360,7 @@ sealed interface Navigation : Action {
     @Serializable
     @SerialName("NavigateBack")
     data object NavigateBack : Navigation {
-        //        
-        override val id: String = Uuid.random().toString().toString()
+        override val id: String = Uuid.random().toString()
 
         @Transient
         override val name: String = "Navigate back"
@@ -422,8 +421,7 @@ sealed interface StateAction : Action {
     @Serializable
     @SerialName("SetAppStateValue")
     data class SetAppStateValue(
-//        
-        override val id: String = Uuid.random().toString().toString(),
+        override val id: String = Uuid.random().toString(),
         @Serializable(FallbackMutableStateListSerializer::class)
         val setValueToStates: MutableList<SetValueToState> = mutableStateListEqualsOverrideOf(),
         @Transient
