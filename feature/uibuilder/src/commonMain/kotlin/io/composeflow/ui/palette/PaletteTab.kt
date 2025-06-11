@@ -40,11 +40,14 @@ import io.composeflow.Res
 import io.composeflow.model.palette.PaletteDraggable
 import io.composeflow.model.palette.PaletteNodeCallbacks
 import io.composeflow.model.palette.TraitCategory
+import io.composeflow.model.palette.emptyPaletteNodeCallbacks
+import io.composeflow.model.parameter.ColumnTrait
 import io.composeflow.model.parameter.ComposeTrait
 import io.composeflow.model.parameter.entries
 import io.composeflow.model.project.Project
 import io.composeflow.palette_icon_for
 import io.composeflow.ui.Tooltip
+import io.composeflow.ui.common.ComposeFlowTheme
 import io.composeflow.ui.draggableFromPalette
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.switchByHovered
@@ -52,6 +55,7 @@ import io.composeflow.ui.utils.TreeExpanderInverse
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 const val PaletteTestTag = "Palette"
 
@@ -300,4 +304,53 @@ fun PaletteIcon(
                 .padding(4.dp),
         )
     }
+}
+
+@Composable
+private fun ThemedPaletteTabPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        val mockProject = Project()
+        val mockZoomableContainerStateHolder = ZoomableContainerStateHolder()
+        PaletteTab(
+            project = mockProject,
+            paletteNodeCallbacks = emptyPaletteNodeCallbacks,
+            zoomableContainerStateHolder = mockZoomableContainerStateHolder
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PaletteTabPreview_Light() {
+    ThemedPaletteTabPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun PaletteTabPreview_Dark() {
+    ThemedPaletteTabPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedPaletteIconPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        val columnTrait = ColumnTrait()
+        PaletteIcon(
+            imageVector = columnTrait.icon(),
+            iconText = columnTrait.iconText(),
+            contentDescription = "Preview icon"
+        )
+    }
+}
+
+@Preview
+@Composable
+fun PaletteIconPreview_Light() {
+    ThemedPaletteIconPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun PaletteIconPreview_Dark() {
+    ThemedPaletteIconPreview(useDarkTheme = true)
 }

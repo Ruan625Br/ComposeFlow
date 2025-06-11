@@ -12,3 +12,10 @@ data class PaletteNodeCallbacks(
     val onDraggedPositionUpdated: (draggedPosition: Offset, paletteDraggable: PaletteDraggable) -> Unit,
     val onDragEnd: () -> Unit,
 )
+
+val emptyPaletteNodeCallbacks = PaletteNodeCallbacks(
+    onComposableDroppedToTarget = { _, _ -> },
+    onDraggedNodeUpdated = {},
+    onDraggedPositionUpdated = { _, _ -> },
+    onDragEnd = {},
+)

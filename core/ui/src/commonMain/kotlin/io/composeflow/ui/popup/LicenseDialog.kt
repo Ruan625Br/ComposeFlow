@@ -26,7 +26,9 @@ import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.close
 import io.composeflow.open_source_licenses
+import io.composeflow.ui.common.ComposeFlowTheme
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 data class Library(
     val name: String,
@@ -123,4 +125,66 @@ fun LicenseDialog(
             }
         }
     }
+}
+
+@Composable
+private fun ThemedLicenseDialogPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        val sampleLibraries = listOf(
+            Library("Compose Multiplatform", "org.jetbrains.compose", "1.5.11"),
+            Library("Kotlin", "org.jetbrains.kotlin", "1.9.21"),
+            Library("Ktor Client", "io.ktor", "2.3.7"),
+            Library("Kotlinx Serialization", "org.jetbrains.kotlinx", "1.6.2"),
+            Library("PreCompose", "moe.tlaster", "1.5.10"),
+            Library("KotlinPoet", "com.squareup", "1.15.3"),
+            Library("Koin", "io.insert-koin", "3.5.3"),
+            Library("Material3", "androidx.compose.material3", "1.5.4"),
+            Library("Reorderable", "org.burnoutcrew.reorderable", "0.9.6"),
+            Library("Color Picker", "com.godaddy.android", "1.0.0")
+        )
+        
+        LicenseDialog(
+            libraries = sampleLibraries,
+            onCloseClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LicenseDialogPreview_Light() {
+    ThemedLicenseDialogPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun LicenseDialogPreview_Dark() {
+    ThemedLicenseDialogPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedLicenseDialogFewItemsPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        val sampleLibraries = listOf(
+            Library("Compose Multiplatform", "org.jetbrains.compose", "1.5.11"),
+            Library("Kotlin", "org.jetbrains.kotlin", "1.9.21")
+        )
+        
+        LicenseDialog(
+            libraries = sampleLibraries,
+            onCloseClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun LicenseDialogFewItemsPreview_Light() {
+    ThemedLicenseDialogFewItemsPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun LicenseDialogFewItemsPreview_Dark() {
+    ThemedLicenseDialogFewItemsPreview(useDarkTheme = true)
 }

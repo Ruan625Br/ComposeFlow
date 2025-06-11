@@ -21,7 +21,9 @@ import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.cancel
 import io.composeflow.delete
+import io.composeflow.ui.common.ComposeFlowTheme
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SimpleConfirmationDialog(
@@ -81,4 +83,52 @@ fun SimpleConfirmationDialog(
             }
         }
     }
+}
+
+@Composable
+private fun ThemedSimpleConfirmationDialogPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        SimpleConfirmationDialog(
+            text = "Are you sure you want to delete this item?",
+            onCloseClick = {},
+            onConfirmClick = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun SimpleConfirmationDialogPreview_Light() {
+    ThemedSimpleConfirmationDialogPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun SimpleConfirmationDialogPreview_Dark() {
+    ThemedSimpleConfirmationDialogPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedSimpleConfirmationDialogCustomPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        SimpleConfirmationDialog(
+            text = "Do you want to save your changes before closing?",
+            onCloseClick = {},
+            onConfirmClick = {},
+            positiveText = "Save",
+            positiveButtonColor = MaterialTheme.colorScheme.primary
+        )
+    }
+}
+
+@Preview
+@Composable
+fun SimpleConfirmationDialogCustomPreview_Light() {
+    ThemedSimpleConfirmationDialogCustomPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun SimpleConfirmationDialogCustomPreview_Dark() {
+    ThemedSimpleConfirmationDialogCustomPreview(useDarkTheme = true)
 }

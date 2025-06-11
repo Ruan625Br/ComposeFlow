@@ -31,9 +31,11 @@ import io.composeflow.cancel
 import io.composeflow.confirm
 import io.composeflow.editor.validator.KotlinIdentifierValidator.MUST_NOT_BE_EMPTY
 import io.composeflow.editor.validator.ValidateResult
+import io.composeflow.ui.common.ComposeFlowTheme
 import io.composeflow.ui.modifier.moveFocusOnTab
 import io.composeflow.ui.textfield.SmallOutlinedTextField
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun SingleTextInputDialog(
@@ -146,4 +148,60 @@ fun SingleTextInputDialog(
             }
         }
     }
+}
+
+@Composable
+private fun ThemedSingleTextInputDialogPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        SingleTextInputDialog(
+            textLabel = "Enter file name",
+            onTextConfirmed = {},
+            onDismissDialog = {},
+            initialValue = "MyFile"
+        )
+    }
+}
+
+@Preview
+@Composable
+fun SingleTextInputDialogPreview_Light() {
+    ThemedSingleTextInputDialogPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun SingleTextInputDialogPreview_Dark() {
+    ThemedSingleTextInputDialogPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedSingleTextInputDialogWithValidatorPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        SingleTextInputDialog(
+            textLabel = "Class name",
+            onTextConfirmed = {},
+            onDismissDialog = {},
+            validator = { text ->
+                if (text.isEmpty()) {
+                    ValidateResult.Failure("Class name cannot be empty")
+                } else if (!text.first().isLetter()) {
+                    ValidateResult.Failure("Class name must start with a letter")
+                } else {
+                    ValidateResult.Success
+                }
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun SingleTextInputDialogWithValidatorPreview_Light() {
+    ThemedSingleTextInputDialogWithValidatorPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun SingleTextInputDialogWithValidatorPreview_Dark() {
+    ThemedSingleTextInputDialogWithValidatorPreview(useDarkTheme = true)
 }

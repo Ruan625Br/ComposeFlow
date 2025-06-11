@@ -58,11 +58,13 @@ import io.composeflow.serializer.asString
 import io.composeflow.theme_colors
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
+import io.composeflow.ui.common.ComposeFlowTheme
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.labeledbox.LabeledBorderBox
 import io.composeflow.ui.modifier.hoverIconClickable
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ColorPropertyEditor(
@@ -363,4 +365,75 @@ fun ColorPreviewInfo(
         )
         Spacer(Modifier.height(16.dp))
     }
+}
+
+@Composable
+private fun ThemedColorPropertyEditorPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        ColorPropertyEditor(
+            label = "Background Color",
+            initialColor = ColorWrapper(Material3ColorWrapper.Primary),
+            onColorUpdated = {},
+            onThemeColorSelected = {},
+            onColorDeleted = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ColorPropertyEditorPreview_Light() {
+    ThemedColorPropertyEditorPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun ColorPropertyEditorPreview_Dark() {
+    ThemedColorPropertyEditorPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedColorPropertyDialogContentPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        ColorPropertyDialogContent(
+            initialColor = ColorWrapper(Material3ColorWrapper.PrimaryContainer),
+            fallbackColor = Color.Gray,
+            onThemeColorSelected = {},
+            onCloseClick = {},
+            onColorUpdated = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ColorPropertyDialogContentPreview_Light() {
+    ThemedColorPropertyDialogContentPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun ColorPropertyDialogContentPreview_Dark() {
+    ThemedColorPropertyDialogContentPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedColorPreviewInfoPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        ColorPreviewInfo(
+            color = Color(0xFF1976D2)
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ColorPreviewInfoPreview_Light() {
+    ThemedColorPreviewInfoPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun ColorPreviewInfoPreview_Dark() {
+    ThemedColorPreviewInfoPreview(useDarkTheme = true)
 }

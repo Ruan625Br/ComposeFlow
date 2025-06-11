@@ -41,7 +41,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
-import io.composeflow.ui.uibuilder.UiBuilderViewModel
 import io.composeflow.add_screen
 import io.composeflow.appears_in_navigation
 import io.composeflow.cancel
@@ -58,6 +57,7 @@ import io.composeflow.template.ScreenTemplatePair
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.Tooltip
+import io.composeflow.ui.common.ComposeFlowTheme
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.inspector.propertyeditor.IconPropertyEditor
@@ -72,11 +72,16 @@ import org.burnoutcrew.reorderable.detectReorder
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun ScreenBuilderTab(
     project: Project,
-    viewModel: UiBuilderViewModel,
+    onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+    onSelectScreen: (screen: Screen) -> Unit,
+    onScreenUpdated: (screen: Screen) -> Unit,
+    onDeleteScreen: (screen: Screen) -> Unit,
+    onScreensSwapped: (from: Int, to: Int) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var screenToBeDeleted by remember { mutableStateOf<Screen?>(null) }
@@ -88,11 +93,11 @@ fun ScreenBuilderTab(
     ) {
         ScreensHeader(
             project = project,
-            onAddScreen = viewModel::onAddScreenFromTemplate,
+            onAddScreen = onAddScreenFromTemplate,
         )
 
         val reorderableLazyListState = rememberReorderableLazyListState(onMove = { from, to ->
-            viewModel.onScreensSwapped(from.index, to.index)
+            onScreensSwapped(from.index, to.index)
         })
 
         LazyColumn(
@@ -120,8 +125,8 @@ fun ScreenBuilderTab(
                         onDeleteClick = { screen ->
                             screenToBeDeleted = screen
                         },
-                        onSelectScreen = viewModel::onSelectScreen,
-                        onScreenUpdated = viewModel::onScreenUpdated,
+                        onSelectScreen = onSelectScreen,
+                        onScreenUpdated = onScreenUpdated,
                         modifier = rowModifier,
                     )
                 }
@@ -141,7 +146,7 @@ fun ScreenBuilderTab(
                 onAllDialogsClosed()
             },
             onDeleteScreen = { screen ->
-                viewModel.onDeleteScreen(screen)
+                onDeleteScreen(screen)
                 screenToBeDeleted = null
                 onAllDialogsClosed()
             },
@@ -418,4 +423,63 @@ private fun DeleteScreenDialog(
             }
         }
     }
+}
+
+@Composable
+private fun ThemedScreenBuilderTabPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        val mockProject = Project().apply {
+            screenHolder.screens.addAll(
+                listOf(
+                    Screen("HomeScreen", name = "Home"),
+                    Screen("ProfileScreen", name = "Profile"),
+                    Screen("SettingsScreen", name = "Settings")
+                )
+            )
+        }
+
+        ScreenBuilderTab(
+            project = mockProject,
+            onAddScreenFromTemplate = { _, _ -> },
+            onSelectScreen = { },
+            onScreenUpdated = { },
+            onDeleteScreen = { },
+            onScreensSwapped = { _, _ -> },
+        )
+    }
+}
+
+@Preview
+@Composable
+fun ScreenBuilderTabPreview_Light() {
+    ThemedScreenBuilderTabPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun ScreenBuilderTabPreview_Dark() {
+    ThemedScreenBuilderTabPreview(useDarkTheme = true)
+}
+
+@Composable
+private fun ThemedDeleteScreenDialogPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        DeleteScreenDialog(
+            screen = Screen("MyScreen", name = "MyScreen"),
+            onCloseClick = {},
+            onDeleteScreen = {}
+        )
+    }
+}
+
+@Preview
+@Composable
+fun DeleteScreenDialogPreview_Light() {
+    ThemedDeleteScreenDialogPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun DeleteScreenDialogPreview_Dark() {
+    ThemedDeleteScreenDialogPreview(useDarkTheme = true)
 }

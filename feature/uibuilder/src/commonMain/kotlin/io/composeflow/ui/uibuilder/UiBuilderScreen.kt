@@ -392,7 +392,11 @@ fun UiBuilderScreen(
                         1 -> {
                             ScreenBuilderTab(
                                 project = project,
-                                viewModel = viewModel,
+                                onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                                onSelectScreen = viewModel::onSelectScreen,
+                                onScreenUpdated = viewModel::onScreenUpdated,
+                                onDeleteScreen = viewModel::onDeleteScreen,
+                                onScreensSwapped = viewModel::onScreensSwapped,
                                 modifier = Modifier.weight(1f),
                             )
                         }

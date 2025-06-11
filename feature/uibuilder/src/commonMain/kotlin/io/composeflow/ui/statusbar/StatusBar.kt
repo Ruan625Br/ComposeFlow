@@ -17,6 +17,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.StrokeCap.Companion.Round
 import androidx.compose.ui.unit.dp
+import io.composeflow.ui.common.ComposeFlowTheme
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun StatusBar(
@@ -120,4 +122,77 @@ private fun StatusBarFailure(
             )
         }
     }
+}
+
+@Composable
+private fun ThemedStatusBarPreview(useDarkTheme: Boolean, uiState: StatusBarUiState) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
+        StatusBar(uiState = uiState)
+    }
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Normal_Light() {
+    ThemedStatusBarPreview(useDarkTheme = false, uiState = StatusBarUiState.Normal)
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Normal_Dark() {
+    ThemedStatusBarPreview(useDarkTheme = true, uiState = StatusBarUiState.Normal)
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Loading_Light() {
+    ThemedStatusBarPreview(
+        useDarkTheme = false,
+        uiState = StatusBarUiState.Loading("Building application...")
+    )
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Loading_Dark() {
+    ThemedStatusBarPreview(
+        useDarkTheme = true,
+        uiState = StatusBarUiState.Loading("Building application...")
+    )
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Success_Light() {
+    ThemedStatusBarPreview(
+        useDarkTheme = false,
+        uiState = StatusBarUiState.Success("Build completed successfully")
+    )
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Success_Dark() {
+    ThemedStatusBarPreview(
+        useDarkTheme = true,
+        uiState = StatusBarUiState.Success("Build completed successfully")
+    )
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Failure_Light() {
+    ThemedStatusBarPreview(
+        useDarkTheme = false,
+        uiState = StatusBarUiState.Failure("Build failed: compilation error")
+    )
+}
+
+@Preview
+@Composable
+fun StatusBarPreview_Failure_Dark() {
+    ThemedStatusBarPreview(
+        useDarkTheme = true,
+        uiState = StatusBarUiState.Failure("Build failed: compilation error")
+    )
 }
