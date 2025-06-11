@@ -125,7 +125,12 @@ fun ColorEditorContent(
             ) {
                 mutableStateOf(
                     sourceColor?.let {
-                        dynamicColorScheme(it, isDark = false, paletteStyle)
+                        dynamicColorScheme(
+                            it,
+                            isDark = false,
+                            isAmoled = false,
+                            style = paletteStyle
+                        )
                     }
                         ?: colorSchemeHolder.lightColorScheme.value.toColorScheme(),
                 )
@@ -137,7 +142,12 @@ fun ColorEditorContent(
             ) {
                 mutableStateOf(
                     sourceColor?.let {
-                        dynamicColorScheme(it, isDark = true, paletteStyle)
+                        dynamicColorScheme(
+                            it,
+                            isDark = true,
+                            isAmoled = false,
+                            style = paletteStyle
+                        )
                     } ?: colorSchemeHolder.darkColorScheme.value.toColorScheme(),
                 )
             }

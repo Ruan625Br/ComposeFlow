@@ -17,6 +17,9 @@ allprojects {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         maven("https://packages.jetbrains.team/maven/p/kpm/public/")
+        maven("https://packages.jetbrains.team/maven/p/ij/intellij-dependencies/")
+        maven("https://maven.pkg.jetbrains.space/public/p/intellij-dependencies/dev")
+        maven("https://maven.pkg.jetbrains.space/public/p/kotlin/dev")
         maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }
         maven { url = uri("https://jitpack.io") }
         mavenLocal()
