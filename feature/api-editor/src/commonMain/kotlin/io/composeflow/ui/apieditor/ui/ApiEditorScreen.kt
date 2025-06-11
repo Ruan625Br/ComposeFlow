@@ -229,6 +229,7 @@ private fun ApiRow(
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier
+                        .weight(1f)
                         .padding(horizontal = 8.dp, vertical = 4.dp),
                 )
                 apiDefinition.exampleJsonResponse?.let { json ->
