@@ -7,9 +7,16 @@ these [instructions](https://github.com/JetBrains/compose-multiplatform-template
 
 ## Prerequisites
 
+### JetBrain's Runtime
+
 You need to install the [JBR](https://github.com/JetBrains/JetBrainsRuntime) (JetBrain's Runtime) to
 run ComposeFlow since ComposeFlow depends
 on [jewel](https://github.com/JetBrains/jewel)
+
+### Android Studio or Intellij IDEA
+
+To show the Previews for Composables, you need to use Android Studio (Narwhal 2025.1.1. or higher)
+or Intellij IDEA (2025.1.1 or higheer)
 
 ### Prerequisites On Windows (Only Windows users need to follow this section)
 

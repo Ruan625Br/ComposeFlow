@@ -53,6 +53,7 @@ import io.composeflow.editor.validator.NonEmptyStringValidator
 import io.composeflow.editor.validator.ValidateResult
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
+import io.composeflow.ui.common.ComposeFlowTheme
 import io.composeflow.ui.modifier.moveFocusOnTab
 import io.composeflow.ui.popup.PositionCustomizablePopup
 import org.jetbrains.compose.resources.stringResource
@@ -258,38 +259,26 @@ fun NewProjectDialogContent(
     }
 }
 
-/**
- *  Previews are still not rendered with Android Studio Narwhal | 2025.1.1 RC 1 with following stack trace
- *
- * Caused by: java.lang.UnsatisfiedLinkError: 'long org.jetbrains.skiko.node.RenderNodeContextKt.RenderNodeContext_nMake(boolean)'
- * 	at org.jetbrains.skiko.node.RenderNodeContextKt.RenderNodeContext_nMake(Native Method)
- * 	at org.jetbrains.skiko.node.RenderNodeContextKt.access$RenderNodeContext_nMake(RenderNodeContext.kt:1)
- * 	at org.jetbrains.skiko.node.RenderNodeContext.<init>(RenderNodeContext.kt:16)
- * 	at androidx.compose.ui.graphics.SkiaGraphicsContext.<init>(SkiaGraphicsContext.skiko.kt:28)
- * 	at androidx.compose.ui.node.RootNodeOwner.<init>(RootNodeOwner.skiko.kt:141)
- * 	at androidx.compose.ui.node.RootNodeOwner.<init>(RootNodeOwner.skiko.kt)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeSceneImpl.<init>(CanvasLayersComposeScene.skiko.kt:111)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeSceneImpl.<init>(CanvasLayersComposeScene.skiko.kt)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeScene_skikoKt.CanvasLayersComposeScene-3tKcejY(CanvasLayersComposeScene.skiko.kt:91)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeScene_skikoKt.CanvasLayersComposeScene-3tKcejY$default(CanvasLayersComposeScene.skiko.kt:82)
- * 	at androidx.compose.ui.ImageComposeScene.<init>(ImageComposeScene.skiko.kt:153)
- * 	at androidx.compose.ui.ImageComposeScene.<init>(ImageComposeScene.skiko.kt:130)
- * 	at androidx.compose.ui.ImageComposeScene.<init>(ImageComposeScene.skiko.kt:124)
- * 	at androidx.compose.ui.ImageComposeScene_skikoMainKt.renderComposeScene(ImageComposeScene.skiko.kt:68)
- * 	at androidx.compose.desktop.ui.tooling.preview.runtime.NonInteractivePreviewFacade$Companion.render(NonInteractivePreviewFacade.kt:53)
- * 	at androidx.compose.desktop.ui.tooling.preview.runtime.NonInteractivePreviewFacade.render(NonInteractivePreviewFacade.kt)
- */
-@Preview
+
 @Composable
-fun NewProjectDialogPreview() {
-    MaterialTheme {
+private fun ThemedNewProjectDialogPreview(useDarkTheme: Boolean) {
+    ComposeFlowTheme(useDarkTheme = useDarkTheme) {
         NewProjectDialogContent(
-            onConfirmProject = { _, _ ->
-            },
-            onConfirmProjectWithScreens = { _, _, _ ->
-            },
-            onDismissDialog = {
-            }
+            onConfirmProject = { _, _ -> },
+            onConfirmProjectWithScreens = { _, _, _ -> },
+            onDismissDialog = {}
         )
     }
+}
+
+@Preview
+@Composable
+fun NewProjectDialogPreview_Light() {
+    ThemedNewProjectDialogPreview(useDarkTheme = false)
+}
+
+@Preview
+@Composable
+fun NewProjectDialogPreview_Dark() {
+    ThemedNewProjectDialogPreview(useDarkTheme = true)
 }
