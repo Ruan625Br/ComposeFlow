@@ -1,3 +1,4 @@
+
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.getByType
@@ -27,7 +28,6 @@ class ComposeMultiplatformPlugin : Plugin<Project> {
                             implementation(compose.materialIconsExtended)
                             implementation(compose.ui)
                             implementation(compose.components.resources)
-                            implementation(compose.components.uiToolingPreview)
                         }
                     }
                 }

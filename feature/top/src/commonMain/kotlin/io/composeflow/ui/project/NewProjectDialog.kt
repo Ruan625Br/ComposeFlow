@@ -56,7 +56,6 @@ import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.ui.modifier.moveFocusOnTab
 import io.composeflow.ui.popup.PositionCustomizablePopup
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun NewProjectDialog(
@@ -79,11 +78,18 @@ fun NewProjectDialog(
         },
         modifier = modifier,
     ) {
-        NewProjectDialogContent(
-            onConfirmProject = onConfirmProject,
-            onConfirmProjectWithScreens = onConfirmProjectWithScreens,
-            onDismissDialog = onDismissDialog
-        )
+        Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
+            Column(
+                modifier = Modifier.padding(vertical = 32.dp)
+                    .size(820.dp, 580.dp)
+            ) {
+                AiAssistedCreationInputs(
+                    onConfirmProject = onConfirmProject,
+                    onConfirmProjectWithScreens = onConfirmProjectWithScreens,
+                    onDismissDialog = onDismissDialog
+                )
+            }
+        }
     }
 }
 
@@ -233,63 +239,6 @@ private fun AiAssistedCreationInputs(
         AddNewProjectDialog(
             onDismissDialog = closeDialog,
             onConfirmProject = onConfirmProject,
-        )
-    }
-}
-
-
-@Composable
-fun NewProjectDialogContent(
-    onConfirmProject: (projectName: String, packageName: String) -> Unit,
-    onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
-    onDismissDialog: () -> Unit,
-) {
-    Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
-        Column(
-            modifier = Modifier.padding(vertical = 32.dp)
-                .size(820.dp, 580.dp)
-        ) {
-            AiAssistedCreationInputs(
-                onConfirmProject = onConfirmProject,
-                onConfirmProjectWithScreens = onConfirmProjectWithScreens,
-                onDismissDialog = onDismissDialog
-            )
-        }
-    }
-}
-
-/**
- *  Previews are still not rendered with Android Studio Narwhal | 2025.1.1 RC 1 with following stack trace
- *
- * Caused by: java.lang.UnsatisfiedLinkError: 'long org.jetbrains.skiko.node.RenderNodeContextKt.RenderNodeContext_nMake(boolean)'
- * 	at org.jetbrains.skiko.node.RenderNodeContextKt.RenderNodeContext_nMake(Native Method)
- * 	at org.jetbrains.skiko.node.RenderNodeContextKt.access$RenderNodeContext_nMake(RenderNodeContext.kt:1)
- * 	at org.jetbrains.skiko.node.RenderNodeContext.<init>(RenderNodeContext.kt:16)
- * 	at androidx.compose.ui.graphics.SkiaGraphicsContext.<init>(SkiaGraphicsContext.skiko.kt:28)
- * 	at androidx.compose.ui.node.RootNodeOwner.<init>(RootNodeOwner.skiko.kt:141)
- * 	at androidx.compose.ui.node.RootNodeOwner.<init>(RootNodeOwner.skiko.kt)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeSceneImpl.<init>(CanvasLayersComposeScene.skiko.kt:111)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeSceneImpl.<init>(CanvasLayersComposeScene.skiko.kt)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeScene_skikoKt.CanvasLayersComposeScene-3tKcejY(CanvasLayersComposeScene.skiko.kt:91)
- * 	at androidx.compose.ui.scene.CanvasLayersComposeScene_skikoKt.CanvasLayersComposeScene-3tKcejY$default(CanvasLayersComposeScene.skiko.kt:82)
- * 	at androidx.compose.ui.ImageComposeScene.<init>(ImageComposeScene.skiko.kt:153)
- * 	at androidx.compose.ui.ImageComposeScene.<init>(ImageComposeScene.skiko.kt:130)
- * 	at androidx.compose.ui.ImageComposeScene.<init>(ImageComposeScene.skiko.kt:124)
- * 	at androidx.compose.ui.ImageComposeScene_skikoMainKt.renderComposeScene(ImageComposeScene.skiko.kt:68)
- * 	at androidx.compose.desktop.ui.tooling.preview.runtime.NonInteractivePreviewFacade$Companion.render(NonInteractivePreviewFacade.kt:53)
- * 	at androidx.compose.desktop.ui.tooling.preview.runtime.NonInteractivePreviewFacade.render(NonInteractivePreviewFacade.kt)
- */
-@Preview
-@Composable
-fun NewProjectDialogPreview() {
-    MaterialTheme {
-        NewProjectDialogContent(
-            onConfirmProject = { _, _ ->
-            },
-            onConfirmProjectWithScreens = { _, _, _ ->
-            },
-            onDismissDialog = {
-            }
         )
     }
 }
