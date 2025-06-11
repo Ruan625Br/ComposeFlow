@@ -11,6 +11,10 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
 }
 
+tasks.withType<AbstractArchiveTask>().configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
 application {
     mainClass.set("io.composeflow.MainKt")
 }
