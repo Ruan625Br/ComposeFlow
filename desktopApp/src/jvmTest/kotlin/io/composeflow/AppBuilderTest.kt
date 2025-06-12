@@ -511,6 +511,9 @@ class AppBuilderTest {
         ChipGroupTrait().onAttachStateToNode(project, currentEditable, chipGroup2)
         rootNode.addChild(chipGroup2)
 
+        val chipGroupWithoutState = ChipGroupTrait().defaultComposeNode(project)
+        rootNode.addChild(chipGroupWithoutState)
+
         rootNode.addChild(
             SwitchTrait().defaultComposeNode(project),
         )

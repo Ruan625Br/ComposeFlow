@@ -246,11 +246,13 @@ data class ChipGroupTrait(
             companionState
         }
         val canvasEditable = project.findCanvasEditableHavingNodeOrNull(node)!!
-        canvasEditable.updateState(updatedState as WriteableState)
+        (updatedState as? WriteableState)?.let {
+            canvasEditable.updateState(updatedState)
+        }
 
         val itemsCodeBlock = when (val items = chipItems) {
             null -> {
-                CodeBlock.of("emptyList()")
+                CodeBlock.of("emptyList<String>()")
             }
 
             else -> {
@@ -269,7 +271,11 @@ data class ChipGroupTrait(
                 MemberName("androidx.compose.material3", "AssistChip")
             }
             builder.add("%M(", chipMember)
-            builder.addStatement("selected = ${updatedState.getReadVariableName(project)}.contains(it),")
+            if (updatedState is WriteableState) {
+                builder.addStatement("selected = ${updatedState.getReadVariableName(project)}.contains(it),")
+            } else {
+                builder.addStatement("selected = false,")
+            }
             builder.addStatement("label = { %M(it) },", MemberHolder.Material3.Text)
             builder.addStatement("onClick = {")
             if (node.actionsMap[ActionType.OnChange]?.isNotEmpty() == true) {
@@ -277,14 +283,16 @@ data class ChipGroupTrait(
                     builder.add(it.generateCodeBlock(project, context, dryRun = dryRun))
                 }
             }
-            builder.add(
-                updatedState.generateWriteBlock(
-                    project,
-                    canvasEditable,
-                    context,
-                    dryRun = dryRun
+            if (updatedState is WriteableState) {
+                builder.add(
+                    updatedState.generateWriteBlock(
+                        project,
+                        canvasEditable,
+                        context,
+                        dryRun = dryRun
+                    )
                 )
-            )
+            }
             builder.addStatement("},")
             listOf(ModifierWrapper.Padding(4.dp)).generateCode(
                 project,
