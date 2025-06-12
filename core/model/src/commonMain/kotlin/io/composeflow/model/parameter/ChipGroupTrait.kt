@@ -239,7 +239,7 @@ data class ChipGroupTrait(
 
         val companionState = node.companionStateId?.let {
             project.findLocalStateOrNull(it)
-        }!!
+        }
         val updatedState = if (companionState is ScreenState.StringListScreenState) {
             companionState.copy(singleValueOnly = !multiSelect)
         } else {

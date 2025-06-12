@@ -68,7 +68,7 @@ class LlmRepository(
                 success = {
                     when (val responseDetail = it.responseDetail) {
                         is CreateNewScreen -> {
-                            var screen: Screen? = null
+                            var screen: Screen?
                             var result: CreateScreenResponse
                             try {
                                 screen =
@@ -78,6 +78,24 @@ class LlmRepository(
                                 if (screenName != null) {
                                     screen = screen.createCopyOfNewName(screenName)
                                 }
+
+                                // If any constraints are violated such as, nested scrollable
+                                // containers, rethrow the same prompt to LLM.
+                                // TODO: Think about a mechanism to reproduce the situation
+                                screen.getRootNode().allChildren().forEach { child ->
+                                    child.parentNode?.let { parent ->
+                                        val errors = child.checkConstraints(parent)
+                                        if (errors.isNotEmpty()) {
+                                            Logger.w("Constraint errors: $errors")
+                                            throw IllegalStateException(
+                                                "${child.id}," + errors.joinToString(
+                                                    ", "
+                                                )
+                                            )
+                                        }
+                                    }
+                                }
+
                                 result = CreateScreenResponse.Success(
                                     screen = screen,
                                     message = it.message,
