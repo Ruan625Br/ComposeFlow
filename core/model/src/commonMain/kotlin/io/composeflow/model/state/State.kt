@@ -11,6 +11,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.asTypeName
 import io.composeflow.ViewModelConstant
+import io.composeflow.asVariableName
 import io.composeflow.kotlinpoet.ClassHolder
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
@@ -50,8 +51,8 @@ sealed interface ReadableState {
     ): CodeBlock
 
     fun generateReadBlock(project: Project, context: GenerationContext, dryRun: Boolean): CodeBlock
-    fun getReadVariableName(project: Project): String = name
-    fun getFlowName(): String = name + "Flow"
+    fun getReadVariableName(project: Project): String = name.asVariableName()
+    fun getFlowName(): String = name.asVariableName() + "Flow"
 
     /**
      * [asNonList] If set to true, returns the result type with [ComposeFlowType.isList] = false regardless of the
@@ -87,7 +88,7 @@ sealed interface WriteableState : ReadableState {
 
     fun generateClearStateCodeToViewModel(): CodeBlock
     override fun generateStatePropertiesToViewModel(project: Project): List<PropertySpec>
-    fun getValidateResultName(): String = name + "ValidateResult"
+    fun getValidateResultName(): String = name.asVariableName() + "ValidateResult"
 }
 
 @Serializable
