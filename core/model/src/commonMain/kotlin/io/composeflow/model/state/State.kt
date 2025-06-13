@@ -108,7 +108,7 @@ sealed interface State<T> : ReadableState, WriteableState {
 
     override val userWritable: Boolean
     override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType
-    override fun getReadVariableName(project: Project): String = name
+    override fun getReadVariableName(project: Project): String = name.asVariableName()
     override fun generateWriteBlock(
         project: Project,
         canvasEditable: CanvasEditable,
@@ -116,9 +116,11 @@ sealed interface State<T> : ReadableState, WriteableState {
         dryRun: Boolean,
     ): CodeBlock
 
-    override fun getValidateResultName(): String = name + "ValidateResult"
-    override fun getFlowName(): String = name + "Flow"
-    override fun getUpdateMethodName(): String = "on${name.capitalize(Locale.current)}Updated"
+    override fun getValidateResultName(): String = name.asVariableName() + "ValidateResult"
+    override fun getFlowName(): String = name.asVariableName() + "Flow"
+    override fun getUpdateMethodName(): String =
+        "on${name.asVariableName().capitalize(Locale.current)}Updated"
+
     override fun generateUpdateStateMethodToViewModel(): FunSpec
     override fun generateUpdateStateCodeToViewModel(
         project: Project,
@@ -303,8 +305,11 @@ sealed interface ScreenState<T> : State<T> {
         project: Project, context: GenerationContext, dryRun: Boolean,
     ): CodeBlock {
         val builder = CodeBlock.builder()
+        val variableName = context.getCurrentComposableContext()
+            .addComposeFileVariable(getReadVariableName(project), dryRun = dryRun)
+        name = variableName
         builder.addStatement(
-            "val ${getReadVariableName(project)} by ${context.currentEditable.viewModelName}.${getFlowName()}.%M()",
+            "val $name by ${context.currentEditable.viewModelName}.${getFlowName()}.%M()",
             MemberHolder.AndroidX.Runtime.collectAsState,
         )
         return builder.build()
@@ -2033,8 +2038,11 @@ sealed interface AppState<T> : State<T> {
         context: GenerationContext,
         dryRun: Boolean,
     ): CodeBlock {
+        val variableName = context.getCurrentComposableContext()
+            .addComposeFileVariable(getReadVariableName(project), dryRun = dryRun)
+        name = variableName
         return CodeBlock.of(
-            "val ${getReadVariableName(project)} by ${context.currentEditable.viewModelName}.${getFlowName()}.%M()",
+            "val $name by ${context.currentEditable.viewModelName}.${getFlowName()}.%M()",
             MemberHolder.AndroidX.Runtime.collectAsState,
         )
     }

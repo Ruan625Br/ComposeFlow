@@ -2,7 +2,6 @@ package io.composeflow.model.parameter
 
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.FilterChip
@@ -54,7 +53,9 @@ data class ChipGroupTrait(
     val selectable: Boolean = true,
     val multiSelect: Boolean = false,
     val elevated: Boolean = false,
-    val wrapContent: Boolean = false,
+    // TODO: Temporarily disable the wrapContent since it may introduce nested horizontally scrollable
+    // containers issue
+    // val wrapContent: Boolean = false,
 ) : ComposeTrait {
     override fun getPropertyContainers(): List<PropertyContainer> {
         return listOf(
@@ -183,47 +184,23 @@ data class ChipGroupTrait(
             null -> listOf("[Empty item]")
             else -> listOf(chipItems.transformedValueExpression(project))
         }
-        if (wrapContent) {
-            FlowRow(
-                modifier = modifier.then(
-                    node.modifierChainForCanvas()
-                        .modifierForCanvas(
-                            project = project,
-                            node = node,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
-                ),
-            ) {
-                chipItems.forEachIndexed { _, item ->
-                    LocalChip(
-                        label = item,
-                        chipGroupTrait = node.trait.value as ChipGroupTrait,
-                    )
-                }
-            }
-        } else {
-            LazyRow(
-                modifier = modifier.then(
-                    node.modifierChainForCanvas()
-                        .modifierForCanvas(
-                            project = project,
-                            node = node,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
-                ),
-            ) {
-                chipItems.forEachIndexed { _, item ->
-                    item {
-                        LocalChip(
-                            label = item,
-                            chipGroupTrait = node.trait.value as ChipGroupTrait,
-                        )
-                    }
-                }
+        FlowRow(
+            modifier = modifier.then(
+                node.modifierChainForCanvas()
+                    .modifierForCanvas(
+                        project = project,
+                        node = node,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                    ),
+            ),
+        ) {
+            chipItems.forEachIndexed { _, item ->
+                LocalChip(
+                    label = item,
+                    chipGroupTrait = node.trait.value as ChipGroupTrait,
+                )
             }
         }
     }
@@ -303,39 +280,19 @@ data class ChipGroupTrait(
             builder.add(")")
         }
 
-        if (wrapContent) {
-            codeBlockBuilder.addStatement(
-                "%M(",
-                MemberName("androidx.compose.foundation.layout", "FlowRow"),
-            )
-            codeBlockBuilder.addStatement(") {")
-            codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
-            )
+        codeBlockBuilder.addStatement(
+            "%M(",
+            MemberName("androidx.compose.foundation.layout", "FlowRow"),
+        )
+        codeBlockBuilder.add(
+            node.generateModifierCode(project, context, dryRun = dryRun)
+        )
+        codeBlockBuilder.addStatement(") {")
 
-            codeBlockBuilder.add(itemsCodeBlock)
-            codeBlockBuilder.addStatement(".forEach {")
-            generateChipCode(groupParams = chipGroupTrait, codeBlockBuilder, dryRun = dryRun)
-            codeBlockBuilder.addStatement("}")
-
-            codeBlockBuilder.addStatement("}")
-        } else {
-            codeBlockBuilder.addStatement(
-                "%M(",
-                MemberName("androidx.compose.foundation.lazy", "LazyRow"),
-            )
-            codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
-            )
-            codeBlockBuilder.addStatement(") {")
-            codeBlockBuilder.add(CodeBlock.of("%M(", MemberHolder.AndroidX.Lazy.items))
-            codeBlockBuilder.add(itemsCodeBlock)
-            codeBlockBuilder.addStatement(") { ")
-
-            generateChipCode(groupParams = chipGroupTrait, codeBlockBuilder, dryRun = dryRun)
-
-            codeBlockBuilder.addStatement("}")
-        }
+        codeBlockBuilder.add(itemsCodeBlock)
+        codeBlockBuilder.addStatement(".forEach {")
+        generateChipCode(groupParams = chipGroupTrait, codeBlockBuilder, dryRun = dryRun)
+        codeBlockBuilder.addStatement("}")
         codeBlockBuilder.addStatement("}")
         return codeBlockBuilder.build()
     }

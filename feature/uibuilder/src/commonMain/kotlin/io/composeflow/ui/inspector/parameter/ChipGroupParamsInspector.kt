@@ -63,13 +63,5 @@ fun ChipGroupParamsInspector(
             },
             modifier = Modifier.hoverOverlay(),
         )
-        BooleanPropertyEditor(
-            checked = chipGroupTrait.wrapContent,
-            label = "Wrap content",
-            onCheckedChange = {
-                composeNodeCallbacks.onTraitUpdated(node, chipGroupTrait.copy(wrapContent = it))
-            },
-            modifier = Modifier.hoverOverlay(),
-        )
     }
 }

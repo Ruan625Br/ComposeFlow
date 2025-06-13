@@ -110,6 +110,7 @@ import io.composeflow.model.property.ValueFromState
 import io.composeflow.model.state.AppState
 import io.composeflow.model.state.AuthenticatedUserState
 import io.composeflow.model.state.ScreenState
+import io.composeflow.model.state.WriteableState
 import io.composeflow.model.validator.TextFieldValidator
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.repository.fakeFirebaseIdToken
@@ -154,6 +155,19 @@ class AppBuilderTest {
         project.themeHolder.fontHolder.primaryFontFamily = FontFamilyWrapper.Lato
         project.themeHolder.fontHolder.textStyleOverrides[TextStyleWrapper.DisplayLarge] =
             TextStyleOverride(fontSize = 56)
+        toolbarViewModel.onRunPreviewApp(
+            project = project,
+            onStatusBarUiStateChanged = { _ -> },
+        )
+        assertBuildSucceed()
+    }
+
+    @Test
+    fun testStatesWithSameNames() {
+        val project = Project()
+        val screen = project.screenHolder.currentEditable() as Screen
+        screen.addState(ScreenState.StringScreenState(id = "state1", name = "name"))
+        screen.addState(ScreenState.StringScreenState(id = "state2", name = "name"))
         toolbarViewModel.onRunPreviewApp(
             project = project,
             onStatusBarUiStateChanged = { _ -> },
