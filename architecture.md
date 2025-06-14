@@ -131,6 +131,73 @@ All models use kotlinx.serialization with YAML as the primary format:
 - Efficient storage and transmission
 - Custom serializers for complex types
 
+## State Management
+
+ComposeFlow provides a comprehensive state management system that enables dynamic behavior in applications. The system supports both global application states and local screen states, with automatic code generation for Compose Multiplatform applications.
+
+For detailed information about state management, see the [ComposeFlow State Management documentation](https://docs.composeflow.io/basics/state_management/).
+
+### State Architecture
+
+The state management system is built on a hierarchy of interfaces and implementations:
+
+#### State Types
+ComposeFlow supports three categories of states:
+
+1. **App States** - Global states accessible throughout the application:
+   - Primitive types: String, Int, Float, Boolean, Instant
+   - List types: StringList, IntList, FloatList, BooleanList
+   - Custom data types defined in the project
+   - Persisted across app sessions using platform preferences
+
+2. **Screen States** - Local states scoped to individual screens:
+   - String, Float, Boolean, Instant, StringList
+   - Held in memory using MutableStateFlow
+   - Reset when navigating away from the screen
+
+3. **Authenticated User States** - Built-in states for user information:
+   - IsSignedIn, DisplayName, Email, PhoneNumber, PhotoUrl, IsAnonymous
+   - Automatically populated when authentication is configured
+
+#### StateHolder System
+The `StateHolder` interface provides state management capabilities at different levels:
+- **Global**: Project-level states managed by the root Project instance
+- **Screen**: Each screen maintains its own StateHolder for local states
+- **Component**: Reusable components can encapsulate their own states
+
+#### State Operations
+States support various operations through the `StateOperation` interface:
+- **Basic**: SetValue, ClearValue, ToggleValue (for booleans)
+- **List Operations**: AddValue, RemoveFirstValue, RemoveLastValue, RemoveValueAtIndex, UpdateValueAtIndex
+- **Custom Operations**: For user-defined data types
+
+### Code Generation
+
+ComposeFlow automatically generates proper Kotlin code for state management:
+
+1. **ViewModel Generation**: Each screen with states generates a ViewModel class
+2. **State Declaration**: App states use persistent storage, screen states use MutableStateFlow
+3. **Compose Integration**: States are collected using `collectAsState()` for reactive UI updates
+4. **Type Safety**: Strong typing maintained throughout with proper imports
+
+### UI Integration
+
+States integrate seamlessly with the visual builder:
+- **Property Binding**: Any assignable property can be bound to a state
+- **Visual Indicators**: State types and current values shown in the UI
+- **State Selection**: Intuitive dialogs for selecting states to bind
+- **Live Preview**: Changes to state values reflected immediately in the canvas
+
+#### State Assignment Dialog
+<img width="906" src="https://github.com/user-attachments/assets/52ed72e3-9a42-4aa5-bca2-5f0f76310dd1" alt="Dialog to set a state to a property" />
+
+The state assignment dialog allows users to bind any assignable property to an existing state. Through the `AssignableProperty` system, properties can reference states which are then translated to state references in the generated code.
+
+#### Visual Builder with State Binding
+<img width="969" src="https://github.com/user-attachments/assets/6a82517b-dc57-4e66-bfa2-2fcfe3569ab3" alt="UiBuilder showing a Text component with an app state assigned" />
+
+The visual builder clearly indicates when a component property is bound to a state, showing the state type and name directly in the UI. This provides immediate visual feedback about which properties are dynamic and state-driven.
+
 ## ComposeNode overview
 
 ![ComposeNode Architecture](https://github.com/user-attachments/assets/09b618bf-8ea2-48f0-a220-9a51fd96cda2)
