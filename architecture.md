@@ -198,6 +198,35 @@ The state assignment dialog allows users to bind any assignable property to an e
 
 The visual builder clearly indicates when a component property is bound to a state, showing the state type and name directly in the UI. This provides immediate visual feedback about which properties are dynamic and state-driven.
 
+## Code Generation
+
+ComposeFlow transforms visual designs into production-ready Kotlin code for Compose Multiplatform applications.
+
+### Key Components
+
+#### App Template System
+The `feature/app-builder/app-template` directory contains the base structure for generated applications, including standard project layout, build configuration, and platform-specific source sets for Android, iOS, Desktop, and Web.
+
+#### Generated Artifacts
+- **Screens**: Each visual screen becomes a `@Composable` function with proper navigation and state management
+- **ViewModels**: Platform-specific ViewModels with state persistence and business logic
+- **Data Classes**: Custom types with `@Serializable` annotations and null safety
+- **Action Handlers**: Event handling for user interactions, navigation, and API calls
+
+### Core Principles
+
+#### Self-Sufficient Code Generation
+Each component generates complete, valid Compose code without runtime dependencies on ComposeFlow:
+- ComposeNodes include all necessary imports and proper parameter passing
+- ModifierWrapper system translates visual properties to exact modifier chains
+- Compose's declarative nature enables natural composition of generated units
+
+#### Code Quality
+Generated code follows Kotlin best practices with idiomatic patterns, clean architecture, and proper performance optimizations. The code is designed to be maintainable and extensible by developers.
+
+### Integration
+The code generation system seamlessly integrates with ComposeFlow's theme system, state management, component library, and asset management, ensuring developers can take the generated code and continue development independently.
+
 ## ComposeNode overview
 
 ![ComposeNode Architecture](https://github.com/user-attachments/assets/09b618bf-8ea2-48f0-a220-9a51fd96cda2)
