@@ -116,17 +116,27 @@ sealed interface StateOperation {
             readProperty.generateParameterSpec(project)?.let {
                 funSpecBuilder.addParameter(it)
             }
+
+            val wrapCodeBlock =
+                readProperty.generateWrapWithViewModelBlock(project, CodeBlock.of(""))
+            val updateStateCodeBlock = writeState.generateUpdateStateCodeToViewModel(
+                project,
+                context,
+                readProperty,
+                dryRun = dryRun,
+            )
             context.addFunction(
                 funSpecBuilder.addCode(
-                    writeState.generateUpdateStateCodeToViewModel(
-                        project,
-                        context,
-                        readProperty,
-                        dryRun = dryRun,
-                    ),
+                    wrapCodeBlock?.let {
+                        readProperty.generateWrapWithViewModelBlock(
+                            project,
+                            updateStateCodeBlock,
+                        )
+                    } ?: updateStateCodeBlock,
                 ).build(),
                 dryRun = dryRun,
             )
+
             writeState.generateStatePropertiesToViewModel(project).forEach {
                 context.addProperty(it, dryRun = dryRun)
             }

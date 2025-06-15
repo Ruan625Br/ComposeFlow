@@ -1324,6 +1324,8 @@ class AppBuilderTest {
         val editable = project.screenHolder.currentEditable()
         val textFieldState = ScreenState.StringScreenState(name = "textField")
         editable.addState(textFieldState)
+        val appStringState = AppState.StringAppState(name = "stringState")
+        project.addState(appStringState)
 
         val api = ApiDefinition(
             name = "tes Api", // include a space to check if the app compiles
@@ -1357,6 +1359,22 @@ class AppBuilderTest {
         )
         project.apiHolder.apiDefinitions.add(api)
         project.apiHolder.apiDefinitions.add(postApi)
+
+        val button = ButtonTrait().defaultComposeNode(project)
+        button.actionsMap[ActionType.OnClick] = mutableListOf(
+            ActionNode.Simple(
+                action = StateAction.SetAppStateValue(
+                    setValueToStates = mutableListOf(
+                        SetValueToState(
+                            writeToStateId = appStringState.id,
+                            operation = StateOperation.SetValue(
+                                readProperty = ApiResultProperty(apiId = api.id)
+                            )
+                        )
+                    )
+                )
+            )
+        )
 
         val lazyColumn = LazyColumnTrait().defaultComposeNode(project)
         rootNode.addChild(lazyColumn)

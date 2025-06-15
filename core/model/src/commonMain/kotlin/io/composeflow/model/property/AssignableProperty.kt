@@ -183,8 +183,19 @@ sealed interface AssignableProperty {
      * ```.
      * }
      */
-    fun generateWrapWithComposableBlock(project: Project, insideContent: CodeBlock): CodeBlock? =
-        null
+    fun generateWrapWithComposableBlock(
+        project: Project,
+        insideContent: CodeBlock,
+    ): CodeBlock? = null
+
+    /**
+     * Counter part of the code block that needs to be placed in the ViewModel
+     */
+    fun generateWrapWithViewModelBlock(
+        project: Project,
+        insideContent: CodeBlock,
+    ): CodeBlock? = null
+
 
     /**
      * Generate CodeBlock that represents this property including the transformations by using
@@ -1311,7 +1322,6 @@ data class CustomEnumValuesProperty(
 @Serializable
 @SerialName("FirestoreCollectionProperty")
 data class FirestoreCollectionProperty(
-
     val collectionId: CollectionId,
 ) : AssignableProperty, AssignablePropertyBase() {
 
@@ -1343,7 +1353,7 @@ data class FirestoreCollectionProperty(
     override fun displayText(project: Project): String = asText(project)
 
     override fun generateWrapWithComposableBlock(
-        project: Project, insideContent: CodeBlock,
+        project: Project, insideContent: CodeBlock
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val firestoreCollection =
@@ -1471,6 +1481,37 @@ data class ApiResultProperty(
             MemberHolder.Material3.CircularProgressIndicator,
             ClassHolder.ComposeFlow.DataResult,
             MemberHolder.Material3.Text,
+            ClassHolder.ComposeFlow.DataResult,
+        )
+        builder.add(insideContent)
+        builder.add(
+            """
+        }
+    }
+    """
+        )
+        return builder.build()
+    }
+
+    override fun generateWrapWithViewModelBlock(
+        project: Project, insideContent: CodeBlock,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        val apiDefinition =
+            apiId?.let { project.findApiDefinitionOrNull(apiId) } ?: return builder.build()
+
+        builder.add(
+            """when (val $apiResultName = ${apiDefinition.apiResultName()}.value) {
+    %T.Idle -> {}
+    %T.Loading -> {
+    }
+    is %T.Error -> {
+    }
+    is %T.Success -> {
+            """,
+            ClassHolder.ComposeFlow.DataResult,
+            ClassHolder.ComposeFlow.DataResult,
+            ClassHolder.ComposeFlow.DataResult,
             ClassHolder.ComposeFlow.DataResult,
         )
         builder.add(insideContent)
@@ -1720,7 +1761,7 @@ data class ConditionalProperty(
 
     override fun generateWrapWithComposableBlock(
         project: Project,
-        insideContent: CodeBlock
+        insideContent: CodeBlock,
     ): CodeBlock? {
         val a = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue)
         val b = elseIfBlocks.map {
