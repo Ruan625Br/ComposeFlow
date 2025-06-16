@@ -233,7 +233,12 @@ data class ChipGroupTrait(
             }
 
             else -> {
-                items.transformedCodeBlock(project, context, dryRun = dryRun)
+                items.transformedCodeBlock(
+                    project,
+                    context,
+                    dryRun = dryRun,
+                    writeType = ComposeFlowType.StringType(isList = true)
+                )
             }
         }
 

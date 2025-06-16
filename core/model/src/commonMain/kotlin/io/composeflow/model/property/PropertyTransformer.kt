@@ -51,6 +51,7 @@ import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.size
 import io.composeflow.sorted
 import io.composeflow.sorted_by
+import io.composeflow.split
 import io.composeflow.starts_with
 import io.composeflow.substring_after
 import io.composeflow.substring_before
@@ -657,6 +658,69 @@ sealed interface FromString : PropertyTransformer {
         }
     }
 
+    @Serializable
+    sealed interface ToStringList : FromString, PropertyTransformer {
+
+        override fun toType(): ComposeFlowType = ComposeFlowType.StringType(isList = true)
+
+        @Serializable
+        @SerialName("split")
+        data class Split(
+            @Serializable(MutableStateSerializer::class)
+            val value: MutableState<AssignableProperty> =
+                mutableStateOf(StringProperty.StringIntrinsicValue(",")),
+        ) : ToStringList {
+
+            override fun transformedValueExpression(project: Project, input: String): String {
+                return "($input).split(${value.value.transformedValueExpression(project)})"
+            }
+
+            override fun transformedCodeBlock(
+                project: Project,
+                input: CodeBlock,
+                context: GenerationContext,
+                dryRun: Boolean,
+            ): CodeBlock {
+                val builder = CodeBlock.builder()
+                builder.add("(")
+                builder.add(input)
+                builder.add(")")
+                builder.add(".split(")
+                builder.add(value.value.transformedCodeBlock(project, context, dryRun = dryRun))
+                builder.add(")")
+                return builder.build()
+            }
+
+            override fun isDependent(sourceId: String): Boolean = value.value.isDependent(sourceId)
+
+            @Composable
+            override fun displayName(): String = stringResource(Res.string.split)
+
+            @Composable
+            override fun Editor(
+                project: Project,
+                node: ComposeNode,
+                onTransformerEdited: (transformer: PropertyTransformer) -> Unit,
+                modifier: Modifier,
+            ) {
+                AssignableEditableTextPropertyEditor(
+                    project = project,
+                    node = node,
+                    acceptableType = ComposeFlowType.StringType(),
+                    onValidPropertyChanged = { property, _ ->
+                        value.value = property
+                        onTransformerEdited(this)
+                    },
+                    onInitializeProperty = {
+                        value.value = ComposeFlowType.StringType().defaultValue()
+                        onTransformerEdited(this)
+                    },
+                    initialProperty = value.value,
+                )
+            }
+        }
+    }
+
     companion object {
         fun transformers(): List<PropertyTransformer> = listOf(
             ToString.AddBefore(),
@@ -668,6 +732,7 @@ sealed interface FromString : PropertyTransformer {
             ToBoolean.EndsWith(),
             ToBoolean.IsEmpty,
             ToInt.Length,
+            ToStringList.Split(),
         )
     }
 }

@@ -100,7 +100,8 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             exactMatch: Boolean
         ): Boolean {
             return if (isList) {
-                type == StringType(isList = true)
+                // StringType(isList = false) converts the element as listOf("...")
+                type == StringType(isList = true) || type == StringType(isList = false)
             } else {
                 if (exactMatch) {
                     type is StringType
@@ -141,6 +142,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
             return if (inputType is StringType && inputType.isList == this.isList) {
                 codeBlock
+            } else if (inputType is StringType && isList && !inputType.isList) {
+                val builder = CodeBlock.builder()
+                builder.add("listOf(")
+                builder.add(codeBlock)
+                builder.add(")")
+                return builder.build()
             } else {
                 val builder = CodeBlock.builder()
                 builder.add("(")

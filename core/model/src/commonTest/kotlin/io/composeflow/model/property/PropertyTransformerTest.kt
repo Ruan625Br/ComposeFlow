@@ -161,6 +161,23 @@ class PropertyTransformerTest {
     }
 
     @Test
+    fun testSplit() {
+        val transformer =
+            FromString.ToStringList.Split(mutableStateOf(StringProperty.StringIntrinsicValue(",")))
+
+        val property = StringProperty.StringIntrinsicValue("test,string")
+        property.propertyTransformers.add(transformer)
+        val result = property.transformedCodeBlock(
+            project,
+            context,
+            writeType = ComposeFlowType.StringType(isList = true),
+            dryRun = false
+        )
+
+        assertEquals(result.toString(), """("test,string").split(",")""")
+    }
+
+    @Test
     fun testToString() {
         val transformer = FromBoolean.ToStringType.ToString
 

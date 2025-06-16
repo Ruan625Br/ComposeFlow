@@ -363,6 +363,7 @@ instead of in the canvas.</string>
     <string name="sorted">Sorted</string>
     <string name="sorted_by">Sorted by</string>
     <string name="source_color">Source color</string>
+    <string name="split">Split</string>
     <string name="state_name">State name</string>
     <string name="starts_with">Starts with</string>
     <string name="style_name">Style name</string>
@@ -407,7 +408,7 @@ instead of in the canvas.</string>
     <string name="zoom_in">Zoom in</string>
     <string name="zoom_out">Zoom out</string>
     <string name="reset_position_and_zoom">Reset position and zoom</string>
-    
+
     <!-- Palette tooltips for ComposeTrait items -->
     <string name="tooltip_box_trait">A layout container that positions children relative to its edges. Useful for overlapping elements.</string>
     <string name="tooltip_column_trait">A vertical layout container that arranges children in a single column from top to bottom.</string>

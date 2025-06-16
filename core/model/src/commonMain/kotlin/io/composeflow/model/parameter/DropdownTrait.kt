@@ -64,11 +64,18 @@ data class DropdownTrait(
         codeBlockBuilder.add("items = ")
         when (items) {
             null -> {
-                codeBlockBuilder.add("emptyList()")
+                codeBlockBuilder.add("emptyList<String>()")
             }
 
             else -> {
-                codeBlockBuilder.add(items.transformedCodeBlock(project, context, dryRun = dryRun))
+                codeBlockBuilder.add(
+                    items.transformedCodeBlock(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                        writeType = ComposeFlowType.StringType(isList = true)
+                    )
+                )
             }
         }
         codeBlockBuilder.addStatement(",")
@@ -159,7 +166,8 @@ data class DropdownTrait(
                 items.rawVale(project)
             }
 
-            else -> emptyList()
+            null -> listOf("")
+            else -> listOf(items.transformedValueExpression(project))
         }
         var selectedText by remember(node.id) { mutableStateOf("") }
         DropdownMenuTextField(

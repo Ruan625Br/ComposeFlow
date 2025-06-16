@@ -61,9 +61,7 @@ fun AssignableEditableTextPropertyEditor(
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
     val textFieldEnabled =
-        editable &&
-                (initialProperty is IntrinsicProperty<*> || initialProperty == null) &&
-                !acceptableType.isList
+        editable && (initialProperty is IntrinsicProperty<*> || initialProperty == null)
 
     val resolvedLeadingIcon = if (leadingIcon != null) {
         leadingIcon
