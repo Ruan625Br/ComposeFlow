@@ -1387,6 +1387,31 @@ data class FirestoreCollectionProperty(
         return builder.build()
     }
 
+    override fun generateWrapWithViewModelBlock(
+        project: Project, insideContent: CodeBlock,
+    ): CodeBlock {
+        val builder = CodeBlock.builder()
+        val firestoreCollection =
+            project.findFirestoreCollectionOrNull(collectionId) ?: return builder.build()
+        val readVariableName = firestoreCollection.getReadVariableName(project)
+        builder.add(
+            """
+when (${readVariableName}) {
+    is %T.Success -> {
+            """,
+            ClassHolder.ComposeFlow.DataResult,
+        )
+        builder.add(insideContent)
+        builder.add(
+            """
+    }
+    else -> {}
+}                
+"""
+        )
+        return builder.build()
+    }
+
     private fun asText(project: Project): String {
         val firestoreCollection = project.findFirestoreCollectionOrNull(collectionId)
         return firestoreCollection?.let { "[Firestore: ${it.name}]" }
@@ -1501,23 +1526,17 @@ data class ApiResultProperty(
             apiId?.let { project.findApiDefinitionOrNull(apiId) } ?: return builder.build()
 
         builder.add(
-            """when (val $apiResultName = ${apiDefinition.apiResultName()}.value) {
-    %T.Idle -> {}
-    %T.Loading -> {
-    }
-    is %T.Error -> {
-    }
+            """
+    when (val $apiResultName = ${apiDefinition.apiResultName()}.value) {
     is %T.Success -> {
             """,
-            ClassHolder.ComposeFlow.DataResult,
-            ClassHolder.ComposeFlow.DataResult,
-            ClassHolder.ComposeFlow.DataResult,
             ClassHolder.ComposeFlow.DataResult,
         )
         builder.add(insideContent)
         builder.add(
             """
         }
+    else -> {}
     }
     """
         )
