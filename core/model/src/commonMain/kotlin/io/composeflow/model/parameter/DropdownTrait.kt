@@ -135,21 +135,20 @@ data class DropdownTrait(
 
     override fun isResizeable(): Boolean = false
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
+    override fun companionState(composeNode: ComposeNode): ScreenState<*>? {
+        return ScreenState.StringScreenState(
+            id = composeNode.companionStateId,
+            name = composeNode.label.value
+        )
+    }
+
     override fun onAttachStateToNode(
         project: Project,
         stateHolder: StateHolder,
         node: ComposeNode,
     ) {
-        val stateName =
-            stateHolder.createUniqueName(project = project, initial = "dropdownSelectedText")
-        val screenState =
-            ScreenState.StringScreenState(name = stateName, companionNodeId = node.id)
-        stateHolder.addState(screenState)
-
-        val dropdownTrait = node.trait.value as DropdownTrait
-        node.companionStateId = screenState.id
-        node.trait.value =
-            dropdownTrait.copy(selectedItem = ValueFromState(screenState.id))
+        node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
+        node.trait.value = this.copy(selectedItem = ValueFromState(node.companionStateId))
     }
 
     @Composable

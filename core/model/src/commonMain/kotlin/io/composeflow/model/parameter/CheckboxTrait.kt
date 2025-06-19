@@ -116,20 +116,20 @@ data class CheckboxTrait(
     override fun tooltipResource(): StringResource = Res.string.tooltip_checkbox_trait
     override fun isResizeable(): Boolean = false
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> {
+        return ScreenState.BooleanScreenState(
+            id = composeNode.companionStateId,
+            name = composeNode.label.value
+        )
+    }
+
     override fun onAttachStateToNode(
         project: Project,
         stateHolder: StateHolder,
         node: ComposeNode,
     ) {
-        val stateName = stateHolder.createUniqueName(project = project, initial = "checkbox")
-        val screenState =
-            ScreenState.BooleanScreenState(name = stateName, companionNodeId = node.id)
-        stateHolder.addState(screenState)
-
-        val checkboxTrait = node.trait.value as CheckboxTrait
-        node.companionStateId = screenState.id
-        node.trait.value =
-            checkboxTrait.copy(checked = ValueFromState(screenState.id))
+        node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
+        node.trait.value = this.copy(checked = ValueFromState(node.companionStateId))
     }
 
     @Composable

@@ -65,14 +65,12 @@ data class Project(
         // Memorize the count of how many components are used to generate the viewModelKey
         val context = GenerationContext()
         screenHolder.generateComposeLauncherFile()
-
         return screenHolder.screens.flatMap { it.generateCode(this, context = context) } +
                 screenHolder.generateComposeLauncherFile() +
                 screenHolder.generateAppNavHostFile(this, context = context) +
                 screenHolder.generateKoinViewModelModule(this) +
                 screenHolder.generateAppViewModel(this) +
                 screenHolder.generateScreenRouteFileSpec(this) +
-//                apiHolder.generatePagingSourcesFileSpec(this) +
                 dataTypeHolder.generateDataTypeFiles(this) +
                 customEnumHolder.generateEnumFiles(this) +
                 themeHolder.generateThemeFiles() +

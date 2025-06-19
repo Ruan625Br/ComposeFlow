@@ -224,7 +224,9 @@ data class ScreenHolder(
         if (loginScreen != null) {
             val authenticatedUserName = "authenticatedUser"
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                authenticatedUserName, MemberHolder.ComposeFlow.LocalAuthenticatedUser
+                id = "appNavHost",
+                initialIdentifier = authenticatedUserName,
+                MemberHolder.ComposeFlow.LocalAuthenticatedUser
             )
             funSpecBuilder.addCode(
                 """

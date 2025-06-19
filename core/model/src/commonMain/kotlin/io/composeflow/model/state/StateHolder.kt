@@ -1,6 +1,7 @@
 package io.composeflow.model.state
 
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.util.generateUniqueName
@@ -16,7 +17,14 @@ interface StateHolder {
     fun addState(readableState: ReadableState)
     fun updateState(readableState: ReadableState)
 
-    fun createUniqueName(project: Project, initial: String): String
+    /**
+     * Create a unique label within the StateHolder
+     * This will be used for the value for ComposeNode#label.
+     * The value doesn't have to be unique, but to easily distinguish which companion state is
+     * used, it's better to keep the label names unique within the StateHolder (the value of the
+     * label is used for the companion state name)
+     */
+    fun createUniqueLabel(project: Project, composeNode: ComposeNode, initial: String): String
     fun findStateOrNull(project: Project, stateId: StateId): ReadableState?
 
     /**
@@ -42,7 +50,11 @@ data class StateHolderImpl(
         states.add(readableState)
     }
 
-    override fun createUniqueName(project: Project, initial: String): String {
+    override fun createUniqueLabel(
+        project: Project,
+        composeNode: ComposeNode,
+        initial: String
+    ): String {
         return generateUniqueName(
             initial = initial,
             existing = getStates(project).map { it.name }.toSet(),

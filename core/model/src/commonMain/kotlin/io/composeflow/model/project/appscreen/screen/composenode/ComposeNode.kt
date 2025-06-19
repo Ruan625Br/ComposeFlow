@@ -47,9 +47,8 @@ import io.composeflow.model.parameter.lazylist.LazyListChildParams
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.component.ComponentId
 import io.composeflow.model.project.findCanvasEditableHavingNodeOrNull
-import io.composeflow.model.project.findComponentOrThrow
+import io.composeflow.model.project.findComponentOrNull
 import io.composeflow.model.project.findComposeNodeOrThrow
-import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.issue.TrackableIssue
 import io.composeflow.model.property.AssignableProperty
@@ -119,13 +118,6 @@ data class ComposeNode(
 
     @Serializable(with = MutableStateSerializer::class)
     val visibilityParams: MutableState<VisibilityParams> = mutableStateOf(VisibilityParams()),
-
-    /**
-     * StateId that coexists with this node.
-     * For example, StringState for TextField, BooleanState for Switch.
-     * Null if this node doesn't have a built-in state.
-     */
-    var companionStateId: StateId? = null,
 
     /**
      * Updated to true when this node is focused. For example when it's clicked.
@@ -240,12 +232,19 @@ data class ComposeNode(
      * In a LLM generated screen, sometimes duplicated IDs are assigned, that leads to a crash
      * in ComposeFlow. This is to mitigate potential crashes by providing a unique identifier.
      */
+    @Transient
     val fallbackId = "${label.value}-${id}"
+
+    /**
+     * StateId that coexists with this node.
+     */
+    @Transient
+    val companionStateId: StateId = "${id}-companionState"
 
     fun displayName(project: Project): String {
         return if (trait.value is ComponentTrait) {
             componentId?.let {
-                project.findComponentOrThrow(it).name
+                project.findComponentOrNull(it)?.name
             } ?: label.value
         } else {
             if (label.value != trait.value.iconText()) {
@@ -284,9 +283,6 @@ data class ComposeNode(
         idMap: IdMap = mutableMapOf(),
     ): ComposeNode {
         val newId = idMap.createNewIdIfNotPresent(id)
-        val newCompanionStateId = companionStateId?.let {
-            idMap.createNewIdIfNotPresent(it)
-        }
         val restored = this.copy(
             id = newId,
             children = mutableStateListEqualsOverrideOf<ComposeNode>().apply {
@@ -298,7 +294,6 @@ data class ComposeNode(
                     },
                 )
             },
-            companionStateId = newCompanionStateId,
             componentId = componentId,
         )
         restored.parentNode = parentNode
@@ -395,10 +390,6 @@ data class ComposeNode(
             }
         }
         updateChildParentRelationships()
-    }
-
-    fun onRemoveNode(project: Project) {
-        trait.value.onRemoveNode(project, this)
     }
 
     fun findFirstFocusedNodeOrNull(): ComposeNode? =
@@ -837,12 +828,18 @@ data class ComposeNode(
     }
 
     fun getCompanionStateOrNull(project: Project): ScreenState<*>? {
-        return companionStateId?.let {
-            when (val state = project.findLocalStateOrNull(it)) {
-                is ScreenState<*> -> state
-                else -> null
-            }
+        return trait.value.companionState(this)
+    }
+
+    fun getCompanionStates(project: Project): List<ScreenState<*>> {
+        val statesFromTrait = trait.value.companionState(this)?.let {
+            listOf(it)
+        } ?: emptyList()
+        val statesFromActions = allActions().mapNotNull {
+            it.companionState(project)
         }
+
+        return statesFromTrait + statesFromActions
     }
 
     fun isPositionWithinBounds(position: Offset) =

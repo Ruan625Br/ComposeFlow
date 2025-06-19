@@ -77,7 +77,7 @@ data class ButtonTrait(
             node.getDependentValidatorNodesForActionType(project, ActionType.OnClick)
         validatorNodes.forEachIndexed { index, validatorNode ->
             val validateResultName =
-                validatorNode.getCompanionStateOrNull(project)?.getValidateResultName()
+                validatorNode.getCompanionStateOrNull(project)?.getValidateResultName(context)
             validateResultBuilder.add(
                 CodeBlock.of(
                     "${validateResultName}.%M()",

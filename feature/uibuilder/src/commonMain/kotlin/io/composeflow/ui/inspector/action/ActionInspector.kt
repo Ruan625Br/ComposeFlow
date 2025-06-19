@@ -193,7 +193,7 @@ fun ActionInspector(
                     val newActionsMap = mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
                         putAll(composeNode.actionsMap)
                     }
-                    it.onActionAdded(project)
+//                    it.onActionAdded(project)
                     newActionsMap[selectedActionType]?.add(it.asActionNode())
                     composeNodeCallbacks.onActionsMapUpdated(
                         composeNode,
@@ -285,11 +285,6 @@ private fun ActionTriggersContent(
                                         mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
                                             putAll(composeNode.actionsMap)
                                         }
-                                    newActionsMap[actionType]?.get(index)?.let {
-                                        it.allActions().forEach { action ->
-                                            action.onActionRemoved(project)
-                                        }
-                                    }
                                     newActionsMap[actionType]?.removeAt(index)
                                     composeNodeCallbacks.onActionsMapUpdated(
                                         composeNode,

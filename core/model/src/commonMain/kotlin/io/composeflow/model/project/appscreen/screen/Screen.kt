@@ -69,6 +69,7 @@ import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.StateHolderImpl
 import io.composeflow.model.state.StateHolderType
+import io.composeflow.model.state.StateId
 import io.composeflow.model.state.StateResult
 import io.composeflow.onScreenInitiallyLoaded
 import io.composeflow.override.mutableStateListEqualsOverrideOf
@@ -85,6 +86,7 @@ import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.propertyeditor.DropdownItem
 import io.composeflow.ui.switchByHovered
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
+import io.composeflow.util.generateUniqueName
 import io.composeflow.util.toKotlinFileName
 import io.composeflow.util.toPackageName
 import kotlinx.serialization.SerialName
@@ -194,7 +196,7 @@ data class Screen(
     @Serializable(FallbackMutableStateListSerializer::class)
     override val parameters: MutableList<ParameterWrapper<*>> = mutableStateListEqualsOverrideOf(),
     private val stateHolderImpl: StateHolderImpl = StateHolderImpl(),
-) : StateHolder by stateHolderImpl,
+) : StateHolder,
     CanvasEditable,
     DropdownItem {
     init {
@@ -258,13 +260,62 @@ data class Screen(
         "${project.packageName}.screens.$name".toPackageName()
 
     override fun getStates(project: Project): List<ReadableState> {
-        return project.getStates(project) + stateHolderImpl.getStates(project)
+        val projectStates = project.getStates(project)
+        val screenSpecificStates = stateHolderImpl.getStates(project)
+        val companionStates = getRootNode().allChildren()
+            .flatMap {
+                it.getCompanionStates(project)
+            }
+        return projectStates + screenSpecificStates + companionStates
+    }
+
+    override fun addState(readableState: ReadableState) {
+        stateHolderImpl.states.add(readableState)
+    }
+
+    override fun createUniqueLabel(
+        project: Project,
+        composeNode: ComposeNode,
+        initial: String
+    ): String {
+        val existingLabels =
+            getRootNode().allChildren().filter { it.id != composeNode.id }.map { it.label.value }
+                .toSet()
+        return generateUniqueName(
+            initial = initial,
+            existing = existingLabels,
+        )
+    }
+
+    override fun findStateOrNull(project: Project, stateId: StateId): ReadableState? =
+        getStates(project).firstOrNull { it.id == stateId }
+
+    override fun removeState(stateId: StateId): Boolean =
+        stateHolderImpl.states.removeIf {
+            it.id == stateId
+        }
+
+    override fun updateState(readableState: ReadableState) {
+        val index = stateHolderImpl.states.indexOfFirst { it.id == readableState.id }
+        if (index != -1) {
+            stateHolderImpl.states[index] = readableState
+        }
+    }
+
+    override fun copyContents(other: StateHolder) {
+        stateHolderImpl.states.clear()
+        stateHolderImpl.states.addAll((other as? StateHolderImpl)?.states ?: emptyList())
     }
 
     override fun getStateResults(project: Project): List<StateResult> {
         return project.getStates(project).map { StateHolderType.Global to it } +
                 stateHolderImpl.getStates(project)
-                    .map { StateHolderType.Screen(screenId = id) to it }
+                    .map { StateHolderType.Screen(screenId = id) to it } +
+                getRootNode().allChildren().flatMap { node ->
+                    node.getCompanionStates(project).map { state ->
+                        StateHolderType.Screen(screenId = id) to state
+                    }
+                }
     }
 
     fun generateCode(project: Project, context: GenerationContext): List<FileSpec?> {

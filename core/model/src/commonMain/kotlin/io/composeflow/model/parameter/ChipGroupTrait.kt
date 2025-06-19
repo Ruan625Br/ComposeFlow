@@ -33,9 +33,10 @@ import io.composeflow.model.project.findCanvasEditableHavingNodeOrNull
 import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.CustomEnumValuesProperty
+import io.composeflow.model.property.FromString
 import io.composeflow.model.property.PropertyContainer
+import io.composeflow.model.property.StringProperty
 import io.composeflow.model.state.ScreenState
-import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.WriteableState
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.tooltip_chip_group_trait
@@ -49,7 +50,12 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("ChipGroupTrait")
 data class ChipGroupTrait(
-    val chipItems: AssignableProperty? = null,
+    val chipItems: AssignableProperty? = StringProperty.StringIntrinsicValue("Chip1,Chip2,Chip3")
+        .apply {
+            propertyTransformers.add(
+                FromString.ToStringList.Split(mutableStateOf(StringProperty.StringIntrinsicValue(",")))
+            )
+        },
     val selectable: Boolean = true,
     val multiSelect: Boolean = false,
     val elevated: Boolean = false,
@@ -71,27 +77,13 @@ data class ChipGroupTrait(
         return chipGroup
     }
 
-    override fun onAttachStateToNode(
-        project: Project,
-        stateHolder: StateHolder,
-        node: ComposeNode,
-    ) {
-        val stateName =
-            stateHolder.createUniqueName(project = project, initial = "chipGroupSelectedItems")
-
-        val companionEnum = project.customEnumHolder.newCustomEnum("ChipGroupItem").apply {
-            values.addAll(listOf("Chip1", "Chip2", "Chip3"))
-        }
-        project.customEnumHolder.enumList.add(companionEnum)
-        val chipGroupTrait = node.trait.value as ChipGroupTrait
-        node.trait.value =
-            chipGroupTrait.copy(chipItems = CustomEnumValuesProperty(companionEnum.customEnumId))
-
-        val screenState =
-            ScreenState.StringListScreenState(name = stateName, companionNodeId = node.id)
-        stateHolder.addState(screenState)
-        node.companionStateId = screenState.id
-        node.label.value = stateName
+    override fun companionState(
+        composeNode: ComposeNode,
+    ): ScreenState<*> {
+        return ScreenState.StringListScreenState(
+            id = composeNode.companionStateId,
+            name = composeNode.label.value,
+        )
     }
 
     override fun icon(): ImageVector = ComposeFlowIcons.Choice
@@ -254,7 +246,14 @@ data class ChipGroupTrait(
             }
             builder.add("%M(", chipMember)
             if (updatedState is WriteableState) {
-                builder.addStatement("selected = ${updatedState.getReadVariableName(project)}.contains(it),")
+                builder.addStatement(
+                    "selected = ${
+                        updatedState.getReadVariableName(
+                            project,
+                            context
+                        )
+                    }.contains(it),"
+                )
             } else {
                 builder.addStatement("selected = false,")
             }

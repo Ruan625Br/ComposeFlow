@@ -34,7 +34,11 @@ class ComposeEditableContext(
     private val _launchedEffectBlock: MutableSet<CodeBlock> = mutableSetOf()
     val launchedEffectBlock: Set<CodeBlock> = _launchedEffectBlock
 
-    private val composeFileVariables: MutableSet<String> = mutableSetOf()
+    /**
+     * Holds the information about the map of the ID to identifier (such as variable name within
+     * the pair of the Composable and the ViewModel) to avoid the conflicting variable names.
+     */
+    private val identifierMap: MutableMap<String, String> = mutableMapOf()
 
     /**
      * Holds the pairs of a variable name and corresponding MemberName used for retrieving a value in
@@ -85,6 +89,22 @@ class ComposeEditableContext(
     }
 
     /**
+     * Get the identifier or create a unique identifier within the pair of Composable file and the
+     * ViewModel
+     *
+     * @param id the ID of the identifier. For example id of [State] or [ComposeNode], [Action]
+     * @param initialIdentifier initial identifier for the identifier
+     */
+    fun getOrAddIdentifier(id: String, initialIdentifier: String): String {
+        return identifierMap.getOrPut(id) {
+            generateUniqueName(
+                initialIdentifier,
+                identifierMap.values.toSet(),
+            )
+        }
+    }
+
+    /**
      * LaunchedEffect code block in the Compose code.
      */
     fun addLaunchedEffectBlock(codeBlock: CodeBlock, dryRun: Boolean) {
@@ -93,17 +113,9 @@ class ComposeEditableContext(
     }
 
     fun addCompositionLocalVariableEntryIfNotPresent(
-        variableName: String, compositionLocalMember: MemberName,
+        id: String, initialIdentifier: String, compositionLocalMember: MemberName,
     ): String {
-        val newName =
-            if (!composeFileVariables.contains(variableName) && !_compositionLocalVariables.contains(
-                    variableName
-                )
-            ) {
-                generateUniqueName(initial = variableName, existing = composeFileVariables)
-            } else {
-                variableName
-            }
+        val newName = getOrAddIdentifier(id, initialIdentifier)
         if (!_compositionLocalVariables.contains(newName)) {
             _compositionLocalVariables[newName] = compositionLocalMember
         }
@@ -113,15 +125,10 @@ class ComposeEditableContext(
     /**
      * Add the variable name to the Compose file. Returns the generated unique name
      */
-    fun addComposeFileVariable(variableName: String, dryRun: Boolean): String {
-        if (dryRun) return variableName
-        val newName = generateUniqueName(initial = variableName, existing = composeFileVariables)
-        composeFileVariables.add(newName)
+    fun addComposeFileVariable(id: String, initialIdentifier: String, dryRun: Boolean): String {
+        if (dryRun) return initialIdentifier
+        val newName = getOrAddIdentifier(id, initialIdentifier)
         return newName
-    }
-
-    fun removeComposeFileVariable(variableName: String) {
-        composeFileVariables.remove(variableName)
     }
 
     fun buildTypeSpec(): TypeSpec {
@@ -145,10 +152,7 @@ class ComposeEditableContext(
         )
     }
 
-    fun generateUniqueFunName(initial: String): String {
-        return generateUniqueName(
-            initial,
-            funSpecs.map { it.name }.toSet(),
-        )
+    fun generateUniqueFunName(id: String, initial: String): String {
+        return getOrAddIdentifier(id = id, initialIdentifier = initial)
     }
 }

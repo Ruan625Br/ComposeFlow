@@ -211,9 +211,13 @@ data object TabsTrait : ComposeTrait {
             )
             codeBlockBuilder.addStatement(") {")
         }
+        val selectedIndexInitialName = "selectedIndex"
         val indexVariable =
             context.getCurrentComposableContext()
-                .addComposeFileVariable("selectedIndex", dryRun)
+                .addComposeFileVariable(
+                    id = "${node.id}-${selectedIndexInitialName}",
+                    initialIdentifier = selectedIndexInitialName, dryRun
+                )
         codeBlockBuilder.addStatement(
             "var $indexVariable by %M { %M(0) }",
             MemberHolder.AndroidX.Runtime.rememberSaveable,
@@ -252,7 +256,6 @@ data object TabsTrait : ComposeTrait {
         codeBlockBuilder.addStatement("  } ")
         codeBlockBuilder.addStatement("}")
 
-        context.getCurrentComposableContext().removeComposeFileVariable(indexVariable)
         return codeBlockBuilder.build()
     }
 

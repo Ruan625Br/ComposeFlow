@@ -865,8 +865,8 @@ data class ValueFromState(
         return textFromState(project, readFromStateId)
     }
 
-    private fun textFromState(project: Project, stateId: StateId): String =
-        project.findLocalStateOrNull(stateId)?.let {
+    private fun textFromState(project: Project, stateId: StateId): String {
+        return project.findLocalStateOrNull(stateId)?.let {
             val prefix = if (it is ScreenState<*>) {
                 "state: "
             } else if (it is AppState<*>) {
@@ -876,6 +876,7 @@ data class ValueFromState(
             }
             "[$prefix${it.name}]"
         } ?: "[Invalid]"
+    }
 
     override fun isDependent(sourceId: String): Boolean {
         return readFromStateId == sourceId || super<AssignableProperty>.isDependent(sourceId)
@@ -906,13 +907,19 @@ data class ValueFromState(
     ): CodeBlock {
         val state = project.findLocalStateOrNull(readFromStateId) ?: return CodeBlock.of("")
         val codeBlock = when (context.generatedPlace) {
-            GeneratedPlace.ComposeScreen -> CodeBlock.of(state.getReadVariableName(project))
-            GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName()}.value")
-            GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project))
+            GeneratedPlace.ComposeScreen -> CodeBlock.of(
+                state.getReadVariableName(
+                    project,
+                    context
+                )
+            )
+
+            GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
+            GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project, context))
         }
 
         if (state is WriteableState) {
-            state.generateStatePropertiesToViewModel(project).forEach {
+            state.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun = dryRun)
             }
         }
@@ -928,6 +935,7 @@ data class ValueFromState(
         if (state is WriteableState) {
             state.generateStatePropertiesToViewModel(
                 project,
+                context,
             ).forEach {
                 context.addProperty(it, dryRun = dryRun)
             }

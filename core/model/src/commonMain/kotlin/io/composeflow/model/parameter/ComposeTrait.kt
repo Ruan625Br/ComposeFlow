@@ -18,10 +18,9 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.lazylist.LazyGridCells
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.model.project.findCanvasEditableHavingNodeOrNull
-import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.project.issue.Issue
 import io.composeflow.model.property.PropertyContainer
+import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.validator.ComposeStateValidator
 import io.composeflow.override.mutableStateListEqualsOverrideOf
@@ -56,8 +55,6 @@ sealed interface ComposeTrait : PaletteDraggable {
     /**
      * Attach any read/write states to the [node]. This is to attach states from the method which
      * is composition aware.
-     * Before this method is introduced, attaching states was done through the [defaultComposeNode]
-     * method, which isn't composition aware because it was called from the non-Composable callback.
      */
     fun onAttachStateToNode(
         project: Project,
@@ -65,20 +62,6 @@ sealed interface ComposeTrait : PaletteDraggable {
         node: ComposeNode,
     ) {
     }
-
-    fun onRemoveNode(
-        project: Project,
-        node: ComposeNode,
-    ) {
-        val currentEditable = project.findCanvasEditableHavingNodeOrNull(node)
-        node.companionStateId?.let {
-            project.findLocalStateOrNull(it)?.let { companionState ->
-                currentEditable?.removeState(companionState.id)
-            }
-            node.companionStateId = null
-        }
-    }
-
 
     fun defaultModifierList(): MutableList<ModifierWrapper> =
         mutableStateListEqualsOverrideOf(ModifierWrapper.Padding(all = 8.dp))
@@ -162,6 +145,13 @@ sealed interface ComposeTrait : PaletteDraggable {
         dryRun: Boolean,
     ): CodeBlock
 
+    /**
+     * Defines a companion state if the trait needs a state for ComposeTraits that need to hold
+     * some state.
+     * For example, a TextFieldTrait needs a StringScreenState for storing the input value in the
+     * TextField.
+     */
+    fun companionState(composeNode: ComposeNode): ScreenState<*>? = null
 
     companion object {
         const val NumOfItemsInLazyList = 1

@@ -121,10 +121,10 @@ interface CanvasEditable : StateHolder {
         getStates(project).forEach { state ->
             when (state) {
                 is ScreenState<*> -> {
-                    state.generateStatePropertiesToViewModel(project).forEach {
+                    state.generateStatePropertiesToViewModel(project, context).forEach {
                         context.addProperty(it, dryRun)
                     }
-                    context.addFunction(state.generateUpdateStateMethodToViewModel(), dryRun)
+                    context.addFunction(state.generateUpdateStateMethodToViewModel(context), dryRun)
                 }
 
                 is AppState<*> -> {
@@ -136,7 +136,7 @@ interface CanvasEditable : StateHolder {
                         if (state is AppState.CustomDataTypeAppState) {
                             dependsOnCustomDataTypeAppState = true
                         }
-                        state.generateStatePropertiesToViewModel(project).forEach {
+                        state.generateStatePropertiesToViewModel(project, context).forEach {
                             context.addProperty(it, dryRun)
                         }
                     }
@@ -258,14 +258,12 @@ interface CanvasEditable : StateHolder {
         return getAllComposeNodes().any { node ->
             node.actionHandler.allActions().any { action ->
                 action.isDependent(readableState.id)
-//                action.hasDependency(project, readableState)
             }
         }
     }
 
     private fun anyNodeHasReadDependency(project: Project, readableState: ReadableState): Boolean =
         getAllComposeNodes().any { node ->
-//            node.hasReadDependency(project, readableState)
             node.isDependent(readableState.id)
         }
 

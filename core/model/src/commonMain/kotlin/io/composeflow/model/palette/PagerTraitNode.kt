@@ -36,9 +36,14 @@ object PagerTraitNode {
             node.generateModifierCode(project, context, dryRun = dryRun)
         )
         codeBlockBuilder.addStatement(") {")
+        val initialPagerStateName = "pagerState"
         val pagerStateName =
             context.getCurrentComposableContext()
-                .addComposeFileVariable("pagerState", dryRun)
+                .addComposeFileVariable(
+                    id = "${node.id}-${initialPagerStateName}",
+                    initialPagerStateName,
+                    dryRun
+                )
         if (!childrenDependOnDynamicItems) {
             codeBlockBuilder.addStatement(
                 "val $pagerStateName = %M(pageCount = {${node.children.size}})",
@@ -96,8 +101,13 @@ object PagerTraitNode {
                 )
                 codeBlockBuilder.addStatement(") { ${itemName}Index -> ")
 
+                val initialComposableListName = "composableList"
                 val composableListName = context.getCurrentComposableContext()
-                    .addComposeFileVariable("composableList", dryRun)
+                    .addComposeFileVariable(
+                        id = "${node.id}-${initialComposableListName}",
+                        initialComposableListName,
+                        dryRun
+                    )
 
                 codeBlockBuilder.add("val ${composableListName}: List<@Composable () -> Unit> = ")
                 codeBlockBuilder.add(transformedItemCodeBlock)

@@ -81,6 +81,24 @@ data class TextFieldTrait(
         )
     }
 
+    override fun companionState(
+        composeNode: ComposeNode,
+    ): ScreenState<*> {
+        return ScreenState.StringScreenState(
+            id = composeNode.companionStateId,
+            name = composeNode.label.value,
+        )
+    }
+
+    override fun onAttachStateToNode(
+        project: Project,
+        stateHolder: StateHolder,
+        node: ComposeNode,
+    ) {
+        node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
+        node.trait.value = this.copy(value = ValueFromState(node.companionStateId))
+    }
+
     private fun generateParamsCode(
         project: Project,
         node: ComposeNode,
@@ -126,7 +144,7 @@ data class TextFieldTrait(
                 if (enableValidator == true) {
                     codeBlockBuilder.add(
                         CodeBlock.of(
-                            "if (${writeState.getValidateResultName()}.%M()) {",
+                            "if (${writeState.getValidateResultName(context)}.%M()) {",
                             MemberHolder.ComposeFlow.isSuccess,
                         )
                     )
@@ -266,7 +284,7 @@ data class TextFieldTrait(
             if (enableValidator == true && writeState != null && writeState is WriteableState) {
                 codeBlockBuilder.add(
                     CodeBlock.of(
-                        "if (${writeState.getValidateResultName()}.%M()) {",
+                        "if (${writeState.getValidateResultName(context)}.%M()) {",
                         MemberHolder.ComposeFlow.isSuccess,
                     )
                 )
@@ -283,13 +301,13 @@ data class TextFieldTrait(
         }
         if (enableValidator == true && writeState != null && writeState is WriteableState) {
             codeBlockBuilder.add(
-                "isError = ${writeState.getValidateResultName()} is %M.Failure,",
+                "isError = ${writeState.getValidateResultName(context)} is %M.Failure,",
                 MemberHolder.ComposeFlow.ValidateResult
             )
             codeBlockBuilder.add(
                 CodeBlock.of(
                     """
-                supportingText = ${writeState.getValidateResultName()}.%M()?.let {
+                supportingText = ${writeState.getValidateResultName(context)}.%M()?.let {
                     {
                         %M(it)
                     }
@@ -321,20 +339,6 @@ data class TextFieldTrait(
             modifierList = defaultModifierList(),
             trait = mutableStateOf(TextFieldTrait(value = StringProperty.StringIntrinsicValue(""))),
         )
-    }
-
-    override fun onAttachStateToNode(
-        project: Project,
-        stateHolder: StateHolder,
-        node: ComposeNode,
-    ) {
-        val stateName = stateHolder.createUniqueName(project = project, initial = "textField")
-        val screenState =
-            ScreenState.StringScreenState(name = stateName, companionNodeId = node.id)
-        stateHolder.addState(screenState)
-        node.companionStateId = screenState.id
-        node.trait.value = this.copy(value = ValueFromState(screenState.id))
-        node.label.value = stateName
     }
 
     override fun icon(): ImageVector = Icons.Outlined.EditNote
@@ -564,7 +568,11 @@ data class TextFieldTrait(
                     launchedEffectBuilder.add(
                         """
                     %M(Unit) {
-                        ${context.currentEditable.viewModelName}.${companionState.getFlowName()}.%M {
+                        ${context.currentEditable.viewModelName}.${
+                            companionState.getFlowName(
+                                context
+                            )
+                        }.%M {
                 """,
                         MemberHolder.AndroidX.Runtime.LaunchedEffect,
                         MemberHolder.Coroutines.Flow.collectLatest,

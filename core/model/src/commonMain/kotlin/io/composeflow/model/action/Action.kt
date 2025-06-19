@@ -60,7 +60,6 @@ import io.composeflow.model.project.findScreenOrNull
 import io.composeflow.model.project.firebase.CollectionId
 import io.composeflow.model.project.issue.Issue
 import io.composeflow.model.project.issue.NavigatableDestination
-import io.composeflow.model.project.removeLocalState
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.IntrinsicProperty
 import io.composeflow.model.property.StringProperty
@@ -84,7 +83,6 @@ import io.composeflow.show_nav_drawer
 import io.composeflow.show_snackbar
 import io.composeflow.sign_in_with
 import io.composeflow.sign_out
-import io.composeflow.util.generateUniqueName
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -147,14 +145,13 @@ sealed interface Action {
     fun asActionNode(actionNodeId: ActionNodeId? = null): ActionNode
 
     /**
-     * Post process after the action is added
+     * Defines a companion state if the action needs a state for hold
+     * some state.
+     * For example, a OpenDatePicker action needs a InstantState for storing the picked value in the
+     * DatePicker.
      */
-    fun onActionAdded(project: Project) {}
+    fun companionState(project: Project): ScreenState<*>? = null
 
-    /**
-     * Post process after the action is removed
-     */
-    fun onActionRemoved(project: Project) {}
     fun hasSuspendFunction(): Boolean = false
     fun getDependentComposeNodes(project: Project): List<ComposeNode> = emptyList()
 
@@ -753,9 +750,13 @@ data class ShowConfirmationDialog(
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
-        val variableName =
-            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
-        dialogOpenVariableName = variableName
+//        val variableName =
+//            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
+        val variableName = composableContext.getOrAddIdentifier(
+            id = "${id}-${dialogOpenVariableName}",
+            initialIdentifier = dialogOpenVariableName
+        )
+//        dialogOpenVariableName = variableName
         val titleArg = title?.let {
             "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
         } ?: ""
@@ -764,7 +765,7 @@ data class ShowConfirmationDialog(
         } ?: ""
         builder.addStatement(
             """
-                var $dialogOpenVariableName by %M { %M(false) }    
+                var $variableName by %M { %M(false) }    
                 if ($dialogOpenVariableName) {
                     %M(
                         positiveText = ${
@@ -822,7 +823,8 @@ data class ShowInformationDialog(
     val confirmText: AssignableProperty = StringProperty.StringIntrinsicValue("Ok"),
     @Transient
     override val name: String = "Show information dialog",
-    var dialogOpenVariableName: String = "openInformationDialog",
+    @Transient
+    val dialogOpenVariableName: String = "openInformationDialog",
 ) : ShowModal {
 
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
@@ -876,9 +878,11 @@ data class ShowInformationDialog(
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
-        val variableName =
-            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
-        dialogOpenVariableName = variableName
+        val dialogVariableName =
+            composableContext.getOrAddIdentifier(
+                id = "${id}-${dialogOpenVariableName}",
+                initialIdentifier = dialogOpenVariableName,
+            )
         val titleArg = title?.let {
             "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
         } ?: ""
@@ -887,8 +891,8 @@ data class ShowInformationDialog(
         } ?: ""
         builder.addStatement(
             """
-                var $dialogOpenVariableName by %M { %M(false) }    
-                if ($dialogOpenVariableName) {
+                var $dialogVariableName by %M { %M(false) }    
+                if ($dialogVariableName) {
                     %M(
                         confirmText = ${
                 confirmText.transformedCodeBlock(
@@ -898,7 +902,7 @@ data class ShowInformationDialog(
                 )
             },
                         onDismissRequest = {
-                            $dialogOpenVariableName = false
+                            $dialogVariableName = false
                         },
                         $titleArg
                         $messageArg
@@ -989,7 +993,8 @@ data class ShowCustomDialog(
         mutableStateMapOf(),
     @Transient
     override val name: String = "Show custom dialog",
-    var dialogOpenVariableName: String = "openCustomDialog",
+    @Transient
+    val dialogOpenVariableName: String = "openCustomDialog",
 ) : ShowModalWithComponent {
 
     override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent {
@@ -1027,9 +1032,12 @@ data class ShowCustomDialog(
     ): CodeBlock {
         val component = findComponentOrNull(project) ?: return CodeBlock.of("")
         val composableContext = context.getCurrentComposableContext()
-        val variableName =
-            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
-        dialogOpenVariableName = variableName
+        val dialogOpenVariableName =
+            composableContext.addComposeFileVariable(
+                id = "${id}-${dialogOpenVariableName}",
+                initialIdentifier = dialogOpenVariableName,
+                dryRun = dryRun
+            )
 
         val paramBuilder = CodeBlock.builder()
         paramsMap.forEach {
@@ -1102,7 +1110,8 @@ data class ShowBottomSheet(
         mutableStateMapOf(),
     @Transient
     override val name: String = "Show bottom sheet",
-    var bottomSheetOpenVariableName: String = "openBottomSheet",
+    @Transient
+    val bottomSheetOpenVariableName: String = "openBottomSheet",
 ) : ShowModalWithComponent {
 
     override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent {
@@ -1141,11 +1150,19 @@ data class ShowBottomSheet(
         val component = findComponentOrNull(project) ?: return CodeBlock.of("")
 
         val composableContext = context.getCurrentComposableContext()
-        val variableName =
-            composableContext.addComposeFileVariable(bottomSheetOpenVariableName, dryRun = dryRun)
-        bottomSheetOpenVariableName = variableName
+        val bottomSheetOpenVariableName =
+            composableContext.addComposeFileVariable(
+                id = "${id}-${bottomSheetOpenVariableName}",
+                initialIdentifier = bottomSheetOpenVariableName,
+                dryRun = dryRun
+            )
+        val initialBottomSheetStateName = "bottomSheetState"
         val bottomSheetStateVariable =
-            composableContext.addComposeFileVariable("bottomSheetState", dryRun = dryRun)
+            composableContext.addComposeFileVariable(
+                id = "${id}-${initialBottomSheetStateName}",
+                initialBottomSheetStateName,
+                dryRun = dryRun
+            )
 
         val paramBuilder = CodeBlock.builder()
         paramsMap.forEach {
@@ -1296,7 +1313,8 @@ sealed interface ShowMessaging : Action {
         val actionLabel: AssignableProperty? = null,
         @Transient
         override val name: String = "Show Snackbar",
-        var snackbarOpenVariableName: String = "onShowSnackbar",
+        @Transient
+        val snackbarOpenVariableName: String = "onShowSnackbar",
     ) : ShowMessaging {
 
         override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
@@ -1347,10 +1365,11 @@ sealed interface ShowMessaging : Action {
             context: GenerationContext,
             dryRun: Boolean,
         ): CodeBlock {
-            snackbarOpenVariableName =
-                context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                    snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
-                )
+            context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                id = "${id}-${snackbarOpenVariableName}",
+                initialIdentifier = snackbarOpenVariableName,
+                MemberHolder.ComposeFlow.LocalOnShowsnackbar
+            )
             // Initialize the uriHandler once in the compose file instead of initializing it in
             // every action
             return CodeBlock.of("")
@@ -1393,7 +1412,7 @@ sealed interface YearRangeSelectableAction : Action {
     var maxSelectableYear: MutableState<AssignableProperty?>
     var onlyPastDates: MutableState<Boolean>
     var onlyFutureDates: MutableState<Boolean>
-    var outputStateName: MutableState<String>
+    val outputStateName: MutableState<String>
 
     fun generateRememberDatePickerState(
         stateVariableName: String,
@@ -1470,13 +1489,16 @@ sealed interface DateOrTimePicker : Action {
         @Serializable(MutableStateSerializer::class)
         override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
 
-        var companionStateId: StateId = Uuid.random().toString(),
         @Transient
         override val name: String = "Date picker",
-        var dialogOpenVariableName: String = "openDatePicker",
-        @Serializable(MutableStateSerializer::class)
-        override var outputStateName: MutableState<String> = mutableStateOf("datePickerState"),
+        @Transient
+        private val dialogOpenVariableName: String = "openDatePicker",
+        @Transient
+        override val outputStateName: MutableState<String> = mutableStateOf("pickedDate"),
+        @Transient
+        private val rememberedDatePickerStateName: String = "datePickerState",
     ) : DateOrTimePicker, YearRangeSelectableAction {
+        val companionStateId: StateId = "${id}-outputState"
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -1512,23 +1534,12 @@ sealed interface DateOrTimePicker : Action {
             }
         }
 
-        override fun onActionAdded(project: Project) {
-            val canvasEditable = project.screenHolder.currentEditable()
-            val states = canvasEditable.getStates(project)
-            val stateName = generateUniqueName(
-                initial = "pickedDate",
-                existing = states.map { it.name }.toSet(),
-            )
-            val instantState = ScreenState.InstantScreenState(
-                name = stateName,
+        override fun companionState(project: Project): ScreenState<*> {
+            return ScreenState.InstantScreenState(
+                id = companionStateId,
+                name = outputStateName.value,
                 userWritable = false // This state can be only changed from the Open date picker action
             )
-            this.companionStateId = instantState.id
-            canvasEditable.addState(instantState)
-        }
-
-        override fun onActionRemoved(project: Project) {
-            project.removeLocalState(companionStateId)
         }
 
         override fun generateInitializationCodeBlock(
@@ -1538,16 +1549,23 @@ sealed interface DateOrTimePicker : Action {
         ): CodeBlock {
             val builder = CodeBlock.builder()
             val composableContext = context.getCurrentComposableContext()
-            dialogOpenVariableName =
-                composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
-            outputStateName.value =
-                composableContext.addComposeFileVariable(outputStateName.value, dryRun = dryRun)
+            val dialogOpenVariableName =
+                composableContext.addComposeFileVariable(
+                    id = "${id}-${dialogOpenVariableName}",
+                    dialogOpenVariableName, dryRun = dryRun
+                )
+            val rememberedDatePickerStateName =
+                composableContext.addComposeFileVariable(
+                    id = "${id}-${rememberedDatePickerStateName}",
+                    initialIdentifier = rememberedDatePickerStateName,
+                    dryRun = dryRun
+                )
 
             val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
             if (state !is WriteableState) return builder.build()
             builder.add(
                 generateRememberDatePickerState(
-                    stateVariableName = outputStateName.value,
+                    stateVariableName = rememberedDatePickerStateName,
                     project, context, dryRun = dryRun
                 )
             )
@@ -1565,11 +1583,15 @@ sealed interface DateOrTimePicker : Action {
                                     %M(
                                         onClick = {
                                             $dialogOpenVariableName = false
-                                            ${outputStateName.value}.selectedDateMillis?.let {
-                                                ${composableContext.canvasEditable.viewModelName}.${state.getUpdateMethodName()}(%T.fromEpochMilliseconds(it))
+                                            ${rememberedDatePickerStateName}.selectedDateMillis?.let {
+                                                ${composableContext.canvasEditable.viewModelName}.${
+                    state.getUpdateMethodName(
+                        context
+                    )
+                }(%T.fromEpochMilliseconds(it))
                                             }
                                         },
-                                        enabled = ${outputStateName.value}.selectedDateMillis != null
+                                        enabled = ${rememberedDatePickerStateName}.selectedDateMillis != null
                                     ) {
                                         %M(%M(%M.string.%M))
                                     }
@@ -1588,7 +1610,7 @@ sealed interface DateOrTimePicker : Action {
                             }
                         },
                     ) {
-                        %M(${outputStateName.value})
+                        %M(${rememberedDatePickerStateName})
                     }
                 }
             """,
@@ -1644,16 +1666,23 @@ sealed interface DateOrTimePicker : Action {
         @Serializable(MutableStateSerializer::class)
         override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
 
-        var companionStateId: StateId = Uuid.random().toString(),
         @Transient
         override val name: String = "Date+Time picker",
-        var dateDialogOpenVariableName: String = "openDatePicker",
-        var datePickerStateName: String = "datePickerState",
-        var timeDialogOpenVariableName: String = "openTimePicker",
-        var timePickerStateName: String = "timePickerState",
-        @Serializable(MutableStateSerializer::class)
-        override var outputStateName: MutableState<String> = mutableStateOf("pickedDateTime"),
+        @Transient
+        val dateDialogOpenVariableName: String = "openDatePicker",
+        @Transient
+        val datePickerStateName: String = "datePickerState",
+        @Transient
+        val timeDialogOpenVariableName: String = "openTimePicker",
+        @Transient
+        val timePickerStateName: String = "timePickerState",
+        @Transient
+        override val outputStateName: MutableState<String> = mutableStateOf("pickedDateTime"),
+        @Transient
+        val rememberedStateName: String = "dateTimePickerState",
     ) : DateOrTimePicker, YearRangeSelectableAction {
+
+        val companionStateId: StateId = "${id}-outputState"
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -1689,23 +1718,12 @@ sealed interface DateOrTimePicker : Action {
             }
         }
 
-        override fun onActionAdded(project: Project) {
-            val canvasEditable = project.screenHolder.currentEditable()
-            val states = canvasEditable.getStates(project)
-            val stateName = generateUniqueName(
-                initial = outputStateName.value,
-                existing = states.map { it.name }.toSet(),
-            )
-            val instantState = ScreenState.InstantScreenState(
-                name = stateName,
+        override fun companionState(project: Project): ScreenState<*> {
+            return ScreenState.InstantScreenState(
+                id = companionStateId,
+                name = outputStateName.value,
                 userWritable = false // This state can be only changed from the Open date picker action
             )
-            this.companionStateId = instantState.id
-            canvasEditable.addState(instantState)
-        }
-
-        override fun onActionRemoved(project: Project) {
-            project.removeLocalState(companionStateId)
         }
 
         override fun generateInitializationCodeBlock(
@@ -1715,25 +1733,39 @@ sealed interface DateOrTimePicker : Action {
         ): CodeBlock {
             val builder = CodeBlock.builder()
             val composableContext = context.getCurrentComposableContext()
-            dateDialogOpenVariableName = composableContext.addComposeFileVariable(
-                dateDialogOpenVariableName,
+            val dateDialogOpenVariableName = composableContext.addComposeFileVariable(
+                id = "${id}-${dateDialogOpenVariableName}",
+                initialIdentifier = dateDialogOpenVariableName,
                 dryRun = dryRun
             )
-            datePickerStateName =
-                composableContext.addComposeFileVariable(datePickerStateName, dryRun = dryRun)
-            timeDialogOpenVariableName = composableContext.addComposeFileVariable(
-                timeDialogOpenVariableName,
+            val datePickerStateName =
+                composableContext.addComposeFileVariable(
+                    id = "${id}-${datePickerStateName}",
+                    initialIdentifier = datePickerStateName, dryRun = dryRun
+                )
+            val timeDialogOpenVariableName = composableContext.addComposeFileVariable(
+                id = "${id}-${timeDialogOpenVariableName}",
+                initialIdentifier = timeDialogOpenVariableName,
                 dryRun = dryRun
             )
-            timePickerStateName =
-                composableContext.addComposeFileVariable(timePickerStateName, dryRun = dryRun)
+            val timePickerStateName =
+                composableContext.addComposeFileVariable(
+                    id = "${id}-${timePickerStateName}",
+                    initialIdentifier =
+                        timePickerStateName, dryRun = dryRun
+                )
+            val rememberedStateName =
+                composableContext.addComposeFileVariable(
+                    id = "${id}-${rememberedStateName}",
+                    initialIdentifier = rememberedStateName, dryRun = dryRun
+                )
 
             val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
             if (state !is WriteableState) return builder.build()
 
             builder.add(
                 generateRememberDatePickerState(
-                    stateVariableName = datePickerStateName,
+                    stateVariableName = rememberedStateName,
                     project, context, dryRun = dryRun,
                 )
             )
@@ -1756,7 +1788,7 @@ sealed interface DateOrTimePicker : Action {
                                             $dateDialogOpenVariableName = false
                                             $timeDialogOpenVariableName = true
                                         },
-                                        enabled = ${datePickerStateName}.selectedDateMillis != null
+                                        enabled = ${rememberedStateName}.selectedDateMillis != null
                                     ) {
                                         %M(%M(%M.string.%M))
                                     }
@@ -1775,7 +1807,7 @@ sealed interface DateOrTimePicker : Action {
                             }
                         },
                     ) {
-                        %M($datePickerStateName)
+                        %M($rememberedStateName)
                     }
                 }
             """,
@@ -1832,8 +1864,12 @@ sealed interface DateOrTimePicker : Action {
                         %M(modifier = %M.%M(32.dp))
                         %M(onClick = {
                             $timeDialogOpenVariableName = false
-                            $datePickerStateName.selectedDateMillis?.let {
-                                ${composableContext.canvasEditable.viewModelName}.${state.getUpdateMethodName()}(
+                            $rememberedStateName.selectedDateMillis?.let {
+                                ${composableContext.canvasEditable.viewModelName}.${
+                        state.getUpdateMethodName(
+                            context
+                        )
+                    }(
                                     %T.fromEpochMilliseconds(it).%M(
                                         ${timePickerStateName}.hour
                                     ).%M(
@@ -1915,7 +1951,8 @@ sealed interface Share : Action {
         @Transient
         override val name: String = "Open URL",
         val url: AssignableProperty = StringProperty.StringIntrinsicValue(""),
-        var uriHandlerName: String = "uriHandler",
+        @Transient
+        val uriHandlerName: String = "uriHandler",
     ) : Share {
 
         override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
@@ -1965,10 +2002,11 @@ sealed interface Share : Action {
             context: GenerationContext,
             dryRun: Boolean,
         ): CodeBlock {
-            uriHandlerName =
-                context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                    uriHandlerName, MemberHolder.AndroidX.Platform.LocalUriHandler
-                )
+            context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                id = "${id}-${uriHandlerName}",
+                initialIdentifier = uriHandlerName,
+                MemberHolder.AndroidX.Platform.LocalUriHandler
+            )
             // Initialize the uriHandler once in the compose file instead of initializing it in
             // every action
             return CodeBlock.of("")
@@ -2062,10 +2100,14 @@ sealed interface Auth : Action {
         override val id: ActionId = Uuid.random().toString(),
         val email: AssignableProperty = StringProperty.StringIntrinsicValue(""),
         val password: AssignableProperty = StringProperty.StringIntrinsicValue(""),
-        var signInStateViewModelFunName: String = "onSignInWithEmailAndPassword",
-        var signInStateName: String = "signInUserState",
-        var snackbarOpenVariableName: String = "onShowSnackbar",
-        var resetEventResultFunName: String = "resetSignInEventResultState",
+        @Transient
+        val signInStateViewModelFunName: String = "onSignInWithEmailAndPassword",
+        @Transient
+        val signInStateName: String = "signInUserState",
+        @Transient
+        val snackbarOpenVariableName: String = "onShowSnackbar",
+        @Transient
+        val resetEventResultFunName: String = "resetSignInEventResultState",
     ) : Auth {
         override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
             return email.getDependentComposeNodes(project) +
@@ -2146,14 +2188,18 @@ sealed interface Auth : Action {
             context: GenerationContext,
             dryRun: Boolean,
         ): CodeBlock {
-            snackbarOpenVariableName =
+            val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                    id = "${id}_${snackbarOpenVariableName}",
                     snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
 
-            signInStateName = context.getCurrentComposableContext()
-                .addComposeFileVariable(signInStateName, dryRun = dryRun)
+            val signInStateName = context.getCurrentComposableContext()
+                .addComposeFileVariable(
+                    id = "${id}-${signInStateName}",
+                    initialIdentifier = signInStateName, dryRun = dryRun
+                )
 
             context.getCurrentComposableContext().addFunction(
                 FunSpec.builder(signInStateViewModelFunName)
@@ -2274,10 +2320,14 @@ sealed interface Auth : Action {
         override val id: ActionId = Uuid.random().toString(),
         val email: AssignableProperty = StringProperty.StringIntrinsicValue(""),
         val password: AssignableProperty = StringProperty.StringIntrinsicValue(""),
-        var createStateViewModelFunName: String = "onCreateUserWithEmailAndPassword",
-        var createStateName: String = "createUserState",
-        var snackbarOpenVariableName: String = "onShowSnackbar",
-        var resetEventResultFunName: String = "resetCreateUserEventResultState",
+        @Transient
+        private val createStateViewModelFunName: String = "onCreateUserWithEmailAndPassword",
+        @Transient
+        private val createStateName: String = "createUserState",
+        @Transient
+        private val snackbarOpenVariableName: String = "onShowSnackbar",
+        @Transient
+        private val resetEventResultFunName: String = "resetCreateUserEventResultState",
     ) : Auth {
         override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
             return email.getDependentComposeNodes(project) +
@@ -2358,14 +2408,18 @@ sealed interface Auth : Action {
             context: GenerationContext,
             dryRun: Boolean,
         ): CodeBlock {
-            snackbarOpenVariableName =
+            val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
+                    id = "${id}-${snackbarOpenVariableName}",
                     snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
 
-            createStateName = context.getCurrentComposableContext()
-                .addComposeFileVariable(createStateName, dryRun = dryRun)
+            val createStateName = context.getCurrentComposableContext()
+                .addComposeFileVariable(
+                    id = "${id}-${createStateName}",
+                    createStateName, dryRun = dryRun
+                )
 
             context.getCurrentComposableContext().addFunction(
                 FunSpec.builder(createStateViewModelFunName)
@@ -2589,7 +2643,8 @@ sealed interface FirestoreAction : Action {
         val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
         @Transient
         override val name: String = "Save to Firestore",
-        var updateMethodName: String = "onSaveToFirestore",
+        @Transient
+        private val updateMethodName: String = "onSaveToFirestore",
     ) : FirestoreAction {
 
         @Composable
@@ -2629,8 +2684,11 @@ sealed interface FirestoreAction : Action {
                 firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) } ?: return
 
             val composableContext = context.getCurrentComposableContext()
-            updateMethodName =
-                composableContext.generateUniqueFunName(initial = "onSave${dataType.className}ToFirestore")
+            val updateMethodName =
+                composableContext.generateUniqueFunName(
+                    id = "${id}-${updateMethodName}",
+                    initial = "onSave${dataType.className}ToFirestore"
+                )
 
             val funSpecBuilder = FunSpec.builder(updateMethodName)
 
@@ -2679,7 +2737,7 @@ sealed interface FirestoreAction : Action {
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
                     ?: return builder.build()
-            firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) }
+            val dataType = firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) }
                 ?: return builder.build()
 
             val paramString = buildString {
@@ -2697,6 +2755,11 @@ sealed interface FirestoreAction : Action {
                     }
                 }
             }
+            val updateMethodName =
+                context.getCurrentComposableContext().generateUniqueFunName(
+                    id = "${id}-${updateMethodName}",
+                    initial = "onSave${dataType.className}ToFirestore"
+                )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
             builder.add("""${currentEditable.viewModelName}.${updateMethodName}($paramString)""")
             return builder.build()
@@ -2732,7 +2795,8 @@ sealed interface FirestoreAction : Action {
         val filterExpression: FilterExpression? = SingleFilter(),
         @Transient
         override val name: String = "Update document",
-        var updateMethodName: String = "onUpdateDocument",
+        @Transient
+        private val updateMethodName: String = "onUpdateDocument",
     ) : FirestoreAction {
 
         override fun generateIssues(project: Project): List<Issue> {
@@ -2789,8 +2853,11 @@ sealed interface FirestoreAction : Action {
                 firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) } ?: return
             val composableContext = context.getCurrentComposableContext()
 
-            updateMethodName =
-                composableContext.generateUniqueFunName(initial = "onUpdate${dataType.className}Document")
+            val updateMethodName =
+                composableContext.generateUniqueFunName(
+                    id = "${id}-${updateMethodName}",
+                    initial = "onUpdate${dataType.className}Document"
+                )
             val funSpecBuilder = FunSpec.builder(updateMethodName)
 
             context.getCurrentComposableContext()
@@ -2938,7 +3005,8 @@ sealed interface FirestoreAction : Action {
         val filterExpression: FilterExpression? = SingleFilter(),
         @Transient
         override val name: String = "Delete document",
-        var updateMethodName: String = "onDeleteDocument",
+        @Transient
+        private val updateMethodName: String = "onDeleteDocument",
     ) : FirestoreAction {
 
         override fun generateIssues(project: Project): List<Issue> {
@@ -2989,7 +3057,11 @@ sealed interface FirestoreAction : Action {
             val dataType =
                 firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) } ?: return
 
-            updateMethodName = "onDelete${dataType.className}Document"
+            val updateMethodName =
+                context.getCurrentComposableContext().generateUniqueFunName(
+                    id = "${id}-${updateMethodName}",
+                    initial = "onDelete${dataType.className}Document"
+                )
             val funSpecBuilder = FunSpec.builder(updateMethodName)
 
             context.getCurrentComposableContext()
@@ -3033,7 +3105,7 @@ sealed interface FirestoreAction : Action {
         ): CodeBlock {
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
-            firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
+            val dataType = firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
                 ?: return CodeBlock.of("")
 
             val paramString = buildString {
@@ -3053,6 +3125,11 @@ sealed interface FirestoreAction : Action {
             }
             val builder = CodeBlock.builder()
             val currentEditable = context.getCurrentComposableContext().canvasEditable
+            val updateMethodName =
+                context.getCurrentComposableContext().generateUniqueFunName(
+                    id = "${id}-${updateMethodName}",
+                    initial = "onDelete${dataType.className}Document"
+                )
             builder.add("""${currentEditable.viewModelName}.${updateMethodName}($paramString)""")
             return builder.build()
         }

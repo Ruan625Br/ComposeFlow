@@ -189,7 +189,6 @@ class UiBuilderOperator {
                 }
             } else {
                 val operationTarget = nodeToRemove?.getOperationTargetNode(project)
-                operationTarget?.onRemoveNode(project)
                 operationTarget?.removeFromParent()
             }
         }

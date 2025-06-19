@@ -137,7 +137,7 @@ sealed interface StateOperation {
                 dryRun = dryRun,
             )
 
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun = dryRun)
             }
         }
@@ -180,7 +180,7 @@ sealed interface StateOperation {
                 ),
             )
             context.addFunction(
-                funSpecBuilder.addCode(writeState.generateClearStateCodeToViewModel())
+                funSpecBuilder.addCode(writeState.generateClearStateCodeToViewModel(context))
                     .build(),
                 dryRun = dryRun
             )
@@ -219,11 +219,11 @@ sealed interface StateOperation {
             if (writeState is BooleanState) {
                 context.addFunction(
                     funSpecBuilder.addCode(
-                        writeState.generateToggleStateCodeToViewModel(),
+                        writeState.generateToggleStateCodeToViewModel(context),
                     ).build(),
                     dryRun = dryRun
                 )
-                writeState.generateStatePropertiesToViewModel(project).forEach {
+                writeState.generateStatePropertiesToViewModel(project, context).forEach {
                     context.addProperty(it, dryRun)
                 }
             }
@@ -407,7 +407,7 @@ sealed interface StateOperationForDataType : StateOperation {
 
             funSpecBuilder.addCode(
                 """%M.%M {
-                val updated = ${writeState.getFlowName()}.value.copy($updateString)
+                val updated = ${writeState.getFlowName(context)}.value.copy($updateString)
                 ${ViewModelConstant.flowSettings.name}.putString("${writeState.name}", ${ViewModelConstant.jsonSerializer.name}.%M(updated))
             }""",
                 MemberHolder.PreCompose.viewModelScope,
@@ -415,7 +415,7 @@ sealed interface StateOperationForDataType : StateOperation {
                 MemberHolder.Serialization.encodeToString,
             )
             context.addFunction(funSpecBuilder.build(), dryRun)
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }
@@ -500,7 +500,7 @@ sealed interface StateOperationForList : StateOperation {
                 ).build(),
                 dryRun,
             )
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }
@@ -608,7 +608,7 @@ sealed interface StateOperationForList : StateOperation {
 
             funSpecBuilder.addCode(
                 """%M.%M {
-                    val list = ${writeState.getFlowName()}.value.toMutableList().apply {
+                    val list = ${writeState.getFlowName(context)}.value.toMutableList().apply {
                         add(%T().copy($updateString))
                     }
                     ${ViewModelConstant.flowSettings.name}.putString("${writeState.name}", ${ViewModelConstant.jsonSerializer.name}.%M(list))
@@ -619,7 +619,7 @@ sealed interface StateOperationForList : StateOperation {
                 MemberHolder.Serialization.encodeToString,
             )
             context.addFunction(funSpecBuilder.build(), dryRun)
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }
@@ -686,7 +686,7 @@ sealed interface StateOperationForList : StateOperation {
         ) {
             if (writeState !is ListAppState) return
 
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
 
@@ -850,7 +850,7 @@ sealed interface StateOperationForList : StateOperation {
 
             funSpecBuilder.addCode(
                 """
-                val list = ${writeState.getFlowName()}.value.toMutableList()
+                val list = ${writeState.getFlowName(context)}.value.toMutableList()
                 if ($indexToUpdate < 0 || $indexToUpdate >= list.size) return     
                 %M.%M {
                     val $item = list[$indexToUpdate]
@@ -862,7 +862,7 @@ sealed interface StateOperationForList : StateOperation {
                 MemberHolder.Serialization.encodeToString,
             )
             context.addFunction(funSpecBuilder.build(), dryRun)
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }
@@ -917,7 +917,7 @@ sealed interface StateOperationForList : StateOperation {
                 ),
                 dryRun = dryRun
             )
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }
@@ -964,7 +964,7 @@ sealed interface StateOperationForList : StateOperation {
                 ).build(),
                 dryRun = dryRun,
             )
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }
@@ -1011,7 +1011,7 @@ sealed interface StateOperationForList : StateOperation {
                 ).build(),
                 dryRun = dryRun
             )
-            writeState.generateStatePropertiesToViewModel(project).forEach {
+            writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
             }
         }

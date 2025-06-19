@@ -110,7 +110,6 @@ import io.composeflow.model.property.ValueFromState
 import io.composeflow.model.state.AppState
 import io.composeflow.model.state.AuthenticatedUserState
 import io.composeflow.model.state.ScreenState
-import io.composeflow.model.state.WriteableState
 import io.composeflow.model.validator.TextFieldValidator
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.repository.fakeFirebaseIdToken
@@ -471,7 +470,7 @@ class AppBuilderTest {
                         SetValueToState(
                             writeToStateId = appStringState.id,
                             operation = StateOperation.SetValue(
-                                readProperty = ValueFromState(readFromStateId = textField1.companionStateId!!)
+                                readProperty = ValueFromState(readFromStateId = textField1.companionStateId)
                             )
                         )
                     )
@@ -692,7 +691,6 @@ class AppBuilderTest {
         val sliderScreenState = ScreenState.FloatScreenState(name = "sliderScreenState")
 
         val slider = SliderTrait().defaultComposeNode(project)
-        slider.companionStateId = sliderScreenState.id
         rootNode.addChild(slider)
         project.screenHolder.currentEditable().addState(switchScreenState)
         project.screenHolder.currentEditable().addState(sliderScreenState)
@@ -1044,6 +1042,7 @@ class AppBuilderTest {
         lazyColumn.dynamicItems.value = dynamicItems
         val textTrait = ComposeNode(
             trait = mutableStateOf(TextTrait()),
+            label = mutableStateOf("text1")
         ).apply {
             trait.value = TextTrait(
                 text = ValueFromDynamicItem(
@@ -1059,7 +1058,9 @@ class AppBuilderTest {
         )
 
         rootNode.addChild(
-            TextFieldTrait().defaultComposeNode(project),
+            TextFieldTrait().defaultComposeNode(project).apply {
+                label.value = "textField1"
+            },
         )
         val editable = project.screenHolder.currentEditable()
         val textFieldState = ScreenState.StringScreenState(name = "textField")
@@ -1137,7 +1138,9 @@ class AppBuilderTest {
         val text = TextTrait().defaultComposeNode(project)
         rootNode.addChild(text)
         rootNode.addChild(
-            SwitchTrait().defaultComposeNode(project),
+            SwitchTrait().defaultComposeNode(project).apply {
+                label.value = "switch1"
+            },
         )
         val switchState = ScreenState.BooleanScreenState(name = "switch")
         val editable = project.screenHolder.currentEditable()
@@ -1182,7 +1185,9 @@ class AppBuilderTest {
         val row = RowTrait().defaultComposeNode(project)
         val text = TextTrait().defaultComposeNode(project)
         row.addChild(text)
-        row.addChild(SwitchTrait().defaultComposeNode(project))
+        row.addChild(SwitchTrait().defaultComposeNode(project).apply {
+            label.value = "switch1"
+        })
         val switchState = ScreenState.BooleanScreenState(name = "switch")
 
         val component = Component(
@@ -1216,12 +1221,16 @@ class AppBuilderTest {
         val text = TextTrait().defaultComposeNode(project)
         rootNode.addChild(text)
         rootNode.addChild(
-            SwitchTrait().defaultComposeNode(project),
+            SwitchTrait().defaultComposeNode(project).apply {
+                label.value = "switch1"
+            },
         )
         val button = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button)
 
-        val textField = TextFieldTrait().defaultComposeNode(project)
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            label.value = "textField1"
+        }
         rootNode.addChild(textField)
         val switchState = ScreenState.BooleanScreenState(name = "switch")
         val textFieldState = ScreenState.StringScreenState(name = "textField")
@@ -1319,7 +1328,9 @@ class AppBuilderTest {
         val project = Project()
         val rootNode = project.screenHolder.currentContentRootNode()
 
-        val textField = TextFieldTrait().defaultComposeNode(project)
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            label.value = "textField1"
+        }
         rootNode.addChild(textField)
         val editable = project.screenHolder.currentEditable()
         val textFieldState = ScreenState.StringScreenState(name = "textField")
@@ -1579,7 +1590,6 @@ class AppBuilderTest {
         val openDatePickerAction = DateOrTimePicker.OpenDatePicker()
 
         val openDateAndTimePickerAction = DateOrTimePicker.OpenDateAndTimePicker()
-        openDateAndTimePickerAction.onActionAdded(project)
 
         button1.actionsMap[ActionType.OnClick] = mutableListOf(
             ActionNode.Simple(
@@ -1589,7 +1599,6 @@ class AppBuilderTest {
                 action = openDateAndTimePickerAction
             )
         )
-        openDatePickerAction.onActionAdded(project)
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1650,10 +1659,10 @@ class AppBuilderTest {
         val rootNode = project.screenHolder.currentContentRootNode()
         val textField1 = ComposeNode(
             trait = mutableStateOf(TextFieldTrait()),
-        )
-        val screen = project.screenHolder.currentEditable()
+        ).apply {
+            label.value = "textField1"
+        }
         val textFieldParams = textField1.trait.value as TextFieldTrait
-        TextFieldTrait().onAttachStateToNode(project, screen, textField1)
 
         val todoNameField = DataField(
             name = "todoName",

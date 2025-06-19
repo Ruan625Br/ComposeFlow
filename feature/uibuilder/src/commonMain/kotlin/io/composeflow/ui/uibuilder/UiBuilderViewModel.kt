@@ -642,19 +642,9 @@ class UiBuilderViewModel(
                 label = label,
             ),
         )
-        node.label.value = label
-        node.companionStateId?.let { companionStateId ->
-            val currentEditable = project.screenHolder.currentEditable()
-
-            // Use unique name in the screen or component level so that the variable names don't collide
-            val newLabel = currentEditable.createUniqueName(project, label)
-            node.label.value = newLabel
-
-            currentEditable.findStateOrNull(project, companionStateId)?.let {
-                it.name = newLabel
-                currentEditable.updateState(it)
-            }
-        }
+        val currentEditable = project.screenHolder.currentEditable()
+        val newLabel = currentEditable.createUniqueLabel(project, node, label)
+        node.label.value = newLabel
 
         saveProject(project)
     }
@@ -786,26 +776,6 @@ class UiBuilderViewModel(
                 actionsMap = actionsMap,
             ),
         )
-        val beforeAllActions = node.actionHandler.allActions()
-        val afterAllActions = actionsMap.entries.flatMap { entry ->
-            entry.value.flatMap { it.allActions() }
-        }
-
-        val idsBefore = beforeAllActions.map { it.id }.toSet()
-        val idsAfter = afterAllActions.map { it.id }.toSet()
-        val uniqueIdsBefore = idsBefore - idsAfter
-        val uniqueIdsAfter = idsAfter - idsBefore
-
-        val uniqueActionsBefore = beforeAllActions.filter { it.id in uniqueIdsBefore }
-        val uniqueActionsAfter = afterAllActions.filter { it.id in uniqueIdsAfter }
-
-        uniqueActionsBefore.forEach {
-            it.onActionRemoved(project)
-        }
-        uniqueActionsAfter.forEach {
-            it.onActionAdded(project)
-        }
-
         node.actionHandler.actionsMap = actionsMap
 
         saveProject(project)
@@ -849,9 +819,6 @@ class UiBuilderViewModel(
                 node = node,
             ),
         )
-        node.allChildren().forEach {
-            it.onRemoveNode(project)
-        }
         val newComponentName = generateUniqueName(
             componentName,
             project.getAllCanvasEditable().map { it.name.asClassName() }.toSet(),
