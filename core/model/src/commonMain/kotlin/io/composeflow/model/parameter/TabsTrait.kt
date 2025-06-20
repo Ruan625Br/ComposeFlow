@@ -39,7 +39,7 @@ import org.jetbrains.compose.resources.StringResource
 data object TabsTrait : ComposeTrait {
 
     override fun defaultConstraints(): Set<Constraint> =
-        super.defaultConstraints().toMutableSet().apply {
+        defaultConstraints().toMutableSet().apply {
             add(Constraint.NestedTabs)
         }
 

@@ -15,8 +15,7 @@ rootNode:
       children:
         - id: "searchTextField"
           trait: !<TextFieldTrait>
-            value: !<ValueFromState>
-              readFromStateId: "searchTextFieldState"
+            value: !<ValueFromCompanionState> { }
             placeholder: !<StringIntrinsicValue>
               value: "Search replies"
             leadingIcon: !<Outlined> "Search"
@@ -43,7 +42,6 @@ rootNode:
               "OnSubmit": [ ]
               "OnFocused": [ ]
           visibilityParams: { }
-          companionStateId: "searchTextFieldState"
         - id: "messagesList"
           trait: !<LazyColumnTrait>
             contentPadding: 1.0
@@ -354,7 +352,4 @@ bottomAppBarNode: null
 navigationDrawerNode: null
 fabNode: null
 stateHolderImpl:
-  states:
-    - !<StringScreenState>
-      id: "searchTextFieldState"
-      name: "textField"
+  states: [ ]

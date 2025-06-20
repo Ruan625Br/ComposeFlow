@@ -15,6 +15,7 @@ data class PropertyContainer(
 ) {
 
     fun generateTrackableIssues(project: Project, composeNode: ComposeNode): List<TrackableIssue> {
+        if (assignableProperty is ValueFromCompanionState) return emptyList()
         val transformedType =
             assignableProperty?.transformedValueType(project) ?: return emptyList()
         return buildList {

@@ -254,7 +254,6 @@ fun AssignableProperty?.mergeProperty(
     }
 }
 
-
 @Serializable
 @SerialName("AssignablePropertyBase")
 abstract class AssignablePropertyBase : AssignableProperty {
@@ -957,6 +956,140 @@ data class ValueFromState(
         editable: Boolean,
     ) {
         val readState = project.findLocalStateOrNull(readFromStateId)
+        AssignableEditableTextPropertyEditor(
+            project = project,
+            node = node,
+            initialProperty = initialProperty,
+            label = label,
+            onValidPropertyChanged = onValidPropertyChanged,
+            modifier = modifier,
+            destinationStateId = destinationStateId,
+            onInitializeProperty = onInitializeProperty,
+            leadingIcon = readState?.valueType(project)?.leadingIcon()?.let {
+                {
+                    ComposeFlowIcon(
+                        it,
+                        contentDescription = null,
+                    )
+                }
+            },
+            validateInput = validateInput ?: { ValidateResult.Success },
+            editable = editable,
+            functionScopeProperties = functionScopeProperties,
+        )
+    }
+}
+
+/**
+ * State that represents the value is assigned from a companion state.
+ * For example, TextFieldTrait has a default companion state that represents its input value.
+ * This class represents that the specific property is is assigned from such a companion state.
+ * Technically it's same as using [ValueFromState] with the ID representing the state, but this
+ * clas exits to reduce * the implication as much as possible,
+ */
+@Serializable
+@SerialName("ValueFromCompanionState")
+data class ValueFromCompanionState(
+    /**
+     * The reference to the composeNode that has the companion state.
+     * Intentionally defining it as MutableState since the initialization of the composeNode
+     * may happen after the matching screen is loaded. And the values that depend on this reference
+     * needs to be aware of the composition in the UI because they may be used in the UI.
+     */
+    @Transient
+    val composeNode: ComposeNode? = null
+) : AssignableProperty, AssignablePropertyBase() {
+
+    @Transient
+    private val companionState: ScreenState<*>? =
+        composeNode?.let { node ->
+            node.trait.value.companionState(node)
+        }
+
+    override fun valueType(project: Project): ComposeFlowType =
+        companionState?.valueType(project)
+            ?: ComposeFlowType.UnknownType()
+
+    override fun valueExpression(project: Project): String {
+        return textFromState()
+    }
+
+    override fun displayText(project: Project): String {
+        return textFromState()
+    }
+
+    private fun textFromState(): String {
+        return companionState?.let {
+            // companion state is always screen level
+            val prefix = "state: "
+            "[$prefix${it.name}]"
+        } ?: "[Invalid]"
+    }
+
+    override fun isDependent(sourceId: String): Boolean {
+        return companionState?.id == sourceId || super<AssignableProperty>.isDependent(sourceId)
+    }
+
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
+        return composeNode?.let {
+            listOf(it)
+        } ?: emptyList()
+    }
+
+    override fun generateCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        writeType: ComposeFlowType,
+        dryRun: Boolean,
+    ): CodeBlock {
+        val state = companionState ?: return CodeBlock.of("")
+        val codeBlock = when (context.generatedPlace) {
+            GeneratedPlace.ComposeScreen -> CodeBlock.of(
+                state.getReadVariableName(
+                    project,
+                    context
+                )
+            )
+
+            GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
+            GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project, context))
+        }
+
+        state.generateStatePropertiesToViewModel(project, context).forEach {
+            context.addProperty(it, dryRun = dryRun)
+        }
+        return codeBlock
+    }
+
+    override fun addReadProperty(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ) {
+        val state = companionState ?: return
+        state.generateStatePropertiesToViewModel(
+            project,
+            context,
+        ).forEach {
+            context.addProperty(it, dryRun = dryRun)
+        }
+    }
+
+    @Composable
+    override fun Editor(
+        project: Project,
+        node: ComposeNode,
+        initialProperty: AssignableProperty?,
+        label: String,
+        onValidPropertyChanged: (AssignableProperty, lazyListSource: LazyListChildParams?) -> Unit,
+        onInitializeProperty: (() -> Unit)?,
+        functionScopeProperties: List<FunctionScopeParameterProperty>,
+        modifier: Modifier,
+        destinationStateId: StateId?,
+        validateInput: ((String) -> ValidateResult)?,
+        editable: Boolean,
+    ) {
+        val readState = companionState
         AssignableEditableTextPropertyEditor(
             project = project,
             node = node,

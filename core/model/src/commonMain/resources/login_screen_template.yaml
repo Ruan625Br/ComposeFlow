@@ -179,8 +179,7 @@ rootNode:
                           visibilityParams: { }
                         - id: "signInEmailTextField"
                           trait: !<TextFieldTrait>
-                            value: !<ValueFromState>
-                              readFromStateId: "signInEmailState"
+                            value: !<ValueFromCompanionState> { }
                             label: !<StringIntrinsicValue>
                               value: "email"
                             shapeWrapper: !<Circle> { }
@@ -205,11 +204,9 @@ rootNode:
                               "OnSubmit": [ ]
                               "OnFocused": [ ]
                           visibilityParams: { }
-                          companionStateId: "signInEmailState"
                         - id: "signInPasswordTextField"
                           trait: !<TextFieldTrait>
-                            value: !<ValueFromState>
-                              readFromStateId: "signInPasswordState"
+                            value: !<ValueFromCompanionState> { }
                             label: !<StringIntrinsicValue>
                               value: "password"
                             trailingIcon: !<Outlined> "VisibilityOff"
@@ -234,7 +231,6 @@ rootNode:
                               "OnSubmit": [ ]
                               "OnFocused": [ ]
                           visibilityParams: { }
-                          companionStateId: "signInPasswordState"
                         - id: "signInButton"
                           trait: !<ButtonTrait>
                             textProperty: !<StringIntrinsicValue>
@@ -253,15 +249,7 @@ rootNode:
                           dynamicItems: null
                           actionHandler: !<ActionHandlerImpl>
                             actionsMap:
-                              "OnClick":
-                                - !<Simple>
-                                  id: "signInActionWrapper"
-                                  action: !<SignInWithEmailAndPassword>
-                                    id: "signInWithEmailAction"
-                                    email: !<ValueFromState>
-                                      readFromStateId: "signInEmailState"
-                                    password: !<ValueFromState>
-                                      readFromStateId: "signInPasswordState"
+                              "OnClick": { }
                           visibilityParams: { }
                         - id: "orSignUpWithText"
                           trait: !<TextTrait>
@@ -363,8 +351,7 @@ rootNode:
                           visibilityParams: { }
                         - id: "signUpEmailTextField"
                           trait: !<TextFieldTrait>
-                            value: !<ValueFromState>
-                              readFromStateId: "signUpEmailState"
+                            value: !<ValueFromCompanionState> { }
                             label: !<StringIntrinsicValue>
                               value: "email"
                             shapeWrapper: !<Circle> { }
@@ -387,11 +374,9 @@ rootNode:
                               "OnSubmit": [ ]
                               "OnFocused": [ ]
                           visibilityParams: { }
-                          companionStateId: "signUpEmailState"
                         - id: "signUpPasswordTextField"
                           trait: !<TextFieldTrait>
-                            value: !<ValueFromState>
-                              readFromStateId: "signUpPasswordState"
+                            value: !<ValueFromCompanionState> { }
                             label: !<StringIntrinsicValue>
                               value: "password"
                             trailingIcon: !<Outlined> "VisibilityOff"
@@ -416,7 +401,6 @@ rootNode:
                               "OnSubmit": [ ]
                               "OnFocused": [ ]
                           visibilityParams: { }
-                          companionStateId: "signUpPasswordState"
                         - id: "createAccountButton"
                           trait: !<ButtonTrait>
                             textProperty: !<StringIntrinsicValue>
@@ -435,15 +419,7 @@ rootNode:
                           dynamicItems: null
                           actionHandler: !<ActionHandlerImpl>
                             actionsMap:
-                              "OnClick":
-                                - !<Simple>
-                                  id: "createAccountActionWrapper"
-                                  action: !<CreateUserWithEmailAndPassword>
-                                    id: "createAccountAction"
-                                    email: !<ValueFromState>
-                                      readFromStateId: "signUpEmailState"
-                                    password: !<ValueFromState>
-                                      readFromStateId: "signUpPasswordState"
+                              "OnClick": [ ]
                           visibilityParams: { }
                       lazyListChildParams: !<FixedNumber>
                         numOfItems: 1
@@ -542,20 +518,4 @@ bottomAppBarNode: null
 navigationDrawerNode: null
 fabNode: null
 stateHolderImpl:
-  states:
-    - !<StringScreenState>
-      id: "signInEmailState"
-      name: "email"
-      companionNodeId: "signInEmailTextField"
-    - !<StringScreenState>
-      id: "signInPasswordState"
-      name: "password"
-      companionNodeId: "signInPasswordTextField"
-    - !<StringScreenState>
-      id: "signUpEmailState"
-      name: "create_email"
-      companionNodeId: "signUpEmailTextField"
-    - !<StringScreenState>
-      id: "signUpPasswordState"
-      name: "create_password"
-      companionNodeId: "signUpPasswordTextField" 
+  states: [ ]

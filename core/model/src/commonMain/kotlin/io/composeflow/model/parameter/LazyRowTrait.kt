@@ -12,12 +12,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.LazyRow
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
-import io.composeflow.Res
-import org.jetbrains.compose.resources.StringResource
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.palette.Constraint
 import io.composeflow.model.palette.LazyListTraitNode
@@ -36,6 +35,7 @@ import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("LazyRowTrait")
@@ -102,6 +102,7 @@ data class LazyRowTrait(
         TraitCategory.WrapContainer,
         TraitCategory.Layout
     )
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_lazy_row_trait
 
     override fun isLazyList(): Boolean = true

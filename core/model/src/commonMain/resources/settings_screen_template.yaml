@@ -414,8 +414,7 @@ rootNode:
                   visibilityParams: { }
                 - id: "sensitiveNotificationsSwitch"
                   trait: !<SwitchTrait>
-                    checked: !<ValueFromState>
-                      readFromStateId: "sensitiveNotificationsSwitchState"
+                    checked: !<ValueFromCompanionState> { }
                   label: "Switch"
                   level: 4
                   lazyListChildParams: !<FixedNumber>
@@ -425,7 +424,6 @@ rootNode:
                     actionsMap:
                       "OnChange": [ ]
                   visibilityParams: { }
-                  companionStateId: "sensitiveNotificationsSwitchState"
               lazyListChildParams: !<FixedNumber> { }
               dynamicItems: null
               actionHandler: !<ActionHandlerImpl>
@@ -915,8 +913,4 @@ bottomAppBarNode: null
 navigationDrawerNode: null
 fabNode: null
 stateHolderImpl:
-  states:
-    - !<BooleanScreenState>
-      id: "sensitiveNotificationsSwitchState"
-      name: "switch"
-      companionNodeId: "sensitiveNotificationsSwitch" 
+  states: [ ]

@@ -26,6 +26,7 @@ import io.composeflow.model.property.BooleanProperty
 import io.composeflow.model.property.FloatProperty
 import io.composeflow.model.property.IntProperty
 import io.composeflow.model.property.PropertyContainer
+import io.composeflow.model.property.ValueFromCompanionState
 import io.composeflow.model.property.ValueFromState
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
@@ -67,13 +68,8 @@ data class SliderTrait(
         codeBlockBuilder.addStatement(",")
 
         val canvasEditable = project.findCanvasEditableHavingNodeOrNull(node)
-        val writeState = when (value) {
-            is ValueFromState -> {
-                canvasEditable?.findStateOrNull(project, value.readFromStateId)
-            }
+        val writeState = value.findReadableState(project, canvasEditable, node)
 
-            else -> null
-        }
         codeBlockBuilder.addStatement("onValueChange = {")
         if (node.actionsMap[ActionType.OnChange]?.isNotEmpty() == true) {
             node.actionsMap[ActionType.OnChange]?.forEach {
@@ -136,7 +132,14 @@ data class SliderTrait(
         node: ComposeNode,
     ) {
         node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
-        node.trait.value = this.copy(value = ValueFromState(node.companionStateId))
+        node.trait.value =
+            this.copy(value = ValueFromCompanionState(node))
+    }
+
+    override fun updateCompanionStateProperties(composeNode: ComposeNode) {
+        if (value is ValueFromCompanionState) {
+            composeNode.trait.value = this.copy(value = ValueFromCompanionState(composeNode))
+        }
     }
 
     @Composable

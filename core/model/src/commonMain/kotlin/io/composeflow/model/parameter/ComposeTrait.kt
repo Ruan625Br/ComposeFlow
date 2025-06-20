@@ -16,10 +16,15 @@ import io.composeflow.model.palette.PaletteDraggable
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.lazylist.LazyGridCells
+import io.composeflow.model.project.CanvasEditable
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.issue.Issue
+import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.PropertyContainer
+import io.composeflow.model.property.ValueFromCompanionState
+import io.composeflow.model.property.ValueFromState
+import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.validator.ComposeStateValidator
@@ -152,6 +157,31 @@ sealed interface ComposeTrait : PaletteDraggable {
      * TextField.
      */
     fun companionState(composeNode: ComposeNode): ScreenState<*>? = null
+
+    /**
+     * Update the properties if [ValueFromCompanionState] is used for any of the properties.
+     * The ValueFromCompanionState doesn't store any ID for state or composeNode to reduce the
+     * implication. So the composeNode reference needs to be passed at runtime.
+     */
+    fun updateCompanionStateProperties(composeNode: ComposeNode) {}
+
+    fun AssignableProperty.findReadableState(
+        project: Project,
+        canvasEditable: CanvasEditable?,
+        node: ComposeNode,
+    ): ReadableState? {
+        return when (this) {
+            is ValueFromState -> {
+                canvasEditable?.findStateOrNull(project, readFromStateId)
+            }
+
+            is ValueFromCompanionState -> {
+                companionState(node)
+            }
+
+            else -> null
+        }
+    }
 
     companion object {
         const val NumOfItemsInLazyList = 1

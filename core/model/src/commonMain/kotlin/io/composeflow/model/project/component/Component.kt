@@ -116,6 +116,7 @@ data class Component(
 
     init {
         componentRoot.value.updateChildParentRelationships()
+        getAllComposeNodes().forEach { it.updateComposeNodeReferencesForTrait() }
     }
 
     override fun getPackageName(project: Project): String =

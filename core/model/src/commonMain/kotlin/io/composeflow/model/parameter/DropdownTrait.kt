@@ -20,12 +20,11 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.findCanvasEditableHavingNodeOrNull
-import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.CustomEnumValuesProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
-import io.composeflow.model.property.ValueFromState
+import io.composeflow.model.property.ValueFromCompanionState
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.WriteableState
@@ -84,14 +83,8 @@ data class DropdownTrait(
         codeBlockBuilder.add(label.transformedCodeBlock(project, context, dryRun = dryRun))
         codeBlockBuilder.addStatement(",")
 
-        val writeState = when (selectedItem) {
-            is ValueFromState -> {
-                project.findLocalStateOrNull(selectedItem.readFromStateId)
-            }
-
-            else -> null
-        }
         val canvasEditable = project.findCanvasEditableHavingNodeOrNull(node)
+        val writeState = selectedItem?.findReadableState(project, canvasEditable, node)
         codeBlockBuilder.addStatement("onValueChange = {")
         if (writeState != null && canvasEditable != null && writeState is WriteableState) {
             codeBlockBuilder.add(
@@ -135,7 +128,7 @@ data class DropdownTrait(
 
     override fun isResizeable(): Boolean = false
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
-    override fun companionState(composeNode: ComposeNode): ScreenState<*>? {
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> {
         return ScreenState.StringScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value
@@ -148,7 +141,14 @@ data class DropdownTrait(
         node: ComposeNode,
     ) {
         node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
-        node.trait.value = this.copy(selectedItem = ValueFromState(node.companionStateId))
+        node.trait.value =
+            this.copy(selectedItem = ValueFromCompanionState(node))
+    }
+
+    override fun updateCompanionStateProperties(composeNode: ComposeNode) {
+        if (selectedItem is ValueFromCompanionState) {
+            composeNode.trait.value = this.copy(selectedItem = ValueFromCompanionState(composeNode))
+        }
     }
 
     @Composable

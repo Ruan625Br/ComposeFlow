@@ -213,6 +213,8 @@ data class Screen(
             rootNode.value = newRoot
         }
         rootNode.value.label.value = label.value
+
+        getAllComposeNodes().forEach { it.updateComposeNodeReferencesForTrait() }
     }
 
     /**

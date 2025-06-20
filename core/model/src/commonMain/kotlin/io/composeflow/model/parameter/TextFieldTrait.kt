@@ -34,7 +34,7 @@ import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
-import io.composeflow.model.property.ValueFromState
+import io.composeflow.model.property.ValueFromCompanionState
 import io.composeflow.model.property.asBooleanValue
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
@@ -96,7 +96,14 @@ data class TextFieldTrait(
         node: ComposeNode,
     ) {
         node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
-        node.trait.value = this.copy(value = ValueFromState(node.companionStateId))
+        node.trait.value =
+            this.copy(value = ValueFromCompanionState(node))
+    }
+
+    override fun updateCompanionStateProperties(composeNode: ComposeNode) {
+        if (value is ValueFromCompanionState) {
+            composeNode.trait.value = this.copy(value = ValueFromCompanionState(composeNode))
+        }
     }
 
     private fun generateParamsCode(
@@ -118,13 +125,8 @@ data class TextFieldTrait(
         codeBlockBuilder.addStatement(",")
 
         val canvasEditable = project.findCanvasEditableHavingNodeOrNull(node)
-        val writeState = when (value) {
-            is ValueFromState -> {
-                canvasEditable?.findStateOrNull(project, value.readFromStateId)
-            }
+        val writeState = value.findReadableState(project, canvasEditable, node)
 
-            else -> null
-        }
         if (writeState != null &&
             canvasEditable != null &&
             writeState is WriteableState &&
@@ -560,7 +562,7 @@ data class TextFieldTrait(
         codeBlockBuilder.addStatement(")")
 
         if (node.actionsMap[ActionType.OnChange]?.isNotEmpty() == true) {
-            node.companionStateId?.let { companionStateId ->
+            node.companionStateId.let { companionStateId ->
                 val companionState = project.findLocalStateOrNull(companionStateId)
 
                 if (companionState != null && companionState is WriteableState) {

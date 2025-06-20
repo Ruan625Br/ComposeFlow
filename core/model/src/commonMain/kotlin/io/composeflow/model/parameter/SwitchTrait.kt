@@ -21,7 +21,7 @@ import io.composeflow.model.project.findCanvasEditableHavingNodeOrNull
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.BooleanProperty
 import io.composeflow.model.property.PropertyContainer
-import io.composeflow.model.property.ValueFromState
+import io.composeflow.model.property.ValueFromCompanionState
 import io.composeflow.model.property.asBooleanValue
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
@@ -61,13 +61,8 @@ data class SwitchTrait(
         codeBlockBuilder.addStatement(",")
 
         val canvasEditable = project.findCanvasEditableHavingNodeOrNull(node)
-        val writeState = when (checked) {
-            is ValueFromState -> {
-                canvasEditable?.findStateOrNull(project, checked.readFromStateId)
-            }
+        val writeState = checked.findReadableState(project, canvasEditable, node)
 
-            else -> null
-        }
         codeBlockBuilder.addStatement("onCheckedChange = {")
         if (node.actionsMap[ActionType.OnChange]?.isNotEmpty() == true) {
             node.actionsMap[ActionType.OnChange]?.forEach {
@@ -129,7 +124,14 @@ data class SwitchTrait(
         node: ComposeNode,
     ) {
         node.label.value = stateHolder.createUniqueLabel(project, node, node.label.value)
-        node.trait.value = this.copy(checked = ValueFromState(node.companionStateId))
+        node.trait.value =
+            this.copy(checked = ValueFromCompanionState(node))
+    }
+
+    override fun updateCompanionStateProperties(composeNode: ComposeNode) {
+        if (checked is ValueFromCompanionState) {
+            composeNode.trait.value = this.copy(checked = ValueFromCompanionState(composeNode))
+        }
     }
 
     @Composable

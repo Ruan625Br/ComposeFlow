@@ -965,10 +965,12 @@ fun Modifier.draggableFromPalette(
                     )
                 },
                 onDragEnd = {
-                    paletteDraggable.defaultComposeNode(project)?.let {
+                    paletteDraggable.defaultComposeNode(project)?.let { composeNode ->
+                        composeNode.updateComposeNodeReferencesForTrait()
+
                         paletteNodeCallbacks.onComposableDroppedToTarget(
                             localToRoot + (pointerPosition - zoomableContainerStateHolder.offset) / zoomableContainerStateHolder.scale,
-                            it,
+                            composeNode,
                         )
                     }
 
