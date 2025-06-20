@@ -114,7 +114,8 @@ data class SwitchTrait(
     override fun companionState(composeNode: ComposeNode): ScreenState<*> {
         return ScreenState.BooleanScreenState(
             id = composeNode.companionStateId,
-            name = composeNode.label.value
+            name = composeNode.label.value,
+            companionNodeId = composeNode.id,
         )
     }
 

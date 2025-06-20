@@ -191,6 +191,32 @@ class AppBuilderTest {
     }
 
     @Test
+    fun textFieldWithValidator() {
+        val project = Project()
+        val rootNode = project.screenHolder.currentContentRootNode()
+        val textField1 = ComposeNode(
+            trait = mutableStateOf(
+                TextFieldTrait(
+                    enableValidator = true,
+                    textFieldValidator = TextFieldValidator.StringValidator(
+                        maxLength = 10,
+                        minLength = 0
+                    )
+                )
+            ),
+        )
+        val screen = project.screenHolder.currentEditable()
+        TextFieldTrait().onAttachStateToNode(project, screen, textField1)
+        rootNode.addChild(textField1)
+
+        toolbarViewModel.onRunPreviewApp(
+            project = project,
+            onStatusBarUiStateChanged = { _ -> },
+        )
+        assertBuildSucceed()
+    }
+
+    @Test
     fun testLayoutModifiers() {
         // Test padding, border, background, zIndex
         val project1 = Project()

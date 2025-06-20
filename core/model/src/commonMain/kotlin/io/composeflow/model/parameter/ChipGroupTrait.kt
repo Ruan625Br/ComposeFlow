@@ -83,6 +83,7 @@ data class ChipGroupTrait(
         return ScreenState.StringListScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
+            companionNodeId = composeNode.id,
         )
     }
 

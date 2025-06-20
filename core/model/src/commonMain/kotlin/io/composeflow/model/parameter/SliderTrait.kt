@@ -122,7 +122,8 @@ data class SliderTrait(
     override fun companionState(composeNode: ComposeNode): ScreenState<*> {
         return ScreenState.FloatScreenState(
             id = composeNode.companionStateId,
-            name = composeNode.label.value
+            name = composeNode.label.value,
+            companionNodeId = composeNode.id,
         )
     }
 

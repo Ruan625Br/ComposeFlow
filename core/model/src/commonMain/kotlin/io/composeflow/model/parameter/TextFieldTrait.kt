@@ -87,6 +87,7 @@ data class TextFieldTrait(
         return ScreenState.StringScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
+            companionNodeId = composeNode.id,
         )
     }
 
