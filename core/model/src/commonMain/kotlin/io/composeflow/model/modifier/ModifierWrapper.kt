@@ -87,7 +87,6 @@ sealed class ModifierWrapper(
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Alpha(alpha)
         override fun category() = ModifierCategory.Drawing
         override fun tooltipText(): String =
             "Draw content with modified alpha that may be less than 1."
@@ -127,7 +126,6 @@ sealed class ModifierWrapper(
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = AspectRatio(ratio, matchHeightConstraintsFirst)
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String =
             "Attempts to size the content to match a specified aspect ratio"
@@ -182,7 +180,6 @@ sealed class ModifierWrapper(
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Background(colorWrapper, shapeWrapper)
         override fun category() = ModifierCategory.Drawing
         override fun tooltipText(): String = "Draws shape with a solid color behind the content."
     }
@@ -240,7 +237,6 @@ sealed class ModifierWrapper(
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Border(width, colorWrapper, shapeWrapper)
         override fun category() = ModifierCategory.Border
         override fun tooltipText(): String =
             """Modify element to add border with appearance specified with a width, 
@@ -271,7 +267,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Clip(shapeWrapper)
         override fun category() = ModifierCategory.Drawing
         override fun tooltipText(): String = "Clip the content to shape"
     }
@@ -300,7 +295,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Height(height)
 
         override fun heightDecider(parent: ComposeTrait?) = "${height.value.toInt()}dp"
         override fun category() = ModifierCategory.Size
@@ -330,7 +324,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = FillMaxHeight(fraction)
 
         override fun heightDecider(parent: ComposeTrait?) = fraction.fillAsString()
         override fun category() = ModifierCategory.Size
@@ -359,7 +352,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = FillMaxWidth(fraction)
         override fun widthDecider(parent: ComposeTrait?) = fraction.fillAsString()
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String = "Have the content fill (possibly only partially)"
@@ -387,7 +379,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = FillMaxSize(fraction)
 
         override fun heightDecider(parent: ComposeTrait?) = fraction.fillAsString()
         override fun widthDecider(parent: ComposeTrait?) = fraction.fillAsString()
@@ -426,7 +417,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Offset(x, y)
         override fun category() = ModifierCategory.Position
         override fun tooltipText(): String = "Offset the content by (x dp, y dp)"
     }
@@ -511,7 +501,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Padding(start, top, end, bottom)
         override fun category() = ModifierCategory.Padding
         override fun tooltipText(): String = "Apply additional space along each edge of the content"
 
@@ -562,7 +551,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Rotate(degrees)
         override fun category() = ModifierCategory.Transformations
         override fun tooltipText(): String =
             "Sets the degrees the view is rotated around the center of the composable"
@@ -606,7 +594,6 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Scale(scaleX, scaleY)
         override fun category() = ModifierCategory.Transformations
         override fun tooltipText(): String =
             """Scale the contents of the composable by the following 
@@ -654,7 +641,6 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Shadow(elevation)
         override fun category() = ModifierCategory.Drawing
         override fun tooltipText(): String = """Creates a graphicsLayer that draws a shadow"""
     }
@@ -698,11 +684,6 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Size(
-            width,
-            height,
-        )
-
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String =
             """Declare the preferred size of the content to be exactly width dp by height dp"""
@@ -736,7 +717,6 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = VerticalScroll
 
         override fun category() = ModifierCategory.Scroll
         override fun tooltipText(): String =
@@ -765,7 +745,6 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = VerticalScroll
 
         override fun category() = ModifierCategory.Scroll
         override fun tooltipText(): String =
@@ -799,7 +778,6 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Width(width)
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String =
             "Declare the preferred width of the content to be exactly width dp"
@@ -845,7 +823,6 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = WrapContentHeight(align, unbounded)
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String = """Allow the content to measure at its desired height 
 without regard for the incoming measurement"""
@@ -888,7 +865,6 @@ without regard for the incoming measurement"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = WrapContentSize(align, unbounded)
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String =
             """Allow the content to measure at its desired size without 
@@ -932,7 +908,6 @@ regard for the incoming measurement"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = WrapContentWidth(align, unbounded)
         override fun category() = ModifierCategory.Size
         override fun tooltipText(): String =
             """Allow the content to measure at its desired size without 
@@ -960,7 +935,6 @@ regard for the incoming measurement"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = ZIndex(zIndex)
         override fun category() = ModifierCategory.Drawing
         override fun tooltipText(): String = """Creates a modifier that controls the drawing order 
 for the children of the same layout parent"""
@@ -1004,7 +978,6 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Align(align)
 
         override fun hasValidParent(parent: ComposeTrait): Boolean = parent is BoxTrait
         override fun category() = ModifierCategory.Alignment
@@ -1043,7 +1016,6 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = AlignHorizontal(align)
 
         override fun hasValidParent(parent: ComposeTrait): Boolean = parent is ColumnTrait
         override fun category() = ModifierCategory.Alignment
@@ -1081,7 +1053,6 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = AlignVertical(align)
 
         override fun hasValidParent(parent: ComposeTrait): Boolean = parent is RowTrait
         override fun category() = ModifierCategory.Alignment
@@ -1121,7 +1092,6 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-        override fun deepCopy(): ModifierWrapper = Weight(weight, fill)
 
         override fun heightDecider(parent: ComposeTrait?) = if (parent is ColumnTrait) {
             "weight $weight"
@@ -1163,8 +1133,6 @@ relative to other weighted sibling elements in the Row"""
         codeBlockBuilder: CodeBlock.Builder,
         dryRun: Boolean,
     ): CodeBlock.Builder
-
-    abstract fun deepCopy(): ModifierWrapper
 
     abstract fun category(): ModifierCategory
 
@@ -1260,7 +1228,6 @@ fun List<ModifierWrapper>.generateCode(
     context: GenerationContext,
     codeBlockBuilder: CodeBlock.Builder = CodeBlock.builder(),
     dryRun: Boolean,
-    parentNode: ComposeNode? = null,
 ): CodeBlock.Builder {
     return if (isEmpty()) {
         codeBlockBuilder
