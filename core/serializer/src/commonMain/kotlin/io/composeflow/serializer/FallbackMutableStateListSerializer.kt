@@ -1,5 +1,6 @@
 package io.composeflow.serializer
 
+import co.touchlab.kermit.Logger
 import io.composeflow.override.toMutableStateListEqualsOverride
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
@@ -31,7 +32,7 @@ class FallbackMutableStateListSerializer<T>(
         return try {
             ListSerializer(dataSerializer).deserialize(decoder).toMutableStateListEqualsOverride()
         } catch (e: SerializationException) {
-            println("Failed to deserialize list: ${e.message}, returning empty list")
+            Logger.e { "Failed to deserialize list: ${e.message}, returning empty list" }
             listOf<T>().toMutableStateListEqualsOverride()
         }
     }

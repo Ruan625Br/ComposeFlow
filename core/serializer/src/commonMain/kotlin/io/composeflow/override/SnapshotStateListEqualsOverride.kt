@@ -73,7 +73,7 @@ class SnapshotStateListEqualsOverride<T> : StateObject, MutableList<T>, RandomAc
     }
 
     override fun hashCode(): Int {
-        return delegate.hashCode()
+        return delegate.toList().hashCode()
     }
 }
 

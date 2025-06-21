@@ -1,6 +1,7 @@
 package io.composeflow.serializer
 
-import androidx.compose.runtime.mutableStateMapOf
+import co.touchlab.kermit.Logger
+import io.composeflow.override.toMutableStateMapEqualsOverride
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerializationException
@@ -33,18 +34,10 @@ class FallbackMutableStateMapSerializer<K, V>(
 
     override fun deserialize(decoder: Decoder): MutableMap<K, V> {
         return try {
-            MapSerializer(keySerializer, valueSerializer).deserialize(decoder)
-                .toMutableMap()
-                .toMutableStateMap()
+            MapSerializer(keySerializer, valueSerializer).deserialize(decoder).toMutableStateMapEqualsOverride()
         } catch (e: SerializationException) {
-            println("Deserialization failed, returning empty state map: ${e.message}")
-            mutableStateMapOf()
+            Logger.e { "Failed to deserialize map: ${e.message}, returning empty map" }
+            mapOf<K, V>().toMutableStateMapEqualsOverride()
         }
     }
-}
-
-private fun <K, V> MutableMap<K, V>.toMutableStateMap(): MutableMap<K, V> {
-    val stateMap = mutableStateMapOf<K, V>()
-    stateMap.putAll(this)
-    return stateMap
 }
