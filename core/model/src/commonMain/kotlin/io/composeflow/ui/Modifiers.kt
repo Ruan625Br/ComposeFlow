@@ -71,6 +71,7 @@ import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.ui.zoomablecontainer.calculateAdjustedBoundsInZoomableContainer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import java.awt.Cursor
 
 const val DeviceCanvasTestTag = "DeviceCanvas"
 
@@ -490,8 +491,10 @@ private fun Modifier.dragHandlerAndTapGestures(
             .then(resizeLabelModifier)
             .then(dragModifier)
             .then(
-                if (onBottomDragHandler || isHeightResizing || onRightDragHandler || isWidthResizing) {
-                    pointerHoverIcon(PointerIcon.Crosshair)
+                if (onRightDragHandler || isWidthResizing) {
+                    pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                } else if (onBottomDragHandler || isHeightResizing) {
+                    pointerHoverIcon(PointerIcon(Cursor(Cursor.S_RESIZE_CURSOR)))
                 } else {
                     Modifier
                 },
