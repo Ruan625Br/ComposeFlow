@@ -194,17 +194,34 @@ e.g.
  9. Navigation: Navigation is (such as BottomNavigatioin, NavigationRail) is automatically added by ComposeFlow. Whenther each screen should be part of the navigation is toggled by `showOnNavigation` property in the screen. You don't have to create BottomAppBarNode to represent a bottom navigation.
 
 10. State Mechanism: ComposeFlow supports two levels of state:
-    - App-level states: These are globally accessible across all screens.
-    - Screen-level states: These are local to the current screen and must be defined in the stateHolderImpl block in a screen. A state has id, human-readable name, and companionNodeId, that corresponds to the ComposeNode, wchich uses the state as its internal state. For every input UI element (e.g., TextField, Checkbox, Switch, Slider), a corresponding screen-level state must be created and linked to the element via the companionStateId property. This ensures proper state binding between the UI and logic layer.
+    - App-level states: These are globally accessible across all screens defined in the stateHolderImpl block in the project level .
+    - Screen-level states:
+      - companioon state: These are local to the current screen. Some ComposeTraits that have input values have default companion states by default (for example, TextField, Switch, Checkbox). When this is assigned, the specific AssignableProperty (`ValueFromCompanionState`) is assigned. When other ComposeNode has a reference to the companion state, it's named as `"${id of ComposeNode}-companionState"`` (for example, `searchTextField-companionState`).
+     - explicit screen level state: States that are explicitly defined in its stateHolderImpl block.
 
-    Example screen level state:
+    Example companion state:
 ```
-    stateHolderImpl:
-      states:
-      - !<StringScreenState>
-        id: "searchTextFieldState"
-        name: "replyText"
-        companionNodeId: "textField"
+        - id: "searchTextField"
+          trait: !<TextFieldTrait>
+            value: !<ValueFromCompanionState> { }
+```
+
+Example of another ComposeNode has a reference to the companion state for the TextField:
+```
+        - id: "textField"
+          trait: !<TextTrait>
+            text: !<ValueFromState>
+               readFromStateId: "searchTextField-companionState"
+```
+
+Example of explicit screen level state:
+```
+stateHolderImpl:
+  states:
+  - !<StringScreenState>
+    id: "searchTextFieldState"
+    name: "replyText"
+    companionNodeId: "textField"
 ```
 
   Error Handling:
