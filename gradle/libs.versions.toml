@@ -62,6 +62,8 @@ compose-adaptive-navigation = { module = "org.jetbrains.compose.material3.adapti
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutine" }
 compose-navigation = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "compose-navigation" }
 
+splitpane = { module = "org.jetbrains.compose.components:components-splitpane-desktop", version.ref = "compose-multiplatform" }
+
 # precompose
 precompose = { module = "moe.tlaster:precompose", version.ref = "precompose" }
 precompose-koin = { module = "moe.tlaster:precompose-koin", version.ref = "precompose" }

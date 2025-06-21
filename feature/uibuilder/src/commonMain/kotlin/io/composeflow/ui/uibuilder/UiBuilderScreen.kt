@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -43,7 +44,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DismissibleNavigationDrawer
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.FabPosition
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
@@ -166,6 +166,8 @@ import io.composeflow.zoom_out
 import kotlinx.coroutines.CoroutineScope
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
+import org.jetbrains.jewel.ui.component.HorizontalSplitLayout
+import org.jetbrains.jewel.ui.component.VerticalSplitLayout
 import kotlin.math.roundToInt
 
 @Composable
@@ -184,8 +186,8 @@ fun UiBuilderScreen(
     }
     val editingProject = viewModel.editingProject.collectAsState().value
     editingProject.screenHolder.pendingDestinationContext?.let {
-        (it as? DestinationContext.UiBuilderScreen)?.let {
-            viewModel.onSetPendingFocus(it)
+        (it as? DestinationContext.UiBuilderScreen)?.let { destination ->
+            viewModel.onSetPendingFocus(destination)
         }
     }
 
@@ -306,12 +308,172 @@ fun UiBuilderScreen(
                     consumed
                 }
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxSize()
+            HorizontalSplitLayout(
+                maxRatio = 0.4f,
+                initialDividerPosition = 380.dp,
+                first = { firstModifier ->
+                    LeftPane(
+                        project = project,
+                        copiedNode = copiedNode,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        composeNodeCallbacks = composeNodeCallbacks,
+                        paletteNodeCallbacks = paletteNodeCallbacks,
+                        zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
+                        onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                        onSelectScreen = viewModel::onSelectScreen,
+                        onScreenUpdated = viewModel::onScreenUpdated,
+                        onDeleteScreen = viewModel::onDeleteScreen,
+                        onScreensSwapped = viewModel::onScreensSwapped,
+                        onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
+                        onHoveredStatusUpdated = viewModel::onHoveredStatusUpdated,
+                        onShowInspectorTab = {
+                            selectedInspectorDestination = InspectorTabDestination.Inspector
+                        },
+                        onShowActionTab = {
+                            selectedInspectorDestination = InspectorTabDestination.Action
+                        },
+                        onShowSnackbar = onShowSnackbar,
+                        modifier = firstModifier
+                    )
+                },
+                second = { secondModifier ->
+                    Row(modifier = secondModifier) {
+                        CanvasArea(
+                            project = project,
+                            aiAssistantUiState = aiAssistantUiState,
+                            canvasEditable = currentEditable,
+                            copiedNode = copiedNode,
+                            currentFormFactor = currentFormFactor,
+                            canvasAreaUiState = canvasAreaUiState,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            composeNodeCallbacks = composeNodeCallbacks,
+                            onAddScreen = viewModel::onAddScreen,
+                            onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                            onMousePressedAt = viewModel::onMousePressedAt,
+                            onMouseHoveredAt = viewModel::onMouseHoveredAt,
+                            onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
+                            onHoveredStatusUpdated =
+                                { node, isHovered ->
+                                    viewModel.onHoveredStatusUpdated(
+                                        node,
+                                        isHovered
+                                    )
+                                },
+                            onOpenAddModifierDialog = { addModifierDialogVisible = true },
+                            onShowSnackbar = onShowSnackbar,
+                            zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
+                            modifier = Modifier.weight(1f),
+                        )
+                        InspectorTab(
+                            project = project,
+                            composeNodeCallbacks = composeNodeCallbacks,
+                            onShowSnackbar = onShowSnackbar,
+                            onResetPendingDestination = {
+                                selectedInspectorDestination = null
+                                viewModel.onResetPendingInspectorTab()
+                            },
+                            selectedDestination = (editingProject.screenHolder.pendingDestination as? NavigatableDestination.UiBuilderScreen)?.inspectorTabDestination
+                                ?: selectedInspectorDestination,
+                            modifier = Modifier.width(420.dp)
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxSize()
                     .background(MaterialTheme.colorScheme.secondaryContainer),
-            ) {
-                Column(modifier = Modifier.width(380.dp)) {
+            )
+        }
+    }
+
+    draggedNode?.let {
+        val size = Size(80f, 64f)
+        PaletteIcon(
+            modifier = Modifier
+                .width(size.width.dp)
+                .height(size.height.dp)
+                .offset {
+                    IntOffset(
+                        (dragStartPosition.x - size.width / 2f).roundToInt(),
+                        (dragStartPosition.y - size.height / 2f).roundToInt(),
+                    )
+                }
+                .clip(RoundedCornerShape(16.dp))
+                .alpha(0.5f)
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            imageVector = it.trait.value.icon(),
+            iconText = it.trait.value.iconText(),
+            contentDescription = "Palette icon for ${it.trait.value.iconText()}",
+        )
+    }
+
+    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+    if (addModifierDialogVisible) {
+        onAnyDialogIsShown()
+        project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
+            val modifiers = ModifierWrapper.values().filter { m ->
+                focused.parentNode?.let {
+                    m.hasValidParent(it.trait.value)
+                } ?: true
+            }.mapIndexed { i, modifierWrapper ->
+                i to modifierWrapper
+            }
+
+            AddModifierDialog(
+                modifiers = modifiers,
+                onModifierSelected = {
+                    addModifierDialogVisible = false
+                    composeNodeCallbacks.onModifierAdded(focused, modifiers[it].second)
+                    onAllDialogsClosed()
+                },
+                onCloseClick = {
+                    addModifierDialogVisible = false
+                    onAllDialogsClosed()
+                },
+            )
+        }
+    }
+}
+
+const val DeviceCanvasTestTag = "DeviceCanvas"
+
+@Immutable
+data class CanvasAreaUiState(
+    val topToolbarUiState: CanvasTopToolbarUiState,
+)
+
+const val ToggleTopAppBarButtonTestTag = "ToggleTopAppBarButton"
+const val ToggleNavButtonTestTag = "ToggleNavButton"
+
+@Composable
+private fun LeftPane(
+    project: Project,
+    copiedNode: ComposeNode?,
+    canvasNodeCallbacks: CanvasNodeCallbacks,
+    composeNodeCallbacks: ComposeNodeCallbacks,
+    paletteNodeCallbacks: PaletteNodeCallbacks,
+    zoomableContainerStateHolder: ZoomableContainerStateHolder,
+    onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+    onSelectScreen: (screen: Screen) -> Unit,
+    onScreenUpdated: (screen: Screen) -> Unit,
+    onDeleteScreen: (screen: Screen) -> Unit,
+    onScreensSwapped: (from: Int, to: Int) -> Unit,
+    onFocusedStatusUpdated: (node: ComposeNode) -> Unit,
+    onHoveredStatusUpdated: (node: ComposeNode, isHovered: Boolean) -> Unit,
+    onShowSnackbar: suspend (String, String?) -> Boolean,
+    onShowInspectorTab: () -> Unit,
+    onShowActionTab: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BoxWithConstraints(
+        modifier = modifier
+    ) {
+        val maxHeight = maxHeight.value.dp
+        VerticalSplitLayout(
+            initialDividerPosition = maxHeight / 2,
+            minRatio = 0.25f,
+            maxRatio = 0.75f,
+            first = { firstModifier ->
+                Column(modifier = firstModifier) {
                     var selectedTabIndex by remember { mutableStateOf(0) }
                     TabRow(
                         selectedTabIndex = selectedTabIndex,
@@ -384,7 +546,7 @@ fun UiBuilderScreen(
                             PaletteTab(
                                 project = project,
                                 paletteNodeCallbacks = paletteNodeCallbacks,
-                                zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
                                 modifier = Modifier.weight(1f),
                             )
                         }
@@ -392,11 +554,11 @@ fun UiBuilderScreen(
                         1 -> {
                             ScreenBuilderTab(
                                 project = project,
-                                onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
-                                onSelectScreen = viewModel::onSelectScreen,
-                                onScreenUpdated = viewModel::onScreenUpdated,
-                                onDeleteScreen = viewModel::onDeleteScreen,
-                                onScreensSwapped = viewModel::onScreensSwapped,
+                                onAddScreenFromTemplate = onAddScreenFromTemplate,
+                                onSelectScreen = onSelectScreen,
+                                onScreenUpdated = onScreenUpdated,
+                                onDeleteScreen = onDeleteScreen,
+                                onScreensSwapped = onScreensSwapped,
                                 modifier = Modifier.weight(1f),
                             )
                         }
@@ -410,128 +572,27 @@ fun UiBuilderScreen(
                             )
                         }
                     }
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.inverseOnSurface)
-
-                    ComposeNodeTree(
-                        project = project,
-                        copiedNode = copiedNode,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        composeNodeCallbacks = composeNodeCallbacks,
-                        modifier = Modifier.weight(1f),
-                        onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
-                        onHoveredStatusUpdated =
-                            { node, isHovered ->
-                                viewModel.onHoveredStatusUpdated(
-                                    node,
-                                    isHovered
-                                )
-                            },
-                        onShowInspectorTab = {
-                            selectedInspectorDestination = InspectorTabDestination.Inspector
-                        },
-                        onShowActionTab = {
-                            selectedInspectorDestination = InspectorTabDestination.Action
-                        },
-                        onShowSnackbar = onShowSnackbar,
-                    )
                 }
-                CanvasArea(
+            },
+            second = { secondModifier ->
+                ComposeNodeTree(
                     project = project,
-                    aiAssistantUiState = aiAssistantUiState,
-                    canvasEditable = currentEditable,
                     copiedNode = copiedNode,
-                    currentFormFactor = currentFormFactor,
-                    canvasAreaUiState = canvasAreaUiState,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     composeNodeCallbacks = composeNodeCallbacks,
-                    onAddScreen = viewModel::onAddScreen,
-                    onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
-                    onMousePressedAt = viewModel::onMousePressedAt,
-                    onMouseHoveredAt = viewModel::onMouseHoveredAt,
-                    onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
-                    onHoveredStatusUpdated =
-                        { node, isHovered -> viewModel.onHoveredStatusUpdated(node, isHovered) },
-                    onOpenAddModifierDialog = { addModifierDialogVisible = true },
-                    onShowSnackbar = onShowSnackbar,
-                    zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
-                    modifier = Modifier.weight(1f),
-                )
-
-                InspectorTab(
-                    project = project,
-                    composeNodeCallbacks = composeNodeCallbacks,
-                    onShowSnackbar = onShowSnackbar,
-                    onResetPendingDestination = {
-                        selectedInspectorDestination = null
-                        viewModel.onResetPendingInspectorTab()
+                    onFocusedStatusUpdated = onFocusedStatusUpdated,
+                    onHoveredStatusUpdated = { node, isHovered ->
+                        onHoveredStatusUpdated(node, isHovered)
                     },
-                    selectedDestination = (editingProject.screenHolder.pendingDestination as? NavigatableDestination.UiBuilderScreen)?.inspectorTabDestination
-                        ?: selectedInspectorDestination,
+                    onShowInspectorTab = onShowInspectorTab,
+                    onShowActionTab = onShowActionTab,
+                    onShowSnackbar = onShowSnackbar,
+                    modifier = secondModifier
                 )
-            }
-        }
-    }
-
-    draggedNode?.let {
-        val size = Size(80f, 64f)
-        PaletteIcon(
-            modifier = Modifier
-                .width(size.width.dp)
-                .height(size.height.dp)
-                .offset {
-                    IntOffset(
-                        (dragStartPosition.x - size.width / 2f).roundToInt(),
-                        (dragStartPosition.y - size.height / 2f).roundToInt(),
-                    )
-                }
-                .clip(RoundedCornerShape(16.dp))
-                .alpha(0.5f)
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            imageVector = it.trait.value.icon(),
-            iconText = it.trait.value.iconText(),
-            contentDescription = "Palette icon for ${it.trait.value.iconText()}",
+            },
         )
     }
-
-    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    if (addModifierDialogVisible) {
-        onAnyDialogIsShown()
-        project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
-            val modifiers = ModifierWrapper.values().filter { m ->
-                focused.parentNode?.let {
-                    m.hasValidParent(it.trait.value)
-                } ?: true
-            }.mapIndexed { i, modifierWrapper ->
-                i to modifierWrapper
-            }
-
-            AddModifierDialog(
-                modifiers = modifiers,
-                onModifierSelected = {
-                    addModifierDialogVisible = false
-                    composeNodeCallbacks.onModifierAdded(focused, modifiers[it].second)
-                    onAllDialogsClosed()
-                },
-                onCloseClick = {
-                    addModifierDialogVisible = false
-                    onAllDialogsClosed()
-                },
-            )
-        }
-    }
 }
-
-const val DeviceCanvasTestTag = "DeviceCanvas"
-
-@Immutable
-data class CanvasAreaUiState(
-    val topToolbarUiState: CanvasTopToolbarUiState,
-)
-
-const val ToggleTopAppBarButtonTestTag = "ToggleTopAppBarButton"
-const val ToggleNavButtonTestTag = "ToggleNavButton"
 
 @Composable
 private fun CanvasArea(
@@ -894,20 +955,26 @@ private fun BoxScope.DeviceInCanvas(
             .clip(shape = RoundedCornerShape(16.dp))
             .background(MaterialTheme.colorScheme.background)
     ) {
-        if (currentFormFactor is FormFactor.Phone) {
-            PixelPhoneFrame(
-                contentPadding = currentFormFactor.vesselSize.dp,
-            ) {
+        when (currentFormFactor) {
+            is FormFactor.Phone -> {
+                PixelPhoneFrame(
+                    contentPadding = currentFormFactor.vesselSize.dp,
+                ) {
+                    DrawEditorContents()
+                }
+            }
+
+            is FormFactor.Tablet -> {
+                IPadTabletFrame(
+                    contentPadding = currentFormFactor.vesselSize.dp,
+                ) {
+                    DrawEditorContents()
+                }
+            }
+
+            else -> {
                 DrawEditorContents()
             }
-        } else if (currentFormFactor is FormFactor.Tablet) {
-            IPadTabletFrame(
-                contentPadding = currentFormFactor.vesselSize.dp,
-            ) {
-                DrawEditorContents()
-            }
-        } else {
-            DrawEditorContents()
         }
     }
 }

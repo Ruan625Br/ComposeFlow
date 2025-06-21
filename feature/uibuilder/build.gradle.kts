@@ -44,6 +44,7 @@ kotlin {
             implementation(libs.jewel.int.ui.decorated.window)
             implementation(libs.reorderable)
             implementation(libs.kaml)
+            implementation(libs.splitpane)
             api(libs.precompose)
             api(libs.precompose.viewmodel)
         }
