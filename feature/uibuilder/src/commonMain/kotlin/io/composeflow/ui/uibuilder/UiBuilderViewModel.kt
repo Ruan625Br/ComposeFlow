@@ -10,6 +10,7 @@ import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.composeflow.MainViewUiState
@@ -154,6 +155,12 @@ class UiBuilderViewModel(
 
     private var uiBuilderCanvasSizeDp by mutableStateOf(IntSize(0, 0))
 
+    var leftPaneDividerPosition by mutableStateOf(380.dp)
+        private set
+
+    var inspectorTabWidth by mutableStateOf(420.dp)
+        private set
+
     fun onFormFactorChanged(newFormFactor: FormFactor) {
         formFactor = newFormFactor
         val maximumAvailableWidth = uiBuilderCanvasSizeDp.width
@@ -180,6 +187,14 @@ class UiBuilderViewModel(
 
     fun onUiBuilderCanvasSizeChanged(newSize: IntSize) {
         uiBuilderCanvasSizeDp = newSize
+    }
+
+    fun onLeftPaneDividerPositionChanged(newPosition: Dp) {
+        leftPaneDividerPosition = newPosition
+    }
+
+    fun onInspectorTabWidthChanged(newWidth: Dp) {
+        inspectorTabWidth = newWidth
     }
 
     fun onDraggedPositionUpdated(draggedPosition: Offset, paletteDraggable: PaletteDraggable) {

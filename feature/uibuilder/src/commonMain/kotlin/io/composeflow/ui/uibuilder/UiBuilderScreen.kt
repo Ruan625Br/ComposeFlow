@@ -147,6 +147,9 @@ import io.composeflow.ui.handleMessages
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.inspector.InspectorTab
 import io.composeflow.ui.inspector.modifier.AddModifierDialog
+import io.composeflow.ui.jewel.SplitLayoutState
+import io.composeflow.ui.jewel.StatefulHorizontalSplitLayout
+import io.composeflow.ui.jewel.rememberSplitLayoutState
 import io.composeflow.ui.modifier.backgroundContainerNeutral
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.modifierForCanvas
@@ -166,7 +169,6 @@ import io.composeflow.zoom_out
 import kotlinx.coroutines.CoroutineScope
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.jewel.ui.component.HorizontalSplitLayout
 import org.jetbrains.jewel.ui.component.VerticalSplitLayout
 import kotlin.math.roundToInt
 
@@ -200,6 +202,7 @@ fun UiBuilderScreen(
     val mainViewUiState by viewModel.mainViewUiState.collectAsState()
     var dragStartPosition by remember { mutableStateOf(Offset.Zero) }
     var selectedInspectorDestination: InspectorTabDestination? by remember { mutableStateOf(null) }
+
 
     val onShowSnackbar = LocalOnShowSnackbar.current
     val composeNodeCallbacks = ComposeNodeCallbacks(
@@ -308,9 +311,12 @@ fun UiBuilderScreen(
                     consumed
                 }
         ) {
-            HorizontalSplitLayout(
+            val leftPaneSplitState =
+                rememberSplitLayoutState(initialDividerPosition = viewModel.leftPaneDividerPosition)
+            StatefulHorizontalSplitLayout(
+                state = leftPaneSplitState,
                 maxRatio = 0.4f,
-                initialDividerPosition = 380.dp,
+                onDividerPositionChanged = viewModel::onLeftPaneDividerPositionChanged,
                 first = { firstModifier ->
                     LeftPane(
                         project = project,
@@ -337,44 +343,59 @@ fun UiBuilderScreen(
                     )
                 },
                 second = { secondModifier ->
-                    Row(modifier = secondModifier) {
-                        CanvasArea(
-                            project = project,
-                            aiAssistantUiState = aiAssistantUiState,
-                            canvasEditable = currentEditable,
-                            copiedNode = copiedNode,
-                            currentFormFactor = currentFormFactor,
-                            canvasAreaUiState = canvasAreaUiState,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            composeNodeCallbacks = composeNodeCallbacks,
-                            onAddScreen = viewModel::onAddScreen,
-                            onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
-                            onMousePressedAt = viewModel::onMousePressedAt,
-                            onMouseHoveredAt = viewModel::onMouseHoveredAt,
-                            onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
-                            onHoveredStatusUpdated =
-                                { node, isHovered ->
-                                    viewModel.onHoveredStatusUpdated(
-                                        node,
-                                        isHovered
-                                    )
-                                },
-                            onOpenAddModifierDialog = { addModifierDialogVisible = true },
-                            onShowSnackbar = onShowSnackbar,
-                            zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
-                            modifier = Modifier.weight(1f),
-                        )
-                        InspectorTab(
-                            project = project,
-                            composeNodeCallbacks = composeNodeCallbacks,
-                            onShowSnackbar = onShowSnackbar,
-                            onResetPendingDestination = {
-                                selectedInspectorDestination = null
-                                viewModel.onResetPendingInspectorTab()
+                    BoxWithConstraints(modifier = secondModifier) {
+                        val canvasDividerPosition = this.maxWidth - viewModel.inspectorTabWidth
+                        // TODO: Moving speed doesn't align with the actual amount of in this
+                        // SplitLayout
+                        StatefulHorizontalSplitLayout(
+                            state = SplitLayoutState.DpBased(canvasDividerPosition),
+                            maxRatio = 0.8f,
+                            onDividerPositionChanged = { newPosition ->
+                                val newInspectorWidth = maxWidth - newPosition
+                                viewModel.onInspectorTabWidthChanged(newInspectorWidth)
                             },
-                            selectedDestination = (editingProject.screenHolder.pendingDestination as? NavigatableDestination.UiBuilderScreen)?.inspectorTabDestination
-                                ?: selectedInspectorDestination,
-                            modifier = Modifier.width(420.dp)
+                            first = { canvasModifier ->
+                                CanvasArea(
+                                    project = project,
+                                    aiAssistantUiState = aiAssistantUiState,
+                                    canvasEditable = currentEditable,
+                                    copiedNode = copiedNode,
+                                    currentFormFactor = currentFormFactor,
+                                    canvasAreaUiState = canvasAreaUiState,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    composeNodeCallbacks = composeNodeCallbacks,
+                                    onAddScreen = viewModel::onAddScreen,
+                                    onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                                    onMousePressedAt = viewModel::onMousePressedAt,
+                                    onMouseHoveredAt = viewModel::onMouseHoveredAt,
+                                    onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
+                                    onHoveredStatusUpdated =
+                                        { node, isHovered ->
+                                            viewModel.onHoveredStatusUpdated(
+                                                node,
+                                                isHovered
+                                            )
+                                        },
+                                    onOpenAddModifierDialog = { addModifierDialogVisible = true },
+                                    onShowSnackbar = onShowSnackbar,
+                                    zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
+                                    modifier = canvasModifier,
+                                )
+                            },
+                            second = { inspectorModifier ->
+                                InspectorTab(
+                                    project = project,
+                                    composeNodeCallbacks = composeNodeCallbacks,
+                                    onShowSnackbar = onShowSnackbar,
+                                    onResetPendingDestination = {
+                                        selectedInspectorDestination = null
+                                        viewModel.onResetPendingInspectorTab()
+                                    },
+                                    selectedDestination = (editingProject.screenHolder.pendingDestination as? NavigatableDestination.UiBuilderScreen)?.inspectorTabDestination
+                                        ?: selectedInspectorDestination,
+                                    modifier = inspectorModifier.width(viewModel.inspectorTabWidth)
+                                )
+                            },
                         )
                     }
                 },
