@@ -137,6 +137,7 @@ import io.composeflow.ui.Tooltip
 import io.composeflow.ui.adaptive.ProvideDeviceSizeDp
 import io.composeflow.ui.adaptive.computeNavigationSuiteType
 import io.composeflow.ui.background.DotPatternBackground
+import io.composeflow.ui.calculateScale
 import io.composeflow.ui.common.AppTheme
 import io.composeflow.ui.common.ProvideAppThemeTokens
 import io.composeflow.ui.component.ComponentBuilderTab
@@ -177,13 +178,14 @@ fun UiBuilderScreen(
     project: Project,
     aiAssistantUiState: AiAssistantUiState,
     onUpdateProject: (Project) -> Unit,
+    screenMaxSize: Size,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel = viewModel(modelClass = UiBuilderViewModel::class) {
         UiBuilderViewModel(
             firebaseIdToken = firebaseIdToken,
             project = project,
-            onUpdateProject = onUpdateProject
+            onUpdateProject = onUpdateProject,
         )
     }
     val editingProject = viewModel.editingProject.collectAsState().value
@@ -264,9 +266,19 @@ fun UiBuilderScreen(
         onDraggedPositionUpdated = viewModel::onDraggedPositionUpdated,
         onDragEnd = viewModel::onDragEnd,
     )
+    val zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder
     val (focusRequester) = remember { FocusRequester.createRefs() }
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+
+    LaunchedEffect(screenMaxSize) {
+        val scale = calculateScale(
+            formFactor = currentFormFactor,
+            // To subtract the Top tool bar area some margin for bottom
+            screenSize = Size(screenMaxSize.width, screenMaxSize.height - 80 - 40),
+        )
+        viewModel.onScaleChanged(scale)
     }
 
     val colorSchemeHolder = project.themeHolder.colorSchemeHolder
@@ -378,7 +390,7 @@ fun UiBuilderScreen(
                                         },
                                     onOpenAddModifierDialog = { addModifierDialogVisible = true },
                                     onShowSnackbar = onShowSnackbar,
-                                    zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
                                     modifier = canvasModifier,
                                 )
                             },

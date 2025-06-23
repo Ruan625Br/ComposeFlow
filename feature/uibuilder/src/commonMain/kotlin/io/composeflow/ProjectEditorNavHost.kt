@@ -1,6 +1,7 @@
 package io.composeflow
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.geometry.Size
 import io.composeflow.ai.AiAssistantUiState
 import io.composeflow.model.project.Project
 import io.composeflow.ui.apieditor.apiEditorScreen
@@ -21,6 +22,7 @@ fun ProjectEditorNavHost(
     project: Project,
     aiAssistantUiState: AiAssistantUiState,
     onUpdateProject: (Project) -> Unit,
+    screenMaxSize: Size,
 ) {
     NavHost(
         navigator = navigator,
@@ -30,6 +32,7 @@ fun ProjectEditorNavHost(
             project = project,
             aiAssistantUiState = aiAssistantUiState,
             onUpdateProject = onUpdateProject,
+            screenMaxSize = screenMaxSize
         )
         dataTypeEditorScreen(
             project = project,

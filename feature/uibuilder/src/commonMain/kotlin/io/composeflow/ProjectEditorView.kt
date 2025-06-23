@@ -1,6 +1,7 @@
 package io.composeflow
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -20,6 +21,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
@@ -46,7 +48,6 @@ import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.jewel.ui.component.Icon
 import org.jetbrains.jewel.ui.component.SelectableIconButton
 import org.jetbrains.jewel.ui.component.styling.LocalIconButtonStyle
-import org.jetbrains.jewel.ui.painter.hints.Size
 import org.jetbrains.jewel.ui.painter.hints.Stroke
 import org.jetbrains.jewel.ui.painter.rememberResourcePainterProvider
 
@@ -110,86 +111,91 @@ fun ProjectEditorContent(
                 StatusBarViewModel()
             }
         val statusBarUiState by statusBarViewModel.uiState.collectAsState()
-        ProvideNavigator(navigator = projectEditorNavigator) {
-            Column {
-                onTitleBarLeftContentSet {
-                    LeftToolbar(
-                        onToggleVisibilityOfAiChatDialog = {
-                            viewModel.onToggleShowAiChatDialog()
-                        },
-                    )
-                }
-                onTitleBarRightContentSet {
-                    RightToolbar(
-                        firebaseIdToken = firebaseIdToken,
-                        projectFileName = projectId,
-                        onStatusBarUiStateChanged = statusBarViewModel::onStatusBarUiStateChanged,
-                        statusBarUiState = statusBarUiState,
-                        navigator = projectEditorNavigator,
-                    )
-                }
-
-                Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                    var selectedItem by remember(currentDestination) {
-                        mutableStateOf(
-                            currentDestination?.ordinal ?: 0
+        BoxWithConstraints {
+            val screenMaxSize = Size(maxWidth.value, maxHeight.value)
+            ProvideNavigator(navigator = projectEditorNavigator) {
+                Column {
+                    onTitleBarLeftContentSet {
+                        LeftToolbar(
+                            onToggleVisibilityOfAiChatDialog = {
+                                viewModel.onToggleShowAiChatDialog()
+                            },
                         )
                     }
-                    Column(
-                        modifier = Modifier.width(40.dp)
-                            .fillMaxHeight()
-                            .background(color = MaterialTheme.colorScheme.surface),
-                    ) {
-                        TopLevelDestination.entries.forEachIndexed { index, item ->
-                            Tooltip(item.label) {
-                                SelectableIconButton(
-                                    selected = selectedItem == item.ordinal,
-                                    onClick = {
-                                        projectEditorNavigator.navigate(
-                                            item.route, options = NavOptions(
-                                                popUpTo = PopUpTo(
-                                                    route = item.route
+                    onTitleBarRightContentSet {
+                        RightToolbar(
+                            firebaseIdToken = firebaseIdToken,
+                            projectFileName = projectId,
+                            onStatusBarUiStateChanged = statusBarViewModel::onStatusBarUiStateChanged,
+                            statusBarUiState = statusBarUiState,
+                            navigator = projectEditorNavigator,
+                        )
+                    }
+
+                    Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
+                        var selectedItem by remember(currentDestination) {
+                            mutableStateOf(
+                                currentDestination?.ordinal ?: 0
+                            )
+                        }
+                        Column(
+                            modifier = Modifier.width(40.dp)
+                                .fillMaxHeight()
+                                .background(color = MaterialTheme.colorScheme.surface),
+                        ) {
+                            TopLevelDestination.entries.forEachIndexed { index, item ->
+                                Tooltip(item.label) {
+                                    SelectableIconButton(
+                                        selected = selectedItem == item.ordinal,
+                                        onClick = {
+                                            projectEditorNavigator.navigate(
+                                                item.route, options = NavOptions(
+                                                    popUpTo = PopUpTo(
+                                                        route = item.route
+                                                    )
                                                 )
                                             )
+                                            selectedItem = index
+                                        },
+                                        modifier = Modifier
+                                            .size(40.dp)
+                                            .padding(5.dp)
+                                            .testTag("$NavigationRailTestTag/${item.name}"),
+                                    ) { state ->
+                                        val tint by LocalIconButtonStyle.current.colors.foregroundFor(
+                                            state,
                                         )
-                                        selectedItem = index
-                                    },
-                                    modifier = Modifier
-                                        .size(40.dp)
-                                        .padding(5.dp)
-                                        .testTag("$NavigationRailTestTag/${item.name}"),
-                                ) { state ->
-                                    val tint by LocalIconButtonStyle.current.colors.foregroundFor(
-                                        state,
-                                    )
-                                    val painterProvider = rememberResourcePainterProvider(
-                                        item.iconPath,
-                                        Icons::class.java,
-                                    )
-                                    val painter by painterProvider.getPainter(
-                                        Size(20),
-                                        Stroke(tint),
-                                    )
-                                    Icon(painter = painter, "icon")
+                                        val painterProvider = rememberResourcePainterProvider(
+                                            item.iconPath,
+                                            Icons::class.java,
+                                        )
+                                        val painter by painterProvider.getPainter(
+                                            org.jetbrains.jewel.ui.painter.hints.Size(20),
+                                            Stroke(tint),
+                                        )
+                                        Icon(painter = painter, "icon")
+                                    }
                                 }
                             }
                         }
+                        VerticalDivider(
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(1.dp),
+                        )
+
+                        ProjectEditorNavHost(
+                            navigator = projectEditorNavigator,
+                            project = project,
+                            aiAssistantUiState = aiAssistantUiState,
+                            onUpdateProject = viewModel::onUpdateProject,
+                            screenMaxSize = screenMaxSize
+                        )
                     }
-                    VerticalDivider(
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .width(1.dp),
-                    )
-                    ProjectEditorNavHost(
-                        navigator = projectEditorNavigator,
-                        project = project,
-                        aiAssistantUiState = aiAssistantUiState,
-                        onUpdateProject = viewModel::onUpdateProject,
-                    )
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                    StatusBar(uiState = statusBarUiState)
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
-                StatusBar(uiState = statusBarUiState)
             }
         }
     }

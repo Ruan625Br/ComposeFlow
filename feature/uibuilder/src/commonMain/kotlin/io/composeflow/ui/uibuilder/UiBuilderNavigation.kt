@@ -1,5 +1,6 @@
 package io.composeflow.ui.uibuilder
 
+import androidx.compose.ui.geometry.Size
 import io.composeflow.ai.AiAssistantUiState
 import io.composeflow.model.project.Project
 import moe.tlaster.precompose.navigation.RouteBuilder
@@ -11,6 +12,7 @@ fun RouteBuilder.uiBuilderScreen(
     project: Project,
     aiAssistantUiState: AiAssistantUiState,
     onUpdateProject: (Project) -> Unit,
+    screenMaxSize: Size,
     navTransition: NavTransition? = null,
 ) {
     scene(
@@ -21,6 +23,7 @@ fun RouteBuilder.uiBuilderScreen(
             project = project,
             aiAssistantUiState = aiAssistantUiState,
             onUpdateProject = onUpdateProject,
+            screenMaxSize = screenMaxSize,
         )
     }
 }

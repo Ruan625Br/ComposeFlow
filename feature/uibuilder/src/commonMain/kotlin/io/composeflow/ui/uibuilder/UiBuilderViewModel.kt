@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
 import androidx.compose.ui.input.key.isCtrlPressed
@@ -56,6 +57,7 @@ import io.composeflow.ui.EventResult
 import io.composeflow.ui.FormFactor
 import io.composeflow.ui.UiBuilderHelper
 import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
+import io.composeflow.ui.calculateScale
 import io.composeflow.ui.common.buildUiState
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.util.generateUniqueName
@@ -66,7 +68,6 @@ import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.getString
-import kotlin.math.min
 import kotlin.uuid.Uuid
 
 class UiBuilderViewModel(
@@ -164,25 +165,20 @@ class UiBuilderViewModel(
     fun onFormFactorChanged(newFormFactor: FormFactor) {
         formFactor = newFormFactor
         val maximumAvailableWidth = uiBuilderCanvasSizeDp.width
-        // Subtract the size of the TopToolbar and the bottom card
-        val maximumAvailableHeight = uiBuilderCanvasSizeDp.height - 80 - 80
+        val maximumAvailableHeight = uiBuilderCanvasSizeDp.height
 
-        var widthScale = 1f
-        val minimumScale = 0.3f
-        while (formFactor.deviceSize.width * widthScale > maximumAvailableWidth) {
-            widthScale -= 0.1f
-            if (widthScale <= minimumScale) {
-                break
-            }
-        }
-        var heightScale = 1f
-        while (formFactor.deviceSize.height * heightScale > maximumAvailableHeight) {
-            heightScale -= 0.1f
-            if (heightScale <= minimumScale) {
-                break
-            }
-        }
-        zoomableContainerStateHolder.onToolbarZoomScaleChanged(min(widthScale, heightScale))
+        val scale = calculateScale(
+            formFactor = formFactor,
+            Size(
+                maximumAvailableWidth.toFloat(),
+                maximumAvailableHeight.toFloat()
+            )
+        )
+        zoomableContainerStateHolder.onToolbarZoomScaleChanged(scale)
+    }
+
+    fun onScaleChanged(newScale: Float) {
+        zoomableContainerStateHolder.onToolbarZoomScaleChanged(newScale)
     }
 
     fun onUiBuilderCanvasSizeChanged(newSize: IntSize) {
