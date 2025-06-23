@@ -643,17 +643,18 @@ private fun AuthenticatedUserStateViewer(
         if (expanded) {
             Column {
                 filteredProperties.forEach { property ->
-                    val selectedModifier = if (selectedProperty == property) {
-                        Modifier
-                            .padding(start = 24.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(8.dp)
-                    } else {
-                        Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-                    }
+                    val selectedModifier =
+                        if (selectedProperty != null && selectedProperty.isIdentical(property)) {
+                            Modifier
+                                .padding(start = 24.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                                .padding(8.dp)
+                        } else {
+                            Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                        }
                     AssignablePropertyLabelRow(
                         project = project,
                         onLabelClicked = onPropertySelected,
@@ -678,15 +679,16 @@ private fun StateViewer(
     selectedProperty: AssignableProperty? = null,
 ) {
     val filteredProperties = properties.filter { searchParams.matchCriteria(project, it) }
-    val initiallyExpanded = if (properties.any { it == selectedProperty }) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredProperties.isNotEmpty()
+    val initiallyExpanded =
+        if (properties.any { selectedProperty != null && it.isIdentical(selectedProperty) }) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                filteredProperties.isNotEmpty()
+            } else {
+                false
+            }
         }
-    }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
@@ -724,17 +726,18 @@ private fun StateViewer(
         if (expanded) {
             Column {
                 filteredProperties.forEach { property ->
-                    val selectedModifier = if (selectedProperty == property) {
-                        Modifier
-                            .padding(start = 24.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(8.dp)
-                    } else {
-                        Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-                    }
+                    val selectedModifier =
+                        if (selectedProperty != null && selectedProperty.isIdentical(property)) {
+                            Modifier
+                                .padding(start = 24.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                                .padding(8.dp)
+                        } else {
+                            Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                        }
                     val isDestinationEqualToSource =
                         destinationStateId != null &&
                                 destinationStateId == (property as? ValueFromState)?.readFromStateId
@@ -811,15 +814,16 @@ private fun EnumViewer(
     selectedProperty: AssignableProperty? = null,
 ) {
     val filteredProperties = properties.filter { searchParams.matchCriteria(project, it) }
-    val initiallyExpanded = if (properties.any { it == selectedProperty }) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredProperties.isNotEmpty()
+    val initiallyExpanded =
+        if (properties.any { selectedProperty != null && selectedProperty.isIdentical(it) }) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                filteredProperties.isNotEmpty()
+            } else {
+                false
+            }
         }
-    }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
@@ -858,7 +862,7 @@ private fun EnumViewer(
             Column {
                 filteredProperties.forEach { property ->
                     val selectedModifier =
-                        if (selectedProperty != null && selectedProperty == property) {
+                        if (selectedProperty != null && selectedProperty.isIdentical(property)) {
                             Modifier
                                 .padding(start = 24.dp)
                                 .background(
@@ -906,15 +910,16 @@ private fun FirestoreCollectionViewer(
     selectedProperty: AssignableProperty? = null,
 ) {
     val filteredProperties = properties.filter { searchParams.matchCriteria(project, it) }
-    val initiallyExpanded = if (properties.any { it == selectedProperty }) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredProperties.isNotEmpty()
+    val initiallyExpanded =
+        if (properties.any { selectedProperty != null && it.isIdentical(selectedProperty) }) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                filteredProperties.isNotEmpty()
+            } else {
+                false
+            }
         }
-    }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
@@ -952,17 +957,18 @@ private fun FirestoreCollectionViewer(
         if (expanded) {
             Column {
                 filteredProperties.forEach { property ->
-                    val selectedModifier = if (selectedProperty == property) {
-                        Modifier
-                            .padding(start = 24.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(8.dp)
-                    } else {
-                        Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-                    }
+                    val selectedModifier =
+                        if (selectedProperty != null && selectedProperty.isIdentical(property)) {
+                            Modifier
+                                .padding(start = 24.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                                .padding(8.dp)
+                        } else {
+                            Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                        }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -1000,15 +1006,16 @@ private fun ApiDefinitionViewer(
     selectedProperty: AssignableProperty? = null,
 ) {
     val filteredProperties = properties.filter { searchParams.matchCriteria(project, it) }
-    val initiallyExpanded = if (properties.any { it == selectedProperty }) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredProperties.isNotEmpty()
+    val initiallyExpanded =
+        if (properties.any { selectedProperty != null && it.isIdentical(selectedProperty) }) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                filteredProperties.isNotEmpty()
+            } else {
+                false
+            }
         }
-    }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
@@ -1047,7 +1054,7 @@ private fun ApiDefinitionViewer(
             Column {
                 filteredProperties.forEach { property ->
                     val selectedModifier =
-                        if (selectedProperty != null && selectedProperty == property) {
+                        if (selectedProperty != null && selectedProperty.isIdentical(property)) {
                             Modifier
                                 .padding(start = 24.dp)
                                 .background(
@@ -1805,15 +1812,16 @@ private fun LazyListChildViewer(
     searchParams: SearchStatesParams,
     modifier: Modifier = Modifier,
 ) {
-    val initiallyExpanded = if (selectedProperty != null && selectedProperty == property) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            searchParams.matchCriteria(project, property)
+    val initiallyExpanded =
+        if (selectedProperty != null && selectedProperty.isIdentical(property)) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                searchParams.matchCriteria(project, property)
+            } else {
+                false
+            }
         }
-    }
 
     val enabled =
         if (searchParams.isFilterEnabled) searchParams.matchCriteria(project, property) else true
@@ -1853,17 +1861,18 @@ private fun LazyListChildViewer(
         modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         if (expanded) {
-            val selectedModifier = if (selectedProperty != null && selectedProperty == property) {
-                modifier
-                    .padding(start = 24.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(8.dp),
-                    )
-                    .padding(8.dp)
-            } else {
-                modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-            }
+            val selectedModifier =
+                if (selectedProperty != null && selectedProperty.isIdentical(property)) {
+                    modifier
+                        .padding(start = 24.dp)
+                        .background(
+                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(8.dp),
+                        )
+                        .padding(8.dp)
+                } else {
+                    modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                }
             StateLabel(
                 project = project,
                 state = AppState.IntAppState(name = stringResource(Res.string.index_at)),

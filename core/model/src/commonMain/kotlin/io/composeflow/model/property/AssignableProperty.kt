@@ -222,6 +222,14 @@ sealed interface AssignableProperty {
         return propertyTransformers.any { it.isDependent(sourceId) }
     }
 
+    /**
+     * Method to compare the identity with the other property.
+     * This is usually comparing the identity except for a case where the same property is
+     * represented as [ValueFromCompanionState], which is considered as same with [ValueFromState]
+     * with the same state ID.
+     */
+    fun isIdentical(other: AssignableProperty): Boolean = this == other
+
     @Composable
     fun Editor(
         project: Project,
@@ -881,6 +889,14 @@ data class ValueFromState(
         return readFromStateId == sourceId || super<AssignableProperty>.isDependent(sourceId)
     }
 
+    override fun isIdentical(other: AssignableProperty): Boolean {
+        return if (other is ValueFromCompanionState) {
+            other.composeNode?.companionStateId == readFromStateId
+        } else {
+            other == this
+        }
+    }
+
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
         val companionComposeNode = project.findLocalStateOrNull(readFromStateId)?.let { readState ->
             when (readState) {
@@ -983,9 +999,9 @@ data class ValueFromState(
 /**
  * State that represents the value is assigned from a companion state.
  * For example, TextFieldTrait has a default companion state that represents its input value.
- * This class represents that the specific property is is assigned from such a companion state.
+ * This class represents that the specific property is assigned from such a companion state.
  * Technically it's same as using [ValueFromState] with the ID representing the state, but this
- * clas exits to reduce * the implication as much as possible,
+ * class exits to reduce the implication as much as possible,
  */
 @Serializable
 @SerialName("ValueFromCompanionState")
@@ -1016,6 +1032,14 @@ data class ValueFromCompanionState(
 
     override fun displayText(project: Project): String {
         return textFromState()
+    }
+
+    override fun isIdentical(other: AssignableProperty): Boolean {
+        return if (other is ValueFromState) {
+            other.readFromStateId == composeNode?.companionStateId
+        } else {
+            other == this
+        }
     }
 
     private fun textFromState(): String {
@@ -1697,7 +1721,6 @@ data class ApiResultProperty(
 @Serializable
 @SerialName("ComposableParameterProperty")
 data class ComposableParameterProperty(
-
     val parameterId: ParameterId,
     val dataFieldType: DataFieldType = DataFieldType.Primitive,
 ) : AssignableProperty, AssignablePropertyBase() {
