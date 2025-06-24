@@ -485,7 +485,7 @@ class AppBuilderTest {
         val textFieldParams = textField1.trait.value as TextFieldTrait
         TextFieldTrait().onAttachStateToNode(project, screen, textField1)
 
-        val appStringState = AppState.StringAppState(name = "stringState")
+        val appStringState = AppState.StringAppState(name = "stringState including space")
         project.addState(appStringState)
 
         textField1.trait.value = textFieldParams.copy(

@@ -9,6 +9,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import io.composeflow.Res
 import io.composeflow.ViewModelConstant
 import io.composeflow.add_value
+import io.composeflow.asVariableName
 import io.composeflow.clear_value
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
@@ -46,7 +47,12 @@ sealed interface StateOperation {
 
     fun isDependent(sourceId: String): Boolean
 
-    fun getUpdateMethodName(project: Project, writeState: WriteableState): String
+    fun getUpdateMethodName(
+        project: Project,
+        context: GenerationContext,
+        writeState: WriteableState
+    ): String
+
     fun getUpdateMethodParamsAsString(
         project: Project,
         context: GenerationContext,
@@ -87,17 +93,30 @@ sealed interface StateOperation {
             } ?: ""
         }
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val writeStateIdentifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name,
+            ).asVariableName()
             return if (readProperty is ValueFromState) {
                 val readState = project.findLocalStateOrNull(readProperty.readFromStateId)
                 if (readState != null) {
-                    "onSet${writeState.name.capitalize(Locale.current)}" +
-                            readState.let { "From${readState.name.capitalize(Locale.current)}" }
+                    val readStateIdentifier =
+                        context.getCurrentComposableContext().getOrAddIdentifier(
+                            id = readState.id,
+                            initialIdentifier = readState.name,
+                        ).asVariableName()
+                    "onSet${writeStateIdentifier.capitalize(Locale.current)}" +
+                            readState.let { "From${readStateIdentifier.capitalize(Locale.current)}" }
                 } else {
-                    "onSet${writeState.name.capitalize(Locale.current)}"
+                    "onSet${writeStateIdentifier.capitalize(Locale.current)}"
                 }
             } else {
-                "onSet${writeState.name.capitalize(Locale.current)}"
+                "onSet${writeStateIdentifier.capitalize(Locale.current)}"
             }
         }
 
@@ -110,6 +129,7 @@ sealed interface StateOperation {
             val funSpecBuilder = FunSpec.builder(
                 getUpdateMethodName(
                     project = project,
+                    context = context,
                     writeState = writeState,
                 ),
             )
@@ -163,8 +183,16 @@ sealed interface StateOperation {
 
         override fun isDependent(sourceId: String): Boolean = false
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
-            return "onClear${writeState.name.capitalize(Locale.current)}"
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name
+            ).asVariableName()
+            return "onClear${identifier.capitalize(Locale.current)}"
         }
 
         override fun addUpdateMethodAndReadProperty(
@@ -176,6 +204,7 @@ sealed interface StateOperation {
             val funSpecBuilder = FunSpec.builder(
                 getUpdateMethodName(
                     project = project,
+                    context = context,
                     writeState = writeState,
                 ),
             )
@@ -201,8 +230,17 @@ sealed interface StateOperation {
 
         override fun isDependent(sourceId: String): Boolean = false
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String =
-            "onToggle${writeState.name.capitalize(Locale.current)}"
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name
+            ).asVariableName()
+            return "onToggle${identifier.capitalize(Locale.current)}"
+        }
 
         override fun addUpdateMethodAndReadProperty(
             project: Project,
@@ -213,6 +251,7 @@ sealed interface StateOperation {
             val funSpecBuilder = FunSpec.builder(
                 getUpdateMethodName(
                     project = project,
+                    context = context,
                     writeState = writeState,
                 ),
             )
@@ -342,7 +381,11 @@ sealed interface StateOperationForDataType : StateOperation {
                 it.assignableProperty
             }
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
             check(writeState is AppState.CustomDataTypeAppState)
             val dataTypeId = writeState.dataTypeId
             val dataType = project.findDataTypeOrThrow(dataTypeId)
@@ -382,7 +425,7 @@ sealed interface StateOperationForDataType : StateOperation {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
             val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(project = project, writeState = writeState),
+                getUpdateMethodName(project = project, context = context, writeState = writeState),
             )
 
             val updateString = buildString {
@@ -459,17 +502,30 @@ sealed interface StateOperationForList : StateOperation {
             } ?: ""
         }
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val writeStateIdentifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name
+            ).asVariableName()
             return if (readProperty is ValueFromState) {
                 val readState = project.findLocalStateOrNull(readProperty.readFromStateId)
                 if (readState != null) {
-                    "onAddValueTo${writeState.name.capitalize(Locale.current)}" +
-                            readState.let { "From${readState.name.capitalize(Locale.current)}" }
+                    val readStateIdentifier =
+                        context.getCurrentComposableContext().getOrAddIdentifier(
+                            id = readState.id,
+                            initialIdentifier = readState.name
+                        ).asVariableName()
+                    "onAddValueTo${writeStateIdentifier.capitalize(Locale.current)}" +
+                            readState.let { "From${readStateIdentifier.capitalize(Locale.current)}" }
                 } else {
-                    "onAddValueTo${writeState.name.capitalize(Locale.current)}"
+                    "onAddValueTo${writeStateIdentifier.capitalize(Locale.current)}"
                 }
             } else {
-                "onAddValueTo${writeState.name.capitalize(Locale.current)}"
+                "onAddValueTo${writeStateIdentifier.capitalize(Locale.current)}"
             }
         }
 
@@ -482,6 +538,7 @@ sealed interface StateOperationForList : StateOperation {
             val funSpecBuilder = FunSpec.builder(
                 getUpdateMethodName(
                     project = project,
+                    context = context,
                     writeState = writeState,
                 ),
             )
@@ -541,7 +598,11 @@ sealed interface StateOperationForList : StateOperation {
                 it.assignableProperty
             }
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
             check(writeState is AppState.CustomDataTypeListAppState)
             val dataTypeId = writeState.dataTypeId
             val dataType = project.findDataTypeOrThrow(dataTypeId)
@@ -581,7 +642,7 @@ sealed interface StateOperationForList : StateOperation {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
             val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(project = project, writeState = writeState),
+                getUpdateMethodName(project = project, context = context, writeState = writeState),
             )
 
             val updateString = buildString {
@@ -654,8 +715,16 @@ sealed interface StateOperationForList : StateOperation {
 
         override fun getAssignableProperties(): List<AssignableProperty> = listOf(readProperty)
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
-            return "onUpdateValueFor${writeState.name.capitalize(Locale.current)}AtIndex"
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.id,
+            ).asVariableName()
+            return "onUpdateValueFor${identifier.capitalize(Locale.current)}AtIndex"
         }
 
         override fun getUpdateMethodParamsAsString(
@@ -696,6 +765,7 @@ sealed interface StateOperationForList : StateOperation {
                     context = context,
                     functionName = getUpdateMethodName(
                         project = project,
+                        context = context,
                         writeState = writeState,
                     ),
                     writeState = writeState,
@@ -756,7 +826,11 @@ sealed interface StateOperationForList : StateOperation {
                 it.assignableProperty
             }
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
             check(writeState is AppState.CustomDataTypeListAppState)
             val dataTypeId = writeState.dataTypeId
             val dataType = project.findDataTypeOrThrow(dataTypeId)
@@ -799,7 +873,7 @@ sealed interface StateOperationForList : StateOperation {
 
             val indexToUpdate = "indexToUpdate"
             val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(project = project, writeState = writeState),
+                getUpdateMethodName(project = project, context = context, writeState = writeState),
             ).addParameter(
                 ParameterSpec.builder(name = indexToUpdate, Int::class).build(),
             )
@@ -887,8 +961,16 @@ sealed interface StateOperationForList : StateOperation {
             return indexProperty.isDependent(sourceId)
         }
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
-            return "onRemoveValueFrom${writeState.name.capitalize(Locale.current)}AtIndex"
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name,
+            ).asVariableName()
+            return "onRemoveValueFrom${identifier.capitalize(Locale.current)}AtIndex"
         }
 
         override fun getUpdateMethodParamsAsString(
@@ -911,6 +993,7 @@ sealed interface StateOperationForList : StateOperation {
                     context = context,
                     functionName = getUpdateMethodName(
                         project = project,
+                        context = context,
                         writeState = writeState,
                     ),
                     writeState = writeState,
@@ -937,8 +1020,16 @@ sealed interface StateOperationForList : StateOperation {
 
         override fun isDependent(sourceId: String): Boolean = false
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
-            return "onRemoveFirstValueFrom${writeState.name.capitalize(Locale.current)}"
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name,
+            ).asVariableName()
+            return "onRemoveFirstValueFrom${identifier.capitalize(Locale.current)}"
         }
 
         override fun addUpdateMethodAndReadProperty(
@@ -950,6 +1041,7 @@ sealed interface StateOperationForList : StateOperation {
             val funSpecBuilder = FunSpec.builder(
                 getUpdateMethodName(
                     project = project,
+                    context = context,
                     writeState = writeState,
                 ),
             )
@@ -984,8 +1076,16 @@ sealed interface StateOperationForList : StateOperation {
 
         override fun isDependent(sourceId: String): Boolean = false
 
-        override fun getUpdateMethodName(project: Project, writeState: WriteableState): String {
-            return "onRemoveLastValueFrom${writeState.name.capitalize(Locale.current)}"
+        override fun getUpdateMethodName(
+            project: Project,
+            context: GenerationContext,
+            writeState: WriteableState
+        ): String {
+            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
+                id = writeState.id,
+                initialIdentifier = writeState.name,
+            ).asVariableName()
+            return "onRemoveLastValueFrom${identifier.capitalize(Locale.current)}"
         }
 
         override fun addUpdateMethodAndReadProperty(
@@ -997,6 +1097,7 @@ sealed interface StateOperationForList : StateOperation {
             val funSpecBuilder = FunSpec.builder(
                 getUpdateMethodName(
                     project = project,
+                    context = context,
                     writeState = writeState,
                 ),
             )

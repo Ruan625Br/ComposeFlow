@@ -502,7 +502,7 @@ sealed interface StateAction : Action {
                 }
                 ?: throw IllegalStateException("No CanvasEditable has State $this")
             setValueToStates.forEach {
-                it.getUpdateMethodName(project)?.let { updateMethodName ->
+                it.getUpdateMethodName(project, context)?.let { updateMethodName ->
                     builder.addStatement(
                         "${editable.viewModelName}.${updateMethodName}(${
                             it.operation.getUpdateMethodParamsAsString(
@@ -544,10 +544,10 @@ data class SetValueToState(
         return operation.isDependent(sourceId)
     }
 
-    fun getUpdateMethodName(project: Project): String? {
+    fun getUpdateMethodName(project: Project, context: GenerationContext): String? {
         val state = project.findLocalStateOrNull(writeToStateId) ?: return null
         val writeState = state as? WriteableState ?: return null
-        return operation.getUpdateMethodName(project, writeState)
+        return operation.getUpdateMethodName(project, context, writeState)
     }
 
     fun addUpdateMethodAndReadProperty(
