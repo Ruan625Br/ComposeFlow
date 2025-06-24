@@ -750,13 +750,10 @@ data class ShowConfirmationDialog(
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
-//        val variableName =
-//            composableContext.addComposeFileVariable(dialogOpenVariableName, dryRun = dryRun)
         val variableName = composableContext.getOrAddIdentifier(
             id = "${id}-${dialogOpenVariableName}",
             initialIdentifier = dialogOpenVariableName
         )
-//        dialogOpenVariableName = variableName
         val titleArg = title?.let {
             "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
         } ?: ""

@@ -3,6 +3,7 @@ package io.composeflow.model.parameter
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -101,6 +102,41 @@ abstract class AbstractIconTrait(
 
     @Composable
     override fun RenderedNode(
+        project: Project,
+        node: ComposeNode,
+        canvasNodeCallbacks: CanvasNodeCallbacks,
+        paletteRenderParams: PaletteRenderParams,
+        zoomableContainerStateHolder: ZoomableContainerStateHolder,
+        modifier: Modifier,
+    ) {
+        // Technically IconButton and Icon are different Composables, but to simplify, we automatically
+        // wrap it with IconButton if any click handler is set or IconButtonTrait is used as the
+        // trait otherwise render it as Icon composable
+        if (node.actionHandler.allActionNodes().isNotEmpty() || this is IconButtonTrait) {
+            IconButton(onClick = {}) {
+                RenderIcon(
+                    project,
+                    node,
+                    canvasNodeCallbacks,
+                    paletteRenderParams,
+                    zoomableContainerStateHolder,
+                    modifier
+                )
+            }
+        } else {
+            RenderIcon(
+                project,
+                node,
+                canvasNodeCallbacks,
+                paletteRenderParams,
+                zoomableContainerStateHolder,
+                modifier
+            )
+        }
+    }
+
+    @Composable
+    private fun RenderIcon(
         project: Project,
         node: ComposeNode,
         canvasNodeCallbacks: CanvasNodeCallbacks,

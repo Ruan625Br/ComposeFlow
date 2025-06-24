@@ -90,6 +90,7 @@ import io.composeflow.ui.inspector.parameter.DropdownParamsInspector
 import io.composeflow.ui.inspector.parameter.FabParamsInspector
 import io.composeflow.ui.inspector.parameter.GoogleSignInButtonParamsInspector
 import io.composeflow.ui.inspector.parameter.HorizontalPagerParamsInspector
+import io.composeflow.ui.inspector.parameter.IconButtonParamsInspector
 import io.composeflow.ui.inspector.parameter.IconParamsInspector
 import io.composeflow.ui.inspector.parameter.ImageParamsInspector
 import io.composeflow.ui.inspector.parameter.LazyColumnParamsInspector
@@ -308,6 +309,14 @@ fun ParamsInspector(
                         )
                     }
 
+                    is IconButtonTrait -> {
+                        IconButtonParamsInspector(
+                            project = project,
+                            composeNode,
+                            composeNodeCallbacks,
+                        )
+                    }
+
                     is ImageTrait -> {
                         ImageParamsInspector(
                             project = project,
@@ -513,7 +522,6 @@ fun ParamsInspector(
                     EmptyTrait -> {}
                     is LazyListTrait -> {}
                     is PagerTrait -> {}
-                    is IconButtonTrait -> {}
                     is AbstractIconTrait -> {}
                 }
             }

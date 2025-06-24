@@ -14,7 +14,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.model.parameter.IconAssetType
-import io.composeflow.model.parameter.IconTrait
+import io.composeflow.model.parameter.IconButtonTrait
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -30,13 +30,14 @@ import io.composeflow.ui.propertyeditor.DropdownProperty
 import io.composeflow.ui.utils.asIconComposable
 import kotlinx.coroutines.launch
 
+// Mostly identical with IconParamsInspector.
 @Composable
-fun IconParamsInspector(
+fun IconButtonParamsInspector(
     project: Project,
     node: ComposeNode,
     composeNodeCallbacks: ComposeNodeCallbacks,
 ) {
-    val iconTrait = node.trait.value as IconTrait
+    val iconButtonTrait = node.trait.value as IconButtonTrait
     val coroutineScope = rememberCoroutineScope()
     val onShowSnackbar = LocalOnShowSnackbar.current
     Column {
@@ -49,25 +50,25 @@ fun IconParamsInspector(
                 onValueChanged = { index, _ ->
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        iconTrait.copy(assetType = IconAssetType.entries[index]),
+                        iconButtonTrait.copy(assetType = IconAssetType.entries[index]),
                     )
                 },
-                selectedIndex = iconTrait.assetType.ordinal,
+                selectedIndex = iconButtonTrait.assetType.ordinal,
                 modifier = Modifier.padding(bottom = 4.dp),
             )
         }
 
-        when (iconTrait.assetType) {
+        when (iconButtonTrait.assetType) {
             IconAssetType.Material -> {
                 IconPropertyEditor(
                     label = "Icon",
                     onIconSelected = {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            iconTrait.copy(imageVectorHolder = it)
+                            iconButtonTrait.copy(imageVectorHolder = it)
                         )
                     },
-                    currentIcon = iconTrait.imageVectorHolder?.imageVector,
+                    currentIcon = iconButtonTrait.imageVectorHolder?.imageVector,
                     modifier = Modifier
                         .hoverOverlay(),
                 )
@@ -97,7 +98,7 @@ fun IconParamsInspector(
                             }
                         },
                         displayText = {
-                            iconTrait.blobInfoWrapper?.let {
+                            iconButtonTrait.blobInfoWrapper?.let {
                                 Text(
                                     it.fileName,
                                     style = MaterialTheme.typography.bodyMedium,
@@ -110,10 +111,10 @@ fun IconParamsInspector(
                         onValueChanged = { index, _ ->
                             composeNodeCallbacks.onTraitUpdated(
                                 node,
-                                iconTrait.copy(blobInfoWrapper = iconAssets[index]),
+                                iconButtonTrait.copy(blobInfoWrapper = iconAssets[index]),
                             )
                         },
-                        selectedItem = iconTrait.blobInfoWrapper,
+                        selectedItem = iconButtonTrait.blobInfoWrapper,
                         modifier = Modifier.padding(bottom = 4.dp),
                     )
                 }
@@ -125,7 +126,7 @@ fun IconParamsInspector(
             node = node,
             label = "Color",
             acceptableType = ComposeFlowType.Color(),
-            initialProperty = iconTrait.tint
+            initialProperty = iconButtonTrait.tint
                 ?: ColorProperty.ColorIntrinsicValue(
                     ColorWrapper(
                         themeColor = null,
@@ -135,7 +136,7 @@ fun IconParamsInspector(
             onValidPropertyChanged = { property, lazyListSource ->
                 val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
                     node,
-                    iconTrait.copy(tint = property),
+                    iconButtonTrait.copy(tint = property),
                     lazyListSource,
                 )
                 result.errorMessages.forEach {
@@ -145,7 +146,7 @@ fun IconParamsInspector(
                 }
             },
             onInitializeProperty = {
-                composeNodeCallbacks.onTraitUpdated(node, iconTrait.copy(tint = null))
+                composeNodeCallbacks.onTraitUpdated(node, iconButtonTrait.copy(tint = null))
             },
             modifier = Modifier
                 .hoverOverlay()

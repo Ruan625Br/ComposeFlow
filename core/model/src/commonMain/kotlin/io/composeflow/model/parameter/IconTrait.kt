@@ -2,9 +2,7 @@ package io.composeflow.model.parameter
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
@@ -14,7 +12,6 @@ import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.materialicons.ImageVectorHolder
 import io.composeflow.materialicons.Outlined
 import io.composeflow.model.modifier.generateModifierCode
-import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
@@ -23,8 +20,6 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.tooltip_icon_trait
-import io.composeflow.ui.CanvasNodeCallbacks
-import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.StringResource
@@ -55,25 +50,6 @@ data class IconTrait(
     override fun tooltipResource(): StringResource = Res.string.tooltip_icon_trait
     override fun isResizeable(): Boolean = false
 
-    @Composable
-    override fun RenderedNode(
-        project: Project,
-        node: ComposeNode,
-        canvasNodeCallbacks: CanvasNodeCallbacks,
-        paletteRenderParams: PaletteRenderParams,
-        zoomableContainerStateHolder: ZoomableContainerStateHolder,
-        modifier: Modifier,
-    ) {
-        super<AbstractIconTrait>.RenderedNode(
-            project,
-            node,
-            canvasNodeCallbacks,
-            paletteRenderParams,
-            zoomableContainerStateHolder,
-            modifier
-        )
-    }
-
     override fun paletteCategories(): List<TraitCategory> =
         listOf(TraitCategory.Common, TraitCategory.Basic)
 
@@ -84,6 +60,12 @@ data class IconTrait(
         dryRun: Boolean,
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
+
+        if (node.actionHandler.allActionNodes().isNotEmpty()) {
+            val iconButtonMember = MemberName("androidx.compose.material3", "IconButton")
+            // actual onClick code is written in the modifier in Icon
+            codeBlockBuilder.addStatement("%M(onClick = {}) {", iconButtonMember)
+        }
         val iconMember = MemberName("androidx.compose.material3", "Icon")
         codeBlockBuilder.addStatement("%M(", iconMember)
         codeBlockBuilder.add(
@@ -97,6 +79,11 @@ data class IconTrait(
             node.generateModifierCode(project, context, dryRun = dryRun)
         )
         codeBlockBuilder.addStatement(")")
+
+        if (node.actionHandler.allActionNodes().isNotEmpty()) {
+            // Close the lambda for IconButton
+            codeBlockBuilder.addStatement("}")
+        }
         return codeBlockBuilder.build()
     }
 

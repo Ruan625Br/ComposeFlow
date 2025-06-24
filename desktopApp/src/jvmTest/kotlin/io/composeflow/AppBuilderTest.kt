@@ -57,6 +57,7 @@ import io.composeflow.model.parameter.ChipGroupTrait
 import io.composeflow.model.parameter.ColumnTrait
 import io.composeflow.model.parameter.DropdownTrait
 import io.composeflow.model.parameter.HorizontalPagerTrait
+import io.composeflow.model.parameter.IconButtonTrait
 import io.composeflow.model.parameter.IconTrait
 import io.composeflow.model.parameter.ImageTrait
 import io.composeflow.model.parameter.LazyColumnTrait
@@ -379,6 +380,11 @@ class AppBuilderTest {
         lazyColumn1.addChild(
             ComposeNode(
                 trait = mutableStateOf(IconTrait()),
+            ),
+        )
+        lazyColumn1.addChild(
+            ComposeNode(
+                trait = mutableStateOf(IconButtonTrait()),
             ),
         )
         rootNode1.addChild(lazyColumn1)
