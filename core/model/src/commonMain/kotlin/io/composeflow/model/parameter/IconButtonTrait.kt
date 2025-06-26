@@ -82,9 +82,17 @@ data class IconButtonTrait(
             node.generateModifierCode(project, context, dryRun = dryRun)
         )
         codeBlockBuilder.addStatement(") {", iconButtonMember)
-        node.children.forEach { child ->
-            codeBlockBuilder.add(child.generateCode(project, context, dryRun))
-        }
+        val iconMember = MemberName("androidx.compose.material3", "Icon")
+        codeBlockBuilder.addStatement("%M(", iconMember)
+        codeBlockBuilder.add(
+            generateIconParamsCode(
+                project = project,
+                context = context,
+                dryRun,
+            )
+        )
+        codeBlockBuilder.addStatement(")")
+
         codeBlockBuilder.addStatement("}", iconButtonMember)
         return codeBlockBuilder.build()
     }
