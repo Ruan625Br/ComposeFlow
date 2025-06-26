@@ -100,6 +100,13 @@ sealed interface AssignableProperty {
      */
     fun getEnumValue(): Enum<*>? = null
 
+    /**
+     * Get all AssignableProperties contained within this property, including those in transformers.
+     */
+    fun getAssignableProperties(): List<AssignableProperty> {
+        return propertyTransformers.flatMap { it.getAssignableProperties() }
+    }
+
     fun valueType(project: Project): ComposeFlowType
     fun transformedValueType(project: Project): ComposeFlowType {
         return if (propertyTransformers.isEmpty()) {
@@ -1980,6 +1987,14 @@ data class ConditionalProperty(
 
     override fun displayText(project: Project): String {
         return "[Conditional]"
+    }
+
+    override fun getAssignableProperties(): List<AssignableProperty> {
+        val fromTransformers = propertyTransformers.flatMap { it.getAssignableProperties() }
+        val fromConditional = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue) +
+                elseIfBlocks.flatMap { listOf(it.ifExpression, it.thenValue) } +
+                listOf(elseBlock.value)
+        return fromTransformers + fromConditional + fromConditional.flatMap { it.getAssignableProperties() }
     }
 
     override fun addReadProperty(

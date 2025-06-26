@@ -892,6 +892,10 @@ data class ComposeNode(
         }
     }
 
+    /**
+     * Detect any issues in this node. When the user clicks on an issue, the ComposeFlow's UI
+     * should navigate to the screen and focus on the node.
+     */
     fun generateTrackableIssues(project: Project): List<TrackableIssue> {
         val paramIssues = trait.value.getPropertyContainers().flatMap {
             it.generateTrackableIssues(project = project, composeNode = this)

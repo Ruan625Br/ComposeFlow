@@ -585,4 +585,159 @@ class PropertyTransformerTest {
 
         assertEquals(result.toString(), "stringList.size")
     }
+
+    // Tests for getAssignableProperties() method
+    @Test
+    fun testGetAssignableProperties_singleProperty() {
+        val transformer = FromString.ToString.AddBefore(
+            value = mutableStateOf(StringProperty.StringIntrinsicValue("test"))
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        assertEquals(1, assignableProperties.size)
+        assertEquals("test", (assignableProperties[0] as StringProperty.StringIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_nestedProperties() {
+        // Create a nested property with a transformer
+        val nestedProperty = StringProperty.StringIntrinsicValue("nested")
+        nestedProperty.propertyTransformers.add(
+            FromString.ToString.AddAfter(mutableStateOf(StringProperty.StringIntrinsicValue("suffix")))
+        )
+
+        val transformer = FromString.ToString.AddBefore(value = mutableStateOf(nestedProperty))
+
+        val assignableProperties = transformer.getAssignableProperties()
+        // Should contain: nestedProperty itself + the suffix property from its transformer
+        assertEquals(2, assignableProperties.size)
+        assertEquals("nested", (assignableProperties[0] as StringProperty.StringIntrinsicValue).value)
+        assertEquals("suffix", (assignableProperties[1] as StringProperty.StringIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_multipleFields() {
+        val transformer = FromInt.ToBoolean.IntModEqualsTo(
+            mod = mutableStateOf(IntProperty.IntIntrinsicValue(5)),
+            equalsTo = mutableStateOf(IntProperty.IntIntrinsicValue(0))
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        assertEquals(2, assignableProperties.size)
+        assertEquals(5, (assignableProperties[0] as IntProperty.IntIntrinsicValue).value)
+        assertEquals(0, (assignableProperties[1] as IntProperty.IntIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_multipleFieldsWithNested() {
+        // Create nested properties for both fields
+        val modProperty = IntProperty.IntIntrinsicValue(5)
+        modProperty.propertyTransformers.add(
+            FromInt.ToInt.IntPlus(mutableStateOf(IntProperty.IntIntrinsicValue(1)))
+        )
+
+        val equalsToProperty = IntProperty.IntIntrinsicValue(0)
+        equalsToProperty.propertyTransformers.add(
+            FromInt.ToInt.IntMultipliedBy(mutableStateOf(IntProperty.IntIntrinsicValue(2)))
+        )
+
+        val transformer = FromInt.ToBoolean.IntModEqualsTo(
+            mod = mutableStateOf(modProperty),
+            equalsTo = mutableStateOf(equalsToProperty)
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        // Should contain: modProperty, equalsToProperty, and their nested properties
+        assertEquals(4, assignableProperties.size)
+        assertEquals(5, (assignableProperties[0] as IntProperty.IntIntrinsicValue).value)
+        assertEquals(0, (assignableProperties[1] as IntProperty.IntIntrinsicValue).value)
+        assertEquals(1, (assignableProperties[2] as IntProperty.IntIntrinsicValue).value)
+        assertEquals(2, (assignableProperties[3] as IntProperty.IntIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_listFilter() {
+        val conditionProperty = FunctionScopeParameterProperty(
+            functionName = "filter",
+            variableType = ComposeFlowType.StringType(),
+        ).apply {
+            propertyTransformers.add(
+                FromString.ToBoolean.StringContains(
+                    mutableStateOf(StringProperty.StringIntrinsicValue("filtered"))
+                )
+            )
+        }
+
+        val transformer = FromList.ToList.Filter(
+            innerType = ComposeFlowType.StringType(),
+            condition = mutableStateOf(conditionProperty)
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        // Should contain: conditionProperty and the StringIntrinsicValue from its transformer
+        assertEquals(2, assignableProperties.size)
+        assertEquals(conditionProperty, assignableProperties[0])
+        assertEquals("filtered", (assignableProperties[1] as StringProperty.StringIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_listContains() {
+        val valueProperty = StringProperty.StringIntrinsicValue("searchValue")
+        valueProperty.propertyTransformers.add(
+            FromString.ToString.AddBefore(mutableStateOf(StringProperty.StringIntrinsicValue("prefix_")))
+        )
+
+        val transformer = FromList.ToBoolean.ListContains(
+            innerType = ComposeFlowType.StringType(),
+            value = mutableStateOf(valueProperty)
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        // Should contain: valueProperty and the prefix property from its transformer
+        assertEquals(2, assignableProperties.size)
+        assertEquals("searchValue", (assignableProperties[0] as StringProperty.StringIntrinsicValue).value)
+        assertEquals("prefix_", (assignableProperties[1] as StringProperty.StringIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_floatModEqualsTo() {
+        val transformer = FromFloat.ToBoolean.FloatModEqualsTo(
+            mod = mutableStateOf(FloatProperty.FloatIntrinsicValue(3.5f)),
+            equalsTo = mutableStateOf(FloatProperty.FloatIntrinsicValue(1.5f))
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        assertEquals(2, assignableProperties.size)
+        assertEquals(3.5f, (assignableProperties[0] as FloatProperty.FloatIntrinsicValue).value)
+        assertEquals(1.5f, (assignableProperties[1] as FloatProperty.FloatIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_dateTransformers() {
+        val transformer = FromInstant.ToInstant.PlusDay(
+            value = mutableStateOf(IntProperty.IntIntrinsicValue(7))
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        assertEquals(1, assignableProperties.size)
+        assertEquals(7, (assignableProperties[0] as IntProperty.IntIntrinsicValue).value)
+    }
+
+    @Test
+    fun testGetAssignableProperties_splitTransformer() {
+        val delimiterProperty = StringProperty.StringIntrinsicValue(",")
+        delimiterProperty.propertyTransformers.add(
+            FromString.ToString.AddAfter(mutableStateOf(StringProperty.StringIntrinsicValue(" ")))
+        )
+
+        val transformer = FromString.ToStringList.Split(
+            value = mutableStateOf(delimiterProperty)
+        )
+
+        val assignableProperties = transformer.getAssignableProperties()
+        // Should contain: delimiterProperty and the space property from its transformer
+        assertEquals(2, assignableProperties.size)
+        assertEquals(",", (assignableProperties[0] as StringProperty.StringIntrinsicValue).value)
+        assertEquals(" ", (assignableProperties[1] as StringProperty.StringIntrinsicValue).value)
+    }
 }
