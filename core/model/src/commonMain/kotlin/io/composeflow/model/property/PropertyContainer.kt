@@ -48,21 +48,23 @@ data class PropertyContainer(
                 }
 
                 // Adds issues generated from the AssignableProperties derived from the property
-                assignableProperty.getAssignableProperties().forEach { property ->
-                    if (property.transformedValueType(project) is ComposeFlowType.UnknownType) {
-                        add(
-                            TrackableIssue(
-                                destinationContext = DestinationContext.UiBuilderScreen(
-                                    canvasEditableId = canvasEditable.id,
-                                    composeNodeId = composeNode.id,
-                                ),
-                                issue = Issue.ResolvedToUnknownType(
-                                    property = property,
+                // except for the self  property because self property is considered above block
+                assignableProperty.getAssignableProperties(includeSelf = false)
+                    .forEach { property ->
+                        if (property.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                            add(
+                                TrackableIssue(
+                                    destinationContext = DestinationContext.UiBuilderScreen(
+                                        canvasEditableId = canvasEditable.id,
+                                        composeNodeId = composeNode.id,
+                                    ),
+                                    issue = Issue.ResolvedToUnknownType(
+                                        property = property,
+                                    )
                                 )
                             )
-                        )
+                        }
                     }
-                }
             }
         }
     }

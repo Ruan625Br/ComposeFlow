@@ -103,8 +103,12 @@ sealed interface AssignableProperty {
     /**
      * Get all AssignableProperties contained within this property, including those in transformers.
      */
-    fun getAssignableProperties(): List<AssignableProperty> {
-        return propertyTransformers.flatMap { it.getAssignableProperties() } + this
+    fun getAssignableProperties(includeSelf: Boolean = true): List<AssignableProperty> {
+        return propertyTransformers.flatMap { it.getAssignableProperties() } + if (includeSelf) {
+            listOf(this)
+        } else {
+            emptyList()
+        }
     }
 
     fun valueType(project: Project): ComposeFlowType
@@ -1989,12 +1993,16 @@ data class ConditionalProperty(
         return "[Conditional]"
     }
 
-    override fun getAssignableProperties(): List<AssignableProperty> {
+    override fun getAssignableProperties(includeSelf: Boolean): List<AssignableProperty> {
         val fromTransformers = propertyTransformers.flatMap { it.getAssignableProperties() }
         val fromConditional = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue) +
                 elseIfBlocks.flatMap { listOf(it.ifExpression, it.thenValue) } +
                 listOf(elseBlock.value)
-        return fromTransformers + fromConditional + fromConditional.flatMap { it.getAssignableProperties() } + this
+        return fromTransformers + fromConditional + fromConditional.flatMap {
+            it.getAssignableProperties()
+        } + if (includeSelf) listOf(
+            this
+        ) else emptyList()
     }
 
     override fun addReadProperty(
