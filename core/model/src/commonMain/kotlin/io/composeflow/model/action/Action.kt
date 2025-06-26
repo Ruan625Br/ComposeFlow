@@ -598,17 +598,19 @@ data class CallApi(
             api?.let {
                 paramsMap.entries.forEach { entry ->
                     api.parameters.firstOrNull { it.parameterId == entry.key }?.let {
-                        val transformedValueType = entry.value.transformedValueType(project)
-                        if (transformedValueType is ComposeFlowType.UnknownType) {
-                            add(
-                                Issue.ResolvedToUnknownType(
-                                    property = entry.value,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
-                                    issueContext = this@CallApi,
+                        entry.value.getAssignableProperties().forEach { property ->
+                            val transformedValueType = property.transformedValueType(project)
+                            if (transformedValueType is ComposeFlowType.UnknownType) {
+                                add(
+                                    Issue.ResolvedToUnknownType(
+                                        property = property,
+                                        destination = NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action
+                                        ),
+                                        issueContext = this@CallApi,
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
                 }
@@ -707,19 +709,20 @@ data class ShowConfirmationDialog(
 
     override fun generateIssues(project: Project): List<Issue> {
         return buildList {
-            listOf(title, message, negativeText, positiveText).forEach {
-                if (it?.transformedValueType(project) is ComposeFlowType.UnknownType) {
-                    add(
-                        Issue.ResolvedToUnknownType(
-                            property = it,
-                            destination = NavigatableDestination.UiBuilderScreen(
-                                inspectorTabDestination = InspectorTabDestination.Action
-                            ),
-                            issueContext = this@ShowConfirmationDialog,
+            listOf(title, message, negativeText, positiveText).mapNotNull { it }
+                .flatMap { it.getAssignableProperties() }.forEach {
+                    if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@ShowConfirmationDialog,
+                            )
                         )
-                    )
+                    }
                 }
-            }
         }
     }
 
@@ -832,19 +835,20 @@ data class ShowInformationDialog(
 
     override fun generateIssues(project: Project): List<Issue> {
         return buildList {
-            listOf(title, message, confirmText).forEach {
-                if (it?.transformedValueType(project) is ComposeFlowType.UnknownType) {
-                    add(
-                        Issue.ResolvedToUnknownType(
-                            property = it,
-                            destination = NavigatableDestination.UiBuilderScreen(
-                                inspectorTabDestination = InspectorTabDestination.Action
-                            ),
-                            issueContext = this@ShowInformationDialog,
+            listOf(title, message, confirmText).mapNotNull { it }
+                .flatMap { it.getAssignableProperties() }.forEach {
+                    if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                        add(
+                            Issue.ResolvedToUnknownType(
+                                property = it,
+                                destination = NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action
+                                ),
+                                issueContext = this@ShowInformationDialog,
+                            )
                         )
-                    )
+                    }
                 }
-            }
         }
     }
 
@@ -950,29 +954,31 @@ sealed interface ShowModalWithComponent : ShowModal {
         return buildList {
             paramsMap.entries.forEach { entry ->
                 component.parameters.firstOrNull { it.id == entry.key }?.let { parameter ->
-                    val transformedValueType = entry.value.transformedValueType(project)
-                    if (transformedValueType is ComposeFlowType.UnknownType) {
-                        add(
-                            Issue.ResolvedToUnknownType(
-                                property = entry.value,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
-                                issueContext = this@ShowModalWithComponent,
+                    entry.value.getAssignableProperties().forEach { property ->
+                        val transformedValueType = property.transformedValueType(project)
+                        if (transformedValueType is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = property,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@ShowModalWithComponent,
+                                )
                             )
-                        )
-                    }
-                    if (!parameter.parameterType.isAbleToAssign(transformedValueType)) {
-                        add(
-                            Issue.ResolvedToTypeNotAssignable(
-                                property = entry.value,
-                                acceptableType = parameter.parameterType,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
-                                issueContext = this@ShowModalWithComponent,
+                        }
+                        if (!parameter.parameterType.isAbleToAssign(transformedValueType)) {
+                            add(
+                                Issue.ResolvedToTypeNotAssignable(
+                                    property = property,
+                                    acceptableType = parameter.parameterType,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@ShowModalWithComponent,
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -1321,19 +1327,20 @@ sealed interface ShowMessaging : Action {
 
         override fun generateIssues(project: Project): List<Issue> {
             return buildList {
-                listOf(message, actionLabel).forEach {
-                    if (it?.transformedValueType(project) is ComposeFlowType.UnknownType) {
-                        add(
-                            Issue.ResolvedToUnknownType(
-                                property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
-                                issueContext = this@Snackbar,
+                listOf(message, actionLabel).mapNotNull { it }
+                    .flatMap { it.getAssignableProperties() }.forEach {
+                        if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = it,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@Snackbar,
+                                )
                             )
-                        )
+                        }
                     }
-                }
             }
         }
 
@@ -1502,21 +1509,22 @@ sealed interface DateOrTimePicker : Action {
 
         override fun generateIssues(project: Project): List<Issue> {
             return buildList {
-                listOf(minSelectableYear, maxSelectableYear).forEach {
-                    it.value?.let { value ->
-                        if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
-                            add(
-                                Issue.ResolvedToUnknownType(
-                                    property = value,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
-                                    issueContext = this@OpenDatePicker,
+                listOf(minSelectableYear, maxSelectableYear).mapNotNull { it.value }
+                    .flatMap { it.getAssignableProperties() }.forEach {
+                        it.let { value ->
+                            if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                                add(
+                                    Issue.ResolvedToUnknownType(
+                                        property = value,
+                                        destination = NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action
+                                        ),
+                                        issueContext = this@OpenDatePicker,
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
-                }
             }
         }
 
@@ -1686,21 +1694,22 @@ sealed interface DateOrTimePicker : Action {
 
         override fun generateIssues(project: Project): List<Issue> {
             return buildList {
-                listOf(minSelectableYear, maxSelectableYear).forEach {
-                    it.value?.let { value ->
-                        if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
-                            add(
-                                Issue.ResolvedToUnknownType(
-                                    property = value,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
-                                    issueContext = this@OpenDateAndTimePicker,
+                listOf(minSelectableYear, maxSelectableYear).mapNotNull { it.value }
+                    .flatMap { it.getAssignableProperties() }.forEach {
+                        it.let { value ->
+                            if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
+                                add(
+                                    Issue.ResolvedToUnknownType(
+                                        property = value,
+                                        destination = NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action
+                                        ),
+                                        issueContext = this@OpenDateAndTimePicker,
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
-                }
             }
         }
 
@@ -1958,7 +1967,7 @@ sealed interface Share : Action {
 
         override fun generateIssues(project: Project): List<Issue> {
             return buildList {
-                listOf(url).forEach {
+                listOf(url).flatMap { it.getAssignableProperties() }.forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
@@ -2113,7 +2122,7 @@ sealed interface Auth : Action {
 
         override fun generateIssues(project: Project): List<Issue> {
             return buildList {
-                listOf(email, password).forEach {
+                listOf(email, password).flatMap { it.getAssignableProperties() }.forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
@@ -2333,7 +2342,7 @@ sealed interface Auth : Action {
 
         override fun generateIssues(project: Project): List<Issue> {
             return buildList {
-                listOf(email, password).forEach {
+                listOf(email, password).flatMap { it.getAssignableProperties() }.forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
@@ -2599,21 +2608,9 @@ sealed interface FirestoreAction : Action {
             dataFieldUpdateProperties.forEach { entry ->
                 val dataField = dataType.fields.firstOrNull { it.id == entry.dataFieldId }
                 dataField?.let {
-                    val transformedValueType =
+                    val transformedType =
                         entry.assignableProperty.transformedValueType(project)
-                    if (transformedValueType is ComposeFlowType.UnknownType) {
-                        add(
-                            Issue.ResolvedToUnknownType(
-                                property = entry.assignableProperty,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
-                                issueContext = this@FirestoreAction,
-                            )
-                        )
-                    }
-
-                    if (!dataField.fieldType.type().isAbleToAssign(transformedValueType)) {
+                    if (!dataField.fieldType.type().isAbleToAssign(transformedType)) {
                         add(
                             Issue.ResolvedToTypeNotAssignable(
                                 property = entry.assignableProperty,
@@ -2624,6 +2621,22 @@ sealed interface FirestoreAction : Action {
                                 issueContext = this@FirestoreAction,
                             )
                         )
+                    }
+
+                    entry.assignableProperty.getAssignableProperties().forEach { property ->
+                        val transformedValueType =
+                            property.transformedValueType(project)
+                        if (transformedValueType is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = property,
+                                    destination = NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action
+                                    ),
+                                    issueContext = this@FirestoreAction,
+                                )
+                            )
+                        }
                     }
                 }
             }

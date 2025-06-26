@@ -169,7 +169,8 @@ sealed interface StateOperation {
             return readProperty.getDependentComposeNodes(project)
         }
 
-        override fun getAssignableProperties(): List<AssignableProperty> = listOf(readProperty)
+        override fun getAssignableProperties(): List<AssignableProperty> =
+            readProperty.getAssignableProperties()
 
         @Composable
         override fun asDropdownText(): String = displayName()
@@ -377,8 +378,8 @@ sealed interface StateOperationForDataType : StateOperation {
         }
 
         override fun getAssignableProperties(): List<AssignableProperty> =
-            dataFieldUpdateProperties.map {
-                it.assignableProperty
+            dataFieldUpdateProperties.flatMap {
+                it.assignableProperty.getAssignableProperties()
             }
 
         override fun getUpdateMethodName(
@@ -490,7 +491,8 @@ sealed interface StateOperationForList : StateOperation {
             return readProperty.getDependentComposeNodes(project)
         }
 
-        override fun getAssignableProperties(): List<AssignableProperty> = listOf(readProperty)
+        override fun getAssignableProperties(): List<AssignableProperty> =
+            readProperty.getAssignableProperties()
 
         override fun getUpdateMethodParamsAsString(
             project: Project,
@@ -594,8 +596,8 @@ sealed interface StateOperationForList : StateOperation {
         }
 
         override fun getAssignableProperties(): List<AssignableProperty> =
-            dataFieldUpdateProperties.map {
-                it.assignableProperty
+            dataFieldUpdateProperties.flatMap {
+                it.assignableProperty.getAssignableProperties()
             }
 
         override fun getUpdateMethodName(
@@ -713,7 +715,8 @@ sealed interface StateOperationForList : StateOperation {
             return readProperty.getDependentComposeNodes(project)
         }
 
-        override fun getAssignableProperties(): List<AssignableProperty> = listOf(readProperty)
+        override fun getAssignableProperties(): List<AssignableProperty> =
+            readProperty.getAssignableProperties()
 
         override fun getUpdateMethodName(
             project: Project,
@@ -822,8 +825,8 @@ sealed interface StateOperationForList : StateOperation {
         }
 
         override fun getAssignableProperties(): List<AssignableProperty> =
-            dataFieldUpdateProperties.map {
-                it.assignableProperty
+            dataFieldUpdateProperties.flatMap {
+                it.assignableProperty.getAssignableProperties()
             }
 
         override fun getUpdateMethodName(

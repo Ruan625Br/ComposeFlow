@@ -104,7 +104,7 @@ sealed interface AssignableProperty {
      * Get all AssignableProperties contained within this property, including those in transformers.
      */
     fun getAssignableProperties(): List<AssignableProperty> {
-        return propertyTransformers.flatMap { it.getAssignableProperties() }
+        return propertyTransformers.flatMap { it.getAssignableProperties() } + this
     }
 
     fun valueType(project: Project): ComposeFlowType
@@ -1994,7 +1994,7 @@ data class ConditionalProperty(
         val fromConditional = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue) +
                 elseIfBlocks.flatMap { listOf(it.ifExpression, it.thenValue) } +
                 listOf(elseBlock.value)
-        return fromTransformers + fromConditional + fromConditional.flatMap { it.getAssignableProperties() }
+        return fromTransformers + fromConditional + fromConditional.flatMap { it.getAssignableProperties() } + this
     }
 
     override fun addReadProperty(

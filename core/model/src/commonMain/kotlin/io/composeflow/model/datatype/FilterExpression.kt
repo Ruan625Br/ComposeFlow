@@ -113,7 +113,7 @@ sealed interface LogicalFilterExpression : FilterExpression {
     }
 
     override fun getAssignableProperties(): List<AssignableProperty> =
-        filters.flatMap { it.getAssignableProperties() }
+        filters.flatMap { it.getAssignableProperties() }.flatMap { it.getAssignableProperties() }
 }
 
 @Serializable
