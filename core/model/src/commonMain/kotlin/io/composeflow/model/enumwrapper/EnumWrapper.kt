@@ -12,8 +12,8 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.CodeConvertible
 import io.composeflow.kotlinpoet.MemberHolder
-import io.composeflow.materialicons.Filled
 import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.ui.propertyeditor.DropdownTextDisplayable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.enums.EnumEntries
@@ -49,12 +49,14 @@ enum class TextDecorationWrapper(val textDecoration: TextDecoration) : EnumWrapp
     override fun asCodeBlock(): CodeBlock =
         CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextDecoration"))
 
-    object TextDecorationWrapperSerializer : FallbackEnumSerializer<TextDecorationWrapper>(TextDecorationWrapper::class)
+    object TextDecorationWrapperSerializer :
+        FallbackEnumSerializer<TextDecorationWrapper>(TextDecorationWrapper::class)
 }
 
 @SerialName("TextStyleWrapper")
 @Serializable(TextStyleWrapper.TextStyleWrapperSerializer::class)
-enum class TextStyleWrapper(val styleName: String, val displayName: String) : EnumWrapper {
+enum class TextStyleWrapper(val styleName: String, val displayName: String) : EnumWrapper,
+    DropdownTextDisplayable {
     DisplayLarge("displayLarge", "Display Large"),
     DisplayMedium("displayMedium", "Display Medium"),
     DisplaySmall("displaySmall", "Display Small"),
@@ -71,6 +73,27 @@ enum class TextStyleWrapper(val styleName: String, val displayName: String) : En
     LabelMedium("labelMedium", "Label Medium"),
     LabelSmall("labelSmall", "Label Small"),
     ;
+
+    @Composable
+    override fun asDropdownText(): String =
+        // TODO: Technically, if font styles are overridden, the size and weight may not be correct
+        when (this) {
+            DisplayLarge -> "Display Large: ${MaterialTheme.typography.displayLarge.fontSize}, weight:${MaterialTheme.typography.displayLarge.fontWeight?.weight}"
+            DisplayMedium -> "Display Medium: ${MaterialTheme.typography.displayMedium.fontSize}, weight:${MaterialTheme.typography.displayMedium.fontWeight?.weight}"
+            DisplaySmall -> "Display Small: ${MaterialTheme.typography.displaySmall.fontSize}, weight:${MaterialTheme.typography.displaySmall.fontWeight?.weight}"
+            HeadlineLarge -> "Headline Large: ${MaterialTheme.typography.headlineLarge.fontSize}, weight:${MaterialTheme.typography.headlineLarge.fontWeight?.weight}"
+            HeadlineMedium -> "Headline Medium: ${MaterialTheme.typography.headlineMedium.fontSize}, weight:${MaterialTheme.typography.headlineMedium.fontWeight?.weight}"
+            HeadlineSmall -> "Headline Small: ${MaterialTheme.typography.headlineSmall.fontSize}, weight:${MaterialTheme.typography.headlineSmall.fontWeight?.weight}"
+            TitleLarge -> "Title Large: ${MaterialTheme.typography.titleLarge.fontSize}, weight:${MaterialTheme.typography.titleLarge.fontWeight?.weight}"
+            TitleMedium -> "Title Medium: ${MaterialTheme.typography.titleMedium.fontSize}, weight:${MaterialTheme.typography.titleMedium.fontWeight?.weight}"
+            TitleSmall -> "Title Small: ${MaterialTheme.typography.titleSmall.fontSize}, weight:${MaterialTheme.typography.titleSmall.fontWeight?.weight}"
+            BodyLarge -> "Body Large: ${MaterialTheme.typography.bodyLarge.fontSize}, weight:${MaterialTheme.typography.bodyLarge.fontWeight?.weight}"
+            BodyMedium -> "Body Medium: ${MaterialTheme.typography.bodyMedium.fontSize}, weight:${MaterialTheme.typography.bodyMedium.fontWeight?.weight}"
+            BodySmall -> "Body Small: ${MaterialTheme.typography.bodySmall.fontSize}, weight:${MaterialTheme.typography.bodySmall.fontWeight?.weight}"
+            LabelLarge -> "Label Large: ${MaterialTheme.typography.labelLarge.fontSize}, weight:${MaterialTheme.typography.labelLarge.fontWeight?.weight}"
+            LabelMedium -> "Label Medium: ${MaterialTheme.typography.labelMedium.fontSize}, weight:${MaterialTheme.typography.labelMedium.fontWeight?.weight}"
+            LabelSmall -> "Label Small: ${MaterialTheme.typography.labelSmall.fontSize}, weight:${MaterialTheme.typography.labelSmall.fontWeight?.weight}"
+        }
 
     @Composable
     fun getStyle(): TextStyle =
@@ -102,7 +125,8 @@ enum class TextStyleWrapper(val styleName: String, val displayName: String) : En
     override fun asCodeBlock(): CodeBlock =
         CodeBlock.of("%M.typography.$styleName", MemberHolder.Material3.MaterialTheme)
 
-    object TextStyleWrapperSerializer : FallbackEnumSerializer<TextStyleWrapper>(TextStyleWrapper::class)
+    object TextStyleWrapperSerializer :
+        FallbackEnumSerializer<TextStyleWrapper>(TextStyleWrapper::class)
 }
 
 @SerialName("FontStyleWrapper")
@@ -122,7 +146,8 @@ enum class FontStyleWrapper(val fontStyle: FontStyle) : EnumWrapper {
     override fun asCodeBlock(): CodeBlock =
         CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.font", "FontStyle"))
 
-    object FontStyleWrapperSerializer : FallbackEnumSerializer<FontStyleWrapper>(FontStyleWrapper::class)
+    object FontStyleWrapperSerializer :
+        FallbackEnumSerializer<FontStyleWrapper>(FontStyleWrapper::class)
 }
 
 @SerialName("TextAlignWrapper")
@@ -146,7 +171,8 @@ enum class TextAlignWrapper(val textAlign: TextAlign) : EnumWrapper {
     override fun asCodeBlock(): CodeBlock =
         CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextAlign"))
 
-    object TextAlignWrapperSerializer : FallbackEnumSerializer<TextAlignWrapper>(TextAlignWrapper::class)
+    object TextAlignWrapperSerializer :
+        FallbackEnumSerializer<TextAlignWrapper>(TextAlignWrapper::class)
 }
 
 @SerialName("TextOverflowWrapper")
@@ -167,7 +193,8 @@ enum class TextOverflowWrapper(val textOverflow: TextOverflow) : EnumWrapper {
     override fun asCodeBlock(): CodeBlock =
         CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextOverflow"))
 
-    object TextOverflowWrapperSerializer : FallbackEnumSerializer<TextOverflowWrapper>(TextOverflowWrapper::class)
+    object TextOverflowWrapperSerializer :
+        FallbackEnumSerializer<TextOverflowWrapper>(TextOverflowWrapper::class)
 }
 
 @SerialName("ContentScaleWrapper")
@@ -192,7 +219,8 @@ enum class ContentScaleWrapper(val contentScale: ContentScale) : EnumWrapper {
     override fun asCodeBlock(): CodeBlock =
         CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.layout", "ContentScale"))
 
-    object ContentScaleWrapperSerializer : FallbackEnumSerializer<ContentScaleWrapper>(ContentScaleWrapper::class)
+    object ContentScaleWrapperSerializer :
+        FallbackEnumSerializer<ContentScaleWrapper>(ContentScaleWrapper::class)
 }
 
 @SerialName("TextFieldColorsWrapper")
@@ -219,7 +247,8 @@ enum class TextFieldColorsWrapper : EnumWrapper {
         }
     }
 
-    object TextFieldColorsWrapperSerializer : FallbackEnumSerializer<TextFieldColorsWrapper>(TextFieldColorsWrapper::class)
+    object TextFieldColorsWrapperSerializer :
+        FallbackEnumSerializer<TextFieldColorsWrapper>(TextFieldColorsWrapper::class)
 }
 
 @SerialName("NodeVisibility")

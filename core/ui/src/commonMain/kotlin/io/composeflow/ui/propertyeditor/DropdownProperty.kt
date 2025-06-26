@@ -36,8 +36,8 @@ inline fun <reified T> DropdownProperty(
     modifier: Modifier = Modifier,
     crossinline displayText: @Composable (T) -> Unit = {
         val text: String? = when (it) {
-            is String -> it
             is DropdownTextDisplayable -> it.asDropdownText()
+            is String -> it
             is Enum<*> -> it.name
             else -> null
         }
@@ -52,9 +52,9 @@ inline fun <reified T> DropdownProperty(
     },
     crossinline dropDownMenuText: @Composable (T) -> Unit = {
         val text: String? = when (it) {
+            is DropdownTextDisplayable -> it.asDropdownText()
             is String -> it
             is Enum<*> -> it.name
-            is DropdownTextDisplayable -> it.asDropdownText()
             else -> null
         }
         text?.let { t ->
