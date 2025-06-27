@@ -5,7 +5,11 @@ import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.enumwrapper.NodeVisibility
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
+import io.composeflow.model.project.CanvasEditable
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.issue.DestinationContext
+import io.composeflow.model.project.issue.Issue
+import io.composeflow.model.project.issue.TrackableIssue
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.BooleanProperty
 import io.composeflow.model.property.EnumProperty
@@ -28,6 +32,47 @@ data class VisibilityParams(
             }
 
             else -> NodeVisibility.AlwaysVisible
+        }
+    }
+
+    fun generateTrackableIssues(
+        project: Project,
+        canvasEditable: CanvasEditable,
+        composeNode: ComposeNode
+    ): List<TrackableIssue> {
+        if (visibilityCondition is BooleanProperty.Empty) return emptyList()
+        return buildList {
+            val transformedValueType = visibilityCondition.transformedValueType(project)
+            if (transformedValueType.isAbleToAssign(ComposeFlowType.BooleanType())) {
+                add(
+                    TrackableIssue(
+                        destinationContext = DestinationContext.UiBuilderScreen(
+                            canvasEditableId = canvasEditable.id,
+                            composeNodeId = composeNode.id,
+                        ),
+                        issue = Issue.ResolvedToTypeNotAssignable(
+                            property = visibilityCondition,
+                            acceptableType = ComposeFlowType.BooleanType(),
+                        )
+                    )
+                )
+            }
+            visibilityCondition.getAssignableProperties().forEach { property ->
+                val transformedType = property.transformedValueType(project)
+                if (transformedType is ComposeFlowType.UnknownType) {
+                    add(
+                        TrackableIssue(
+                            destinationContext = DestinationContext.UiBuilderScreen(
+                                canvasEditableId = canvasEditable.id,
+                                composeNodeId = composeNode.id,
+                            ),
+                            issue = Issue.ResolvedToUnknownType(
+                                property = property,
+                            )
+                        )
+                    )
+                }
+            }
         }
     }
 

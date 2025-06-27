@@ -52,7 +52,6 @@ import io.composeflow.model.project.findComposeNodeOrThrow
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.issue.TrackableIssue
 import io.composeflow.model.property.AssignableProperty
-import io.composeflow.model.property.ValueFromCompanionState
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateId
 import io.composeflow.override.mutableStateListEqualsOverrideOf
@@ -937,7 +936,9 @@ data class ComposeNode(
                     )
                 }
         }
-        return paramIssues + issuesFromParams + actionIssues + modifierIssues
+        val visibilityParamsIssues =
+            visibilityParams.value.generateTrackableIssues(project, canvasEditable, this)
+        return paramIssues + issuesFromParams + actionIssues + modifierIssues + visibilityParamsIssues
     }
 
     /**
