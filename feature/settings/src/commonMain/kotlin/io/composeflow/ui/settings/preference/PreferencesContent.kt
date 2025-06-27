@@ -97,6 +97,7 @@ fun InitialScreenContent(
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
             BasicDropdownPropertyEditor(
+                project = project,
                 items = screens,
                 onValueChanged = { _, screen ->
                     settingsCallbacks.onLoginScreenChanged(screen)

@@ -21,7 +21,6 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -34,7 +33,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,12 +50,36 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
+import io.composeflow.Res
+import io.composeflow.add_data_type
+import io.composeflow.add_data_type_from_json
+import io.composeflow.add_field
 import io.composeflow.auth.LocalFirebaseIdToken
+import io.composeflow.cancel
+import io.composeflow.confirm
+import io.composeflow.data_type
+import io.composeflow.data_type_name
+import io.composeflow.data_type_tooltip
+import io.composeflow.default_value
+import io.composeflow.delete
+import io.composeflow.delete_data_field
+import io.composeflow.delete_data_type
+import io.composeflow.delete_enum
+import io.composeflow.editor.validator.FloatValidator
+import io.composeflow.editor.validator.IntValidator
+import io.composeflow.editor.validator.KotlinClassNameValidator
+import io.composeflow.editor.validator.KotlinIdentifierValidator.MUST_NOT_BE_EMPTY
+import io.composeflow.editor.validator.KotlinVariableNameValidator
+import io.composeflow.editor.validator.ValidateResult
+import io.composeflow.enum
+import io.composeflow.enum_tooltip
+import io.composeflow.field_name
+import io.composeflow.field_type
 import io.composeflow.model.datatype.DataField
 import io.composeflow.model.datatype.DataTypeParseResult
 import io.composeflow.model.datatype.FieldType
 import io.composeflow.model.datatype.ParseDataTypeJsonTextField
-import io.composeflow.model.project.LoadedProjectUiState
+import io.composeflow.model.project.Project
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.Tooltip
@@ -72,31 +94,6 @@ import io.composeflow.ui.propertyeditor.BasicDropdownPropertyEditor
 import io.composeflow.ui.propertyeditor.BooleanPropertyEditor
 import io.composeflow.ui.text.EditableText
 import io.composeflow.ui.textfield.SmallOutlinedTextField
-import io.composeflow.editor.validator.FloatValidator
-import io.composeflow.editor.validator.IntValidator
-import io.composeflow.editor.validator.KotlinClassNameValidator
-import io.composeflow.editor.validator.KotlinIdentifierValidator.MUST_NOT_BE_EMPTY
-import io.composeflow.editor.validator.KotlinVariableNameValidator
-import io.composeflow.editor.validator.ValidateResult
-import io.composeflow.Res
-import io.composeflow.add_data_type
-import io.composeflow.add_data_type_from_json
-import io.composeflow.add_field
-import io.composeflow.cancel
-import io.composeflow.confirm
-import io.composeflow.data_type
-import io.composeflow.data_type_name
-import io.composeflow.data_type_tooltip
-import io.composeflow.default_value
-import io.composeflow.delete
-import io.composeflow.delete_data_field
-import io.composeflow.delete_data_type
-import io.composeflow.delete_enum
-import io.composeflow.enum
-import io.composeflow.enum_tooltip
-import io.composeflow.field_name
-import io.composeflow.field_type
-import io.composeflow.model.project.Project
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -807,6 +804,7 @@ private fun DataTypeDetailContent(
                 dataType?.fields?.get(it)
             }
             AddDataFieldDialog(
+                project = project,
                 initialValue = initialValue,
                 updateIndex = indexOfDataFieldToBeEdited,
                 onDataFieldAdded = {
@@ -842,6 +840,7 @@ private fun DataTypeDetailContent(
 
 @Composable
 fun AddDataFieldDialog(
+    project: Project,
     initialValue: DataField? = null,
     updateIndex: Int? = null,
     onDataFieldAdded: (DataField) -> Unit,
@@ -940,6 +939,7 @@ fun AddDataFieldDialog(
                 var dropDownSelectedIndex by remember { mutableStateOf(0) }
 
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = FieldType.entries(),
                     onValueChanged = { index, item ->
                         fieldType = item

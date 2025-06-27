@@ -149,6 +149,7 @@ fun AddParameterDialog(
                 }
 
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = availableParameters
                         .map {
                             it.parameterType.displayName(

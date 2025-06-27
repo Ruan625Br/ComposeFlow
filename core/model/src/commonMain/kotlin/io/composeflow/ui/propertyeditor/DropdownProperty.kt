@@ -26,17 +26,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import io.composeflow.model.project.Project
 import io.composeflow.ui.icon.ComposeFlowIcon
 import org.jetbrains.jewel.ui.component.Tooltip
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 inline fun <reified T> DropdownProperty(
+    project: Project,
     items: List<T>,
     crossinline onValueChanged: (Int, T) -> Unit,
     modifier: Modifier = Modifier,
     crossinline displayText: @Composable (T) -> Unit = {
         val text: AnnotatedString? = when (it) {
+            is CustomizedDropdownTextDisplayable -> it.asDropdownText(project)
             is DropdownTextDisplayable -> it.asDropdownText()
             is String -> AnnotatedString(it)
             is Enum<*> -> AnnotatedString(it.name)
@@ -53,6 +56,7 @@ inline fun <reified T> DropdownProperty(
     },
     crossinline dropDownMenuText: @Composable (T) -> Unit = {
         val text: AnnotatedString? = when (it) {
+            is CustomizedDropdownTextDisplayable -> it.asDropdownText(project)
             is DropdownTextDisplayable -> it.asDropdownText()
             is String -> AnnotatedString(it)
             is Enum<*> -> AnnotatedString(it.name)
@@ -154,4 +158,13 @@ interface DropdownTextDisplayable {
 
 interface DropdownItemComparable {
     fun isSameItem(item: Any): Boolean
+}
+
+
+/**
+ * Same as [DropdownTextDisplayable] except that [asDropdownText] takes a [Project]
+ */
+interface CustomizedDropdownTextDisplayable {
+    @Composable
+    fun asDropdownText(project: Project): AnnotatedString
 }

@@ -114,6 +114,7 @@ fun FabParamsInspector(
 
         Row {
             BasicDropdownPropertyEditor(
+                project = project,
                 items = FabPositionWrapper.entries,
                 selectedItem = fabTrait.fabPositionWrapper,
                 label = "Position",
@@ -130,6 +131,7 @@ fun FabParamsInspector(
                     .hoverOverlay(),
             )
             BasicDropdownPropertyEditor(
+                project = project,
                 items = FabElevationWrapper.entries,
                 selectedItem = fabTrait.fabElevationWrapper,
                 label = "Elevation",
@@ -148,6 +150,7 @@ fun FabParamsInspector(
         }
 
         BasicDropdownPropertyEditor(
+            project = project,
             items = FabType.entries,
             label = "Fab type",
             selectedIndex = fabTrait.fabType.ordinal,

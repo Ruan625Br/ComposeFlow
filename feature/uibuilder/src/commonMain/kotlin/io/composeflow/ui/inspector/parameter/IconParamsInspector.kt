@@ -45,6 +45,7 @@ fun IconParamsInspector(
             modifier = Modifier.hoverOverlay()
         ) {
             DropdownProperty(
+                project = project,
                 items = IconAssetType.entries,
                 onValueChanged = { index, _ ->
                     composeNodeCallbacks.onTraitUpdated(
@@ -82,6 +83,7 @@ fun IconParamsInspector(
                     val iconAssets = project.assetHolder.icons
                     val userId = LocalFirebaseIdToken.current.user_id
                     DropdownProperty(
+                        project = project,
                         items = iconAssets,
                         dropDownMenuText = {
                             Row {

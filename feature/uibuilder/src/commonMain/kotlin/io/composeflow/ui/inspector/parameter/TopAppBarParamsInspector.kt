@@ -54,6 +54,7 @@ fun TopAppBarParamsInspector(
     if (currentEditable !is Screen) return
     Column {
         BasicDropdownPropertyEditor(
+            project = project,
             items = TopAppBarTypeWrapper.entries,
             selectedItem = topAppBarTrait.topAppBarType,
             label = "AppBar Type",
@@ -234,6 +235,7 @@ fun TopAppBarParamsInspector(
             )
         }
         BasicDropdownPropertyEditor(
+            project = project,
             items = ScrollBehaviorWrapper.entries,
             selectedItem = topAppBarTrait.scrollBehaviorWrapper,
             label = "Scroll Behavior",

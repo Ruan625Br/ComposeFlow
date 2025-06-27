@@ -76,6 +76,7 @@ fun ImageParamsInspector(
             modifier = Modifier.hoverOverlay()
         ) {
             DropdownProperty(
+                project = project,
                 items = ImageAssetType.entries,
                 onValueChanged = { index, _ ->
                     composeNodeCallbacks.onTraitUpdated(
@@ -178,12 +179,13 @@ fun ImageParamsInspector(
                     val assets = project.assetHolder.images
                     val userId = LocalFirebaseIdToken.current.user_id
                     DropdownProperty(
+                        project = project,
                         items = assets,
                         dropDownMenuText = {
                             Row {
                                 it.asImageComposable(
                                     userId = userId,
-                                    projectId = project.id.toString(),
+                                    projectId = project.id,
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier.size(48.dp)
                                 )

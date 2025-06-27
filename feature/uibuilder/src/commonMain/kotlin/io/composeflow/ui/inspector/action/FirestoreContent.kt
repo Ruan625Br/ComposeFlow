@@ -140,6 +140,7 @@ fun SaveToFirestoreContentDetail(
         val firestoreCollections =
             project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
         BasicDropdownPropertyEditor(
+            project = project,
             items = firestoreCollections,
             onValueChanged = { i, item ->
                 val firestoreCollection = project.findFirestoreCollectionOrNull(item.id)
@@ -196,6 +197,7 @@ fun UpdateFirestoreDocumentContentDetail(
         val firestoreCollections =
             project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
         BasicDropdownPropertyEditor(
+            project = project,
             items = firestoreCollections,
             onValueChanged = { i, item ->
                 val updatedAction = initialAction.copy(
@@ -253,6 +255,7 @@ fun DeleteFirestoreDocumentContentDetail(
         val firestoreCollections =
             project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
         BasicDropdownPropertyEditor(
+            project = project,
             items = firestoreCollections,
             onValueChanged = { i, item ->
                 val updatedAction = initialAction.copy(

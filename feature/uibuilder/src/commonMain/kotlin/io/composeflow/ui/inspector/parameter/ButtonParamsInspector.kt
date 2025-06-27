@@ -94,6 +94,7 @@ fun ButtonParamsInspector(
             },
         )
         BasicDropdownPropertyEditor(
+            project = project,
             items = ButtonType.entries,
             label = "Button type",
             selectedIndex = buttonTrait.buttonType.ordinal,

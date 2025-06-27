@@ -152,6 +152,7 @@ fun ColorEditorContent(
                 )
             }
             ColorSchemeEditor(
+                project = project,
                 callbacks = callbacks,
                 sourceColor = sourceColor,
                 paletteStyle = paletteStyle,
@@ -184,6 +185,7 @@ fun ColorEditorContent(
 
 @Composable
 private fun ColorSchemeEditor(
+    project: Project,
     callbacks: ThemeEditorCallbacks,
     sourceColor: Color?,
     paletteStyle: PaletteStyle,
@@ -234,6 +236,7 @@ private fun ColorSchemeEditor(
                 }
 
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = PaletteStyle.entries,
                     label = "Palette style",
                     onValueChanged = { _, item ->

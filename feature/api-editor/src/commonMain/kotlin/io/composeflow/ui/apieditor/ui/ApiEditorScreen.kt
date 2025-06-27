@@ -131,8 +131,8 @@ fun ApiEditorScreen(
     )
     val editingProject = viewModel.editingProject.collectAsState().value
     editingProject.screenHolder.pendingDestinationContext?.let {
-        (it as? DestinationContext.ApiEditorScreen)?.let {
-            viewModel.onSetPendingFocus(it)
+        (it as? DestinationContext.ApiEditorScreen)?.let { screen ->
+            viewModel.onSetPendingFocus(screen)
         }
     }
     Surface {
@@ -164,6 +164,7 @@ fun ApiEditorScreen(
             )
 
             ApiEditorPane(
+                project = project,
                 viewModel,
                 allApiDefinitions = project.apiHolder.apiDefinitions,
             )
@@ -365,6 +366,7 @@ private fun ApiEditorRowOptionMenu(
 
 @Composable
 private fun RowScope.ApiEditorPane(
+    project: Project,
     viewModel: ApiEditorViewModel,
     allApiDefinitions: List<ApiDefinition>,
 ) {
@@ -373,6 +375,7 @@ private fun RowScope.ApiEditorPane(
             .padding(16.dp),
     ) {
         ApiDefinitionEditor(
+            project = project,
             viewModel = viewModel,
             allApiDefinitions = allApiDefinitions,
         )
@@ -384,6 +387,7 @@ private fun RowScope.ApiEditorPane(
 
 @Composable
 private fun ApiDefinitionEditor(
+    project: Project,
     viewModel: ApiEditorViewModel,
     allApiDefinitions: List<ApiDefinition>,
     modifier: Modifier = Modifier,
@@ -523,6 +527,7 @@ private fun ApiDefinitionEditor(
             }
 
             RequestParameterEditor(
+                project = project,
                 initialValue = initialApiDefinition,
                 onApiDefinitionChanged = viewModel::onApiDefinitionUpdated,
             )
@@ -731,6 +736,7 @@ private fun ApiDefinitionEditor(
 
 @Composable
 private fun RequestParameterEditor(
+    project: Project,
     initialValue: ApiDefinition,
     onApiDefinitionChanged: (ApiDefinition) -> Unit,
 ) {
@@ -785,6 +791,7 @@ private fun RequestParameterEditor(
 
         2 -> {
             AuthorizationParametersEditor(
+                project = project,
                 initialValue = initialValue,
                 onApiDefinitionChanged = onApiDefinitionChanged,
             )
@@ -978,11 +985,13 @@ private fun QueryParametersEditor(
 
 @Composable
 private fun AuthorizationParametersEditor(
+    project: Project,
     initialValue: ApiDefinition,
     onApiDefinitionChanged: (ApiDefinition) -> Unit,
 ) {
     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
         BasicDropdownPropertyEditor(
+            project = project,
             items = Authorization.entries(),
             onValueChanged = { _, item ->
 

@@ -193,6 +193,7 @@ fun SelectedPropertyEditor(
                                     },
                                 )
                                 DropdownProperty(
+                                    project = project,
                                     items = currentCandidates,
                                     displayText = {
                                         Text(

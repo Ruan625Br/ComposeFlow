@@ -8,6 +8,7 @@ import androidx.compose.ui.unit.dp
 import io.composeflow.editor.validator.DpValidator
 import io.composeflow.editor.validator.NotEmptyNotLessThanZeroIntValidator
 import io.composeflow.model.parameter.LazyVerticalGridTrait
+import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNodeCallbacks
 import io.composeflow.ui.inspector.lazylist.GridCellsInspector
@@ -18,12 +19,14 @@ import io.composeflow.ui.propertyeditor.BooleanPropertyEditor
 
 @Composable
 fun LazyVerticalGridParamsInspector(
+    project: Project,
     node: ComposeNode,
     composeNodeCallbacks: ComposeNodeCallbacks,
 ) {
     val trait = node.trait.value as LazyVerticalGridTrait
     Column {
         GridCellsInspector(
+            project = project,
             node = node,
             dropdownLabel = "Columns",
             onGridCellsUpdated = {

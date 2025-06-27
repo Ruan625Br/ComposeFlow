@@ -108,6 +108,7 @@ private fun VisibilityInspectorContent(
         val nodeVisibility = node.visibilityParams.value.nodeVisibility
         Row {
             BasicDropdownPropertyEditor(
+                project = project,
                 items = NodeVisibility.entries,
                 label = "Conditional visibility",
                 selectedIndex = (nodeVisibility as? EnumProperty)?.value?.enumValue()?.ordinal ?: 0,

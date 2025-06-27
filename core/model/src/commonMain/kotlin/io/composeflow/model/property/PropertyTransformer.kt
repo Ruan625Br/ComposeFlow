@@ -184,7 +184,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -244,7 +245,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input + ${value.value.transformedValueExpression(project)}"
@@ -301,7 +303,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "($input).substringBefore(${value.value.transformedValueExpression(project)})"
@@ -359,7 +362,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "($input).substringAfter(${value.value.transformedValueExpression(project)})"
@@ -422,7 +426,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "($input).contains(${value.value.transformedValueExpression(project)})"
@@ -480,7 +485,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "($input).startsWith(${value.value.transformedValueExpression(project)})"
@@ -537,7 +543,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "($input).endsWith(${value.value.transformedValueExpression(project)})"
@@ -689,7 +696,8 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue(",")),
         ) : ToStringList {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "($input).split(${value.value.transformedValueExpression(project)})"
@@ -848,7 +856,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInt {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -908,7 +917,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInt {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -974,7 +984,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input < ${value.value.transformedValueExpression(project)}"
@@ -1031,7 +1042,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input <= ${value.value.transformedValueExpression(project)}"
@@ -1088,7 +1100,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input == ${value.value.transformedValueExpression(project)}"
@@ -1145,7 +1158,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input >= ${value.value.transformedValueExpression(project)}"
@@ -1202,7 +1216,8 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input > ${value.value.transformedValueExpression(project)}"
@@ -1262,8 +1277,8 @@ sealed interface FromInt : PropertyTransformer {
             val equalsTo: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(mod.value, equalsTo.value) + 
-                mod.value.getAssignableProperties() + equalsTo.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(mod.value, equalsTo.value) +
+                    mod.value.getAssignableProperties() + equalsTo.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input mod ${mod.value.transformedValueExpression(project)} == ${
@@ -1371,7 +1386,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToFloat {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -1431,7 +1447,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToFloat {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -1497,7 +1514,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input < ${value.value.transformedValueExpression(project)}"
@@ -1554,7 +1572,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input <= ${value.value.transformedValueExpression(project)}"
@@ -1611,7 +1630,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input == ${value.value.transformedValueExpression(project)}"
@@ -1668,7 +1688,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input >= ${value.value.transformedValueExpression(project)}"
@@ -1725,7 +1746,8 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input > ${value.value.transformedValueExpression(project)}"
@@ -1785,8 +1807,8 @@ sealed interface FromFloat : PropertyTransformer {
             val equalsTo: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(mod.value, equalsTo.value) + 
-                mod.value.getAssignableProperties() + equalsTo.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(mod.value, equalsTo.value) +
+                    mod.value.getAssignableProperties() + equalsTo.value.getAssignableProperties()
 
             override fun transformedValueExpression(project: Project, input: String): String {
                 return "$input mod ${mod.value.transformedValueExpression(project)} == ${
@@ -1895,7 +1917,8 @@ sealed interface FromInstant : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -1967,7 +1990,8 @@ sealed interface FromInstant : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -2039,7 +2063,8 @@ sealed interface FromInstant : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
@@ -2160,6 +2185,7 @@ sealed interface FromInstant : PropertyTransformer {
                 modifier: Modifier,
             ) {
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = DateTimeFormatter.entries(),
                     onValueChanged = { _, item ->
                         dateTimeFormatter.value = item
@@ -2172,6 +2198,7 @@ sealed interface FromInstant : PropertyTransformer {
                 val localFormatter = dateTimeFormatter.value
                 if (localFormatter is SeparatorHolder) {
                     BasicDropdownPropertyEditor(
+                        project = project,
                         items = Separator.entries,
                         onValueChanged = { _, item ->
                             val newFormatter = localFormatter.newInstance()
@@ -2188,6 +2215,7 @@ sealed interface FromInstant : PropertyTransformer {
                 }
                 if (localFormatter is PaddingHolder) {
                     BasicDropdownPropertyEditor(
+                        project = project,
                         items = PaddingWrapper.entries,
                         onValueChanged = { _, item ->
                             val newFormatter = localFormatter.newInstance()
@@ -2231,7 +2259,8 @@ sealed interface FromList : PropertyTransformer {
             @Serializable(MutableStateSerializer::class)
             val condition: MutableState<AssignableProperty> = mutableStateOf(BooleanProperty.Empty),
         ) : ToList {
-            override fun getAssignableProperties() = listOf(condition.value) + condition.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(condition.value) + condition.value.getAssignableProperties()
 
             private val functionScopeParameterProperty = FunctionScopeParameterProperty(
                 functionName = "filter",
@@ -2410,6 +2439,7 @@ sealed interface FromList : PropertyTransformer {
                     .firstOrNull { it.id == dataFieldIdToSort.value }
                     ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = dataType.fields,
                     onValueChanged = { _, item ->
                         dataFieldIdToSort.value = item.id
@@ -2503,6 +2533,7 @@ sealed interface FromList : PropertyTransformer {
                 val dataTypes = project.dataTypeHolder.dataTypes
 
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = types,
                     onValueChanged = { _, item ->
                         outputType.value = item
@@ -2513,6 +2544,7 @@ sealed interface FromList : PropertyTransformer {
                 )
                 if (outputType.value is ComposeFlowType.CustomDataType) {
                     BasicDropdownPropertyEditor(
+                        project = project,
                         items = dataTypes,
                         onValueChanged = { _, selectedDataType ->
                             outputType.value =
@@ -2626,7 +2658,8 @@ sealed interface FromList : PropertyTransformer {
             @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> = mutableStateOf(innerType.defaultValue()),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() =
+                listOf(value.value) + value.value.getAssignableProperties()
 
             private val functionScopeParameterProperty = FunctionScopeParameterProperty(
                 functionName = "contains",

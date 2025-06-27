@@ -10,6 +10,7 @@ import io.composeflow.editor.validator.IntValidator
 import io.composeflow.model.parameter.LazyHorizontalGridTrait
 import io.composeflow.model.parameter.LazyVerticalGridTrait
 import io.composeflow.model.parameter.lazylist.LazyGridCells
+import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.propertyeditor.BasicDropdownPropertyEditor
@@ -17,6 +18,7 @@ import io.composeflow.ui.propertyeditor.BasicEditableTextProperty
 
 @Composable
 fun GridCellsInspector(
+    project: Project,
     node: ComposeNode,
     dropdownLabel: String,
     onGridCellsUpdated: (LazyGridCells) -> Unit,
@@ -37,6 +39,7 @@ fun GridCellsInspector(
     if (params == null) return
     Row {
         BasicDropdownPropertyEditor(
+            project = project,
             items = LazyGridCells.entries(),
             onValueChanged = { _, item ->
                 onGridCellsUpdated(item)

@@ -255,6 +255,7 @@ private fun EditStateArea(
         ) {
             val entries = stateOperationProvider.entries()
             BasicDropdownPropertyEditor(
+                project = project,
                 items = entries,
                 selectedItem = setValueToState.operation,
                 label = stringResource(Res.string.update_type),
@@ -667,6 +668,7 @@ fun EditUpdatePropertiesForDataType(
                 is FieldType.Boolean -> {
                     if (updateValue) {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = FieldUpdateType.Boolean.entries(),
                             onValueChanged = { index, item ->
 
@@ -731,9 +733,9 @@ fun EditUpdatePropertiesForDataType(
                 is FieldType.Int -> {
                     if (updateValue) {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = FieldUpdateType.Normal.entries(),
-                            onValueChanged = { index, item ->
-
+                            onValueChanged = { _, item ->
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
@@ -793,8 +795,9 @@ fun EditUpdatePropertiesForDataType(
                 is FieldType.Float -> {
                     if (updateValue) {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = FieldUpdateType.Normal.entries(),
-                            onValueChanged = { index, item ->
+                            onValueChanged = { _, item ->
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
@@ -854,8 +857,9 @@ fun EditUpdatePropertiesForDataType(
                 is FieldType.String -> {
                     if (updateValue) {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = FieldUpdateType.Normal.entries(),
-                            onValueChanged = { index, item ->
+                            onValueChanged = { _, item ->
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
@@ -914,6 +918,7 @@ fun EditUpdatePropertiesForDataType(
                 is FieldType.Instant -> {
                     if (updateValue) {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = FieldUpdateType.Normal.entries(),
                             onValueChanged = { index, item ->
                                 onDataFieldUpdatePropertiesUpdated(

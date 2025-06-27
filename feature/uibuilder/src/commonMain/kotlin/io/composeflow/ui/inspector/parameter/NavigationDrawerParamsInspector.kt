@@ -51,6 +51,7 @@ fun NavigationDrawerParamsInspector(
         )
 
         BasicDropdownPropertyEditor(
+            project = project,
             items = NavigationDrawerType.entries,
             label = "Drawer type",
             selectedIndex = trait.navigationDrawerType.ordinal,

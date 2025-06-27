@@ -119,6 +119,7 @@ private fun FontEditorDetailContent(
 
             FontTableHeader()
             FontTable(
+                project = project,
                 callbacks = callbacks,
                 fontEditableParams = fontEditableParams,
                 modifier = modifier
@@ -358,6 +359,7 @@ private fun FontTableHeader() {
 
 @Composable
 private fun FontTable(
+    project: Project,
     callbacks: ThemeEditorCallbacks,
     fontEditableParams: FontEditableParams,
     modifier: Modifier,
@@ -431,6 +433,7 @@ private fun FontTable(
                         modifier = Modifier.width(letterSpacingDp).padding(end = 16.dp)
                     )
                     BasicDropdownPropertyEditor(
+                        project = project,
                         items = FontWeightWrapper.entries,
                         onValueChanged = { _, item ->
                             callbacks.onTextStyleOverridesChanged(
@@ -442,6 +445,7 @@ private fun FontTable(
                         modifier = Modifier.width(fontWeightDp).padding(end = 16.dp),
                     )
                     BasicDropdownPropertyEditor(
+                        project = project,
                         items = FontFamilyCandidate.entries,
                         onValueChanged = { _, item ->
                             callbacks.onTextStyleOverridesChanged(

@@ -16,8 +16,9 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.CodeConvertible
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.model.project.Project
 import io.composeflow.serializer.FallbackEnumSerializer
-import io.composeflow.ui.propertyeditor.DropdownTextDisplayable
+import io.composeflow.ui.propertyeditor.CustomizedDropdownTextDisplayable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.enums.EnumEntries
@@ -60,7 +61,7 @@ enum class TextDecorationWrapper(val textDecoration: TextDecoration) : EnumWrapp
 @SerialName("TextStyleWrapper")
 @Serializable(TextStyleWrapper.TextStyleWrapperSerializer::class)
 enum class TextStyleWrapper(val styleName: String, val displayName: String) : EnumWrapper,
-    DropdownTextDisplayable {
+    CustomizedDropdownTextDisplayable {
     DisplayLarge("displayLarge", "Display Large"),
     DisplayMedium("displayMedium", "Display Medium"),
     DisplaySmall("displaySmall", "Display Small"),
@@ -79,112 +80,112 @@ enum class TextStyleWrapper(val styleName: String, val displayName: String) : En
     ;
 
     @Composable
-    override fun asDropdownText(): AnnotatedString {
-        // TODO: Technically, if font styles are overridden, the size and weight may not be correct
+    override fun asDropdownText(project: Project): AnnotatedString {
         val secondaryColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
+        val overriddenTypography = project.themeHolder.fontHolder.generateTypography()
         return when (this) {
             DisplayLarge -> buildAnnotatedString {
                 append("Display Large ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.displayLarge.fontSize}, weight:${MaterialTheme.typography.displayLarge.fontWeight?.weight}")
+                    append("${overriddenTypography.displayLarge.fontSize}, weight:${overriddenTypography.displayLarge.fontWeight?.weight}")
                 }
             }
 
             DisplayMedium -> buildAnnotatedString {
                 append("Display Medium ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.displayMedium.fontSize}, weight:${MaterialTheme.typography.displayMedium.fontWeight?.weight}")
+                    append("${overriddenTypography.displayMedium.fontSize}, weight:${overriddenTypography.displayMedium.fontWeight?.weight}")
                 }
             }
 
             DisplaySmall -> buildAnnotatedString {
                 append("Display Small ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.displaySmall.fontSize}, weight:${MaterialTheme.typography.displaySmall.fontWeight?.weight}")
+                    append("${overriddenTypography.displaySmall.fontSize}, weight:${overriddenTypography.displaySmall.fontWeight?.weight}")
                 }
             }
 
             HeadlineLarge -> buildAnnotatedString {
                 append("Headline Large ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.headlineLarge.fontSize}, weight:${MaterialTheme.typography.headlineLarge.fontWeight?.weight}")
+                    append("${overriddenTypography.headlineLarge.fontSize}, weight:${overriddenTypography.headlineLarge.fontWeight?.weight}")
                 }
             }
 
             HeadlineMedium -> buildAnnotatedString {
                 append("Headline Medium ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.headlineMedium.fontSize}, weight:${MaterialTheme.typography.headlineMedium.fontWeight?.weight}")
+                    append("${overriddenTypography.headlineMedium.fontSize}, weight:${overriddenTypography.headlineMedium.fontWeight?.weight}")
                 }
             }
 
             HeadlineSmall -> buildAnnotatedString {
                 append("Headline Small ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.headlineSmall.fontSize}, weight:${MaterialTheme.typography.headlineSmall.fontWeight?.weight}")
+                    append("${overriddenTypography.headlineSmall.fontSize}, weight:${overriddenTypography.headlineSmall.fontWeight?.weight}")
                 }
             }
 
             TitleLarge -> buildAnnotatedString {
                 append("Title Large ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.titleLarge.fontSize}, weight:${MaterialTheme.typography.titleLarge.fontWeight?.weight}")
+                    append("${overriddenTypography.titleLarge.fontSize}, weight:${overriddenTypography.titleLarge.fontWeight?.weight}")
                 }
             }
 
             TitleMedium -> buildAnnotatedString {
                 append("Title Medium ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.titleMedium.fontSize}, weight:${MaterialTheme.typography.titleMedium.fontWeight?.weight}")
+                    append("${overriddenTypography.titleMedium.fontSize}, weight:${overriddenTypography.titleMedium.fontWeight?.weight}")
                 }
             }
 
             TitleSmall -> buildAnnotatedString {
                 append("Title Small ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.titleSmall.fontSize}, weight:${MaterialTheme.typography.titleSmall.fontWeight?.weight}")
+                    append("${overriddenTypography.titleSmall.fontSize}, weight:${overriddenTypography.titleSmall.fontWeight?.weight}")
                 }
             }
 
             BodyLarge -> buildAnnotatedString {
                 append("Body Large ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.bodyLarge.fontSize}, weight:${MaterialTheme.typography.bodyLarge.fontWeight?.weight}")
+                    append("${overriddenTypography.bodyLarge.fontSize}, weight:${overriddenTypography.bodyLarge.fontWeight?.weight}")
                 }
             }
 
             BodyMedium -> buildAnnotatedString {
                 append("Body Medium ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.bodyMedium.fontSize}, weight:${MaterialTheme.typography.bodyMedium.fontWeight?.weight}")
+                    append("${overriddenTypography.bodyMedium.fontSize}, weight:${overriddenTypography.bodyMedium.fontWeight?.weight}")
                 }
             }
 
             BodySmall -> buildAnnotatedString {
                 append("Body Small ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.bodySmall.fontSize}, weight:${MaterialTheme.typography.bodySmall.fontWeight?.weight}")
+                    append("${overriddenTypography.bodySmall.fontSize}, weight:${overriddenTypography.bodySmall.fontWeight?.weight}")
                 }
             }
 
             LabelLarge -> buildAnnotatedString {
                 append("Label Large ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.labelLarge.fontSize}, weight:${MaterialTheme.typography.labelLarge.fontWeight?.weight}")
+                    append("${overriddenTypography.labelLarge.fontSize}, weight:${overriddenTypography.labelLarge.fontWeight?.weight}")
                 }
             }
 
             LabelMedium -> buildAnnotatedString {
                 append("Label Medium ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.labelMedium.fontSize}, weight:${MaterialTheme.typography.labelMedium.fontWeight?.weight}")
+                    append("${overriddenTypography.labelMedium.fontSize}, weight:${overriddenTypography.labelMedium.fontWeight?.weight}")
                 }
             }
 
             LabelSmall -> buildAnnotatedString {
                 append("Label Small ")
                 withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${MaterialTheme.typography.labelSmall.fontSize}, weight:${MaterialTheme.typography.labelSmall.fontWeight?.weight}")
+                    append("${overriddenTypography.labelSmall.fontSize}, weight:${overriddenTypography.labelSmall.fontWeight?.weight}")
                 }
             }
         }

@@ -107,6 +107,7 @@ private fun TextFieldValidatorInspectorContent(
                     val acceptsTooltip = stringResource(Res.string.validator_accepts_description)
                     Tooltip(acceptsTooltip) {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = TextFieldValidator.entries(),
                             label = "Accepts",
                             selectedItem = textFieldTrait.textFieldValidator,

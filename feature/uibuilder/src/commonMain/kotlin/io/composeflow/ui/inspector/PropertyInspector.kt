@@ -365,6 +365,7 @@ fun ParamsInspector(
 
                     is LazyVerticalGridTrait -> {
                         LazyVerticalGridParamsInspector(
+                            project = project,
                             composeNode,
                             composeNodeCallbacks,
                         )
@@ -372,6 +373,7 @@ fun ParamsInspector(
 
                     is LazyHorizontalGridTrait -> {
                         LazyHorizontalGridParamsInspector(
+                            project = project,
                             composeNode,
                             composeNodeCallbacks,
                         )
@@ -379,6 +381,7 @@ fun ParamsInspector(
 
                     is CardTrait -> {
                         CardParamsInspector(
+                            project = project,
                             node = composeNode,
                             composeNodeCallbacks = composeNodeCallbacks
                         )

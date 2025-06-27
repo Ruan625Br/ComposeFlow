@@ -64,6 +64,7 @@ inline fun <reified T : Enum<T>> AssignableEnumPropertyEditor(
                 modifier = Modifier.weight(1f),
             ) {
                 DropdownProperty(
+                    project = project,
                     items = items,
                     onValueChanged = { _, item ->
                         onValidPropertyChanged(EnumProperty(item as EnumWrapper), null)

@@ -10,10 +10,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import io.composeflow.model.project.Project
 import io.composeflow.ui.labeledbox.LabeledBorderBox
 
 @Composable
 inline fun <reified T> BasicDropdownPropertyEditor(
+    project: Project,
     items: List<T>,
     noinline onValueChanged: (Int, T) -> Unit,
     modifier: Modifier = Modifier,
@@ -64,6 +66,7 @@ inline fun <reified T> BasicDropdownPropertyEditor(
             modifier = Modifier.weight(1f),
         ) {
             DropdownProperty(
+                project = project,
                 items = items,
                 onValueChanged = onValueChanged,
                 selectedItem = selectedItem,

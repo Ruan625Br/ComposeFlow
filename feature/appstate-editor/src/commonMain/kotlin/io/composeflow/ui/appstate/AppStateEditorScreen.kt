@@ -644,6 +644,7 @@ private fun AddAppStateDialog(
                 }
 
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = AppState.entries()
                         .map {
                             it.valueType(project).displayName(
@@ -679,6 +680,7 @@ private fun AddAppStateDialog(
                     if (dataTypes.isEmpty()) {
                         Tooltip(stringResource(Res.string.no_data_type_defined)) {
                             BasicDropdownPropertyEditor(
+                                project = project,
                                 items = dataTypes.map { it.className },
                                 onValueChanged = { _, _ ->
                                 },
@@ -688,6 +690,7 @@ private fun AddAppStateDialog(
                         }
                     } else {
                         BasicDropdownPropertyEditor(
+                            project = project,
                             items = dataTypes.map { it.className },
                             onValueChanged = { index, _ ->
                                 when (val appState = editedAppState) {

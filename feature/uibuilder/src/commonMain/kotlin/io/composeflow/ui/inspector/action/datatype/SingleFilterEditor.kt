@@ -77,7 +77,7 @@ fun SingleFilterEditor(
         ) {
             Column(
                 modifier =
-                Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
+                    Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
             ) {
                 DropdownMenuItem(text = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -168,6 +168,7 @@ fun SingleFilterEditor(
             }
 
             BasicDropdownPropertyEditor(
+                project = project,
                 items = dataType.dataFieldsDropdownItems(project),
                 onValueChanged = { _, item ->
                     val itemChanged = selectedItem != item
@@ -223,6 +224,7 @@ fun SingleFilterEditor(
             )
 
             BasicDropdownPropertyEditor(
+                project = project,
                 items = FilterOperator.entries,
                 label = "Operator",
                 onValueChanged = { _, item ->

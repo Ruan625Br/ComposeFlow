@@ -1449,6 +1449,7 @@ data class EnumProperty(
     ) {
         check(initialProperty is EnumProperty)
         DropdownProperty(
+            project = project,
             items = value.entries(),
             onValueChanged = { _, property ->
                 onValidPropertyChanged(EnumProperty(property as EnumWrapper), null)

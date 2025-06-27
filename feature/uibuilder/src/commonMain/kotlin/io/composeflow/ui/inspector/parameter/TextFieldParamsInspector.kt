@@ -247,6 +247,7 @@ fun TextFieldParamsInspector(
         )
         Row {
             BasicDropdownPropertyEditor(
+                project = project,
                 items = TextFieldType.entries,
                 label = "TextField type",
                 selectedIndex = textFieldTrait.textFieldType.ordinal,

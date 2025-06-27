@@ -315,6 +315,7 @@ fun ShowModalWithComponentContent(
             ) {
 
                 DropdownProperty(
+                    project = project,
                     items = components.map { it.name },
                     onValueChanged = { index, _ ->
                         if (index <= components.size) {

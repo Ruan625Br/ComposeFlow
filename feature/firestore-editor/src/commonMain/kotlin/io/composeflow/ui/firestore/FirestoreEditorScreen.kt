@@ -475,6 +475,7 @@ fun NewFirestoreCollectionDialog(
                 } + DataTypeToAssociate.CreateNewDataType
 
                 BasicDropdownPropertyEditor(
+                    project = project,
                     items = dataTypes,
                     onValueChanged = { _, item ->
                         dataTypeToAssociate = when (item) {
@@ -639,6 +640,7 @@ private fun FirestoreCollectionRelationshipDetailContent(
                 dataType.fields[it]
             }
             AddDataFieldDialog(
+                project = project,
                 initialValue = initialValue,
                 updateIndex = indexOfDataFieldToBeEdited,
                 onDataFieldAdded = {

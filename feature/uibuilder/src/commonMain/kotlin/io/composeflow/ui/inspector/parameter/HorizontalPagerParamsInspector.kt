@@ -78,6 +78,7 @@ fun HorizontalPagerParamsInspector(
             label = "Vertical alignment",
         )
         BasicDropdownPropertyEditor(
+            project = project,
             items = SnapPositionWrapper.entries,
             onValueChanged = { _, item ->
                 composeNodeCallbacks.onTraitUpdated(
