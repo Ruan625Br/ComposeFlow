@@ -1,6 +1,7 @@
 package io.composeflow.model.datatype
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import io.composeflow.asVariableName
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.findDataTypeOrNull
@@ -62,8 +63,8 @@ data class DataField(
     val variableName = name.asVariableName()
 
     @Composable
-    override fun asDropdownText(): String {
-        return "$name ${fieldType.asDropdownText()}"
+    override fun asDropdownText(): AnnotatedString {
+        return AnnotatedString("$name ${fieldType.asDropdownText().text}")
     }
 
     override fun isSameItem(item: Any): Boolean {
@@ -75,7 +76,7 @@ data class DocumentIdDropdownItem(
     val firestoreCollectionId: CollectionId,
 ) : DropdownItem {
     @Composable
-    override fun asDropdownText(): String = "Document ID"
+    override fun asDropdownText(): AnnotatedString = AnnotatedString("Document ID")
 
     override fun isSameItem(item: Any): Boolean = item is DocumentIdDropdownItem
 }

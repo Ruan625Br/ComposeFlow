@@ -1,6 +1,7 @@
 package io.composeflow.model.datatype
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.model.parameter.wrapper.InstantWrapper
 import io.composeflow.model.project.Project
@@ -33,7 +34,7 @@ sealed interface FieldType<T> : DropdownItem {
             CodeBlock.of("\"${defaultValue}\"")
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "String"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("String")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is String
     }
@@ -51,7 +52,7 @@ sealed interface FieldType<T> : DropdownItem {
         }
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "Int"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is Int
     }
@@ -69,7 +70,7 @@ sealed interface FieldType<T> : DropdownItem {
         }
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "Float"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is Float
     }
@@ -87,7 +88,7 @@ sealed interface FieldType<T> : DropdownItem {
         }
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "Boolean"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Boolean")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is Boolean
     }
@@ -107,7 +108,7 @@ sealed interface FieldType<T> : DropdownItem {
         }
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "Instant"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Instant")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is Instant
     }
@@ -127,7 +128,7 @@ sealed interface FieldType<T> : DropdownItem {
         }
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "DataType"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("DataType")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is CustomDataType
     }
@@ -150,7 +151,7 @@ sealed interface FieldType<T> : DropdownItem {
         }
 
         @Composable
-        override fun asDropdownText(): kotlin.String = "DocumentId"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("DocumentId")
 
         override fun isSameItem(item: Any): kotlin.Boolean = item is DataFieldType.DocumentId
     }

@@ -1,6 +1,7 @@
 package io.composeflow.model.datatype
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.GenerationContext
@@ -33,37 +34,37 @@ sealed interface FilterFieldType {
 enum class FilterOperator : DropdownTextDisplayable {
     EqualTo {
         @Composable
-        override fun asDropdownText(): String = "Equal to (==)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Equal to (==)")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("equalTo")
     },
     NotEqualTo {
         @Composable
-        override fun asDropdownText(): String = "Not equal to (!=)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Not equal to (!=)")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("notEqualTo")
     },
     LessThan {
         @Composable
-        override fun asDropdownText(): String = "Less than (<)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Less than (<)")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("lessThan")
     },
     LessThanOrEqualTo {
         @Composable
-        override fun asDropdownText(): String = "Less than or equal to (<=)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Less than or equal to (<=)")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("lessThanOrEqualTo")
     },
     GreaterThan {
         @Composable
-        override fun asDropdownText(): String = "Greater than (>)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Greater than (>)")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("greaterThan")
     },
     GreaterThanOrEqualTo {
         @Composable
-        override fun asDropdownText(): String = "Greater than or equal to (>=)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Greater than or equal to (>=)")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("greaterThanOrEqualTo")
     },
     Contains {
         @Composable
-        override fun asDropdownText(): String = "Contains"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Contains")
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("contains")
     },
     ;

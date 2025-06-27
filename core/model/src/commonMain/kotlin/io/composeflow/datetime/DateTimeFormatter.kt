@@ -1,6 +1,7 @@
 package io.composeflow.datetime
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.ui.propertyeditor.DropdownItem
@@ -60,8 +61,8 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "YYYY${separator}MM${separator}DD"
 
         @Composable
-        override fun asDropdownText(): String =
-            "YYYY${separator}MM${separator}DD (2024${separator}${padding.asString()}8${separator}${padding.asString()}9)"
+        override fun asDropdownText(): AnnotatedString =
+            AnnotatedString("YYYY${separator}MM${separator}DD (2024${separator}${padding.asString()}8${separator}${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY_MM_DD
         override fun newInstance(): DateTimeFormatter = YYYY_MM_DD()
@@ -108,8 +109,8 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "YYYY${separator}MM${separator}DD HH:MM"
 
         @Composable
-        override fun asDropdownText(): String =
-            "YYYY${separator}MM${separator}DD HH:MM (2024${separator}${padding.asString()}8${separator}${padding.asString()}9 10:05)"
+        override fun asDropdownText(): AnnotatedString =
+            AnnotatedString("YYYY${separator}MM${separator}DD HH:MM (2024${separator}${padding.asString()}8${separator}${padding.asString()}9 10:05)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY_MM_DD_HH_MM
         override fun newInstance(): DateTimeFormatter = YYYY_MM_DD_HH_MM()
@@ -144,8 +145,8 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "YYYY${separator}MM$"
 
         @Composable
-        override fun asDropdownText(): String =
-            "YYYY${separator}MM (2024${separator}${padding.asString()}8)"
+        override fun asDropdownText(): AnnotatedString =
+            AnnotatedString("YYYY${separator}MM (2024${separator}${padding.asString()}8)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY_MM
         override fun newInstance(): DateTimeFormatter = YYYY_MM()
@@ -180,8 +181,8 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "MM${separator}DD"
 
         @Composable
-        override fun asDropdownText(): String =
-            "MM${separator}DD (${padding.asString()}8${separator}${padding.asString()}9)"
+        override fun asDropdownText(): AnnotatedString =
+            AnnotatedString("MM${separator}DD (${padding.asString()}8${separator}${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is MM_DD
         override fun newInstance(): DateTimeFormatter = MM_DD()
@@ -220,8 +221,8 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "DD${separator}MM${separator}YYYY"
 
         @Composable
-        override fun asDropdownText(): String =
-            "DD${separator}MM${separator}YYYY (${padding.asString()}9${separator}${padding.asString()}8${separator}2024)"
+        override fun asDropdownText(): AnnotatedString =
+            AnnotatedString("DD${separator}MM${separator}YYYY (${padding.asString()}9${separator}${padding.asString()}8${separator}2024)")
 
         override fun isSameItem(item: Any): Boolean = item is DD_MM_YYYY
         override fun newInstance(): DateTimeFormatter = DD_MM_YYYY()
@@ -260,7 +261,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "MMM DD, YYYY"
 
         @Composable
-        override fun asDropdownText(): String = "MMM DD, YYYY (Aug ${padding.asString()}9, 2024)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("MMM DD, YYYY (Aug ${padding.asString()}9, 2024)")
 
         override fun isSameItem(item: Any): Boolean = item is MMM_DD_YYYY
         override fun newInstance(): DateTimeFormatter = MMM_DD_YYYY()
@@ -295,7 +296,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "MMM DD"
 
         @Composable
-        override fun asDropdownText(): String = "MMM DD (Aug ${padding.asString()}9)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("MMM DD (Aug ${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is MMM_DD
         override fun newInstance(): DateTimeFormatter = MMM_DD()
@@ -325,7 +326,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "YYYY"
 
         @Composable
-        override fun asDropdownText(): String = "YYYY (2024)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("YYYY (2024)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY
         override fun newInstance(): DateTimeFormatter = YYYY()
@@ -355,7 +356,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "MM"
 
         @Composable
-        override fun asDropdownText(): String = "MM (${padding.asString()}8)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("MM (${padding.asString()}8)")
 
         override fun isSameItem(item: Any): Boolean = item is MM
         override fun newInstance(): DateTimeFormatter = MM()
@@ -384,7 +385,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "MMM"
 
         @Composable
-        override fun asDropdownText(): String = "MMM (Aug)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("MMM (Aug)")
 
         override fun isSameItem(item: Any): Boolean = item is MMM
         override fun newInstance(): DateTimeFormatter = MMM
@@ -414,7 +415,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "DD"
 
         @Composable
-        override fun asDropdownText(): String = "DD (${padding.asString()}9)"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("DD (${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is DD
         override fun newInstance(): DateTimeFormatter = DD()
@@ -448,7 +449,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun simplifiedFormat(): String = "HH:MM"
 
         @Composable
-        override fun asDropdownText(): String = "HH:MM"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("HH:MM")
 
         override fun isSameItem(item: Any): Boolean = item is HH_MM
         override fun newInstance(): DateTimeFormatter = HH_MM()

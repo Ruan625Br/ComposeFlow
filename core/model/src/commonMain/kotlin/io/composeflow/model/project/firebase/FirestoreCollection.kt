@@ -1,6 +1,7 @@
 package io.composeflow.model.project.firebase
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -36,7 +37,7 @@ data class FirestoreCollection(
     }
 
     @Composable
-    override fun asDropdownText(): String = name
+    override fun asDropdownText(): AnnotatedString = AnnotatedString(name)
 
     override fun isSameItem(item: Any): Boolean {
         return item is FirestoreCollection && item.id == id

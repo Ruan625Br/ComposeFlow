@@ -1,6 +1,7 @@
 package io.composeflow.model.apieditor
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.serialization.SerialName
@@ -20,7 +21,7 @@ sealed interface Authorization : DropdownItem {
         val password: String = "",
     ) : Authorization {
         @Composable
-        override fun asDropdownText(): String = "Basic"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Basic")
 
         override fun isSameItem(item: Any): Boolean = item is BasicAuth
 

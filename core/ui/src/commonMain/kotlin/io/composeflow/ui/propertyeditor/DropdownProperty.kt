@@ -24,6 +24,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import io.composeflow.ui.icon.ComposeFlowIcon
 import org.jetbrains.jewel.ui.component.Tooltip
@@ -35,10 +36,10 @@ inline fun <reified T> DropdownProperty(
     crossinline onValueChanged: (Int, T) -> Unit,
     modifier: Modifier = Modifier,
     crossinline displayText: @Composable (T) -> Unit = {
-        val text: String? = when (it) {
+        val text: AnnotatedString? = when (it) {
             is DropdownTextDisplayable -> it.asDropdownText()
-            is String -> it
-            is Enum<*> -> it.name
+            is String -> AnnotatedString(it)
+            is Enum<*> -> AnnotatedString(it.name)
             else -> null
         }
         text?.let { t ->
@@ -51,10 +52,10 @@ inline fun <reified T> DropdownProperty(
         }
     },
     crossinline dropDownMenuText: @Composable (T) -> Unit = {
-        val text: String? = when (it) {
+        val text: AnnotatedString? = when (it) {
             is DropdownTextDisplayable -> it.asDropdownText()
-            is String -> it
-            is Enum<*> -> it.name
+            is String -> AnnotatedString(it)
+            is Enum<*> -> AnnotatedString(it.name)
             else -> null
         }
         text?.let { t ->
@@ -148,7 +149,7 @@ inline fun <reified T> DropdownProperty(
 interface DropdownItem : DropdownTextDisplayable, DropdownItemComparable
 interface DropdownTextDisplayable {
     @Composable
-    fun asDropdownText(): String
+    fun asDropdownText(): AnnotatedString
 }
 
 interface DropdownItemComparable {

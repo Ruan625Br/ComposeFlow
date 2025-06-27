@@ -1,6 +1,7 @@
 package io.composeflow.model.action
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import com.squareup.kotlinpoet.CodeBlock
@@ -173,7 +174,7 @@ sealed interface StateOperation {
             readProperty.getAssignableProperties()
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item is SetValue
     }
@@ -220,7 +221,7 @@ sealed interface StateOperation {
         override fun displayName(): String = stringResource(Res.string.clear_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item == ClearValue
     }
@@ -273,7 +274,7 @@ sealed interface StateOperation {
         override fun displayName(): String = stringResource(Res.string.toggle_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item == ToggleValue
     }
@@ -292,7 +293,7 @@ sealed interface FieldUpdateType {
         override fun displayName(): String = stringResource(Res.string.set_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): kotlin.Boolean = item == SetValue
     }
@@ -304,7 +305,7 @@ sealed interface FieldUpdateType {
         override fun displayName(): String = stringResource(Res.string.clear_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): kotlin.Boolean = item == ClearValue
     }
@@ -316,7 +317,7 @@ sealed interface FieldUpdateType {
         override fun displayName(): String = stringResource(Res.string.toggle_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): kotlin.Boolean = item == ToggleValue
     }
@@ -468,7 +469,7 @@ sealed interface StateOperationForDataType : StateOperation {
         override fun displayName(): String = stringResource(Res.string.set_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item is DataTypeSetValue
     }
@@ -568,7 +569,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.add_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item is AddValue
     }
@@ -691,7 +692,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.add_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean =
             item is AddValueForCustomDataType
@@ -792,7 +793,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.update_value_at_index)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean =
             item is UpdateValueAtIndex
@@ -948,7 +949,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.update_value_at_index)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item is UpdateValueAtIndexForCustomDataType
     }
@@ -1012,7 +1013,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.remove_value_at_index)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item is RemoveValueAtIndex
     }
@@ -1068,7 +1069,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.remove_first_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item == RemoveFirstValue
     }
@@ -1124,7 +1125,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun displayName(): String = stringResource(Res.string.remove_last_value)
 
         @Composable
-        override fun asDropdownText(): String = displayName()
+        override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
         override fun isSameItem(item: Any): Boolean = item == RemoveLastValue
     }

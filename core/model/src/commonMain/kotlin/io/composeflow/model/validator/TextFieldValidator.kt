@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
@@ -43,7 +44,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
         val minLength: Int? = null,
     ) : TextFieldValidator {
         @Composable
-        override fun asDropdownText(): String = "String"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("String")
         override fun isSameItem(item: Any): Boolean = item is StringValidator
 
         @Composable
@@ -119,7 +120,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
         val minValue: Int? = null,
     ) : TextFieldValidator {
         @Composable
-        override fun asDropdownText(): String = "Int"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
         override fun isSameItem(item: Any): Boolean = item is IntValidator
 
         @Composable
@@ -193,7 +194,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
         val minValue: Float? = null,
     ) : TextFieldValidator {
         @Composable
-        override fun asDropdownText(): String = "Float"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
         override fun isSameItem(item: Any): Boolean = item is FloatValidator
 
         @Composable
@@ -263,7 +264,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
     @SerialName("EmailValidator")
     data object EmailValidator : TextFieldValidator {
         @Composable
-        override fun asDropdownText(): String = "Email address"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Email address")
         override fun isSameItem(item: Any): Boolean = item is EmailValidator
 
         override fun asCodeBlock(project: Project, context: GenerationContext): CodeBlock {

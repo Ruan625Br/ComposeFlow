@@ -1,6 +1,7 @@
 package io.composeflow.model.datatype
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FunSpec
@@ -43,7 +44,7 @@ data class DataType(
     private fun isValid(): Boolean = fields.isNotEmpty()
 
     @Composable
-    override fun asDropdownText(): String = className
+    override fun asDropdownText(): AnnotatedString = AnnotatedString(className)
 
     fun getDataFields(project: Project): List<DataField> {
         val matchingFirestoreCollection = findMatchingFirestoreCollection(project)

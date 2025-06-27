@@ -1,6 +1,7 @@
 package io.composeflow.model.type
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeName
@@ -175,7 +176,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         override fun isPrimitive() = true
 
         @Composable
-        override fun asDropdownText(): String = "String"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("String")
     }
 
     @Serializable
@@ -217,7 +218,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Boolean"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Boolean")
     }
 
     @Serializable
@@ -273,7 +274,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Int"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
     }
 
     @Serializable
@@ -329,7 +330,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Float"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
     }
 
     @Serializable
@@ -371,7 +372,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Color"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Color")
     }
 
     @Serializable
@@ -413,7 +414,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Instant"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Instant")
     }
 
     @Serializable
@@ -483,7 +484,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "DataType"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("DataType")
     }
 
     data class Enum<E : kotlin.Enum<E>>(
@@ -532,7 +533,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Enum"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Enum")
     }
 
     @Serializable
@@ -578,7 +579,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "JsonElement"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("JsonElement")
     }
 
     @Serializable
@@ -620,7 +621,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Any"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Any")
     }
 
     /**
@@ -677,7 +678,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "DocumentId"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("DocumentId")
     }
 
     @Serializable
@@ -704,7 +705,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         }
 
         @Composable
-        override fun asDropdownText(): String = "Unknown"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Unknown")
     }
 
     companion object {

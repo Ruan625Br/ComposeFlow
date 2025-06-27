@@ -2,6 +2,7 @@ package io.composeflow.model.parameter.lazylist
 
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
@@ -26,7 +27,7 @@ sealed interface LazyGridCells : DropdownItem {
         val minSize: Dp = 100.dp,
     ) : LazyGridCells {
         @Composable
-        override fun asDropdownText(): String = "Adaptive"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Adaptive")
         override fun isSameItem(item: Any): Boolean = item is Adaptive
         override fun asCodeBlock(): CodeBlock {
             return CodeBlock.of(
@@ -43,7 +44,7 @@ sealed interface LazyGridCells : DropdownItem {
     @SerialName("Fixed")
     data class Fixed(val count: Int = 2) : LazyGridCells {
         @Composable
-        override fun asDropdownText(): String = "Fixed"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Fixed")
         override fun isSameItem(item: Any): Boolean = item is Fixed
         override fun asCodeBlock(): CodeBlock {
             return CodeBlock.of(
@@ -62,7 +63,7 @@ sealed interface LazyGridCells : DropdownItem {
         val size: Dp = 100.dp,
     ) : LazyGridCells {
         @Composable
-        override fun asDropdownText(): String = "FixedSize"
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("FixedSize")
         override fun isSameItem(item: Any): Boolean = item is FixedSize
         override fun asCodeBlock(): CodeBlock {
             return CodeBlock.of(

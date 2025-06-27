@@ -12,6 +12,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -896,7 +897,7 @@ data class Screen(
     private fun hasOwnTopAppBar(): Boolean = topAppBarNode.value != null
 
     @Composable
-    override fun asDropdownText(): String = name
+    override fun asDropdownText(): AnnotatedString = AnnotatedString(name)
 
     override fun isSameItem(item: Any): Boolean {
         val otherScreen = item as? Screen ?: return false

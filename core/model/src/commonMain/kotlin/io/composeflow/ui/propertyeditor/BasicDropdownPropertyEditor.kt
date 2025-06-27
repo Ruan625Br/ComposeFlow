@@ -8,6 +8,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import io.composeflow.ui.labeledbox.LabeledBorderBox
 
@@ -21,10 +22,10 @@ inline fun <reified T> BasicDropdownPropertyEditor(
     selectedItem: T? = null,
     supportTooltipText: String? = null,
     crossinline displayText: @Composable (T) -> Unit = {
-        val text: String? = when (it) {
-            is String -> it
+        val text: AnnotatedString? = when (it) {
+            is String -> AnnotatedString(it)
             is DropdownTextDisplayable -> it.asDropdownText()
-            is Enum<*> -> it.name
+            is Enum<*> -> AnnotatedString(it.name)
             else -> null
         }
         text?.let { t ->
@@ -39,10 +40,10 @@ inline fun <reified T> BasicDropdownPropertyEditor(
     crossinline dropDownMenuText: @Composable (T) -> Unit = {
         // Extracting this to a function mysteriously throws an IR lowring error, thus inlining the
         // default function
-        val text: String? = when (it) {
-            is String -> it
+        val text: AnnotatedString? = when (it) {
+            is String -> AnnotatedString(it)
             is DropdownTextDisplayable -> it.asDropdownText()
-            is Enum<*> -> it.name
+            is Enum<*> -> AnnotatedString(it.name)
             else -> null
         }
         text?.let { t ->
