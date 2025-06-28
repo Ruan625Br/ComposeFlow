@@ -96,6 +96,54 @@ object OpenRouterToolResultSerializer : KSerializer<OpenRouterToolResult> {
                             value.tool_args
                         )
                     )
+
+                is OpenRouterToolResult.AddAppStateArgs ->
+                    put(
+                        "tool_args", json.encodeToJsonElement(
+                            ToolArgs.AddAppStateArgs.serializer(),
+                            value.tool_args
+                        )
+                    )
+
+                is OpenRouterToolResult.DeleteAppStateArgs ->
+                    put(
+                        "tool_args", json.encodeToJsonElement(
+                            ToolArgs.DeleteAppStateArgs.serializer(),
+                            value.tool_args
+                        )
+                    )
+
+                is OpenRouterToolResult.UpdateAppStateArgs ->
+                    put(
+                        "tool_args", json.encodeToJsonElement(
+                            ToolArgs.UpdateAppStateArgs.serializer(),
+                            value.tool_args
+                        )
+                    )
+
+                is OpenRouterToolResult.UpdateCustomDataTypeListDefaultValuesArgs ->
+                    put(
+                        "tool_args", json.encodeToJsonElement(
+                            ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs.serializer(),
+                            value.tool_args
+                        )
+                    )
+
+                is OpenRouterToolResult.ListAppStatesArgs ->
+                    put(
+                        "tool_args", json.encodeToJsonElement(
+                            ToolArgs.ListAppStatesArgs.serializer(),
+                            value.tool_args
+                        )
+                    )
+
+                is OpenRouterToolResult.GetAppStateArgs ->
+                    put(
+                        "tool_args", json.encodeToJsonElement(
+                            ToolArgs.GetAppStateArgs.serializer(),
+                            value.tool_args
+                        )
+                    )
             }
         }
 
@@ -211,6 +259,78 @@ object OpenRouterToolResultSerializer : KSerializer<OpenRouterToolResult> {
                     processedToolArgsElement
                 )
                 OpenRouterToolResult.MoveComposeNodeToContainerArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "add_app_state" -> {
+                val toolArgs = json.decodeFromJsonElement(
+                    ToolArgs.AddAppStateArgs.serializer(),
+                    processedToolArgsElement
+                )
+                OpenRouterToolResult.AddAppStateArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "delete_app_state" -> {
+                val toolArgs = json.decodeFromJsonElement(
+                    ToolArgs.DeleteAppStateArgs.serializer(),
+                    processedToolArgsElement
+                )
+                OpenRouterToolResult.DeleteAppStateArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "update_app_state" -> {
+                val toolArgs = json.decodeFromJsonElement(
+                    ToolArgs.UpdateAppStateArgs.serializer(),
+                    processedToolArgsElement
+                )
+                OpenRouterToolResult.UpdateAppStateArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "update_custom_data_type_list_default_values" -> {
+                val toolArgs = json.decodeFromJsonElement(
+                    ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs.serializer(),
+                    processedToolArgsElement
+                )
+                OpenRouterToolResult.UpdateCustomDataTypeListDefaultValuesArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "list_app_states" -> {
+                val toolArgs = json.decodeFromJsonElement(
+                    ToolArgs.ListAppStatesArgs.serializer(),
+                    processedToolArgsElement
+                )
+                OpenRouterToolResult.ListAppStatesArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "get_app_state" -> {
+                val toolArgs = json.decodeFromJsonElement(
+                    ToolArgs.GetAppStateArgs.serializer(),
+                    processedToolArgsElement
+                )
+                OpenRouterToolResult.GetAppStateArgs(
                     tool_name = toolName,
                     tool_call_id = toolCallId,
                     tool_args = toolArgs,

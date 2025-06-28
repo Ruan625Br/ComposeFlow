@@ -79,6 +79,43 @@ sealed class ToolArgs {
 //    ) : ToolArgs()
 
     @Serializable
+    @SerialName("add_app_state")
+    data class AddAppStateArgs(
+        val appStateYaml: String
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("delete_app_state")
+    data class DeleteAppStateArgs(
+        val appStateId: String
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("update_app_state")
+    data class UpdateAppStateArgs(
+        val appStateYaml: String
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("update_custom_data_type_list_default_values")
+    data class UpdateCustomDataTypeListDefaultValuesArgs(
+        val appStateId: String,
+        val defaultValuesYaml: String
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("list_app_states")
+    data class ListAppStatesArgs(
+        val dummy: String = "" // Needed because data classes need at least one parameter
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("get_app_state")
+    data class GetAppStateArgs(
+        val appStateId: String
+    ) : ToolArgs()
+
+    @Serializable
     data class FakeArgs(
         val fakeString: String = "fakeString",
     ) : ToolArgs()

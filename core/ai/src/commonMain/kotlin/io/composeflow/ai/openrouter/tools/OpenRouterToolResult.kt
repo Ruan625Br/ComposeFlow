@@ -60,4 +60,46 @@ sealed interface OpenRouterToolResult {
         override val tool_call_id: String,
         override val tool_args: ToolArgs.MoveComposeNodeToContainerArgs,
     ) : OpenRouterToolResult
+
+    @Serializable
+    data class AddAppStateArgs(
+        override val tool_name: String = "add_app_state",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.AddAppStateArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class DeleteAppStateArgs(
+        override val tool_name: String = "delete_app_state",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.DeleteAppStateArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class UpdateAppStateArgs(
+        override val tool_name: String = "update_app_state",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.UpdateAppStateArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class UpdateCustomDataTypeListDefaultValuesArgs(
+        override val tool_name: String = "update_custom_data_type_list_default_values",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class ListAppStatesArgs(
+        override val tool_name: String = "list_app_states",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.ListAppStatesArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class GetAppStateArgs(
+        override val tool_name: String = "get_app_state",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.GetAppStateArgs,
+    ) : OpenRouterToolResult
 }

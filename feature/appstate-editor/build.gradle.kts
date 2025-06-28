@@ -1,6 +1,7 @@
 plugins {
     id("io.compose.flow.kmp.library")
     id("io.compose.flow.compose.multiplatform")
+    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
 }
 
 version = "1.0-SNAPSHOT"
@@ -11,6 +12,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":ksp-llm-tools"))
             implementation(project(":core:di"))
             implementation(project(":core:model"))
             implementation(project(":core:platform"))
@@ -39,5 +41,16 @@ kotlin {
             optInKotlinExperimentalApis()
         }
     }
+}
+
+// Configure KSP for LLM tools
+dependencies {
+    add("kspDesktop", project(":ksp-llm-tools"))
+}
+
+// Configure KSP options
+ksp {
+    // Set output directory for LLM tool JSON files
+    arg("llmToolsOutputDir", "${project.layout.buildDirectory.get()}/generated/llm-tools")
 }
 
