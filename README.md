@@ -18,6 +18,10 @@ on [jewel](https://github.com/JetBrains/jewel)
 To show the Previews for Composables, you need to use Android Studio (Narwhal 2025.1.1. or higher)
 or Intellij IDEA (2025.1.1 or higheer)
 
+#### Recommended plugins for IDE
+
+* [ktlint](https://plugins.jetbrains.com/plugin/15057-ktlint)
+
 ### Prerequisites On Windows (Only Windows users need to follow this section)
 
 You need to create a following file to run the tests successfully otherwise the gradle process in
@@ -60,7 +64,7 @@ conveyor make copied-site
 
 ## How to apply spotless
 
-`./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache spotlessApply`
+`./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply`
 
 ## How to generate a system prompt for Gemini
 

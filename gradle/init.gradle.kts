@@ -1,7 +1,7 @@
-val ktlintVersion = "0.48.1"
+val ktlintVersion = "1.6.0"
 
 initscript {
-    val spotlessVersion = "6.18.0"
+    val spotlessVersion = "7.0.4"
 
     repositories {
         mavenCentral()
@@ -13,20 +13,21 @@ initscript {
 }
 
 rootProject {
-    subprojects {
+    allprojects {
         apply<com.diffplug.gradle.spotless.SpotlessPlugin>()
         extensions.configure<com.diffplug.gradle.spotless.SpotlessExtension> {
             kotlin {
-                target("**/*.kt")
-                targetExclude(
-                    "**/build/**/*.kt", 
-                    "**/*main*.kt",
-                    "**/__ComposeFlowIcons.kt",
+                target(
+                    "**/*.kt",
+                    "**/*.kts",
                 )
-            }
-            format("kts") {
-                target("**/*.kts")
-                targetExclude("**/build/**/*.kts")
+                targetExclude(
+                    "**/build/**/*.kt",
+                    "**/build/**/*.kts",
+                    "**/*main*.kt",
+                    "**/composeflowicons/*.kt",
+                )
+                ktlint(ktlintVersion)
             }
         }
     }

@@ -11,8 +11,8 @@ ComposeFlow is a **Compose Multiplatform visual UI builder** that allows develop
 ### Development
 ```bash
 ./gradlew desktopApp:run                    # Run desktop app
-./gradlew allTests                          # Run all tests  
-./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache spotlessApply  # Format code
+./gradlew allTests                          # Run all tests
+./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply  # Format code
 ```
 
 ### Build & Release
