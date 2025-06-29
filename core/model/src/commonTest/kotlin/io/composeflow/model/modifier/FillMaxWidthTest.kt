@@ -11,7 +11,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class FillMaxWidthTest {
-
     @Test
     fun toComposeCode_fillMaxWidth() {
         val modifierList = listOf(ModifierWrapper.FillMaxWidth())
@@ -22,8 +21,7 @@ class FillMaxWidthTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier
-                 .androidx.compose.foundation.layout.fillMaxWidth(),"""
-                .trimForCompare(),
+                 .androidx.compose.foundation.layout.fillMaxWidth(),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }
@@ -38,18 +36,18 @@ class FillMaxWidthTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier
-                 .androidx.compose.foundation.layout.fillMaxWidth(fraction = 0.5f),"""
-                .trimForCompare(),
+                 .androidx.compose.foundation.layout.fillMaxWidth(fraction = 0.5f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }
 
     @Test
     fun toComposeCode_withOtherModifier() {
-        val modifierList = listOf(
-            ModifierWrapper.Padding(8.dp),
-            ModifierWrapper.FillMaxWidth(),
-        )
+        val modifierList =
+            listOf(
+                ModifierWrapper.Padding(8.dp),
+                ModifierWrapper.FillMaxWidth(),
+            )
 
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)

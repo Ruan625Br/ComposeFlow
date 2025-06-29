@@ -5,8 +5,7 @@ import androidx.datastore.preferences.core.Preferences
 import io.composeflow.datastore.Factory
 import io.composeflow.datastore.Factory.DATA_STORE_FILENAME
 
-actual fun getOrCreateDataStore(): DataStore<Preferences> {
-    return Factory.getOrCreateDataStore {
+actual fun getOrCreateDataStore(): DataStore<Preferences> =
+    Factory.getOrCreateDataStore {
         getCacheDir().resolve(DATA_STORE_FILENAME).toPath().toString()
     }
-}

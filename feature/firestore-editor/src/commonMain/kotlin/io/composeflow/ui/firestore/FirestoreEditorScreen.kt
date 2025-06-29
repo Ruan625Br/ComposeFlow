@@ -102,20 +102,22 @@ fun FirestoreEditorScreen(
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = FirestoreEditorViewModel::class) {
-        FirestoreEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
-    }
+    val viewModel =
+        viewModel(modelClass = FirestoreEditorViewModel::class) {
+            FirestoreEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
+        }
 
     Surface(modifier = modifier.fillMaxSize()) {
         Row {
-            val callbacks = FirestoreCollectionScreenCallbacks(
-                onFirestoreCollectionAdded = viewModel::onFirestoreCollectionAdded,
-                onFocusedFirestoreCollectionIndexUpdated = viewModel::onFocusedFirestoreCollectionIndexUpdated,
-                onDataFieldAdded = viewModel::onDataFieldAdded,
-                onDataFieldNameUpdated = viewModel::onDataFieldNameUpdated,
-                onDeleteDataField = viewModel::onDeleteDataField,
-                onDeleteFirestoreCollectionRelationship = viewModel::onDeleteFirestoreCollectionRelationship,
-            )
+            val callbacks =
+                FirestoreCollectionScreenCallbacks(
+                    onFirestoreCollectionAdded = viewModel::onFirestoreCollectionAdded,
+                    onFocusedFirestoreCollectionIndexUpdated = viewModel::onFocusedFirestoreCollectionIndexUpdated,
+                    onDataFieldAdded = viewModel::onDataFieldAdded,
+                    onDataFieldNameUpdated = viewModel::onDataFieldNameUpdated,
+                    onDeleteDataField = viewModel::onDeleteDataField,
+                    onDeleteFirestoreCollectionRelationship = viewModel::onDeleteFirestoreCollectionRelationship,
+                )
             FirestoreHeaderContainer(
                 project = project,
                 callbacks = callbacks,
@@ -177,9 +179,10 @@ private fun ConnectWithFirebaseMessage() {
                         imageVector = Icons.Outlined.Info,
                         contentDescription = contentDesc,
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .size(18.dp),
+                        modifier =
+                            Modifier
+                                .padding(start = 8.dp)
+                                .size(18.dp),
                     )
                 }
             }
@@ -200,7 +203,7 @@ private fun ConnectWithFirebaseMessage() {
         }) {
             ComposeFlowIcon(
                 imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
-                contentDescription = openSettings
+                contentDescription = openSettings,
             )
             Spacer(Modifier.size(8.dp))
             Text(openSettings)
@@ -229,9 +232,10 @@ private fun FirestoreHeader(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = contentDesc,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(18.dp),
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(18.dp),
                 )
             }
             Spacer(Modifier.weight(1f))
@@ -242,9 +246,10 @@ private fun FirestoreHeader(
                     onClick = {
                         addCollectionDialogOpen = true
                     },
-                    modifier = Modifier
-                        .hoverIconClickable()
-                        .hoverOverlay(),
+                    modifier =
+                        Modifier
+                            .hoverIconClickable()
+                            .hoverOverlay(),
                 ) {
                     Icon(
                         ComposeFlowIcons.Plugin,
@@ -279,7 +284,7 @@ private fun FirestoreHeader(
                         }
                     }
                     closeDialog()
-                }
+                },
             )
         }
     }
@@ -295,14 +300,14 @@ private fun FirebaseFirestoreContent(
             onClick = {
                 openInBrowser(URI("${firebaseConsoleUrl}project/${firebaseAppInfo.firebaseProjectId}/firestore"))
             },
-            modifier = Modifier.hoverIconClickable()
+            modifier = Modifier.hoverIconClickable(),
         ) {
             val openFirebaseConsole = stringResource(Res.string.open_firebase_console)
             Row {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                     contentDescription = openFirebaseConsole,
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 Text(openFirebaseConsole)
             }
@@ -317,7 +322,6 @@ private fun FirebaseFirestoreContent(
     }
 }
 
-
 @Composable
 private fun FirestoreCollectionList(
     project: Project,
@@ -325,35 +329,37 @@ private fun FirestoreCollectionList(
     focusedFirestoreCollectionIndex: Int?,
 ) {
     Column(
-        Modifier.padding(vertical = 16.dp)
+        Modifier.padding(vertical = 16.dp),
     ) {
         val firestoreCollections =
             project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
         LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
             itemsIndexed(firestoreCollections) { i, firestoreCollection ->
-                val focusedModifier = if (i == focusedFirestoreCollectionIndex) {
-                    Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                alpha = 0.8f,
-                            ),
-                        )
-                } else {
-                    Modifier.alpha(0.4f)
-                }
+                val focusedModifier =
+                    if (i == focusedFirestoreCollectionIndex) {
+                        Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                    alpha = 0.8f,
+                                ),
+                            )
+                    } else {
+                        Modifier.alpha(0.4f)
+                    }
                 val companionDataType =
                     firestoreCollection.findCompanionDataType(project)
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .hoverIconClickable()
-                        .then(focusedModifier)
-                        .clickable {
-                            callbacks.onFocusedFirestoreCollectionIndexUpdated(i)
-                        },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .hoverIconClickable()
+                            .then(focusedModifier)
+                            .clickable {
+                                callbacks.onFocusedFirestoreCollectionIndexUpdated(i)
+                            },
                 ) {
                     Text(
                         firestoreCollection.name,
@@ -365,7 +371,7 @@ private fun FirestoreCollectionList(
                     Text(
                         "->",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary,
                     )
                     companionDataType?.let {
                         Text(
@@ -411,28 +417,29 @@ fun NewFirestoreCollectionDialog(
 
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 420.dp, height = 400.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 420.dp, height = 400.dp)
+                        .padding(16.dp),
             ) {
                 var validateResult by remember {
                     mutableStateOf<ValidateResult>(
                         ValidateResult.Failure(
-                            MUST_NOT_BE_EMPTY
-                        )
+                            MUST_NOT_BE_EMPTY,
+                        ),
                     )
                 }
                 Text(
                     text = stringResource(Res.string.firestore_collection_associate),
                     style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 Text(
                     text = stringResource(Res.string.firestore_collection_associate_description),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 SmallOutlinedTextField(
@@ -452,45 +459,49 @@ fun NewFirestoreCollectionDialog(
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     isError = validateResult is ValidateResult.Failure,
-                    supportingText = (validateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .fillMaxWidth()
+                    supportingText =
+                        (validateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
+                            }
+                        },
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .fillMaxWidth(),
                 )
                 Spacer(Modifier.size(8.dp))
                 Text(
                     text = stringResource(Res.string.firestore_collection_name_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.warning,
-                    modifier = Modifier.padding(bottom = 24.dp)
+                    modifier = Modifier.padding(bottom = 24.dp),
                 )
 
-                val dataTypes = project.dataTypeHolder.dataTypes.map {
-                    DataTypeToAssociate.ExistingDataType(it)
-                } + DataTypeToAssociate.CreateNewDataType
+                val dataTypes =
+                    project.dataTypeHolder.dataTypes.map {
+                        DataTypeToAssociate.ExistingDataType(it)
+                    } + DataTypeToAssociate.CreateNewDataType
 
                 BasicDropdownPropertyEditor(
                     project = project,
                     items = dataTypes,
                     onValueChanged = { _, item ->
-                        dataTypeToAssociate = when (item) {
-                            DataTypeToAssociate.CreateNewDataType -> {
-                                DataTypeToAssociate.CreateNewDataType
-                            }
+                        dataTypeToAssociate =
+                            when (item) {
+                                DataTypeToAssociate.CreateNewDataType -> {
+                                    DataTypeToAssociate.CreateNewDataType
+                                }
 
-                            is DataTypeToAssociate.ExistingDataType -> {
-                                DataTypeToAssociate.ExistingDataType(item.dataType)
+                                is DataTypeToAssociate.ExistingDataType -> {
+                                    DataTypeToAssociate.ExistingDataType(item.dataType)
+                                }
                             }
-                        }
                     },
                     selectedItem = dataTypeToAssociate,
                     label = stringResource(Res.string.data_type),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
 
                 Row(
@@ -501,9 +512,10 @@ fun NewFirestoreCollectionDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(second),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(second),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -512,8 +524,9 @@ fun NewFirestoreCollectionDialog(
                             onCollectionConfirmed(collectionName, dataTypeToAssociate)
                         },
                         enabled = validateResult is ValidateResult.Success,
-                        modifier = Modifier
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }
@@ -522,7 +535,6 @@ fun NewFirestoreCollectionDialog(
         }
     }
 }
-
 
 @Composable
 private fun FirestoreCollectionRelationshipDetailContent(
@@ -536,20 +548,21 @@ private fun FirestoreCollectionRelationshipDetailContent(
     var indexOfDataFieldToBeDeleted by remember { mutableStateOf<Int?>(null) }
 
     Column(
-        modifier = Modifier
-            .width(960.dp)
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier =
+            Modifier
+                .width(960.dp)
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surface),
     ) {
-
         focusedFirestoreCollectionIndex ?: return
 
         val firestoreCollection =
             project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex]
         val dataTypeId =
-            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex].dataTypeId
+            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedFirestoreCollectionIndex]
+                .dataTypeId
         val dataType =
             project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
         Column(
@@ -636,9 +649,10 @@ private fun FirestoreCollectionRelationshipDetailContent(
                 addDataFieldDialogOpen = false
                 onAllDialogsClosed()
             }
-            val initialValue = indexOfDataFieldToBeEdited?.let {
-                dataType.fields[it]
-            }
+            val initialValue =
+                indexOfDataFieldToBeEdited?.let {
+                    dataType.fields[it]
+                }
             AddDataFieldDialog(
                 project = project,
                 initialValue = initialValue,
@@ -700,10 +714,11 @@ private fun FirestoreCollectionToDataTypeRelationshipDetail(
     focusedFirestoreCollectionIndex: Int?,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundContainerNeutral()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .backgroundContainerNeutral()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.weight(1f))
         FirestoreCollectionRelationshipDetailContent(
@@ -735,9 +750,10 @@ private fun DeleteFirestoreCollectionRelationshipDialog(
     ) {
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 300.dp, height = 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 300.dp, height = 160.dp)
+                        .padding(16.dp),
             ) {
                 Text(
                     text = stringResource(resource = Res.string.firestore_collection_delete_data_type_relationship_confirmation),
@@ -751,8 +767,9 @@ private fun DeleteFirestoreCollectionRelationshipDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text("Cancel")
                     }

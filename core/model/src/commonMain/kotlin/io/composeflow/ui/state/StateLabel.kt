@@ -23,23 +23,26 @@ fun StateLabel(
     enabled: Boolean = true,
     displayNameListAware: Boolean = true,
 ) {
-    val onClickModifier = if (onLabelClicked != null) {
-        Modifier.clickable {
-            onLabelClicked(state)
+    val onClickModifier =
+        if (onLabelClicked != null) {
+            Modifier.clickable {
+                onLabelClicked(state)
+            }
+        } else {
+            Modifier
         }
-    } else {
-        Modifier
-    }
-    val alphaModifier = if (enabled) {
-        Modifier
-    } else {
-        Modifier.alpha(0.4f)
-    }
+    val alphaModifier =
+        if (enabled) {
+            Modifier
+        } else {
+            Modifier.alpha(0.4f)
+        }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .then(onClickModifier)
-            .then(alphaModifier),
+        modifier =
+            modifier
+                .then(onClickModifier)
+                .then(alphaModifier),
     ) {
         Text(
             state.name,
@@ -48,7 +51,8 @@ fun StateLabel(
             modifier = Modifier.padding(end = 8.dp),
         )
         Text(
-            state.valueType(project)
+            state
+                .valueType(project)
                 .displayName(project = project, listAware = displayNameListAware),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.tertiary,
@@ -65,23 +69,26 @@ fun AssignablePropertyLabel(
     enabled: Boolean = true,
     displayNameListAware: Boolean = true,
 ) {
-    val onClickModifier = if (onLabelClicked != null) {
-        Modifier.clickable {
-            onLabelClicked(property)
+    val onClickModifier =
+        if (onLabelClicked != null) {
+            Modifier.clickable {
+                onLabelClicked(property)
+            }
+        } else {
+            Modifier
         }
-    } else {
-        Modifier
-    }
-    val alphaModifier = if (enabled) {
-        Modifier
-    } else {
-        Modifier.alpha(0.4f)
-    }
+    val alphaModifier =
+        if (enabled) {
+            Modifier
+        } else {
+            Modifier.alpha(0.4f)
+        }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .then(onClickModifier)
-            .then(alphaModifier),
+        modifier =
+            modifier
+                .then(onClickModifier)
+                .then(alphaModifier),
     ) {
         Text(
             property.displayText(project),
@@ -90,7 +97,8 @@ fun AssignablePropertyLabel(
             modifier = Modifier.padding(end = 8.dp),
         )
         Text(
-            property.valueType(project)
+            property
+                .valueType(project)
                 .displayName(project = project, listAware = displayNameListAware),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.tertiary,

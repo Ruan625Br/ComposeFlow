@@ -49,7 +49,7 @@ enum class TraitCategory(
      * For example, FAB, TopAppBar, Drawer, BottomAppBar, etc.
      */
     ScreenOnly(
-        tooltipResource = Res.string.palette_category_screen_elements_tooltip
+        tooltipResource = Res.string.palette_category_screen_elements_tooltip,
     ) {
         override fun displayName() = "Screen elements"
     },

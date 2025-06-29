@@ -88,7 +88,7 @@ fun WhereExpressionEditor(
             onFilterExpressionUpdated = onFilterExpressionUpdated,
             onRemoveFilter = {
                 onFilterExpressionUpdated(null)
-            }
+            },
         )
 
         if (openAddFilterMenu) {
@@ -104,7 +104,7 @@ fun WhereExpressionEditor(
                 },
                 onSingleFilterAdded = {
                     onFilterExpressionUpdated(SingleFilter())
-                }
+                },
             )
         }
     }

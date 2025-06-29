@@ -11,7 +11,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class FillMaxSizeTest {
-
     @Test
     fun toComposeCode_fillMaxSize() {
         val modifierList = listOf(ModifierWrapper.FillMaxSize())
@@ -22,8 +21,7 @@ class FillMaxSizeTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier
-                 .androidx.compose.foundation.layout.fillMaxSize(),"""
-                .trimForCompare(),
+                 .androidx.compose.foundation.layout.fillMaxSize(),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }
@@ -38,18 +36,18 @@ class FillMaxSizeTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier
-                 .androidx.compose.foundation.layout.fillMaxSize(fraction = 0.5f),"""
-                .trimForCompare(),
+                 .androidx.compose.foundation.layout.fillMaxSize(fraction = 0.5f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }
 
     @Test
     fun toComposeCode_withOtherModifier() {
-        val modifierList = listOf(
-            ModifierWrapper.Padding(8.dp),
-            ModifierWrapper.FillMaxSize(),
-        )
+        val modifierList =
+            listOf(
+                ModifierWrapper.Padding(8.dp),
+                ModifierWrapper.FillMaxSize(),
+            )
 
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -59,8 +57,7 @@ class FillMaxSizeTest {
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                    all = 8.androidx.compose.ui.unit.dp)
-                 .androidx.compose.foundation.layout.fillMaxSize(),"""
-                .trimForCompare(),
+                 .androidx.compose.foundation.layout.fillMaxSize(),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }

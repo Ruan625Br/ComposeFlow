@@ -6,8 +6,9 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ExtensionsTest {
-    private val json = Json.parseToJsonElement(
-        """
+    private val json =
+        Json.parseToJsonElement(
+            """
 {
   "total": 133,
   "total_pages": 7,
@@ -60,7 +61,7 @@ class ExtensionsTest {
   ]
 }
     """,
-    )
+        )
 
     @Test
     fun jsonElement_selectString_primitive_field() {

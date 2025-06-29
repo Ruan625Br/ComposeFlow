@@ -27,9 +27,10 @@ fun ComposeFlowReorderableItem(
         val backgroundModifier =
             if (isDragging) {
                 Modifier.background(
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(
-                        alpha = 0.8f,
-                    ),
+                    color =
+                        MaterialTheme.colorScheme.secondaryContainer.copy(
+                            alpha = 0.8f,
+                        ),
                 )
             } else {
                 Modifier
@@ -37,10 +38,11 @@ fun ComposeFlowReorderableItem(
         val clipShape =
             if (isDragging) RoundedCornerShape(16.dp) else RectangleShape
         Column(
-            modifier = Modifier
-                .clip(clipShape)
-                .shadow(elevation.value)
-                .then(backgroundModifier),
+            modifier =
+                Modifier
+                    .clip(clipShape)
+                    .shadow(elevation.value)
+                    .then(backgroundModifier),
         ) {
             content()
         }

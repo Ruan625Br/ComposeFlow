@@ -64,36 +64,39 @@ fun IssuesBadge(
 ) {
     var openIssuesPanel by remember { mutableStateOf(false) }
     Card(
-        colors = CardDefaults.cardColors().copy(
-            containerColor = if (issues.isEmpty()) ValidContainerColor else ErrorContainerColor,
-            contentColor = ContentColor
-        ),
-        modifier = Modifier.hoverIconClickable()
-            .clickable {
-                openIssuesPanel = true
-            }
+        colors =
+            CardDefaults.cardColors().copy(
+                containerColor = if (issues.isEmpty()) ValidContainerColor else ErrorContainerColor,
+                contentColor = ContentColor,
+            ),
+        modifier =
+            Modifier
+                .hoverIconClickable()
+                .clickable {
+                    openIssuesPanel = true
+                },
     ) {
         if (issues.isEmpty()) {
             ComposeFlowIcon(
                 imageVector = Icons.Outlined.Done,
                 contentDescription = "",
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             )
         } else {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
             ) {
                 Text(
                     text = issues.size.toString(),
                     style = MaterialTheme.typography.bodyMedium,
                     color = ContentColor,
-                    modifier = Modifier.padding(bottom = 2.dp)
+                    modifier = Modifier.padding(bottom = 2.dp),
                 )
                 Spacer(Modifier.size(4.dp))
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.BugReport,
-                    contentDescription = "Issues"
+                    contentDescription = "Issues",
                 )
             }
         }
@@ -127,9 +130,10 @@ private fun IssuesPanel(
         onDismissRequest = {
             onClosePanel()
         },
-        modifier = modifier
-            .width(420.dp)
-            .background(color = ContainerColor),
+        modifier =
+            modifier
+                .width(420.dp)
+                .background(color = ContainerColor),
     ) {
         if (issues.isEmpty()) {
             DropdownMenuItem(
@@ -139,7 +143,7 @@ private fun IssuesPanel(
                             imageVector = Icons.Outlined.Done,
                             contentDescription = "",
                             tint = ValidContainerColor,
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(28.dp),
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
@@ -149,30 +153,42 @@ private fun IssuesPanel(
                         )
                     }
                 },
-                onClick = onClosePanel
+                onClick = onClosePanel,
             )
         } else {
-            issues.sortedBy { it.issue.destination.destinationToNavigate().ordinal }
-                .groupBy { it.issue.destination }
+            issues
+                .sortedBy {
+                    it.issue.destination
+                        .destinationToNavigate()
+                        .ordinal
+                }.groupBy { it.issue.destination }
                 .forEach { destinationEntry ->
                     when (destinationEntry.key.destinationToNavigate()) {
                         TopLevelDestination.UiBuilder -> {
-
-                            destinationEntry.value.groupBy { (it.destinationContext as DestinationContext.UiBuilderScreen).canvasEditableId }
-                                .entries.toList().forEach {
+                            destinationEntry.value
+                                .groupBy { (it.destinationContext as DestinationContext.UiBuilderScreen).canvasEditableId }
+                                .entries
+                                .toList()
+                                .forEach {
                                     val canvasEditable = project.findCanvasEditableOrNull(it.key)
 
                                     canvasEditable?.let {
                                         Row(
                                             verticalAlignment = Alignment.CenterVertically,
-                                            modifier = Modifier.fillMaxWidth()
-                                                .height(36.dp)
-                                                .padding(start = 8.dp)
+                                            modifier =
+                                                Modifier
+                                                    .fillMaxWidth()
+                                                    .height(36.dp)
+                                                    .padding(start = 8.dp),
                                         ) {
                                             ComposeFlowIcon(
-                                                imageVector = if (canvasEditable is Screen) Icons.AutoMirrored.Outlined.Note else
-                                                    ComposeFlowIcons.HttpRequestsFiletype,
-                                                contentDescription = ""
+                                                imageVector =
+                                                    if (canvasEditable is Screen) {
+                                                        Icons.AutoMirrored.Outlined.Note
+                                                    } else {
+                                                        ComposeFlowIcons.HttpRequestsFiletype
+                                                    },
+                                                contentDescription = "",
                                             )
                                             Spacer(Modifier.width(8.dp))
                                             Text(
@@ -207,7 +223,8 @@ private fun IssuesPanel(
                                                         )
                                                         Spacer(Modifier.width(8.dp))
 
-                                                        trackableIssue.issue.issueContextLabel()
+                                                        trackableIssue.issue
+                                                            .issueContextLabel()
                                                             ?.let { label ->
                                                                 Text(
                                                                     text = label,
@@ -217,14 +234,15 @@ private fun IssuesPanel(
                                                                 Spacer(Modifier.width(8.dp))
                                                             }
                                                         Text(
-                                                            text = trackableIssue.issue.errorMessage(
-                                                                project
-                                                            ),
+                                                            text =
+                                                                trackableIssue.issue.errorMessage(
+                                                                    project,
+                                                                ),
                                                             style = MaterialTheme.typography.titleSmall,
                                                             color = MaterialTheme.colorScheme.error,
                                                             maxLines = 1,
                                                             overflow = TextOverflow.Ellipsis,
-                                                            modifier = Modifier.weight(1f)
+                                                            modifier = Modifier.weight(1f),
                                                         )
                                                     }
                                                 }
@@ -232,7 +250,7 @@ private fun IssuesPanel(
                                                 onClosePanel()
                                                 coroutineScope.launch {
                                                     trackableIssue.onNavigateToTopLevelDestination(
-                                                        navigator
+                                                        navigator,
                                                     )
                                                 }
                                                 onSetPendingFocus(
@@ -243,25 +261,28 @@ private fun IssuesPanel(
                                         }
                                     }
                                 }
-
                         }
 
                         TopLevelDestination.ApiEditor -> {
                             destinationEntry.value.forEach { trackableIssue ->
 
                                 val api =
-                                    project.apiHolder.findApiDefinitionOrNull((trackableIssue.destinationContext as DestinationContext.ApiEditorScreen).apiId)
+                                    project.apiHolder.findApiDefinitionOrNull(
+                                        (trackableIssue.destinationContext as DestinationContext.ApiEditorScreen).apiId,
+                                    )
 
                                 api?.let {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier.fillMaxWidth()
-                                            .height(36.dp)
-                                            .padding(start = 8.dp)
+                                        modifier =
+                                            Modifier
+                                                .fillMaxWidth()
+                                                .height(36.dp)
+                                                .padding(start = 8.dp),
                                     ) {
                                         ComposeFlowIcon(
                                             imageVector = ComposeFlowIcons.HttpRequestsFiletype,
-                                            contentDescription = ""
+                                            contentDescription = "",
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         Text(
@@ -288,7 +309,8 @@ private fun IssuesPanel(
                                                     modifier = Modifier.padding(start = 8.dp),
                                                 )
                                                 Spacer(Modifier.width(8.dp))
-                                                trackableIssue.issue.issueContextLabel()
+                                                trackableIssue.issue
+                                                    .issueContextLabel()
                                                     ?.let { label ->
                                                         Text(
                                                             text = label,
@@ -303,7 +325,7 @@ private fun IssuesPanel(
                                                     color = MaterialTheme.colorScheme.error,
                                                     maxLines = 1,
                                                     overflow = TextOverflow.Ellipsis,
-                                                    modifier = Modifier.weight(1f)
+                                                    modifier = Modifier.weight(1f),
                                                 )
                                             }
                                         }

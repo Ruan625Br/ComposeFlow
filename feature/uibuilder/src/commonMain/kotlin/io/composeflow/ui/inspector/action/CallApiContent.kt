@@ -49,9 +49,10 @@ fun CallApiActionContent(
     Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                callApiActionsOpened = !callApiActionsOpened
-            },
+            modifier =
+                Modifier.clickable {
+                    callApiActionsOpened = !callApiActionsOpened
+                },
         ) {
             Text(
                 text = "Call API",
@@ -70,25 +71,25 @@ fun CallApiActionContent(
             project.apiHolder.apiDefinitions.forEach { api ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                CallApi(apiId = api.id)
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    CallApi(apiId = api.id),
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is CallApi &&
                                         actionInEdit.apiId == api.id
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = api.name,
@@ -119,10 +120,11 @@ fun CallApiActionDetail(
             StringProperty.StringIntrinsicValue().Editor(
                 project = project,
                 node = composeNode,
-                initialProperty = initialParamsMap[parameter.parameterId]
-                    ?: StringProperty.StringIntrinsicValue(
-                        parameter.defaultValue
-                    ),
+                initialProperty =
+                    initialParamsMap[parameter.parameterId]
+                        ?: StringProperty.StringIntrinsicValue(
+                            parameter.defaultValue,
+                        ),
                 label = parameter.variableName,
                 onValidPropertyChanged = { newProperty, _ ->
                     initialParamsMap[parameter.parameterId] = newProperty
@@ -161,7 +163,7 @@ fun CallApiActionDetail(
             },
             onCloseDialog = {
                 closeDialog()
-            }
+            },
         )
     }
 }

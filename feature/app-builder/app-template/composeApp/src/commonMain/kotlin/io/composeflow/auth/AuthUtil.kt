@@ -12,15 +12,14 @@ import kotlinx.coroutines.flow.map
 val LocalAuthenticatedUser = compositionLocalOf<FirebaseUserWrapper?> { null }
 
 @Composable
-fun ProvideAuthenticatedUser(
-    content: @Composable () -> Unit,
-) {
+fun ProvideAuthenticatedUser(content: @Composable () -> Unit) {
     // For some reason, authStateChanged is constantly invoked on android.
     // To prevent constant recomposition, create a wrapper for FirebaseUser
-    val authenticatedUser = Firebase.auth.authStateChanged
-        .map { it?.toWrapper() }
-        .distinctUntilChanged()
-        .collectAsState(null)
+    val authenticatedUser =
+        Firebase.auth.authStateChanged
+            .map { it?.toWrapper() }
+            .distinctUntilChanged()
+            .collectAsState(null)
     CompositionLocalProvider(LocalAuthenticatedUser provides authenticatedUser.value) {
         content()
     }

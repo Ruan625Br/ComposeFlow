@@ -14,7 +14,6 @@ import kotlin.test.assertTrue
  * Verifies that ListAppStatesArgs and GetAppStateArgs properly return data to the LLM.
  */
 class AppStateToolsTest {
-
     private lateinit var project: Project
     private lateinit var toolDispatcher: ToolDispatcher
 
@@ -33,9 +32,9 @@ class AppStateToolsTest {
     fun testListAppStatesArgs_EmptyProject() {
         // Test listing app states in an empty project
         val toolArgs = ToolArgs.ListAppStatesArgs()
-        
+
         executeToolAndSetStatus(toolArgs)
-        
+
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
         assertTrue(toolArgs.result.contains("[]") || toolArgs.result.isBlank()) // Empty list in YAML format
     }
@@ -45,16 +44,16 @@ class AppStateToolsTest {
         // Add some app states to the project
         val stringState1 = AppState.StringAppState(name = "userInput", defaultValue = "Hello")
         val stringState2 = AppState.StringAppState(name = "counter", defaultValue = "0")
-        
+
         project.globalStateHolder.addState(stringState1)
         project.globalStateHolder.addState(stringState2)
-        
+
         val toolArgs = ToolArgs.ListAppStatesArgs()
-        
+
         executeToolAndSetStatus(toolArgs)
-        
+
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
-        
+
         // Result should contain YAML representation of the states
         assertTrue(toolArgs.result.contains("userInput") || toolArgs.result.contains("\"userInput\""))
         assertTrue(toolArgs.result.contains("counter") || toolArgs.result.contains("\"counter\""))
@@ -66,13 +65,13 @@ class AppStateToolsTest {
         // Add an app state to the project
         val stringState = AppState.StringAppState(name = "testState", defaultValue = "test value")
         project.globalStateHolder.addState(stringState)
-        
+
         val toolArgs = ToolArgs.GetAppStateArgs(appStateId = stringState.id)
-        
+
         executeToolAndSetStatus(toolArgs)
-        
+
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
-        
+
         // Result should contain YAML representation of the specific state
         assertTrue(toolArgs.result.contains("testState") || toolArgs.result.contains("\"testState\""))
         assertTrue(toolArgs.result.contains("test value") || toolArgs.result.contains("\"test value\""))
@@ -82,11 +81,11 @@ class AppStateToolsTest {
     fun testGetAppStateArgs_NonExistentState() {
         // Try to get a state that doesn't exist
         val toolArgs = ToolArgs.GetAppStateArgs(appStateId = "non-existent-id")
-        
+
         executeToolAndSetStatus(toolArgs)
-        
+
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
-        
+
         // Result should indicate the state was not found
         assertTrue(toolArgs.result.contains("not found") || toolArgs.result.contains("null"))
     }
@@ -95,14 +94,14 @@ class AppStateToolsTest {
     fun testToolArgsResultProperty_IsModifiable() {
         // Test that the result property can be modified (was previously val)
         val toolArgs = ToolArgs.ListAppStatesArgs()
-        
+
         // Initial value
         assertEquals("Successfully executed.", toolArgs.result)
-        
+
         // Should be able to modify
         toolArgs.result = "Custom result"
         assertEquals("Custom result", toolArgs.result)
-        
+
         // Should be able to modify again
         toolArgs.result = "Another result"
         assertEquals("Another result", toolArgs.result)
@@ -111,31 +110,31 @@ class AppStateToolsTest {
     @Test
     fun testIntegrationFlow_ListThenGet() {
         // Test a realistic scenario: list states, then get a specific one
-        
+
         // Add app states
         val state1 = AppState.StringAppState(name = "userName", defaultValue = "Anonymous")
         val state2 = AppState.StringAppState(name = "theme", defaultValue = "light")
         project.globalStateHolder.addState(state1)
         project.globalStateHolder.addState(state2)
-        
+
         // First, list all states
         val listToolArgs = ToolArgs.ListAppStatesArgs()
         executeToolAndSetStatus(listToolArgs)
-        
+
         assertEquals(ToolExecutionStatus.Success, listToolArgs.status)
         val listResult = listToolArgs.result
-        
+
         // Result should contain both states
         assertTrue(listResult.contains("userName") || listResult.contains("\"userName\""))
         assertTrue(listResult.contains("theme") || listResult.contains("\"theme\""))
-        
+
         // Then, get a specific state
         val getToolArgs = ToolArgs.GetAppStateArgs(appStateId = state1.id)
         executeToolAndSetStatus(getToolArgs)
-        
+
         assertEquals(ToolExecutionStatus.Success, getToolArgs.status)
         val getResult = getToolArgs.result
-        
+
         // Result should contain the specific state
         assertTrue(getResult.contains("userName") || getResult.contains("\"userName\""))
         assertTrue(getResult.contains("Anonymous") || getResult.contains("\"Anonymous\""))

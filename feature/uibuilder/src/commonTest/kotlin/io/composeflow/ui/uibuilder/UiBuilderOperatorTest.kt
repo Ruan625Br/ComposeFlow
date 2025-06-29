@@ -13,7 +13,6 @@ import io.composeflow.serializer.yamlSerializer
 import kotlinx.serialization.encodeToString
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
@@ -24,7 +23,6 @@ import kotlin.test.assertTrue
  * without making assumptions about internal implementation details.
  */
 class UiBuilderOperatorTest {
-
     private lateinit var uiBuilderOperator: UiBuilderOperator
     private lateinit var project: Project
     private lateinit var screen: Screen
@@ -40,25 +38,15 @@ class UiBuilderOperatorTest {
 
     // ========== Helper Methods ==========
 
-    private fun createColumnNode(): ComposeNode {
-        return ColumnTrait().defaultComposeNode(project)
-    }
+    private fun createColumnNode(): ComposeNode = ColumnTrait().defaultComposeNode(project)
 
-    private fun createButtonNode(): ComposeNode {
-        return ButtonTrait().defaultComposeNode(project)
-    }
+    private fun createButtonNode(): ComposeNode = ButtonTrait().defaultComposeNode(project)
 
-    private fun createTextNode(): ComposeNode {
-        return TextTrait().defaultComposeNode(project)
-    }
+    private fun createTextNode(): ComposeNode = TextTrait().defaultComposeNode(project)
 
-    private fun createFabNode(): ComposeNode {
-        return FabTrait().defaultComposeNode(project)
-    }
+    private fun createFabNode(): ComposeNode = FabTrait().defaultComposeNode(project)
 
-    private fun createPaddingModifier(): ModifierWrapper {
-        return ModifierWrapper.Padding(16.dp)
-    }
+    private fun createPaddingModifier(): ModifierWrapper = ModifierWrapper.Padding(16.dp)
 
     // ========== Basic Structure Tests ==========
 
@@ -89,11 +77,12 @@ class UiBuilderOperatorTest {
     fun testOnPreAddComposeNodeToContainerNode_ContainerNotFound() {
         val nodeToAdd = createButtonNode()
 
-        val result = uiBuilderOperator.onPreAddComposeNodeToContainerNode(
-            project = project,
-            containerNodeId = "non-existent-id",
-            composeNode = nodeToAdd
-        )
+        val result =
+            uiBuilderOperator.onPreAddComposeNodeToContainerNode(
+                project = project,
+                containerNodeId = "non-existent-id",
+                composeNode = nodeToAdd,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("Container node with ID non-existent-id not found"))
@@ -105,11 +94,12 @@ class UiBuilderOperatorTest {
         rootNode.addChild(containerNode)
         val nodeToAdd = createButtonNode()
 
-        val result = uiBuilderOperator.onPreAddComposeNodeToContainerNode(
-            project = project,
-            containerNodeId = containerNode.id,
-            composeNode = nodeToAdd
-        )
+        val result =
+            uiBuilderOperator.onPreAddComposeNodeToContainerNode(
+                project = project,
+                containerNodeId = containerNode.id,
+                composeNode = nodeToAdd,
+            )
 
         assertTrue(result.errorMessages.isEmpty())
     }
@@ -121,12 +111,13 @@ class UiBuilderOperatorTest {
         val buttonNode = createButtonNode()
         val buttonYaml = yamlSerializer.encodeToString(buttonNode)
 
-        val result = uiBuilderOperator.onAddComposeNodeToContainerNode(
-            project = project,
-            containerNodeId = containerNode.id,
-            composeNodeYaml = buttonYaml,
-            indexToDrop = 0
-        )
+        val result =
+            uiBuilderOperator.onAddComposeNodeToContainerNode(
+                project = project,
+                containerNodeId = containerNode.id,
+                composeNodeYaml = buttonYaml,
+                indexToDrop = 0,
+            )
 
         // The method returns an empty EventResult on success
         assertTrue(result.errorMessages.isEmpty())
@@ -149,10 +140,11 @@ class UiBuilderOperatorTest {
 
     @Test
     fun testOnRemoveComposeNode_NodeNotFound() {
-        val result = uiBuilderOperator.onRemoveComposeNode(
-            project = project,
-            composeNodeId = "non-existent-id"
-        )
+        val result =
+            uiBuilderOperator.onRemoveComposeNode(
+                project = project,
+                composeNodeId = "non-existent-id",
+            )
 
         // The implementation doesn't check for existence in the error path
         assertTrue(result.errorMessages.isEmpty())
@@ -163,10 +155,11 @@ class UiBuilderOperatorTest {
         val fabNode = createFabNode()
         screen.fabNode.value = fabNode
 
-        val result = uiBuilderOperator.onRemoveComposeNode(
-            project = project,
-            composeNodeId = fabNode.id
-        )
+        val result =
+            uiBuilderOperator.onRemoveComposeNode(
+                project = project,
+                composeNodeId = fabNode.id,
+            )
 
         assertTrue(result.errorMessages.isEmpty())
         assertNull(screen.fabNode.value)
@@ -179,11 +172,12 @@ class UiBuilderOperatorTest {
         val modifier = createPaddingModifier()
         val modifierYaml = yamlSerializer.encodeToString(modifier)
 
-        val result = uiBuilderOperator.onAddModifier(
-            project = project,
-            composeNodeId = "non-existent-id",
-            modifierYaml = modifierYaml
-        )
+        val result =
+            uiBuilderOperator.onAddModifier(
+                project = project,
+                composeNodeId = "non-existent-id",
+                modifierYaml = modifierYaml,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("not found"))
@@ -194,12 +188,13 @@ class UiBuilderOperatorTest {
         val modifier = createPaddingModifier()
         val modifierYaml = yamlSerializer.encodeToString(modifier)
 
-        val result = uiBuilderOperator.onUpdateModifier(
-            project = project,
-            composeNodeId = "non-existent-id",
-            index = 0,
-            modifierYaml = modifierYaml
-        )
+        val result =
+            uiBuilderOperator.onUpdateModifier(
+                project = project,
+                composeNodeId = "non-existent-id",
+                index = 0,
+                modifierYaml = modifierYaml,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("not found"))
@@ -212,12 +207,13 @@ class UiBuilderOperatorTest {
         val modifier = createPaddingModifier()
         val modifierYaml = yamlSerializer.encodeToString(modifier)
 
-        val result = uiBuilderOperator.onUpdateModifier(
-            project = project,
-            composeNodeId = node.id,
-            index = 5, // Invalid index for empty modifier list
-            modifierYaml = modifierYaml
-        )
+        val result =
+            uiBuilderOperator.onUpdateModifier(
+                project = project,
+                composeNodeId = node.id,
+                index = 5, // Invalid index for empty modifier list
+                modifierYaml = modifierYaml,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("Invalid modifier index"))
@@ -225,11 +221,12 @@ class UiBuilderOperatorTest {
 
     @Test
     fun testOnRemoveModifier_NodeNotFound() {
-        val result = uiBuilderOperator.onRemoveModifier(
-            project = project,
-            composeNodeId = "non-existent-id",
-            index = 0
-        )
+        val result =
+            uiBuilderOperator.onRemoveModifier(
+                project = project,
+                composeNodeId = "non-existent-id",
+                index = 0,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("not found"))
@@ -239,15 +236,16 @@ class UiBuilderOperatorTest {
     fun testOnRemoveModifier_InvalidIndex() {
         val node = createButtonNode()
         rootNode.addChild(node)
-        
+
         // Clear any default modifiers to ensure we're testing with no modifiers
         node.modifierList.clear()
 
-        val result = uiBuilderOperator.onRemoveModifier(
-            project = project,
-            composeNodeId = node.id,
-            index = 0 // No modifiers exist
-        )
+        val result =
+            uiBuilderOperator.onRemoveModifier(
+                project = project,
+                composeNodeId = node.id,
+                index = 0, // No modifiers exist
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("Invalid modifier index"))
@@ -255,12 +253,13 @@ class UiBuilderOperatorTest {
 
     @Test
     fun testOnSwapModifiers_NodeNotFound() {
-        val result = uiBuilderOperator.onSwapModifiers(
-            project = project,
-            composeNodeId = "non-existent-id",
-            fromIndex = 0,
-            toIndex = 1
-        )
+        val result =
+            uiBuilderOperator.onSwapModifiers(
+                project = project,
+                composeNodeId = "non-existent-id",
+                fromIndex = 0,
+                toIndex = 1,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("not found"))
@@ -273,12 +272,13 @@ class UiBuilderOperatorTest {
         val modifier = createPaddingModifier()
         node.modifierList.add(modifier)
 
-        val result = uiBuilderOperator.onSwapModifiers(
-            project = project,
-            composeNodeId = node.id,
-            fromIndex = 0,
-            toIndex = 5 // Invalid index
-        )
+        val result =
+            uiBuilderOperator.onSwapModifiers(
+                project = project,
+                composeNodeId = node.id,
+                fromIndex = 0,
+                toIndex = 5, // Invalid index
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("Invalid modifier indices"))
@@ -291,11 +291,12 @@ class UiBuilderOperatorTest {
         val container = createColumnNode()
         rootNode.addChild(container)
 
-        val result = uiBuilderOperator.onPreMoveComposeNodeToPosition(
-            project = project,
-            composeNodeId = "non-existent-id",
-            containerNodeId = container.id
-        )
+        val result =
+            uiBuilderOperator.onPreMoveComposeNodeToPosition(
+                project = project,
+                composeNodeId = "non-existent-id",
+                containerNodeId = container.id,
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("not found"))
@@ -306,11 +307,12 @@ class UiBuilderOperatorTest {
         val nodeToMove = createButtonNode()
         rootNode.addChild(nodeToMove)
 
-        val result = uiBuilderOperator.onPreMoveComposeNodeToPosition(
-            project = project,
-            composeNodeId = nodeToMove.id,
-            containerNodeId = "non-existent-id"
-        )
+        val result =
+            uiBuilderOperator.onPreMoveComposeNodeToPosition(
+                project = project,
+                composeNodeId = nodeToMove.id,
+                containerNodeId = "non-existent-id",
+            )
 
         assertFalse(result.errorMessages.isEmpty())
         assertTrue(result.errorMessages.first().contains("not found"))
@@ -320,11 +322,12 @@ class UiBuilderOperatorTest {
 
     @Test
     fun testInvalidYamlHandling() {
-        val result = uiBuilderOperator.onAddModifier(
-            project = project,
-            composeNodeId = "some-id",
-            modifierYaml = "invalid-yaml-content"
-        )
+        val result =
+            uiBuilderOperator.onAddModifier(
+                project = project,
+                composeNodeId = "some-id",
+                modifierYaml = "invalid-yaml-content",
+            )
 
         // Should have error messages due to invalid YAML or missing node
         assertFalse(result.errorMessages.isEmpty())
@@ -336,7 +339,7 @@ class UiBuilderOperatorTest {
     fun testModifierSerialization() {
         val modifier = createPaddingModifier()
         val yaml = yamlSerializer.encodeToString(modifier)
-        
+
         // Basic check that serialization produces non-empty result
         assertTrue(yaml.isNotEmpty())
         assertTrue(yaml.contains("Padding"))
@@ -346,7 +349,7 @@ class UiBuilderOperatorTest {
     fun testNodeSerialization() {
         val buttonNode = createButtonNode()
         val yaml = yamlSerializer.encodeToString(buttonNode)
-        
+
         // Basic check that serialization produces non-empty result
         assertTrue(yaml.isNotEmpty())
         assertTrue(yaml.contains("Button"))

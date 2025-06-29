@@ -7,11 +7,14 @@ import io.composeflow.model.parameter.IconTrait
  * Interface that defines specific functionalities for TopAppBar
  */
 interface BottomAppBarNode {
-
     var self: ComposeNode
+
     fun getBottomAppBarFab(): ComposeNode
+
     fun addBottomAppbarActionIcon()
+
     fun removeBottomAppBarActionIcon(i: Int)
+
     fun getBottomAppBarActionIcons(): List<ComposeNode>
 }
 

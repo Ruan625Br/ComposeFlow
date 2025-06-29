@@ -33,7 +33,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 data class Library(
     val name: String,
     val group: String,
-    val version: String
+    val version: String,
 )
 
 @Composable
@@ -55,52 +55,54 @@ fun LicenseDialog(
         Surface(
             color = MaterialTheme.colorScheme.surfaceContainer,
             shape = MaterialTheme.shapes.medium,
-            modifier = Modifier.size(width = 600.dp, height = 500.dp)
+            modifier = Modifier.size(width = 600.dp, height = 500.dp),
         ) {
             Column(
-                modifier = Modifier.padding(24.dp)
+                modifier = Modifier.padding(24.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.open_source_licenses),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp)
+                    modifier = Modifier.padding(bottom = 16.dp),
                 )
 
                 Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxWidth()
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxWidth(),
                 ) {
                     val scrollState = rememberScrollState()
 
                     Column(
-                        modifier = Modifier
-                            .verticalScroll(scrollState)
-                            .fillMaxWidth()
-                            .padding(end = 8.dp)
+                        modifier =
+                            Modifier
+                                .verticalScroll(scrollState)
+                                .fillMaxWidth()
+                                .padding(end = 8.dp),
                     ) {
                         libraries.forEachIndexed { index, library ->
                             if (index > 0) {
                                 HorizontalDivider(
                                     modifier = Modifier.padding(vertical = 8.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant
+                                    color = MaterialTheme.colorScheme.outlineVariant,
                                 )
                             }
 
                             Column(
-                                modifier = Modifier.fillMaxWidth()
+                                modifier = Modifier.fillMaxWidth(),
                             ) {
                                 Text(
                                     text = library.name,
                                     style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
                                 )
                                 Text(
                                     text = "${library.group}:${library.version}",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    modifier = Modifier.padding(top = 2.dp)
+                                    modifier = Modifier.padding(top = 2.dp),
                                 )
                             }
                         }
@@ -108,15 +110,16 @@ fun LicenseDialog(
 
                     VerticalScrollbar(
                         modifier = Modifier.align(Alignment.CenterEnd),
-                        adapter = rememberScrollbarAdapter(scrollState)
+                        adapter = rememberScrollbarAdapter(scrollState),
                     )
                 }
 
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 16.dp),
-                    horizontalArrangement = Arrangement.End
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(onClick = onCloseClick) {
                         Text(stringResource(Res.string.close))
@@ -130,22 +133,23 @@ fun LicenseDialog(
 @Composable
 private fun ThemedLicenseDialogPreview(useDarkTheme: Boolean) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
-        val sampleLibraries = listOf(
-            Library("Compose Multiplatform", "org.jetbrains.compose", "1.5.11"),
-            Library("Kotlin", "org.jetbrains.kotlin", "1.9.21"),
-            Library("Ktor Client", "io.ktor", "2.3.7"),
-            Library("Kotlinx Serialization", "org.jetbrains.kotlinx", "1.6.2"),
-            Library("PreCompose", "moe.tlaster", "1.5.10"),
-            Library("KotlinPoet", "com.squareup", "1.15.3"),
-            Library("Koin", "io.insert-koin", "3.5.3"),
-            Library("Material3", "androidx.compose.material3", "1.5.4"),
-            Library("Reorderable", "org.burnoutcrew.reorderable", "0.9.6"),
-            Library("Color Picker", "com.godaddy.android", "1.0.0")
-        )
-        
+        val sampleLibraries =
+            listOf(
+                Library("Compose Multiplatform", "org.jetbrains.compose", "1.5.11"),
+                Library("Kotlin", "org.jetbrains.kotlin", "1.9.21"),
+                Library("Ktor Client", "io.ktor", "2.3.7"),
+                Library("Kotlinx Serialization", "org.jetbrains.kotlinx", "1.6.2"),
+                Library("PreCompose", "moe.tlaster", "1.5.10"),
+                Library("KotlinPoet", "com.squareup", "1.15.3"),
+                Library("Koin", "io.insert-koin", "3.5.3"),
+                Library("Material3", "androidx.compose.material3", "1.5.4"),
+                Library("Reorderable", "org.burnoutcrew.reorderable", "0.9.6"),
+                Library("Color Picker", "com.godaddy.android", "1.0.0"),
+            )
+
         LicenseDialog(
             libraries = sampleLibraries,
-            onCloseClick = {}
+            onCloseClick = {},
         )
     }
 }
@@ -165,14 +169,15 @@ fun LicenseDialogPreview_Dark() {
 @Composable
 private fun ThemedLicenseDialogFewItemsPreview(useDarkTheme: Boolean) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
-        val sampleLibraries = listOf(
-            Library("Compose Multiplatform", "org.jetbrains.compose", "1.5.11"),
-            Library("Kotlin", "org.jetbrains.kotlin", "1.9.21")
-        )
-        
+        val sampleLibraries =
+            listOf(
+                Library("Compose Multiplatform", "org.jetbrains.compose", "1.5.11"),
+                Library("Kotlin", "org.jetbrains.kotlin", "1.9.21"),
+            )
+
         LicenseDialog(
             libraries = sampleLibraries,
-            onCloseClick = {}
+            onCloseClick = {},
         )
     }
 }

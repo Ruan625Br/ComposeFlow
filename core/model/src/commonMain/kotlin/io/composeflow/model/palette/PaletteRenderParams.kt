@@ -8,14 +8,12 @@ data class PaletteRenderParams(
      *  set to `true` for the rest of the items.
      */
     val isShadowNode: Boolean = false,
-
     /**
      *  isThumbnail Set to `true` if this node is rendered as a thumbnail (such as thumbnail
      *  in the new screen dialog). Certain features need to be disabled (such as scrolling in a
      *  LazyList)
      */
     val isThumbnail: Boolean = false,
-
     /**
      * Show borders for all the composables dropped in the canvas.
      */

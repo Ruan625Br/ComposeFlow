@@ -7,7 +7,6 @@ import org.junit.Test
 import kotlin.test.assertTrue
 
 class PaletteNodeTest {
-
     @Test
     fun text_verify_not_having_any_constrains() {
         assertTrue(TextTrait().defaultConstraints().isEmpty())
@@ -17,11 +16,11 @@ class PaletteNodeTest {
     fun lazyColumn_verify_having_infiniteScroll_constraints() {
         assertTrue(
             Constraint.InfiniteScroll(Orientation.Vertical)
-                    in LazyColumnTrait().defaultConstraints(),
+                in LazyColumnTrait().defaultConstraints(),
         )
         assertFalse(
             Constraint.InfiniteScroll(Orientation.Horizontal)
-                    in LazyColumnTrait().defaultConstraints(),
+                in LazyColumnTrait().defaultConstraints(),
         )
     }
 }

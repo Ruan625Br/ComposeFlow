@@ -7,7 +7,6 @@ import io.composeflow.model.project.component.ComponentId
 import io.composeflow.model.project.findComponentOrNull
 
 sealed interface ComponentHandler {
-
     var self: ComposeNode
 
     /**
@@ -18,20 +17,25 @@ sealed interface ComponentHandler {
      */
     fun createComponentWrapperNode(componentId: ComponentId): ComposeNode
 
-    fun getComponentRootNode(project: Project, componentId: ComponentId): ComposeNode?
+    fun getComponentRootNode(
+        project: Project,
+        componentId: ComponentId,
+    ): ComposeNode?
 }
 
 class ComponentHandlerImpl : ComponentHandler {
     override lateinit var self: ComposeNode
 
-    override fun createComponentWrapperNode(componentId: ComponentId): ComposeNode {
-        return ComposeNode(
+    override fun createComponentWrapperNode(componentId: ComponentId): ComposeNode =
+        ComposeNode(
             componentId = componentId,
             trait = mutableStateOf(ComponentTrait()),
         )
-    }
 
-    override fun getComponentRootNode(project: Project, componentId: ComponentId): ComposeNode? {
+    override fun getComponentRootNode(
+        project: Project,
+        componentId: ComponentId,
+    ): ComposeNode? {
         val component = project.findComponentOrNull(componentId)
         val root = component?.componentRoot?.value?.copyExceptId()
         root?.setIsPartOfComponentRecursively(value = true)

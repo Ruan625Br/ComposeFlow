@@ -79,9 +79,10 @@ private fun PopupContent(
 
         Card {
             Column(
-                modifier = modifier
-                    .width(IntrinsicSize.Max)
-                    .verticalScroll(scrollState),
+                modifier =
+                    modifier
+                        .width(IntrinsicSize.Max)
+                        .verticalScroll(scrollState),
             ) {
                 content()
             }

@@ -19,53 +19,54 @@ import kotlinx.serialization.json.Json.Default.parseToJsonElement
 import kotlinx.serialization.json.JsonElement
 
 class ApiCallRepository(
-    private val client: HttpClient = HttpClient(CIO) {
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    prettyPrint = true
-                    isLenient = true
-                },
-            )
-        }
-    },
-) {
-
-    fun makeApiCall(
-        apiDefinition: ApiDefinition,
-    ): Flow<JsonElement> = flow {
-        val response = client.request(apiDefinition.url) {
-            method = when (apiDefinition.method) {
-                Method.Get -> HttpMethod.Get
-                Method.Post -> HttpMethod.Post
-                Method.Put -> HttpMethod.Put
-                Method.Delete -> HttpMethod.Delete
-                Method.Patch -> HttpMethod.Patch
+    private val client: HttpClient =
+        HttpClient(CIO) {
+            install(ContentNegotiation) {
+                json(
+                    Json {
+                        prettyPrint = true
+                        isLenient = true
+                    },
+                )
             }
-            url {
-                headers {
-                    apiDefinition.headers.forEach {
-                        append(it.first, it.second.asStringValue())
-                    }
-                    when (val authorization = apiDefinition.authorization) {
-                        is Authorization.BasicAuth -> {
-                            authorization.makeAuthorizationHeader()?.let {
-                                append(HttpHeaders.Authorization, it)
+        },
+) {
+    fun makeApiCall(apiDefinition: ApiDefinition): Flow<JsonElement> =
+        flow {
+            val response =
+                client.request(apiDefinition.url) {
+                    method =
+                        when (apiDefinition.method) {
+                            Method.Get -> HttpMethod.Get
+                            Method.Post -> HttpMethod.Post
+                            Method.Put -> HttpMethod.Put
+                            Method.Delete -> HttpMethod.Delete
+                            Method.Patch -> HttpMethod.Patch
+                        }
+                    url {
+                        headers {
+                            apiDefinition.headers.forEach {
+                                append(it.first, it.second.asStringValue())
+                            }
+                            when (val authorization = apiDefinition.authorization) {
+                                is Authorization.BasicAuth -> {
+                                    authorization.makeAuthorizationHeader()?.let {
+                                        append(HttpHeaders.Authorization, it)
+                                    }
+                                }
+                            }
+                        }
+                        parameters.apply {
+                            apiDefinition.queryParameters.forEach {
+                                append(it.first, it.second.asStringValue())
                             }
                         }
                     }
-                }
-                parameters.apply {
-                    apiDefinition.queryParameters.forEach {
-                        append(it.first, it.second.asStringValue())
+                    if (apiDefinition.method in listOf(Method.Post, Method.Put, Method.Patch)) {
+//                setBody(apiDefinition.body) // Assuming `body` is of type `JsonElement`
                     }
                 }
-            }
-            if (apiDefinition.method in listOf(Method.Post, Method.Put, Method.Patch)) {
-//                setBody(apiDefinition.body) // Assuming `body` is of type `JsonElement`
-            }
+            val json: JsonElement = parseToJsonElement(response.bodyAsText())
+            emit(json)
         }
-        val json: JsonElement = parseToJsonElement(response.bodyAsText())
-        emit(json)
-    }
 }

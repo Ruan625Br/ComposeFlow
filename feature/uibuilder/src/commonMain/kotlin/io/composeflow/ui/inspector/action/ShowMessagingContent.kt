@@ -42,9 +42,10 @@ fun ShowMessagingContent(
     Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                showMessagingActionsOpened = !showMessagingActionsOpened
-            },
+            modifier =
+                Modifier.clickable {
+                    showMessagingActionsOpened = !showMessagingActionsOpened
+                },
         ) {
             Text(
                 text = "Show messaging",
@@ -63,25 +64,25 @@ fun ShowMessagingContent(
             ShowMessaging.entries().forEach { showMessagingAction ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                showMessagingAction
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    showMessagingAction,
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is ShowMessaging &&
                                         actionInEdit.name == showMessagingAction.name
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = showMessagingAction.name,

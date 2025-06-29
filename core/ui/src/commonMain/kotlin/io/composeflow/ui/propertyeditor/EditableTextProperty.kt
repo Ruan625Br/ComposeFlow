@@ -90,27 +90,30 @@ fun EditableTextProperty(
                 )
             }
         },
-        label = if (label.isNotEmpty()) {
-            {
-                Text(
-                    text = label,
-                    modifier = Modifier.alpha(0.7f),
-                    style = MaterialTheme.typography.labelSmall,
-                )
-            }
-        } else {
-            null
-        },
-        textStyle = if (errorMessage != null) {
-            MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error)
-        } else if (valueSetFromVariable) {
-            MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.tertiary)
-        } else {
-            MaterialTheme.typography.bodyMedium
-        },
-        colors = OutlinedTextFieldDefaults.colors().copy(
-            disabledSupportingTextColor = MaterialTheme.colorScheme.error,
-        ),
+        label =
+            if (label.isNotEmpty()) {
+                {
+                    Text(
+                        text = label,
+                        modifier = Modifier.alpha(0.7f),
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                }
+            } else {
+                null
+            },
+        textStyle =
+            if (errorMessage != null) {
+                MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.error)
+            } else if (valueSetFromVariable) {
+                MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.tertiary)
+            } else {
+                MaterialTheme.typography.bodyMedium
+            },
+        colors =
+            OutlinedTextFieldDefaults.colors().copy(
+                disabledSupportingTextColor = MaterialTheme.colorScheme.error,
+            ),
         isError = errorMessage != null,
         singleLine = singleLine,
         shape = RoundedCornerShape(8.dp),

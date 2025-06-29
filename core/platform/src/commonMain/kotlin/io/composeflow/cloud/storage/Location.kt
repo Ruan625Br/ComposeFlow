@@ -4,15 +4,11 @@ import org.http4k.urlEncoded
 
 class Location(
     val bucket: String,
-    val path: String
+    val path: String,
 ) {
-    fun isRoot (): Boolean {
-        return path.isEmpty()
-    }
+    fun isRoot(): Boolean = path.isEmpty()
 
-    fun bucketOnlyServerUrl(): String {
-        return "b/${bucket.urlEncoded()}/o"
-    }
+    fun bucketOnlyServerUrl(): String = "b/${bucket.urlEncoded()}/o"
 
     fun filename(): String {
         val split = path.split("/")

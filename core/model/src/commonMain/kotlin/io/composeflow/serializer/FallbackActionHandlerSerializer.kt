@@ -15,13 +15,15 @@ import kotlinx.serialization.encoding.Encoder
  * to a default ActionHandlerImpl instance if deserialization fails.
  */
 object FallbackActionHandlerSerializer : KSerializer<ActionHandler> {
-
     // We will primarily deal with ActionHandlerImpl as the concrete type.
     private val delegateSerializer = ActionHandlerImpl.serializer()
 
     override val descriptor: SerialDescriptor = delegateSerializer.descriptor
 
-    override fun serialize(encoder: Encoder, value: ActionHandler) {
+    override fun serialize(
+        encoder: Encoder,
+        value: ActionHandler,
+    ) {
         // When serializing, we expect the 'value' to be an instance of ActionHandlerImpl
         // because our deserialization fallback and delegate are tied to ActionHandlerImpl.
         if (value is ActionHandlerImpl) {
@@ -34,14 +36,14 @@ object FallbackActionHandlerSerializer : KSerializer<ActionHandler> {
             // we'll assume that what we serialize should also be an ActionHandlerImpl.
             throw SerializationException(
                 "FallbackActionHandlerSerializer is designed to serialize ActionHandlerImpl. " +
-                        "Encountered type: ${value::class.simpleName}. " +
-                        "If other implementations are needed, consider a polymorphic serialization setup."
+                    "Encountered type: ${value::class.simpleName}. " +
+                    "If other implementations are needed, consider a polymorphic serialization setup.",
             )
         }
     }
 
-    override fun deserialize(decoder: Decoder): ActionHandler {
-        return try {
+    override fun deserialize(decoder: Decoder): ActionHandler =
+        try {
             // Attempt to deserialize as ActionHandlerImpl
             decoder.decodeSerializableValue(delegateSerializer)
         } catch (e: Exception) {
@@ -49,10 +51,9 @@ object FallbackActionHandlerSerializer : KSerializer<ActionHandler> {
             // In a real app, use a proper logger.
             println(
                 "WARN: FallbackActionHandlerSerializer failed to deserialize ActionHandler. " +
-                        "Falling back to a default ActionHandlerImpl instance. Error: ${e.message}"
+                    "Falling back to a default ActionHandlerImpl instance. Error: ${e.message}",
             )
             // Fallback to a new default instance of ActionHandlerImpl
             ActionHandlerImpl()
         }
-    }
 }

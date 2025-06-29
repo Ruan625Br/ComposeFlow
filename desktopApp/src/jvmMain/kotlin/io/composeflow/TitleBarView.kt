@@ -41,10 +41,11 @@ fun DecoratedWindowScope.TitleBarView(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth(),
         ) {
-            val painterProvider = rememberResourcePainterProvider(
-                "ic_composeflow_logo.svg",
-                Icons::class.java,
-            )
+            val painterProvider =
+                rememberResourcePainterProvider(
+                    "ic_composeflow_logo.svg",
+                    Icons::class.java,
+                )
             val painter by painterProvider.getPainter(
                 Size(18),
             )
@@ -52,16 +53,21 @@ fun DecoratedWindowScope.TitleBarView(
 
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier.background(
-                    color = Color.White,
-                    shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
-                ).clickable {
-                    onComposeFlowLogoClicked()
-                }.hoverIconClickable()
+                modifier =
+                    Modifier
+                        .background(
+                            color = Color.White,
+                            shape =
+                                androidx.compose.foundation.shape
+                                    .RoundedCornerShape(4.dp),
+                        ).clickable {
+                            onComposeFlowLogoClicked()
+                        }.hoverIconClickable(),
             ) {
                 Icon(
-                    painter = painter, "icon",
-                    modifier = Modifier.padding(4.dp)
+                    painter = painter,
+                    "icon",
+                    modifier = Modifier.padding(4.dp),
                 )
             }
             Row(modifier = Modifier.weight(1f)) {

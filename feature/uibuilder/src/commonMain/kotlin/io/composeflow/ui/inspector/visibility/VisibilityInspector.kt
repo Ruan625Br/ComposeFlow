@@ -61,17 +61,19 @@ fun VisibilityInspector(
 ) {
     val initiallyExpanded = !node.visibilityParams.value.alwaysVisible()
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         var expanded by remember(node.id) { mutableStateOf(initiallyExpanded) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { expanded = !expanded }
-                .hoverIconClickable(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { expanded = !expanded }
+                    .hoverIconClickable(),
         ) {
             Text(
                 text = stringResource(Res.string.visibility),
@@ -120,10 +122,11 @@ private fun VisibilityInspectorContent(
                         ),
                     )
                 },
-                modifier = Modifier
-                    .hoverOverlay()
-                    .weight(3f)
-                    .padding(end = 8.dp),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .weight(3f)
+                        .padding(end = 8.dp),
             )
 
             BooleanPropertyEditor(
@@ -167,9 +170,10 @@ private fun VisibilityInspectorContent(
                             ),
                         )
                     },
-                    modifier = Modifier
-                        .hoverOverlay()
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .hoverOverlay()
+                            .fillMaxWidth(),
                 )
             }
         }
@@ -177,9 +181,10 @@ private fun VisibilityInspectorContent(
         FormFactorVisibilityInspector(
             node = node,
             composeNodeCallbacks = composeNodeCallbacks,
-            modifier = Modifier
-                .padding(top = 4.dp)
-                .padding(4.dp)
+            modifier =
+                Modifier
+                    .padding(top = 4.dp)
+                    .padding(4.dp),
         )
     }
 }
@@ -206,22 +211,23 @@ private fun FormFactorVisibilityInspector(
                 ComposeFlowIconToggleButton(
                     checked = checked,
                     onCheckedChange = onCheckedChange,
-                    modifier = Modifier
-                        .padding(2.dp)
-                        .hoverIconClickable()
-                        .then(
-                            if (checked) {
-                                Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                            alpha = 0.3f,
-                                        ),
-                                    )
-                            } else {
-                                Modifier.alpha(0.5f)
-                            },
-                        ),
+                    modifier =
+                        Modifier
+                            .padding(2.dp)
+                            .hoverIconClickable()
+                            .then(
+                                if (checked) {
+                                    Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                                alpha = 0.3f,
+                                            ),
+                                        )
+                                } else {
+                                    Modifier.alpha(0.5f)
+                                },
+                            ),
                 ) {
                     ComposeFlowIcon(
                         imageVector = iconImageVector,
@@ -243,7 +249,7 @@ private fun FormFactorVisibilityInspector(
                             formFactorVisibility = formFactorVisibility.copy(visibleInCompact = it),
                         ),
                     )
-                }
+                },
             )
             FormFactorVisibilityIconToggleButton(
                 checked = formFactorVisibility.visibleInMedium,
@@ -256,7 +262,7 @@ private fun FormFactorVisibilityInspector(
                             formFactorVisibility = formFactorVisibility.copy(visibleInMedium = it),
                         ),
                     )
-                }
+                },
             )
             FormFactorVisibilityIconToggleButton(
                 checked = formFactorVisibility.visibleInExpanded,
@@ -269,7 +275,7 @@ private fun FormFactorVisibilityInspector(
                             formFactorVisibility = formFactorVisibility.copy(visibleInExpanded = it),
                         ),
                     )
-                }
+                },
             )
         }
     }

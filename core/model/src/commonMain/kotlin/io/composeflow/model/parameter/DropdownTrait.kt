@@ -45,13 +45,11 @@ data class DropdownTrait(
     val items: AssignableProperty? = null,
     val label: AssignableProperty = StringProperty.StringIntrinsicValue("Dropdown item..."),
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Items", items, ComposeFlowType.StringType(isList = true)),
             PropertyContainer("Label", label, ComposeFlowType.StringType()),
         )
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -72,8 +70,8 @@ data class DropdownTrait(
                         project,
                         context,
                         dryRun = dryRun,
-                        writeType = ComposeFlowType.StringType(isList = true)
-                    )
+                        writeType = ComposeFlowType.StringType(isList = true),
+                    ),
                 )
             }
         }
@@ -92,8 +90,8 @@ data class DropdownTrait(
                     project,
                     canvasEditable,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
         }
         if (node.actionsMap[ActionType.OnChange]?.isNotEmpty() == true) {
@@ -110,31 +108,34 @@ data class DropdownTrait(
                     project,
                     context,
                     ComposeFlowType.StringType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
         }
         return codeBlockBuilder.build()
     }
 
-    override fun defaultComposeNode(project: Project): ComposeNode =
-        ComposeNode(trait = mutableStateOf(DropdownTrait()))
+    override fun defaultComposeNode(project: Project): ComposeNode = ComposeNode(trait = mutableStateOf(DropdownTrait()))
 
     override fun icon(): ImageVector = Icons.Outlined.FormatListNumbered
+
     override fun iconText(): String = "Dropdown"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_dropdown_trait
 
     override fun isResizeable(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
-    override fun companionState(composeNode: ComposeNode): ScreenState<*> {
-        return ScreenState.StringScreenState(
+
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> =
+        ScreenState.StringScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
             companionNodeId = composeNode.id,
         )
-    }
 
     override fun onAttachStateToNode(
         project: Project,
@@ -161,14 +162,15 @@ data class DropdownTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        val items = when (val items = items) {
-            is CustomEnumValuesProperty -> {
-                items.rawVale(project)
-            }
+        val items =
+            when (val items = items) {
+                is CustomEnumValuesProperty -> {
+                    items.rawVale(project)
+                }
 
-            null -> listOf("")
-            else -> listOf(items.transformedValueExpression(project))
-        }
+                null -> listOf("")
+                else -> listOf(items.transformedValueExpression(project))
+            }
         var selectedText by remember(node.id) { mutableStateOf("") }
         DropdownMenuTextField(
             items = items,
@@ -177,16 +179,18 @@ data class DropdownTrait(
                 selectedText = it
             },
             selectedItem = selectedText,
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        paletteRenderParams = paletteRenderParams,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            paletteRenderParams = paletteRenderParams,
+                        ),
+                ),
         )
     }
 
@@ -207,10 +211,10 @@ data class DropdownTrait(
                 node = node,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()

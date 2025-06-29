@@ -11,7 +11,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class OffsetTest {
-
     @Test
     fun toComposeCode_default_args() {
         val modifierList = listOf(ModifierWrapper.Offset())
@@ -24,8 +23,7 @@ class OffsetTest {
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.offset(
                    x = 0.androidx.compose.ui.unit.dp,
-                   y = 0.androidx.compose.ui.unit.dp),"""
-                .trimForCompare(),
+                   y = 0.androidx.compose.ui.unit.dp),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }

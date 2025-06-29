@@ -83,7 +83,7 @@ fun NewProjectDialog(
         NewProjectDialogContent(
             onConfirmProject = onConfirmProject,
             onConfirmProjectWithScreens = onConfirmProjectWithScreens,
-            onDismissDialog = onDismissDialog
+            onDismissDialog = onDismissDialog,
         )
     }
 }
@@ -98,16 +98,17 @@ private fun AiAssistedCreationInputs(
     var openAiAssistantDialog by remember { mutableStateOf(false) }
     var openProjectDialogManually by remember { mutableStateOf(false) }
 
-    val promptSuggestions = listOf(
-        stringResource(Res.string.ai_prompt_suggestion_social_media),
-        stringResource(Res.string.ai_prompt_suggestion_task_management),
-        stringResource(Res.string.ai_prompt_suggestion_ecommerce),
-        stringResource(Res.string.ai_prompt_suggestion_weather),
-        stringResource(Res.string.ai_prompt_suggestion_fitness),
-        stringResource(Res.string.ai_prompt_suggestion_notes),
-        stringResource(Res.string.ai_prompt_suggestion_recipes),
-        stringResource(Res.string.ai_prompt_suggestion_chat)
-    )
+    val promptSuggestions =
+        listOf(
+            stringResource(Res.string.ai_prompt_suggestion_social_media),
+            stringResource(Res.string.ai_prompt_suggestion_task_management),
+            stringResource(Res.string.ai_prompt_suggestion_ecommerce),
+            stringResource(Res.string.ai_prompt_suggestion_weather),
+            stringResource(Res.string.ai_prompt_suggestion_fitness),
+            stringResource(Res.string.ai_prompt_suggestion_notes),
+            stringResource(Res.string.ai_prompt_suggestion_recipes),
+            stringResource(Res.string.ai_prompt_suggestion_chat),
+        )
 
     Column {
         var queryValidator by remember {
@@ -126,14 +127,14 @@ private fun AiAssistedCreationInputs(
             text = stringResource(Res.string.ai_title_prompt_dialog),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 32.dp)
+            modifier = Modifier.padding(horizontal = 32.dp),
         )
         Spacer(Modifier.size(16.dp))
         Text(
             text = stringResource(Res.string.ai_prompt_suggestions_label),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-            modifier = Modifier.padding(horizontal = 32.dp)
+            modifier = Modifier.padding(horizontal = 32.dp),
         )
         Spacer(Modifier.size(8.dp))
         LazyHorizontalGrid(
@@ -141,7 +142,7 @@ private fun AiAssistedCreationInputs(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp),
             contentPadding = PaddingValues(horizontal = 32.dp),
-            modifier = Modifier.fillMaxWidth().height(80.dp)
+            modifier = Modifier.fillMaxWidth().height(80.dp),
         ) {
             items(promptSuggestions) { suggestion ->
                 SuggestionChip(
@@ -152,9 +153,9 @@ private fun AiAssistedCreationInputs(
                     label = {
                         Text(
                             text = suggestion,
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -173,26 +174,33 @@ private fun AiAssistedCreationInputs(
             },
             singleLine = false,
             minLines = 7,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp)
-                .weight(1f)
-                .focusRequester(first).moveFocusOnTab()
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp)
+                    .weight(1f)
+                    .focusRequester(first)
+                    .moveFocusOnTab(),
         )
         Spacer(Modifier.size(16.dp))
         TextButton(
             onClick = {
                 openProjectDialogManually = true
             },
-            modifier = Modifier.align(Alignment.End).focusRequester(third)
-                .padding(horizontal = 32.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.End)
+                    .focusRequester(third)
+                    .padding(horizontal = 32.dp),
         ) {
             Text(stringResource(Res.string.ai_create_project_alternative_manually))
         }
         Spacer(Modifier.size(16.dp))
         Row(
-            modifier = Modifier.padding(top = 16.dp)
-                .padding(horizontal = 32.dp),
+            modifier =
+                Modifier
+                    .padding(top = 16.dp)
+                    .padding(horizontal = 32.dp),
         ) {
             Spacer(modifier = Modifier.weight(1f))
             TextButton(
@@ -224,7 +232,7 @@ private fun AiAssistedCreationInputs(
                 openAiAssistantDialog = false
             },
             onConfirmProjectWithScreens = onConfirmProjectWithScreens,
-            projectCreationPrompt = userQuery
+            projectCreationPrompt = userQuery,
         )
     }
     if (openProjectDialogManually) {
@@ -238,7 +246,6 @@ private fun AiAssistedCreationInputs(
     }
 }
 
-
 @Composable
 fun NewProjectDialogContent(
     onConfirmProject: (projectName: String, packageName: String) -> Unit,
@@ -247,18 +254,19 @@ fun NewProjectDialogContent(
 ) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
         Column(
-            modifier = Modifier.padding(vertical = 32.dp)
-                .size(820.dp, 580.dp)
+            modifier =
+                Modifier
+                    .padding(vertical = 32.dp)
+                    .size(820.dp, 580.dp),
         ) {
             AiAssistedCreationInputs(
                 onConfirmProject = onConfirmProject,
                 onConfirmProjectWithScreens = onConfirmProjectWithScreens,
-                onDismissDialog = onDismissDialog
+                onDismissDialog = onDismissDialog,
             )
         }
     }
 }
-
 
 @Composable
 private fun ThemedNewProjectDialogPreview(useDarkTheme: Boolean) {
@@ -266,7 +274,7 @@ private fun ThemedNewProjectDialogPreview(useDarkTheme: Boolean) {
         NewProjectDialogContent(
             onConfirmProject = { _, _ -> },
             onConfirmProjectWithScreens = { _, _, _ -> },
-            onDismissDialog = {}
+            onDismissDialog = {},
         )
     }
 }

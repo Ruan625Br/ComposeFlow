@@ -78,24 +78,25 @@ fun SelectNewScreenDialog(
                 ) {
                     items(items = ScreenTemplates.initialTemplates()) {
                         Column(
-                            modifier = Modifier
-                                .pointerInput(Unit) {
-                                    awaitPointerEventScope {
-                                        // To consume the click event in this Composable.
-                                        // (Not let the children handle click event in the thumbnail)
-                                        while (true) {
-                                            val event = awaitPointerEvent()
-                                            if (event.changes.any { it.pressed }) {
-                                                onScreenTemplateSelected(it)
-                                                event.changes.forEach { it.consume() }
+                            modifier =
+                                Modifier
+                                    .pointerInput(Unit) {
+                                        awaitPointerEventScope {
+                                            // To consume the click event in this Composable.
+                                            // (Not let the children handle click event in the thumbnail)
+                                            while (true) {
+                                                val event = awaitPointerEvent()
+                                                if (event.changes.any { it.pressed }) {
+                                                    onScreenTemplateSelected(it)
+                                                    event.changes.forEach { it.consume() }
+                                                }
                                             }
                                         }
-                                    }
-                                },
+                                    },
                         ) {
                             it.screen.thumbnail(
                                 project,
-                                includeUpdateTime = false
+                                includeUpdateTime = false,
                             )
                         }
                     }
@@ -108,8 +109,9 @@ fun SelectNewScreenDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -153,16 +155,18 @@ fun ScreenNameDialog(
                     label = { Text(stringResource(Res.string.screen_name)) },
                     singleLine = true,
                     isError = screenName.isEmpty(),
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && screenName.isNotEmpty()) {
-                                onNameConfirmed(screenName)
-                                true
-                            } else {
-                                false
-                            }
-                        },
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && screenName.isNotEmpty()) {
+                                    onNameConfirmed(screenName)
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
 
                 Row(
@@ -172,9 +176,10 @@ fun ScreenNameDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(second),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(second),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -182,9 +187,10 @@ fun ScreenNameDialog(
                         onClick = {
                             onNameConfirmed(screenName)
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }

@@ -34,7 +34,7 @@ fun LazyVerticalGridParamsInspector(
                     node,
                     trait.copy(lazyGridCells = it),
                 )
-            }
+            },
         )
         Row {
             BasicEditableTextProperty(
@@ -51,7 +51,11 @@ fun LazyVerticalGridParamsInspector(
                 modifier = Modifier.hoverOverlay().weight(1f),
             )
             BasicEditableTextProperty(
-                initialValue = trait.contentPadding?.value?.toInt()?.toString() ?: "",
+                initialValue =
+                    trait.contentPadding
+                        ?.value
+                        ?.toInt()
+                        ?.toString() ?: "",
                 label = "Content padding",
                 validateInput = DpValidator()::validate,
                 onValidValueChanged = {

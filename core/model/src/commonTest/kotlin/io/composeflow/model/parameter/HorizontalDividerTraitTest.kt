@@ -16,7 +16,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class HorizontalDividerTraitTest {
-
     @Test
     fun toComposeCode_default() {
         val dividerParams = HorizontalDividerTrait()
@@ -25,7 +24,8 @@ class HorizontalDividerTraitTest {
             dividerParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             "androidx.compose.material3.HorizontalDivider()",
@@ -35,16 +35,18 @@ class HorizontalDividerTraitTest {
 
     @Test
     fun toComposeCode_withOptionalArguments() {
-        val dividerParams = HorizontalDividerTrait(
-            thickness = 4.dp,
-            color = ColorProperty.ColorIntrinsicValue(ColorWrapper(themeColor = Material3ColorWrapper.Outline)),
-        )
+        val dividerParams =
+            HorizontalDividerTrait(
+                thickness = 4.dp,
+                color = ColorProperty.ColorIntrinsicValue(ColorWrapper(themeColor = Material3ColorWrapper.Outline)),
+            )
 
         val code =
             dividerParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -59,10 +61,11 @@ class HorizontalDividerTraitTest {
 
     @Test
     fun serialize_deserialize() {
-        val dividerParams = HorizontalDividerTrait(
-            thickness = 4.dp,
-            color = ColorProperty.ColorIntrinsicValue(ColorWrapper(themeColor = Material3ColorWrapper.Outline)),
-        )
+        val dividerParams =
+            HorizontalDividerTrait(
+                thickness = 4.dp,
+                color = ColorProperty.ColorIntrinsicValue(ColorWrapper(themeColor = Material3ColorWrapper.Outline)),
+            )
         val encoded = yamlSerializer.encodeToString(dividerParams)
         val decoded = yamlSerializer.decodeFromString<HorizontalDividerTrait>(encoded)
 

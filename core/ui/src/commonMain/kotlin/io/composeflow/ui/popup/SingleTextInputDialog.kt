@@ -67,9 +67,9 @@ fun SingleTextInputDialog(
             mutableStateOf<ValidateResult?>(
                 validator?.let {
                     ValidateResult.Failure(
-                        MUST_NOT_BE_EMPTY
+                        MUST_NOT_BE_EMPTY,
                     )
-                }
+                },
             )
         }
         val isFormValid by remember {
@@ -79,17 +79,19 @@ fun SingleTextInputDialog(
         }
         Surface {
             Column(
-                modifier = Modifier
-                    .size(width = 280.dp, height = 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 280.dp, height = 160.dp)
+                        .padding(16.dp),
             ) {
                 SmallOutlinedTextField(
                     value = editedText,
                     onValueChange = { changedValue ->
                         editedText = changedValue
-                        validateResult = validator?.let {
-                            it(changedValue)
-                        }
+                        validateResult =
+                            validator?.let {
+                                it(changedValue)
+                            }
                     },
                     label = {
                         Text(
@@ -100,27 +102,31 @@ fun SingleTextInputDialog(
                     },
                     singleLine = true,
                     isError = !isFormValid,
-                    supportingText = when (val failedResult = validateResult) {
-                        is ValidateResult.Failure -> {
-                            {
-                                Text(failedResult.message)
+                    supportingText =
+                        when (val failedResult = validateResult) {
+                            is ValidateResult.Failure -> {
+                                {
+                                    Text(failedResult.message)
+                                }
                             }
-                        }
 
-                        else -> {
-                            {
+                            else -> {
+                                {
+                                }
                             }
-                        }
-                    },
-                    modifier = Modifier.focusRequester(first).moveFocusOnTab().onKeyEvent {
-                        if (it.key == Key.Enter && editedText.isNotEmpty()) {
-                            onTextConfirmed(editedText)
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                        .fillMaxWidth(),
+                        },
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && editedText.isNotEmpty()) {
+                                    onTextConfirmed(editedText)
+                                    true
+                                } else {
+                                    false
+                                }
+                            }.fillMaxWidth(),
                 )
 
                 Row(
@@ -157,7 +163,7 @@ private fun ThemedSingleTextInputDialogPreview(useDarkTheme: Boolean) {
             textLabel = "Enter file name",
             onTextConfirmed = {},
             onDismissDialog = {},
-            initialValue = "MyFile"
+            initialValue = "MyFile",
         )
     }
 }
@@ -189,7 +195,7 @@ private fun ThemedSingleTextInputDialogWithValidatorPreview(useDarkTheme: Boolea
                 } else {
                     ValidateResult.Success
                 }
-            }
+            },
         )
     }
 }

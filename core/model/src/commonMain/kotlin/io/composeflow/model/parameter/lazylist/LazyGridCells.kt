@@ -16,8 +16,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("LazyGridCells")
 sealed interface LazyGridCells : DropdownItem {
-
     fun asCodeBlock(): CodeBlock
+
     fun asComposeGridCells(): GridCells
 
     @Serializable
@@ -28,30 +28,34 @@ sealed interface LazyGridCells : DropdownItem {
     ) : LazyGridCells {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Adaptive")
+
         override fun isSameItem(item: Any): Boolean = item is Adaptive
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 "%T.Adaptive(${minSize.value.toInt()}.%M)",
                 ClassHolder.AndroidX.Lazy.GridCells,
-                MemberHolder.AndroidX.Ui.dp
+                MemberHolder.AndroidX.Ui.dp,
             )
-        }
 
         override fun asComposeGridCells(): GridCells = GridCells.Adaptive(minSize)
     }
 
     @Serializable
     @SerialName("Fixed")
-    data class Fixed(val count: Int = 2) : LazyGridCells {
+    data class Fixed(
+        val count: Int = 2,
+    ) : LazyGridCells {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Fixed")
+
         override fun isSameItem(item: Any): Boolean = item is Fixed
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
-                "%T.Fixed(${count})",
+
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
+                "%T.Fixed($count)",
                 ClassHolder.AndroidX.Lazy.GridCells,
             )
-        }
 
         override fun asComposeGridCells(): GridCells = GridCells.Fixed(count)
     }
@@ -64,23 +68,25 @@ sealed interface LazyGridCells : DropdownItem {
     ) : LazyGridCells {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("FixedSize")
+
         override fun isSameItem(item: Any): Boolean = item is FixedSize
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 "%T.FixedSize(${size.value.toInt()}.%M)",
                 ClassHolder.AndroidX.Lazy.GridCells,
-                MemberHolder.AndroidX.Ui.dp
+                MemberHolder.AndroidX.Ui.dp,
             )
-        }
 
         override fun asComposeGridCells(): GridCells = GridCells.FixedSize(size)
     }
 
     companion object {
-        fun entries(): List<LazyGridCells> = listOf(
-            Adaptive(),
-            Fixed(),
-            FixedSize(),
-        )
+        fun entries(): List<LazyGridCells> =
+            listOf(
+                Adaptive(),
+                Fixed(),
+                FixedSize(),
+            )
     }
 }

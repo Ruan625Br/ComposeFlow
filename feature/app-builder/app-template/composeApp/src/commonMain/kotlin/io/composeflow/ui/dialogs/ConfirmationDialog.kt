@@ -38,16 +38,18 @@ fun ConfirmationDialog(
                 Text(negativeText)
             }
         },
-        title = title?.let {
-            {
-                Text(it)
-            }
-        },
-        text = message?.let {
-            {
-                Text(it)
-            }
-        },
+        title =
+            title?.let {
+                {
+                    Text(it)
+                }
+            },
+        text =
+            message?.let {
+                {
+                    Text(it)
+                }
+            },
         modifier = modifier,
     )
 }

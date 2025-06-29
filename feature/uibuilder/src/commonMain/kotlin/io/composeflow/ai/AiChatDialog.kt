@@ -107,8 +107,8 @@ fun AiChatDialog(
                 .width(400.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.85f),
-                    shape = MaterialTheme.shapes.small
-                )
+                    shape = MaterialTheme.shapes.small,
+                ),
         ) {
             val focusRequester = remember { FocusRequester() }
             LaunchedEffect(Unit) {
@@ -117,7 +117,7 @@ fun AiChatDialog(
             Column(
                 Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
+                    .padding(16.dp),
             ) {
                 var textFieldValue by remember { mutableStateOf("") }
                 val onSendInput = {
@@ -136,12 +136,12 @@ fun AiChatDialog(
                                     onClick = {
                                         viewModel.onStopGeneration()
                                     },
-                                    modifier = Modifier.hoverIconClickable()
+                                    modifier = Modifier.hoverIconClickable(),
                                 ) {
                                     Icon(
                                         imageVector = Icons.Filled.Stop,
                                         contentDescription = "Stop generation",
-                                        tint = MaterialTheme.colorScheme.error
+                                        tint = MaterialTheme.colorScheme.error,
                                     )
                                 }
                             }
@@ -150,40 +150,42 @@ fun AiChatDialog(
                                     if (!aiAssistantUiState.isGenerating.value) {
                                         onSendInput()
                                     }
-                                }
+                                },
                             ) {
                                 if (aiAssistantUiState.isGenerating.value) {
                                     CircularProgressIndicator(
                                         strokeWidth = 2.dp,
-                                        modifier = Modifier.size(32.dp)
+                                        modifier = Modifier.size(32.dp),
                                     )
                                 } else {
                                     Icon(
                                         imageVector = Icons.AutoMirrored.Filled.Send,
-                                        contentDescription = "Send task"
+                                        contentDescription = "Send task",
                                     )
                                 }
                             }
                         }
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                        .focusRequester(focusRequester)
-                        .alpha(0.8f)
-                        .then(
-                            if (aiAssistantUiState.isGenerating.value) {
-                                Modifier
-                            } else {
-                                Modifier.onKeyEvent {
-                                    if (it.key == Key.Enter) {
-                                        onSendInput()
-                                        true
-                                    } else {
-                                        false
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(120.dp)
+                            .focusRequester(focusRequester)
+                            .alpha(0.8f)
+                            .then(
+                                if (aiAssistantUiState.isGenerating.value) {
+                                    Modifier
+                                } else {
+                                    Modifier.onKeyEvent {
+                                        if (it.key == Key.Enter) {
+                                            onSendInput()
+                                            true
+                                        } else {
+                                            false
+                                        }
                                     }
-                                }
-                            })
+                                },
+                            ),
                 )
                 Spacer(Modifier.height(8.dp))
                 val listState = rememberLazyListState()
@@ -196,7 +198,7 @@ fun AiChatDialog(
                     state = listState,
                     reverseLayout = true,
                     verticalArrangement = Arrangement.Top,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 ) {
                     items(messages) {
                         ChatMessage(messageModel = it, modifier = Modifier.alpha(0.7f))
@@ -212,45 +214,51 @@ private fun ChatMessage(
     messageModel: MessageModel,
     modifier: Modifier = Modifier,
 ) {
-    val hhmmFormat = Format {
-        hour(Padding.NONE)
-        chars(":")
-        minute(Padding.ZERO)
-    }
+    val hhmmFormat =
+        Format {
+            hour(Padding.NONE)
+            chars(":")
+            minute(Padding.ZERO)
+        }
     if (messageModel.messageOwner == MessageOwner.User) {
         Column(modifier = modifier) {
             Row(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
                     messageModel.createdAt.format(
                         hhmmFormat,
-                        offset = TimeZone.currentSystemDefault()
-                            .offsetAt(messageModel.createdAt)
+                        offset =
+                            TimeZone
+                                .currentSystemDefault()
+                                .offsetAt(messageModel.createdAt),
                     ),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 )
                 Column(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                        shape = RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 0.dp,
-                            bottomEnd = 16.dp,
-                            bottomStart = 16.dp
-                        )
-                    ).weight(1f)
+                    modifier =
+                        Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape =
+                                    RoundedCornerShape(
+                                        topStart = 16.dp,
+                                        topEnd = 0.dp,
+                                        bottomEnd = 16.dp,
+                                        bottomStart = 16.dp,
+                                    ),
+                            ).weight(1f),
                 ) {
                     SelectionContainer {
                         Text(
                             text = messageModel.message,
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp),
                         )
                     }
                 }
@@ -262,41 +270,47 @@ private fun ChatMessage(
             Row(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Start,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            topEnd = 16.dp,
-                            bottomEnd = 16.dp,
-                            bottomStart = 16.dp
-                        )
-                    ).weight(1f)
+                    modifier =
+                        Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape =
+                                    RoundedCornerShape(
+                                        topStart = 0.dp,
+                                        topEnd = 16.dp,
+                                        bottomEnd = 16.dp,
+                                        bottomStart = 16.dp,
+                                    ),
+                            ).weight(1f),
                 ) {
                     SelectionContainer {
                         Text(
                             text = messageModel.message,
-                            color = if (messageModel.isFailed) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            },
+                            color =
+                                if (messageModel.isFailed) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                },
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp),
                         )
                     }
                 }
                 Text(
                     messageModel.createdAt.format(
                         hhmmFormat,
-                        offset = TimeZone.currentSystemDefault()
-                            .offsetAt(messageModel.createdAt)
+                        offset =
+                            TimeZone
+                                .currentSystemDefault()
+                                .offsetAt(messageModel.createdAt),
                     ),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))

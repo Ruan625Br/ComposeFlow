@@ -16,18 +16,18 @@ sealed interface ErrorResponse : AiRepositoryResponse {
 sealed interface SuccessResponse : AiRepositoryResponse
 
 sealed interface CreateScreenResponse {
-
     val requestId: String?
 
     data class BeforeRequest(
-        override val requestId: String? = null
+        override val requestId: String? = null,
     ) : CreateScreenResponse
 
     data class Success(
         val screen: Screen,
         val message: String,
         override val requestId: String? = null,
-    ) : CreateScreenResponse, SuccessResponse
+    ) : CreateScreenResponse,
+        SuccessResponse
 
     data class Error(
         override val originalPrompt: String,
@@ -37,11 +37,11 @@ sealed interface CreateScreenResponse {
         override val throwable: Throwable? = null,
         override val requestId: String? = null,
         override var retryCount: Int = 0,
-    ) : ErrorResponse, CreateScreenResponse
+    ) : ErrorResponse,
+        CreateScreenResponse
 }
 
 sealed interface ToolResponse : AiRepositoryResponse {
-
     val originalPrompt: String
     val message: String
     val previousToolArgs: List<ToolArgs>

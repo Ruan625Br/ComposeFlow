@@ -16,41 +16,41 @@ object LlmToolsExample {
      */
     @JvmStatic
     fun main(args: Array<String>) {
-    // Path to the directory containing generated JSON files
-    val toolsDir = File("feature/uibuilder/build/generated/llm-tools")
+        // Path to the directory containing generated JSON files
+        val toolsDir = File("feature/uibuilder/build/generated/llm-tools")
 
-    // Load the tools
-    val loader = LlmToolsLoader()
-    val tools = loader.loadTools(toolsDir)
+        // Load the tools
+        val loader = LlmToolsLoader()
+        val tools = loader.loadTools(toolsDir)
 
-    println("Loaded ${tools.size} LLM tools:")
-    tools.forEach { tool ->
-        println("- ${tool.name}: ${tool.description}")
-        println("  Parameters:")
-        tool.parameters.forEach { param ->
-            println("  - ${param.name} (${param.type}): ${param.description}")
-            if (!param.required) {
-                println("    Optional, default: ${param.defaultValue}")
+        println("Loaded ${tools.size} LLM tools:")
+        tools.forEach { tool ->
+            println("- ${tool.name}: ${tool.description}")
+            println("  Parameters:")
+            tool.parameters.forEach { param ->
+                println("  - ${param.name} (${param.type}): ${param.description}")
+                if (!param.required) {
+                    println("    Optional, default: ${param.defaultValue}")
+                }
             }
+            println()
         }
+
+        // Convert to Claude format
+        val claudeToolsMap = loader.convertToClaudeFormat(tools)
+
+        println("Claude format:")
+        println(claudeToolsMap)
         println()
-    }
 
-    // Convert to Claude format
-    val claudeToolsMap = loader.convertToClaudeFormat(tools)
-    
-    println("Claude format:")
-    println(claudeToolsMap)
-    println()
-    
-    // Extract the tools list for easier access
-    @Suppress("UNCHECKED_CAST")
-    val claudeTools = claudeToolsMap["tools"] as List<Map<String, Any>>
+        // Extract the tools list for easier access
+        @Suppress("UNCHECKED_CAST")
+        val claudeTools = claudeToolsMap["tools"] as List<Map<String, Any>>
 
-    // Example of how you might use this with Claude API client
-    println("Example Claude API integration:")
-    println(
-        """
+        // Example of how you might use this with Claude API client
+        println("Example Claude API integration:")
+        println(
+            """
             // Using with Claude API (pseudocode)
             val claudeClient = ClaudeClient(apiKey)
             
@@ -69,7 +69,7 @@ object LlmToolsExample {
                 // Parse arguments and call the actual function
                 // ...
             }
-        """.trimIndent()
-    )
+            """.trimIndent(),
+        )
     }
 }

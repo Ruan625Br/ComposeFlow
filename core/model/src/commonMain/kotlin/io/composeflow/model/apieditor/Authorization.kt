@@ -12,7 +12,6 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 @Serializable
 @SerialName("Authorization")
 sealed interface Authorization : DropdownItem {
-
     @Serializable
     @OptIn(ExperimentalEncodingApi::class)
     @SerialName("BasicAuth")
@@ -25,19 +24,21 @@ sealed interface Authorization : DropdownItem {
 
         override fun isSameItem(item: Any): Boolean = item is BasicAuth
 
-        fun makeAuthorizationHeader(): String? {
-            return if (username.isNotBlank() && password.isNotBlank()) {
-                val base64Encoded = Base64.encode("${username}:${password}".toByteArray())
+        fun makeAuthorizationHeader(): String? =
+            if (username.isNotBlank() && password.isNotBlank()) {
+                val base64Encoded = Base64.encode("$username:$password".toByteArray())
                 "Basic $base64Encoded"
-            } else null
-        }
+            } else {
+                null
+            }
 
-        override fun generateCodeBlock(): CodeBlock? {
-            return if (username.isNotBlank() && password.isNotBlank()) {
-                val base64Encoded = Base64.encode("${username}:${password}".toByteArray())
+        override fun generateCodeBlock(): CodeBlock? =
+            if (username.isNotBlank() && password.isNotBlank()) {
+                val base64Encoded = Base64.encode("$username:$password".toByteArray())
                 CodeBlock.of("Basic $base64Encoded")
-            } else null
-        }
+            } else {
+                null
+            }
     }
 
     fun generateCodeBlock(): CodeBlock?

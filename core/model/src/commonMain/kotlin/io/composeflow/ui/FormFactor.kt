@@ -31,7 +31,7 @@ fun calculateScale(
     formFactor: FormFactor,
     screenSize: Size,
     topAreaMargin: Int = 80,
-    bottomAreaMargin: Int = 40
+    bottomAreaMargin: Int = 40,
 ): Float {
     var widthScale = 1f
     val minimumScale = 0.3f

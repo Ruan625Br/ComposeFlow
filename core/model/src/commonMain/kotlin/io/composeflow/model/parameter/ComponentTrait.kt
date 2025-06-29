@@ -37,8 +37,8 @@ data class ComponentTrait(
     val paramsMap: MutableMap<ParameterId, AssignableProperty> =
         mutableStateMapOf(),
 ) : ComposeTrait {
-
     override fun areAllParamsEmpty(): Boolean = paramsMap.isEmpty()
+
     private fun generateParamsCode(
         project: Project,
         context: GenerationContext,
@@ -53,8 +53,8 @@ data class ComponentTrait(
                 assignableProperty.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
         }
@@ -62,13 +62,19 @@ data class ComponentTrait(
     }
 
     override fun icon(): ImageVector = ComposeFlowIcons.ComposeLogo
+
     override fun iconText(): String = "Component"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_component_trait
 
     override fun visibleInPalette(): Boolean = false
+
     override fun isDroppable(): Boolean = false
+
     override fun isVisibilityConditional(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnInitialLoad)
 
     @Composable
@@ -87,13 +93,14 @@ data class ComponentTrait(
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     paletteRenderParams = paletteRenderParams,
                     zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    modifier = Modifier.modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
+                    modifier =
+                        Modifier.modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
                 )
             }
         }
@@ -106,8 +113,9 @@ data class ComponentTrait(
         dryRun: Boolean,
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
-        val component = node.componentId?.let { project.findComponentOrNull(it) }
-            ?: return codeBlockBuilder.build()
+        val component =
+            node.componentId?.let { project.findComponentOrNull(it) }
+                ?: return codeBlockBuilder.build()
         codeBlockBuilder.addStatement(
             "%M(",
             component.asMemberName(project),
@@ -117,10 +125,10 @@ data class ComponentTrait(
                 project = project,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         val componentInvocationCount = context.componentCountMap[component.name] ?: 0
         context.componentCountMap[component.name] = componentInvocationCount + 1

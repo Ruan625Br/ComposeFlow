@@ -3,11 +3,9 @@ package io.composeflow.ai
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -34,7 +32,6 @@ import io.composeflow.ui.popup.SimpleConfirmationDialog
 import org.jetbrains.compose.resources.stringResource
 
 sealed class AiAssistantUiState {
-
     data object Idle : AiAssistantUiState()
 
     var isGenerating: MutableState<Boolean> = mutableStateOf(false)
@@ -48,11 +45,9 @@ sealed class AiAssistantUiState {
     }
 
     sealed class Success : AiAssistantUiState() {
-
         data class NewScreenCreated(
             val screen: Screen,
         ) : Success() {
-
             @Composable
             override fun ActionContent(
                 callbacks: AiAssistantDialogCallbacks,
@@ -71,7 +66,7 @@ sealed class AiAssistantUiState {
                         modifier = buttonModifier,
                     ) {
                         Text(
-                            stringResource(Res.string.ai_action_discard_result)
+                            stringResource(Res.string.ai_action_discard_result),
                         )
                     }
                     Button(
@@ -83,7 +78,7 @@ sealed class AiAssistantUiState {
                         modifier = buttonModifier,
                     ) {
                         Text(
-                            stringResource(Res.string.ai_action_add_screen)
+                            stringResource(Res.string.ai_action_add_screen),
                         )
                     }
                 }
@@ -115,7 +110,7 @@ sealed class AiAssistantUiState {
                         modifier = buttonModifier,
                     ) {
                         Text(
-                            stringResource(Res.string.ai_action_discard_result)
+                            stringResource(Res.string.ai_action_discard_result),
                         )
                     }
 
@@ -127,12 +122,13 @@ sealed class AiAssistantUiState {
                             modifier = buttonModifier,
                         ) {
                             Text(
-                                stringResource(Res.string.ai_action_proceed_to_generate_screens)
+                                stringResource(Res.string.ai_action_proceed_to_generate_screens),
                             )
                         }
                     } else if (screenPrompts.all {
                             it is GeneratedScreenPrompt.ScreenGenerated || (it is GeneratedScreenPrompt.Error && !it.withRetry)
-                        }) {
+                        }
+                    ) {
                         Button(
                             onClick = {
                                 callbacks.onConfirmProjectWithScreens(
@@ -140,13 +136,13 @@ sealed class AiAssistantUiState {
                                     packageName,
                                     screenPrompts.mapNotNull {
                                         (it as? GeneratedScreenPrompt.ScreenGenerated)?.screen
-                                    }
+                                    },
                                 )
                             },
                             modifier = buttonModifier,
                         ) {
                             Text(
-                                stringResource(Res.string.ai_action_create_project)
+                                stringResource(Res.string.ai_action_create_project),
                             )
                         }
                     } else if (screenPrompts.any { it is GeneratedScreenPrompt.ScreenGenerated }) {
@@ -157,7 +153,7 @@ sealed class AiAssistantUiState {
                             modifier = buttonModifier,
                         ) {
                             Text(
-                                stringResource(Res.string.ai_action_create_project)
+                                stringResource(Res.string.ai_action_create_project),
                             )
                         }
                     }
@@ -174,12 +170,12 @@ sealed class AiAssistantUiState {
                                 packageName,
                                 screenPrompts.mapNotNull {
                                     (it as? GeneratedScreenPrompt.ScreenGenerated)?.screen
-                                }
+                                },
                             )
                         },
                         onCloseClick = {
                             openCreateProjectDialog = false
-                        }
+                        },
                     )
                 }
             }
@@ -190,5 +186,7 @@ sealed class AiAssistantUiState {
         ) : Success()
     }
 
-    data class Error(val message: String) : AiAssistantUiState()
+    data class Error(
+        val message: String,
+    ) : AiAssistantUiState()
 }

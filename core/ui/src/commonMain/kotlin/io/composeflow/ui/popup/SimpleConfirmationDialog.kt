@@ -49,9 +49,10 @@ fun SimpleConfirmationDialog(
     ) {
         Surface(color = surfaceColor) {
             Column(
-                modifier = Modifier
-                    .size(width = 300.dp, height = 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 300.dp, height = 160.dp)
+                        .padding(16.dp),
             ) {
                 Text(text = text)
 
@@ -64,8 +65,9 @@ fun SimpleConfirmationDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -91,7 +93,7 @@ private fun ThemedSimpleConfirmationDialogPreview(useDarkTheme: Boolean) {
         SimpleConfirmationDialog(
             text = "Are you sure you want to delete this item?",
             onCloseClick = {},
-            onConfirmClick = {}
+            onConfirmClick = {},
         )
     }
 }
@@ -116,7 +118,7 @@ private fun ThemedSimpleConfirmationDialogCustomPreview(useDarkTheme: Boolean) {
             onCloseClick = {},
             onConfirmClick = {},
             positiveText = "Save",
-            positiveButtonColor = MaterialTheme.colorScheme.primary
+            positiveButtonColor = MaterialTheme.colorScheme.primary,
         )
     }
 }

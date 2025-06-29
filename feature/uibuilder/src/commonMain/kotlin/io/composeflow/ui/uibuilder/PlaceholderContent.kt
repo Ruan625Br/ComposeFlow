@@ -19,23 +19,23 @@ import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
 
 @Composable
-fun PlaceholderScreen(
-    modifier: Modifier = Modifier,
-) {
+fun PlaceholderScreen(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.fillMaxWidth().wrapContentHeight()
+            modifier = Modifier.fillMaxWidth().wrapContentHeight(),
         ) {
             Spacer(Modifier.size(8.dp))
             PlaceholderBox(
-                modifier = Modifier
-                    .width(240.dp)
-                    .height(48.dp)
+                modifier =
+                    Modifier
+                        .width(240.dp)
+                        .height(48.dp),
             )
             Spacer(Modifier.size(8.dp))
         }
@@ -47,27 +47,30 @@ fun PlaceholderScreen(
         PlaceholderBox(Modifier.size(120.dp))
         Spacer(Modifier.size(16.dp))
         PlaceholderBox(
-            modifier = Modifier.fillMaxWidth()
-                .padding(end = 64.dp)
-                .height(48.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(end = 64.dp)
+                    .height(48.dp),
         )
         Spacer(Modifier.size(16.dp))
         PlaceholderBox(
-            modifier = Modifier.width(180.dp)
-                .padding(end = 64.dp)
-                .height(48.dp)
+            modifier =
+                Modifier
+                    .width(180.dp)
+                    .padding(end = 64.dp)
+                    .height(48.dp),
         )
     }
 }
 
 @Composable
-fun PlaceholderComponent(
-    modifier: Modifier = Modifier,
-) {
+fun PlaceholderComponent(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
     ) {
         PlaceholderBox(modifier = Modifier.fillMaxWidth().height(48.dp))
         Spacer(Modifier.size(16.dp))
@@ -77,15 +80,14 @@ fun PlaceholderComponent(
 }
 
 @Composable
-private fun PlaceholderBox(
-    modifier: Modifier = Modifier,
-) {
+private fun PlaceholderBox(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .shimmer()
-            .background(
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(16.dp)
-            )
+        modifier =
+            modifier
+                .shimmer()
+                .background(
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = RoundedCornerShape(16.dp),
+                ),
     ) {}
 }

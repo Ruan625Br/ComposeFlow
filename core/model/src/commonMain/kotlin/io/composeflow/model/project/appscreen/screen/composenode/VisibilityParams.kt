@@ -25,20 +25,19 @@ data class VisibilityParams(
     val formFactorVisibility: FormFactorVisibility = FormFactorVisibility(),
     val visibleInUiBuilder: Boolean = true,
 ) {
-    fun nodeVisibilityValue(): NodeVisibility {
-        return when (nodeVisibility) {
+    fun nodeVisibilityValue(): NodeVisibility =
+        when (nodeVisibility) {
             is EnumProperty -> {
                 NodeVisibility.entries[nodeVisibility.value.enumValue().ordinal]
             }
 
             else -> NodeVisibility.AlwaysVisible
         }
-    }
 
     fun generateTrackableIssues(
         project: Project,
         canvasEditable: CanvasEditable,
-        composeNode: ComposeNode
+        composeNode: ComposeNode,
     ): List<TrackableIssue> {
         if (visibilityCondition is BooleanProperty.Empty) return emptyList()
         return buildList {
@@ -46,15 +45,17 @@ data class VisibilityParams(
             if (transformedValueType.isAbleToAssign(ComposeFlowType.BooleanType())) {
                 add(
                     TrackableIssue(
-                        destinationContext = DestinationContext.UiBuilderScreen(
-                            canvasEditableId = canvasEditable.id,
-                            composeNodeId = composeNode.id,
-                        ),
-                        issue = Issue.ResolvedToTypeNotAssignable(
-                            property = visibilityCondition,
-                            acceptableType = ComposeFlowType.BooleanType(),
-                        )
-                    )
+                        destinationContext =
+                            DestinationContext.UiBuilderScreen(
+                                canvasEditableId = canvasEditable.id,
+                                composeNodeId = composeNode.id,
+                            ),
+                        issue =
+                            Issue.ResolvedToTypeNotAssignable(
+                                property = visibilityCondition,
+                                acceptableType = ComposeFlowType.BooleanType(),
+                            ),
+                    ),
                 )
             }
             visibilityCondition.getAssignableProperties().forEach { property ->
@@ -62,23 +63,23 @@ data class VisibilityParams(
                 if (transformedType is ComposeFlowType.UnknownType) {
                     add(
                         TrackableIssue(
-                            destinationContext = DestinationContext.UiBuilderScreen(
-                                canvasEditableId = canvasEditable.id,
-                                composeNodeId = composeNode.id,
-                            ),
-                            issue = Issue.ResolvedToUnknownType(
-                                property = property,
-                            )
-                        )
+                            destinationContext =
+                                DestinationContext.UiBuilderScreen(
+                                    canvasEditableId = canvasEditable.id,
+                                    composeNodeId = composeNode.id,
+                                ),
+                            issue =
+                                Issue.ResolvedToUnknownType(
+                                    property = property,
+                                ),
+                        ),
                     )
                 }
             }
         }
     }
 
-    fun alwaysVisible(): Boolean {
-        return isVisibilityConditionAlwaysVisible() && formFactorVisibility.alwaysVisible()
-    }
+    fun alwaysVisible(): Boolean = isVisibilityConditionAlwaysVisible() && formFactorVisibility.alwaysVisible()
 
     fun generateVisibilityCondition(
         project: Project,
@@ -93,7 +94,7 @@ data class VisibilityParams(
                         project,
                         context,
                         ComposeFlowType.BooleanType(),
-                        dryRun = dryRun
+                        dryRun = dryRun,
                     ),
             )
         }
@@ -115,7 +116,7 @@ data class VisibilityParams(
                         "%M(%M.COMPACT)",
                         isCurrentWindowWidthSizeClassMember,
                         windowWidthSizeClassMember,
-                    )
+                    ),
                 )
                 needsOr = true
             }
@@ -129,7 +130,7 @@ data class VisibilityParams(
                         "%M(%M.MEDIUM)",
                         isCurrentWindowWidthSizeClassMember,
                         windowWidthSizeClassMember,
-                    )
+                    ),
                 )
                 needsOr = true
             }
@@ -143,7 +144,7 @@ data class VisibilityParams(
                         "%M(%M.EXPANDED)",
                         isCurrentWindowWidthSizeClassMember,
                         windowWidthSizeClassMember,
-                    )
+                    ),
                 )
             }
 
@@ -159,7 +160,7 @@ data class VisibilityParams(
 
     private fun isVisibilityConditionAlwaysVisible(): Boolean =
         nodeVisibility == EnumProperty(value = NodeVisibility.AlwaysVisible) ||
-                visibilityCondition == BooleanProperty.Empty
+            visibilityCondition == BooleanProperty.Empty
 }
 
 @Serializable

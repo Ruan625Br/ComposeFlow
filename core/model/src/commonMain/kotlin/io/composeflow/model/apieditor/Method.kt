@@ -9,7 +9,6 @@ enum class Method {
     ;
 
     companion object {
-        fun fromOrdinal(ordinal: Int): Method =
-            entries.first { it.ordinal == ordinal }
+        fun fromOrdinal(ordinal: Int): Method = entries.first { it.ordinal == ordinal }
     }
 }

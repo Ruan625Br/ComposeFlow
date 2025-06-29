@@ -30,7 +30,6 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("SpacerTrait")
 data object SpacerTrait : ComposeTrait {
-
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
             trait = mutableStateOf(SpacerTrait),
@@ -44,8 +43,11 @@ data object SpacerTrait : ComposeTrait {
         )
 
     override fun icon(): ImageVector = Icons.Outlined.SpaceBar
+
     override fun iconText(): String = "Spacer"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_spacer_trait
 
     @Composable
@@ -58,16 +60,18 @@ data object SpacerTrait : ComposeTrait {
         modifier: Modifier,
     ) {
         Spacer(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        paletteRenderParams = paletteRenderParams,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            paletteRenderParams = paletteRenderParams,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         )
     }
 
@@ -83,7 +87,7 @@ data object SpacerTrait : ComposeTrait {
             MemberName("androidx.compose.foundation.layout", "Spacer"),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()

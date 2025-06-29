@@ -24,20 +24,21 @@ class FallbackMutableStateMapSerializer<K, V>(
     private val keySerializer: KSerializer<K>,
     private val valueSerializer: KSerializer<V>,
 ) : KSerializer<MutableMap<K, V>> {
-
     override val descriptor: SerialDescriptor =
         mapSerialDescriptor(keySerializer.descriptor, valueSerializer.descriptor)
 
-    override fun serialize(encoder: Encoder, value: MutableMap<K, V>) {
+    override fun serialize(
+        encoder: Encoder,
+        value: MutableMap<K, V>,
+    ) {
         MapSerializer(keySerializer, valueSerializer).serialize(encoder, value.toMap())
     }
 
-    override fun deserialize(decoder: Decoder): MutableMap<K, V> {
-        return try {
+    override fun deserialize(decoder: Decoder): MutableMap<K, V> =
+        try {
             MapSerializer(keySerializer, valueSerializer).deserialize(decoder).toMutableStateMapEqualsOverride()
         } catch (e: SerializationException) {
             Logger.e { "Failed to deserialize map: ${e.message}, returning empty map" }
             mapOf<K, V>().toMutableStateMapEqualsOverride()
         }
-    }
 }

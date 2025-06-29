@@ -86,25 +86,28 @@ fun ScreenBuilderTab(
 ) {
     var screenToBeDeleted by remember { mutableStateOf<Screen?>(null) }
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(start = 16.dp, top = 16.dp, end = 16.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(start = 16.dp, top = 16.dp, end = 16.dp),
     ) {
         ScreensHeader(
             project = project,
             onAddScreen = onAddScreenFromTemplate,
         )
 
-        val reorderableLazyListState = rememberReorderableLazyListState(onMove = { from, to ->
-            onScreensSwapped(from.index, to.index)
-        })
+        val reorderableLazyListState =
+            rememberReorderableLazyListState(onMove = { from, to ->
+                onScreensSwapped(from.index, to.index)
+            })
 
         LazyColumn(
             state = reorderableLazyListState.listState,
-            modifier = Modifier
-                .reorderable(reorderableLazyListState)
-                .detectReorder(reorderableLazyListState),
+            modifier =
+                Modifier
+                    .reorderable(reorderableLazyListState)
+                    .detectReorder(reorderableLazyListState),
         ) {
             itemsIndexed(items = project.screenHolder.screens) { i, screen ->
                 val rowModifier =
@@ -174,9 +177,10 @@ private fun ScreensHeader(
                 onClick = {
                     addNewScreenDialogOpen = true
                 },
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .padding(start = 16.dp)
+                        .hoverOverlay(),
             ) {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.Add,
@@ -296,14 +300,14 @@ private fun ScreenRowHeader(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .clip(RoundedCornerShape(8.dp))
-            .clickable {
-                onSelectScreen(screen)
-            }
-            .padding(end = 8.dp)
-            .height(32.dp)
-            .hoverIconClickable(),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(8.dp))
+                .clickable {
+                    onSelectScreen(screen)
+                }.padding(end = 8.dp)
+                .height(32.dp)
+                .hoverIconClickable(),
     ) {
         TreeExpander(
             expanded = expanded,
@@ -320,8 +324,10 @@ private fun ScreenRowHeader(
                 imageVector = ComposeFlowIcons.Smartphone,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(start = 4.dp)
-                    .size(16.dp),
+                modifier =
+                    Modifier
+                        .padding(start = 4.dp)
+                        .size(16.dp),
             )
 
             Text(
@@ -376,22 +382,25 @@ private fun DeleteScreenDialog(
     ) {
         Surface {
             Column(
-                modifier = Modifier
-                    .size(300.dp, 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(300.dp, 160.dp)
+                        .padding(16.dp),
             ) {
                 Text(
-                    text = buildAnnotatedString {
-                        append("Delete screen: ")
-                        withStyle(
-                            style = SpanStyle(
-                                fontWeight = FontWeight.Bold,
-                            ),
-                        ) {
-                            append(screen.name)
-                        }
-                        append(" ?")
-                    },
+                    text =
+                        buildAnnotatedString {
+                            append("Delete screen: ")
+                            withStyle(
+                                style =
+                                    SpanStyle(
+                                        fontWeight = FontWeight.Bold,
+                                    ),
+                            ) {
+                                append(screen.name)
+                            }
+                            append(" ?")
+                        },
                 )
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -402,8 +411,9 @@ private fun DeleteScreenDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -411,8 +421,9 @@ private fun DeleteScreenDialog(
                         onClick = {
                             onDeleteScreen(screen)
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text(
                             text = stringResource(Res.string.delete),
@@ -428,15 +439,16 @@ private fun DeleteScreenDialog(
 @Composable
 private fun ThemedScreenBuilderTabPreview(useDarkTheme: Boolean) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
-        val mockProject = Project().apply {
-            screenHolder.screens.addAll(
-                listOf(
-                    Screen("HomeScreen", name = "Home"),
-                    Screen("ProfileScreen", name = "Profile"),
-                    Screen("SettingsScreen", name = "Settings")
+        val mockProject =
+            Project().apply {
+                screenHolder.screens.addAll(
+                    listOf(
+                        Screen("HomeScreen", name = "Home"),
+                        Screen("ProfileScreen", name = "Profile"),
+                        Screen("SettingsScreen", name = "Settings"),
+                    ),
                 )
-            )
-        }
+            }
 
         ScreenBuilderTab(
             project = mockProject,
@@ -467,7 +479,7 @@ private fun ThemedDeleteScreenDialogPreview(useDarkTheme: Boolean) {
         DeleteScreenDialog(
             screen = Screen("MyScreen", name = "MyScreen"),
             onCloseClick = {},
-            onDeleteScreen = {}
+            onDeleteScreen = {},
         )
     }
 }

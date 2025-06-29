@@ -94,13 +94,13 @@ typealias ActionId = String
 
 @Serializable
 sealed interface Action {
-
     val id: ActionId
 
     @Composable
     fun SimplifiedContent(project: Project)
 
     val name: String
+
     fun generateActionTriggerCodeBlock(
         project: Project,
         context: GenerationContext,
@@ -114,7 +114,9 @@ sealed interface Action {
     ): CodeBlock? = null
 
     fun argumentName(project: Project): String? = null
+
     fun generateArgumentParameterSpec(project: Project): ParameterSpec? = null
+
     fun generateNavigationInitializationBlock(): CodeBlock? = null
 
     /**
@@ -142,6 +144,7 @@ sealed interface Action {
     }
 
     fun isDependent(sourceId: String): Boolean = false
+
     fun asActionNode(actionNodeId: ActionNodeId? = null): ActionNode
 
     /**
@@ -153,6 +156,7 @@ sealed interface Action {
     fun companionState(project: Project): ScreenState<*>? = null
 
     fun hasSuspendFunction(): Boolean = false
+
     fun getDependentComposeNodes(project: Project): List<ComposeNode> = emptyList()
 
     fun generateIssues(project: Project): List<Issue> = emptyList()
@@ -179,7 +183,6 @@ sealed interface ForkedAction : Action
 
 @Serializable
 sealed interface Navigation : Action {
-
     @Serializable
     @SerialName("NavigateTo")
     data class NavigateTo(
@@ -190,40 +193,39 @@ sealed interface Navigation : Action {
         @Transient
         override val name: String = "Navigate to",
     ) : Navigation {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
-        }
-
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
                 val screen = project.findScreenOrNull(screenId)
                 if (screen == null) {
                     add(
                         Issue.InvalidScreenReference(
                             screenId,
-                            destination = NavigatableDestination.UiBuilderScreen(
-                                inspectorTabDestination = InspectorTabDestination.Action
-                            ),
+                            destination =
+                                NavigatableDestination.UiBuilderScreen(
+                                    inspectorTabDestination = InspectorTabDestination.Action,
+                                ),
                             issueContext = this@NavigateTo,
-                        )
+                        ),
                     )
                 }
                 screen?.let {
                     paramsMap.forEach { entry ->
                         val parameter = screen.parameters.firstOrNull { it.id == entry.key }
                         parameter?.let {
-
                             val transformedValueType = entry.value.transformedValueType(project)
                             if (transformedValueType is ComposeFlowType.UnknownType) {
                                 add(
                                     Issue.ResolvedToUnknownType(
                                         property = entry.value,
-                                        destination = NavigatableDestination.UiBuilderScreen(
-                                            inspectorTabDestination = InspectorTabDestination.Action
-                                        ),
+                                        destination =
+                                            NavigatableDestination.UiBuilderScreen(
+                                                inspectorTabDestination = InspectorTabDestination.Action,
+                                            ),
                                         issueContext = this@NavigateTo,
-                                    )
+                                    ),
                                 )
                             }
 
@@ -232,18 +234,18 @@ sealed interface Navigation : Action {
                                     Issue.ResolvedToTypeNotAssignable(
                                         property = entry.value,
                                         acceptableType = parameter.parameterType,
-                                        destination = NavigatableDestination.UiBuilderScreen(
-                                            inspectorTabDestination = InspectorTabDestination.Action
-                                        ),
+                                        destination =
+                                            NavigatableDestination.UiBuilderScreen(
+                                                inspectorTabDestination = InspectorTabDestination.Action,
+                                            ),
                                         issueContext = this@NavigateTo,
-                                    )
+                                    ),
                                 )
                             }
                         }
                     }
                 }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -264,54 +266,58 @@ sealed interface Navigation : Action {
         }
 
         override fun generateActionTriggerCodeBlock(
-            project: Project, context: GenerationContext, dryRun: Boolean,
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
         ): CodeBlock {
             val targetScreen = project.screenHolder.screens.firstOrNull { it.id == screenId }
             val builder = CodeBlock.builder()
             targetScreen?.let {
-                val argString = if (targetScreen.parameters.isEmpty()) {
-                    // ScreenRoute is data object. No parameters are needed
-                    ""
-                } else {
-                    buildString {
-                        append("(")
-                        paramsMap.entries.forEachIndexed { index, (key, value) ->
-                            val parameter = targetScreen.parameters.firstOrNull { parameter ->
-                                parameter.id == key
-                            }
+                val argString =
+                    if (targetScreen.parameters.isEmpty()) {
+                        // ScreenRoute is data object. No parameters are needed
+                        ""
+                    } else {
+                        buildString {
+                            append("(")
+                            paramsMap.entries.forEachIndexed { index, (key, value) ->
+                                val parameter =
+                                    targetScreen.parameters.firstOrNull { parameter ->
+                                        parameter.id == key
+                                    }
 
-                            parameter?.let {
-                                if (value is IntrinsicProperty<*>) {
-                                    append(
-                                        "${parameter.variableName} = ${
-                                            value.transformedCodeBlock(
-                                                project,
-                                                context,
-                                                parameter.parameterType,
-                                                dryRun = dryRun,
-                                            )
-                                        }"
-                                    )
-                                } else {
-                                    append(
-                                        "${parameter.variableName} = ${
-                                            value.transformedCodeBlock(
-                                                project,
-                                                context,
-                                                parameter.parameterType,
-                                                dryRun = dryRun,
-                                            )
-                                        }"
-                                    )
+                                parameter?.let {
+                                    if (value is IntrinsicProperty<*>) {
+                                        append(
+                                            "${parameter.variableName} = ${
+                                                value.transformedCodeBlock(
+                                                    project,
+                                                    context,
+                                                    parameter.parameterType,
+                                                    dryRun = dryRun,
+                                                )
+                                            }",
+                                        )
+                                    } else {
+                                        append(
+                                            "${parameter.variableName} = ${
+                                                value.transformedCodeBlock(
+                                                    project,
+                                                    context,
+                                                    parameter.parameterType,
+                                                    dryRun = dryRun,
+                                                )
+                                            }",
+                                        )
+                                    }
+                                }
+                                if (index != paramsMap.entries.size - 1) {
+                                    append(",\n")
                                 }
                             }
-                            if (index != paramsMap.entries.size - 1) {
-                                append(",\n")
-                            }
+                            append(")")
                         }
-                        append(")")
                     }
-                }
                 builder.addStatement(
                     """${argumentName(project)}($screenRoute.${it.routeName}$argString)""",
                 )
@@ -319,22 +325,22 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun argumentName(project: Project): String =
-            ComposeScreenConstant.onNavigateToRoute.name
+        override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateToRoute.name
 
-        override fun generateArgumentParameterSpec(project: Project): ParameterSpec {
-            return argumentName(project).let { argumentName ->
-                ParameterSpec.builder(
-                    argumentName,
-                    LambdaTypeName.get(
-                        parameters = arrayOf(
-                            ParameterSpec.unnamed(screenRouteClass),
+        override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
+            argumentName(project).let { argumentName ->
+                ParameterSpec
+                    .builder(
+                        argumentName,
+                        LambdaTypeName.get(
+                            parameters =
+                                arrayOf(
+                                    ParameterSpec.unnamed(screenRouteClass),
+                                ),
+                            returnType = UNIT,
                         ),
-                        returnType = UNIT,
-                    ),
-                ).build()
+                    ).build()
             }
-        }
 
         override fun generateNavigationInitializationBlock(): CodeBlock {
             val builder = CodeBlock.builder()
@@ -347,8 +353,7 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun isDependent(sourceId: String): Boolean =
-            paramsMap.any { it.value.isDependent(sourceId) }
+        override fun isDependent(sourceId: String): Boolean = paramsMap.any { it.value.isDependent(sourceId) }
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -383,19 +388,18 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun argumentName(project: Project): String =
-            ComposeScreenConstant.onNavigateBack.name
+        override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateBack.name
 
-        override fun generateArgumentParameterSpec(project: Project): ParameterSpec {
-            return argumentName(project).let { argumentName ->
-                ParameterSpec.builder(
-                    argumentName,
-                    LambdaTypeName.get(
-                        returnType = UNIT,
-                    ),
-                ).build()
+        override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
+            argumentName(project).let { argumentName ->
+                ParameterSpec
+                    .builder(
+                        argumentName,
+                        LambdaTypeName.get(
+                            returnType = UNIT,
+                        ),
+                    ).build()
             }
-        }
 
         override fun generateNavigationInitializationBlock(): CodeBlock {
             val builder = CodeBlock.builder()
@@ -414,7 +418,6 @@ sealed interface Navigation : Action {
 
 @Serializable
 sealed interface StateAction : Action {
-
     @Serializable
     @SerialName("SetAppStateValue")
     data class SetAppStateValue(
@@ -424,13 +427,11 @@ sealed interface StateAction : Action {
         @Transient
         override val name: String = "Set state",
     ) : StateAction {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            setValueToStates.flatMap { it.operation.getDependentComposeNodes(project) }
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return setValueToStates.flatMap { it.operation.getDependentComposeNodes(project) }
-        }
-
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
                 setValueToStates.forEach { setValueToState ->
                     project.findLocalStateOrNull(setValueToState.writeToStateId)?.let {
                         setValueToState.operation.getAssignableProperties().forEach {
@@ -438,27 +439,26 @@ sealed interface StateAction : Action {
                                 add(
                                     Issue.ResolvedToUnknownType(
                                         property = it,
-                                        destination = NavigatableDestination.UiBuilderScreen(
-                                            inspectorTabDestination = InspectorTabDestination.Action
-                                        ),
+                                        destination =
+                                            NavigatableDestination.UiBuilderScreen(
+                                                inspectorTabDestination = InspectorTabDestination.Action,
+                                            ),
                                         issueContext = this@SetAppStateValue,
-                                    )
+                                    ),
                                 )
                             }
                         }
                     }
                 }
             }
-        }
 
-        override fun isDependent(sourceId: String): Boolean {
-            return setValueToStates.any {
+        override fun isDependent(sourceId: String): Boolean =
+            setValueToStates.any {
                 it.isDependent(sourceId)
             } ||
-                    setValueToStates.any {
-                        it.writeToStateId == sourceId
-                    }
-        }
+                setValueToStates.any {
+                    it.writeToStateId == sourceId
+                }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -495,20 +495,25 @@ sealed interface StateAction : Action {
         ): CodeBlock {
             val builder = CodeBlock.builder()
             // CanvasEditable that has this action
-            val editable = project.getAllCanvasEditable()
-                .firstOrNull {
-                    it.getAllComposeNodes()
-                        .any { node -> node.allActions().any { action -> action == this } }
-                }
-                ?: throw IllegalStateException("No CanvasEditable has State $this")
+            val editable =
+                project
+                    .getAllCanvasEditable()
+                    .firstOrNull {
+                        it
+                            .getAllComposeNodes()
+                            .any { node -> node.allActions().any { action -> action == this } }
+                    }
+                    ?: throw IllegalStateException("No CanvasEditable has State $this")
             setValueToStates.forEach {
                 it.getUpdateMethodName(project, context)?.let { updateMethodName ->
                     builder.addStatement(
-                        "${editable.viewModelName}.${updateMethodName}(${
+                        "${editable.viewModelName}.$updateMethodName(${
                             it.operation.getUpdateMethodParamsAsString(
-                                project, context, dryRun = dryRun
+                                project,
+                                context,
+                                dryRun = dryRun,
                             )
-                        })"
+                        })",
                     )
                 }
             }
@@ -540,11 +545,12 @@ data class SetValueToState(
     val writeToStateId: StateId,
     val operation: StateOperation,
 ) {
-    fun isDependent(sourceId: String): Boolean {
-        return operation.isDependent(sourceId)
-    }
+    fun isDependent(sourceId: String): Boolean = operation.isDependent(sourceId)
 
-    fun getUpdateMethodName(project: Project, context: GenerationContext): String? {
+    fun getUpdateMethodName(
+        project: Project,
+        context: GenerationContext,
+    ): String? {
         val state = project.findLocalStateOrNull(writeToStateId) ?: return null
         val writeState = state as? WriteableState ?: return null
         return operation.getUpdateMethodName(project, context, writeState)
@@ -576,23 +582,22 @@ data class CallApi(
     @Transient
     override val name: String = "Call API",
 ) : Action {
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
 
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
-    }
-
-    override fun generateIssues(project: Project): List<Issue> {
-        return buildList {
+    override fun generateIssues(project: Project): List<Issue> =
+        buildList {
             val api = project.findApiDefinitionOrNull(apiId)
             if (api == null) {
                 add(
                     Issue.InvalidApiReference(
                         apiId = apiId,
-                        destination = NavigatableDestination.UiBuilderScreen(
-                            inspectorTabDestination = InspectorTabDestination.Action
-                        ),
+                        destination =
+                            NavigatableDestination.UiBuilderScreen(
+                                inspectorTabDestination = InspectorTabDestination.Action,
+                            ),
                         issueContext = this@CallApi,
-                    )
+                    ),
                 )
             }
             api?.let {
@@ -604,11 +609,12 @@ data class CallApi(
                                 add(
                                     Issue.ResolvedToUnknownType(
                                         property = property,
-                                        destination = NavigatableDestination.UiBuilderScreen(
-                                            inspectorTabDestination = InspectorTabDestination.Action
-                                        ),
+                                        destination =
+                                            NavigatableDestination.UiBuilderScreen(
+                                                inspectorTabDestination = InspectorTabDestination.Action,
+                                            ),
                                         issueContext = this@CallApi,
-                                    )
+                                    ),
                                 )
                             }
                         }
@@ -616,7 +622,6 @@ data class CallApi(
                 }
             }
         }
-    }
 
     @Composable
     override fun SimplifiedContent(project: Project) {
@@ -639,8 +644,7 @@ data class CallApi(
         }
     }
 
-    override fun isDependent(sourceId: String): Boolean =
-        paramsMap.any { it.value.isDependent(sourceId) }
+    override fun isDependent(sourceId: String): Boolean = paramsMap.any { it.value.isDependent(sourceId) }
 
     override fun generateActionTriggerCodeBlock(
         project: Project,
@@ -650,19 +654,20 @@ data class CallApi(
         val builder = CodeBlock.builder()
         val apiDefinition = project.findApiDefinitionOrNull(apiId)
         apiDefinition?.let {
-            val argumentString = buildString {
-                paramsMap.entries.forEachIndexed { index, (parameterId, value) ->
-                    val parameter =
-                        apiDefinition.parameters.firstOrNull { it.parameterId == parameterId }
-                    parameter?.let {
-                        append("${parameter.variableName} = ")
-                        append("${value.transformedCodeBlock(project, context, dryRun = dryRun)}")
-                        if (index != paramsMap.entries.size - 1) {
-                            append(",")
+            val argumentString =
+                buildString {
+                    paramsMap.entries.forEachIndexed { index, (parameterId, value) ->
+                        val parameter =
+                            apiDefinition.parameters.firstOrNull { it.parameterId == parameterId }
+                        parameter?.let {
+                            append("${parameter.variableName} = ")
+                            append("${value.transformedCodeBlock(project, context, dryRun = dryRun)}")
+                            if (index != paramsMap.entries.size - 1) {
+                                append(",")
+                            }
                         }
                     }
                 }
-            }
             builder.addStatement(
                 """${context.currentEditable.viewModelName}.${apiDefinition.callApiFunName()}($argumentString)""",
             )
@@ -675,15 +680,15 @@ data class CallApi(
 }
 
 sealed interface ShowModal : Action {
-
     companion object {
-        fun entries(): List<ShowModal> = listOf(
-            ShowInformationDialog(),
-            ShowConfirmationDialog(),
-            ShowCustomDialog(),
-            ShowBottomSheet(),
-            ShowNavigationDrawer(),
-        )
+        fun entries(): List<ShowModal> =
+            listOf(
+                ShowInformationDialog(),
+                ShowConfirmationDialog(),
+                ShowCustomDialog(),
+                ShowBottomSheet(),
+                ShowNavigationDrawer(),
+            )
     }
 }
 
@@ -698,33 +703,34 @@ data class ShowConfirmationDialog(
     @Transient
     override val name: String = "Show confirmation dialog",
     var dialogOpenVariableName: String = "openConfirmationDialog",
-) : ShowModal, ForkedAction {
+) : ShowModal,
+    ForkedAction {
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        (title?.getDependentComposeNodes(project) ?: emptyList()) +
+            (message?.getDependentComposeNodes(project) ?: emptyList()) +
+            negativeText.getDependentComposeNodes(project) +
+            positiveText.getDependentComposeNodes(project)
 
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return (title?.getDependentComposeNodes(project) ?: emptyList()) +
-                (message?.getDependentComposeNodes(project) ?: emptyList()) +
-                negativeText.getDependentComposeNodes(project) +
-                positiveText.getDependentComposeNodes(project)
-    }
-
-    override fun generateIssues(project: Project): List<Issue> {
-        return buildList {
-            listOf(title, message, negativeText, positiveText).mapNotNull { it }
-                .flatMap { it.getAssignableProperties() }.forEach {
+    override fun generateIssues(project: Project): List<Issue> =
+        buildList {
+            listOf(title, message, negativeText, positiveText)
+                .mapNotNull { it }
+                .flatMap { it.getAssignableProperties() }
+                .forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
                                 property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
+                                destination =
+                                    NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action,
+                                    ),
                                 issueContext = this@ShowConfirmationDialog,
-                            )
+                            ),
                         )
                     }
                 }
         }
-    }
 
     override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
         ActionNode.Forked(id = actionNodeId ?: Uuid.random().toString(), forkedAction = this)
@@ -753,16 +759,19 @@ data class ShowConfirmationDialog(
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
-        val variableName = composableContext.getOrAddIdentifier(
-            id = "${id}-${dialogOpenVariableName}",
-            initialIdentifier = dialogOpenVariableName
-        )
-        val titleArg = title?.let {
-            "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
-        } ?: ""
-        val messageArg = message?.let {
-            "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
-        } ?: ""
+        val variableName =
+            composableContext.getOrAddIdentifier(
+                id = "$id-$dialogOpenVariableName",
+                initialIdentifier = dialogOpenVariableName,
+            )
+        val titleArg =
+            title?.let {
+                "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+            } ?: ""
+        val messageArg =
+            message?.let {
+                "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+            } ?: ""
         builder.addStatement(
             """
                 var $variableName by %M { %M(false) }    
@@ -772,14 +781,14 @@ data class ShowConfirmationDialog(
                 positiveText.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
+                    dryRun = dryRun,
                 )
             },
                         negativeText = ${
                 negativeText.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
+                    dryRun = dryRun,
                 )
             },
                         positiveBlock = {
@@ -826,31 +835,31 @@ data class ShowInformationDialog(
     @Transient
     val dialogOpenVariableName: String = "openInformationDialog",
 ) : ShowModal {
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        (title?.getDependentComposeNodes(project) ?: emptyList()) +
+            (message?.getDependentComposeNodes(project) ?: emptyList()) +
+            confirmText.getDependentComposeNodes(project)
 
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return (title?.getDependentComposeNodes(project) ?: emptyList()) +
-                (message?.getDependentComposeNodes(project) ?: emptyList()) +
-                confirmText.getDependentComposeNodes(project)
-    }
-
-    override fun generateIssues(project: Project): List<Issue> {
-        return buildList {
-            listOf(title, message, confirmText).mapNotNull { it }
-                .flatMap { it.getAssignableProperties() }.forEach {
+    override fun generateIssues(project: Project): List<Issue> =
+        buildList {
+            listOf(title, message, confirmText)
+                .mapNotNull { it }
+                .flatMap { it.getAssignableProperties() }
+                .forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
                                 property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
+                                destination =
+                                    NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action,
+                                    ),
                                 issueContext = this@ShowInformationDialog,
-                            )
+                            ),
                         )
                     }
                 }
         }
-    }
 
     override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
         ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -881,15 +890,17 @@ data class ShowInformationDialog(
         val composableContext = context.getCurrentComposableContext()
         val dialogVariableName =
             composableContext.getOrAddIdentifier(
-                id = "${id}-${dialogOpenVariableName}",
+                id = "$id-$dialogOpenVariableName",
                 initialIdentifier = dialogOpenVariableName,
             )
-        val titleArg = title?.let {
-            "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
-        } ?: ""
-        val messageArg = message?.let {
-            "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
-        } ?: ""
+        val titleArg =
+            title?.let {
+                "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+            } ?: ""
+        val messageArg =
+            message?.let {
+                "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
+            } ?: ""
         builder.addStatement(
             """
                 var $dialogVariableName by %M { %M(false) }    
@@ -899,7 +910,7 @@ data class ShowInformationDialog(
                 confirmText.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
+                    dryRun = dryRun,
                 )
             },
                         onDismissRequest = {
@@ -912,7 +923,7 @@ data class ShowInformationDialog(
             """,
             MemberHolder.AndroidX.Runtime.remember,
             MemberHolder.AndroidX.Runtime.mutableStateOf,
-            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "InformationDialog")
+            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "InformationDialog"),
         )
         return builder.build()
     }
@@ -933,21 +944,22 @@ data class ShowInformationDialog(
 sealed interface ShowModalWithComponent : ShowModal {
     val componentId: ComponentId?
     val paramsMap: MutableMap<ParameterId, AssignableProperty>
+
     fun copy(
-        paramsMap:
-        MutableMap<ParameterId,
-                AssignableProperty>,
+        paramsMap: MutableMap<
+            ParameterId,
+            AssignableProperty,
+        >,
     ): ShowModalWithComponent
 
-    fun findComponentOrNull(project: Project): Component? {
-        return if (componentId != null) {
+    fun findComponentOrNull(project: Project): Component? =
+        if (componentId != null) {
             componentId?.let { project.findComponentOrNull(it) }
         } else if (project.componentHolder.components.isNotEmpty()) {
             project.componentHolder.components[0]
         } else {
             null
         }
-    }
 
     override fun generateIssues(project: Project): List<Issue> {
         val component = findComponentOrNull(project) ?: return emptyList()
@@ -960,11 +972,12 @@ sealed interface ShowModalWithComponent : ShowModal {
                             add(
                                 Issue.ResolvedToUnknownType(
                                     property = property,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
+                                    destination =
+                                        NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action,
+                                        ),
                                     issueContext = this@ShowModalWithComponent,
-                                )
+                                ),
                             )
                         }
                         if (!parameter.parameterType.isAbleToAssign(transformedValueType)) {
@@ -972,11 +985,12 @@ sealed interface ShowModalWithComponent : ShowModal {
                                 Issue.ResolvedToTypeNotAssignable(
                                     property = property,
                                     acceptableType = parameter.parameterType,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
+                                    destination =
+                                        NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action,
+                                        ),
                                     issueContext = this@ShowModalWithComponent,
-                                )
+                                ),
                             )
                         }
                     }
@@ -999,14 +1013,12 @@ data class ShowCustomDialog(
     @Transient
     val dialogOpenVariableName: String = "openCustomDialog",
 ) : ShowModalWithComponent {
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent = this.copy(paramsMap = paramsMap)
 
-    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent {
-        return this.copy(paramsMap = paramsMap)
-    }
-
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
-    }
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        paramsMap.entries.flatMap {
+            it.value.getDependentComposeNodes(project)
+        }
 
     override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
         ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -1037,9 +1049,9 @@ data class ShowCustomDialog(
         val composableContext = context.getCurrentComposableContext()
         val dialogOpenVariableName =
             composableContext.addComposeFileVariable(
-                id = "${id}-${dialogOpenVariableName}",
+                id = "$id-$dialogOpenVariableName",
                 initialIdentifier = dialogOpenVariableName,
-                dryRun = dryRun
+                dryRun = dryRun,
             )
 
         val paramBuilder = CodeBlock.builder()
@@ -1051,8 +1063,8 @@ data class ShowCustomDialog(
                 assignableProperty.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             paramBuilder.addStatement(",")
         }
@@ -1065,7 +1077,7 @@ data class ShowCustomDialog(
                     ${paramBuilder.build()}
                     $componentKeyName = "${component.name}-$componentInvocationCount" 
                 )""",
-            component.asMemberName(project)
+            component.asMemberName(project),
         )
 
         val builder = CodeBlock.builder()
@@ -1085,7 +1097,7 @@ data class ShowCustomDialog(
             """,
             MemberHolder.AndroidX.Runtime.remember,
             MemberHolder.AndroidX.Runtime.mutableStateOf,
-            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "CustomDialog")
+            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "CustomDialog"),
         )
         return builder.build()
     }
@@ -1116,14 +1128,12 @@ data class ShowBottomSheet(
     @Transient
     val bottomSheetOpenVariableName: String = "openBottomSheet",
 ) : ShowModalWithComponent {
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent = this.copy(paramsMap = paramsMap)
 
-    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent {
-        return this.copy(paramsMap = paramsMap)
-    }
-
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return paramsMap.entries.flatMap { it.value.getDependentComposeNodes(project) }
-    }
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        paramsMap.entries.flatMap {
+            it.value.getDependentComposeNodes(project)
+        }
 
     override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
         ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -1155,16 +1165,16 @@ data class ShowBottomSheet(
         val composableContext = context.getCurrentComposableContext()
         val bottomSheetOpenVariableName =
             composableContext.addComposeFileVariable(
-                id = "${id}-${bottomSheetOpenVariableName}",
+                id = "$id-$bottomSheetOpenVariableName",
                 initialIdentifier = bottomSheetOpenVariableName,
-                dryRun = dryRun
+                dryRun = dryRun,
             )
         val initialBottomSheetStateName = "bottomSheetState"
         val bottomSheetStateVariable =
             composableContext.addComposeFileVariable(
-                id = "${id}-${initialBottomSheetStateName}",
+                id = "$id-$initialBottomSheetStateName",
                 initialBottomSheetStateName,
-                dryRun = dryRun
+                dryRun = dryRun,
             )
 
         val paramBuilder = CodeBlock.builder()
@@ -1176,8 +1186,8 @@ data class ShowBottomSheet(
                 assignableProperty.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             paramBuilder.addStatement(",")
         }
@@ -1190,7 +1200,7 @@ data class ShowBottomSheet(
                     ${paramBuilder.build()}
                     $componentKeyName = "${component.name}-$componentInvocationCount" 
                 )""",
-            component.asMemberName(project)
+            component.asMemberName(project),
         )
 
         val builder = CodeBlock.builder()
@@ -1212,7 +1222,7 @@ data class ShowBottomSheet(
             MemberHolder.AndroidX.Runtime.remember,
             MemberHolder.AndroidX.Runtime.mutableStateOf,
             MemberName("androidx.compose.material3", "rememberModalBottomSheetState"),
-            MemberName("androidx.compose.material3", "ModalBottomSheet")
+            MemberName("androidx.compose.material3", "ModalBottomSheet"),
         )
         return builder.build()
     }
@@ -1233,12 +1243,10 @@ data class ShowBottomSheet(
 @Serializable
 @SerialName("ShowNavigationDrawer")
 data class ShowNavigationDrawer(
-
     override val id: ActionId = Uuid.random().toString(),
     @Transient
     override val name: String = "Show nav drawer",
 ) : ShowModal {
-
     override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
         ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
@@ -1260,13 +1268,14 @@ data class ShowNavigationDrawer(
     }
 
     override fun generateIssues(project: Project): List<Issue> {
-        val screenHavingThisAction = project.screenHolder.screens.firstOrNull { screen ->
-            screen.getAllComposeNodes().firstOrNull { node ->
-                node.allActions().any { action ->
-                    action.id == this.id
-                }
-            } != null
-        }
+        val screenHavingThisAction =
+            project.screenHolder.screens.firstOrNull { screen ->
+                screen.getAllComposeNodes().firstOrNull { node ->
+                    node.allActions().any { action ->
+                        action.id == this.id
+                    }
+                } != null
+            }
         return if (screenHavingThisAction?.navigationDrawerNode?.value == null) {
             listOf(Issue.NavigationDrawerIsNotSet())
         } else {
@@ -1279,13 +1288,14 @@ data class ShowNavigationDrawer(
         context: GenerationContext,
         dryRun: Boolean,
     ): CodeBlock {
-        val screenHavingThisAction = project.screenHolder.screens.firstOrNull { screen ->
-            screen.getAllComposeNodes().firstOrNull { node ->
-                node.allActions().any { action ->
-                    action.id == this.id
-                }
-            } != null
-        }
+        val screenHavingThisAction =
+            project.screenHolder.screens.firstOrNull { screen ->
+                screen.getAllComposeNodes().firstOrNull { node ->
+                    node.allActions().any { action ->
+                        action.id == this.id
+                    }
+                } != null
+            }
         if (screenHavingThisAction?.navigationDrawerNode?.value == null) return CodeBlock.of("")
 
         val builder = CodeBlock.builder()
@@ -1297,7 +1307,8 @@ data class ShowNavigationDrawer(
                    if (isClosed) { open() } else {}
                }
            } 
-        """, MemberHolder.Coroutines.launch
+        """,
+                MemberHolder.Coroutines.launch,
             )
         }
         return builder.build()
@@ -1306,11 +1317,9 @@ data class ShowNavigationDrawer(
 
 @Serializable
 sealed interface ShowMessaging : Action {
-
     @Serializable
     @SerialName("Snackbar")
     data class Snackbar(
-
         override val id: ActionId = Uuid.random().toString(),
         val message: AssignableProperty = StringProperty.StringIntrinsicValue("Snackbar message"),
         val actionLabel: AssignableProperty? = null,
@@ -1319,30 +1328,30 @@ sealed interface ShowMessaging : Action {
         @Transient
         val snackbarOpenVariableName: String = "onShowSnackbar",
     ) : ShowMessaging {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            message.getDependentComposeNodes(project) +
+                (actionLabel?.getDependentComposeNodes(project) ?: emptyList())
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return message.getDependentComposeNodes(project) +
-                    (actionLabel?.getDependentComposeNodes(project) ?: emptyList())
-        }
-
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
-                listOf(message, actionLabel).mapNotNull { it }
-                    .flatMap { it.getAssignableProperties() }.forEach {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
+                listOf(message, actionLabel)
+                    .mapNotNull { it }
+                    .flatMap { it.getAssignableProperties() }
+                    .forEach {
                         if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                             add(
                                 Issue.ResolvedToUnknownType(
                                     property = it,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
+                                    destination =
+                                        NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action,
+                                        ),
                                     issueContext = this@Snackbar,
-                                )
+                                ),
                             )
                         }
                     }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -1355,8 +1364,12 @@ sealed interface ShowMessaging : Action {
                 Text(
                     message.displayText(project),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (message is IntrinsicProperty<*>) MaterialTheme.colorScheme.secondary
-                    else MaterialTheme.colorScheme.tertiary,
+                    color =
+                        if (message is IntrinsicProperty<*>) {
+                            MaterialTheme.colorScheme.secondary
+                        } else {
+                            MaterialTheme.colorScheme.tertiary
+                        },
                     modifier = Modifier.padding(top = 8.dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -1370,9 +1383,9 @@ sealed interface ShowMessaging : Action {
             dryRun: Boolean,
         ): CodeBlock {
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                id = "${id}-${snackbarOpenVariableName}",
+                id = "$id-$snackbarOpenVariableName",
                 initialIdentifier = snackbarOpenVariableName,
-                MemberHolder.ComposeFlow.LocalOnShowsnackbar
+                MemberHolder.ComposeFlow.LocalOnShowsnackbar,
             )
             // Initialize the uriHandler once in the compose file instead of initializing it in
             // every action
@@ -1388,15 +1401,16 @@ sealed interface ShowMessaging : Action {
                 actionLabel?.transformedCodeBlock(project, context, dryRun = dryRun) ?: "null"
             return CodeBlock.of(
                 """${ComposeScreenConstant.coroutineScope.name}.%M {
-                ${snackbarOpenVariableName}(${
+                $snackbarOpenVariableName(${
                     message.transformedCodeBlock(
                         project,
                         context,
                         dryRun = dryRun,
                     )
-                }, ${actionLabel})
+                }, $actionLabel)
             }
-        """, MemberHolder.Coroutines.launch
+        """,
+                MemberHolder.Coroutines.launch,
             )
         }
 
@@ -1427,7 +1441,7 @@ sealed interface YearRangeSelectableAction : Action {
         val builder = CodeBlock.builder()
         builder.addStatement(
             "val $stateVariableName = %M(",
-            MemberHolder.Material3.rememberDatePickerState
+            MemberHolder.Material3.rememberDatePickerState,
         )
         val minYear = minSelectableYear.value
         val maxYear = maxSelectableYear.value
@@ -1438,11 +1452,11 @@ sealed interface YearRangeSelectableAction : Action {
                         minYear.transformedCodeBlock(
                             project,
                             context,
-                            dryRun = dryRun
+                            dryRun = dryRun,
                         )
                     }, ${maxYear.transformedCodeBlock(project, context, dryRun = dryRun)}),",
-                    IntRange::class.asTypeName()
-                )
+                    IntRange::class.asTypeName(),
+                ),
             )
         }
         if (onlyPastDates.value) {
@@ -1453,9 +1467,10 @@ sealed interface YearRangeSelectableAction : Action {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     return utcTimeMillis <= %T.System.now().toEpochMilliseconds()
                 }
-            },""", MemberHolder.Material3.SelectableDates,
-                    ClassHolder.Kotlinx.DateTime.Clock
-                )
+            },""",
+                    MemberHolder.Material3.SelectableDates,
+                    ClassHolder.Kotlinx.DateTime.Clock,
+                ),
             )
         }
         if (!onlyPastDates.value && onlyFutureDates.value) {
@@ -1466,9 +1481,10 @@ sealed interface YearRangeSelectableAction : Action {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     return utcTimeMillis >= %T.System.now().toEpochMilliseconds()
                 }
-            },""", MemberHolder.Material3.SelectableDates,
-                    ClassHolder.Kotlinx.DateTime.Clock
-                )
+            },""",
+                    MemberHolder.Material3.SelectableDates,
+                    ClassHolder.Kotlinx.DateTime.Clock,
+                ),
             )
         }
         builder.add(")")
@@ -1478,11 +1494,9 @@ sealed interface YearRangeSelectableAction : Action {
 
 @Serializable
 sealed interface DateOrTimePicker : Action {
-
     @Serializable
     @SerialName("OpenDatePicker")
     data class OpenDatePicker(
-
         override val id: ActionId = Uuid.random().toString(),
         @Serializable(MutableStateSerializer::class)
         override var minSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
@@ -1492,7 +1506,6 @@ sealed interface DateOrTimePicker : Action {
         override var onlyPastDates: MutableState<Boolean> = mutableStateOf(false),
         @Serializable(MutableStateSerializer::class)
         override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
-
         @Transient
         override val name: String = "Date picker",
         @Transient
@@ -1501,32 +1514,35 @@ sealed interface DateOrTimePicker : Action {
         override val outputStateName: MutableState<String> = mutableStateOf("pickedDate"),
         @Transient
         private val rememberedDatePickerStateName: String = "datePickerState",
-    ) : DateOrTimePicker, YearRangeSelectableAction {
-        val companionStateId: StateId = "${id}-outputState"
+    ) : DateOrTimePicker,
+        YearRangeSelectableAction {
+        val companionStateId: StateId = "$id-outputState"
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
-                listOf(minSelectableYear, maxSelectableYear).mapNotNull { it.value }
-                    .flatMap { it.getAssignableProperties() }.forEach {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
+                listOf(minSelectableYear, maxSelectableYear)
+                    .mapNotNull { it.value }
+                    .flatMap { it.getAssignableProperties() }
+                    .forEach {
                         it.let { value ->
                             if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
                                 add(
                                     Issue.ResolvedToUnknownType(
                                         property = value,
-                                        destination = NavigatableDestination.UiBuilderScreen(
-                                            inspectorTabDestination = InspectorTabDestination.Action
-                                        ),
+                                        destination =
+                                            NavigatableDestination.UiBuilderScreen(
+                                                inspectorTabDestination = InspectorTabDestination.Action,
+                                            ),
                                         issueContext = this@OpenDatePicker,
-                                    )
+                                    ),
                                 )
                             }
                         }
                     }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -1539,13 +1555,12 @@ sealed interface DateOrTimePicker : Action {
             }
         }
 
-        override fun companionState(project: Project): ScreenState<*> {
-            return ScreenState.InstantScreenState(
+        override fun companionState(project: Project): ScreenState<*> =
+            ScreenState.InstantScreenState(
                 id = companionStateId,
                 name = outputStateName.value,
-                userWritable = false // This state can be only changed from the Open date picker action
+                userWritable = false, // This state can be only changed from the Open date picker action
             )
-        }
 
         override fun generateInitializationCodeBlock(
             project: Project,
@@ -1556,14 +1571,15 @@ sealed interface DateOrTimePicker : Action {
             val composableContext = context.getCurrentComposableContext()
             val dialogOpenVariableName =
                 composableContext.addComposeFileVariable(
-                    id = "${id}-${dialogOpenVariableName}",
-                    dialogOpenVariableName, dryRun = dryRun
+                    id = "$id-$dialogOpenVariableName",
+                    dialogOpenVariableName,
+                    dryRun = dryRun,
                 )
             val rememberedDatePickerStateName =
                 composableContext.addComposeFileVariable(
-                    id = "${id}-${rememberedDatePickerStateName}",
+                    id = "$id-$rememberedDatePickerStateName",
                     initialIdentifier = rememberedDatePickerStateName,
-                    dryRun = dryRun
+                    dryRun = dryRun,
                 )
 
             val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
@@ -1571,8 +1587,10 @@ sealed interface DateOrTimePicker : Action {
             builder.add(
                 generateRememberDatePickerState(
                     stateVariableName = rememberedDatePickerStateName,
-                    project, context, dryRun = dryRun
-                )
+                    project,
+                    context,
+                    dryRun = dryRun,
+                ),
             )
             builder.addStatement(
                 """
@@ -1588,15 +1606,15 @@ sealed interface DateOrTimePicker : Action {
                                     %M(
                                         onClick = {
                                             $dialogOpenVariableName = false
-                                            ${rememberedDatePickerStateName}.selectedDateMillis?.let {
+                                            $rememberedDatePickerStateName.selectedDateMillis?.let {
                                                 ${composableContext.canvasEditable.viewModelName}.${
                     state.getUpdateMethodName(
-                        context
+                        context,
                     )
                 }(%T.fromEpochMilliseconds(it))
                                             }
                                         },
-                                        enabled = ${rememberedDatePickerStateName}.selectedDateMillis != null
+                                        enabled = $rememberedDatePickerStateName.selectedDateMillis != null
                                     ) {
                                         %M(%M(%M.string.%M))
                                     }
@@ -1615,7 +1633,7 @@ sealed interface DateOrTimePicker : Action {
                             }
                         },
                     ) {
-                        %M(${rememberedDatePickerStateName})
+                        %M($rememberedDatePickerStateName)
                     }
                 }
             """,
@@ -1660,7 +1678,6 @@ sealed interface DateOrTimePicker : Action {
     @Serializable
     @SerialName("OpenDateAndTimePicker")
     data class OpenDateAndTimePicker(
-
         override val id: ActionId = Uuid.random().toString(),
         @Serializable(MutableStateSerializer::class)
         override var minSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
@@ -1670,7 +1687,6 @@ sealed interface DateOrTimePicker : Action {
         override var onlyPastDates: MutableState<Boolean> = mutableStateOf(false),
         @Serializable(MutableStateSerializer::class)
         override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
-
         @Transient
         override val name: String = "Date+Time picker",
         @Transient
@@ -1685,33 +1701,35 @@ sealed interface DateOrTimePicker : Action {
         override val outputStateName: MutableState<String> = mutableStateOf("pickedDateTime"),
         @Transient
         val rememberedStateName: String = "dateTimePickerState",
-    ) : DateOrTimePicker, YearRangeSelectableAction {
-
-        val companionStateId: StateId = "${id}-outputState"
+    ) : DateOrTimePicker,
+        YearRangeSelectableAction {
+        val companionStateId: StateId = "$id-outputState"
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
-                listOf(minSelectableYear, maxSelectableYear).mapNotNull { it.value }
-                    .flatMap { it.getAssignableProperties() }.forEach {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
+                listOf(minSelectableYear, maxSelectableYear)
+                    .mapNotNull { it.value }
+                    .flatMap { it.getAssignableProperties() }
+                    .forEach {
                         it.let { value ->
                             if (value.transformedValueType(project) is ComposeFlowType.UnknownType) {
                                 add(
                                     Issue.ResolvedToUnknownType(
                                         property = value,
-                                        destination = NavigatableDestination.UiBuilderScreen(
-                                            inspectorTabDestination = InspectorTabDestination.Action
-                                        ),
+                                        destination =
+                                            NavigatableDestination.UiBuilderScreen(
+                                                inspectorTabDestination = InspectorTabDestination.Action,
+                                            ),
                                         issueContext = this@OpenDateAndTimePicker,
-                                    )
+                                    ),
                                 )
                             }
                         }
                     }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -1724,13 +1742,12 @@ sealed interface DateOrTimePicker : Action {
             }
         }
 
-        override fun companionState(project: Project): ScreenState<*> {
-            return ScreenState.InstantScreenState(
+        override fun companionState(project: Project): ScreenState<*> =
+            ScreenState.InstantScreenState(
                 id = companionStateId,
                 name = outputStateName.value,
-                userWritable = false // This state can be only changed from the Open date picker action
+                userWritable = false, // This state can be only changed from the Open date picker action
             )
-        }
 
         override fun generateInitializationCodeBlock(
             project: Project,
@@ -1739,31 +1756,36 @@ sealed interface DateOrTimePicker : Action {
         ): CodeBlock {
             val builder = CodeBlock.builder()
             val composableContext = context.getCurrentComposableContext()
-            val dateDialogOpenVariableName = composableContext.addComposeFileVariable(
-                id = "${id}-${dateDialogOpenVariableName}",
-                initialIdentifier = dateDialogOpenVariableName,
-                dryRun = dryRun
-            )
+            val dateDialogOpenVariableName =
+                composableContext.addComposeFileVariable(
+                    id = "$id-$dateDialogOpenVariableName",
+                    initialIdentifier = dateDialogOpenVariableName,
+                    dryRun = dryRun,
+                )
             val datePickerStateName =
                 composableContext.addComposeFileVariable(
-                    id = "${id}-${datePickerStateName}",
-                    initialIdentifier = datePickerStateName, dryRun = dryRun
+                    id = "$id-$datePickerStateName",
+                    initialIdentifier = datePickerStateName,
+                    dryRun = dryRun,
                 )
-            val timeDialogOpenVariableName = composableContext.addComposeFileVariable(
-                id = "${id}-${timeDialogOpenVariableName}",
-                initialIdentifier = timeDialogOpenVariableName,
-                dryRun = dryRun
-            )
+            val timeDialogOpenVariableName =
+                composableContext.addComposeFileVariable(
+                    id = "$id-$timeDialogOpenVariableName",
+                    initialIdentifier = timeDialogOpenVariableName,
+                    dryRun = dryRun,
+                )
             val timePickerStateName =
                 composableContext.addComposeFileVariable(
-                    id = "${id}-${timePickerStateName}",
+                    id = "$id-$timePickerStateName",
                     initialIdentifier =
-                        timePickerStateName, dryRun = dryRun
+                    timePickerStateName,
+                    dryRun = dryRun,
                 )
             val rememberedStateName =
                 composableContext.addComposeFileVariable(
-                    id = "${id}-${rememberedStateName}",
-                    initialIdentifier = rememberedStateName, dryRun = dryRun
+                    id = "$id-$rememberedStateName",
+                    initialIdentifier = rememberedStateName,
+                    dryRun = dryRun,
                 )
 
             val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
@@ -1772,8 +1794,10 @@ sealed interface DateOrTimePicker : Action {
             builder.add(
                 generateRememberDatePickerState(
                     stateVariableName = rememberedStateName,
-                    project, context, dryRun = dryRun,
-                )
+                    project,
+                    context,
+                    dryRun = dryRun,
+                ),
             )
             // Code to open DatePicker
             builder.addStatement(
@@ -1794,7 +1818,7 @@ sealed interface DateOrTimePicker : Action {
                                             $dateDialogOpenVariableName = false
                                             $timeDialogOpenVariableName = true
                                         },
-                                        enabled = ${rememberedStateName}.selectedDateMillis != null
+                                        enabled = $rememberedStateName.selectedDateMillis != null
                                     ) {
                                         %M(%M(%M.string.%M))
                                     }
@@ -1873,13 +1897,13 @@ sealed interface DateOrTimePicker : Action {
                             $rememberedStateName.selectedDateMillis?.let {
                                 ${composableContext.canvasEditable.viewModelName}.${
                         state.getUpdateMethodName(
-                            context
+                            context,
                         )
                     }(
                                     %T.fromEpochMilliseconds(it).%M(
-                                        ${timePickerStateName}.hour
+                                        $timePickerStateName.hour
                                     ).%M(
-                                        ${timePickerStateName}.minute
+                                        $timePickerStateName.minute
                                     )
                                 )
                             }
@@ -1921,7 +1945,7 @@ sealed interface DateOrTimePicker : Action {
                     MemberHolder.JetBrains.stringResource,
                     MemberHolder.ComposeFlow.Res,
                     MemberHolder.ComposeFlow.String.confirm,
-                )
+                ),
             )
 
             return builder.build()
@@ -1939,20 +1963,19 @@ sealed interface DateOrTimePicker : Action {
     }
 
     companion object {
-        fun entries(): List<DateOrTimePicker> = listOf(
-            OpenDatePicker(),
-            OpenDateAndTimePicker(),
-        )
+        fun entries(): List<DateOrTimePicker> =
+            listOf(
+                OpenDatePicker(),
+                OpenDateAndTimePicker(),
+            )
     }
 }
 
 @Serializable
 sealed interface Share : Action {
-
     @Serializable
     @SerialName("OpenUrl")
     data class OpenUrl(
-
         override val id: ActionId = Uuid.random().toString(),
         @Transient
         override val name: String = "Open URL",
@@ -1960,28 +1983,25 @@ sealed interface Share : Action {
         @Transient
         val uriHandlerName: String = "uriHandler",
     ) : Share {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> = url.getDependentComposeNodes(project)
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return url.getDependentComposeNodes(project)
-        }
-
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
                 listOf(url).flatMap { it.getAssignableProperties() }.forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
                                 property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
+                                destination =
+                                    NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action,
+                                    ),
                                 issueContext = this@OpenUrl,
-                            )
+                            ),
                         )
                     }
                 }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -1994,8 +2014,12 @@ sealed interface Share : Action {
                 Text(
                     url.displayText(project),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = if (url is IntrinsicProperty<*>) MaterialTheme.colorScheme.secondary
-                    else MaterialTheme.colorScheme.tertiary,
+                    color =
+                        if (url is IntrinsicProperty<*>) {
+                            MaterialTheme.colorScheme.secondary
+                        } else {
+                            MaterialTheme.colorScheme.tertiary
+                        },
                     modifier = Modifier.padding(top = 8.dp),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -2009,9 +2033,9 @@ sealed interface Share : Action {
             dryRun: Boolean,
         ): CodeBlock {
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                id = "${id}-${uriHandlerName}",
+                id = "$id-$uriHandlerName",
                 initialIdentifier = uriHandlerName,
-                MemberHolder.AndroidX.Platform.LocalUriHandler
+                MemberHolder.AndroidX.Platform.LocalUriHandler,
             )
             // Initialize the uriHandler once in the compose file instead of initializing it in
             // every action
@@ -2022,17 +2046,16 @@ sealed interface Share : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of(
-                """${uriHandlerName}.openUri(${
+        ): CodeBlock =
+            CodeBlock.of(
+                """$uriHandlerName.openUri(${
                     url.transformedCodeBlock(
                         project,
                         context,
-                        dryRun = dryRun
+                        dryRun = dryRun,
                     )
-                })"""
+                })""",
             )
-        }
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -2045,11 +2068,9 @@ sealed interface Share : Action {
 
 @Serializable
 sealed interface Auth : Action {
-
     @Serializable
     @SerialName("SignInWithGoogle")
     data object SignInWithGoogle : Auth {
-
         override val id: ActionId = Uuid.random().toString()
 
         @Composable
@@ -2079,9 +2100,7 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("this@GoogleButtonUiContainerFirebase.onClick()")
-        }
+        ): CodeBlock = CodeBlock.of("this@GoogleButtonUiContainerFirebase.onClick()")
 
         override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
             val builder = CodeBlock.builder()
@@ -2091,7 +2110,8 @@ sealed interface Auth : Action {
             builder.add(
                 """
                 %M(onResult = {}) {
-            """, MemberName("com.mmk.kmpauth.firebase.google", "GoogleButtonUiContainerFirebase")
+            """,
+                MemberName("com.mmk.kmpauth.firebase.google", "GoogleButtonUiContainerFirebase"),
             )
             builder.add(insideContent)
             builder.addStatement("}")
@@ -2102,7 +2122,6 @@ sealed interface Auth : Action {
     @Serializable
     @SerialName("SignInWithEmailAndPassword")
     data class SignInWithEmailAndPassword(
-
         override val id: ActionId = Uuid.random().toString(),
         val email: AssignableProperty = StringProperty.StringIntrinsicValue(""),
         val password: AssignableProperty = StringProperty.StringIntrinsicValue(""),
@@ -2115,28 +2134,27 @@ sealed interface Auth : Action {
         @Transient
         val resetEventResultFunName: String = "resetSignInEventResultState",
     ) : Auth {
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return email.getDependentComposeNodes(project) +
-                    password.getDependentComposeNodes(project)
-        }
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            email.getDependentComposeNodes(project) +
+                password.getDependentComposeNodes(project)
 
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
                 listOf(email, password).flatMap { it.getAssignableProperties() }.forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
                                 property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
+                                destination =
+                                    NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action,
+                                    ),
                                 issueContext = this@SignInWithEmailAndPassword,
-                            )
+                            ),
                         )
                     }
                 }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -2162,30 +2180,31 @@ sealed interface Auth : Action {
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
         private fun generateCreateUserFlowProperties(): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${signInStateName}",
-                ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
-                    ClassHolder.ComposeFlow.EventResultState
-                )
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer(
-                    "%T(%T.NotStarted)",
-                    ClassHolder.Coroutines.Flow.MutableStateFlow,
-                    ClassHolder.ComposeFlow.EventResultState,
-                )
-                .build()
-            val property = PropertySpec.builder(
-                signInStateName,
-                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
-                    ClassHolder.ComposeFlow.EventResultState
-                )
-            )
-                .initializer("_${signInStateName}")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_$signInStateName",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
+                            ClassHolder.ComposeFlow.EventResultState,
+                        ),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer(
+                        "%T(%T.NotStarted)",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow,
+                        ClassHolder.ComposeFlow.EventResultState,
+                    ).build()
+            val property =
+                PropertySpec
+                    .builder(
+                        signInStateName,
+                        ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                            ClassHolder.ComposeFlow.EventResultState,
+                        ),
+                    ).initializer("_$signInStateName")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
@@ -2196,30 +2215,35 @@ sealed interface Auth : Action {
         ): CodeBlock {
             val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                    id = "${id}_${snackbarOpenVariableName}",
-                    snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
+                    id = "${id}_$snackbarOpenVariableName",
+                    snackbarOpenVariableName,
+                    MemberHolder.ComposeFlow.LocalOnShowsnackbar,
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
 
-            val signInStateName = context.getCurrentComposableContext()
-                .addComposeFileVariable(
-                    id = "${id}-${signInStateName}",
-                    initialIdentifier = signInStateName, dryRun = dryRun
-                )
+            val signInStateName =
+                context
+                    .getCurrentComposableContext()
+                    .addComposeFileVariable(
+                        id = "$id-$signInStateName",
+                        initialIdentifier = signInStateName,
+                        dryRun = dryRun,
+                    )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec.builder(signInStateViewModelFunName)
+                FunSpec
+                    .builder(signInStateViewModelFunName)
                     .addParameter(ParameterSpec.builder("email", String::class).build())
                     .addParameter(ParameterSpec.builder("password", String::class).build())
                     .addCode(
                         """%M.%M {   
-            _${signInStateName}.value = %T.Loading
+            _$signInStateName.value = %T.Loading
             try {
                 val authResult = %M.%M.signInWithEmailAndPassword(email, password)
-                _${signInStateName}.value = %T.Success(
+                _$signInStateName.value = %T.Success(
                     message = "User signed in with email: ${'$'}{authResult.user?.email}")
             } catch (e: Exception) {
-                _${signInStateName}.value = %T.Error(e.message ?: "Unknown error")
+                _$signInStateName.value = %T.Error(e.message ?: "Unknown error")
             }
         }""",
                         MemberHolder.PreCompose.viewModelScope,
@@ -2229,18 +2253,17 @@ sealed interface Auth : Action {
                         MemberHolder.Firebase.auth,
                         ClassHolder.ComposeFlow.EventResultState,
                         ClassHolder.ComposeFlow.EventResultState,
-                    )
-                    .build(),
-                dryRun = dryRun
+                    ).build(),
+                dryRun = dryRun,
             )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec.builder(resetEventResultFunName)
+                FunSpec
+                    .builder(resetEventResultFunName)
                     .addCode(
-                        "_${signInStateName}.value = %T.NotStarted",
-                        ClassHolder.ComposeFlow.EventResultState
-                    )
-                    .build(),
+                        "_$signInStateName.value = %T.NotStarted",
+                        ClassHolder.ComposeFlow.EventResultState,
+                    ).build(),
                 dryRun = dryRun,
             )
 
@@ -2251,20 +2274,20 @@ sealed interface Auth : Action {
             val builder = CodeBlock.builder()
             builder.add(
                 """
-    val $signInStateName by ${currentEditable.viewModelName}.${signInStateName}.%M()
-    when (val state = ${signInStateName}) {
+    val $signInStateName by ${currentEditable.viewModelName}.$signInStateName.%M()
+    when (val state = $signInStateName) {
         is %T.Error -> {
             ${ComposeScreenConstant.coroutineScope.name}.%M {
-                ${snackbarOpenVariableName}(state.message, null)
-                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+                $snackbarOpenVariableName(state.message, null)
+                ${currentEditable.viewModelName}.$resetEventResultFunName()
             }
         }
         %T.Loading -> {}
         %T.NotStarted -> {}
         is %T.Success -> {
             ${ComposeScreenConstant.coroutineScope.name}.%M {
-                ${snackbarOpenVariableName}(state.message, null)
-                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+                $snackbarOpenVariableName(state.message, null)
+                ${currentEditable.viewModelName}.$resetEventResultFunName()
             }
         }
     }
@@ -2287,9 +2310,9 @@ sealed interface Auth : Action {
         ): CodeBlock {
             val currentEditable = context.getCurrentComposableContext().canvasEditable
             return CodeBlock.of(
-                """${currentEditable.viewModelName}.${signInStateViewModelFunName}(
+                """${currentEditable.viewModelName}.$signInStateViewModelFunName(
                 ${email.transformedCodeBlock(project, context, dryRun = dryRun)},
-                ${password.transformedCodeBlock(project, context, dryRun = dryRun)})"""
+                ${password.transformedCodeBlock(project, context, dryRun = dryRun)})""",
             )
         }
 
@@ -2297,7 +2320,7 @@ sealed interface Auth : Action {
             val builder = CodeBlock.builder()
             builder.add(
                 """
-                if (${signInStateName} == %T.Loading) {
+                if ($signInStateName == %T.Loading) {
                     %M(modifier = %M.%M(24.%M))
                 } else {
             """,
@@ -2311,7 +2334,7 @@ sealed interface Auth : Action {
             builder.add(
                 """
                 }
-            """
+            """,
             )
             return builder.build()
         }
@@ -2322,7 +2345,6 @@ sealed interface Auth : Action {
     @Serializable
     @SerialName("CreateUserWithEmailAndPassword")
     data class CreateUserWithEmailAndPassword(
-
         override val id: ActionId = Uuid.random().toString(),
         val email: AssignableProperty = StringProperty.StringIntrinsicValue(""),
         val password: AssignableProperty = StringProperty.StringIntrinsicValue(""),
@@ -2335,28 +2357,27 @@ sealed interface Auth : Action {
         @Transient
         private val resetEventResultFunName: String = "resetCreateUserEventResultState",
     ) : Auth {
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return email.getDependentComposeNodes(project) +
-                    password.getDependentComposeNodes(project)
-        }
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            email.getDependentComposeNodes(project) +
+                password.getDependentComposeNodes(project)
 
-        override fun generateIssues(project: Project): List<Issue> {
-            return buildList {
+        override fun generateIssues(project: Project): List<Issue> =
+            buildList {
                 listOf(email, password).flatMap { it.getAssignableProperties() }.forEach {
                     if (it.transformedValueType(project) is ComposeFlowType.UnknownType) {
                         add(
                             Issue.ResolvedToUnknownType(
                                 property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
+                                destination =
+                                    NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action,
+                                    ),
                                 issueContext = this@CreateUserWithEmailAndPassword,
-                            )
+                            ),
                         )
                     }
                 }
             }
-        }
 
         @Composable
         override fun SimplifiedContent(project: Project) {
@@ -2382,30 +2403,31 @@ sealed interface Auth : Action {
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
         private fun generateCreateUserFlowProperties(): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${createStateName}",
-                ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
-                    ClassHolder.ComposeFlow.EventResultState
-                )
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer(
-                    "%T(%T.NotStarted)",
-                    ClassHolder.Coroutines.Flow.MutableStateFlow,
-                    ClassHolder.ComposeFlow.EventResultState,
-                )
-                .build()
-            val property = PropertySpec.builder(
-                createStateName,
-                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
-                    ClassHolder.ComposeFlow.EventResultState
-                )
-            )
-                .initializer("_${createStateName}")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_$createStateName",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
+                            ClassHolder.ComposeFlow.EventResultState,
+                        ),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer(
+                        "%T(%T.NotStarted)",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow,
+                        ClassHolder.ComposeFlow.EventResultState,
+                    ).build()
+            val property =
+                PropertySpec
+                    .builder(
+                        createStateName,
+                        ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                            ClassHolder.ComposeFlow.EventResultState,
+                        ),
+                    ).initializer("_$createStateName")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
@@ -2416,30 +2438,35 @@ sealed interface Auth : Action {
         ): CodeBlock {
             val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
-                    id = "${id}-${snackbarOpenVariableName}",
-                    snackbarOpenVariableName, MemberHolder.ComposeFlow.LocalOnShowsnackbar
+                    id = "$id-$snackbarOpenVariableName",
+                    snackbarOpenVariableName,
+                    MemberHolder.ComposeFlow.LocalOnShowsnackbar,
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
 
-            val createStateName = context.getCurrentComposableContext()
-                .addComposeFileVariable(
-                    id = "${id}-${createStateName}",
-                    createStateName, dryRun = dryRun
-                )
+            val createStateName =
+                context
+                    .getCurrentComposableContext()
+                    .addComposeFileVariable(
+                        id = "$id-$createStateName",
+                        createStateName,
+                        dryRun = dryRun,
+                    )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec.builder(createStateViewModelFunName)
+                FunSpec
+                    .builder(createStateViewModelFunName)
                     .addParameter(ParameterSpec.builder("email", String::class).build())
                     .addParameter(ParameterSpec.builder("password", String::class).build())
                     .addCode(
                         """%M.%M {   
-            _${createStateName}.value = %T.Loading
+            _$createStateName.value = %T.Loading
             try {
                 val authResult = %M.%M.createUserWithEmailAndPassword(email, password)
-                _${createStateName}.value = %T.Success(
+                _$createStateName.value = %T.Success(
                     message = "Created user with email: ${'$'}{authResult.user?.email}")
             } catch (e: Exception) {
-                _${createStateName}.value = %T.Error(e.message ?: "Unknown error")
+                _$createStateName.value = %T.Error(e.message ?: "Unknown error")
             }
         }""",
                         MemberHolder.PreCompose.viewModelScope,
@@ -2449,18 +2476,17 @@ sealed interface Auth : Action {
                         MemberHolder.Firebase.auth,
                         ClassHolder.ComposeFlow.EventResultState,
                         ClassHolder.ComposeFlow.EventResultState,
-                    )
-                    .build(),
-                dryRun = dryRun
+                    ).build(),
+                dryRun = dryRun,
             )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec.builder(resetEventResultFunName)
+                FunSpec
+                    .builder(resetEventResultFunName)
                     .addCode(
-                        "_${createStateName}.value = %T.NotStarted",
-                        ClassHolder.ComposeFlow.EventResultState
-                    )
-                    .build(),
+                        "_$createStateName.value = %T.NotStarted",
+                        ClassHolder.ComposeFlow.EventResultState,
+                    ).build(),
                 dryRun = dryRun,
             )
 
@@ -2471,20 +2497,20 @@ sealed interface Auth : Action {
             val builder = CodeBlock.builder()
             builder.add(
                 """
-    val $createStateName by ${currentEditable.viewModelName}.${createStateName}.%M()
-    when (val state = ${createStateName}) {
+    val $createStateName by ${currentEditable.viewModelName}.$createStateName.%M()
+    when (val state = $createStateName) {
         is %T.Error -> {
             ${ComposeScreenConstant.coroutineScope.name}.%M {
-                ${snackbarOpenVariableName}(state.message, null)
-                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+                $snackbarOpenVariableName(state.message, null)
+                ${currentEditable.viewModelName}.$resetEventResultFunName()
             }
         }
         %T.Loading -> {}
         %T.NotStarted -> {}
         is %T.Success -> {
             ${ComposeScreenConstant.coroutineScope.name}.%M {
-                ${snackbarOpenVariableName}(state.message, null)
-                ${currentEditable.viewModelName}.${resetEventResultFunName}()
+                $snackbarOpenVariableName(state.message, null)
+                ${currentEditable.viewModelName}.$resetEventResultFunName()
             }
         }
     }
@@ -2507,9 +2533,9 @@ sealed interface Auth : Action {
         ): CodeBlock {
             val currentEditable = context.getCurrentComposableContext().canvasEditable
             return CodeBlock.of(
-                """${currentEditable.viewModelName}.${createStateViewModelFunName}(
+                """${currentEditable.viewModelName}.$createStateViewModelFunName(
                 ${email.transformedCodeBlock(project, context, dryRun = dryRun)},
-                ${password.transformedCodeBlock(project, context, dryRun = dryRun)})"""
+                ${password.transformedCodeBlock(project, context, dryRun = dryRun)})""",
             )
         }
 
@@ -2517,7 +2543,7 @@ sealed interface Auth : Action {
             val builder = CodeBlock.builder()
             builder.add(
                 """
-                if (${createStateName} == %T.Loading) {
+                if ($createStateName == %T.Loading) {
                     %M(modifier = %M.%M(24.%M))
                 } else {
             """,
@@ -2531,7 +2557,7 @@ sealed interface Auth : Action {
             builder.add(
                 """
                 }
-            """
+            """,
             )
             return builder.build()
         }
@@ -2542,7 +2568,6 @@ sealed interface Auth : Action {
     @Serializable
     @SerialName("SignOut")
     data object SignOut : Auth {
-
         override val id: ActionId = Uuid.random().toString()
 
         @Composable
@@ -2566,8 +2591,8 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of(
+        ): CodeBlock =
+            CodeBlock.of(
                 """${ComposeScreenConstant.coroutineScope.name}.%M {
             %M.%M.signOut()
         }
@@ -2576,24 +2601,23 @@ sealed interface Auth : Action {
                 MemberHolder.Firebase.Firebase,
                 MemberHolder.Firebase.auth,
             )
-        }
 
         override fun hasSuspendFunction(): Boolean = true
     }
 
     companion object {
-        fun entries(): List<Auth> = listOf(
-            SignInWithGoogle,
-            SignInWithEmailAndPassword(),
-            CreateUserWithEmailAndPassword(),
-            SignOut,
-        )
+        fun entries(): List<Auth> =
+            listOf(
+                SignInWithGoogle,
+                SignInWithEmailAndPassword(),
+                CreateUserWithEmailAndPassword(),
+                SignOut,
+            )
     }
 }
 
 @Serializable
 sealed interface FirestoreAction : Action {
-
     fun generateIssues(
         project: Project,
         collectionId: CollectionId?,
@@ -2615,11 +2639,12 @@ sealed interface FirestoreAction : Action {
                             Issue.ResolvedToTypeNotAssignable(
                                 property = entry.assignableProperty,
                                 acceptableType = dataField.fieldType.type(),
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
-                                ),
+                                destination =
+                                    NavigatableDestination.UiBuilderScreen(
+                                        inspectorTabDestination = InspectorTabDestination.Action,
+                                    ),
                                 issueContext = this@FirestoreAction,
-                            )
+                            ),
                         )
                     }
 
@@ -2630,11 +2655,12 @@ sealed interface FirestoreAction : Action {
                             add(
                                 Issue.ResolvedToUnknownType(
                                     property = property,
-                                    destination = NavigatableDestination.UiBuilderScreen(
-                                        inspectorTabDestination = InspectorTabDestination.Action
-                                    ),
+                                    destination =
+                                        NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action,
+                                        ),
                                     issueContext = this@FirestoreAction,
-                                )
+                                ),
                             )
                         }
                     }
@@ -2646,9 +2672,7 @@ sealed interface FirestoreAction : Action {
     @Serializable
     @SerialName("SaveToFirestore")
     data class SaveToFirestore(
-
         override val id: ActionId = Uuid.random().toString(),
-
         val collectionId: CollectionId? = null,
         val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
         @Transient
@@ -2656,7 +2680,6 @@ sealed interface FirestoreAction : Action {
         @Transient
         private val updateMethodName: String = "onSaveToFirestore",
     ) : FirestoreAction {
-
         @Composable
         override fun SimplifiedContent(project: Project) {
             Column {
@@ -2675,13 +2698,12 @@ sealed interface FirestoreAction : Action {
             }
         }
 
-        override fun generateIssues(project: Project): List<Issue> {
-            return generateIssues(
+        override fun generateIssues(project: Project): List<Issue> =
+            generateIssues(
                 project = project,
                 collectionId = collectionId,
-                dataFieldUpdateProperties = dataFieldUpdateProperties
+                dataFieldUpdateProperties = dataFieldUpdateProperties,
             )
-        }
 
         override fun addUpdateMethodAndReadProperty(
             project: Project,
@@ -2696,33 +2718,37 @@ sealed interface FirestoreAction : Action {
             val composableContext = context.getCurrentComposableContext()
             val updateMethodName =
                 composableContext.generateUniqueFunName(
-                    id = "${id}-${updateMethodName}",
-                    initial = "onSave${dataType.className}ToFirestore"
+                    id = "$id-$updateMethodName",
+                    initial = "onSave${dataType.className}ToFirestore",
                 )
 
             val funSpecBuilder = FunSpec.builder(updateMethodName)
 
-            context.getCurrentComposableContext()
+            context
+                .getCurrentComposableContext()
                 .addDependency(viewModelConstant = ViewModelConstant.firestore)
-            val updateString = buildString {
-                dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
-                    val dataField = dataType.findDataFieldOrNull(dataFieldId)
-                    dataField?.let {
-                        readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
-                            .let { codeBlock ->
-                                val expression = dataField.fieldType.type().convertCodeFromType(
-                                    inputType = readProperty.valueType(project),
-                                    codeBlock = codeBlock,
-                                )
-                                append("${dataField.variableName} = $expression,\n")
-                            }
-                    }
+            val updateString =
+                buildString {
+                    dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
+                        val dataField = dataType.findDataFieldOrNull(dataFieldId)
+                        dataField?.let {
+                            readProperty
+                                .transformedCodeBlock(project, context, dryRun = dryRun)
+                                .let { codeBlock ->
+                                    val expression =
+                                        dataField.fieldType.type().convertCodeFromType(
+                                            inputType = readProperty.valueType(project),
+                                            codeBlock = codeBlock,
+                                        )
+                                    append("${dataField.variableName} = $expression,\n")
+                                }
+                        }
 
-                    readProperty.generateParameterSpec(project)?.let {
-                        funSpecBuilder.addParameter(it)
+                        readProperty.generateParameterSpec(project)?.let {
+                            funSpecBuilder.addParameter(it)
+                        }
                     }
                 }
-            }
 
             funSpecBuilder.addCode(
                 """val document = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}").document 
@@ -2747,46 +2773,47 @@ sealed interface FirestoreAction : Action {
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
                     ?: return builder.build()
-            val dataType = firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) }
-                ?: return builder.build()
+            val dataType =
+                firestoreCollection.dataTypeId?.let { project.findDataTypeOrNull(it) }
+                    ?: return builder.build()
 
-            val paramString = buildString {
-                dataFieldUpdateProperties.forEach { (_, readProperty) ->
-                    readProperty.generateParameterSpec(project)?.let {
-                        append(
-                            "${it.name} = ${
-                                readProperty.transformedCodeBlock(
-                                    project,
-                                    context,
-                                    dryRun = dryRun
-                                )
-                            },"
-                        )
+            val paramString =
+                buildString {
+                    dataFieldUpdateProperties.forEach { (_, readProperty) ->
+                        readProperty.generateParameterSpec(project)?.let {
+                            append(
+                                "${it.name} = ${
+                                    readProperty.transformedCodeBlock(
+                                        project,
+                                        context,
+                                        dryRun = dryRun,
+                                    )
+                                },",
+                            )
+                        }
                     }
                 }
-            }
             val updateMethodName =
                 context.getCurrentComposableContext().generateUniqueFunName(
-                    id = "${id}-${updateMethodName}",
-                    initial = "onSave${dataType.className}ToFirestore"
+                    id = "$id-$updateMethodName",
+                    initial = "onSave${dataType.className}ToFirestore",
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
-            builder.add("""${currentEditable.viewModelName}.${updateMethodName}($paramString)""")
+            builder.add("""${currentEditable.viewModelName}.$updateMethodName($paramString)""")
             return builder.build()
         }
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return dataFieldUpdateProperties.flatMap {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            dataFieldUpdateProperties.flatMap {
                 it.assignableProperty.getDependentComposeNodes(
-                    project
+                    project,
                 )
             }
-        }
 
         override fun isDependent(sourceId: String): Boolean =
             dataFieldUpdateProperties.any {
                 it.assignableProperty.isDependent(
-                    sourceId
+                    sourceId,
                 )
             }
 
@@ -2797,9 +2824,7 @@ sealed interface FirestoreAction : Action {
     @Serializable
     @SerialName("UpdateDocument")
     data class UpdateDocument(
-
         override val id: ActionId = Uuid.random().toString(),
-
         val collectionId: CollectionId? = null,
         val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
         val filterExpression: FilterExpression? = SingleFilter(),
@@ -2808,29 +2833,31 @@ sealed interface FirestoreAction : Action {
         @Transient
         private val updateMethodName: String = "onUpdateDocument",
     ) : FirestoreAction {
-
         override fun generateIssues(project: Project): List<Issue> {
-            val parameterIssues = generateIssues(
-                project = project,
-                collectionId = collectionId,
-                dataFieldUpdateProperties = dataFieldUpdateProperties
-            )
-            val filterIssues = buildList {
-                filterExpression?.getAssignableProperties()?.forEach {
-                    val transformedValueType = it.transformedValueType(project)
-                    if (transformedValueType is ComposeFlowType.UnknownType) {
-                        add(
-                            Issue.ResolvedToUnknownType(
-                                property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
+            val parameterIssues =
+                generateIssues(
+                    project = project,
+                    collectionId = collectionId,
+                    dataFieldUpdateProperties = dataFieldUpdateProperties,
+                )
+            val filterIssues =
+                buildList {
+                    filterExpression?.getAssignableProperties()?.forEach {
+                        val transformedValueType = it.transformedValueType(project)
+                        if (transformedValueType is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = it,
+                                    destination =
+                                        NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action,
+                                        ),
+                                    issueContext = this@UpdateDocument,
                                 ),
-                                issueContext = this@UpdateDocument,
                             )
-                        )
+                        }
                     }
                 }
-            }
             return parameterIssues + filterIssues
         }
 
@@ -2865,12 +2892,13 @@ sealed interface FirestoreAction : Action {
 
             val updateMethodName =
                 composableContext.generateUniqueFunName(
-                    id = "${id}-${updateMethodName}",
-                    initial = "onUpdate${dataType.className}Document"
+                    id = "$id-$updateMethodName",
+                    initial = "onUpdate${dataType.className}Document",
                 )
             val funSpecBuilder = FunSpec.builder(updateMethodName)
 
-            context.getCurrentComposableContext()
+            context
+                .getCurrentComposableContext()
                 .addDependency(viewModelConstant = ViewModelConstant.firestore)
 
             filterExpression?.getAssignableProperties()?.forEach {
@@ -2879,28 +2907,31 @@ sealed interface FirestoreAction : Action {
                 }
             }
 
-            val updateString = buildString {
-                dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
-                    val dataField = dataType.findDataFieldOrNull(dataFieldId)
-                    dataField?.let {
-                        readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
-                            .let { codeBlock ->
-                                val expression = dataField.fieldType.type().convertCodeFromType(
-                                    inputType = readProperty.valueType(project),
-                                    codeBlock = codeBlock,
-                                )
-                                append("${dataField.variableName} = $expression,\n")
-                            }
-                    }
+            val updateString =
+                buildString {
+                    dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
+                        val dataField = dataType.findDataFieldOrNull(dataFieldId)
+                        dataField?.let {
+                            readProperty
+                                .transformedCodeBlock(project, context, dryRun = dryRun)
+                                .let { codeBlock ->
+                                    val expression =
+                                        dataField.fieldType.type().convertCodeFromType(
+                                            inputType = readProperty.valueType(project),
+                                            codeBlock = codeBlock,
+                                        )
+                                    append("${dataField.variableName} = $expression,\n")
+                                }
+                        }
 
-                    readProperty.generateParameterSpec(project)?.let {
-                        funSpecBuilder.addParameter(it)
+                        readProperty.generateParameterSpec(project)?.let {
+                            funSpecBuilder.addParameter(it)
+                        }
                     }
                 }
-            }
 
             funSpecBuilder.addCode(
-                """val collection = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}")"""
+                """val collection = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}")""",
             )
             filterExpression?.let {
                 funSpecBuilder.addStatement(".where {")
@@ -2912,7 +2943,7 @@ sealed interface FirestoreAction : Action {
                         """%M.%M {
                     collection.snapshots.%M().documents.forEach { document ->
                         val entity = document.data(%T.serializer()) 
-                        document.reference.set(entity.copy(${updateString}))
+                        document.reference.set(entity.copy($updateString))
                     }
                 }
                 """,
@@ -2920,7 +2951,7 @@ sealed interface FirestoreAction : Action {
                         MemberHolder.Coroutines.launch,
                         MemberHolder.Coroutines.Flow.first,
                         dataType.asKotlinPoetClassName(project),
-                    )
+                    ),
                 )
             }
             context.addFunction(funSpecBuilder.build(), dryRun = dryRun)
@@ -2937,67 +2968,73 @@ sealed interface FirestoreAction : Action {
             firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
                 ?: return builder.build()
 
-            val paramStringFromFilter = buildString {
-                filterExpression?.getAssignableProperties()?.forEach { readProperty ->
-                    readProperty.generateParameterSpec(project)?.let {
-                        append(
-                            "${it.name} = ${
-                                readProperty.transformedCodeBlock(
-                                    project,
-                                    context,
-                                    dryRun = dryRun
-                                )
-                            },"
-                        )
+            val paramStringFromFilter =
+                buildString {
+                    filterExpression?.getAssignableProperties()?.forEach { readProperty ->
+                        readProperty.generateParameterSpec(project)?.let {
+                            append(
+                                "${it.name} = ${
+                                    readProperty.transformedCodeBlock(
+                                        project,
+                                        context,
+                                        dryRun = dryRun,
+                                    )
+                                },",
+                            )
+                        }
                     }
                 }
-            }
-            val paramStringFromUpdateProperties = buildString {
-                dataFieldUpdateProperties.forEach { (_, readProperty) ->
-                    readProperty.generateParameterSpec(project)?.let {
-                        append(
-                            "${it.name} = ${
-                                readProperty.transformedCodeBlock(
-                                    project,
-                                    context,
-                                    dryRun = dryRun
-                                )
-                            },"
-                        )
+            val paramStringFromUpdateProperties =
+                buildString {
+                    dataFieldUpdateProperties.forEach { (_, readProperty) ->
+                        readProperty.generateParameterSpec(project)?.let {
+                            append(
+                                "${it.name} = ${
+                                    readProperty.transformedCodeBlock(
+                                        project,
+                                        context,
+                                        dryRun = dryRun,
+                                    )
+                                },",
+                            )
+                        }
                     }
                 }
-            }
             val currentEditable = context.getCurrentComposableContext().canvasEditable
-            builder.add("""${currentEditable.viewModelName}.${updateMethodName}(${paramStringFromFilter}${paramStringFromUpdateProperties})""")
+            builder.add("""${currentEditable.viewModelName}.$updateMethodName(${paramStringFromFilter}$paramStringFromUpdateProperties)""")
             return builder.build()
         }
 
         override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            val nodesFromFilter = filterExpression?.getAssignableProperties()?.flatMap {
-                it.getDependentComposeNodes(
-                    project
-                )
-            } ?: emptyList()
+            val nodesFromFilter =
+                filterExpression?.getAssignableProperties()?.flatMap {
+                    it.getDependentComposeNodes(
+                        project,
+                    )
+                } ?: emptyList()
 
-            val nodesFromUpdate = dataFieldUpdateProperties.flatMap {
-                it.assignableProperty.getDependentComposeNodes(
-                    project
-                )
-            }
+            val nodesFromUpdate =
+                dataFieldUpdateProperties.flatMap {
+                    it.assignableProperty.getDependentComposeNodes(
+                        project,
+                    )
+                }
             return nodesFromUpdate + nodesFromFilter
         }
 
         override fun isDependent(sourceId: String): Boolean {
-            val dependsOnFilter = filterExpression?.getAssignableProperties()?.any {
-                it.isDependent(
-                    sourceId
-                )
-            } == true
-            val dependsOnUpdateProperties = dataFieldUpdateProperties.any {
-                it.assignableProperty.isDependent(
-                    sourceId
-                )
-            }
+            val dependsOnFilter =
+                filterExpression?.getAssignableProperties()?.any {
+                    it.isDependent(
+                        sourceId,
+                    )
+                } == true
+            val dependsOnUpdateProperties =
+                dataFieldUpdateProperties.any {
+                    it.assignableProperty.isDependent(
+                        sourceId,
+                    )
+                }
             return dependsOnFilter || dependsOnUpdateProperties
         }
 
@@ -3008,9 +3045,7 @@ sealed interface FirestoreAction : Action {
     @Serializable
     @SerialName("DeleteDocument")
     data class DeleteDocument(
-
         override val id: ActionId = Uuid.random().toString(),
-
         val collectionId: CollectionId? = null,
         val filterExpression: FilterExpression? = SingleFilter(),
         @Transient
@@ -3018,24 +3053,25 @@ sealed interface FirestoreAction : Action {
         @Transient
         private val updateMethodName: String = "onDeleteDocument",
     ) : FirestoreAction {
-
         override fun generateIssues(project: Project): List<Issue> {
-            val filterIssues = buildList {
-                filterExpression?.getAssignableProperties()?.forEach {
-                    val transformedValueType = it.transformedValueType(project)
-                    if (transformedValueType is ComposeFlowType.UnknownType) {
-                        add(
-                            Issue.ResolvedToUnknownType(
-                                property = it,
-                                destination = NavigatableDestination.UiBuilderScreen(
-                                    inspectorTabDestination = InspectorTabDestination.Action
+            val filterIssues =
+                buildList {
+                    filterExpression?.getAssignableProperties()?.forEach {
+                        val transformedValueType = it.transformedValueType(project)
+                        if (transformedValueType is ComposeFlowType.UnknownType) {
+                            add(
+                                Issue.ResolvedToUnknownType(
+                                    property = it,
+                                    destination =
+                                        NavigatableDestination.UiBuilderScreen(
+                                            inspectorTabDestination = InspectorTabDestination.Action,
+                                        ),
+                                    issueContext = this@DeleteDocument,
                                 ),
-                                issueContext = this@DeleteDocument,
                             )
-                        )
+                        }
                     }
                 }
-            }
             return filterIssues
         }
 
@@ -3069,12 +3105,13 @@ sealed interface FirestoreAction : Action {
 
             val updateMethodName =
                 context.getCurrentComposableContext().generateUniqueFunName(
-                    id = "${id}-${updateMethodName}",
-                    initial = "onDelete${dataType.className}Document"
+                    id = "$id-$updateMethodName",
+                    initial = "onDelete${dataType.className}Document",
                 )
             val funSpecBuilder = FunSpec.builder(updateMethodName)
 
-            context.getCurrentComposableContext()
+            context
+                .getCurrentComposableContext()
                 .addDependency(viewModelConstant = ViewModelConstant.firestore)
 
             filterExpression?.getAssignableProperties()?.forEach {
@@ -3084,7 +3121,7 @@ sealed interface FirestoreAction : Action {
             }
 
             funSpecBuilder.addCode(
-                """val collection = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}")"""
+                """val collection = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}")""",
             )
             filterExpression?.let {
                 funSpecBuilder.addStatement(".where {")
@@ -3102,7 +3139,7 @@ sealed interface FirestoreAction : Action {
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.launch,
                         MemberHolder.Coroutines.Flow.first,
-                    )
+                    ),
                 )
             }
             context.addFunction(funSpecBuilder.build(), dryRun = dryRun)
@@ -3115,47 +3152,48 @@ sealed interface FirestoreAction : Action {
         ): CodeBlock {
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
-            val dataType = firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
-                ?: return CodeBlock.of("")
+            val dataType =
+                firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
+                    ?: return CodeBlock.of("")
 
-            val paramString = buildString {
-                filterExpression?.getAssignableProperties()?.forEach { readProperty ->
-                    readProperty.generateParameterSpec(project)?.let {
-                        append(
-                            "${it.name} = ${
-                                readProperty.transformedCodeBlock(
-                                    project,
-                                    context,
-                                    dryRun = dryRun
-                                )
-                            },"
-                        )
+            val paramString =
+                buildString {
+                    filterExpression?.getAssignableProperties()?.forEach { readProperty ->
+                        readProperty.generateParameterSpec(project)?.let {
+                            append(
+                                "${it.name} = ${
+                                    readProperty.transformedCodeBlock(
+                                        project,
+                                        context,
+                                        dryRun = dryRun,
+                                    )
+                                },",
+                            )
+                        }
                     }
                 }
-            }
             val builder = CodeBlock.builder()
             val currentEditable = context.getCurrentComposableContext().canvasEditable
             val updateMethodName =
                 context.getCurrentComposableContext().generateUniqueFunName(
-                    id = "${id}-${updateMethodName}",
-                    initial = "onDelete${dataType.className}Document"
+                    id = "$id-$updateMethodName",
+                    initial = "onDelete${dataType.className}Document",
                 )
-            builder.add("""${currentEditable.viewModelName}.${updateMethodName}($paramString)""")
+            builder.add("""${currentEditable.viewModelName}.$updateMethodName($paramString)""")
             return builder.build()
         }
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return filterExpression?.getAssignableProperties()?.flatMap {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            filterExpression?.getAssignableProperties()?.flatMap {
                 it.getDependentComposeNodes(
-                    project
+                    project,
                 )
             } ?: emptyList()
-        }
 
         override fun isDependent(sourceId: String): Boolean =
             filterExpression?.getAssignableProperties()?.any {
                 it.isDependent(
-                    sourceId
+                    sourceId,
                 )
             } == true
 
@@ -3164,10 +3202,11 @@ sealed interface FirestoreAction : Action {
     }
 
     companion object {
-        fun entries(): List<FirestoreAction> = listOf(
-            SaveToFirestore(),
-            UpdateDocument(),
-            DeleteDocument(),
-        )
+        fun entries(): List<FirestoreAction> =
+            listOf(
+                SaveToFirestore(),
+                UpdateDocument(),
+                DeleteDocument(),
+            )
     }
 }

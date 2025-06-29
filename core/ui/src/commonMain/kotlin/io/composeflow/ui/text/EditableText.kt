@@ -44,9 +44,10 @@ fun EditableText(
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     allowEmptyText: Boolean = false,
-    textStyle: TextStyle = TextStyle(
-        color = MaterialTheme.colorScheme.onSurface
-    ),
+    textStyle: TextStyle =
+        TextStyle(
+            color = MaterialTheme.colorScheme.onSurface,
+        ),
 ) {
     var text by remember(initialText) { mutableStateOf(initialText) }
     var isEditable by remember { mutableStateOf(false) }
@@ -75,11 +76,11 @@ fun EditableText(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.padding(8.dp)
+        modifier = modifier.padding(8.dp),
     ) {
         Box(contentAlignment = Alignment.CenterStart) {
             Row(
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 BasicTextField(
                     value = tempText,
@@ -88,37 +89,40 @@ fun EditableText(
                     singleLine = true,
                     textStyle = textStyle,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            onCommitChange()
-                        }
-                    ),
-                    modifier = Modifier
-                        .focusRequester(focusRequester)
-                        .defaultMinSize(minWidth = Dp.Unspecified)
-                        .drawUnderline(isEditable, color = MaterialTheme.colorScheme.primary)
-                        .onPreviewKeyEvent { keyEvent ->
-                            // Handle Escape key to cancel edit
-                            if (isEditable && keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
-                                tempText = text
-                                isEditable = false
-                                focusManager.clearFocus()
-                                true // Consume the event
-                            } else {
-                                false
-                            }
-                        },
+                    keyboardOptions =
+                        KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done,
+                        ),
+                    keyboardActions =
+                        KeyboardActions(
+                            onDone = {
+                                onCommitChange()
+                            },
+                        ),
+                    modifier =
+                        Modifier
+                            .focusRequester(focusRequester)
+                            .defaultMinSize(minWidth = Dp.Unspecified)
+                            .drawUnderline(isEditable, color = MaterialTheme.colorScheme.primary)
+                            .onPreviewKeyEvent { keyEvent ->
+                                // Handle Escape key to cancel edit
+                                if (isEditable && keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                    tempText = text
+                                    isEditable = false
+                                    focusManager.clearFocus()
+                                    true // Consume the event
+                                } else {
+                                    false
+                                }
+                            },
                     interactionSource = interactionSource,
                     decorationBox = { innerTextField ->
                         Box(
-                            modifier = Modifier
+                            modifier = Modifier,
                         ) {
                             innerTextField()
                         }
-                    }
+                    },
                 )
 
                 if (isEditable) {
@@ -129,7 +133,7 @@ fun EditableText(
                     ) {
                         ComposeFlowIcon(
                             imageVector = Icons.Default.Done,
-                            contentDescription = "Done"
+                            contentDescription = "Done",
                         )
                     }
                 }
@@ -142,30 +146,34 @@ fun EditableText(
                     isEditable = true
                     tempText = text
                     focusRequester.requestFocus()
-                }
+                },
             ) {
                 ComposeFlowIcon(
                     imageVector = Icons.Default.Edit,
-                    contentDescription = "Edit"
+                    contentDescription = "Edit",
                 )
             }
         }
     }
 }
 
-fun Modifier.drawUnderline(isEditable: Boolean, color: Color): Modifier = this.then(
-    if (isEditable) {
-        Modifier.drawBehind {
-            val strokeWidth = 1.dp.toPx()
-            val y = size.height - strokeWidth / 2 + 1.dp.toPx()
-            drawLine(
-                color = color,
-                start = Offset(0f, y),
-                end = Offset(size.width, y),
-                strokeWidth = strokeWidth
-            )
-        }
-    } else {
-        Modifier
-    }
-)
+fun Modifier.drawUnderline(
+    isEditable: Boolean,
+    color: Color,
+): Modifier =
+    this.then(
+        if (isEditable) {
+            Modifier.drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                val y = size.height - strokeWidth / 2 + 1.dp.toPx()
+                drawLine(
+                    color = color,
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = strokeWidth,
+                )
+            }
+        } else {
+            Modifier
+        },
+    )

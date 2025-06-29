@@ -134,15 +134,16 @@ import kotlin.test.assertTrue
  */
 @OptIn(ExperimentalKermitApi::class)
 class AppBuilderTest {
+    private val testLogWriter =
+        TestLogWriter(
+            loggable = Severity.Verbose, // accept everything
+        )
 
-    private val testLogWriter = TestLogWriter(
-        loggable = Severity.Verbose, // accept everything
-    )
-
-    private val toolbarViewModel = ToolbarViewModel(
-        firebaseIdTokenArg = fakeFirebaseIdToken,
-        projectRepository = fakeProjectRepository,
-    )
+    private val toolbarViewModel =
+        ToolbarViewModel(
+            firebaseIdTokenArg = fakeFirebaseIdToken,
+            projectRepository = fakeProjectRepository,
+        )
 
     @Before
     fun setUp() {
@@ -195,17 +196,20 @@ class AppBuilderTest {
     fun textFieldWithValidator() {
         val project = Project()
         val rootNode = project.screenHolder.currentContentRootNode()
-        val textField1 = ComposeNode(
-            trait = mutableStateOf(
-                TextFieldTrait(
-                    enableValidator = true,
-                    textFieldValidator = TextFieldValidator.StringValidator(
-                        maxLength = 10,
-                        minLength = 0
-                    )
-                )
-            ),
-        )
+        val textField1 =
+            ComposeNode(
+                trait =
+                    mutableStateOf(
+                        TextFieldTrait(
+                            enableValidator = true,
+                            textFieldValidator =
+                                TextFieldValidator.StringValidator(
+                                    maxLength = 10,
+                                    minLength = 0,
+                                ),
+                        ),
+                    ),
+            )
         val screen = project.screenHolder.currentEditable()
         TextFieldTrait().onAttachStateToNode(project, screen, textField1)
         rootNode.addChild(textField1)
@@ -224,23 +228,26 @@ class AppBuilderTest {
         val rootNode1 = project1.screenHolder.currentContentRootNode()
         rootNode1.addChild(
             ComposeNode(
-                trait = mutableStateOf(
-                    TextTrait(
-                        text = StringProperty.StringIntrinsicValue("default value"),
-                        colorWrapper = ColorProperty.ColorIntrinsicValue(defaultColorWrapper),
-                    ),
-                ),
-                modifierList = mutableStateListEqualsOverrideOf(
-                    ModifierWrapper.Padding(),
-                    ModifierWrapper.Border(
-                        width = 1.dp,
-                        colorWrapper = ColorProperty.ColorIntrinsicValue(
-                            ColorWrapper(themeColor = Material3ColorWrapper.Secondary),
+                trait =
+                    mutableStateOf(
+                        TextTrait(
+                            text = StringProperty.StringIntrinsicValue("default value"),
+                            colorWrapper = ColorProperty.ColorIntrinsicValue(defaultColorWrapper),
                         ),
                     ),
-                    ModifierWrapper.Background(),
-                    ModifierWrapper.ZIndex(),
-                ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Padding(),
+                        ModifierWrapper.Border(
+                            width = 1.dp,
+                            colorWrapper =
+                                ColorProperty.ColorIntrinsicValue(
+                                    ColorWrapper(themeColor = Material3ColorWrapper.Secondary),
+                                ),
+                        ),
+                        ModifierWrapper.Background(),
+                        ModifierWrapper.ZIndex(),
+                    ),
             ),
         )
         toolbarViewModel.onRunPreviewApp(
@@ -255,28 +262,32 @@ class AppBuilderTest {
         rootNode2.addChild(
             ComposeNode(
                 trait = mutableStateOf(RowTrait()),
-                modifierList = mutableStateListEqualsOverrideOf(
-                    ModifierWrapper.Size(180.dp),
-                ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Size(180.dp),
+                    ),
             ).apply {
                 addChild(
                     ComposeNode(
                         trait = mutableStateOf(TextTrait()),
-                        modifierList = mutableStateListEqualsOverrideOf(
-                            ModifierWrapper.Weight(),
-                            ModifierWrapper.AlignVertical(),
-                        ),
+                        modifierList =
+                            mutableStateListEqualsOverrideOf(
+                                ModifierWrapper.Weight(),
+                                ModifierWrapper.AlignVertical(),
+                            ),
                     ),
                 )
             },
         )
 
         val rowNode2 = RowTrait().defaultComposeNode(project2)
-        rowNode2.visibilityParams.value = VisibilityParams(
-            formFactorVisibility = FormFactorVisibility(
-                visibleInCompact = false,
+        rowNode2.visibilityParams.value =
+            VisibilityParams(
+                formFactorVisibility =
+                    FormFactorVisibility(
+                        visibleInCompact = false,
+                    ),
             )
-        )
         rootNode2.addChild(rowNode2)
 
         toolbarViewModel.onRunPreviewApp(
@@ -291,17 +302,19 @@ class AppBuilderTest {
         rootNode3.addChild(
             ComposeNode(
                 trait = mutableStateOf(ColumnTrait()),
-                modifierList = mutableStateListEqualsOverrideOf(
-                    ModifierWrapper.Size(180.dp),
-                ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Size(180.dp),
+                    ),
             ).apply {
                 addChild(
                     ComposeNode(
                         trait = mutableStateOf(TextTrait()),
-                        modifierList = mutableStateListEqualsOverrideOf(
-                            ModifierWrapper.Weight(),
-                            ModifierWrapper.AlignHorizontal(),
-                        ),
+                        modifierList =
+                            mutableStateListEqualsOverrideOf(
+                                ModifierWrapper.Weight(),
+                                ModifierWrapper.AlignHorizontal(),
+                            ),
                     ),
                 )
             },
@@ -318,16 +331,18 @@ class AppBuilderTest {
         rootNode4.addChild(
             ComposeNode(
                 trait = mutableStateOf(BoxTrait()),
-                modifierList = mutableStateListEqualsOverrideOf(
-                    ModifierWrapper.Size(180.dp),
-                ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Size(180.dp),
+                    ),
             ).apply {
                 addChild(
                     ComposeNode(
                         trait = mutableStateOf(TextTrait()),
-                        modifierList = mutableStateListEqualsOverrideOf(
-                            ModifierWrapper.Align(align = AlignmentWrapper.BottomCenter),
-                        ),
+                        modifierList =
+                            mutableStateListEqualsOverrideOf(
+                                ModifierWrapper.Align(align = AlignmentWrapper.BottomCenter),
+                            ),
                     ),
                 )
             },
@@ -346,20 +361,22 @@ class AppBuilderTest {
         rootNode.addChild(
             ComposeNode(
                 trait = mutableStateOf(RowTrait()),
-                modifierList = mutableStateListEqualsOverrideOf(
-                    // In a real world, wrapContentSize is enough to wrap the size. To verify the
-                    // generated code builds, applying other types of modifiers, too
-                    ModifierWrapper.WrapContentSize(),
-                    ModifierWrapper.WrapContentHeight(),
-                    ModifierWrapper.WrapContentWidth(),
-                ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        // In a real world, wrapContentSize is enough to wrap the size. To verify the
+                        // generated code builds, applying other types of modifiers, too
+                        ModifierWrapper.WrapContentSize(),
+                        ModifierWrapper.WrapContentHeight(),
+                        ModifierWrapper.WrapContentWidth(),
+                    ),
             ).apply {
                 addChild(
                     ComposeNode(
                         trait = mutableStateOf(TextTrait()),
-                        modifierList = mutableStateListEqualsOverrideOf(
-                            ModifierWrapper.Size(180.dp),
-                        ),
+                        modifierList =
+                            mutableStateListEqualsOverrideOf(
+                                ModifierWrapper.Size(180.dp),
+                            ),
                     ),
                 )
             },
@@ -409,7 +426,7 @@ class AppBuilderTest {
             ),
         )
         lazyColumn2.addChild(
-            CardTrait().defaultComposeNode(project2)
+            CardTrait().defaultComposeNode(project2),
         )
         val lazyRow = LazyRowTrait().defaultComposeNode(project2)
         lazyRow.addChild(
@@ -423,7 +440,7 @@ class AppBuilderTest {
             ),
         )
         lazyRow.addChild(
-            CardTrait().defaultComposeNode(project2)
+            CardTrait().defaultComposeNode(project2),
         )
         val lazyVerticalGrid = LazyVerticalGridTrait().defaultComposeNode(project2)
         lazyVerticalGrid.addChild(
@@ -448,9 +465,10 @@ class AppBuilderTest {
             ),
         )
 
-        val horizontalPager = HorizontalPagerTrait(
-            showIndicator = true
-        ).defaultComposeNode(project2)
+        val horizontalPager =
+            HorizontalPagerTrait(
+                showIndicator = true,
+            ).defaultComposeNode(project2)
         horizontalPager.addChild(
             ComposeNode(
                 trait = mutableStateOf(IconTrait()),
@@ -478,9 +496,10 @@ class AppBuilderTest {
     fun multiple_textFields() {
         val project = Project()
         val rootNode = project.screenHolder.currentContentRootNode()
-        val textField1 = ComposeNode(
-            trait = mutableStateOf(TextFieldTrait()),
-        )
+        val textField1 =
+            ComposeNode(
+                trait = mutableStateOf(TextFieldTrait()),
+            )
         val screen = project.screenHolder.currentEditable()
         val textFieldParams = textField1.trait.value as TextFieldTrait
         TextFieldTrait().onAttachStateToNode(project, screen, textField1)
@@ -488,51 +507,61 @@ class AppBuilderTest {
         val appStringState = AppState.StringAppState(name = "stringState including space")
         project.addState(appStringState)
 
-        textField1.trait.value = textFieldParams.copy(
-            placeholder = StringProperty.StringIntrinsicValue("placeholder text"),
-            label = StringProperty.StringIntrinsicValue("label text"),
-            enableValidator = true,
-            textFieldValidator = TextFieldValidator.IntValidator()
-        )
-        val button = ButtonTrait().defaultComposeNode(project)
-        button.actionsMap[ActionType.OnClick] = mutableStateListOf(
-            ActionNode.Simple(
-                action = StateAction.SetAppStateValue(
-                    setValueToStates = mutableListOf(
-                        SetValueToState(
-                            writeToStateId = appStringState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ValueFromState(readFromStateId = textField1.companionStateId)
-                            )
-                        )
-                    )
-                )
+        textField1.trait.value =
+            textFieldParams.copy(
+                placeholder = StringProperty.StringIntrinsicValue("placeholder text"),
+                label = StringProperty.StringIntrinsicValue("label text"),
+                enableValidator = true,
+                textFieldValidator = TextFieldValidator.IntValidator(),
             )
-        )
+        val button = ButtonTrait().defaultComposeNode(project)
+        button.actionsMap[ActionType.OnClick] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action =
+                        StateAction.SetAppStateValue(
+                            setValueToStates =
+                                mutableListOf(
+                                    SetValueToState(
+                                        writeToStateId = appStringState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty = ValueFromState(readFromStateId = textField1.companionStateId),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                ),
+            )
         rootNode.addChild(button)
-        textField1.actionsMap[ActionType.OnSubmit] = mutableStateListOf(
-            ActionNode.Simple(
-                action = Navigation.NavigateBack,
-            ),
-        )
-        textField1.actionsMap[ActionType.OnChange] = mutableStateListOf(
-            ActionNode.Simple(
-                action = Navigation.NavigateBack,
-            ),
-        )
-        textField1.actionsMap[ActionType.OnFocused] = mutableStateListOf(
-            ActionNode.Simple(
-                action = Navigation.NavigateBack,
-            ),
-        )
-        textField1.actionsMap[ActionType.OnUnfocused] = mutableStateListOf(
-            ActionNode.Simple(
-                action = Navigation.NavigateBack,
-            ),
-        )
-        val textField2 = ComposeNode(
-            trait = mutableStateOf(TextFieldTrait()),
-        )
+        textField1.actionsMap[ActionType.OnSubmit] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action = Navigation.NavigateBack,
+                ),
+            )
+        textField1.actionsMap[ActionType.OnChange] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action = Navigation.NavigateBack,
+                ),
+            )
+        textField1.actionsMap[ActionType.OnFocused] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action = Navigation.NavigateBack,
+                ),
+            )
+        textField1.actionsMap[ActionType.OnUnfocused] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action = Navigation.NavigateBack,
+                ),
+            )
+        val textField2 =
+            ComposeNode(
+                trait = mutableStateOf(TextFieldTrait()),
+            )
         TextFieldTrait().onAttachStateToNode(project, screen, textField2)
         rootNode.addChild(textField1)
         rootNode.addChild(textField2)
@@ -569,15 +598,17 @@ class AppBuilderTest {
             CheckboxTrait().defaultComposeNode(project),
         )
 
-        val customEnum = CustomEnum(name = "CustomEnum").apply {
-            values.addAll(listOf("Item_1", "Item_2", "Item_3"))
-        }
+        val customEnum =
+            CustomEnum(name = "CustomEnum").apply {
+                values.addAll(listOf("Item_1", "Item_2", "Item_3"))
+            }
         rootNode.addChild(
             DropdownTrait().defaultComposeNode(project).apply {
-                trait.value = (trait.value as DropdownTrait).copy(
-                    items = CustomEnumValuesProperty(customEnumId = customEnum.customEnumId)
-                )
-            }
+                trait.value =
+                    (trait.value as DropdownTrait).copy(
+                        items = CustomEnumValuesProperty(customEnumId = customEnum.customEnumId),
+                    )
+            },
         )
         project.customEnumHolder.enumList.add(customEnum)
 
@@ -660,44 +691,52 @@ class AppBuilderTest {
 
         project.screenHolder.addScreen(name = screenName, screen)
 
-        val button = ComposeNode(
-            trait = mutableStateOf(ButtonTrait()),
-        )
+        val button =
+            ComposeNode(
+                trait = mutableStateOf(ButtonTrait()),
+            )
         val params: MutableMap<ParameterId, AssignableProperty> = mutableMapOf()
         params[stringParameter.id] = StringProperty.StringIntrinsicValue("argument")
         params[booleanParameter.id] = BooleanProperty.BooleanIntrinsicValue(true)
         params[stringParameter.id] = IntProperty.IntIntrinsicValue(3)
         params[stringParameter.id] = FloatProperty.FloatIntrinsicValue(2.0f)
 
-        button.actionsMap[ActionType.OnClick] = mutableStateListOf(
-            ActionNode.Simple(
-                action = Navigation.NavigateTo(
-                    screenId = screen.id,
-                    paramsMap = params
-                )
-            ),
-        )
-        button.actionsMap[ActionType.OnDoubleClick] = mutableStateListOf(
-            ActionNode.Simple(action = Navigation.NavigateTo(screenId = screen.id)),
-        )
-        button.actionsMap[ActionType.OnLongClick] = mutableStateListOf(
-            ActionNode.Simple(action = Navigation.NavigateTo(screenId = screen.id)),
-            ActionNode.Conditional(
-                ifCondition = BooleanProperty.BooleanIntrinsicValue(true),
-                trueNodes = mutableListOf(
-                    ActionNode.Simple(action = Navigation.NavigateBack),
+        button.actionsMap[ActionType.OnClick] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action =
+                        Navigation.NavigateTo(
+                            screenId = screen.id,
+                            paramsMap = params,
+                        ),
                 ),
-                falseNodes = mutableListOf(
-                    ActionNode.Simple(action = Navigation.NavigateBack),
-                    ActionNode.Conditional(
-                        ifCondition = BooleanProperty.BooleanIntrinsicValue(false),
-                        trueNodes = mutableListOf(
+            )
+        button.actionsMap[ActionType.OnDoubleClick] =
+            mutableStateListOf(
+                ActionNode.Simple(action = Navigation.NavigateTo(screenId = screen.id)),
+            )
+        button.actionsMap[ActionType.OnLongClick] =
+            mutableStateListOf(
+                ActionNode.Simple(action = Navigation.NavigateTo(screenId = screen.id)),
+                ActionNode.Conditional(
+                    ifCondition = BooleanProperty.BooleanIntrinsicValue(true),
+                    trueNodes =
+                        mutableListOf(
                             ActionNode.Simple(action = Navigation.NavigateBack),
                         ),
-                    ),
+                    falseNodes =
+                        mutableListOf(
+                            ActionNode.Simple(action = Navigation.NavigateBack),
+                            ActionNode.Conditional(
+                                ifCondition = BooleanProperty.BooleanIntrinsicValue(false),
+                                trueNodes =
+                                    mutableListOf(
+                                        ActionNode.Simple(action = Navigation.NavigateBack),
+                                    ),
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
         rootNode.addChild(button)
 
         toolbarViewModel.onRunPreviewApp(
@@ -734,87 +773,105 @@ class AppBuilderTest {
         project.globalStateHolder.addState(appInstantState2)
         project.globalStateHolder.addState(appFloatState)
         project.globalStateHolder.addState(appFloatState2)
-        rootNode.actionsMap[ActionType.OnClick] = mutableStateListOf(
-            ActionNode.Simple(
-                action = StateAction.SetAppStateValue(
-                    setValueToStates = mutableListOf(
-                        SetValueToState(
-                            writeToStateId = appStringState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ValueFromState(
-                                    appStringState2.id,
-                                ),
-                            ),
-                        ),
-                        SetValueToState(
-                            writeToStateId = appStringState.id,
-                            operation = StateOperation.ClearValue,
-                        ),
-                        SetValueToState(
-                            writeToStateId = appIntState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ValueFromState(
-                                    appIntState2.id,
-                                ),
-                            ),
-                        ),
-                        SetValueToState(
-                            writeToStateId = appInstantState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ValueFromState(
-                                    appInstantState2.id,
-                                ),
-                            ),
-                        ),
-                        SetValueToState(
-                            writeToStateId = appInstantState.id,
-                            operation = StateOperation.ClearValue,
-                        ),
-                        SetValueToState(
-                            writeToStateId = appFloatState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ValueFromState(
-                                    appFloatState2.id,
-                                ),
-                            ),
-                        ),
-                        SetValueToState(
-                            writeToStateId = appFloatState.id,
-                            operation = StateOperation.ClearValue,
-                        ),
-                        SetValueToState(
-                            writeToStateId = appStringState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ConditionalProperty(
-                                    defaultValue = StringProperty.StringIntrinsicValue("defaultValue"),
-                                    ifThen = ConditionalProperty.IfThenBlock(
-                                        ifExpression = ValueFromState(readFromStateId = switchScreenState.id),
-                                        thenValue = StringProperty.StringIntrinsicValue("abc"),
-                                    ),
-                                    elseIfBlocks = mutableListOf(
-                                        ConditionalProperty.IfThenBlock(
-                                            ifExpression = BooleanProperty.BooleanIntrinsicValue(
-                                                true
+        rootNode.actionsMap[ActionType.OnClick] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action =
+                        StateAction.SetAppStateValue(
+                            setValueToStates =
+                                mutableListOf(
+                                    SetValueToState(
+                                        writeToStateId = appStringState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty =
+                                                    ValueFromState(
+                                                        appStringState2.id,
+                                                    ),
                                             ),
-                                            thenValue = StringProperty.StringIntrinsicValue("def"),
-                                        ),
-                                        ConditionalProperty.IfThenBlock(
-                                            ifExpression = BooleanProperty.BooleanIntrinsicValue(
-                                                false
-                                            ),
-                                            thenValue = StringProperty.StringIntrinsicValue("hgi"),
-                                        ),
                                     ),
-                                    elseBlock = ConditionalProperty.ElseBlock(
-                                        value = StringProperty.StringIntrinsicValue("hgi"),
+                                    SetValueToState(
+                                        writeToStateId = appStringState.id,
+                                        operation = StateOperation.ClearValue,
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appIntState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty =
+                                                    ValueFromState(
+                                                        appIntState2.id,
+                                                    ),
+                                            ),
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appInstantState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty =
+                                                    ValueFromState(
+                                                        appInstantState2.id,
+                                                    ),
+                                            ),
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appInstantState.id,
+                                        operation = StateOperation.ClearValue,
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appFloatState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty =
+                                                    ValueFromState(
+                                                        appFloatState2.id,
+                                                    ),
+                                            ),
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appFloatState.id,
+                                        operation = StateOperation.ClearValue,
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty =
+                                                    ConditionalProperty(
+                                                        defaultValue = StringProperty.StringIntrinsicValue("defaultValue"),
+                                                        ifThen =
+                                                            ConditionalProperty.IfThenBlock(
+                                                                ifExpression = ValueFromState(readFromStateId = switchScreenState.id),
+                                                                thenValue = StringProperty.StringIntrinsicValue("abc"),
+                                                            ),
+                                                        elseIfBlocks =
+                                                            mutableListOf(
+                                                                ConditionalProperty.IfThenBlock(
+                                                                    ifExpression =
+                                                                        BooleanProperty.BooleanIntrinsicValue(
+                                                                            true,
+                                                                        ),
+                                                                    thenValue = StringProperty.StringIntrinsicValue("def"),
+                                                                ),
+                                                                ConditionalProperty.IfThenBlock(
+                                                                    ifExpression =
+                                                                        BooleanProperty.BooleanIntrinsicValue(
+                                                                            false,
+                                                                        ),
+                                                                    thenValue = StringProperty.StringIntrinsicValue("hgi"),
+                                                                ),
+                                                            ),
+                                                        elseBlock =
+                                                            ConditionalProperty.ElseBlock(
+                                                                value = StringProperty.StringIntrinsicValue("hgi"),
+                                                            ),
+                                                    ),
+                                            ),
                                     ),
                                 ),
-                            ),
                         ),
-                    ),
                 ),
-            ),
-        )
+            )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -827,135 +884,155 @@ class AppBuilderTest {
     fun project_including_setStateAction_with_customDataType_verifyNoCrash() {
         val project = Project()
         val rootNode = project.screenHolder.currentContentRootNode()
-        val todoNameField = DataField(
-            name = "todoName",
-            fieldType = FieldType.String(),
-        )
-        val doneField = DataField(
-            name = "done",
-            fieldType = FieldType.Boolean(),
-        )
-        val todoItemDataType = DataType(
-            name = "TodoItem",
-        ).apply {
-            fields.add(todoNameField)
-            fields.add(doneField)
-        }
+        val todoNameField =
+            DataField(
+                name = "todoName",
+                fieldType = FieldType.String(),
+            )
+        val doneField =
+            DataField(
+                name = "done",
+                fieldType = FieldType.Boolean(),
+            )
+        val todoItemDataType =
+            DataType(
+                name = "TodoItem",
+            ).apply {
+                fields.add(todoNameField)
+                fields.add(doneField)
+            }
         project.dataTypeHolder.dataTypes.add(todoItemDataType)
 
-        val todoItemAppState = AppState.CustomDataTypeAppState(
-            name = "todoItemState",
-            dataTypeId = todoItemDataType.id,
-        )
-        val todoItemListAppState = AppState.CustomDataTypeListAppState(
-            name = "todoItemListState",
-            dataTypeId = todoItemDataType.id,
-            defaultValue = listOf(
-                DataTypeDefaultValue(
-                    dataTypeId = todoItemDataType.id,
-                    defaultFields = mutableListOf(
-                        FieldDefaultValue(
-                            fieldId = todoNameField.id,
-                            defaultValue = StringProperty.StringIntrinsicValue("defaultTodo")
-                        ),
-                        FieldDefaultValue(
-                            fieldId = doneField.id,
-                            defaultValue = BooleanProperty.BooleanIntrinsicValue(false)
-                        )
-                    )
-                )
+        val todoItemAppState =
+            AppState.CustomDataTypeAppState(
+                name = "todoItemState",
+                dataTypeId = todoItemDataType.id,
             )
-        )
-        project.globalStateHolder.addState(todoItemAppState)
-        project.globalStateHolder.addState(todoItemListAppState)
-        rootNode.actionsMap[ActionType.OnClick] = mutableStateListOf(
-            ActionNode.Simple(
-                action = StateAction.SetAppStateValue(
-                    setValueToStates = mutableListOf(
-                        SetValueToState(
-                            writeToStateId = todoItemAppState.id,
-                            operation = StateOperationForDataType.DataTypeSetValue().apply {
-                                dataFieldUpdateProperties.add(
-                                    DataFieldUpdateProperty(
-                                        dataFieldId = todoItemDataType.fields[0].id,
-                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
+        val todoItemListAppState =
+            AppState.CustomDataTypeListAppState(
+                name = "todoItemListState",
+                dataTypeId = todoItemDataType.id,
+                defaultValue =
+                    listOf(
+                        DataTypeDefaultValue(
+                            dataTypeId = todoItemDataType.id,
+                            defaultFields =
+                                mutableListOf(
+                                    FieldDefaultValue(
+                                        fieldId = todoNameField.id,
+                                        defaultValue = StringProperty.StringIntrinsicValue("defaultTodo"),
                                     ),
-                                )
-                                dataFieldUpdateProperties.add(
-                                    DataFieldUpdateProperty(
-                                        dataFieldId = todoItemDataType.fields[1].id,
-                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(),
+                                    FieldDefaultValue(
+                                        fieldId = doneField.id,
+                                        defaultValue = BooleanProperty.BooleanIntrinsicValue(false),
                                     ),
-                                )
-                            },
-                        ),
-                        SetValueToState(
-                            writeToStateId = todoItemListAppState.id,
-                            operation = StateOperationForList.AddValueForCustomDataType().apply {
-                                dataFieldUpdateProperties.add(
-                                    DataFieldUpdateProperty(
-                                        dataFieldId = todoItemDataType.fields[0].id,
-                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
-                                    ),
-                                )
-                                dataFieldUpdateProperties.add(
-                                    DataFieldUpdateProperty(
-                                        dataFieldId = todoItemDataType.fields[1].id,
-                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(),
-                                    ),
-                                )
-                            },
-                        ),
-                        SetValueToState(
-                            writeToStateId = todoItemListAppState.id,
-                            operation = StateOperationForList.UpdateValueAtIndexForCustomDataType()
-                                .apply {
-                                    dataFieldUpdateProperties.add(
-                                        DataFieldUpdateProperty(
-                                            dataFieldId = todoItemDataType.fields[0].id,
-                                            assignableProperty = StringProperty.StringIntrinsicValue(
-                                                "updatedValue"
-                                            ),
-                                        ),
-                                    )
-                                    dataFieldUpdateProperties.add(
-                                        DataFieldUpdateProperty(
-                                            dataFieldId = todoItemDataType.fields[1].id,
-                                            assignableProperty = BooleanProperty.BooleanIntrinsicValue(
-                                                true
-                                            ),
-                                            fieldUpdateType = FieldUpdateType.ToggleValue,
-                                        ),
-                                    )
-                                },
-                        ),
-                        SetValueToState(
-                            writeToStateId = todoItemListAppState.id,
-                            operation = StateOperationForList.UpdateValueAtIndexForCustomDataType()
-                                .apply {
-                                    dataFieldUpdateProperties.add(
-                                        DataFieldUpdateProperty(
-                                            dataFieldId = todoItemDataType.fields[0].id,
-                                            assignableProperty = StringProperty.StringIntrinsicValue(
-                                                "newValue"
-                                            ),
-                                        ),
-                                    )
-                                    dataFieldUpdateProperties.add(
-                                        DataFieldUpdateProperty(
-                                            dataFieldId = todoItemDataType.fields[1].id,
-                                            assignableProperty = BooleanProperty.BooleanIntrinsicValue(
-                                                true
-                                            ),
-                                            fieldUpdateType = FieldUpdateType.ClearValue,
-                                        ),
-                                    )
-                                },
+                                ),
                         ),
                     ),
+            )
+        project.globalStateHolder.addState(todoItemAppState)
+        project.globalStateHolder.addState(todoItemListAppState)
+        rootNode.actionsMap[ActionType.OnClick] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action =
+                        StateAction.SetAppStateValue(
+                            setValueToStates =
+                                mutableListOf(
+                                    SetValueToState(
+                                        writeToStateId = todoItemAppState.id,
+                                        operation =
+                                            StateOperationForDataType.DataTypeSetValue().apply {
+                                                dataFieldUpdateProperties.add(
+                                                    DataFieldUpdateProperty(
+                                                        dataFieldId = todoItemDataType.fields[0].id,
+                                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
+                                                    ),
+                                                )
+                                                dataFieldUpdateProperties.add(
+                                                    DataFieldUpdateProperty(
+                                                        dataFieldId = todoItemDataType.fields[1].id,
+                                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(),
+                                                    ),
+                                                )
+                                            },
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = todoItemListAppState.id,
+                                        operation =
+                                            StateOperationForList.AddValueForCustomDataType().apply {
+                                                dataFieldUpdateProperties.add(
+                                                    DataFieldUpdateProperty(
+                                                        dataFieldId = todoItemDataType.fields[0].id,
+                                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
+                                                    ),
+                                                )
+                                                dataFieldUpdateProperties.add(
+                                                    DataFieldUpdateProperty(
+                                                        dataFieldId = todoItemDataType.fields[1].id,
+                                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(),
+                                                    ),
+                                                )
+                                            },
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = todoItemListAppState.id,
+                                        operation =
+                                            StateOperationForList
+                                                .UpdateValueAtIndexForCustomDataType()
+                                                .apply {
+                                                    dataFieldUpdateProperties.add(
+                                                        DataFieldUpdateProperty(
+                                                            dataFieldId = todoItemDataType.fields[0].id,
+                                                            assignableProperty =
+                                                                StringProperty.StringIntrinsicValue(
+                                                                    "updatedValue",
+                                                                ),
+                                                        ),
+                                                    )
+                                                    dataFieldUpdateProperties.add(
+                                                        DataFieldUpdateProperty(
+                                                            dataFieldId = todoItemDataType.fields[1].id,
+                                                            assignableProperty =
+                                                                BooleanProperty.BooleanIntrinsicValue(
+                                                                    true,
+                                                                ),
+                                                            fieldUpdateType = FieldUpdateType.ToggleValue,
+                                                        ),
+                                                    )
+                                                },
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = todoItemListAppState.id,
+                                        operation =
+                                            StateOperationForList
+                                                .UpdateValueAtIndexForCustomDataType()
+                                                .apply {
+                                                    dataFieldUpdateProperties.add(
+                                                        DataFieldUpdateProperty(
+                                                            dataFieldId = todoItemDataType.fields[0].id,
+                                                            assignableProperty =
+                                                                StringProperty.StringIntrinsicValue(
+                                                                    "newValue",
+                                                                ),
+                                                        ),
+                                                    )
+                                                    dataFieldUpdateProperties.add(
+                                                        DataFieldUpdateProperty(
+                                                            dataFieldId = todoItemDataType.fields[1].id,
+                                                            assignableProperty =
+                                                                BooleanProperty.BooleanIntrinsicValue(
+                                                                    true,
+                                                                ),
+                                                            fieldUpdateType = FieldUpdateType.ClearValue,
+                                                        ),
+                                                    )
+                                                },
+                                    ),
+                                ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -984,12 +1061,14 @@ class AppBuilderTest {
             ComposeNode().apply {
                 lazyListChildParams.value =
                     LazyListChildParams.DynamicItemsSource(composeNodeId = lazyColumn.id)
-                trait.value = TextTrait(
-                    text = ValueFromDynamicItem(
-                        composeNodeId = lazyColumn.id,
-                        fieldType = DataFieldType.Primitive,
-                    ),
-                )
+                trait.value =
+                    TextTrait(
+                        text =
+                            ValueFromDynamicItem(
+                                composeNodeId = lazyColumn.id,
+                                fieldType = DataFieldType.Primitive,
+                            ),
+                    )
             },
         )
 
@@ -1002,12 +1081,14 @@ class AppBuilderTest {
             ).apply {
                 lazyListChildParams.value =
                     LazyListChildParams.DynamicItemsSource(composeNodeId = lazyColumnInt.id)
-                trait.value = TextTrait(
-                    text = ValueFromDynamicItem(
-                        composeNodeId = lazyColumnInt.id,
-                        fieldType = DataFieldType.Primitive,
-                    ),
-                )
+                trait.value =
+                    TextTrait(
+                        text =
+                            ValueFromDynamicItem(
+                                composeNodeId = lazyColumnInt.id,
+                                fieldType = DataFieldType.Primitive,
+                            ),
+                    )
             },
         )
 
@@ -1020,12 +1101,14 @@ class AppBuilderTest {
             ).apply {
                 lazyListChildParams.value =
                     LazyListChildParams.DynamicItemsSource(composeNodeId = lazyColumnBoolean.id)
-                trait.value = TextTrait(
-                    text = ValueFromDynamicItem(
-                        composeNodeId = lazyColumnBoolean.id,
-                        fieldType = DataFieldType.Primitive,
-                    ),
-                )
+                trait.value =
+                    TextTrait(
+                        text =
+                            ValueFromDynamicItem(
+                                composeNodeId = lazyColumnBoolean.id,
+                                fieldType = DataFieldType.Primitive,
+                            ),
+                    )
             },
         )
 
@@ -1037,12 +1120,14 @@ class AppBuilderTest {
             ).apply {
                 lazyListChildParams.value =
                     LazyListChildParams.DynamicItemsSource(composeNodeId = horizontalPagerTrait.id)
-                trait.value = TextTrait(
-                    text = ValueFromDynamicItem(
-                        composeNodeId = horizontalPagerTrait.id,
-                        fieldType = DataFieldType.Primitive,
-                    ),
-                )
+                trait.value =
+                    TextTrait(
+                        text =
+                            ValueFromDynamicItem(
+                                composeNodeId = horizontalPagerTrait.id,
+                                fieldType = DataFieldType.Primitive,
+                            ),
+                    )
             },
         )
 
@@ -1064,7 +1149,10 @@ class AppBuilderTest {
         val rootNode = project.screenHolder.currentContentRootNode()
         val stringParameter = ParameterWrapper.StringParameter(name = "strParams")
 
-        project.screenHolder.currentEditable().parameters.add(stringParameter)
+        project.screenHolder
+            .currentEditable()
+            .parameters
+            .add(stringParameter)
 
         val appStringListState = AppState.StringListAppState(name = "stringListState")
         project.globalStateHolder.addState(appStringListState)
@@ -1072,21 +1160,24 @@ class AppBuilderTest {
         val lazyColumn = LazyColumnTrait().defaultComposeNode(project)
         val dynamicItems = ValueFromState(readFromStateId = appStringListState.id)
         lazyColumn.dynamicItems.value = dynamicItems
-        val textTrait = ComposeNode(
-            trait = mutableStateOf(TextTrait()),
-            label = mutableStateOf("text1")
-        ).apply {
-            trait.value = TextTrait(
-                text = ValueFromDynamicItem(
-                    composeNodeId = lazyColumn.id,
-                    fieldType = DataFieldType.Primitive,
-                ),
-            )
-            lazyListChildParams.value =
-                LazyListChildParams.DynamicItemsSource(composeNodeId = lazyColumn.id)
-        }
+        val textTrait =
+            ComposeNode(
+                trait = mutableStateOf(TextTrait()),
+                label = mutableStateOf("text1"),
+            ).apply {
+                trait.value =
+                    TextTrait(
+                        text =
+                            ValueFromDynamicItem(
+                                composeNodeId = lazyColumn.id,
+                                fieldType = DataFieldType.Primitive,
+                            ),
+                    )
+                lazyListChildParams.value =
+                    LazyListChildParams.DynamicItemsSource(composeNodeId = lazyColumn.id)
+            }
         lazyColumn.addChild(
-            textTrait
+            textTrait,
         )
 
         rootNode.addChild(
@@ -1100,57 +1191,64 @@ class AppBuilderTest {
 
         val button = ButtonTrait().defaultComposeNode(project)
         button.lazyListChildParams.value = LazyListChildParams.FixedNumber(1)
-        button.actionsMap[ActionType.OnClick] = mutableStateListOf(
-            ActionNode.Simple(
-                action =
-                    StateAction.SetAppStateValue(
-                        setValueToStates = mutableListOf(
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperationForList.AddValue(
-                                    readProperty = ValueFromState(textFieldState.id),
-                                ),
-                            ),
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperation.ClearValue,
-                            ),
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperationForList.RemoveFirstValue,
-                            ),
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperationForList.RemoveLastValue,
-                            ),
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperationForList.RemoveValueAtIndex(
-                                    indexProperty = IntProperty.ValueFromLazyListIndex(
-                                        lazyListNodeId = lazyColumn.id
+        button.actionsMap[ActionType.OnClick] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action =
+                        StateAction.SetAppStateValue(
+                            setValueToStates =
+                                mutableListOf(
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation =
+                                            StateOperationForList.AddValue(
+                                                readProperty = ValueFromState(textFieldState.id),
+                                            ),
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation = StateOperation.ClearValue,
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation = StateOperationForList.RemoveFirstValue,
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation = StateOperationForList.RemoveLastValue,
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation =
+                                            StateOperationForList.RemoveValueAtIndex(
+                                                indexProperty =
+                                                    IntProperty.ValueFromLazyListIndex(
+                                                        lazyListNodeId = lazyColumn.id,
+                                                    ),
+                                            ),
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation =
+                                            StateOperationForList.UpdateValueAtIndex(
+                                                indexProperty =
+                                                    IntProperty.ValueFromLazyListIndex(
+                                                        lazyListNodeId = lazyColumn.id,
+                                                    ),
+                                                readProperty = StringProperty.StringIntrinsicValue("aaa"),
+                                            ),
+                                    ),
+                                    SetValueToState(
+                                        writeToStateId = appStringListState.id,
+                                        operation =
+                                            StateOperationForList.AddValue(
+                                                readProperty = ComposableParameterProperty(parameterId = stringParameter.id),
+                                            ),
                                     ),
                                 ),
-                            ),
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperationForList.UpdateValueAtIndex(
-                                    indexProperty = IntProperty.ValueFromLazyListIndex(
-                                        lazyListNodeId = lazyColumn.id
-                                    ),
-                                    readProperty = StringProperty.StringIntrinsicValue("aaa"),
-                                ),
-                            ),
-                            SetValueToState(
-                                writeToStateId = appStringListState.id,
-                                operation = StateOperationForList.AddValue(
-                                    readProperty = ComposableParameterProperty(parameterId = stringParameter.id),
-                                ),
-                            ),
                         ),
-
-                        ),
-            ),
-        )
+                ),
+            )
 
         lazyColumn.addChild(button)
         rootNode.addChild(lazyColumn)
@@ -1179,28 +1277,33 @@ class AppBuilderTest {
         editable.addState(switchState)
 
         val textParams = text.trait.value as TextTrait
-        text.trait.value = textParams.copy(
-            textDecoration = ConditionalProperty(
-                defaultValue = EnumProperty(TextDecorationWrapper.None),
-                ifThen = ConditionalProperty.IfThenBlock(
-                    ifExpression = ValueFromState(readFromStateId = switchState.id),
-                    thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
-                ),
-                elseIfBlocks = mutableListOf(
-                    ConditionalProperty.IfThenBlock(
-                        ifExpression = BooleanProperty.BooleanIntrinsicValue(true),
-                        thenValue = EnumProperty(value = TextDecorationWrapper.None),
+        text.trait.value =
+            textParams.copy(
+                textDecoration =
+                    ConditionalProperty(
+                        defaultValue = EnumProperty(TextDecorationWrapper.None),
+                        ifThen =
+                            ConditionalProperty.IfThenBlock(
+                                ifExpression = ValueFromState(readFromStateId = switchState.id),
+                                thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
+                            ),
+                        elseIfBlocks =
+                            mutableListOf(
+                                ConditionalProperty.IfThenBlock(
+                                    ifExpression = BooleanProperty.BooleanIntrinsicValue(true),
+                                    thenValue = EnumProperty(value = TextDecorationWrapper.None),
+                                ),
+                                ConditionalProperty.IfThenBlock(
+                                    ifExpression = BooleanProperty.BooleanIntrinsicValue(false),
+                                    thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
+                                ),
+                            ),
+                        elseBlock =
+                            ConditionalProperty.ElseBlock(
+                                value = EnumProperty(value = TextDecorationWrapper.Underline),
+                            ),
                     ),
-                    ConditionalProperty.IfThenBlock(
-                        ifExpression = BooleanProperty.BooleanIntrinsicValue(false),
-                        thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
-                    ),
-                ),
-                elseBlock = ConditionalProperty.ElseBlock(
-                    value = EnumProperty(value = TextDecorationWrapper.Underline),
-                ),
-            ),
-        )
+            )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1217,15 +1320,18 @@ class AppBuilderTest {
         val row = RowTrait().defaultComposeNode(project)
         val text = TextTrait().defaultComposeNode(project)
         row.addChild(text)
-        row.addChild(SwitchTrait().defaultComposeNode(project).apply {
-            label.value = "switch1"
-        })
+        row.addChild(
+            SwitchTrait().defaultComposeNode(project).apply {
+                label.value = "switch1"
+            },
+        )
         val switchState = ScreenState.BooleanScreenState(name = "switch")
 
-        val component = Component(
-            name = "component",
-            componentRoot = mutableStateOf(row),
-        )
+        val component =
+            Component(
+                name = "component",
+                componentRoot = mutableStateOf(row),
+            )
         rootNode.addChild(
             rootNode.createComponentWrapperNode(component.id),
         )
@@ -1260,9 +1366,10 @@ class AppBuilderTest {
         val button = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button)
 
-        val textField = TextFieldTrait().defaultComposeNode(project).apply {
-            label.value = "textField1"
-        }
+        val textField =
+            TextFieldTrait().defaultComposeNode(project).apply {
+                label.value = "textField1"
+            }
         rootNode.addChild(textField)
         val switchState = ScreenState.BooleanScreenState(name = "switch")
         val textFieldState = ScreenState.StringScreenState(name = "textField")
@@ -1273,80 +1380,90 @@ class AppBuilderTest {
         editable.addState(instantState)
 
         val textParams = text.trait.value as TextTrait
-        text.trait.value = textParams.copy(
-            text = StringProperty.StringIntrinsicValue("original")
-                .apply {
-                    propertyTransformers.add(
-                        FromString.ToString.AddBefore(
-                            mutableStateOf(
-                                StringProperty.StringIntrinsicValue("add before string "),
+        text.trait.value =
+            textParams.copy(
+                text =
+                    StringProperty
+                        .StringIntrinsicValue("original")
+                        .apply {
+                            propertyTransformers.add(
+                                FromString.ToString.AddBefore(
+                                    mutableStateOf(
+                                        StringProperty.StringIntrinsicValue("add before string "),
+                                    ),
+                                ),
+                            )
+                            propertyTransformers.add(
+                                FromString.ToString.AddAfter(
+                                    mutableStateOf(
+                                        StringProperty.StringIntrinsicValue("add after string "),
+                                    ),
+                                ),
+                            )
+                        },
+                textDecoration =
+                    ConditionalProperty(
+                        defaultValue = EnumProperty(TextDecorationWrapper.None),
+                        ifThen =
+                            ConditionalProperty.IfThenBlock(
+                                ifExpression =
+                                    ValueFromState(readFromStateId = textFieldState.id).apply {
+                                        propertyTransformers.add(
+                                            FromString.ToBoolean.StringContains(
+                                                mutableStateOf(
+                                                    StringProperty.StringIntrinsicValue("abc"),
+                                                ),
+                                            ),
+                                        )
+                                    },
+                                thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
                             ),
-                        ),
-                    )
-                    propertyTransformers.add(
-                        FromString.ToString.AddAfter(
-                            mutableStateOf(
-                                StringProperty.StringIntrinsicValue("add after string "),
+                        elseIfBlocks =
+                            mutableListOf(
+                                ConditionalProperty.IfThenBlock(
+                                    ifExpression = BooleanProperty.BooleanIntrinsicValue(true),
+                                    thenValue = EnumProperty(value = TextDecorationWrapper.None),
+                                ),
+                                ConditionalProperty.IfThenBlock(
+                                    ifExpression = BooleanProperty.BooleanIntrinsicValue(false),
+                                    thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
+                                ),
                             ),
-                        ),
-                    )
-                },
-            textDecoration = ConditionalProperty(
-                defaultValue = EnumProperty(TextDecorationWrapper.None),
-                ifThen = ConditionalProperty.IfThenBlock(
-                    ifExpression = ValueFromState(readFromStateId = textFieldState.id).apply {
+                        elseBlock =
+                            ConditionalProperty.ElseBlock(
+                                value = EnumProperty(value = TextDecorationWrapper.Underline),
+                            ),
+                    ),
+            )
+
+        val buttonParams = button.trait.value as ButtonTrait
+        button.trait.value =
+            buttonParams.copy(
+                textProperty =
+                    InstantProperty.InstantIntrinsicValue().apply {
                         propertyTransformers.add(
-                            FromString.ToBoolean.StringContains(
+                            FromInstant.ToInstant.PlusDay(
                                 mutableStateOf(
-                                    StringProperty.StringIntrinsicValue("abc"),
+                                    IntProperty.IntIntrinsicValue(3),
+                                ),
+                            ),
+                        )
+                        propertyTransformers.add(
+                            FromInstant.ToInstant.PlusMonth(
+                                mutableStateOf(
+                                    IntProperty.IntIntrinsicValue(3),
+                                ),
+                            ),
+                        )
+                        propertyTransformers.add(
+                            FromInstant.ToInstant.PlusYear(
+                                mutableStateOf(
+                                    IntProperty.IntIntrinsicValue(3),
                                 ),
                             ),
                         )
                     },
-                    thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
-                ),
-                elseIfBlocks = mutableListOf(
-                    ConditionalProperty.IfThenBlock(
-                        ifExpression = BooleanProperty.BooleanIntrinsicValue(true),
-                        thenValue = EnumProperty(value = TextDecorationWrapper.None),
-                    ),
-                    ConditionalProperty.IfThenBlock(
-                        ifExpression = BooleanProperty.BooleanIntrinsicValue(false),
-                        thenValue = EnumProperty(value = TextDecorationWrapper.LineThrough),
-                    ),
-                ),
-                elseBlock = ConditionalProperty.ElseBlock(
-                    value = EnumProperty(value = TextDecorationWrapper.Underline),
-                ),
-            ),
-        )
-
-        val buttonParams = button.trait.value as ButtonTrait
-        button.trait.value = buttonParams.copy(
-            textProperty = InstantProperty.InstantIntrinsicValue().apply {
-                propertyTransformers.add(
-                    FromInstant.ToInstant.PlusDay(
-                        mutableStateOf(
-                            IntProperty.IntIntrinsicValue(3),
-                        ),
-                    ),
-                )
-                propertyTransformers.add(
-                    FromInstant.ToInstant.PlusMonth(
-                        mutableStateOf(
-                            IntProperty.IntIntrinsicValue(3),
-                        ),
-                    ),
-                )
-                propertyTransformers.add(
-                    FromInstant.ToInstant.PlusYear(
-                        mutableStateOf(
-                            IntProperty.IntIntrinsicValue(3),
-                        ),
-                    ),
-                )
-            }
-        )
+            )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1360,9 +1477,10 @@ class AppBuilderTest {
         val project = Project()
         val rootNode = project.screenHolder.currentContentRootNode()
 
-        val textField = TextFieldTrait().defaultComposeNode(project).apply {
-            label.value = "textField1"
-        }
+        val textField =
+            TextFieldTrait().defaultComposeNode(project).apply {
+                label.value = "textField1"
+            }
         rootNode.addChild(textField)
         val editable = project.screenHolder.currentEditable()
         val textFieldState = ScreenState.StringScreenState(name = "textField")
@@ -1370,74 +1488,90 @@ class AppBuilderTest {
         val appStringState = AppState.StringAppState(name = "stringState")
         project.addState(appStringState)
 
-        val api = ApiDefinition(
-            name = "tes Api", // include a space to check if the app compiles
-            url = "https://example.com/api",
-            parameters = mutableListOf(
-                ApiProperty.StringParameter(name = "query", defaultValue = "default query")
-            ),
-            exampleJsonResponse = JsonWithJsonPath(
-                ".",
-                jsonElement = Json.encodeToJsonElement("{}")
-            ),
-            authorization = Authorization.BasicAuth(
-                username = "username",
-                password = "password",
+        val api =
+            ApiDefinition(
+                name = "tes Api", // include a space to check if the app compiles
+                url = "https://example.com/api",
+                parameters =
+                    mutableListOf(
+                        ApiProperty.StringParameter(name = "query", defaultValue = "default query"),
+                    ),
+                exampleJsonResponse =
+                    JsonWithJsonPath(
+                        ".",
+                        jsonElement = Json.encodeToJsonElement("{}"),
+                    ),
+                authorization =
+                    Authorization.BasicAuth(
+                        username = "username",
+                        password = "password",
+                    ),
             )
-        )
-        val postApi = ApiDefinition(
-            name = "tes Api", // include a space to check if the app compiles
-            url = "https://example.com/api",
-            method = Method.Post,
-            headers = mutableListOf(
-                "header" to ApiProperty.StringParameter(
-                    name = "query",
-                    defaultValue = "default query"
-                )
-            ),
-            exampleJsonResponse = JsonWithJsonPath(
-                ".",
-                jsonElement = Json.encodeToJsonElement("{}")
-            ),
-        )
+        val postApi =
+            ApiDefinition(
+                name = "tes Api", // include a space to check if the app compiles
+                url = "https://example.com/api",
+                method = Method.Post,
+                headers =
+                    mutableListOf(
+                        "header" to
+                            ApiProperty.StringParameter(
+                                name = "query",
+                                defaultValue = "default query",
+                            ),
+                    ),
+                exampleJsonResponse =
+                    JsonWithJsonPath(
+                        ".",
+                        jsonElement = Json.encodeToJsonElement("{}"),
+                    ),
+            )
         project.apiHolder.apiDefinitions.add(api)
         project.apiHolder.apiDefinitions.add(postApi)
 
         val button = ButtonTrait().defaultComposeNode(project)
-        button.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = StateAction.SetAppStateValue(
-                    setValueToStates = mutableListOf(
-                        SetValueToState(
-                            writeToStateId = appStringState.id,
-                            operation = StateOperation.SetValue(
-                                readProperty = ApiResultProperty(apiId = api.id)
-                            )
-                        )
-                    )
-                )
+        button.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action =
+                        StateAction.SetAppStateValue(
+                            setValueToStates =
+                                mutableListOf(
+                                    SetValueToState(
+                                        writeToStateId = appStringState.id,
+                                        operation =
+                                            StateOperation.SetValue(
+                                                readProperty = ApiResultProperty(apiId = api.id),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                ),
             )
-        )
 
         val lazyColumn = LazyColumnTrait().defaultComposeNode(project)
         rootNode.addChild(lazyColumn)
         lazyColumn.dynamicItems.value = ApiResultProperty(apiId = api.id)
 
-        textField.actionsMap[ActionType.OnSubmit] = mutableListOf(
-            ActionNode.Simple(
-                action = CallApi(
-                    apiId = api.id,
-                    paramsMap = mutableMapOf(
-                        api.parameters[0].parameterId to ValueFromState(readFromStateId = textFieldState.id)
-                    )
-                )
-            ),
-            ActionNode.Simple(
-                action = CallApi(
-                    apiId = postApi.id,
-                )
+        textField.actionsMap[ActionType.OnSubmit] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action =
+                        CallApi(
+                            apiId = api.id,
+                            paramsMap =
+                                mutableMapOf(
+                                    api.parameters[0].parameterId to ValueFromState(readFromStateId = textFieldState.id),
+                                ),
+                        ),
+                ),
+                ActionNode.Simple(
+                    action =
+                        CallApi(
+                            apiId = postApi.id,
+                        ),
+                ),
             )
-        )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1445,7 +1579,6 @@ class AppBuilderTest {
         )
         assertBuildSucceed()
     }
-
 
     @Test
     fun project_open_dialog_actions() {
@@ -1455,14 +1588,16 @@ class AppBuilderTest {
 
         val button1 = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button1)
-        button1.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = ShowInformationDialog(
-                    title = StringProperty.StringIntrinsicValue("title"),
-                    message = StringProperty.StringIntrinsicValue("message"),
-                )
+        button1.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action =
+                        ShowInformationDialog(
+                            title = StringProperty.StringIntrinsicValue("title"),
+                            message = StringProperty.StringIntrinsicValue("message"),
+                        ),
+                ),
             )
-        )
 
         val screen = project.screenHolder.currentEditable()
         if (screen is Screen) {
@@ -1470,12 +1605,13 @@ class AppBuilderTest {
                 ActionType.OnClick,
                 mutableListOf(
                     ActionNode.Simple(
-                        action = ShowInformationDialog(
-                            title = StringProperty.StringIntrinsicValue("title"),
-                            message = StringProperty.StringIntrinsicValue("message"),
-                        )
-                    )
-                )
+                        action =
+                            ShowInformationDialog(
+                                title = StringProperty.StringIntrinsicValue("title"),
+                                message = StringProperty.StringIntrinsicValue("message"),
+                            ),
+                    ),
+                ),
             )
         }
 
@@ -1486,10 +1622,11 @@ class AppBuilderTest {
         val switchState = ScreenState.BooleanScreenState(name = "switch")
         editable.addState(switchState)
 
-        val component = Component(
-            name = "component",
-            componentRoot = mutableStateOf(row),
-        )
+        val component =
+            Component(
+                name = "component",
+                componentRoot = mutableStateOf(row),
+            )
         val stringParameter = ParameterWrapper.StringParameter(name = "stringParam")
         val booleanParameter = ParameterWrapper.BooleanParameter(name = "booleanParam")
         val intParameter = ParameterWrapper.IntParameter(name = "intParam")
@@ -1500,14 +1637,16 @@ class AppBuilderTest {
         component.parameters.add(floatParameter)
         project.componentHolder.components.add(component)
 
-        val showCustomDialogAction = ShowCustomDialog(
-            componentId = component.id,
-            paramsMap = mutableMapOf()
-        )
-        val showBottomSheetAction = ShowBottomSheet(
-            componentId = component.id,
-            paramsMap = mutableMapOf()
-        )
+        val showCustomDialogAction =
+            ShowCustomDialog(
+                componentId = component.id,
+                paramsMap = mutableMapOf(),
+            )
+        val showBottomSheetAction =
+            ShowBottomSheet(
+                componentId = component.id,
+                paramsMap = mutableMapOf(),
+            )
         showCustomDialogAction.paramsMap[stringParameter.id] =
             StringProperty.StringIntrinsicValue("argument")
         showCustomDialogAction.paramsMap[booleanParameter.id] =
@@ -1515,67 +1654,75 @@ class AppBuilderTest {
 
         val button2 = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button2)
-        button2.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = ShowInformationDialog(
-                    title = StringProperty.StringIntrinsicValue("title2"),
-                    message = StringProperty.StringIntrinsicValue("message2"),
+        button2.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action =
+                        ShowInformationDialog(
+                            title = StringProperty.StringIntrinsicValue("title2"),
+                            message = StringProperty.StringIntrinsicValue("message2"),
+                        ),
                 ),
-            ),
-            ActionNode.Simple(
-                action = showCustomDialogAction
-            ),
-            ActionNode.Simple(
-                action = showBottomSheetAction
+                ActionNode.Simple(
+                    action = showCustomDialogAction,
+                ),
+                ActionNode.Simple(
+                    action = showBottomSheetAction,
+                ),
             )
-        )
 
         val button3 = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button3)
-        button3.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Forked(
-                forkedAction = ShowConfirmationDialog(
-                    title = StringProperty.StringIntrinsicValue("title2"),
-                    message = StringProperty.StringIntrinsicValue("message2"),
-                ),
-                trueNodes = mutableListOf(
-                    ActionNode.Simple(action = Navigation.NavigateBack),
-                ),
-                falseNodes = mutableListOf(
-                    ActionNode.Simple(action = Navigation.NavigateBack),
-                    ActionNode.Conditional(
-                        ifCondition = BooleanProperty.BooleanIntrinsicValue(false),
-                        trueNodes = mutableListOf(
+        button3.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Forked(
+                    forkedAction =
+                        ShowConfirmationDialog(
+                            title = StringProperty.StringIntrinsicValue("title2"),
+                            message = StringProperty.StringIntrinsicValue("message2"),
+                        ),
+                    trueNodes =
+                        mutableListOf(
                             ActionNode.Simple(action = Navigation.NavigateBack),
                         ),
-                    ),
+                    falseNodes =
+                        mutableListOf(
+                            ActionNode.Simple(action = Navigation.NavigateBack),
+                            ActionNode.Conditional(
+                                ifCondition = BooleanProperty.BooleanIntrinsicValue(false),
+                                trueNodes =
+                                    mutableListOf(
+                                        ActionNode.Simple(action = Navigation.NavigateBack),
+                                    ),
+                            ),
+                        ),
                 ),
-            ),
-        )
+            )
 
         if (screen is Screen) {
             screen.navigationDrawerNode.value =
                 NavigationDrawerTrait().defaultComposeNode(project).apply {
                     addChild(
-                        TextTrait().defaultComposeNode(project)
+                        TextTrait().defaultComposeNode(project),
                     )
                     addChild(
-                        ButtonTrait().defaultComposeNode(project)
+                        ButtonTrait().defaultComposeNode(project),
                     )
                     addChild(
                         NavigationDrawerItemTrait(
-                            imageVectorHolder = Outlined.Add
-                        ).defaultComposeNode(project)
+                            imageVectorHolder = Outlined.Add,
+                        ).defaultComposeNode(project),
                     )
                 }
         }
         val openNavDrawerButton = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(openNavDrawerButton)
-        openNavDrawerButton.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = ShowNavigationDrawer()
-            ),
-        )
+        openNavDrawerButton.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action = ShowNavigationDrawer(),
+                ),
+            )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1591,19 +1738,22 @@ class AppBuilderTest {
 
         val button1 = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button1)
-        button1.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = ShowMessaging.Snackbar(
-                    message = StringProperty.StringIntrinsicValue("message"),
-                    actionLabel = null
-                )
-            ),
-            ActionNode.Simple(
-                action = Share.OpenUrl(
-                    url = StringProperty.StringIntrinsicValue("https://en.wikipedia.org/wiki/Apple"),
-                )
+        button1.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action =
+                        ShowMessaging.Snackbar(
+                            message = StringProperty.StringIntrinsicValue("message"),
+                            actionLabel = null,
+                        ),
+                ),
+                ActionNode.Simple(
+                    action =
+                        Share.OpenUrl(
+                            url = StringProperty.StringIntrinsicValue("https://en.wikipedia.org/wiki/Apple"),
+                        ),
+                ),
             )
-        )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1623,14 +1773,15 @@ class AppBuilderTest {
 
         val openDateAndTimePickerAction = DateOrTimePicker.OpenDateAndTimePicker()
 
-        button1.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = openDatePickerAction
-            ),
-            ActionNode.Simple(
-                action = openDateAndTimePickerAction
+        button1.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action = openDatePickerAction,
+                ),
+                ActionNode.Simple(
+                    action = openDateAndTimePickerAction,
+                ),
             )
-        )
 
         toolbarViewModel.onRunPreviewApp(
             project = project,
@@ -1647,15 +1798,17 @@ class AppBuilderTest {
 
         val button1 = ButtonTrait().defaultComposeNode(project)
         rootNode.addChild(button1)
-        button1.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = Auth.SignInWithGoogle
-            ),
-        )
+        button1.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action = Auth.SignInWithGoogle,
+                ),
+            )
         val text = TextTrait().defaultComposeNode(project)
-        text.trait.value = TextTrait(
-            text = ValueFromGlobalProperty(readableState = AuthenticatedUserState.DisplayName)
-        )
+        text.trait.value =
+            TextTrait(
+                text = ValueFromGlobalProperty(readableState = AuthenticatedUserState.DisplayName),
+            )
         rootNode.addChild(text)
 
         val emailField = TextFieldTrait().defaultComposeNode(project)
@@ -1666,14 +1819,16 @@ class AppBuilderTest {
         screen.addState(passwordFieldState)
 
         val createUserButton = ButtonTrait().defaultComposeNode(project)
-        createUserButton.actionsMap[ActionType.OnClick] = mutableListOf(
-            ActionNode.Simple(
-                action = Auth.CreateUserWithEmailAndPassword(
-                    email = ValueFromState(readFromStateId = emailFieldState.id),
-                    password = ValueFromState(readFromStateId = passwordFieldState.id),
-                )
-            ),
-        )
+        createUserButton.actionsMap[ActionType.OnClick] =
+            mutableListOf(
+                ActionNode.Simple(
+                    action =
+                        Auth.CreateUserWithEmailAndPassword(
+                            email = ValueFromState(readFromStateId = emailFieldState.id),
+                            password = ValueFromState(readFromStateId = passwordFieldState.id),
+                        ),
+                ),
+            )
         rootNode.addChild(emailField)
         rootNode.addChild(passwordField)
         rootNode.addChild(createUserButton)
@@ -1689,58 +1844,68 @@ class AppBuilderTest {
     fun addDocument_toFirestore() {
         val project = Project()
         val rootNode = project.screenHolder.currentContentRootNode()
-        val textField1 = ComposeNode(
-            trait = mutableStateOf(TextFieldTrait()),
-        ).apply {
-            label.value = "textField1"
-        }
+        val textField1 =
+            ComposeNode(
+                trait = mutableStateOf(TextFieldTrait()),
+            ).apply {
+                label.value = "textField1"
+            }
         val textFieldParams = textField1.trait.value as TextFieldTrait
 
-        val todoNameField = DataField(
-            name = "todoName",
-            fieldType = FieldType.String(),
-        )
-        val doneField = DataField(
-            name = "done",
-            fieldType = FieldType.Boolean(),
-        )
-        val todoItemDataType = DataType(
-            name = "TodoItem",
-        ).apply {
-            fields.add(todoNameField)
-            fields.add(doneField)
-        }
-        project.dataTypeHolder.dataTypes.add(todoItemDataType)
-        val firestoreCollection = FirestoreCollection(
-            name = "todoCollection",
-            dataTypeId = todoItemDataType.id,
-        )
-        project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.add(firestoreCollection)
-
-        textField1.trait.value = textFieldParams.copy(
-            placeholder = StringProperty.StringIntrinsicValue("placeholder text"),
-            label = StringProperty.StringIntrinsicValue("label text"),
-            enableValidator = true,
-            textFieldValidator = TextFieldValidator.IntValidator()
-        )
-        val button = ButtonTrait().defaultComposeNode(project)
-        button.actionsMap[ActionType.OnClick] = mutableStateListOf(
-            ActionNode.Simple(
-                action = FirestoreAction.SaveToFirestore(
-                    collectionId = firestoreCollection.id,
-                    dataFieldUpdateProperties = mutableListOf(
-                        DataFieldUpdateProperty(
-                            dataFieldId = todoItemDataType.fields[0].id,
-                            assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
-                        ),
-                        DataFieldUpdateProperty(
-                            dataFieldId = todoItemDataType.fields[1].id,
-                            assignableProperty = BooleanProperty.BooleanIntrinsicValue(true),
-                        ),
-                    )
-                )
+        val todoNameField =
+            DataField(
+                name = "todoName",
+                fieldType = FieldType.String(),
             )
-        )
+        val doneField =
+            DataField(
+                name = "done",
+                fieldType = FieldType.Boolean(),
+            )
+        val todoItemDataType =
+            DataType(
+                name = "TodoItem",
+            ).apply {
+                fields.add(todoNameField)
+                fields.add(doneField)
+            }
+        project.dataTypeHolder.dataTypes.add(todoItemDataType)
+        val firestoreCollection =
+            FirestoreCollection(
+                name = "todoCollection",
+                dataTypeId = todoItemDataType.id,
+            )
+        project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
+            .add(firestoreCollection)
+
+        textField1.trait.value =
+            textFieldParams.copy(
+                placeholder = StringProperty.StringIntrinsicValue("placeholder text"),
+                label = StringProperty.StringIntrinsicValue("label text"),
+                enableValidator = true,
+                textFieldValidator = TextFieldValidator.IntValidator(),
+            )
+        val button = ButtonTrait().defaultComposeNode(project)
+        button.actionsMap[ActionType.OnClick] =
+            mutableStateListOf(
+                ActionNode.Simple(
+                    action =
+                        FirestoreAction.SaveToFirestore(
+                            collectionId = firestoreCollection.id,
+                            dataFieldUpdateProperties =
+                                mutableListOf(
+                                    DataFieldUpdateProperty(
+                                        dataFieldId = todoItemDataType.fields[0].id,
+                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
+                                    ),
+                                    DataFieldUpdateProperty(
+                                        dataFieldId = todoItemDataType.fields[1].id,
+                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(true),
+                                    ),
+                                ),
+                        ),
+                ),
+            )
         rootNode.addChild(button)
 
         val lazyColumn = LazyColumnTrait().defaultComposeNode(project)
@@ -1748,7 +1913,7 @@ class AppBuilderTest {
         lazyColumn.dynamicItems.value = dynamicItems
         lazyColumn.addChild(
             ComposeNode(
-                trait = mutableStateOf(RowTrait())
+                trait = mutableStateOf(RowTrait()),
             ).apply {
                 lazyListChildParams.value =
                     LazyListChildParams.DynamicItemsSource(composeNodeId = lazyColumn.id)
@@ -1756,38 +1921,45 @@ class AppBuilderTest {
                     ComposeNode(
                         trait = mutableStateOf(TextTrait()),
                     ).apply {
-                        trait.value = TextTrait(
-                            text = ValueFromDynamicItem(
-                                composeNodeId = lazyColumn.id,
-                                fieldType = DataFieldType.Primitive,
-                            ),
-                        )
+                        trait.value =
+                            TextTrait(
+                                text =
+                                    ValueFromDynamicItem(
+                                        composeNodeId = lazyColumn.id,
+                                        fieldType = DataFieldType.Primitive,
+                                    ),
+                            )
                     },
                 )
                 addChild(
                     ComposeNode(
-                        trait = mutableStateOf(ButtonTrait())
+                        trait = mutableStateOf(ButtonTrait()),
                     ).apply {
-                        actionsMap[ActionType.OnClick] = mutableStateListOf(
-                            ActionNode.Simple(
-                                action = FirestoreAction.DeleteDocument(
-                                    collectionId = firestoreCollection.id,
-                                    filterExpression = SingleFilter(
-                                        filterFieldType = FilterFieldType.DocumentId(
-                                            firestoreCollection.id
+                        actionsMap[ActionType.OnClick] =
+                            mutableStateListOf(
+                                ActionNode.Simple(
+                                    action =
+                                        FirestoreAction.DeleteDocument(
+                                            collectionId = firestoreCollection.id,
+                                            filterExpression =
+                                                SingleFilter(
+                                                    filterFieldType =
+                                                        FilterFieldType.DocumentId(
+                                                            firestoreCollection.id,
+                                                        ),
+                                                    operator = FilterOperator.EqualTo,
+                                                    property =
+                                                        ValueFromDynamicItem(
+                                                            composeNodeId = lazyColumn.id,
+                                                            fieldType = DataFieldType.DocumentId(firestoreCollection.id),
+                                                        ),
+                                                ),
                                         ),
-                                        operator = FilterOperator.EqualTo,
-                                        property = ValueFromDynamicItem(
-                                            composeNodeId = lazyColumn.id,
-                                            fieldType = DataFieldType.DocumentId(firestoreCollection.id),
-                                        )
-                                    )
-                                )
+                                ),
                             )
-                        )
-                    }
+                    },
                 )
-            }
+            },
         )
         rootNode.addChild(lazyColumn)
 

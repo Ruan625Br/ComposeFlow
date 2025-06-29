@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 data class ToolResponseWrapper(
     val response: Response,
     val tool_results: List<ToolResult> = emptyList(),
-    val message: String? = null
+    val message: String? = null,
 )
 
 @Serializable
@@ -16,10 +16,13 @@ data class Response(
     val type: String,
     val role: String,
     val model: String,
-    val content: List<@Serializable(with = ContentItemSerializer::class) ToolContentItem>,
+    val content: List<
+        @Serializable(with = ContentItemSerializer::class)
+        ToolContentItem,
+    >,
     val stop_reason: String? = null,
     val stop_sequence: String? = null,
-    val usage: Usage
+    val usage: Usage,
 )
 
 @Serializable
@@ -34,14 +37,14 @@ data class AddComposeNodeContentItem(
     override val type: String,
     override val id: String,
     override val name: String,
-    val input: AddComposeNodeInput
+    val input: AddComposeNodeInput,
 ) : ToolContentItem()
 
 @Serializable
 data class AddComposeNodeInput(
     val containerNodeId: String,
     val composeNodeYaml: String,
-    val indexToDrop: Int = 0
+    val indexToDrop: Int = 0,
 )
 
 @Serializable
@@ -49,7 +52,7 @@ data class RemoveComposeNode(
     override val type: String,
     override val id: String,
     override val name: String,
-    val input: RemoveComposeNodeInput
+    val input: RemoveComposeNodeInput,
 ) : ToolContentItem()
 
 @Serializable
@@ -62,7 +65,7 @@ data class AddModifier(
     override val type: String,
     override val id: String,
     override val name: String,
-    val input: AddModifierInput
+    val input: AddModifierInput,
 ) : ToolContentItem()
 
 @Serializable
@@ -76,7 +79,7 @@ data class UpdateModifier(
     override val type: String,
     override val id: String,
     override val name: String,
-    val input: UpdateModifierInput
+    val input: UpdateModifierInput,
 ) : ToolContentItem()
 
 @Serializable

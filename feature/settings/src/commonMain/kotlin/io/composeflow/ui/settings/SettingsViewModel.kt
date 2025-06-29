@@ -52,7 +52,6 @@ class SettingsViewModel(
     private val settingsRepository: SettingsRepository = SettingsRepository(),
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdTokenArg),
 ) : ViewModel() {
-
     private val _firebaseApiResultState: MutableStateFlow<FirebaseApiResultState> =
         MutableStateFlow(FirebaseApiResultState.Initial)
     val firebaseApiResultState: StateFlow<FirebaseApiResultState> = _firebaseApiResultState
@@ -73,13 +72,15 @@ class SettingsViewModel(
         _firebaseWebAppApiResultState
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val firebaseIdToken = authRepository.firebaseIdToken.mapLatest {
-        it
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = firebaseIdTokenArg
-    )
+    private val firebaseIdToken =
+        authRepository.firebaseIdToken
+            .mapLatest {
+                it
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = firebaseIdTokenArg,
+            )
 
     private var authenticationStatusCheckJob: Job? = null
 
@@ -99,7 +100,6 @@ class SettingsViewModel(
                     _firebaseWebAppApiResultState.value =
                         FirebaseWebAppApiResultState(webApp = it)
                 }
-
             }
         }
 
@@ -109,66 +109,73 @@ class SettingsViewModel(
         }
 
         authenticationStatusCheckJob?.cancel()
-        authenticationStatusCheckJob = viewModelScope.launch {
-            while (isActive) {
-                try {
-                    project.firebaseAppInfoHolder.firebaseAppInfo.firebaseProjectId?.let { firebaseProjectId ->
-                        firebaseIdToken.prepareFirebaseApiCall(
-                            firebaseProjectId = firebaseProjectId,
-                            authRepository = authRepository,
-                            ignoreInsufficientScope = true,
-                        ) { identifier ->
-                            firebaseApiCaller.checkIdentityPlatformEnabled(
-                                identifier
-                            ).onSuccess {
-                                if (it == true && !firebaseAppInfo.authenticationEnabled.value) {
-                                    project.firebaseAppInfoHolder.firebaseAppInfo =
-                                        project.firebaseAppInfoHolder.firebaseAppInfo.copy(
-                                            authenticationEnabled = mutableStateOf(true)
-                                        )
-                                    saveProject()
-                                }
+        authenticationStatusCheckJob =
+            viewModelScope.launch {
+                while (isActive) {
+                    try {
+                        project.firebaseAppInfoHolder.firebaseAppInfo.firebaseProjectId?.let { firebaseProjectId ->
+                            firebaseIdToken.prepareFirebaseApiCall(
+                                firebaseProjectId = firebaseProjectId,
+                                authRepository = authRepository,
+                                ignoreInsufficientScope = true,
+                            ) { identifier ->
+                                firebaseApiCaller
+                                    .checkIdentityPlatformEnabled(
+                                        identifier,
+                                    ).onSuccess {
+                                        if (it == true && !firebaseAppInfo.authenticationEnabled.value) {
+                                            project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                project.firebaseAppInfoHolder.firebaseAppInfo.copy(
+                                                    authenticationEnabled = mutableStateOf(true),
+                                                )
+                                            saveProject()
+                                        }
+                                    }
                             }
                         }
+                    } catch (e: Exception) {
+                        Logger.w("Failed in checking the authentication status", e)
+                        authenticationStatusCheckJob?.cancel()
                     }
-                } catch (e: Exception) {
-                    Logger.w("Failed in checking the authentication status", e)
-                    authenticationStatusCheckJob?.cancel()
+                    delay(Duration.ofSeconds(30).toMillis())
                 }
-                delay(Duration.ofSeconds(30).toMillis())
             }
-        }
     }
 
-    val settings = settingsRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ComposeBuilderSettings(),
-    )
-
-    private val composeFlowDarkThemeSetting = settings.map { it.composeBuilderDarkThemeSetting }
-        .stateIn(
+    val settings =
+        settingsRepository.settings.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = settings.value.composeBuilderDarkThemeSetting,
+            initialValue = ComposeBuilderSettings(),
         )
 
-    private val darkThemeSettingSetterUiState = viewModelScope.buildUiState(
-        composeFlowDarkThemeSetting,
-    ) {
-        DarkThemeSettingSetterUiState(
-            darkThemeSetting = it,
-            onThemeChanged = ::onThemeChanged,
-        )
-    }
+    private val composeFlowDarkThemeSetting =
+        settings
+            .map { it.composeBuilderDarkThemeSetting }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = settings.value.composeBuilderDarkThemeSetting,
+            )
 
-    val darkThemeSettingsUiState = viewModelScope.buildUiState(
-        darkThemeSettingSetterUiState,
-    ) { darkThemeSettingSetterUiState ->
-        SettingsUiState(
-            darkThemeSettingSetterUiState = darkThemeSettingSetterUiState,
-        )
-    }
+    private val darkThemeSettingSetterUiState =
+        viewModelScope.buildUiState(
+            composeFlowDarkThemeSetting,
+        ) {
+            DarkThemeSettingSetterUiState(
+                darkThemeSetting = it,
+                onThemeChanged = ::onThemeChanged,
+            )
+        }
+
+    val darkThemeSettingsUiState =
+        viewModelScope.buildUiState(
+            darkThemeSettingSetterUiState,
+        ) { darkThemeSettingSetterUiState ->
+            SettingsUiState(
+                darkThemeSettingSetterUiState = darkThemeSettingSetterUiState,
+            )
+        }
 
     private fun onThemeChanged(darkThemeSetting: DarkThemeSetting) {
         settingsRepository.saveComposeBuilderDarkTheme(darkThemeSetting)
@@ -191,110 +198,122 @@ class SettingsViewModel(
                 val creatingAppString = getString(Res.string.creating_app)
                 val androidApp =
                     project.firebaseAppInfoHolder.firebaseAppInfo.androidApp
-                firebaseApiCaller.listAndroidApps(identifier)
+                firebaseApiCaller
+                    .listAndroidApps(identifier)
                     .mapBoth(
                         success = { existingAndroidApps ->
                             val firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
                             if (androidApp != null) {
-                                existingAndroidApps?.apps?.firstOrNull {
-                                    it.appId == androidApp.metadata.appId ||
+                                existingAndroidApps
+                                    ?.apps
+                                    ?.firstOrNull {
+                                        it.appId == androidApp.metadata.appId ||
                                             it.packageName == androidApp.metadata.packageName
-                                }?.let { metadata ->
-                                    firebaseApiCaller.getAndroidAppConfig(
-                                        identifier = identifier,
-                                        appId = metadata.appId
-                                    ).onSuccess { config ->
-                                        config?.let {
-                                            val appWrapper = AndroidAppWrapper(
-                                                metadata = metadata,
-                                                config = config.decodeFileContents()
-                                            )
-                                            _firebaseAndroidAppApiResultState.value =
-                                                FirebaseAndroidAppApiResultState(androidApp = appWrapper)
-                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                firebaseAppInfo.copy(androidApp = appWrapper)
-                                            saveProject()
-                                        }
-                                    }
-                                }
-                            } else {
-                                existingAndroidApps?.apps?.firstOrNull { it.packageName == project.bundleId }
-                                    ?.let { metadata ->
-                                        firebaseApiCaller.getAndroidAppConfig(
-                                            identifier = identifier,
-                                            appId = metadata.appId
-                                        ).onSuccess { config ->
-                                            config?.let {
-                                                val appWrapper = AndroidAppWrapper(
-                                                    metadata = metadata,
-                                                    config = config.decodeFileContents()
-                                                )
-                                                project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                    firebaseAppInfo.copy(androidApp = appWrapper)
-                                                _firebaseAndroidAppApiResultState.value =
-                                                    FirebaseAndroidAppApiResultState(androidApp = appWrapper)
+                                    }?.let { metadata ->
+                                        firebaseApiCaller
+                                            .getAndroidAppConfig(
+                                                identifier = identifier,
+                                                appId = metadata.appId,
+                                            ).onSuccess { config ->
+                                                config?.let {
+                                                    val appWrapper =
+                                                        AndroidAppWrapper(
+                                                            metadata = metadata,
+                                                            config = config.decodeFileContents(),
+                                                        )
+                                                    _firebaseAndroidAppApiResultState.value =
+                                                        FirebaseAndroidAppApiResultState(androidApp = appWrapper)
+                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                        firebaseAppInfo.copy(androidApp = appWrapper)
+                                                    saveProject()
+                                                }
                                             }
-                                        }
+                                    }
+                            } else {
+                                existingAndroidApps
+                                    ?.apps
+                                    ?.firstOrNull { it.packageName == project.bundleId }
+                                    ?.let { metadata ->
+                                        firebaseApiCaller
+                                            .getAndroidAppConfig(
+                                                identifier = identifier,
+                                                appId = metadata.appId,
+                                            ).onSuccess { config ->
+                                                config?.let {
+                                                    val appWrapper =
+                                                        AndroidAppWrapper(
+                                                            metadata = metadata,
+                                                            config = config.decodeFileContents(),
+                                                        )
+                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                        firebaseAppInfo.copy(androidApp = appWrapper)
+                                                    _firebaseAndroidAppApiResultState.value =
+                                                        FirebaseAndroidAppApiResultState(androidApp = appWrapper)
+                                                }
+                                            }
                                     } ?: run {
                                     _firebaseAndroidAppApiResultState.value =
                                         FirebaseAndroidAppApiResultState(
                                             isLoading = true,
-                                            loadingMessage = creatingAppString
+                                            loadingMessage = creatingAppString,
                                         )
-                                    firebaseApiCaller.createAndroidApp(
-                                        identifier,
-                                        packageName = project.bundleId,
-                                        displayName = FirebaseAppInfo.defaultAppDisplayName(project.name)
-                                    )
-                                        .onSuccess {
+                                    firebaseApiCaller
+                                        .createAndroidApp(
+                                            identifier,
+                                            packageName = project.bundleId,
+                                            displayName = FirebaseAppInfo.defaultAppDisplayName(project.name),
+                                        ).onSuccess {
                                             // Intentionally put some delay because right after creating the
                                             // web app, it doesn't show app in the list result
                                             delay(4000)
                                             // The response doesn't contain the created app metadata, so we need to fetch it again
-                                            firebaseApiCaller.listAndroidApps(
-                                                identifier = identifier
-                                            ).onSuccess { androidApps ->
-                                                val newMetadata = androidApps?.apps?.firstOrNull {
-                                                    it.packageName == project.bundleId
-                                                }
-                                                newMetadata?.let {
-                                                    firebaseApiCaller.getAndroidAppConfig(
-                                                        identifier = identifier,
-                                                        appId = newMetadata.appId,
-                                                    ).onSuccess { config ->
-                                                        config?.let {
-                                                            val appWrapper = AndroidAppWrapper(
-                                                                metadata = newMetadata,
-                                                                config = config.decodeFileContents()
-                                                            )
-                                                            _firebaseAndroidAppApiResultState.value =
-                                                                FirebaseAndroidAppApiResultState(
-                                                                    androidApp = appWrapper
-                                                                )
-                                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                                firebaseAppInfo.copy(androidApp = appWrapper)
-                                                            saveProject()
+                                            firebaseApiCaller
+                                                .listAndroidApps(
+                                                    identifier = identifier,
+                                                ).onSuccess { androidApps ->
+                                                    val newMetadata =
+                                                        androidApps?.apps?.firstOrNull {
+                                                            it.packageName == project.bundleId
                                                         }
-                                                    }.onFailure {
+                                                    newMetadata?.let {
+                                                        firebaseApiCaller
+                                                            .getAndroidAppConfig(
+                                                                identifier = identifier,
+                                                                appId = newMetadata.appId,
+                                                            ).onSuccess { config ->
+                                                                config?.let {
+                                                                    val appWrapper =
+                                                                        AndroidAppWrapper(
+                                                                            metadata = newMetadata,
+                                                                            config = config.decodeFileContents(),
+                                                                        )
+                                                                    _firebaseAndroidAppApiResultState.value =
+                                                                        FirebaseAndroidAppApiResultState(
+                                                                            androidApp = appWrapper,
+                                                                        )
+                                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                                        firebaseAppInfo.copy(androidApp = appWrapper)
+                                                                    saveProject()
+                                                                }
+                                                            }.onFailure {
+                                                                _firebaseAndroidAppApiResultState.value =
+                                                                    FirebaseAndroidAppApiResultState(
+                                                                        failureMessage = it.message,
+                                                                    )
+                                                            }
+                                                    } ?: run {
                                                         _firebaseAndroidAppApiResultState.value =
                                                             FirebaseAndroidAppApiResultState(
-                                                                failureMessage = it.message
+                                                                failureMessage =
+                                                                    "Failed to create Android app",
                                                             )
                                                     }
-                                                } ?: run {
-                                                    _firebaseAndroidAppApiResultState.value =
-                                                        FirebaseAndroidAppApiResultState(
-                                                            failureMessage =
-                                                                "Failed to create Android app"
-                                                        )
                                                 }
-                                            }
-                                        }
-                                        .onFailure {
+                                        }.onFailure {
                                             _firebaseAndroidAppApiResultState.value =
                                                 FirebaseAndroidAppApiResultState(
                                                     failureMessage =
-                                                        it.message ?: "Unknown error"
+                                                        it.message ?: "Unknown error",
                                                 )
                                         }
                                 }
@@ -303,117 +322,130 @@ class SettingsViewModel(
                         failure = {
                             _firebaseAndroidAppApiResultState.value =
                                 FirebaseAndroidAppApiResultState(
-                                    failureMessage = it.message ?: "Unknown error"
+                                    failureMessage = it.message ?: "Unknown error",
                                 )
-                        })
+                        },
+                    )
 
                 val iOSApp = project.firebaseAppInfoHolder.firebaseAppInfo.iOSApp
-                firebaseApiCaller.listIosApps(identifier)
+                firebaseApiCaller
+                    .listIosApps(identifier)
                     .mapBoth(
                         success = { existingIosApps ->
                             val firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
                             if (iOSApp != null) {
-                                existingIosApps?.apps?.firstOrNull {
-                                    it.appId == iOSApp.metadata.appId ||
+                                existingIosApps
+                                    ?.apps
+                                    ?.firstOrNull {
+                                        it.appId == iOSApp.metadata.appId ||
                                             it.bundleId == iOSApp.metadata.bundleId
-                                }?.let { metadata ->
-                                    firebaseApiCaller.getIosAppConfig(
-                                        identifier = identifier,
-                                        appId = metadata.appId
-                                    ).onSuccess { config ->
-                                        config?.let {
-                                            val appWrapper = IosAppWrapper(
-                                                metadata = metadata,
-                                                config = config.decodeFileContents()
-                                            )
-                                            _firebaseIosAppApiResultState.value =
-                                                FirebaseIosAppApiResultState(iOSApp = appWrapper)
-                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                firebaseAppInfo.copy(iOSApp = appWrapper)
-                                            saveProject()
-                                        }
+                                    }?.let { metadata ->
+                                        firebaseApiCaller
+                                            .getIosAppConfig(
+                                                identifier = identifier,
+                                                appId = metadata.appId,
+                                            ).onSuccess { config ->
+                                                config?.let {
+                                                    val appWrapper =
+                                                        IosAppWrapper(
+                                                            metadata = metadata,
+                                                            config = config.decodeFileContents(),
+                                                        )
+                                                    _firebaseIosAppApiResultState.value =
+                                                        FirebaseIosAppApiResultState(iOSApp = appWrapper)
+                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                        firebaseAppInfo.copy(iOSApp = appWrapper)
+                                                    saveProject()
+                                                }
+                                            }
                                     }
-                                }
                             } else {
-                                existingIosApps?.apps?.firstOrNull {
-                                    it.bundleId == project.bundleId
-                                }?.let { metadata ->
-                                    firebaseApiCaller.getIosAppConfig(
-                                        identifier = identifier,
-                                        appId = metadata.appId
-                                    ).onSuccess { config ->
-                                        config?.let {
-                                            val appWrapper = IosAppWrapper(
-                                                metadata = metadata,
-                                                config = config.decodeFileContents()
-                                            )
-                                            _firebaseIosAppApiResultState.value =
-                                                FirebaseIosAppApiResultState(iOSApp = appWrapper)
-                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                firebaseAppInfo.copy(iOSApp = appWrapper)
-                                            saveProject()
-                                        }
-                                    }
-                                } ?: run {
+                                existingIosApps
+                                    ?.apps
+                                    ?.firstOrNull {
+                                        it.bundleId == project.bundleId
+                                    }?.let { metadata ->
+                                        firebaseApiCaller
+                                            .getIosAppConfig(
+                                                identifier = identifier,
+                                                appId = metadata.appId,
+                                            ).onSuccess { config ->
+                                                config?.let {
+                                                    val appWrapper =
+                                                        IosAppWrapper(
+                                                            metadata = metadata,
+                                                            config = config.decodeFileContents(),
+                                                        )
+                                                    _firebaseIosAppApiResultState.value =
+                                                        FirebaseIosAppApiResultState(iOSApp = appWrapper)
+                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                        firebaseAppInfo.copy(iOSApp = appWrapper)
+                                                    saveProject()
+                                                }
+                                            }
+                                    } ?: run {
                                     _firebaseIosAppApiResultState.value =
                                         FirebaseIosAppApiResultState(
                                             isLoading = true,
-                                            loadingMessage = creatingAppString
+                                            loadingMessage = creatingAppString,
                                         )
-                                    firebaseApiCaller.createIosApp(
-                                        identifier,
-                                        bundleId = project.bundleId,
-                                        displayName = FirebaseAppInfo.defaultAppDisplayName(project.name)
-                                    )
-                                        .onSuccess {
+                                    firebaseApiCaller
+                                        .createIosApp(
+                                            identifier,
+                                            bundleId = project.bundleId,
+                                            displayName = FirebaseAppInfo.defaultAppDisplayName(project.name),
+                                        ).onSuccess {
                                             // Intentionally put some delay because right after creating the
                                             // web app, it doesn't show app in the list result
                                             delay(4000)
                                             // The response doesn't contain the created app metadata, so we need to fetch it again
-                                            firebaseApiCaller.listIosApps(
-                                                identifier = identifier
-                                            ).onSuccess { iosApps ->
-                                                val newMetadata = iosApps?.apps?.firstOrNull {
-                                                    it.bundleId == project.bundleId
-                                                }
-                                                newMetadata?.let {
-                                                    firebaseApiCaller.getIosAppConfig(
-                                                        identifier = identifier,
-                                                        appId = newMetadata.appId,
-                                                    ).onSuccess { config ->
-                                                        config?.let {
-                                                            val appWrapper = IosAppWrapper(
-                                                                metadata = newMetadata,
-                                                                config = config.decodeFileContents()
-                                                            )
-                                                            _firebaseIosAppApiResultState.value =
-                                                                FirebaseIosAppApiResultState(
-                                                                    iOSApp = appWrapper
-                                                                )
-                                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                                firebaseAppInfo.copy(iOSApp = appWrapper)
-                                                            saveProject()
+                                            firebaseApiCaller
+                                                .listIosApps(
+                                                    identifier = identifier,
+                                                ).onSuccess { iosApps ->
+                                                    val newMetadata =
+                                                        iosApps?.apps?.firstOrNull {
+                                                            it.bundleId == project.bundleId
                                                         }
-                                                    }.onFailure {
+                                                    newMetadata?.let {
+                                                        firebaseApiCaller
+                                                            .getIosAppConfig(
+                                                                identifier = identifier,
+                                                                appId = newMetadata.appId,
+                                                            ).onSuccess { config ->
+                                                                config?.let {
+                                                                    val appWrapper =
+                                                                        IosAppWrapper(
+                                                                            metadata = newMetadata,
+                                                                            config = config.decodeFileContents(),
+                                                                        )
+                                                                    _firebaseIosAppApiResultState.value =
+                                                                        FirebaseIosAppApiResultState(
+                                                                            iOSApp = appWrapper,
+                                                                        )
+                                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                                        firebaseAppInfo.copy(iOSApp = appWrapper)
+                                                                    saveProject()
+                                                                }
+                                                            }.onFailure {
+                                                                _firebaseIosAppApiResultState.value =
+                                                                    FirebaseIosAppApiResultState(
+                                                                        failureMessage = it.message,
+                                                                    )
+                                                            }
+                                                    } ?: run {
                                                         _firebaseIosAppApiResultState.value =
                                                             FirebaseIosAppApiResultState(
-                                                                failureMessage = it.message
+                                                                failureMessage =
+                                                                    "Failed to create iOS app",
                                                             )
                                                     }
-                                                } ?: run {
-                                                    _firebaseIosAppApiResultState.value =
-                                                        FirebaseIosAppApiResultState(
-                                                            failureMessage =
-                                                                "Failed to create iOS app"
-                                                        )
                                                 }
-                                            }
-                                        }
-                                        .onFailure {
+                                        }.onFailure {
                                             _firebaseAndroidAppApiResultState.value =
                                                 FirebaseAndroidAppApiResultState(
                                                     failureMessage =
-                                                        it.message ?: "Unknown error"
+                                                        it.message ?: "Unknown error",
                                                 )
                                         }
                                 }
@@ -422,128 +454,142 @@ class SettingsViewModel(
                         failure = {
                             _firebaseIosAppApiResultState.value =
                                 FirebaseIosAppApiResultState(
-                                    failureMessage = it.message ?: "Unknown error"
+                                    failureMessage = it.message ?: "Unknown error",
                                 )
-                        })
+                        },
+                    )
 
                 val webApp = project.firebaseAppInfoHolder.firebaseAppInfo.webApp
-                firebaseApiCaller.listWebApps(
-                    identifier = identifier,
-                )
-                    .mapBoth(
+                firebaseApiCaller
+                    .listWebApps(
+                        identifier = identifier,
+                    ).mapBoth(
                         success = { existingWebApps ->
                             val firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
                             if (webApp != null) {
-                                existingWebApps?.apps?.firstOrNull {
-                                    it.appId == webApp.metadata.appId ||
+                                existingWebApps
+                                    ?.apps
+                                    ?.firstOrNull {
+                                        it.appId == webApp.metadata.appId ||
                                             it.displayName == webApp.metadata.displayName
-                                }?.let { metadata ->
-                                    firebaseApiCaller.getWebAppConfig(
-                                        firebaseProjectId = identifier.firebaseProjectId,
-                                        appId = metadata.appId,
-                                        tokenResponse = identifier.googleTokenResponse,
-                                    ).onSuccess { config ->
-                                        config?.let {
-                                            val appWrapper = WebAppWrapper(
-                                                metadata = metadata,
-                                                config = config
-                                            )
-                                            _firebaseWebAppApiResultState.value =
-                                                FirebaseWebAppApiResultState(webApp = appWrapper)
-                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                firebaseAppInfo.copy(webApp = appWrapper)
-                                            saveProject()
-                                        }
-                                    }.onFailure {
-                                        _firebaseWebAppApiResultState.value =
-                                            FirebaseWebAppApiResultState(failureMessage = it.message)
+                                    }?.let { metadata ->
+                                        firebaseApiCaller
+                                            .getWebAppConfig(
+                                                firebaseProjectId = identifier.firebaseProjectId,
+                                                appId = metadata.appId,
+                                                tokenResponse = identifier.googleTokenResponse,
+                                            ).onSuccess { config ->
+                                                config?.let {
+                                                    val appWrapper =
+                                                        WebAppWrapper(
+                                                            metadata = metadata,
+                                                            config = config,
+                                                        )
+                                                    _firebaseWebAppApiResultState.value =
+                                                        FirebaseWebAppApiResultState(webApp = appWrapper)
+                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                        firebaseAppInfo.copy(webApp = appWrapper)
+                                                    saveProject()
+                                                }
+                                            }.onFailure {
+                                                _firebaseWebAppApiResultState.value =
+                                                    FirebaseWebAppApiResultState(failureMessage = it.message)
+                                            }
                                     }
-                                }
                             } else {
-                                existingWebApps?.apps?.firstOrNull {
-                                    it.appId == project.bundleId
-                                }?.let { metadata ->
-                                    firebaseApiCaller.getWebAppConfig(
-                                        firebaseProjectId = identifier.firebaseProjectId,
-                                        appId = metadata.appId,
-                                        tokenResponse = identifier.googleTokenResponse,
-                                    ).onSuccess { config ->
-                                        config?.let {
-                                            val appWrapper = WebAppWrapper(
-                                                metadata = metadata,
-                                                config = config
-                                            )
-                                            _firebaseWebAppApiResultState.value =
-                                                FirebaseWebAppApiResultState(webApp = appWrapper)
-                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                firebaseAppInfo.copy(webApp = appWrapper)
-                                            saveProject()
-                                        }
-                                    }.onFailure {
-                                        _firebaseWebAppApiResultState.value =
-                                            FirebaseWebAppApiResultState(failureMessage = it.message)
-                                    }
-                                } ?: run {
+                                existingWebApps
+                                    ?.apps
+                                    ?.firstOrNull {
+                                        it.appId == project.bundleId
+                                    }?.let { metadata ->
+                                        firebaseApiCaller
+                                            .getWebAppConfig(
+                                                firebaseProjectId = identifier.firebaseProjectId,
+                                                appId = metadata.appId,
+                                                tokenResponse = identifier.googleTokenResponse,
+                                            ).onSuccess { config ->
+                                                config?.let {
+                                                    val appWrapper =
+                                                        WebAppWrapper(
+                                                            metadata = metadata,
+                                                            config = config,
+                                                        )
+                                                    _firebaseWebAppApiResultState.value =
+                                                        FirebaseWebAppApiResultState(webApp = appWrapper)
+                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                        firebaseAppInfo.copy(webApp = appWrapper)
+                                                    saveProject()
+                                                }
+                                            }.onFailure {
+                                                _firebaseWebAppApiResultState.value =
+                                                    FirebaseWebAppApiResultState(failureMessage = it.message)
+                                            }
+                                    } ?: run {
                                     _firebaseWebAppApiResultState.value =
                                         FirebaseWebAppApiResultState(
                                             isLoading = true,
-                                            loadingMessage = creatingAppString
+                                            loadingMessage = creatingAppString,
                                         )
-                                    firebaseApiCaller.createWebApp(
-                                        identifier = identifier,
-                                        displayName = FirebaseAppInfo.defaultWebAppDisplayName(
-                                            project.name
-                                        )
-                                    )
-                                        .onSuccess {
+                                    firebaseApiCaller
+                                        .createWebApp(
+                                            identifier = identifier,
+                                            displayName =
+                                                FirebaseAppInfo.defaultWebAppDisplayName(
+                                                    project.name,
+                                                ),
+                                        ).onSuccess {
                                             // Intentionally put some delay because right after creating the
                                             // web app, it doesn't show app in the list result
                                             delay(4000)
                                             // The response doesn't contain the created web app metadata, so we need to fetch it again
-                                            firebaseApiCaller.listWebApps(
-                                                identifier = identifier
-                                            ).onSuccess { webApps ->
-                                                val newMetadata = webApps?.apps?.firstOrNull {
-                                                    it.displayName == FirebaseAppInfo.defaultWebAppDisplayName(
-                                                        project.name
-                                                    )
-                                                }
-                                                newMetadata?.let {
-                                                    firebaseApiCaller.getWebAppConfig(
-                                                        identifier = identifier,
-                                                        appId = newMetadata.appId,
-                                                    ).onSuccess { config ->
-                                                        config?.let {
-                                                            val appWrapper = WebAppWrapper(
-                                                                metadata = newMetadata,
-                                                                config = config
-                                                            )
-                                                            _firebaseWebAppApiResultState.value =
-                                                                FirebaseWebAppApiResultState(webApp = appWrapper)
-                                                            project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                                firebaseAppInfo.copy(webApp = appWrapper)
-                                                            saveProject()
+                                            firebaseApiCaller
+                                                .listWebApps(
+                                                    identifier = identifier,
+                                                ).onSuccess { webApps ->
+                                                    val newMetadata =
+                                                        webApps?.apps?.firstOrNull {
+                                                            it.displayName ==
+                                                                FirebaseAppInfo.defaultWebAppDisplayName(
+                                                                    project.name,
+                                                                )
                                                         }
-                                                    }.onFailure {
+                                                    newMetadata?.let {
+                                                        firebaseApiCaller
+                                                            .getWebAppConfig(
+                                                                identifier = identifier,
+                                                                appId = newMetadata.appId,
+                                                            ).onSuccess { config ->
+                                                                config?.let {
+                                                                    val appWrapper =
+                                                                        WebAppWrapper(
+                                                                            metadata = newMetadata,
+                                                                            config = config,
+                                                                        )
+                                                                    _firebaseWebAppApiResultState.value =
+                                                                        FirebaseWebAppApiResultState(webApp = appWrapper)
+                                                                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                                                                        firebaseAppInfo.copy(webApp = appWrapper)
+                                                                    saveProject()
+                                                                }
+                                                            }.onFailure {
+                                                                _firebaseWebAppApiResultState.value =
+                                                                    FirebaseWebAppApiResultState(
+                                                                        failureMessage = it.message,
+                                                                    )
+                                                            }
+                                                    } ?: run {
                                                         _firebaseWebAppApiResultState.value =
                                                             FirebaseWebAppApiResultState(
-                                                                failureMessage = it.message
+                                                                failureMessage =
+                                                                    "Failed to create web app",
                                                             )
                                                     }
-                                                } ?: run {
-                                                    _firebaseWebAppApiResultState.value =
-                                                        FirebaseWebAppApiResultState(
-                                                            failureMessage =
-                                                                "Failed to create web app"
-                                                        )
                                                 }
-                                            }
-                                        }
-                                        .onFailure {
+                                        }.onFailure {
                                             _firebaseWebAppApiResultState.value =
                                                 FirebaseWebAppApiResultState(
                                                     failureMessage =
-                                                        it.message ?: "Unknown error"
+                                                        it.message ?: "Unknown error",
                                                 )
                                         }
                                 }
@@ -552,20 +598,22 @@ class SettingsViewModel(
                         failure = {
                             _firebaseWebAppApiResultState.value =
                                 FirebaseWebAppApiResultState(
-                                    failureMessage = it.message ?: "Unknown error"
+                                    failureMessage = it.message ?: "Unknown error",
                                 )
-                        })
+                        },
+                    )
 
                 var firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
-                firebaseApiCaller.checkIdentityPlatformEnabled(
-                    identifier
-                ).onSuccess {
-                    if (it == true && !firebaseAppInfo.authenticationEnabled.value) {
-                        firebaseAppInfo =
-                            firebaseAppInfo.copy(authenticationEnabled = mutableStateOf(true))
-                        project.firebaseAppInfoHolder.firebaseAppInfo = firebaseAppInfo
+                firebaseApiCaller
+                    .checkIdentityPlatformEnabled(
+                        identifier,
+                    ).onSuccess {
+                        if (it == true && !firebaseAppInfo.authenticationEnabled.value) {
+                            firebaseAppInfo =
+                                firebaseAppInfo.copy(authenticationEnabled = mutableStateOf(true))
+                            project.firebaseAppInfoHolder.firebaseAppInfo = firebaseAppInfo
+                        }
                     }
-                }
                 updateApiResult(firebaseAppInfo, identifier.firebaseProjectId.trim())
             }
         }

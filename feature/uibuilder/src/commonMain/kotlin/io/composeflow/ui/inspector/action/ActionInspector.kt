@@ -80,15 +80,20 @@ fun ActionInspector(
     var dialogOpen by remember { mutableStateOf(false) }
     val actionInEdit by remember { mutableStateOf<Action?>(null) }
     var actionEditorDialogOpen by remember { mutableStateOf(false) }
-    val actionTypes = composeNode.trait.value.actionTypes().sortedBy { it.priority }
+    val actionTypes =
+        composeNode.trait.value
+            .actionTypes()
+            .sortedBy { it.priority }
     var selectedActionType by remember(
         composeNode.id,
-        actionTypes
+        actionTypes,
     ) { mutableStateOf(actionTypes.first()) }
     Column(
-        modifier = Modifier.fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(16.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             TextButton(
@@ -110,16 +115,18 @@ fun ActionInspector(
             var actionTypeDropDownExpanded by remember { mutableStateOf(false) }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                    actionTypeDropDownExpanded = true
-                },
+                modifier =
+                    Modifier.clickable {
+                        actionTypeDropDownExpanded = true
+                    },
             ) {
                 Text(
                     text = selectedActionType.name,
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .padding(end = 8.dp),
+                    modifier =
+                        Modifier
+                            .padding(end = 8.dp),
                 )
                 Icon(
                     imageVector = Icons.Outlined.ExpandMore,
@@ -190,9 +197,10 @@ fun ActionInspector(
                 project = project,
                 actionInEdit = actionInEdit,
                 onActionSelected = {
-                    val newActionsMap = mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
-                        putAll(composeNode.actionsMap)
-                    }
+                    val newActionsMap =
+                        mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
+                            putAll(composeNode.actionsMap)
+                        }
 //                    it.onActionAdded(project)
                     newActionsMap[selectedActionType]?.add(it.asActionNode())
                     composeNodeCallbacks.onActionsMapUpdated(
@@ -253,9 +261,10 @@ private fun ActionTriggersContent(
                 actionNodes.forEachIndexed { index, actionNode ->
                     val action = (actionNode as ActionNode.Simple).getFocusedAction()
                     Column(
-                        modifier = Modifier
-                            .hoverOverlay()
-                            .padding(8.dp),
+                        modifier =
+                            Modifier
+                                .hoverOverlay()
+                                .padding(8.dp),
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
@@ -308,8 +317,7 @@ private fun ActionTriggersContent(
                                     screen?.name ?: "",
                                     color = MaterialTheme.colorScheme.tertiary,
                                     style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.padding(bottom = 8.dp)
-
+                                    modifier = Modifier.padding(bottom = 8.dp),
                                 )
 
                                 screen?.let {
@@ -327,13 +335,13 @@ private fun ActionTriggersContent(
                                             val newAction = action.copy(paramsMap = newParamsMap)
                                             newActionsMap[actionType]?.set(
                                                 index,
-                                                ActionNode.Simple(action = newAction)
+                                                ActionNode.Simple(action = newAction),
                                             )
                                             composeNodeCallbacks.onActionsMapUpdated(
                                                 composeNode,
                                                 newActionsMap,
                                             )
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -368,7 +376,7 @@ private fun ActionTriggersContent(
                                         api.name,
                                         color = MaterialTheme.colorScheme.tertiary,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        modifier = Modifier.padding(bottom = 8.dp)
+                                        modifier = Modifier.padding(bottom = 8.dp),
                                     )
 
                                     CallApiActionDetail(
@@ -385,13 +393,13 @@ private fun ActionTriggersContent(
                                             val newAction = action.copy(paramsMap = newParamsMap)
                                             newActionsMap[actionType]?.set(
                                                 index,
-                                                ActionNode.Simple(action = newAction)
+                                                ActionNode.Simple(action = newAction),
                                             )
                                             composeNodeCallbacks.onActionsMapUpdated(
                                                 composeNode,
                                                 newActionsMap,
                                             )
-                                        }
+                                        },
                                     )
                                 }
                             }
@@ -408,13 +416,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -430,13 +438,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -461,13 +469,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -483,13 +491,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -505,13 +513,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -527,13 +535,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -550,13 +558,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -572,13 +580,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -595,13 +603,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -617,13 +625,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -639,13 +647,13 @@ private fun ActionTriggersContent(
                                             }
                                         newActionsMap[actionType]?.set(
                                             index,
-                                            ActionNode.Simple(action = it)
+                                            ActionNode.Simple(action = it),
                                         )
                                         composeNodeCallbacks.onActionsMapUpdated(
                                             composeNode,
                                             newActionsMap,
                                         )
-                                    }
+                                    },
                                 )
                             }
 
@@ -684,9 +692,10 @@ private fun ActionTriggersContent(
                 project = project,
                 actionInEdit = actionNodeInEdit?.getFocusedAction(),
                 onActionSelected = { action ->
-                    val newActionsMap = mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
-                        putAll(composeNode.actionsMap)
-                    }
+                    val newActionsMap =
+                        mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
+                            putAll(composeNode.actionsMap)
+                        }
                     actionNodeIndex?.let { actionNodeIndex ->
                         newActionsMap[actionType]?.set(
                             actionNodeIndex,
@@ -730,7 +739,7 @@ fun AddActionDialogContent(
                 onCloseDialog = {
                     onCloseClick()
                 },
-                modifier = Modifier.heightIn(max = 860.dp)
+                modifier = Modifier.heightIn(max = 860.dp),
             )
             Spacer(Modifier.weight(1f))
             HorizontalDivider()
@@ -741,8 +750,9 @@ fun AddActionDialogContent(
                     onClick = {
                         onCloseClick()
                     },
-                    modifier = Modifier
-                        .padding(end = 16.dp),
+                    modifier =
+                        Modifier
+                            .padding(end = 16.dp),
                 ) {
                     Text(stringResource(Res.string.cancel))
                 }
@@ -760,14 +770,15 @@ fun ActionSelector(
     modifier: Modifier = Modifier,
 ) {
     LazyColumn(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(8.dp),
-            ),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp)
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp),
+                ),
     ) {
         item {
             NavigateToActionContent(
@@ -870,17 +881,16 @@ fun ActionSelector(
 fun Modifier.selectedActionModifier(
     actionInEdit: Action?,
     predicate: (Action?) -> Boolean,
-): Modifier {
-    return this then (
-            if (predicate(actionInEdit)) {
-                Modifier.border(
+): Modifier =
+    this then (
+        if (predicate(actionInEdit)) {
+            Modifier
+                .border(
                     width = 1.dp,
                     color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
                     shape = RoundedCornerShape(8.dp),
-                )
-                    .padding(2.dp)
-            } else {
-                Modifier
-            }
-            )
-}
+                ).padding(2.dp)
+        } else {
+            Modifier
+        }
+    )

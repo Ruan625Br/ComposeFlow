@@ -12,31 +12,29 @@ private class IntValidatorInternal(
     private val maxValue: Int = Int.MAX_VALUE,
     private val minValue: Int = Int.MIN_VALUE,
 ) : InputValidatorInternal {
-
-    override fun validate(
-        input: String,
-    ) = runCatching {
-        val value = input.toIntOrNull()
-        if (value == null) {
-            ValidateResult.Failure(Res.string.invalid_int_format)
-        } else {
-            if (!allowLessThanZero && value <= 0) {
-                ValidateResult.Failure(Res.string.must_be_greater_than_zero)
-            } else if (value > maxValue) {
-                ValidateResult.Failure(
-                    Res.string.must_be_smaller_than_or_equal_to,
-                    listOf(maxValue)
-                )
-            } else if (value < minValue) {
-                ValidateResult.Failure(
-                    Res.string.must_be_greater_than_or_equal_to,
-                    listOf(minValue)
-                )
+    override fun validate(input: String) =
+        runCatching {
+            val value = input.toIntOrNull()
+            if (value == null) {
+                ValidateResult.Failure(Res.string.invalid_int_format)
             } else {
-                ValidateResult.Success
+                if (!allowLessThanZero && value <= 0) {
+                    ValidateResult.Failure(Res.string.must_be_greater_than_zero)
+                } else if (value > maxValue) {
+                    ValidateResult.Failure(
+                        Res.string.must_be_smaller_than_or_equal_to,
+                        listOf(maxValue),
+                    )
+                } else if (value < minValue) {
+                    ValidateResult.Failure(
+                        Res.string.must_be_greater_than_or_equal_to,
+                        listOf(minValue),
+                    )
+                } else {
+                    ValidateResult.Success
+                }
             }
         }
-    }
 }
 
 class IntValidator(
@@ -45,10 +43,11 @@ class IntValidator(
     minValue: Int = Int.MIN_VALUE,
     private val delegate: InputValidatorImpl =
         InputValidatorImpl(
-            delegate = IntValidatorInternal(
-                allowLessThanZero = allowLessThanZero,
-                maxValue = maxValue,
-                minValue = minValue,
-            ),
+            delegate =
+                IntValidatorInternal(
+                    allowLessThanZero = allowLessThanZero,
+                    maxValue = maxValue,
+                    minValue = minValue,
+                ),
         ),
 ) : InputValidator by delegate

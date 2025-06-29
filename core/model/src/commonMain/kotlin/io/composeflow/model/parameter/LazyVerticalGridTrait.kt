@@ -13,10 +13,9 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
+import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
-import io.composeflow.Res
-import org.jetbrains.compose.resources.StringResource
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.palette.Constraint
 import io.composeflow.model.palette.LazyListTraitNode
@@ -35,6 +34,7 @@ import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 @SerialName("LazyVerticalGridTrait")
@@ -45,15 +45,18 @@ data class LazyVerticalGridTrait(
     val reverseLayout: Boolean? = null,
     val verticalArrangement: ArrangementVerticalWrapper? = null,
     val userScrollEnabled: Boolean? = null,
-) : LazyGridTrait, ComposeTrait {
+) : LazyGridTrait,
+    ComposeTrait {
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
     override var defaultChildNumOfItems: Int = ComposeTrait.NumOfItemsInLazyList
 
     override fun areAllParamsEmpty(): Boolean =
-        contentPadding == null && reverseLayout == null && verticalArrangement == null
-                && userScrollEnabled == null
+        contentPadding == null &&
+            reverseLayout == null &&
+            verticalArrangement == null &&
+            userScrollEnabled == null
 
     override fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -93,14 +96,19 @@ data class LazyVerticalGridTrait(
         )
 
     override fun hasDynamicItems(): Boolean = true
+
     override fun iconText(): String = "Lazy V Grid"
+
     override fun icon(): ImageVector = Icons.Outlined.GridView
+
     override fun isLazyList(): Boolean = true
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Container,
-        TraitCategory.WrapContainer,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Container,
+            TraitCategory.WrapContainer,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_lazy_vertical_grid_trait
 
@@ -129,23 +137,27 @@ data class LazyVerticalGridTrait(
             columns = lazyGridCells.asComposeGridCells(),
             contentPadding = PaddingValues(contentPadding?.value?.dp ?: 0.dp),
             reverseLayout = reverseLayout ?: false,
-            verticalArrangement = verticalArrangement?.arrangement
-                ?: Arrangement.Top,
-            userScrollEnabled = if (paletteRenderParams.isThumbnail) {
-                false
-            } else {
-                userScrollEnabled ?: true
-            },
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            verticalArrangement =
+                verticalArrangement?.arrangement
+                    ?: Arrangement.Top,
+            userScrollEnabled =
+                if (paletteRenderParams.isThumbnail) {
+                    false
+                } else {
+                    userScrollEnabled ?: true
+                },
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         ) {
             node.children.forEach { child ->
                 item {
@@ -157,10 +169,11 @@ data class LazyVerticalGridTrait(
                     )
                 }
                 items(
-                    count = child.lazyListChildParams.value.getNumOfItems(
-                        project = project,
-                        lazyList = node,
-                    ) - 1,
+                    count =
+                        child.lazyListChildParams.value.getNumOfItems(
+                            project = project,
+                            lazyList = node,
+                        ) - 1,
                 ) {
                     child.RenderedNodeInCanvas(
                         project = project,

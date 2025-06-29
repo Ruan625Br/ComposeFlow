@@ -14,24 +14,26 @@ class ToolDispatcher(
     private val uiBuilderOperator: UiBuilderOperator = UiBuilderOperator(),
     private val appStateEditorOperator: AppStateEditorOperator = AppStateEditorOperator(),
 ) {
-
     /**
      * Dispatches a tool execution request to the appropriate operator.
-     * 
+     *
      * @param project The project to operate on
      * @param toolArgs The tool arguments containing the operation details
      * @return EventResult indicating success or failure with error messages
      */
-    fun dispatchToolResponse(project: Project, toolArgs: ToolArgs): EventResult {
+    fun dispatchToolResponse(
+        project: Project,
+        toolArgs: ToolArgs,
+    ): EventResult {
         Logger.i("dispatchToolResponse: $toolArgs")
-        
+
         return when (toolArgs) {
             is ToolArgs.AddComposeNodeArgs -> {
                 uiBuilderOperator.onAddComposeNodeToContainerNode(
                     project,
                     toolArgs.containerNodeId,
                     toolArgs.composeNodeYaml,
-                    toolArgs.indexToDrop
+                    toolArgs.indexToDrop,
                 )
             }
 
@@ -39,7 +41,7 @@ class ToolDispatcher(
                 uiBuilderOperator.onAddModifier(
                     project,
                     toolArgs.composeNodeId,
-                    toolArgs.modifierYaml
+                    toolArgs.modifierYaml,
                 )
             }
 
@@ -48,14 +50,14 @@ class ToolDispatcher(
                     project,
                     toolArgs.composeNodeId,
                     toolArgs.containerNodeId,
-                    toolArgs.index
+                    toolArgs.index,
                 )
             }
 
             is ToolArgs.RemoveComposeNodeArgs -> {
                 uiBuilderOperator.onRemoveComposeNode(
                     project,
-                    toolArgs.composeNodeId
+                    toolArgs.composeNodeId,
                 )
             }
 
@@ -63,7 +65,7 @@ class ToolDispatcher(
                 uiBuilderOperator.onRemoveModifier(
                     project,
                     toolArgs.composeNodeId,
-                    toolArgs.index
+                    toolArgs.index,
                 )
             }
 
@@ -72,7 +74,7 @@ class ToolDispatcher(
                     project,
                     toolArgs.composeNodeId,
                     toolArgs.fromIndex,
-                    toolArgs.toIndex
+                    toolArgs.toIndex,
                 )
             }
 
@@ -81,28 +83,28 @@ class ToolDispatcher(
                     project,
                     toolArgs.composeNodeId,
                     toolArgs.index,
-                    toolArgs.modifierYaml
+                    toolArgs.modifierYaml,
                 )
             }
 
             is ToolArgs.AddAppStateArgs -> {
                 appStateEditorOperator.onAddAppState(
                     project,
-                    toolArgs.appStateYaml
+                    toolArgs.appStateYaml,
                 )
             }
 
             is ToolArgs.DeleteAppStateArgs -> {
                 appStateEditorOperator.onDeleteAppState(
                     project,
-                    toolArgs.appStateId
+                    toolArgs.appStateId,
                 )
             }
 
             is ToolArgs.UpdateAppStateArgs -> {
                 appStateEditorOperator.onUpdateAppState(
                     project,
-                    toolArgs.appStateYaml
+                    toolArgs.appStateYaml,
                 )
             }
 
@@ -110,7 +112,7 @@ class ToolDispatcher(
                 appStateEditorOperator.onUpdateCustomDataTypeListDefaultValues(
                     project,
                     toolArgs.appStateId,
-                    toolArgs.defaultValuesYaml
+                    toolArgs.defaultValuesYaml,
                 )
             }
 

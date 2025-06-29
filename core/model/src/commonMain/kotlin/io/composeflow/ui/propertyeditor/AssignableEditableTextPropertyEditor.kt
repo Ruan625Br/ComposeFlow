@@ -63,16 +63,17 @@ fun AssignableEditableTextPropertyEditor(
     val textFieldEnabled =
         editable && (initialProperty is IntrinsicProperty<*> || initialProperty == null)
 
-    val resolvedLeadingIcon = if (leadingIcon != null) {
-        leadingIcon
-    } else {
-        {
-            ComposeFlowIcon(
-                imageVector = acceptableType.leadingIcon(),
-                contentDescription = ""
-            )
+    val resolvedLeadingIcon =
+        if (leadingIcon != null) {
+            leadingIcon
+        } else {
+            {
+                ComposeFlowIcon(
+                    imageVector = acceptableType.leadingIcon(),
+                    contentDescription = "",
+                )
+            }
         }
-    }
     val errorText = initialProperty?.getErrorMessage(project, acceptableType)
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -81,12 +82,13 @@ fun AssignableEditableTextPropertyEditor(
         EditableTextProperty(
             enabled = textFieldEnabled,
             onValidValueChanged = {
-                val newProperty = when (acceptableType) {
-                    is ComposeFlowType.IntType -> IntProperty.IntIntrinsicValue(it.toInt())
-                    is ComposeFlowType.FloatType -> FloatProperty.FloatIntrinsicValue(it.toFloat())
-                    is ComposeFlowType.StringType -> StringProperty.StringIntrinsicValue(it)
-                    else -> throw IllegalArgumentException("Invalid acceptable type: $acceptableType")
-                }
+                val newProperty =
+                    when (acceptableType) {
+                        is ComposeFlowType.IntType -> IntProperty.IntIntrinsicValue(it.toInt())
+                        is ComposeFlowType.FloatType -> FloatProperty.FloatIntrinsicValue(it.toFloat())
+                        is ComposeFlowType.StringType -> StringProperty.StringIntrinsicValue(it)
+                        else -> throw IllegalArgumentException("Invalid acceptable type: $acceptableType")
+                    }
                 onValidPropertyChanged(
                     initialProperty.mergeProperty(
                         project = project,
@@ -95,12 +97,13 @@ fun AssignableEditableTextPropertyEditor(
                     null,
                 )
             },
-            initialValue = if (textFieldEnabled) {
-                initialProperty?.displayText(project)
-            } else {
-                val resolvedExpression = initialProperty?.transformedValueExpression(project)
-                resolvedExpression
-            } ?: "",
+            initialValue =
+                if (textFieldEnabled) {
+                    initialProperty?.displayText(project)
+                } else {
+                    val resolvedExpression = initialProperty?.transformedValueExpression(project)
+                    resolvedExpression
+                } ?: "",
             label = label,
             placeholder = placeholder,
             validateInput = validateInput,

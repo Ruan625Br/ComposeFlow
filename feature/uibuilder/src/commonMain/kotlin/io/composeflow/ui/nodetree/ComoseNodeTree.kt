@@ -82,6 +82,7 @@ fun ComposeNodeTree(
     val editable = project.screenHolder.currentEditable()
     val rootNode = editable.getRootNode()
     val focusedNode = project.screenHolder.findFocusedNodeOrNull()
+
     fun TreeGeneratorScope<ComposeNode>.addNodeRecursively(node: ComposeNode) {
         addNode(node, id = node.fallbackId) {
             node.children.forEach { child ->
@@ -94,30 +95,31 @@ fun ComposeNodeTree(
         }
     }
 
-    val tree = if (editable is Screen) {
-        buildTree<ComposeNode> {
-            addNode(rootNode, rootNode.fallbackId) {
-                editable.navigationDrawerNode.value?.let { navDrawer ->
-                    addNodeRecursively(navDrawer)
-                }
-                editable.topAppBarNode.value?.let { topAppBar ->
-                    addNodeRecursively(topAppBar)
-                }
-                addNodeRecursively(editable.contentRootNode())
+    val tree =
+        if (editable is Screen) {
+            buildTree<ComposeNode> {
+                addNode(rootNode, rootNode.fallbackId) {
+                    editable.navigationDrawerNode.value?.let { navDrawer ->
+                        addNodeRecursively(navDrawer)
+                    }
+                    editable.topAppBarNode.value?.let { topAppBar ->
+                        addNodeRecursively(topAppBar)
+                    }
+                    addNodeRecursively(editable.contentRootNode())
 
-                editable.getBottomAppBar()?.let { bottomAppBar ->
-                    addNodeRecursively(bottomAppBar)
-                }
-                editable.fabNode.value?.let { fabNode ->
-                    addLeaf(fabNode, id = fabNode.fallbackId)
+                    editable.getBottomAppBar()?.let { bottomAppBar ->
+                        addNodeRecursively(bottomAppBar)
+                    }
+                    editable.fabNode.value?.let { fabNode ->
+                        addLeaf(fabNode, id = fabNode.fallbackId)
+                    }
                 }
             }
+        } else {
+            buildTree {
+                addNodeRecursively(rootNode)
+            }
         }
-    } else {
-        buildTree {
-            addNodeRecursively(rootNode)
-        }
-    }
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
     val selectableLazyListState = remember { SelectableLazyListState(lazyListState) }
@@ -129,21 +131,26 @@ fun ComposeNodeTree(
     var addModifierDialogVisible by remember { mutableStateOf(false) }
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .onClick(
-                matcher = PointerMatcher.mouse(PointerButton.Secondary),
-            ) {
-                contextMenuExpanded = true
-            },
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .onClick(
+                    matcher = PointerMatcher.mouse(PointerButton.Secondary),
+                ) {
+                    contextMenuExpanded = true
+                },
     ) {
         SingleSelectionLazyTree(
             tree = tree,
             treeState = treeState,
             style = LocalLazyTreeStyle.current,
             onSelectionChange = {
-                if (it.isNotEmpty() && !it.first().data.isFocused.value) {
+                if (it.isNotEmpty() &&
+                    !it
+                        .first()
+                        .data.isFocused.value
+                ) {
                     project.screenHolder.clearIsFocused()
                     val element = it.first()
                     element.data.setFocus()
@@ -153,40 +160,47 @@ fun ComposeNodeTree(
             val visibilityParams = it.data.visibilityParams.value
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-                    .alpha(if (visibilityParams.visibleInUiBuilder) 1f else 0.5f)
-                    .mousePointerEvents(
-                        node = it.data,
-                        onFocusedStatusUpdated = onFocusedStatusUpdated,
-                        onHoveredStatusUpdated = onHoveredStatusUpdated,
-                    ),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .alpha(if (visibilityParams.visibleInUiBuilder) 1f else 0.5f)
+                        .mousePointerEvents(
+                            node = it.data,
+                            onFocusedStatusUpdated = onFocusedStatusUpdated,
+                            onHoveredStatusUpdated = onHoveredStatusUpdated,
+                        ),
             ) {
                 Icon(
-                    imageVector = it.data.trait.value.icon(),
+                    imageVector =
+                        it.data.trait.value
+                            .icon(),
                     contentDescription = "Tree node icon for ${it.data.displayName(project)}",
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(16.dp),
                 )
                 Text(
                     it.data.displayName(project),
-                    color = if (it.data.generateTrackableIssues(project).isNotEmpty()) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurface
-                    },
+                    color =
+                        if (it.data.generateTrackableIssues(project).isNotEmpty()) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        },
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .padding(horizontal = 8.dp),
+                    modifier =
+                        Modifier
+                            .padding(horizontal = 8.dp),
                 )
 
                 val allActions = it.data.allActions()
                 if (allActions.isNotEmpty()) {
-                    val contentDesc = if (allActions.size == 1) {
-                        allActions[0].name
-                    } else {
-                        "${allActions.size} actions"
-                    }
+                    val contentDesc =
+                        if (allActions.size == 1) {
+                            allActions[0].name
+                        } else {
+                            "${allActions.size} actions"
+                        }
                     Tooltip({
                         if (allActions.size == 1) {
                             allActions[0].SimplifiedContent(project)
@@ -211,11 +225,13 @@ fun ComposeNodeTree(
                             imageVector = Icons.Outlined.FlashOn,
                             contentDescription = contentDesc,
                             tint = MaterialTheme.colorScheme.tertiary,
-                            modifier = Modifier.size(16.dp)
-                                .hoverIconClickable()
-                                .clickable {
-                                    onShowActionTab()
-                                },
+                            modifier =
+                                Modifier
+                                    .size(16.dp)
+                                    .hoverIconClickable()
+                                    .clickable {
+                                        onShowActionTab()
+                                    },
                         )
                     }
                 }
@@ -223,22 +239,24 @@ fun ComposeNodeTree(
                     !visibilityParams.formFactorVisibility.alwaysVisible()
                 ) {
                     val contentDesc =
-                        "Visible if " + visibilityParams.visibilityCondition.transformedValueExpression(
-                            project,
-                        )
+                        "Visible if " +
+                            visibilityParams.visibilityCondition.transformedValueExpression(
+                                project,
+                            )
                     Tooltip({
                         Column {
                             Text(
                                 buildAnnotatedString {
                                     append("Visible if ")
                                     withStyle(
-                                        style = SpanStyle(
-                                            color = MaterialTheme.colorScheme.tertiary,
-                                        ),
+                                        style =
+                                            SpanStyle(
+                                                color = MaterialTheme.colorScheme.tertiary,
+                                            ),
                                     ) {
                                         append(
                                             visibilityParams.visibilityCondition.transformedValueExpression(
-                                                project
+                                                project,
                                             ),
                                         )
                                     }
@@ -252,11 +270,12 @@ fun ComposeNodeTree(
                                     formFactorImageVector: ImageVector,
                                     visible: Boolean,
                                 ) {
-                                    val iconModifier = if (visible) {
-                                        Modifier
-                                    } else {
-                                        Modifier.alpha(0.3f)
-                                    }
+                                    val iconModifier =
+                                        if (visible) {
+                                            Modifier
+                                        } else {
+                                            Modifier.alpha(0.3f)
+                                        }
                                     ComposeFlowIcon(
                                         imageVector = formFactorImageVector,
                                         contentDescription = "",
@@ -281,24 +300,27 @@ fun ComposeNodeTree(
                         }
                     }) {
                         Icon(
-                            imageVector = if (visibilityParams.visibleInUiBuilder) {
-                                Icons.Outlined.Visibility
-                            } else {
-                                Icons.Outlined.VisibilityOff
-                            },
+                            imageVector =
+                                if (visibilityParams.visibleInUiBuilder) {
+                                    Icons.Outlined.Visibility
+                                } else {
+                                    Icons.Outlined.VisibilityOff
+                                },
                             contentDescription = contentDesc,
                             tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier.size(16.dp)
-                                .hoverIconClickable()
-                                .clickable {
-                                    onShowInspectorTab()
-                                    composeNodeCallbacks.onVisibilityParamsUpdated(
-                                        it.data,
-                                        visibilityParams.copy(
-                                            visibleInUiBuilder = !visibilityParams.visibleInUiBuilder,
-                                        ),
-                                    )
-                                },
+                            modifier =
+                                Modifier
+                                    .size(16.dp)
+                                    .hoverIconClickable()
+                                    .clickable {
+                                        onShowInspectorTab()
+                                        composeNodeCallbacks.onVisibilityParamsUpdated(
+                                            it.data,
+                                            visibilityParams.copy(
+                                                visibleInUiBuilder = !visibilityParams.visibleInUiBuilder,
+                                            ),
+                                        )
+                                    },
                         )
                     }
                 }
@@ -341,13 +363,16 @@ fun ComposeNodeTree(
     if (addModifierDialogVisible) {
         onAnyDialogIsShown()
         project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
-            val modifiers = ModifierWrapper.values().filter { m ->
-                focused.parentNode?.let {
-                    m.hasValidParent(it.trait.value)
-                } ?: true
-            }.mapIndexed { i, modifierWrapper ->
-                i to modifierWrapper
-            }
+            val modifiers =
+                ModifierWrapper
+                    .values()
+                    .filter { m ->
+                        focused.parentNode?.let {
+                            m.hasValidParent(it.trait.value)
+                        } ?: true
+                    }.mapIndexed { i, modifierWrapper ->
+                        i to modifierWrapper
+                    }
 
             AddModifierDialog(
                 modifiers = modifiers,

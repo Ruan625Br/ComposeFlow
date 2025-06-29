@@ -45,17 +45,19 @@ fun TextFieldValidatorInspector(
 ) {
     val initiallyExpanded = (node.trait.value as TextFieldTrait).enableValidator == true
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         var expanded by remember(node.id) { mutableStateOf(initiallyExpanded) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { expanded = !expanded }
-                .hoverIconClickable(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { expanded = !expanded }
+                    .hoverIconClickable(),
         ) {
             Text(
                 text = stringResource(Res.string.validator),
@@ -97,10 +99,10 @@ private fun TextFieldValidatorInspectorContent(
                 onCheckedChange = {
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(enableValidator = it)
+                        textFieldTrait.copy(enableValidator = it),
                     )
                 },
-                modifier = Modifier.weight(1f).hoverOverlay()
+                modifier = Modifier.weight(1f).hoverOverlay(),
             )
             if (textFieldTrait.enableValidator == true) {
                 Column(modifier = Modifier.weight(1f)) {
@@ -117,9 +119,10 @@ private fun TextFieldValidatorInspectorContent(
                                     textFieldTrait.copy(textFieldValidator = item),
                                 )
                             },
-                            modifier = Modifier
-                                .hoverOverlay()
-                                .padding(top = 4.dp),
+                            modifier =
+                                Modifier
+                                    .hoverOverlay()
+                                    .padding(top = 4.dp),
                         )
                     }
                 }

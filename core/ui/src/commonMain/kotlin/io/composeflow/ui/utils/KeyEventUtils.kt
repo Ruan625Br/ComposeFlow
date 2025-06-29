@@ -8,5 +8,5 @@ import androidx.compose.ui.input.key.key
 fun isPlusPressed(keyEvent: KeyEvent): Boolean {
     val isShiftPressed = keyEvent.isShiftPressed
     return keyEvent.key == Key.Plus ||
-            (keyEvent.key == Key.Equals && isShiftPressed)
+        (keyEvent.key == Key.Equals && isShiftPressed)
 }

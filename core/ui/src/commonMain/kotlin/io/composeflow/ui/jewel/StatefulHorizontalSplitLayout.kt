@@ -36,41 +36,42 @@ import kotlin.math.roundToInt
 
 @Immutable
 sealed class SplitLayoutState {
-    data class DpBased(val dividerPosition: Dp) : SplitLayoutState()
-    data class RatioBased(val ratio: Float) : SplitLayoutState()
+    data class DpBased(
+        val dividerPosition: Dp,
+    ) : SplitLayoutState()
+
+    data class RatioBased(
+        val ratio: Float,
+    ) : SplitLayoutState()
 
     companion object {
-        val DpSaver: Saver<DpBased, Float> = Saver(
-            save = { it.dividerPosition.value },
-            restore = { DpBased(it.dp) }
-        )
-        val RatioSaver: Saver<RatioBased, Float> = Saver(
-            save = { it.ratio },
-            restore = { RatioBased(it) }
-        )
+        val DpSaver: Saver<DpBased, Float> =
+            Saver(
+                save = { it.dividerPosition.value },
+                restore = { DpBased(it.dp) },
+            )
+        val RatioSaver: Saver<RatioBased, Float> =
+            Saver(
+                save = { it.ratio },
+                restore = { RatioBased(it) },
+            )
     }
 }
 
 @Composable
-fun rememberSplitLayoutState(
-    initialDividerPosition: Dp
-): SplitLayoutState.DpBased {
-    return rememberSaveable(
+fun rememberSplitLayoutState(initialDividerPosition: Dp): SplitLayoutState.DpBased =
+    rememberSaveable(
         key = initialDividerPosition.toString(),
-        saver = SplitLayoutState.DpSaver
+        saver = SplitLayoutState.DpSaver,
     ) {
         SplitLayoutState.DpBased(initialDividerPosition)
     }
-}
 
 @Composable
-fun rememberSplitLayoutState(
-    initialRatio: Float
-): SplitLayoutState.RatioBased {
-    return rememberSaveable(key = initialRatio.toString(), saver = SplitLayoutState.RatioSaver) {
+fun rememberSplitLayoutState(initialRatio: Float): SplitLayoutState.RatioBased =
+    rememberSaveable(key = initialRatio.toString(), saver = SplitLayoutState.RatioSaver) {
         SplitLayoutState.RatioBased(initialRatio)
     }
-}
 
 @Composable
 fun StatefulHorizontalSplitLayout(
@@ -80,7 +81,7 @@ fun StatefulHorizontalSplitLayout(
     first: @Composable (Modifier) -> Unit,
     second: @Composable (Modifier) -> Unit,
     modifier: Modifier = Modifier,
-    onDividerPositionChanged: ((Dp) -> Unit)? = null
+    onDividerPositionChanged: ((Dp) -> Unit)? = null,
 ) {
     when (state) {
         is SplitLayoutState.DpBased -> {
@@ -141,9 +142,10 @@ fun HorizontalSplitLayoutWrapper(
     // Adds a LaunchedEffect to track the changed divider position
     LaunchedEffect(dividerX) {
         onDividerPositionChanged?.let { callback ->
-            val newPositionInDp = with(density) {
-                dividerX.toDp()
-            }
+            val newPositionInDp =
+                with(density) {
+                    dividerX.toDp()
+                }
             callback(newPositionInDp)
         }
     }
@@ -165,24 +167,26 @@ fun HorizontalSplitLayoutWrapper(
             second(Modifier.layoutId("second"))
 
             Box(
-                Modifier.fillMaxHeight()
+                Modifier
+                    .fillMaxHeight()
                     .width(draggableWidth)
                     .draggable(
                         interactionSource = dividerInteractionSource,
                         orientation = androidx.compose.foundation.gestures.Orientation.Horizontal,
                         state = rememberDraggableState { delta -> dividerX += delta.toInt() },
-                    )
-                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
+                    ).pointerHoverIcon(PointerIcon(Cursor(Cursor.E_RESIZE_CURSOR)))
                     .layoutId("divider-handle"),
             )
         },
     ) { measurables, incomingConstraints ->
         val availableWidth = incomingConstraints.maxWidth
-        val actualDividerX = dividerX.coerceIn(0, availableWidth)
-            .coerceIn(
-                (availableWidth * minRatio).roundToInt(),
-                (availableWidth * maxRatio).roundToInt(),
-            )
+        val actualDividerX =
+            dividerX
+                .coerceIn(0, availableWidth)
+                .coerceIn(
+                    (availableWidth * minRatio).roundToInt(),
+                    (availableWidth * maxRatio).roundToInt(),
+                )
 
         val dividerMeasurable = measurables.single { it.layoutId == "divider" }
         val dividerPlaceable =
@@ -192,21 +196,26 @@ fun HorizontalSplitLayoutWrapper(
 
         val firstComponentConstraints =
             Constraints.fixed((actualDividerX).coerceAtLeast(0), incomingConstraints.maxHeight)
-        val firstPlaceable = measurables.find { it.layoutId == "first" }
-            ?.measure(firstComponentConstraints)
-            ?: error("No first component found. Have you applied the provided Modifier to it?")
+        val firstPlaceable =
+            measurables
+                .find { it.layoutId == "first" }
+                ?.measure(firstComponentConstraints)
+                ?: error("No first component found. Have you applied the provided Modifier to it?")
 
         val secondComponentConstraints =
             Constraints.fixed(
                 width = availableWidth - actualDividerX + dividerPlaceable.width,
                 height = incomingConstraints.maxHeight,
             )
-        val secondPlaceable = measurables.find { it.layoutId == "second" }
-            ?.measure(secondComponentConstraints)
-            ?: error("No second component found. Have you applied the provided Modifier to it?")
+        val secondPlaceable =
+            measurables
+                .find { it.layoutId == "second" }
+                ?.measure(secondComponentConstraints)
+                ?: error("No second component found. Have you applied the provided Modifier to it?")
 
         val dividerHandlePlaceable =
-            measurables.single { it.layoutId == "divider-handle" }
+            measurables
+                .single { it.layoutId == "divider-handle" }
                 .measure(Constraints.fixedHeight(incomingConstraints.maxHeight))
 
         layout(availableWidth, incomingConstraints.maxHeight) {
@@ -215,7 +224,7 @@ fun HorizontalSplitLayoutWrapper(
             secondPlaceable.placeRelative(actualDividerX + dividerPlaceable.width, 0)
             dividerHandlePlaceable.placeRelative(
                 actualDividerX - dividerHandlePlaceable.measuredWidth / 2,
-                0
+                0,
             )
         }
     }

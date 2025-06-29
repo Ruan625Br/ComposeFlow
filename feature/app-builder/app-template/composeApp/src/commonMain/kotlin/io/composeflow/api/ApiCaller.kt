@@ -29,26 +29,31 @@ private val httpClient: HttpClient =
         }
     }
 
-suspend fun callApi(apiDefinition: ApiDefinition, jsonPath: String): JsonElement {
-    val response = httpClient.request(apiDefinition.url) {
-        method = when (apiDefinition.method) {
-            Method.Get -> HttpMethod.Get
-            Method.Post -> HttpMethod.Post
-            Method.Delete -> HttpMethod.Delete
-            Method.Put -> HttpMethod.Put
-            Method.Patch -> HttpMethod.Patch
-        }
-        headers {
-            apiDefinition.headers.forEach { (key, value) ->
-                append(key, value)
+suspend fun callApi(
+    apiDefinition: ApiDefinition,
+    jsonPath: String,
+): JsonElement {
+    val response =
+        httpClient.request(apiDefinition.url) {
+            method =
+                when (apiDefinition.method) {
+                    Method.Get -> HttpMethod.Get
+                    Method.Post -> HttpMethod.Post
+                    Method.Delete -> HttpMethod.Delete
+                    Method.Put -> HttpMethod.Put
+                    Method.Patch -> HttpMethod.Patch
+                }
+            headers {
+                apiDefinition.headers.forEach { (key, value) ->
+                    append(key, value)
+                }
+            }
+            url {
+                apiDefinition.queryParameters.forEach { (key, value) ->
+                    parameters.append(key, value)
+                }
             }
         }
-        url {
-            apiDefinition.queryParameters.forEach { (key, value) ->
-                parameters.append(key, value)
-            }
-        }
-    }
     val json: JsonElement = decodeFromString(response.bodyAsText())
     val results: Optional<JsonElement, JsonElement> = JsonPath.select(jsonPath)
     return results.getOrNull(json)

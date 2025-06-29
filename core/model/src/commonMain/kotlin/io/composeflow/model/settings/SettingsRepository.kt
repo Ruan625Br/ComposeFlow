@@ -21,9 +21,10 @@ import kotlinx.serialization.encodeToString
 
 class SettingsRepository(
     private val dataStore: DataStore<Preferences> = ServiceLocator.getOrPut { getOrCreateDataStore() },
-    private val javaHomePathFromEnvVar: PathSetting.FromEnvVar? = getEnvVar("JAVA_HOME")?.let {
-        PathSetting.FromEnvVar("JAVA_HOME", it)
-    },
+    private val javaHomePathFromEnvVar: PathSetting.FromEnvVar? =
+        getEnvVar("JAVA_HOME")?.let {
+            PathSetting.FromEnvVar("JAVA_HOME", it)
+        },
     dispatchers: CoroutineDispatcher = ServiceLocator.getOrPutWithKey(KeyDeafultDispatcher) { Dispatchers.Default },
 ) {
     private val scope: CoroutineScope = CoroutineScope(dispatchers)
@@ -34,25 +35,27 @@ class SettingsRepository(
     private val showBordersKey = booleanPreferencesKey("show_borders")
     private val versionAskedToUpdateKey = stringPreferencesKey("version_asked_to_update")
 
-    val settings: Flow<ComposeBuilderSettings> = dataStore.data.map { preference ->
-        ComposeBuilderSettings(
-            composeBuilderDarkThemeSetting = DarkThemeSetting.fromOrdinal(
-                preference[darkThemeKey] ?: DarkThemeSetting.Dark.ordinal,
-            ),
-            appDarkThemeSetting = DarkThemeSetting.fromOrdinal(
-                preference[appDarkThemeKey] ?: DarkThemeSetting.System.ordinal,
-            ),
-            showBordersInCanvas = preference[showBordersKey] == true,
-            javaHome = preference[javaHomeKey]?.let {
-                jsonSerializer.decodeFromString<PathSetting>(it)
-            } ?: javaHomePathFromEnvVar,
-            versionAskedToUpdate = preference[versionAskedToUpdateKey]
-        )
-    }
+    val settings: Flow<ComposeBuilderSettings> =
+        dataStore.data.map { preference ->
+            ComposeBuilderSettings(
+                composeBuilderDarkThemeSetting =
+                    DarkThemeSetting.fromOrdinal(
+                        preference[darkThemeKey] ?: DarkThemeSetting.Dark.ordinal,
+                    ),
+                appDarkThemeSetting =
+                    DarkThemeSetting.fromOrdinal(
+                        preference[appDarkThemeKey] ?: DarkThemeSetting.System.ordinal,
+                    ),
+                showBordersInCanvas = preference[showBordersKey] == true,
+                javaHome =
+                    preference[javaHomeKey]?.let {
+                        jsonSerializer.decodeFromString<PathSetting>(it)
+                    } ?: javaHomePathFromEnvVar,
+                versionAskedToUpdate = preference[versionAskedToUpdateKey],
+            )
+        }
 
-    fun saveComposeBuilderDarkTheme(
-        darkThemeSetting: DarkThemeSetting,
-    ) {
+    fun saveComposeBuilderDarkTheme(darkThemeSetting: DarkThemeSetting) {
         scope.launch {
             dataStore.edit {
                 it[darkThemeKey] = darkThemeSetting.ordinal
@@ -60,17 +63,16 @@ class SettingsRepository(
         }
     }
 
-    val appDarkThemeSetting: Flow<Boolean> = settings.map {
-        when (it.appDarkThemeSetting) {
-            DarkThemeSetting.System -> false
-            DarkThemeSetting.Light -> false
-            DarkThemeSetting.Dark -> true
+    val appDarkThemeSetting: Flow<Boolean> =
+        settings.map {
+            when (it.appDarkThemeSetting) {
+                DarkThemeSetting.System -> false
+                DarkThemeSetting.Light -> false
+                DarkThemeSetting.Dark -> true
+            }
         }
-    }
 
-    fun saveAppDarkTheme(
-        darkThemeSetting: DarkThemeSetting,
-    ) {
+    fun saveAppDarkTheme(darkThemeSetting: DarkThemeSetting) {
         scope.launch {
             dataStore.edit {
                 it[appDarkThemeKey] = darkThemeSetting.ordinal
@@ -78,9 +80,7 @@ class SettingsRepository(
         }
     }
 
-    fun saveShowBorders(
-        showBorders: Boolean,
-    ) {
+    fun saveShowBorders(showBorders: Boolean) {
         scope.launch {
             dataStore.edit {
                 it[showBordersKey] = showBorders

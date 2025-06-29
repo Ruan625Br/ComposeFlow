@@ -11,7 +11,10 @@ import androidx.compose.runtime.snapshots.StateRecord
  * the equality by using the identify of the instance.
  * (SnapshotStateList compares the equality by using `instance === other`)
  */
-class SnapshotStateListEqualsOverride<T> : StateObject, MutableList<T>, RandomAccess {
+class SnapshotStateListEqualsOverride<T> :
+    StateObject,
+    MutableList<T>,
+    RandomAccess {
     private val delegate: SnapshotStateList<T> = SnapshotStateList()
 
     override val firstStateRecord: StateRecord
@@ -28,10 +31,15 @@ class SnapshotStateListEqualsOverride<T> : StateObject, MutableList<T>, RandomAc
 
     override fun addAll(elements: Collection<T>): Boolean = delegate.addAll(elements)
 
-    override fun addAll(index: Int, elements: Collection<T>): Boolean =
-        delegate.addAll(index, elements)
+    override fun addAll(
+        index: Int,
+        elements: Collection<T>,
+    ): Boolean = delegate.addAll(index, elements)
 
-    override fun add(index: Int, element: T) = delegate.add(index, element)
+    override fun add(
+        index: Int,
+        element: T,
+    ) = delegate.add(index, element)
 
     override fun add(element: T): Boolean = delegate.add(element)
 
@@ -47,10 +55,15 @@ class SnapshotStateListEqualsOverride<T> : StateObject, MutableList<T>, RandomAc
 
     override fun removeAt(index: Int): T = delegate.removeAt(index)
 
-    override fun subList(fromIndex: Int, toIndex: Int): MutableList<T> =
-        delegate.subList(fromIndex, toIndex)
+    override fun subList(
+        fromIndex: Int,
+        toIndex: Int,
+    ): MutableList<T> = delegate.subList(fromIndex, toIndex)
 
-    override fun set(index: Int, element: T): T = delegate.set(index, element)
+    override fun set(
+        index: Int,
+        element: T,
+    ): T = delegate.set(index, element)
 
     override fun retainAll(elements: Collection<T>): Boolean = delegate.retainAll(elements)
 
@@ -72,18 +85,14 @@ class SnapshotStateListEqualsOverride<T> : StateObject, MutableList<T>, RandomAc
         return delegate.toList() == other.delegate.toList()
     }
 
-    override fun hashCode(): Int {
-        return delegate.toList().hashCode()
-    }
+    override fun hashCode(): Int = delegate.toList().hashCode()
 }
 
 @StateFactoryMarker
-fun <T> mutableStateListEqualsOverrideOf(vararg elements: T) =
-    SnapshotStateListEqualsOverride<T>().also { it.addAll(elements.toList()) }
+fun <T> mutableStateListEqualsOverrideOf(vararg elements: T) = SnapshotStateListEqualsOverride<T>().also { it.addAll(elements.toList()) }
 
 /**
  * Create an instance of [MutableList]<T> from a collection that is observable and can be
  * snapshot.
  */
-fun <T> Collection<T>.toMutableStateListEqualsOverride() =
-    SnapshotStateListEqualsOverride<T>().also { it.addAll(this) }
+fun <T> Collection<T>.toMutableStateListEqualsOverride() = SnapshotStateListEqualsOverride<T>().also { it.addAll(this) }

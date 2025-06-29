@@ -19,7 +19,6 @@ sealed interface FilterFieldType {
     @Serializable
     @SerialName("FilterFieldTypeDocumentId")
     data class DocumentId(
-
         val firestoreCollectionId: CollectionId? = null,
     ) : FilterFieldType
 
@@ -35,36 +34,43 @@ enum class FilterOperator : DropdownTextDisplayable {
     EqualTo {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Equal to (==)")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("equalTo")
     },
     NotEqualTo {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Not equal to (!=)")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("notEqualTo")
     },
     LessThan {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Less than (<)")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("lessThan")
     },
     LessThanOrEqualTo {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Less than or equal to (<=)")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("lessThanOrEqualTo")
     },
     GreaterThan {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Greater than (>)")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("greaterThan")
     },
     GreaterThanOrEqualTo {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Greater than or equal to (>=)")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("greaterThanOrEqualTo")
     },
     Contains {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Contains")
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("contains")
     },
     ;
@@ -74,7 +80,6 @@ enum class FilterOperator : DropdownTextDisplayable {
 
 @Serializable
 sealed interface FilterExpression {
-
     fun generateCodeBlock(
         project: Project,
         context: GenerationContext,
@@ -124,7 +129,6 @@ data class SingleFilter(
     val operator: FilterOperator = FilterOperator.EqualTo,
     val property: AssignableProperty = DocumentIdProperty.EmptyDocumentId,
 ) : FilterExpression {
-
     override fun generateCodeBlock(
         project: Project,
         context: GenerationContext,
@@ -137,8 +141,8 @@ data class SingleFilter(
                 builder.add(
                     CodeBlock.of(
                         "%M.documentId ",
-                        MemberName("dev.gitlive.firebase.firestore", "FieldPath")
-                    )
+                        MemberName("dev.gitlive.firebase.firestore", "FieldPath"),
+                    ),
                 )
             }
 
@@ -166,7 +170,6 @@ data class SingleFilter(
 data class AndFilter(
     override val filters: List<FilterExpression> = emptyList(),
 ) : LogicalFilterExpression {
-
     override fun filterString(): String = "and"
 }
 
@@ -174,7 +177,7 @@ data class AndFilter(
 @SerialName("OrFilter")
 data class OrFilter(
     override val filters: List<FilterExpression> = emptyList(),
-) : FilterExpression, LogicalFilterExpression {
-
+) : FilterExpression,
+    LogicalFilterExpression {
     override fun filterString(): String = "or"
 }

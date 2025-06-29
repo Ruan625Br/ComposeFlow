@@ -51,45 +51,50 @@ data class TopAppBarTrait(
     val topAppBarType: TopAppBarTypeWrapper = TopAppBarTypeWrapper.Default,
     val scrollBehaviorWrapper: ScrollBehaviorWrapper = ScrollBehaviorWrapper.EnterAlways,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Title", title, ComposeFlowType.StringType()),
         )
-    }
 
     override fun icon(): ImageVector = ComposeFlowIcons.TopHeader
+
     override fun iconText(): String = "TopAppBar"
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
+
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_top_app_bar_trait
 
     override fun visibleInPalette(): Boolean = true
+
     override fun isDroppable(): Boolean = false
+
     override fun isResizeable(): Boolean = false
+
     override fun isEditable(): Boolean = true
+
     override fun isVisibilityConditional(): Boolean = false
-    override fun defaultComposeNode(project: Project): ComposeNode {
-        return ComposeNode(
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
             label = mutableStateOf("TopAppBar"),
-            trait = mutableStateOf(
-                TopAppBarTrait(
-                    title = StringProperty.StringIntrinsicValue("Title"),
-                    topAppBarType = TopAppBarTypeWrapper.CenterAligned,
+            trait =
+                mutableStateOf(
+                    TopAppBarTrait(
+                        title = StringProperty.StringIntrinsicValue("Title"),
+                        topAppBarType = TopAppBarTypeWrapper.CenterAligned,
+                    ),
                 ),
-            ),
         ).apply {
             addChild(
                 ComposeNode(
                     label = mutableStateOf("Nav Icon"),
-                    trait = mutableStateOf(
-                        IconTrait(imageVectorHolder = null),
-                    ),
+                    trait =
+                        mutableStateOf(
+                            IconTrait(imageVectorHolder = null),
+                        ),
                 ),
             )
         }
-    }
 
     @Composable
     override fun RenderedNode(
@@ -108,25 +113,28 @@ data class TopAppBarTrait(
                     Icon(
                         imageVector = it.imageVector,
                         contentDescription = null,
-                        tint = (iconTrait.tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                            ?: MaterialTheme.colorScheme.onBackground,
-                        modifier = iconNode.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = iconNode,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
+                        tint =
+                            (iconTrait.tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                                ?: MaterialTheme.colorScheme.onBackground,
+                        modifier =
+                            iconNode
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = iconNode,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
                     )
                 }
             }
         }
 
         @Composable
-        fun scrollBehavior(scrollBehaviorWrapper: ScrollBehaviorWrapper?): TopAppBarScrollBehavior? {
-            return when (scrollBehaviorWrapper) {
+        fun scrollBehavior(scrollBehaviorWrapper: ScrollBehaviorWrapper?): TopAppBarScrollBehavior? =
+            when (scrollBehaviorWrapper) {
                 ScrollBehaviorWrapper.None -> null
                 ScrollBehaviorWrapper.EnterAlways -> {
                     enterAlwaysScrollBehavior()
@@ -142,43 +150,46 @@ data class TopAppBarTrait(
 
                 null -> null
             }
-        }
 
         val topAppBarNode = node as TopAppBarNode
         val navIcon = topAppBarNode.getTopAppBarNavigationIcon()
         val navIconTrait = navIcon?.trait?.value as? IconTrait
-        val textWithPlaceholder = when (val usage = titlePlaceholderText) {
-            PlaceholderText.NoUsage -> title.transformedValueExpression(project)
-            is PlaceholderText.Used -> usage.value.transformedValueExpression(project)
-        }
+        val textWithPlaceholder =
+            when (val usage = titlePlaceholderText) {
+                PlaceholderText.NoUsage -> title.transformedValueExpression(project)
+                is PlaceholderText.Used -> usage.value.transformedValueExpression(project)
+            }
         when (topAppBarType) {
             TopAppBarTypeWrapper.Default -> {
                 TopAppBar(
                     title = {
                         Text(text = textWithPlaceholder)
                     },
-                    navigationIcon = navIconTrait?.imageVectorHolder?.let {
-                        {
-                            TopAppBarIconButton(navIcon)
-                        }
-                    } ?: {},
+                    navigationIcon =
+                        navIconTrait?.imageVectorHolder?.let {
+                            {
+                                TopAppBarIconButton(navIcon)
+                            }
+                        } ?: {},
                     actions = {
                         topAppBarNode.getTopAppBarActionIcons().forEach {
                             TopAppBarIconButton(it)
                         }
                     },
                     scrollBehavior = scrollBehavior(scrollBehaviorWrapper),
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 )
             }
 
@@ -187,28 +198,31 @@ data class TopAppBarTrait(
                     title = {
                         Text(text = textWithPlaceholder)
                     },
-                    navigationIcon = navIconTrait?.imageVectorHolder?.let {
-                        {
-                            TopAppBarIconButton(navIcon)
-                        }
-                    } ?: {},
+                    navigationIcon =
+                        navIconTrait?.imageVectorHolder?.let {
+                            {
+                                TopAppBarIconButton(navIcon)
+                            }
+                        } ?: {},
                     actions = {
                         topAppBarNode.getTopAppBarActionIcons().forEach {
                             TopAppBarIconButton(it)
                         }
                     },
                     scrollBehavior = scrollBehavior(scrollBehaviorWrapper),
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 )
             }
 
@@ -217,28 +231,31 @@ data class TopAppBarTrait(
                     title = {
                         Text(text = textWithPlaceholder)
                     },
-                    navigationIcon = navIconTrait?.imageVectorHolder?.let {
-                        {
-                            TopAppBarIconButton(navIcon)
-                        }
-                    } ?: {},
+                    navigationIcon =
+                        navIconTrait?.imageVectorHolder?.let {
+                            {
+                                TopAppBarIconButton(navIcon)
+                            }
+                        } ?: {},
                     actions = {
                         topAppBarNode.getTopAppBarActionIcons().forEach {
                             TopAppBarIconButton(it)
                         }
                     },
                     scrollBehavior = scrollBehavior(scrollBehaviorWrapper),
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 )
             }
 
@@ -247,28 +264,31 @@ data class TopAppBarTrait(
                     title = {
                         Text(text = textWithPlaceholder)
                     },
-                    navigationIcon = navIconTrait?.imageVectorHolder?.let {
-                        {
-                            TopAppBarIconButton(navIcon)
-                        }
-                    } ?: {},
+                    navigationIcon =
+                        navIconTrait?.imageVectorHolder?.let {
+                            {
+                                TopAppBarIconButton(navIcon)
+                            }
+                        } ?: {},
                     actions = {
                         topAppBarNode.getTopAppBarActionIcons().forEach {
                             TopAppBarIconButton(it)
                         }
                     },
                     scrollBehavior = scrollBehavior(scrollBehaviorWrapper),
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 )
             }
         }
@@ -282,32 +302,38 @@ data class TopAppBarTrait(
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
         val topAppBarNode = node as TopAppBarNode
-        val topAppBarMemberName = when (topAppBarType) {
-            TopAppBarTypeWrapper.Default -> MemberName(
-                "androidx.compose.material3",
-                "TopAppBar",
-            )
+        val topAppBarMemberName =
+            when (topAppBarType) {
+                TopAppBarTypeWrapper.Default ->
+                    MemberName(
+                        "androidx.compose.material3",
+                        "TopAppBar",
+                    )
 
-            TopAppBarTypeWrapper.CenterAligned -> MemberName(
-                "androidx.compose.material3",
-                "CenterAlignedTopAppBar",
-            )
+                TopAppBarTypeWrapper.CenterAligned ->
+                    MemberName(
+                        "androidx.compose.material3",
+                        "CenterAlignedTopAppBar",
+                    )
 
-            TopAppBarTypeWrapper.Medium -> MemberName(
-                "androidx.compose.material3",
-                "MediumTopAppBar",
-            )
+                TopAppBarTypeWrapper.Medium ->
+                    MemberName(
+                        "androidx.compose.material3",
+                        "MediumTopAppBar",
+                    )
 
-            TopAppBarTypeWrapper.Large -> MemberName(
-                "androidx.compose.material3",
-                "LargeTopAppBar",
-            )
-        }
+                TopAppBarTypeWrapper.Large ->
+                    MemberName(
+                        "androidx.compose.material3",
+                        "LargeTopAppBar",
+                    )
+            }
         codeBlockBuilder.addStatement("%M(", topAppBarMemberName)
 
-        val screen = project.screenHolder.screens.firstOrNull {
-            it.topAppBarNode.value == node
-        }
+        val screen =
+            project.screenHolder.screens.firstOrNull {
+                it.topAppBarNode.value == node
+            }
         screen?.topAppBarNode?.value?.let {
             // Title for screen specific TopAppBar
             codeBlockBuilder.addStatement(
@@ -319,8 +345,8 @@ data class TopAppBarTrait(
                     project,
                     context,
                     writeType = ComposeFlowType.StringType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(") },")
         } ?: {
@@ -333,16 +359,20 @@ data class TopAppBarTrait(
             codeBlockBuilder.addStatement("} ?: {},")
         }
 
-        fun writeIconButton(iconNode: ComposeNode, builder: CodeBlock.Builder) {
+        fun writeIconButton(
+            iconNode: ComposeNode,
+            builder: CodeBlock.Builder,
+        ) {
             val iconTrait = iconNode.trait.value as? IconTrait
             iconTrait?.imageVectorHolder?.let { imageVectorHolder ->
                 val iconMember = MemberName("androidx.compose.material3", "Icon")
                 val iconButtonMember = MemberName("androidx.compose.material3", "IconButton")
                 val iconsMember = MemberName("androidx.compose.material.icons", "Icons")
-                val imageVectorMember = MemberName(
-                    "androidx.compose.material.icons.${imageVectorHolder.packageDescriptor}",
-                    imageVectorHolder.name,
-                )
+                val imageVectorMember =
+                    MemberName(
+                        "androidx.compose.material.icons.${imageVectorHolder.packageDescriptor}",
+                        imageVectorHolder.name,
+                    )
                 builder.addStatement("%M(onClick = {", iconButtonMember)
                 iconNode.actionsMap[ActionType.OnClick]?.forEach {
                     builder.add(it.generateCodeBlock(project, context, dryRun = dryRun))
@@ -361,8 +391,8 @@ data class TopAppBarTrait(
                             project,
                             context,
                             ComposeFlowType.Color(),
-                            dryRun = dryRun
-                        )
+                            dryRun = dryRun,
+                        ),
                     )
                     codeBlockBuilder.addStatement(",")
                 }
@@ -395,22 +425,20 @@ data class TopAppBarTrait(
             codeBlockBuilder.addStatement("scrollBehavior = scrollBehavior,")
         }
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()
     }
 
-    fun contentEquals(other: TopAppBarTrait): Boolean {
-        return title == other.title &&
-                topAppBarType == other.topAppBarType &&
-                scrollBehaviorWrapper == other.scrollBehaviorWrapper
-    }
+    fun contentEquals(other: TopAppBarTrait): Boolean =
+        title == other.title &&
+            topAppBarType == other.topAppBarType &&
+            scrollBehaviorWrapper == other.scrollBehaviorWrapper
 }
 
-
 object TopAppBarTypeWrapperSerializer : FallbackEnumSerializer<TopAppBarTypeWrapper>(
-    TopAppBarTypeWrapper::class
+    TopAppBarTypeWrapper::class,
 )
 
 @Serializable(TopAppBarTypeWrapperSerializer::class)
@@ -421,9 +449,8 @@ enum class TopAppBarTypeWrapper {
     Large,
 }
 
-
 object ScrollBehaviorWrapperSerializer : FallbackEnumSerializer<ScrollBehaviorWrapper>(
-    ScrollBehaviorWrapper::class
+    ScrollBehaviorWrapper::class,
 )
 
 @Serializable(ScrollBehaviorWrapperSerializer::class)

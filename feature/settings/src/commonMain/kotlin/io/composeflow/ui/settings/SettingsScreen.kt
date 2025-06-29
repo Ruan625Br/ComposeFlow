@@ -35,7 +35,6 @@ import io.composeflow.ui.settings.firebase.FirebaseSettingsContent
 import io.composeflow.ui.settings.preference.PreferencesContent
 import moe.tlaster.precompose.viewmodel.viewModel
 
-
 @Composable
 fun SettingsScreen(
     project: Project,
@@ -43,29 +42,32 @@ fun SettingsScreen(
     initialDestination: SettingsScreenDestination? = null,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = SettingsViewModel::class) {
-        SettingsViewModel(
-            project = project,
-            firebaseIdTokenArg = firebaseIdToken,
-        )
-    }
+    val viewModel =
+        viewModel(modelClass = SettingsViewModel::class) {
+            SettingsViewModel(
+                project = project,
+                firebaseIdTokenArg = firebaseIdToken,
+            )
+        }
     val darkThemeSettingUiState = viewModel.darkThemeSettingsUiState.collectAsState()
     val firebaseApiResultState by viewModel.firebaseApiResultState.collectAsState()
-    val firebaseApiAppResultState = FirebaseApiAppResultState(
-        androidApp = viewModel.firebaseAndroidAppApiResultState.collectAsState().value,
-        iOSApp = viewModel.firebaseIosAppApiResultState.collectAsState().value,
-        webApp = viewModel.firebaseWebAppApiResultState.collectAsState().value
-    )
+    val firebaseApiAppResultState =
+        FirebaseApiAppResultState(
+            androidApp = viewModel.firebaseAndroidAppApiResultState.collectAsState().value,
+            iOSApp = viewModel.firebaseIosAppApiResultState.collectAsState().value,
+            webApp = viewModel.firebaseWebAppApiResultState.collectAsState().value,
+        )
 
     var selectedDestination by remember {
         mutableStateOf(
-            initialDestination ?: SettingsScreenDestination.Preferences
+            initialDestination ?: SettingsScreenDestination.Preferences,
         )
     }
-    val settingsCallbacks = SettingsCallbacks(
-        onConnectFirebaseProjectId = viewModel::onConnectFirebaseProjectId,
-        onLoginScreenChanged = viewModel::onLoginScreenChanged,
-    )
+    val settingsCallbacks =
+        SettingsCallbacks(
+            onConnectFirebaseProjectId = viewModel::onConnectFirebaseProjectId,
+            onLoginScreenChanged = viewModel::onLoginScreenChanged,
+        )
     Surface(modifier = modifier.fillMaxSize()) {
         Row {
             SettingsScreenContentNavigation(
@@ -73,24 +75,25 @@ fun SettingsScreen(
                 onDestinationChanged = {
                     selectedDestination = it
                 },
-                modifier = Modifier.width(196.dp)
+                modifier = Modifier.width(196.dp),
             )
             Row(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .backgroundContainerNeutral()
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .backgroundContainerNeutral()
+                        .padding(16.dp),
             ) {
                 Spacer(Modifier.width(96.dp))
                 Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight()
-                        .padding(vertical = 16.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(color = MaterialTheme.colorScheme.surface),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(vertical = 16.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(color = MaterialTheme.colorScheme.surface),
                 ) {
-
                     when (selectedDestination) {
                         SettingsScreenDestination.Preferences -> {
                             PreferencesContent(
@@ -105,7 +108,7 @@ fun SettingsScreen(
                                 project = project,
                                 firebaseApiResultState = firebaseApiResultState,
                                 firebaseApiAppResultState = firebaseApiAppResultState,
-                                settingsCallbacks = settingsCallbacks
+                                settingsCallbacks = settingsCallbacks,
                             )
                         }
                     }
@@ -146,9 +149,10 @@ fun SettingsScreenContentNavigation(
                         onClick = {
                             onDestinationChanged(destination)
                         },
-                        modifier = Modifier
-                            .heightIn(max = 40.dp)
-                            .padding(horizontal = 12.dp),
+                        modifier =
+                            Modifier
+                                .heightIn(max = 40.dp)
+                                .padding(horizontal = 12.dp),
                     )
                 }
             }
@@ -157,4 +161,3 @@ fun SettingsScreenContentNavigation(
         content = {},
     )
 }
-

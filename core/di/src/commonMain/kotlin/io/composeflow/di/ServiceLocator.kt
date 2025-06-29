@@ -6,27 +6,25 @@ import kotlin.reflect.KClass
 object ServiceLocator {
     val map = mutableMapOf<Any, Any>()
 
-    inline fun <reified T : Any> get(key: KClass<T>): T {
-        return map[key] as T
-    }
+    inline fun <reified T : Any> get(key: KClass<T>): T = map[key] as T
 
-    inline fun <reified T : Any> get(): T {
-        return map[T::class] as T
-    }
+    inline fun <reified T : Any> get(): T = map[T::class] as T
 
-    inline fun <reified T : Any> getOrPut(factory: () -> T): T {
-        return map.getOrPut(T::class) { factory() } as T
-    }
+    inline fun <reified T : Any> getOrPut(factory: () -> T): T = map.getOrPut(T::class) { factory() } as T
 
-    inline fun <reified T : Any> getOrPutWithKey(key: String, factory: () -> T): T {
-        return map.getOrPut(key + T::class) { factory() } as T
-    }
+    inline fun <reified T : Any> getOrPutWithKey(
+        key: String,
+        factory: () -> T,
+    ): T = map.getOrPut(key + T::class) { factory() } as T
 
     inline fun <reified T : Any> put(value: T) {
         map[T::class] = value
     }
 
-    inline fun <reified T : Any> putWithKey(key: String, value: T) {
+    inline fun <reified T : Any> putWithKey(
+        key: String,
+        value: T,
+    ) {
         map[key + T::class] = value
     }
 

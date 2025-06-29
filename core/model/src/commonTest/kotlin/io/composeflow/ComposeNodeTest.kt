@@ -35,13 +35,13 @@ import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 class ComposeNodeTest {
-
-    private val root = ComposeNode(
-        trait = mutableStateOf(BoxTrait()),
-        label = mutableStateOf("Root"),
-    ).apply {
-        boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
-    }
+    private val root =
+        ComposeNode(
+            trait = mutableStateOf(BoxTrait()),
+            label = mutableStateOf("Root"),
+        ).apply {
+            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
+        }
     private lateinit var child: ComposeNode
     private lateinit var grandChild: ComposeNode
 
@@ -49,26 +49,29 @@ class ComposeNodeTest {
     fun setUp() {
         root.addChild(
             ComposeNode(
-                trait = mutableStateOf(
-                    BoxTrait(
-                        contentAlignment = AlignmentWrapper.BottomCenter,
+                trait =
+                    mutableStateOf(
+                        BoxTrait(
+                            contentAlignment = AlignmentWrapper.BottomCenter,
+                        ),
                     ),
-                ),
             ).apply {
                 boundsInWindow.value = Rect(left = 0f, top = 0f, right = 150f, bottom = 150f)
 
                 addChild(
                     ComposeNode(
-                        trait = mutableStateOf(
-                            TextTrait(
-                                text = StringProperty.StringIntrinsicValue("testString"),
-                                colorWrapper = ColorProperty.ColorIntrinsicValue(
-                                    ColorWrapper(
-                                        themeColor = Material3ColorWrapper.OnPrimary
-                                    )
+                        trait =
+                            mutableStateOf(
+                                TextTrait(
+                                    text = StringProperty.StringIntrinsicValue("testString"),
+                                    colorWrapper =
+                                        ColorProperty.ColorIntrinsicValue(
+                                            ColorWrapper(
+                                                themeColor = Material3ColorWrapper.OnPrimary,
+                                            ),
+                                        ),
                                 ),
                             ),
-                        ),
                         modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.Padding(8.dp)),
                     ).apply {
                         boundsInWindow.value =
@@ -78,7 +81,11 @@ class ComposeNodeTest {
             },
         )
         child = root.children.first()
-        grandChild = root.children.first().children.first()
+        grandChild =
+            root.children
+                .first()
+                .children
+                .first()
     }
 
     @Test
@@ -98,7 +105,11 @@ class ComposeNodeTest {
     @Test
     fun findDeepestChildAtOrNull_verify_deepestChildIsFound() {
         val found = root.findDeepestChildAtOrNull(Offset(50f, 50f))
-        val expected = root.children.first().children.first()
+        val expected =
+            root.children
+                .first()
+                .children
+                .first()
         assertEquals(expected, found)
     }
 
@@ -110,31 +121,36 @@ class ComposeNodeTest {
 
     @Test
     fun findDeepestContainerAtOrNull_verify_deepestContainerIsFound() {
-        val deepestContainer = ComposeNode(
-            trait = mutableStateOf(ColumnTrait()),
-        ).apply {
-            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 50f, bottom = 50f)
-        }
+        val deepestContainer =
+            ComposeNode(
+                trait = mutableStateOf(ColumnTrait()),
+            ).apply {
+                boundsInWindow.value = Rect(left = 0f, top = 0f, right = 50f, bottom = 50f)
+            }
         root.children.firstOrNull { it.isContainer() }?.addChild(
             deepestContainer,
         )
 
         val found = root.findDeepestContainerAtOrNull(Offset(25f, 25f))
         val expected =
-            root.children.firstOrNull { it.isContainer() }?.children?.firstOrNull { it.isContainer() }
+            root.children
+                .firstOrNull { it.isContainer() }
+                ?.children
+                ?.firstOrNull { it.isContainer() }
         assertEquals(expected, found)
     }
 
     @Test
     fun findDeepestFocusedNode() {
-        val focused = ComposeNode(
-            trait = mutableStateOf(ButtonTrait()),
-            label = mutableStateOf("focused"),
-        ).apply {
-            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 50f, bottom = 50f)
-            isFocused.value = true
-            level = 2
-        }
+        val focused =
+            ComposeNode(
+                trait = mutableStateOf(ButtonTrait()),
+                label = mutableStateOf("focused"),
+            ).apply {
+                boundsInWindow.value = Rect(left = 0f, top = 0f, right = 50f, bottom = 50f)
+                isFocused.value = true
+                level = 2
+            }
 
         child.addChild(child = focused)
         val found = root.findFirstFocusedNodeOrNull()
@@ -143,7 +159,11 @@ class ComposeNodeTest {
 
     @Test
     fun findNodesUntilRoot() {
-        val leaf = root.children.first().children.first()
+        val leaf =
+            root.children
+                .first()
+                .children
+                .first()
         val nodesUntilRoot = leaf.findNodesUntilRoot()
         val expected = listOf(root.children.first(), root)
         assertEquals(expected, nodesUntilRoot)
@@ -151,7 +171,11 @@ class ComposeNodeTest {
 
     @Test
     fun findRoot_fromLeaf() {
-        val leaf = root.children.first().children.first()
+        val leaf =
+            root.children
+                .first()
+                .children
+                .first()
         val found = leaf.findRoot()
         assertEquals(root, found)
     }
@@ -170,7 +194,11 @@ class ComposeNodeTest {
 
     @Test
     fun removeNode_withExcludeIndex_verifyNodesOtherThanExcludeIndex_areRemoved() {
-        root.children.first().children.first().removeFromParent()
+        root.children
+            .first()
+            .children
+            .first()
+            .removeFromParent()
         child.addChild(grandChild)
         child.addChild(ComposeNode(trait = mutableStateOf(TextFieldTrait())))
         child.addChild(grandChild)
@@ -183,22 +211,25 @@ class ComposeNodeTest {
 
     @Test
     fun getHoveredNode_sameLevel_smallerRectNode_isPicked() {
-        val box = ComposeNode(trait = mutableStateOf(BoxTrait())).apply {
-            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
-        }
-        val childColumn = ComposeNode(
-            trait = mutableStateOf(ColumnTrait()),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        ).apply {
-            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
-            level = 1
-        }
-        val childIcon = ComposeNode(
-            trait = mutableStateOf(IconTrait()),
-        ).apply {
-            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 50f, bottom = 50f)
-            level = 1
-        }
+        val box =
+            ComposeNode(trait = mutableStateOf(BoxTrait())).apply {
+                boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
+            }
+        val childColumn =
+            ComposeNode(
+                trait = mutableStateOf(ColumnTrait()),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            ).apply {
+                boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
+                level = 1
+            }
+        val childIcon =
+            ComposeNode(
+                trait = mutableStateOf(IconTrait()),
+            ).apply {
+                boundsInWindow.value = Rect(left = 0f, top = 0f, right = 50f, bottom = 50f)
+                level = 1
+            }
         box.addChild(childColumn)
         box.addChild(childIcon)
 
@@ -209,12 +240,13 @@ class ComposeNodeTest {
 
     @Test
     fun nesting_lazyColumn_is_not_allowed() {
-        val rootLazyColumn = ComposeNode(
-            trait = mutableStateOf(LazyColumnTrait()),
-            label = mutableStateOf("Root"),
-        ).apply {
-            boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
-        }
+        val rootLazyColumn =
+            ComposeNode(
+                trait = mutableStateOf(LazyColumnTrait()),
+                label = mutableStateOf("Root"),
+            ).apply {
+                boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
+            }
         rootLazyColumn.addChild(
             ComposeNode(
                 trait = mutableStateOf(LazyColumnTrait()),
@@ -229,21 +261,22 @@ class ComposeNodeTest {
 
     @Test
     fun constructingTree_onTheFly_verifyLevelsAndChildParentRelationships() {
-        val root = ComposeNode(
-            trait = mutableStateOf(ColumnTrait()),
-        ).apply {
-            addChild(
-                ComposeNode(
-                    trait = mutableStateOf(RowTrait()),
-                ).apply {
-                    addChild(
-                        ComposeNode(
-                            trait = mutableStateOf(TextTrait()),
-                        ),
-                    )
-                },
-            )
-        }
+        val root =
+            ComposeNode(
+                trait = mutableStateOf(ColumnTrait()),
+            ).apply {
+                addChild(
+                    ComposeNode(
+                        trait = mutableStateOf(RowTrait()),
+                    ).apply {
+                        addChild(
+                            ComposeNode(
+                                trait = mutableStateOf(TextTrait()),
+                            ),
+                        )
+                    },
+                )
+            }
 
         val row = root.children.first()
         val text = row.children.first()
@@ -313,13 +346,15 @@ class ComposeNodeTest {
 
     @Test
     fun serialize_deserialize_withDynamicItems() {
-        val node = ComposeNode(
-            dynamicItems = mutableStateOf(
-                ApiResultProperty(
-                    apiId = Uuid.random().toString(),
-                ),
-            ),
-        )
+        val node =
+            ComposeNode(
+                dynamicItems =
+                    mutableStateOf(
+                        ApiResultProperty(
+                            apiId = Uuid.random().toString(),
+                        ),
+                    ),
+            )
         val encoded = yamlSerializer.encodeToString(node)
         val decoded = yamlSerializer.decodeFromString<ComposeNode>(encoded)
 

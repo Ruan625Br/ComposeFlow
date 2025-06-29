@@ -14,9 +14,10 @@ import moe.tlaster.precompose.ui.LocalBackDispatcherOwner
 
 @Composable
 fun ProvideTestPreCompose(
-    precomposeStateHolder: TestPreComposeWindowHolder = remember {
-        TestPreComposeWindowHolder()
-    },
+    precomposeStateHolder: TestPreComposeWindowHolder =
+        remember {
+            TestPreComposeWindowHolder()
+        },
     content: @Composable () -> Unit,
 ) {
     CompositionLocalProvider(
@@ -28,7 +29,9 @@ fun ProvideTestPreCompose(
     }
 }
 
-class TestPreComposeWindowHolder : LifecycleOwner, BackDispatcherOwner {
+class TestPreComposeWindowHolder :
+    LifecycleOwner,
+    BackDispatcherOwner {
     override val lifecycle by lazy {
         LifecycleRegistry()
     }

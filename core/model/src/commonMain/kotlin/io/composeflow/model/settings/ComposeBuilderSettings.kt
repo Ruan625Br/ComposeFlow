@@ -7,7 +7,6 @@ data class ComposeBuilderSettings(
     val composeBuilderDarkThemeSetting: DarkThemeSetting = DarkThemeSetting.Dark,
     val javaHome: PathSetting? = null,
     val showBordersInCanvas: Boolean = true,
-
     /**
      * The version to which the user is asked to update the ComposeFlow app.
      * Used to not show the same update prompt
@@ -22,8 +21,7 @@ enum class DarkThemeSetting {
     ;
 
     companion object {
-        fun fromOrdinal(ordinal: Int): DarkThemeSetting =
-            entries.first { it.ordinal == ordinal }
+        fun fromOrdinal(ordinal: Int): DarkThemeSetting = entries.first { it.ordinal == ordinal }
     }
 }
 
@@ -32,12 +30,17 @@ sealed interface PathSetting {
     fun path(): String
 
     @Serializable
-    data class FromEnvVar(val envVarName: String, private val value: String) : PathSetting {
+    data class FromEnvVar(
+        val envVarName: String,
+        private val value: String,
+    ) : PathSetting {
         override fun path(): String = value
     }
 
     @Serializable
-    data class FromLocal(private val value: String) : PathSetting {
+    data class FromLocal(
+        private val value: String,
+    ) : PathSetting {
         override fun path(): String = value
     }
 }

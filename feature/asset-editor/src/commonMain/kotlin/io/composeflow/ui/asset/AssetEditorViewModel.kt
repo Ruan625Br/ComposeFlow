@@ -29,7 +29,6 @@ class AssetEditorViewModel(
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
     private val localAssetSaver: LocalAssetSaver = LocalAssetSaver(),
 ) : ViewModel() {
-
     private val _uploadResult: MutableStateFlow<UploadResult> =
         MutableStateFlow(UploadResult.NotStarted)
     val uploadResult: StateFlow<UploadResult> = _uploadResult
@@ -54,8 +53,7 @@ class AssetEditorViewModel(
                     saveProject()
                 },
                 failure = {
-
-                }
+                },
             )
         }
     }
@@ -63,11 +61,12 @@ class AssetEditorViewModel(
     fun onUploadImageFile(file: PlatformFile) {
         viewModelScope.launch(ioDispatcher) {
             _uploadResult.value = UploadResult.Uploading
-            val result = storageWrapper.uploadAsset(
-                userId = firebaseIdToken.user_id,
-                projectId = project.id,
-                file,
-            )
+            val result =
+                storageWrapper.uploadAsset(
+                    userId = firebaseIdToken.user_id,
+                    projectId = project.id,
+                    file,
+                )
             result.mapBoth(
                 success = {
                     result.get()?.let { blobInfo ->
@@ -76,14 +75,14 @@ class AssetEditorViewModel(
                         localAssetSaver.saveAsset(
                             firebaseIdToken.user_id,
                             project.id,
-                            blobInfo
+                            blobInfo,
                         )
                         saveProject()
                     }
                 },
                 failure = {
                     _uploadResult.value = UploadResult.Failure
-                }
+                },
             )
         }
     }
@@ -91,11 +90,12 @@ class AssetEditorViewModel(
     fun onUploadIconFile(file: PlatformFile) {
         viewModelScope.launch(ioDispatcher) {
             _uploadResult.value = UploadResult.Uploading
-            val result = storageWrapper.uploadAsset(
-                userId = firebaseIdToken.user_id,
-                projectId = project.id,
-                file,
-            )
+            val result =
+                storageWrapper.uploadAsset(
+                    userId = firebaseIdToken.user_id,
+                    projectId = project.id,
+                    file,
+                )
             result.mapBoth(
                 success = {
                     result.get()?.let { blobInfo ->
@@ -105,14 +105,14 @@ class AssetEditorViewModel(
                         localAssetSaver.saveAsset(
                             firebaseIdToken.user_id,
                             project.id,
-                            blobInfo
+                            blobInfo,
                         )
                         saveProject()
                     }
                 },
                 failure = {
                     _uploadResult.value = UploadResult.Failure
-                }
+                },
             )
         }
     }
@@ -133,8 +133,7 @@ class AssetEditorViewModel(
                     saveProject()
                 },
                 failure = {
-
-                }
+                },
             )
         }
     }

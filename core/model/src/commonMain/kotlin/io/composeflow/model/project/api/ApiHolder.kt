@@ -13,13 +13,9 @@ data class ApiHolder(
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val apiDefinitions: MutableList<ApiDefinition> = mutableStateListEqualsOverrideOf(),
 ) {
-    fun getValidApiDefinitions(): List<ApiDefinition> =
-        apiDefinitions.filter { it.isValid() }
+    fun getValidApiDefinitions(): List<ApiDefinition> = apiDefinitions.filter { it.isValid() }
 
-    fun findApiDefinitionOrNull(sourceId: String): ApiDefinition? =
-        apiDefinitions.firstOrNull { it.id == sourceId }
+    fun findApiDefinitionOrNull(sourceId: String): ApiDefinition? = apiDefinitions.firstOrNull { it.id == sourceId }
 
-    fun generateTrackableIssues(): List<TrackableIssue> {
-        return apiDefinitions.flatMap { it.generateTrackableIssue() }
-    }
+    fun generateTrackableIssues(): List<TrackableIssue> = apiDefinitions.flatMap { it.generateTrackableIssue() }
 }

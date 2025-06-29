@@ -8,7 +8,6 @@ import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
  * defined.
  */
 object MemberHolder {
-
     object AndroidX {
         object Foundation {
             val Image = MemberName("androidx.compose.foundation", "Image")

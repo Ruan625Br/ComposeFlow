@@ -91,7 +91,6 @@ import kotlin.uuid.Uuid
 @Serializable
 @SerialName("AssignableProperty")
 sealed interface AssignableProperty {
-
     val propertyTransformers: MutableList<PropertyTransformer>
 
     /**
@@ -103,22 +102,24 @@ sealed interface AssignableProperty {
     /**
      * Get all AssignableProperties contained within this property, including those in transformers.
      */
-    fun getAssignableProperties(includeSelf: Boolean = true): List<AssignableProperty> {
-        return propertyTransformers.flatMap { it.getAssignableProperties() } + if (includeSelf) {
-            listOf(this)
-        } else {
-            emptyList()
-        }
-    }
+    fun getAssignableProperties(includeSelf: Boolean = true): List<AssignableProperty> =
+        propertyTransformers.flatMap { it.getAssignableProperties() } +
+            if (includeSelf) {
+                listOf(this)
+            } else {
+                emptyList()
+            }
 
     fun valueType(project: Project): ComposeFlowType
-    fun transformedValueType(project: Project): ComposeFlowType {
-        return if (propertyTransformers.isEmpty()) {
+
+    fun transformedValueType(project: Project): ComposeFlowType =
+        if (propertyTransformers.isEmpty()) {
             valueType(project)
         } else {
             if (propertyTransformers.size == 1) {
-                if (propertyTransformers.areValidRelationships() && propertyTransformers[0].fromType()::class == valueType(
-                        project
+                if (propertyTransformers.areValidRelationships() &&
+                    propertyTransformers[0].fromType()::class == valueType(
+                        project,
                     )::class
                 ) {
                     propertyTransformers.last().toType()
@@ -131,12 +132,12 @@ sealed interface AssignableProperty {
                 ComposeFlowType.UnknownType()
             }
         }
-    }
 
     /**
      * String expression in the dropped Composable int the preview in the editor UI
      */
     fun valueExpression(project: Project): String
+
     fun transformedValueExpression(project: Project): String {
         var result = valueExpression(project)
         propertyTransformers.forEach {
@@ -207,7 +208,6 @@ sealed interface AssignableProperty {
         insideContent: CodeBlock,
     ): CodeBlock? = null
 
-
     /**
      * Generate CodeBlock that represents this property including the transformations by using
      * [propertyTransformers].
@@ -225,13 +225,15 @@ sealed interface AssignableProperty {
         dryRun: Boolean,
     ): CodeBlock
 
-    fun addReadProperty(project: Project, context: GenerationContext, dryRun: Boolean) {}
+    fun addReadProperty(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ) {}
 
     fun getDependentComposeNodes(project: Project): List<ComposeNode> = emptyList()
 
-    fun isDependent(sourceId: String): Boolean {
-        return propertyTransformers.any { it.isDependent(sourceId) }
-    }
+    fun isDependent(sourceId: String): Boolean = propertyTransformers.any { it.isDependent(sourceId) }
 
     /**
      * Method to compare the identity with the other property.
@@ -261,8 +263,8 @@ sealed interface AssignableProperty {
 fun AssignableProperty?.mergeProperty(
     project: Project,
     newProperty: AssignableProperty,
-): AssignableProperty {
-    return if (this is IntrinsicProperty<*> &&
+): AssignableProperty =
+    if (this is IntrinsicProperty<*> &&
         newProperty is IntrinsicProperty<*> &&
         this.valueType(project) == newProperty.valueType(project)
     ) {
@@ -271,12 +273,10 @@ fun AssignableProperty?.mergeProperty(
     } else {
         newProperty
     }
-}
 
 @Serializable
 @SerialName("AssignablePropertyBase")
 abstract class AssignablePropertyBase : AssignableProperty {
-
     @Serializable(FallbackMutableStateListSerializer::class)
     final override val propertyTransformers: MutableList<PropertyTransformer> =
         mutableStateListEqualsOverrideOf()
@@ -313,24 +313,23 @@ abstract class AssignablePropertyBase : AssignableProperty {
 @Serializable
 sealed interface IntrinsicProperty<T> {
     val value: T
+
     fun asCodeBlock(): CodeBlock
 }
 
 @Serializable
 sealed interface StringProperty : AssignableProperty {
-
     override fun valueType(project: Project) = ComposeFlowType.StringType()
 
     @Serializable
     @SerialName("StringIntrinsicValue")
     data class StringIntrinsicValue(
         override val value: String = "",
-    ) :
-        AssignablePropertyBase(),
+    ) : AssignablePropertyBase(),
         StringProperty,
         IntrinsicProperty<String> {
-
         override fun valueExpression(project: Project): String = value
+
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -340,8 +339,8 @@ sealed interface StringProperty : AssignableProperty {
 
         override fun displayText(project: Project): String = value
 
-        override fun asCodeBlock(): CodeBlock {
-            return if (value.contains("\n") || value.contains("\r") || value.length >= kotlinpoetColumnLimit) {
+        override fun asCodeBlock(): CodeBlock =
+            if (value.contains("\n") || value.contains("\r") || value.length >= kotlinpoetColumnLimit) {
                 // It looks like Kotlinpoet's column limit is hard-coded as 100.
                 // That means a string more than 100 characters can be translated as multiline
                 // string unintentionally.
@@ -349,7 +348,6 @@ sealed interface StringProperty : AssignableProperty {
             } else {
                 CodeBlock.of("\"%L\"", value)
             }
-        }
     }
 
     @Serializable
@@ -358,20 +356,22 @@ sealed interface StringProperty : AssignableProperty {
         val jsonPath: String,
         @Serializable(with = JsonAsStringSerializer::class)
         val jsonElement: JsonElement,
-    ) : StringProperty, AssignablePropertyBase() {
+    ) : AssignablePropertyBase(),
+        StringProperty {
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of(
-            """%M(jsonElement, "$jsonPath", replaceQuotation = true)""",
-            MemberName("${COMPOSEFLOW_PACKAGE}.util", "selectString"),
-        )
+        ): CodeBlock =
+            CodeBlock.of(
+                """%M(jsonElement, "$jsonPath", replaceQuotation = true)""",
+                MemberName("${COMPOSEFLOW_PACKAGE}.util", "selectString"),
+            )
 
         override fun valueExpression(project: Project) = "[JsonPath: $jsonPath]"
-        override fun displayText(project: Project): String =
-            jsonElement.selectString(jsonPath, replaceQuotation = true)
+
+        override fun displayText(project: Project): String = jsonElement.selectString(jsonPath, replaceQuotation = true)
     }
 
     @Composable
@@ -415,18 +415,16 @@ sealed interface StringProperty : AssignableProperty {
 
 @Serializable
 sealed interface DocumentIdProperty : AssignableProperty {
-
     @Serializable
     @SerialName("FirestoreDocumentIdProperty")
     data class FirestoreDocumentIdProperty(
         val firestoreCollectionId: CollectionId,
-    ) : AssignablePropertyBase(), DocumentIdProperty {
-
-        override fun valueType(project: Project): ComposeFlowType {
-            return project.findFirestoreCollectionOrNull(firestoreCollectionId)?.let {
+    ) : AssignablePropertyBase(),
+        DocumentIdProperty {
+        override fun valueType(project: Project): ComposeFlowType =
+            project.findFirestoreCollectionOrNull(firestoreCollectionId)?.let {
                 ComposeFlowType.DocumentIdType(it.id)
             } ?: ComposeFlowType.UnknownType()
-        }
 
         override fun valueExpression(project: Project): String = ""
 
@@ -449,7 +447,6 @@ sealed interface DocumentIdProperty : AssignableProperty {
     data object EmptyDocumentId :
         AssignablePropertyBase(),
         DocumentIdProperty {
-
         override fun valueType(project: Project) = emptyDocumentIdType
 
         override fun valueExpression(project: Project): String = ""
@@ -505,20 +502,19 @@ sealed interface DocumentIdProperty : AssignableProperty {
 
 @Serializable
 sealed interface IntProperty : AssignableProperty {
-
     override fun valueType(project: Project) = ComposeFlowType.IntType()
 
     @Serializable
     @SerialName("IntIntrinsicValue")
     data class IntIntrinsicValue(
         override val value: Int = 0,
-    ) :
-        AssignablePropertyBase(),
+    ) : AssignablePropertyBase(),
         IntProperty,
         IntrinsicProperty<Int> {
-
         override fun valueExpression(project: Project) = value.toString()
+
         override fun displayText(project: Project): String = value.toString()
+
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -533,8 +529,8 @@ sealed interface IntProperty : AssignableProperty {
     @SerialName("ValueFromLazyListIndex")
     data class ValueFromLazyListIndex(
         val lazyListNodeId: String,
-    ) : IntProperty, AssignablePropertyBase() {
-
+    ) : AssignablePropertyBase(),
+        IntProperty {
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -547,7 +543,7 @@ sealed interface IntProperty : AssignableProperty {
                     "${
                         lazyList.trait.value.iconText().replaceSpaces()
                             .replaceFirstChar { it.lowercase() }
-                    }Index"
+                    }Index",
                 )
             return writeType.convertCodeFromType(
                 ComposeFlowType.IntType(),
@@ -555,15 +551,14 @@ sealed interface IntProperty : AssignableProperty {
             )
         }
 
-        override fun valueExpression(project: Project): String {
-            return textFromState(project, lazyListNodeId)
-        }
+        override fun valueExpression(project: Project): String = textFromState(project, lazyListNodeId)
 
-        override fun displayText(project: Project): String {
-            return textFromState(project, lazyListNodeId)
-        }
+        override fun displayText(project: Project): String = textFromState(project, lazyListNodeId)
 
-        private fun textFromState(project: Project, composeNodeId: String): String =
+        private fun textFromState(
+            project: Project,
+            composeNodeId: String,
+        ): String =
             project.findComposeNodeOrNull(composeNodeId)?.let {
                 "[${it.displayName(project) + "Index"}]"
             } ?: "[Invalid]"
@@ -610,20 +605,19 @@ sealed interface IntProperty : AssignableProperty {
 
 @Serializable
 sealed interface FloatProperty : AssignableProperty {
-
     override fun valueType(project: Project) = ComposeFlowType.FloatType()
 
     @Serializable
     @SerialName("FloatIntrinsicValue")
     data class FloatIntrinsicValue(
         override val value: Float = 0f,
-    ) :
-        AssignablePropertyBase(),
+    ) : AssignablePropertyBase(),
         FloatProperty,
         IntrinsicProperty<Float> {
-
         override fun valueExpression(project: Project) = value.toString()
+
         override fun displayText(project: Project): String = value.toString()
+
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -675,20 +669,19 @@ sealed interface FloatProperty : AssignableProperty {
 
 @Serializable
 sealed interface BooleanProperty : AssignableProperty {
-
     override fun valueType(project: Project) = ComposeFlowType.BooleanType()
 
     @Serializable
     @SerialName("BooleanIntrinsicValue")
     data class BooleanIntrinsicValue(
         override val value: Boolean = false,
-    ) :
-        AssignablePropertyBase(),
+    ) : AssignablePropertyBase(),
         BooleanProperty,
         IntrinsicProperty<Boolean> {
-
         override fun valueExpression(project: Project) = value.toString()
+
         override fun displayText(project: Project): String = value.toString()
+
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -749,28 +742,25 @@ sealed interface BooleanProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock {
-            throw IllegalStateException("Empty property isn't able to generate code")
-        }
+        ): CodeBlock = throw IllegalStateException("Empty property isn't able to generate code")
     }
 }
 
 @Serializable
 sealed interface ColorProperty : AssignableProperty {
-
     override fun valueType(project: Project) = ComposeFlowType.Color()
 
     @Serializable
     @SerialName("ColorIntrinsicValue")
     data class ColorIntrinsicValue(
         override val value: ColorWrapper = defaultColorWrapper,
-    ) :
-        AssignablePropertyBase(),
+    ) : AssignablePropertyBase(),
         ColorProperty,
         IntrinsicProperty<ColorWrapper> {
-
         override fun valueExpression(project: Project) = value.asString()
+
         override fun displayText(project: Project): String = value.asString()
+
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -812,20 +802,19 @@ sealed interface ColorProperty : AssignableProperty {
 
 @Serializable
 sealed interface InstantProperty : AssignableProperty {
-
     override fun valueType(project: Project) = ComposeFlowType.InstantType()
 
     @Serializable
     @SerialName("InstantIntrinsicValue")
     data class InstantIntrinsicValue(
         override val value: InstantWrapper = InstantWrapper(),
-    ) :
-        AssignablePropertyBase(),
+    ) : AssignablePropertyBase(),
         InstantProperty,
         IntrinsicProperty<InstantWrapper> {
-
         override fun valueExpression(project: Project) = value.asString()
+
         override fun displayText(project: Project): String = value.asString()
+
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
@@ -869,57 +858,54 @@ sealed interface InstantProperty : AssignableProperty {
 @SerialName("ValueFromState")
 data class ValueFromState(
     val readFromStateId: StateId,
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun valueType(project: Project): ComposeFlowType =
         project.findLocalStateOrNull(readFromStateId)?.valueType(project)
             ?: ComposeFlowType.UnknownType()
 
-    override fun valueExpression(project: Project): String {
-        return textFromState(project, readFromStateId)
-    }
+    override fun valueExpression(project: Project): String = textFromState(project, readFromStateId)
 
-    override fun displayText(project: Project): String {
-        return textFromState(project, readFromStateId)
-    }
+    override fun displayText(project: Project): String = textFromState(project, readFromStateId)
 
-    private fun textFromState(project: Project, stateId: StateId): String {
-        return project.findLocalStateOrNull(stateId)?.let {
-            val prefix = if (it is ScreenState<*>) {
-                "state: "
-            } else if (it is AppState<*>) {
-                "app state: "
-            } else {
-                ""
-            }
+    private fun textFromState(
+        project: Project,
+        stateId: StateId,
+    ): String =
+        project.findLocalStateOrNull(stateId)?.let {
+            val prefix =
+                if (it is ScreenState<*>) {
+                    "state: "
+                } else if (it is AppState<*>) {
+                    "app state: "
+                } else {
+                    ""
+                }
             "[$prefix${it.name}]"
         } ?: "[Invalid]"
-    }
 
-    override fun isDependent(sourceId: String): Boolean {
-        return readFromStateId == sourceId || super<AssignableProperty>.isDependent(sourceId)
-    }
+    override fun isDependent(sourceId: String): Boolean = readFromStateId == sourceId || super<AssignableProperty>.isDependent(sourceId)
 
-    override fun isIdentical(other: AssignableProperty): Boolean {
-        return if (other is ValueFromCompanionState) {
+    override fun isIdentical(other: AssignableProperty): Boolean =
+        if (other is ValueFromCompanionState) {
             other.composeNode?.companionStateId == readFromStateId
         } else {
             other == this
         }
-    }
 
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        val companionComposeNode = project.findLocalStateOrNull(readFromStateId)?.let { readState ->
-            when (readState) {
-                is ScreenState<*> -> {
-                    readState.companionNodeId?.let {
-                        project.findComposeNodeOrNull(it)
+        val companionComposeNode =
+            project.findLocalStateOrNull(readFromStateId)?.let { readState ->
+                when (readState) {
+                    is ScreenState<*> -> {
+                        readState.companionNodeId?.let {
+                            project.findComposeNodeOrNull(it)
+                        }
                     }
-                }
 
-                else -> null
+                    else -> null
+                }
             }
-        }
         return companionComposeNode?.let {
             listOf(it)
         } ?: emptyList()
@@ -932,17 +918,19 @@ data class ValueFromState(
         dryRun: Boolean,
     ): CodeBlock {
         val state = project.findLocalStateOrNull(readFromStateId) ?: return CodeBlock.of("")
-        val codeBlock = when (context.generatedPlace) {
-            GeneratedPlace.ComposeScreen -> CodeBlock.of(
-                state.getReadVariableName(
-                    project,
-                    context
-                )
-            )
+        val codeBlock =
+            when (context.generatedPlace) {
+                GeneratedPlace.ComposeScreen ->
+                    CodeBlock.of(
+                        state.getReadVariableName(
+                            project,
+                            context,
+                        ),
+                    )
 
-            GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
-            GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project, context))
-        }
+                GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
+                GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project, context))
+            }
 
         if (state is WriteableState) {
             state.generateStatePropertiesToViewModel(project, context).forEach {
@@ -959,12 +947,13 @@ data class ValueFromState(
     ) {
         val state = project.findLocalStateOrNull(readFromStateId) ?: return
         if (state is WriteableState) {
-            state.generateStatePropertiesToViewModel(
-                project,
-                context,
-            ).forEach {
-                context.addProperty(it, dryRun = dryRun)
-            }
+            state
+                .generateStatePropertiesToViewModel(
+                    project,
+                    context,
+                ).forEach {
+                    context.addProperty(it, dryRun = dryRun)
+                }
         }
     }
 
@@ -992,14 +981,15 @@ data class ValueFromState(
             modifier = modifier,
             destinationStateId = destinationStateId,
             onInitializeProperty = onInitializeProperty,
-            leadingIcon = readState?.valueType(project)?.leadingIcon()?.let {
-                {
-                    ComposeFlowIcon(
-                        it,
-                        contentDescription = null,
-                    )
-                }
-            },
+            leadingIcon =
+                readState?.valueType(project)?.leadingIcon()?.let {
+                    {
+                        ComposeFlowIcon(
+                            it,
+                            contentDescription = null,
+                        )
+                    }
+                },
             validateInput = validateInput ?: { ValidateResult.Success },
             editable = editable,
             functionScopeProperties = functionScopeProperties,
@@ -1024,9 +1014,9 @@ data class ValueFromCompanionState(
      * needs to be aware of the composition in the UI because they may be used in the UI.
      */
     @Transient
-    val composeNode: ComposeNode? = null
-) : AssignableProperty, AssignablePropertyBase() {
-
+    val composeNode: ComposeNode? = null,
+) : AssignablePropertyBase(),
+    AssignableProperty {
     @Transient
     private val companionState: ScreenState<*>? =
         composeNode?.let { node ->
@@ -1037,39 +1027,30 @@ data class ValueFromCompanionState(
         companionState?.valueType(project)
             ?: ComposeFlowType.UnknownType()
 
-    override fun valueExpression(project: Project): String {
-        return textFromState()
-    }
+    override fun valueExpression(project: Project): String = textFromState()
 
-    override fun displayText(project: Project): String {
-        return textFromState()
-    }
+    override fun displayText(project: Project): String = textFromState()
 
-    override fun isIdentical(other: AssignableProperty): Boolean {
-        return if (other is ValueFromState) {
+    override fun isIdentical(other: AssignableProperty): Boolean =
+        if (other is ValueFromState) {
             other.readFromStateId == composeNode?.companionStateId
         } else {
             other == this
         }
-    }
 
-    private fun textFromState(): String {
-        return companionState?.let {
+    private fun textFromState(): String =
+        companionState?.let {
             // companion state is always screen level
             val prefix = "state: "
             "[$prefix${it.name}]"
         } ?: "[Invalid]"
-    }
 
-    override fun isDependent(sourceId: String): Boolean {
-        return companionState?.id == sourceId || super<AssignableProperty>.isDependent(sourceId)
-    }
+    override fun isDependent(sourceId: String): Boolean = companionState?.id == sourceId || super<AssignableProperty>.isDependent(sourceId)
 
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return composeNode?.let {
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        composeNode?.let {
             listOf(it)
         } ?: emptyList()
-    }
 
     override fun generateCodeBlock(
         project: Project,
@@ -1078,17 +1059,19 @@ data class ValueFromCompanionState(
         dryRun: Boolean,
     ): CodeBlock {
         val state = companionState ?: return CodeBlock.of("")
-        val codeBlock = when (context.generatedPlace) {
-            GeneratedPlace.ComposeScreen -> CodeBlock.of(
-                state.getReadVariableName(
-                    project,
-                    context
-                )
-            )
+        val codeBlock =
+            when (context.generatedPlace) {
+                GeneratedPlace.ComposeScreen ->
+                    CodeBlock.of(
+                        state.getReadVariableName(
+                            project,
+                            context,
+                        ),
+                    )
 
-            GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
-            GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project, context))
-        }
+                GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
+                GeneratedPlace.Unspecified -> CodeBlock.of(state.getReadVariableName(project, context))
+            }
 
         state.generateStatePropertiesToViewModel(project, context).forEach {
             context.addProperty(it, dryRun = dryRun)
@@ -1102,12 +1085,13 @@ data class ValueFromCompanionState(
         dryRun: Boolean,
     ) {
         val state = companionState ?: return
-        state.generateStatePropertiesToViewModel(
-            project,
-            context,
-        ).forEach {
-            context.addProperty(it, dryRun = dryRun)
-        }
+        state
+            .generateStatePropertiesToViewModel(
+                project,
+                context,
+            ).forEach {
+                context.addProperty(it, dryRun = dryRun)
+            }
     }
 
     @Composable
@@ -1134,14 +1118,15 @@ data class ValueFromCompanionState(
             modifier = modifier,
             destinationStateId = destinationStateId,
             onInitializeProperty = onInitializeProperty,
-            leadingIcon = readState?.valueType(project)?.leadingIcon()?.let {
-                {
-                    ComposeFlowIcon(
-                        it,
-                        contentDescription = null,
-                    )
-                }
-            },
+            leadingIcon =
+                readState?.valueType(project)?.leadingIcon()?.let {
+                    {
+                        ComposeFlowIcon(
+                            it,
+                            contentDescription = null,
+                        )
+                    }
+                },
             validateInput = validateInput ?: { ValidateResult.Success },
             editable = editable,
             functionScopeProperties = functionScopeProperties,
@@ -1154,8 +1139,8 @@ data class ValueFromCompanionState(
 data class ValueFromDynamicItem(
     val composeNodeId: String,
     val fieldType: DataFieldType = DataFieldType.Primitive,
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun valueType(project: Project): ComposeFlowType {
         val dynamicItems =
             project.findComposeNodeOrNull(composeNodeId)?.dynamicItems?.value
@@ -1164,22 +1149,26 @@ data class ValueFromDynamicItem(
         val itemType = dynamicItems.transformedValueType(project).copyWith(newIsList = false)
         return when (fieldType) {
             is DataFieldType.FieldInDataType -> {
-                val dataType = (itemType as? ComposeFlowType.CustomDataType)?.dataTypeId?.let {
-                    project.findDataTypeOrNull(it)
-                }
+                val dataType =
+                    (itemType as? ComposeFlowType.CustomDataType)?.dataTypeId?.let {
+                        project.findDataTypeOrNull(it)
+                    }
                 val dataField = dataType?.findDataFieldOrNull(fieldType.fieldId)
                 dataField?.fieldType?.type() ?: ComposeFlowType.UnknownType()
             }
 
             is DataFieldType.DataType -> {
                 project.findDataTypeOrNull(fieldType.dataTypeId)?.let {
-                    ComposeFlowType.CustomDataType(dataTypeId = fieldType.dataTypeId)
+                    ComposeFlowType
+                        .CustomDataType(dataTypeId = fieldType.dataTypeId)
                         .copyWith(newIsList = false)
                 } ?: ComposeFlowType.UnknownType()
             }
 
-            DataFieldType.Primitive -> dynamicItems.transformedValueType(project)
-                .copyWith(newIsList = false)
+            DataFieldType.Primitive ->
+                dynamicItems
+                    .transformedValueType(project)
+                    .copyWith(newIsList = false)
 
             is DataFieldType.DocumentId -> {
                 ComposeFlowType.DocumentIdType(fieldType.firestoreCollectionId)
@@ -1193,15 +1182,18 @@ data class ValueFromDynamicItem(
         return if (type is ComposeFlowType.UnknownType || composeNode == null) {
             null
         } else {
-            ParameterSpec.builder(
-                name = "${
-                    composeNode.trait.value.iconText().replaceSpaces()
-                        .replaceFirstChar { it.lowercase() }
-                }Item" + fieldNameAsViewModel(
-                    fieldType.fieldName(project)
-                ),
-                type = type.asKotlinPoetTypeName(project)
-            ).build()
+            ParameterSpec
+                .builder(
+                    name =
+                        "${
+                            composeNode.trait.value.iconText().replaceSpaces()
+                                .replaceFirstChar { it.lowercase() }
+                        }Item" +
+                            fieldNameAsViewModel(
+                                fieldType.fieldName(project),
+                            ),
+                    type = type.asKotlinPoetTypeName(project),
+                ).build()
         }
     }
 
@@ -1220,9 +1212,10 @@ data class ValueFromDynamicItem(
                     "${
                         composeNode.trait.value.iconText().replaceSpaces()
                             .replaceFirstChar { it.lowercase() }
-                    }Item" + fieldType.fieldName(
-                        project
-                    )
+                    }Item" +
+                        fieldType.fieldName(
+                            project,
+                        )
                 CodeBlock.of(valueExpression)
             }
 
@@ -1231,21 +1224,18 @@ data class ValueFromDynamicItem(
                     "${
                         composeNode.trait.value.iconText().replaceSpaces()
                             .replaceFirstChar { it.lowercase() }
-                    }Item" + fieldNameAsViewModel(
-                        fieldType.fieldName(project)
-                    )
+                    }Item" +
+                        fieldNameAsViewModel(
+                            fieldType.fieldName(project),
+                        )
                 CodeBlock.of(valueExpression)
             }
         }
     }
 
-    override fun valueExpression(project: Project): String {
-        return textFromDynamicItem(project)
-    }
+    override fun valueExpression(project: Project): String = textFromDynamicItem(project)
 
-    override fun displayText(project: Project): String {
-        return textFromDynamicItem(project)
-    }
+    override fun displayText(project: Project): String = textFromDynamicItem(project)
 
     private fun textFromDynamicItem(project: Project): String {
         val unknownItem = "[Unknown dynamic item]"
@@ -1253,8 +1243,7 @@ data class ValueFromDynamicItem(
         return "[item: ${composeNode.label.value + fieldType.fieldName(project)}]"
     }
 
-    private fun fieldNameAsViewModel(fieldName: String): String =
-        fieldName.replace(".", "").replaceFirstChar { it.uppercase() }
+    private fun fieldNameAsViewModel(fieldName: String): String = fieldName.replace(".", "").replaceFirstChar { it.uppercase() }
 
     @Composable
     override fun Editor(
@@ -1280,14 +1269,15 @@ data class ValueFromDynamicItem(
             destinationStateId = destinationStateId,
             onInitializeProperty = onInitializeProperty,
             functionScopeProperties = functionScopeProperties,
-            leadingIcon = valueType(project).let {
-                {
-                    ComposeFlowIcon(
-                        it.leadingIcon(),
-                        contentDescription = null,
-                    )
-                }
-            },
+            leadingIcon =
+                valueType(project).let {
+                    {
+                        ComposeFlowIcon(
+                            it.leadingIcon(),
+                            contentDescription = null,
+                        )
+                    }
+                },
             validateInput = validateInput ?: { ValidateResult.Success },
             editable = editable,
         )
@@ -1298,24 +1288,17 @@ data class ValueFromDynamicItem(
 @SerialName("ValueFromGlobalProperty")
 data class ValueFromGlobalProperty(
     val readableState: ReadableState,
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun valueType(project: Project): ComposeFlowType = readableState.valueType(project)
 
-    override fun valueExpression(project: Project): String {
-        return textFromState(readableState)
-    }
+    override fun valueExpression(project: Project): String = textFromState(readableState)
 
-    override fun displayText(project: Project): String {
-        return textFromState(readableState)
-    }
+    override fun displayText(project: Project): String = textFromState(readableState)
 
-    private fun textFromState(readableState: ReadableState): String =
-        "[User: ${readableState.name}]"
+    private fun textFromState(readableState: ReadableState): String = "[User: ${readableState.name}]"
 
-    override fun isDependent(sourceId: String): Boolean {
-        return readableState.id == sourceId || super<AssignableProperty>.isDependent(sourceId)
-    }
+    override fun isDependent(sourceId: String): Boolean = readableState.id == sourceId || super<AssignableProperty>.isDependent(sourceId)
 
     override fun generateCodeBlock(
         project: Project,
@@ -1327,28 +1310,23 @@ data class ValueFromGlobalProperty(
 
 @Serializable
 sealed interface CustomDataTypeProperty : AssignableProperty {
-
-    override fun valueType(project: Project) =
-        ComposeFlowType.CustomDataType(dataTypeId = dataTypeId)
+    override fun valueType(project: Project) = ComposeFlowType.CustomDataType(dataTypeId = dataTypeId)
 
     val dataTypeId: DataTypeId
 
     @Serializable
     @SerialName("ValueFromFields")
     data class ValueFromFields(
-
         override val dataTypeId: DataTypeId,
         val fieldType: DataFieldType = DataFieldType.Primitive,
-    ) : CustomDataTypeProperty, AssignablePropertyBase() {
-
+    ) : AssignablePropertyBase(),
+        CustomDataTypeProperty {
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock {
-            throw IllegalStateException("Invalid call")
-        }
+        ): CodeBlock = throw IllegalStateException("Invalid call")
 
         override fun valueExpression(project: Project): String = createDisplayText(project)
 
@@ -1411,12 +1389,10 @@ sealed interface CustomDataTypeProperty : AssignableProperty {
 @SerialName("EnumProperty")
 data class EnumProperty(
     override val value: EnumWrapper,
-) : AssignableProperty,
-    AssignablePropertyBase(),
+) : AssignablePropertyBase(),
+    AssignableProperty,
     IntrinsicProperty<EnumWrapper> {
-
-    override fun valueType(project: Project) =
-        ComposeFlowType.Enum(enumClass = value.enumValue().declaringJavaClass)
+    override fun valueType(project: Project) = ComposeFlowType.Enum(enumClass = value.enumValue().declaringJavaClass)
 
     override fun getEnumValue() = value.enumValue()
 
@@ -1464,10 +1440,9 @@ data class EnumProperty(
 @Serializable
 @SerialName("CustomEnumValuesProperty")
 data class CustomEnumValuesProperty(
-
     val customEnumId: CustomEnumId,
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun valueType(project: Project) = ComposeFlowType.StringType(isList = true)
 
     override fun generateCodeBlock(
@@ -1479,16 +1454,15 @@ data class CustomEnumValuesProperty(
         val customEnum = project.findCustomEnumOrNull(customEnumId) ?: return CodeBlock.of("")
         return CodeBlock.of(
             """%T.entries.map { it.name }""",
-            customEnum.asKotlinPoetClassName(project)
+            customEnum.asKotlinPoetClassName(project),
         )
     }
 
     override fun valueExpression(project: Project): String = asText(project)
+
     override fun displayText(project: Project): String = asText(project)
 
-    fun rawVale(project: Project): List<String> {
-        return project.findCustomEnumOrNull(customEnumId)?.values ?: emptyList()
-    }
+    fun rawVale(project: Project): List<String> = project.findCustomEnumOrNull(customEnumId)?.values ?: emptyList()
 
     private fun asText(project: Project): String {
         val customEnum = project.findCustomEnumOrNull(customEnumId) ?: return ""
@@ -1500,8 +1474,8 @@ data class CustomEnumValuesProperty(
 @SerialName("FirestoreCollectionProperty")
 data class FirestoreCollectionProperty(
     val collectionId: CollectionId,
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun isDependent(sourceId: String): Boolean = collectionId == sourceId
 
     override fun valueType(project: Project): ComposeFlowType {
@@ -1517,7 +1491,8 @@ data class FirestoreCollectionProperty(
         writeType: ComposeFlowType,
         dryRun: Boolean,
     ): CodeBlock {
-        context.getCurrentComposableContext()
+        context
+            .getCurrentComposableContext()
             .addDependency(viewModelConstant = ViewModelConstant.firestore)
         val builder = CodeBlock.builder()
         val firestoreCollection =
@@ -1527,23 +1502,25 @@ data class FirestoreCollectionProperty(
     }
 
     override fun valueExpression(project: Project): String = asText(project)
+
     override fun displayText(project: Project): String = asText(project)
 
     override fun generateWrapWithComposableBlock(
-        project: Project, insideContent: CodeBlock
+        project: Project,
+        insideContent: CodeBlock,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val firestoreCollection =
             project.findFirestoreCollectionOrNull(collectionId) ?: return builder.build()
         val readVariableName = firestoreCollection.getReadVariableName(project)
         builder.add(
-            """when (${readVariableName}) {
+            """when ($readVariableName) {
     %T.Idle -> {}
     %T.Loading -> {
         %M()
     }
     is %T.Error -> {
-        %M(text = "Error: ${'$'}{${readVariableName}.message}")
+        %M(text = "Error: ${'$'}{$readVariableName.message}")
     } 
     is %T.Success -> {
             """,
@@ -1559,13 +1536,14 @@ data class FirestoreCollectionProperty(
             """
     }
 }                
-"""
+""",
         )
         return builder.build()
     }
 
     override fun generateWrapWithViewModelBlock(
-        project: Project, insideContent: CodeBlock,
+        project: Project,
+        insideContent: CodeBlock,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val firestoreCollection =
@@ -1573,7 +1551,7 @@ data class FirestoreCollectionProperty(
         val readVariableName = firestoreCollection.getReadVariableName(project)
         builder.add(
             """
-when (${readVariableName}) {
+when ($readVariableName) {
     is %T.Success -> {
             """,
             ClassHolder.ComposeFlow.DataResult,
@@ -1584,7 +1562,7 @@ when (${readVariableName}) {
     }
     else -> {}
 }                
-"""
+""",
         )
         return builder.build()
     }
@@ -1599,12 +1577,11 @@ when (${readVariableName}) {
 @Serializable
 @SerialName("ApiResultProperty")
 data class ApiResultProperty(
-
     val apiId: ApiId?,
     @Transient
     private var apiResultName: String = "apiResult",
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun isDependent(sourceId: String): Boolean = apiId == sourceId
 
     override fun valueType(project: Project): ComposeFlowType {
@@ -1631,22 +1608,22 @@ data class ApiResultProperty(
         return when (apiDefinition.exampleJsonResponse?.jsonElement) {
             is JsonArray -> {
                 CodeBlock.of(
-                    "(${apiResultName}.result as %T)",
-                    ClassHolder.Kotlinx.Serialization.JsonArray
+                    "($apiResultName.result as %T)",
+                    ClassHolder.Kotlinx.Serialization.JsonArray,
                 )
             }
 
             is JsonObject -> {
                 CodeBlock.of(
-                    "(${apiResultName}.result as %T)",
-                    ClassHolder.Kotlinx.Serialization.JsonObject
+                    "($apiResultName.result as %T)",
+                    ClassHolder.Kotlinx.Serialization.JsonObject,
                 )
             }
 
             is JsonPrimitive -> {
                 CodeBlock.of(
-                    "(${apiResultName}.result as %T)",
-                    ClassHolder.Kotlinx.Serialization.JsonPrimitive
+                    "($apiResultName.result as %T)",
+                    ClassHolder.Kotlinx.Serialization.JsonPrimitive,
                 )
             }
 
@@ -1661,7 +1638,8 @@ data class ApiResultProperty(
     }
 
     override fun generateWrapWithComposableBlock(
-        project: Project, insideContent: CodeBlock,
+        project: Project,
+        insideContent: CodeBlock,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val apiDefinition =
@@ -1690,13 +1668,14 @@ data class ApiResultProperty(
             """
         }
     }
-    """
+    """,
         )
         return builder.build()
     }
 
     override fun generateWrapWithViewModelBlock(
-        project: Project, insideContent: CodeBlock,
+        project: Project,
+        insideContent: CodeBlock,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val apiDefinition =
@@ -1715,12 +1694,13 @@ data class ApiResultProperty(
         }
     else -> {}
     }
-    """
+    """,
         )
         return builder.build()
     }
 
     override fun valueExpression(project: Project): String = asText(project)
+
     override fun displayText(project: Project): String = asText(project)
 
     private fun asText(project: Project): String {
@@ -1735,15 +1715,21 @@ data class ApiResultProperty(
 data class ComposableParameterProperty(
     val parameterId: ParameterId,
     val dataFieldType: DataFieldType = DataFieldType.Primitive,
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     override fun valueType(project: Project): ComposeFlowType =
         project.findParameterOrNull(parameterId)?.parameterType ?: ComposeFlowType.UnknownType()
 
     override fun getPropertyAvailableAt(): PropertyAvailableAt = PropertyAvailableAt.ComposeScreen
+
     override fun valueExpression(project: Project): String = textFromParameter(project, parameterId)
+
     override fun displayText(project: Project): String = textFromParameter(project, parameterId)
-    private fun textFromParameter(project: Project, parameterId: ParameterId): String =
+
+    private fun textFromParameter(
+        project: Project,
+        parameterId: ParameterId,
+    ): String =
         project.findParameterOrNull(parameterId)?.let {
             "[param: ${getParameterFieldName(project)}]"
         } ?: "[Invalid]"
@@ -1760,42 +1746,45 @@ data class ComposableParameterProperty(
         dryRun: Boolean,
     ): CodeBlock {
         val parameter = project.findParameterOrThrow(parameterId)
-        val parameterFieldName = if (context.generatedPlace == GeneratedPlace.ComposeScreen) {
-            ComposeScreenConstant.arguments.name + "." + getParameterFieldName(project)
-        } else {
-            getParameterFieldName(project)
-        }
-        val codeBlock = if (parameter.parameterType is ComposeFlowType.CustomDataType) {
-            val type = when (dataFieldType) {
-                DataFieldType.Primitive -> {
-                    parameter.parameterType
-                }
-
-                is DataFieldType.FieldInDataType -> {
-                    val dataType = project.findDataTypeOrNull(dataFieldType.dataTypeId)
-                    val dataField = dataType?.findDataFieldOrNull(dataFieldType.fieldId)
-                    dataField?.fieldType?.type() ?: ComposeFlowType.UnknownType()
-                }
-
-                is DataFieldType.DataType -> {
-                    val dataType = project.findDataTypeOrThrow(dataFieldType.dataTypeId)
-                    ComposeFlowType.CustomDataType(isList = false, dataType.id)
-                }
-
-                is DataFieldType.DocumentId -> {
-                    ComposeFlowType.DocumentIdType(dataFieldType.firestoreCollectionId)
-                }
+        val parameterFieldName =
+            if (context.generatedPlace == GeneratedPlace.ComposeScreen) {
+                ComposeScreenConstant.arguments.name + "." + getParameterFieldName(project)
+            } else {
+                getParameterFieldName(project)
             }
-            writeType.convertCodeFromType(
-                type,
-                CodeBlock.of(parameterFieldName),
-            )
-        } else {
-            writeType.convertCodeFromType(
-                parameter.parameterType,
-                CodeBlock.of(parameterFieldName),
-            )
-        }
+        val codeBlock =
+            if (parameter.parameterType is ComposeFlowType.CustomDataType) {
+                val type =
+                    when (dataFieldType) {
+                        DataFieldType.Primitive -> {
+                            parameter.parameterType
+                        }
+
+                        is DataFieldType.FieldInDataType -> {
+                            val dataType = project.findDataTypeOrNull(dataFieldType.dataTypeId)
+                            val dataField = dataType?.findDataFieldOrNull(dataFieldType.fieldId)
+                            dataField?.fieldType?.type() ?: ComposeFlowType.UnknownType()
+                        }
+
+                        is DataFieldType.DataType -> {
+                            val dataType = project.findDataTypeOrThrow(dataFieldType.dataTypeId)
+                            ComposeFlowType.CustomDataType(isList = false, dataType.id)
+                        }
+
+                        is DataFieldType.DocumentId -> {
+                            ComposeFlowType.DocumentIdType(dataFieldType.firestoreCollectionId)
+                        }
+                    }
+                writeType.convertCodeFromType(
+                    type,
+                    CodeBlock.of(parameterFieldName),
+                )
+            } else {
+                writeType.convertCodeFromType(
+                    parameter.parameterType,
+                    CodeBlock.of(parameterFieldName),
+                )
+            }
         return codeBlock
     }
 
@@ -1831,14 +1820,15 @@ data class ComposableParameterProperty(
             modifier = modifier,
             destinationStateId = destinationStateId,
             onInitializeProperty = onInitializeProperty,
-            leadingIcon = valueType(project).let {
-                {
-                    ComposeFlowIcon(
-                        Icons.Outlined.ForkLeft,
-                        contentDescription = null,
-                    )
-                }
-            },
+            leadingIcon =
+                valueType(project).let {
+                    {
+                        ComposeFlowIcon(
+                            Icons.Outlined.ForkLeft,
+                            contentDescription = null,
+                        )
+                    }
+                },
             validateInput = validateInput ?: { ValidateResult.Success },
             editable = editable,
             functionScopeProperties = functionScopeProperties,
@@ -1849,7 +1839,6 @@ data class ComposableParameterProperty(
 @Serializable
 @SerialName("EmptyProperty")
 data object EmptyProperty : AssignablePropertyBase() {
-
     override fun valueType(project: Project): ComposeFlowType = ComposeFlowType.UnknownType()
 
     override fun valueExpression(project: Project): String = "Not selected"
@@ -1879,16 +1868,15 @@ data object EmptyProperty : AssignablePropertyBase() {
 @Serializable
 @SerialName("FunctionScopeParameterProperty")
 data class FunctionScopeParameterProperty(
-
     val id: Uuid = Uuid.random(),
     val functionName: String,
     val variableType: ComposeFlowType,
     val variableName: String = "it",
     val dataFieldType: DataFieldType = DataFieldType.Primitive,
-) : AssignableProperty, AssignablePropertyBase() {
-
-    override fun valueType(project: Project): ComposeFlowType {
-        return when (dataFieldType) {
+) : AssignablePropertyBase(),
+    AssignableProperty {
+    override fun valueType(project: Project): ComposeFlowType =
+        when (dataFieldType) {
             is DataFieldType.DataType -> {
                 ComposeFlowType.CustomDataType(dataTypeId = dataFieldType.dataTypeId)
             }
@@ -1907,17 +1895,18 @@ data class FunctionScopeParameterProperty(
                 ComposeFlowType.DocumentIdType(dataFieldType.firestoreCollectionId)
             }
         }
-    }
 
-    override fun valueExpression(project: Project): String = textFromParameter(
-        project = project,
-        variableName = variableName
-    )
+    override fun valueExpression(project: Project): String =
+        textFromParameter(
+            project = project,
+            variableName = variableName,
+        )
 
-    override fun displayText(project: Project): String = textFromParameter(
-        project = project,
-        variableName = variableName
-    )
+    override fun displayText(project: Project): String =
+        textFromParameter(
+            project = project,
+            variableName = variableName,
+        )
 
     private fun textFromParameter(
         project: Project,
@@ -1929,9 +1918,7 @@ data class FunctionScopeParameterProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        return CodeBlock.of(variableName + dataFieldType.fieldName(project))
-    }
+    ): CodeBlock = CodeBlock.of(variableName + dataFieldType.fieldName(project))
 }
 
 @Serializable
@@ -1942,68 +1929,74 @@ data class ConditionalProperty(
     @Serializable(FallbackMutableStateListSerializer::class)
     val elseIfBlocks: MutableList<IfThenBlock> = mutableStateListEqualsOverrideOf(),
     val elseBlock: ElseBlock = ElseBlock(value = defaultValue),
-) : AssignableProperty, AssignablePropertyBase() {
-
+) : AssignablePropertyBase(),
+    AssignableProperty {
     fun copyWith(newIfThenBlock: IfThenBlock) = this.copy(ifThen = newIfThenBlock)
+
     fun copyWith(newElseBlock: ElseBlock) = this.copy(elseBlock = newElseBlock)
 
-    override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-        return defaultValue.getDependentComposeNodes(project) +
-                ifThen.thenValue.getDependentComposeNodes(project) +
-                elseIfBlocks.flatMap { it.thenValue.getDependentComposeNodes(project) } +
-                elseBlock.value.getDependentComposeNodes(project)
-    }
+    override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+        defaultValue.getDependentComposeNodes(project) +
+            ifThen.thenValue.getDependentComposeNodes(project) +
+            elseIfBlocks.flatMap { it.thenValue.getDependentComposeNodes(project) } +
+            elseBlock.value.getDependentComposeNodes(project)
 
     override fun generateWrapWithComposableBlock(
         project: Project,
         insideContent: CodeBlock,
     ): CodeBlock? {
         val a = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue)
-        val b = elseIfBlocks.map {
-            it.ifExpression
-        } + elseIfBlocks.map {
-            it.thenValue
-        }
+        val b =
+            elseIfBlocks.map {
+                it.ifExpression
+            } +
+                elseIfBlocks.map {
+                    it.thenValue
+                }
         val c = elseBlock.value
-        val result = (a + b + c).filter {
-            it.generateWrapWithComposableBlock(project, insideContent) != null
-        }.fold(initial = null as CodeBlock?) { acc, element ->
-            element.generateWrapWithComposableBlock(project, acc ?: insideContent)
-        }
+        val result =
+            (a + b + c)
+                .filter {
+                    it.generateWrapWithComposableBlock(project, insideContent) != null
+                }.fold(initial = null as CodeBlock?) { acc, element ->
+                    element.generateWrapWithComposableBlock(project, acc ?: insideContent)
+                }
         return result
     }
 
-    override fun isDependent(sourceId: String): Boolean {
-        return defaultValue.isDependent(sourceId) ||
-                ifThen.isDependent(sourceId) ||
-                elseIfBlocks.any { it.isDependent(sourceId) } ||
-                elseBlock.value.isDependent(sourceId)
-    }
+    override fun isDependent(sourceId: String): Boolean =
+        defaultValue.isDependent(sourceId) ||
+            ifThen.isDependent(sourceId) ||
+            elseIfBlocks.any { it.isDependent(sourceId) } ||
+            elseBlock.value.isDependent(sourceId)
 
     fun isValid(): Boolean =
         ifThen.ifExpression != BooleanProperty.Empty &&
-                elseIfBlocks.all { it.ifExpression != BooleanProperty.Empty }
+            elseIfBlocks.all { it.ifExpression != BooleanProperty.Empty }
 
     override fun valueType(project: Project): ComposeFlowType = ifThen.thenValue.valueType(project)
 
-    override fun valueExpression(project: Project): String {
-        return "[Conditional]"
-    }
+    override fun valueExpression(project: Project): String = "[Conditional]"
 
-    override fun displayText(project: Project): String {
-        return "[Conditional]"
-    }
+    override fun displayText(project: Project): String = "[Conditional]"
 
     override fun getAssignableProperties(includeSelf: Boolean): List<AssignableProperty> {
         val fromTransformers = propertyTransformers.flatMap { it.getAssignableProperties() }
-        val fromConditional = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue) +
+        val fromConditional =
+            listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue) +
                 elseIfBlocks.flatMap { listOf(it.ifExpression, it.thenValue) } +
                 listOf(elseBlock.value)
-        return fromTransformers + fromConditional + fromConditional.flatMap {
-            it.getAssignableProperties()
-        } + if (includeSelf) listOf(
-            this
-        ) else emptyList()
+        return fromTransformers + fromConditional +
+            fromConditional.flatMap {
+                it.getAssignableProperties()
+            } +
+            if (includeSelf) {
+                listOf(
+                    this,
+                )
+            } else {
+                emptyList()
+            }
     }
 
     override fun addReadProperty(
@@ -2034,7 +2027,7 @@ data class ConditionalProperty(
                 context,
                 ComposeFlowType.BooleanType(),
                 dryRun = dryRun,
-            )
+            ),
         )
         builder.addStatement(") {")
         builder.add(ifThen.thenValue.transformedCodeBlock(project, context, dryRun = dryRun))
@@ -2045,8 +2038,8 @@ data class ConditionalProperty(
                     project,
                     context,
                     ComposeFlowType.BooleanType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             builder.addStatement(") {")
             builder.add(
@@ -2054,8 +2047,8 @@ data class ConditionalProperty(
                     project,
                     context,
                     writeType,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
         }
         builder.addStatement("} else {")
@@ -2064,8 +2057,8 @@ data class ConditionalProperty(
                 project,
                 context,
                 writeType,
-                dryRun = dryRun
-            )
+                dryRun = dryRun,
+            ),
         )
         builder.addStatement("}")
         return builder.build()
@@ -2078,7 +2071,8 @@ data class ConditionalProperty(
         val metIfTrue: Boolean = true,
         val thenValue: AssignableProperty,
     ) {
-        fun isDependent(sourceId: String): Boolean = ifExpression.isDependent(sourceId) ||
+        fun isDependent(sourceId: String): Boolean =
+            ifExpression.isDependent(sourceId) ||
                 thenValue.isDependent(sourceId)
     }
 
@@ -2111,14 +2105,15 @@ data class ConditionalProperty(
             modifier = modifier,
             destinationStateId = destinationStateId,
             onInitializeProperty = onInitializeProperty,
-            leadingIcon = valueType(project).let {
-                {
-                    ComposeFlowIcon(
-                        it.leadingIcon(),
-                        contentDescription = null,
-                    )
-                }
-            },
+            leadingIcon =
+                valueType(project).let {
+                    {
+                        ComposeFlowIcon(
+                            it.leadingIcon(),
+                            contentDescription = null,
+                        )
+                    }
+                },
             validateInput = validateInput ?: { ValidateResult.Success },
             editable = editable,
             functionScopeProperties = functionScopeProperties,
@@ -2127,8 +2122,8 @@ data class ConditionalProperty(
 }
 
 @Composable
-fun ComposeFlowType.leadingIcon(): ImageVector {
-    return when (this) {
+fun ComposeFlowType.leadingIcon(): ImageVector =
+    when (this) {
         is ComposeFlowType.BooleanType -> Icons.Outlined.ToggleOff
         is ComposeFlowType.Color -> Icons.Outlined.ColorLens
         is ComposeFlowType.CustomDataType -> ComposeFlowIcons.Dbms
@@ -2142,24 +2137,28 @@ fun ComposeFlowType.leadingIcon(): ImageVector {
         is ComposeFlowType.DocumentIdType -> ComposeFlowIcons.Firebase
         is ComposeFlowType.UnknownType -> Icons.Outlined.QuestionMark
     }
-}
 
-fun AssignableProperty?.asBooleanValue(): Boolean = when (this) {
-    is BooleanProperty.BooleanIntrinsicValue -> this.value
-    is ValueFromState -> true
-    BooleanProperty.Empty -> false
-    else -> true
-}
+fun AssignableProperty?.asBooleanValue(): Boolean =
+    when (this) {
+        is BooleanProperty.BooleanIntrinsicValue -> this.value
+        is ValueFromState -> true
+        BooleanProperty.Empty -> false
+        else -> true
+    }
 
 @Composable
-fun AssignableProperty.getErrorMessage(project: Project, acceptableType: ComposeFlowType): String? {
+fun AssignableProperty.getErrorMessage(
+    project: Project,
+    acceptableType: ComposeFlowType,
+): String? {
     val transformedValueType = transformedValueType(project)
-    val errorText = if (transformedValueType is ComposeFlowType.UnknownType) {
-        stringResource(Res.string.invalid_reference)
-    } else if (!acceptableType.isAbleToAssign(transformedValueType)) {
-        stringResource(Res.string.invalid_type)
-    } else {
-        null
-    }
+    val errorText =
+        if (transformedValueType is ComposeFlowType.UnknownType) {
+            stringResource(Res.string.invalid_reference)
+        } else if (!acceptableType.isAbleToAssign(transformedValueType)) {
+            stringResource(Res.string.invalid_type)
+        } else {
+            null
+        }
     return errorText
 }

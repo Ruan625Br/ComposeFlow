@@ -34,7 +34,7 @@ fun DropdownMenuTextField(
                 expanded = !expanded
             }
         },
-        modifier = modifier
+        modifier = modifier,
     ) {
         OutlinedTextField(
             readOnly = true,
@@ -46,13 +46,14 @@ fun DropdownMenuTextField(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
             colors = OutlinedTextFieldDefaults.colors(),
-            modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+            modifier =
+                Modifier
+                    .menuAnchor(MenuAnchorType.PrimaryNotEditable),
         )
 
         ExposedDropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false }
+            onDismissRequest = { expanded = false },
         ) {
             items.forEach { item ->
                 DropdownMenuItem(
@@ -60,7 +61,7 @@ fun DropdownMenuTextField(
                     onClick = {
                         expanded = false
                         onValueChange(item)
-                    }
+                    },
                 )
             }
         }

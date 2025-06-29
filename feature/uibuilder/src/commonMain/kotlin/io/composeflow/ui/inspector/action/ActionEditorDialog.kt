@@ -92,13 +92,14 @@ import org.jetbrains.compose.resources.stringResource
 private val dialogWidth = 1540.dp
 private val dialogHeight = 1000.dp
 private val basicSpaceSize = 16.dp
-private val dashPathEffect = PathEffect.dashPathEffect(
-    floatArrayOf(
-        10f,
-        10f,
-    ),
-    0f,
-)
+private val dashPathEffect =
+    PathEffect.dashPathEffect(
+        floatArrayOf(
+            10f,
+            10f,
+        ),
+        0f,
+    )
 
 @Composable
 fun ActionEditorDialog(
@@ -132,10 +133,11 @@ private fun ActionEditorContent(
     onCloseDialog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val viewModel = viewModel(
-        modelClass = ActionEditorViewModel::class,
-        keys = listOf(composeNode.id, composeNode.actionsMap),
-    ) { ActionEditorViewModel() }
+    val viewModel =
+        viewModel(
+            modelClass = ActionEditorViewModel::class,
+            keys = listOf(composeNode.id, composeNode.actionsMap),
+        ) { ActionEditorViewModel() }
 
     LaunchedEffect(composeNode.actionsMap) {
         viewModel.initializeMap(
@@ -148,17 +150,19 @@ private fun ActionEditorContent(
     val actionsMap = viewModel.actionsMap
     val focusedActionNode =
         viewModel.findFocusableActionNodeOrNull(viewModel.focusedActionNodeId.value)
-    val isConfirmEnabled = viewModel.actionsMap.entries.all { entry ->
-        entry.value.all { it.isValid() }
-    }
+    val isConfirmEnabled =
+        viewModel.actionsMap.entries.all { entry ->
+            entry.value.all { it.isValid() }
+        }
     Column(
         modifier = modifier,
     ) {
         Header(
             actionsMap = actionsMap,
-            actionTypes = actionsMap.entries
-                .sortedBy { it.key.priority }
-                .map { it.key },
+            actionTypes =
+                actionsMap.entries
+                    .sortedBy { it.key.priority }
+                    .map { it.key },
             composeNode = composeNode,
             currentActionType = currentActionType,
             isConfirmEnabled = isConfirmEnabled,
@@ -170,8 +174,9 @@ private fun ActionEditorContent(
             project = project,
             composeNode = composeNode,
             composeNodeCallbacks = composeNodeCallbacks,
-            actionNodes = actionsMap.entries.firstOrNull { it.key == currentActionType }?.value
-                ?: emptyList(),
+            actionNodes =
+                actionsMap.entries.firstOrNull { it.key == currentActionType }?.value
+                    ?: emptyList(),
             currentActionType = currentActionType,
             focusedActionNode = focusedActionNode,
             onActionNodesUpdated = viewModel::onActionNodesUpdated,
@@ -194,10 +199,11 @@ private fun Header(
     onDismissDialog: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(80.dp)
-            .background(MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(80.dp)
+                .background(MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Row(modifier = Modifier.align(Alignment.Center)) {
             actionTypes.forEach { actionType ->
@@ -216,8 +222,10 @@ private fun Header(
 
         Row(
             horizontalArrangement = Arrangement.End,
-            modifier = Modifier.padding(end = 16.dp)
-                .align(Alignment.CenterEnd),
+            modifier =
+                Modifier
+                    .padding(end = 16.dp)
+                    .align(Alignment.CenterEnd),
         ) {
             TextButton(
                 onClick = {
@@ -315,9 +323,11 @@ private fun Body(
             focusedActionNode = focusedActionNode,
             onUpdateActionWithActionNodeId = onUpdateActionWithActionNodeId,
             onRemoveActionNodeWithActionId = onRemoveActionNodeWithActionId,
-            modifier = Modifier.width(340.dp)
-                .fillMaxHeight()
-                .background(color = MaterialTheme.colorScheme.surfaceContainer),
+            modifier =
+                Modifier
+                    .width(340.dp)
+                    .fillMaxHeight()
+                    .background(color = MaterialTheme.colorScheme.surfaceContainer),
         )
     }
 }
@@ -381,10 +391,11 @@ private fun ActionNodeContainer(
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.onGloballyPositioned {
-                    bottomOfContainerOffset =
-                        it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                },
+                modifier =
+                    Modifier.onGloballyPositioned {
+                        bottomOfContainerOffset =
+                            it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                    },
             ) {
                 if (index == 0) {
                     AddNewActionNodeButton(
@@ -406,20 +417,22 @@ private fun ActionNodeContainer(
                     currentActionType = currentActionType,
                     focusedActionNode = focusedActionNode,
                     onNodeUpdated = { newNode ->
-                        val newActionNodes = actionNodes.toMutableList().apply {
-                            set(index, newNode)
-                        }
+                        val newActionNodes =
+                            actionNodes.toMutableList().apply {
+                                set(index, newNode)
+                            }
                         onActionNodesUpdated(currentActionType, newActionNodes)
                     },
                     onFocusableActionNodeClicked = onFocusableActionNodeClicked,
                     onRemoveActionNodeWithActionId = onRemoveActionNodeWithActionId,
                     onUpdateActionWithActionNodeId = onUpdateActionWithActionNodeId,
-                    modifier = Modifier.onGloballyPositioned {
-                        actionNodeTopOffset =
-                            it.boundsInParent().topCenter + Offset(x = 4.dp.toPx(), 0f)
-                        actionNodeBottomOffset =
-                            it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                    },
+                    modifier =
+                        Modifier.onGloballyPositioned {
+                            actionNodeTopOffset =
+                                it.boundsInParent().topCenter + Offset(x = 4.dp.toPx(), 0f)
+                            actionNodeBottomOffset =
+                                it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                        },
                 )
                 BasicSpace()
                 AddNewActionNodeButton(
@@ -431,12 +444,13 @@ private fun ActionNodeContainer(
                             },
                         )
                     },
-                    modifier = Modifier.onGloballyPositioned {
-                        secondAddButtonTopOffset =
-                            it.boundsInParent().topCenter + Offset(x = 4.dp.toPx(), 0f)
-                        secondAddButtonBottomOffset =
-                            it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                    },
+                    modifier =
+                        Modifier.onGloballyPositioned {
+                            secondAddButtonTopOffset =
+                                it.boundsInParent().topCenter + Offset(x = 4.dp.toPx(), 0f)
+                            secondAddButtonBottomOffset =
+                                it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                        },
                 )
             }
         }
@@ -529,34 +543,34 @@ private fun SimpleActionNode(
     modifier: Modifier = Modifier,
 ) {
     val isFocused = focusedActionNode?.id == actionNode.id
-    val borderColor = if (actionNode.getFocusedAction() == null) {
-        MaterialTheme.colorScheme.errorContainer
-    } else {
-        if (isFocused) {
-            MaterialTheme.colorScheme.primary
+    val borderColor =
+        if (actionNode.getFocusedAction() == null) {
+            MaterialTheme.colorScheme.errorContainer
         } else {
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            if (isFocused) {
+                MaterialTheme.colorScheme.primary
+            } else {
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)
+            }
         }
-    }
     var actionNodeMenuOpened by remember { mutableStateOf(false) }
     var selectActionDialogOpen by remember { mutableStateOf(false) }
     Box(
         modifier
             .alpha(if (isFocused) 1f else 0.5f)
             .background(
-                color = if (actionNode.getFocusedAction() != null) {
-                    MaterialTheme.colorScheme.surfaceContainerHighest
-                } else {
-                    MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
-                },
+                color =
+                    if (actionNode.getFocusedAction() != null) {
+                        MaterialTheme.colorScheme.surfaceContainerHighest
+                    } else {
+                        MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.4f)
+                    },
                 shape = RoundedCornerShape(8.dp),
-            )
-            .border(
+            ).border(
                 width = 1.dp,
                 color = borderColor,
                 shape = RoundedCornerShape(8.dp),
-            )
-            .height(72.dp)
+            ).height(72.dp)
             .width(180.dp)
             .hoverIconClickable()
             .clickable {
@@ -568,8 +582,10 @@ private fun SimpleActionNode(
                 onFocusableActionNodeClicked(actionNode)
                 actionNodeMenuOpened = true
             },
-            modifier = Modifier.align(Alignment.TopEnd)
-                .padding(top = 4.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 4.dp),
         ) {
             ComposeFlowIcon(
                 imageVector = Icons.Outlined.MoreVert,
@@ -608,12 +624,13 @@ private fun SimpleActionNode(
             },
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
             ) {
                 Column(
                     modifier =
-                    Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
+                        Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                 ) {
                     DropdownMenuItem(text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -704,14 +721,15 @@ private fun ConditionalActionNode(
     modifier: Modifier = Modifier,
 ) {
     var overlayVisible by remember { mutableStateOf(false) }
-    val overlayModifier = if (overlayVisible) {
-        Modifier.background(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-            shape = RoundedCornerShape(8.dp),
-        )
-    } else {
-        Modifier
-    }
+    val overlayModifier =
+        if (overlayVisible) {
+            Modifier.background(
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(8.dp),
+            )
+        } else {
+            Modifier
+        }
     var menuOpened by remember { mutableStateOf(false) }
     if (menuOpened) {
         CursorDropdownMenu(
@@ -721,12 +739,13 @@ private fun ConditionalActionNode(
             },
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
             ) {
                 Column(
                     modifier =
-                    Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
+                        Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                 ) {
                     DropdownMenuItem(text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -751,14 +770,13 @@ private fun ConditionalActionNode(
         }
     }
     Box(
-        modifier = Modifier
-            .onPointerEvent(PointerEventType.Enter) {
-                overlayVisible = true
-            }
-            .onPointerEvent(PointerEventType.Exit) {
-                overlayVisible = false
-            }
-            .then(overlayModifier),
+        modifier =
+            Modifier
+                .onPointerEvent(PointerEventType.Enter) {
+                    overlayVisible = true
+                }.onPointerEvent(PointerEventType.Exit) {
+                    overlayVisible = false
+                }.then(overlayModifier),
     ) {
         if (overlayVisible) {
             ComposeFlowIconButton(
@@ -814,25 +832,24 @@ private fun ConditionalActionNode(
             with(density) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = modifier.onGloballyPositioned {
-                        windowOffset = it.boundsInWindow().topLeft
-                        bottomOffset = it.boundsInParent().bottomCenter
-                    },
+                    modifier =
+                        modifier.onGloballyPositioned {
+                            windowOffset = it.boundsInWindow().topLeft
+                            bottomOffset = it.boundsInParent().bottomCenter
+                        },
                 ) {
                     Row(
-                        modifier = Modifier
-                            .onGloballyPositioned {
-                                ifBlockBottomOffset =
-                                    it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                            }
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.outline,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(bottom = 4.dp),
-
-                        ) {
+                        modifier =
+                            Modifier
+                                .onGloballyPositioned {
+                                    ifBlockBottomOffset =
+                                        it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                }.border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.outline,
+                                    shape = RoundedCornerShape(8.dp),
+                                ).padding(bottom = 4.dp),
+                    ) {
                         Text(
                             text = "IF",
                             color = MaterialTheme.colorScheme.secondary,
@@ -848,32 +865,37 @@ private fun ConditionalActionNode(
                             onInitializeProperty = {
                                 onIfConditionChanged(BooleanProperty.Empty)
                             },
-                            modifier = Modifier.width(240.dp)
-                                .padding(top = 12.dp),
+                            modifier =
+                                Modifier
+                                    .width(240.dp)
+                                    .padding(top = 12.dp),
                         )
                     }
                     BasicSpace()
                     Row(
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .widthIn(min = 300.dp),
+                        modifier =
+                            Modifier
+                                .wrapContentWidth()
+                                .widthIn(min = 300.dp),
                     ) {
                         BasicSpace()
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.onGloballyPositioned {
-                                globalTrueBranchEndNodeBottomOffset =
-                                    it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                            },
+                            modifier =
+                                Modifier.onGloballyPositioned {
+                                    globalTrueBranchEndNodeBottomOffset =
+                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                },
                         ) {
                             BasicSpace()
                             TrueLabel(
-                                modifier = Modifier.onGloballyPositioned {
-                                    globalTrueLabelTopOffset =
-                                        it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
-                                    globalTrueLabelBottomOffset =
-                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                                },
+                                modifier =
+                                    Modifier.onGloballyPositioned {
+                                        globalTrueLabelTopOffset =
+                                            it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
+                                        globalTrueLabelBottomOffset =
+                                            it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                    },
                             )
                             BasicSpace()
                             if (conditionalNode.trueNodes.isEmpty()) {
@@ -881,13 +903,15 @@ private fun ConditionalActionNode(
                                     onAddActionNode = {
                                         onTrueNodesUpdated(listOf(it).toMutableList())
                                     },
-                                    modifier = Modifier.onGloballyPositioned {
-                                        globalTrueBranchStartNodeTopOffset =
-                                            it.boundsInRoot().topCenter + Offset(
-                                                x = 4.dp.toPx(),
-                                                0f,
-                                            )
-                                    },
+                                    modifier =
+                                        Modifier.onGloballyPositioned {
+                                            globalTrueBranchStartNodeTopOffset =
+                                                it.boundsInRoot().topCenter +
+                                                Offset(
+                                                    x = 4.dp.toPx(),
+                                                    0f,
+                                                )
+                                        },
                                 )
                             } else {
                                 conditionalNode.trueNodes.forEachIndexed { index, actionNode ->
@@ -905,13 +929,15 @@ private fun ConditionalActionNode(
                                         actionNodes = conditionalNode.trueNodes,
                                         actionNode = actionNode,
                                         focusedActionNode = focusedActionNode,
-                                        modifier = Modifier.onGloballyPositioned {
-                                            globalTrueBranchStartNodeTopOffset =
-                                                it.boundsInRoot().topCenter + Offset(
-                                                    x = 4.dp.toPx(),
-                                                    0f,
-                                                )
-                                        },
+                                        modifier =
+                                            Modifier.onGloballyPositioned {
+                                                globalTrueBranchStartNodeTopOffset =
+                                                    it.boundsInRoot().topCenter +
+                                                    Offset(
+                                                        x = 4.dp.toPx(),
+                                                        0f,
+                                                    )
+                                            },
                                     )
                                 }
                             }
@@ -919,19 +945,21 @@ private fun ConditionalActionNode(
                         Spacer(Modifier.width(160.dp))
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.onGloballyPositioned {
-                                globalFalseBranchEndNodeBottomOffset =
-                                    it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                            },
+                            modifier =
+                                Modifier.onGloballyPositioned {
+                                    globalFalseBranchEndNodeBottomOffset =
+                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                },
                         ) {
                             Spacer(Modifier.size(16.dp))
                             FalseLabel(
-                                modifier = Modifier.onGloballyPositioned {
-                                    globalFalseLabelTopOffset =
-                                        it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
-                                    globalFalseLabelBottomOffset =
-                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                                },
+                                modifier =
+                                    Modifier.onGloballyPositioned {
+                                        globalFalseLabelTopOffset =
+                                            it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
+                                        globalFalseLabelBottomOffset =
+                                            it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                    },
                             )
                             BasicSpace()
                             if (conditionalNode.falseNodes.isEmpty()) {
@@ -939,13 +967,15 @@ private fun ConditionalActionNode(
                                     onAddActionNode = {
                                         onFalseNodesUpdated(listOf(it).toMutableList())
                                     },
-                                    modifier = Modifier.onGloballyPositioned {
-                                        globalFalseBranchStartNodeTopOffset =
-                                            it.boundsInRoot().topCenter + Offset(
-                                                x = 4.dp.toPx(),
-                                                0f,
-                                            )
-                                    },
+                                    modifier =
+                                        Modifier.onGloballyPositioned {
+                                            globalFalseBranchStartNodeTopOffset =
+                                                it.boundsInRoot().topCenter +
+                                                Offset(
+                                                    x = 4.dp.toPx(),
+                                                    0f,
+                                                )
+                                        },
                                 )
                             } else {
                                 conditionalNode.falseNodes.forEachIndexed { index, actionNode ->
@@ -963,13 +993,15 @@ private fun ConditionalActionNode(
                                         actionNodes = conditionalNode.falseNodes,
                                         actionNode = actionNode,
                                         focusedActionNode = focusedActionNode,
-                                        modifier = Modifier.onGloballyPositioned {
-                                            globalFalseBranchStartNodeTopOffset =
-                                                it.boundsInRoot().topCenter + Offset(
-                                                    x = 4.dp.toPx(),
-                                                    0f,
-                                                )
-                                        },
+                                        modifier =
+                                            Modifier.onGloballyPositioned {
+                                                globalFalseBranchStartNodeTopOffset =
+                                                    it.boundsInRoot().topCenter +
+                                                    Offset(
+                                                        x = 4.dp.toPx(),
+                                                        0f,
+                                                    )
+                                            },
                                     )
                                 }
                             }
@@ -1074,14 +1106,15 @@ private fun ForkedActionNode(
     modifier: Modifier = Modifier,
 ) {
     var overlayVisible by remember { mutableStateOf(false) }
-    val overlayModifier = if (overlayVisible) {
-        Modifier.background(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
-            shape = RoundedCornerShape(8.dp),
-        )
-    } else {
-        Modifier
-    }
+    val overlayModifier =
+        if (overlayVisible) {
+            Modifier.background(
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(8.dp),
+            )
+        } else {
+            Modifier
+        }
     var menuOpened by remember { mutableStateOf(false) }
     if (menuOpened) {
         CursorDropdownMenu(
@@ -1091,12 +1124,13 @@ private fun ForkedActionNode(
             },
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
             ) {
                 Column(
                     modifier =
-                    Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
+                        Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                 ) {
                     DropdownMenuItem(text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1121,14 +1155,13 @@ private fun ForkedActionNode(
         }
     }
     Box(
-        modifier = Modifier
-            .onPointerEvent(PointerEventType.Enter) {
-                overlayVisible = true
-            }
-            .onPointerEvent(PointerEventType.Exit) {
-                overlayVisible = false
-            }
-            .then(overlayModifier),
+        modifier =
+            Modifier
+                .onPointerEvent(PointerEventType.Enter) {
+                    overlayVisible = true
+                }.onPointerEvent(PointerEventType.Exit) {
+                    overlayVisible = false
+                }.then(overlayModifier),
     ) {
         if (overlayVisible) {
             ComposeFlowIconButton(
@@ -1184,10 +1217,11 @@ private fun ForkedActionNode(
             with(density) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = modifier.onGloballyPositioned {
-                        windowOffset = it.boundsInWindow().topLeft
-                        bottomOffset = it.boundsInParent().bottomCenter
-                    },
+                    modifier =
+                        modifier.onGloballyPositioned {
+                            windowOffset = it.boundsInWindow().topLeft
+                            bottomOffset = it.boundsInParent().bottomCenter
+                        },
                 ) {
                     SimpleActionNode(
                         project = project,
@@ -1196,33 +1230,37 @@ private fun ForkedActionNode(
                         onFocusableActionNodeClicked = onFocusableActionNodeClicked,
                         onRemoveActionNodeWithActionId = onRemoveActionNodeWithActionId,
                         onUpdateActionWithActionNodeId = onUpdateActionWithActionNodeId,
-                        modifier = Modifier.onGloballyPositioned {
-                            forkedActionBlockBottomOffset =
-                                it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                        }
+                        modifier =
+                            Modifier.onGloballyPositioned {
+                                forkedActionBlockBottomOffset =
+                                    it.boundsInParent().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                            },
                     )
                     BasicSpace()
                     Row(
-                        modifier = Modifier
-                            .wrapContentWidth()
-                            .widthIn(min = 300.dp),
+                        modifier =
+                            Modifier
+                                .wrapContentWidth()
+                                .widthIn(min = 300.dp),
                     ) {
                         BasicSpace()
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.onGloballyPositioned {
-                                globalTrueBranchEndNodeBottomOffset =
-                                    it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                            },
+                            modifier =
+                                Modifier.onGloballyPositioned {
+                                    globalTrueBranchEndNodeBottomOffset =
+                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                },
                         ) {
                             BasicSpace()
                             TrueLabel(
-                                modifier = Modifier.onGloballyPositioned {
-                                    globalTrueLabelTopOffset =
-                                        it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
-                                    globalTrueLabelBottomOffset =
-                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                                },
+                                modifier =
+                                    Modifier.onGloballyPositioned {
+                                        globalTrueLabelTopOffset =
+                                            it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
+                                        globalTrueLabelBottomOffset =
+                                            it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                    },
                             )
                             BasicSpace()
                             if (forkedActionNode.trueNodes.isEmpty()) {
@@ -1230,13 +1268,15 @@ private fun ForkedActionNode(
                                     onAddActionNode = {
                                         onTrueNodesUpdated(listOf(it).toMutableList())
                                     },
-                                    modifier = Modifier.onGloballyPositioned {
-                                        globalTrueBranchStartNodeTopOffset =
-                                            it.boundsInRoot().topCenter + Offset(
-                                                x = 4.dp.toPx(),
-                                                0f,
-                                            )
-                                    },
+                                    modifier =
+                                        Modifier.onGloballyPositioned {
+                                            globalTrueBranchStartNodeTopOffset =
+                                                it.boundsInRoot().topCenter +
+                                                Offset(
+                                                    x = 4.dp.toPx(),
+                                                    0f,
+                                                )
+                                        },
                                 )
                             } else {
                                 forkedActionNode.trueNodes.forEachIndexed { index, actionNode ->
@@ -1254,13 +1294,15 @@ private fun ForkedActionNode(
                                         actionNodes = forkedActionNode.trueNodes,
                                         actionNode = actionNode,
                                         focusedActionNode = focusedActionNode,
-                                        modifier = Modifier.onGloballyPositioned {
-                                            globalTrueBranchStartNodeTopOffset =
-                                                it.boundsInRoot().topCenter + Offset(
-                                                    x = 4.dp.toPx(),
-                                                    0f,
-                                                )
-                                        },
+                                        modifier =
+                                            Modifier.onGloballyPositioned {
+                                                globalTrueBranchStartNodeTopOffset =
+                                                    it.boundsInRoot().topCenter +
+                                                    Offset(
+                                                        x = 4.dp.toPx(),
+                                                        0f,
+                                                    )
+                                            },
                                     )
                                 }
                             }
@@ -1268,19 +1310,21 @@ private fun ForkedActionNode(
                         Spacer(Modifier.width(160.dp))
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
-                            modifier = Modifier.onGloballyPositioned {
-                                globalFalseBranchEndNodeBottomOffset =
-                                    it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                            },
+                            modifier =
+                                Modifier.onGloballyPositioned {
+                                    globalFalseBranchEndNodeBottomOffset =
+                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                },
                         ) {
                             Spacer(Modifier.size(16.dp))
                             FalseLabel(
-                                modifier = Modifier.onGloballyPositioned {
-                                    globalFalseLabelTopOffset =
-                                        it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
-                                    globalFalseLabelBottomOffset =
-                                        it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
-                                },
+                                modifier =
+                                    Modifier.onGloballyPositioned {
+                                        globalFalseLabelTopOffset =
+                                            it.boundsInRoot().topCenter + Offset(x = 4.dp.toPx(), 0f)
+                                        globalFalseLabelBottomOffset =
+                                            it.boundsInRoot().bottomCenter + Offset(x = 4.dp.toPx(), 0f)
+                                    },
                             )
                             BasicSpace()
                             if (forkedActionNode.falseNodes.isEmpty()) {
@@ -1288,13 +1332,15 @@ private fun ForkedActionNode(
                                     onAddActionNode = {
                                         onFalseNodesUpdated(listOf(it).toMutableList())
                                     },
-                                    modifier = Modifier.onGloballyPositioned {
-                                        globalFalseBranchStartNodeTopOffset =
-                                            it.boundsInRoot().topCenter + Offset(
-                                                x = 4.dp.toPx(),
-                                                0f,
-                                            )
-                                    },
+                                    modifier =
+                                        Modifier.onGloballyPositioned {
+                                            globalFalseBranchStartNodeTopOffset =
+                                                it.boundsInRoot().topCenter +
+                                                Offset(
+                                                    x = 4.dp.toPx(),
+                                                    0f,
+                                                )
+                                        },
                                 )
                             } else {
                                 forkedActionNode.falseNodes.forEachIndexed { index, actionNode ->
@@ -1312,13 +1358,15 @@ private fun ForkedActionNode(
                                         actionNodes = forkedActionNode.falseNodes,
                                         actionNode = actionNode,
                                         focusedActionNode = focusedActionNode,
-                                        modifier = Modifier.onGloballyPositioned {
-                                            globalFalseBranchStartNodeTopOffset =
-                                                it.boundsInRoot().topCenter + Offset(
-                                                    x = 4.dp.toPx(),
-                                                    0f,
-                                                )
-                                        },
+                                        modifier =
+                                            Modifier.onGloballyPositioned {
+                                                globalFalseBranchStartNodeTopOffset =
+                                                    it.boundsInRoot().topCenter +
+                                                    Offset(
+                                                        x = 4.dp.toPx(),
+                                                        0f,
+                                                    )
+                                            },
                                     )
                                 }
                             }
@@ -1414,16 +1462,16 @@ private fun TrueLabel(
     label: String = "True",
 ) {
     Column(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(4.dp),
-            )
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.tertiary,
-                shape = RoundedCornerShape(4.dp),
-            ),
+        modifier =
+            modifier
+                .background(
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(4.dp),
+                ).border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    shape = RoundedCornerShape(4.dp),
+                ),
     ) {
         Text(
             text = label,
@@ -1440,16 +1488,16 @@ private fun FalseLabel(
     label: String = "False",
 ) {
     Column(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(4.dp),
-            )
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(4.dp),
-            ),
+        modifier =
+            modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainer.copy(alpha = 0.7f),
+                    shape = RoundedCornerShape(4.dp),
+                ).border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(4.dp),
+                ),
     ) {
         Text(
             text = label,
@@ -1487,12 +1535,13 @@ private fun AddNewActionNodeButton(
             },
         ) {
             Surface(
-                modifier = Modifier
-                    .fillMaxSize(),
+                modifier =
+                    Modifier
+                        .fillMaxSize(),
             ) {
                 Column(
                     modifier =
-                    Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
+                        Modifier.background(color = MaterialTheme.colorScheme.surfaceContainerHigh),
                 ) {
                     DropdownMenuItem(text = {
                         Row(verticalAlignment = Alignment.CenterVertically) {

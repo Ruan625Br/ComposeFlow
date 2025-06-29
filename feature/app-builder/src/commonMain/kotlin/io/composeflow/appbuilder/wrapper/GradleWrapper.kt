@@ -10,50 +10,55 @@ class GradleWrapper(
     private val projectRoot: File,
     private val buildLogger: Logger,
 ) {
-
-    fun assembleDebug() = runTask(
-        task = "assembleDebug",
-        onStatusBarUiStateChanged = { _ -> },
-    )
+    fun assembleDebug() =
+        runTask(
+            task = "assembleDebug",
+            onStatusBarUiStateChanged = { _ -> },
+        )
 
     private fun runTask(
         task: String,
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
     ) {
-        val connection = GradleConnector.newConnector()
-            .forProjectDirectory(projectRoot)
-            .useBuildDistribution()
-            .connect()
+        val connection =
+            GradleConnector
+                .newConnector()
+                .forProjectDirectory(projectRoot)
+                .useBuildDistribution()
+                .connect()
         connection.use {
-            val build = it.newBuild().apply {
-                fun loggerOutputStream(logger: (log: String) -> Unit) = object : OutputStream() {
-                    private val buffer = StringBuilder()
-                    override fun write(b: Int) {
-                        if (b == '\n'.code) {
-                            logger(buffer.toString())
-                            buffer.clear()
-                        } else {
-                            buffer.append(b.toChar())
+            val build =
+                it.newBuild().apply {
+                    fun loggerOutputStream(logger: (log: String) -> Unit) =
+                        object : OutputStream() {
+                            private val buffer = StringBuilder()
+
+                            override fun write(b: Int) {
+                                if (b == '\n'.code) {
+                                    logger(buffer.toString())
+                                    buffer.clear()
+                                } else {
+                                    buffer.append(b.toChar())
+                                }
+                            }
                         }
-                    }
+                    setStandardError(
+                        loggerOutputStream { log ->
+                            buildLogger.e(log)
+                            onStatusBarUiStateChanged(StatusBarUiState.Failure(log))
+                        },
+                    )
+                    setStandardOutput(
+                        loggerOutputStream { log ->
+                            buildLogger.d(log)
+                            if (log.isBuildSuccessful()) {
+                                onStatusBarUiStateChanged(StatusBarUiState.Success(log))
+                            } else {
+                                onStatusBarUiStateChanged(StatusBarUiState.Loading(log))
+                            }
+                        },
+                    )
                 }
-                setStandardError(
-                    loggerOutputStream { log ->
-                        buildLogger.e(log)
-                        onStatusBarUiStateChanged(StatusBarUiState.Failure(log))
-                    },
-                )
-                setStandardOutput(
-                    loggerOutputStream { log ->
-                        buildLogger.d(log)
-                        if (log.isBuildSuccessful()) {
-                            onStatusBarUiStateChanged(StatusBarUiState.Success(log))
-                        } else {
-                            onStatusBarUiStateChanged(StatusBarUiState.Loading(log))
-                        }
-                    },
-                )
-            }
             try {
                 build
                     .forTasks(task)

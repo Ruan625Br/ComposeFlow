@@ -22,13 +22,13 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class ComposeCodeTest {
-
     @Test
     fun toComposeCode_emptyBox() {
-        val root = ComposeNode(
-            trait = mutableStateOf(BoxTrait()),
-            label = mutableStateOf("Root"),
-        )
+        val root =
+            ComposeNode(
+                trait = mutableStateOf(BoxTrait()),
+                label = mutableStateOf("Root"),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -43,14 +43,16 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_BoxWithParameters() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                BoxTrait(
-                    contentAlignment = AlignmentWrapper.TopCenter,
-                ),
-            ),
-        )
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        BoxTrait(
+                            contentAlignment = AlignmentWrapper.TopCenter,
+                        ),
+                    ),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -67,15 +69,17 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_BoxWithModifiers() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                BoxTrait(
-                    contentAlignment = AlignmentWrapper.TopCenter,
-                ),
-            ),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        )
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        BoxTrait(
+                            contentAlignment = AlignmentWrapper.TopCenter,
+                        ),
+                    ),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -93,10 +97,11 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_emptyColumn() {
-        val root = ComposeNode(
-            trait = mutableStateOf(ColumnTrait()),
-            label = mutableStateOf("Root"),
-        )
+        val root =
+            ComposeNode(
+                trait = mutableStateOf(ColumnTrait()),
+                label = mutableStateOf("Root"),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -111,15 +116,17 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_ColumnWithParameters() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                ColumnTrait(
-                    verticalArrangementWrapper = ArrangementVerticalWrapper.Top,
-                    horizontalAlignmentWrapper = AlignmentHorizontalWrapper.Start,
-                ),
-            ),
-        )
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        ColumnTrait(
+                            verticalArrangementWrapper = ArrangementVerticalWrapper.Top,
+                            horizontalAlignmentWrapper = AlignmentHorizontalWrapper.Start,
+                        ),
+                    ),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -137,16 +144,18 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_ColumnWithModifiers() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                ColumnTrait(
-                    verticalArrangementWrapper = ArrangementVerticalWrapper.Top,
-                    horizontalAlignmentWrapper = AlignmentHorizontalWrapper.Start,
-                ),
-            ),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        )
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        ColumnTrait(
+                            verticalArrangementWrapper = ArrangementVerticalWrapper.Top,
+                            horizontalAlignmentWrapper = AlignmentHorizontalWrapper.Start,
+                        ),
+                    ),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -165,22 +174,24 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_Column_Text() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                ColumnTrait(
-                    verticalArrangementWrapper = ArrangementVerticalWrapper.Top,
-                    horizontalAlignmentWrapper = AlignmentHorizontalWrapper.Start,
-                ),
-            ),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        ).apply {
-            addChild(
-                ComposeNode(
-                    trait = mutableStateOf(TextTrait(text = StringProperty.StringIntrinsicValue("test"))),
-                ),
-            )
-        }
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        ColumnTrait(
+                            verticalArrangementWrapper = ArrangementVerticalWrapper.Top,
+                            horizontalAlignmentWrapper = AlignmentHorizontalWrapper.Start,
+                        ),
+                    ),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            ).apply {
+                addChild(
+                    ComposeNode(
+                        trait = mutableStateOf(TextTrait(text = StringProperty.StringIntrinsicValue("test"))),
+                    ),
+                )
+            }
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -201,15 +212,17 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_RowWithParameters() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                RowTrait(
-                    horizontalArrangement = ArrangementHorizontalWrapper.Start,
-                    verticalAlignment = AlignmentVerticalWrapper.Top,
-                ),
-            ),
-        )
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        RowTrait(
+                            horizontalArrangement = ArrangementHorizontalWrapper.Start,
+                            verticalAlignment = AlignmentVerticalWrapper.Top,
+                        ),
+                    ),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -227,16 +240,18 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_RowWithModifiers() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                RowTrait(
-                    horizontalArrangement = ArrangementHorizontalWrapper.Start,
-                    verticalAlignment = AlignmentVerticalWrapper.Top,
-                ),
-            ),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        )
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        RowTrait(
+                            horizontalArrangement = ArrangementHorizontalWrapper.Start,
+                            verticalAlignment = AlignmentVerticalWrapper.Top,
+                        ),
+                    ),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            )
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -255,22 +270,24 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_Row_Text() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                RowTrait(
-                    horizontalArrangement = ArrangementHorizontalWrapper.Start,
-                    verticalAlignment = AlignmentVerticalWrapper.Top,
-                ),
-            ),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        ).apply {
-            addChild(
-                ComposeNode(
-                    trait = mutableStateOf(TextTrait(text = StringProperty.StringIntrinsicValue("test"))),
-                ),
-            )
-        }
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        RowTrait(
+                            horizontalArrangement = ArrangementHorizontalWrapper.Start,
+                            verticalAlignment = AlignmentVerticalWrapper.Top,
+                        ),
+                    ),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            ).apply {
+                addChild(
+                    ComposeNode(
+                        trait = mutableStateOf(TextTrait(text = StringProperty.StringIntrinsicValue("test"))),
+                    ),
+                )
+            }
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
         val code = root.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -291,28 +308,32 @@ class ComposeCodeTest {
 
     @Test
     fun toComposeCode_LazyColumn_Text() {
-        val root = ComposeNode(
-            label = mutableStateOf("Root"),
-            trait = mutableStateOf(
-                LazyColumnTrait(
-                    verticalArrangement = ArrangementVerticalWrapper.Bottom,
-                    horizontalAlignment = AlignmentHorizontalWrapper.CenterHorizontally,
-                ),
-            ),
-            modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
-        ).apply {
-            addChild(
-                ComposeNode(
-                    trait = mutableStateOf(TextTrait(text = StringProperty.StringIntrinsicValue("test"))),
-                ),
-            )
-        }
+        val root =
+            ComposeNode(
+                label = mutableStateOf("Root"),
+                trait =
+                    mutableStateOf(
+                        LazyColumnTrait(
+                            verticalArrangement = ArrangementVerticalWrapper.Bottom,
+                            horizontalAlignment = AlignmentHorizontalWrapper.CenterHorizontally,
+                        ),
+                    ),
+                modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.FillMaxSize()),
+            ).apply {
+                addChild(
+                    ComposeNode(
+                        trait = mutableStateOf(TextTrait(text = StringProperty.StringIntrinsicValue("test"))),
+                    ),
+                )
+            }
         root.boundsInWindow.value = Rect(left = 0f, top = 0f, right = 200f, bottom = 200f)
 
-        val code = root.generateCode(
-            Project(),
-            context = GenerationContext(), dryRun = false
-        )
+        val code =
+            root.generateCode(
+                Project(),
+                context = GenerationContext(),
+                dryRun = false,
+            )
 
         // Note that the number of items is defined in the [PaletteNode#numOfItemsInLazyList]
         assertEquals(

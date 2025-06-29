@@ -5,4 +5,3 @@ plugins {
 kotlin {
     jvm()
 }
-

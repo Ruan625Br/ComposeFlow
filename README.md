@@ -64,7 +64,14 @@ conveyor make copied-site
 
 ## How to apply spotless
 
-`./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply`
+```sh
+# Apply spotless to all modules in main project
+./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
+
+# Apply spotless to build-logic and app-template projects
+./gradlew --project-dir build-logic --init-script ../gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
+./gradlew --project-dir feature/app-builder/app-template --init-script ../../../gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
+```
 
 ## How to generate a system prompt for Gemini
 

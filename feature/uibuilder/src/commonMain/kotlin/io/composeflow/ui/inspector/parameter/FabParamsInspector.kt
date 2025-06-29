@@ -41,8 +41,9 @@ fun FabParamsInspector(
                 composeNodeCallbacks.onTraitUpdated(node, fabTrait.copy(imageVectorHolder = it))
             },
             currentIcon = fabTrait.imageVectorHolder.imageVector,
-            modifier = Modifier
-                .hoverOverlay(),
+            modifier =
+                Modifier
+                    .hoverOverlay(),
         )
 
         AssignableColorPropertyEditor(
@@ -50,19 +51,21 @@ fun FabParamsInspector(
             node = node,
             label = "Container color",
             acceptableType = ComposeFlowType.Color(),
-            initialProperty = fabTrait.containerColorWrapper
-                ?: ColorProperty.ColorIntrinsicValue(
-                    ColorWrapper(
-                        themeColor = null,
-                        color = FloatingActionButtonDefaults.containerColor,
+            initialProperty =
+                fabTrait.containerColorWrapper
+                    ?: ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(
+                            themeColor = null,
+                            color = FloatingActionButtonDefaults.containerColor,
+                        ),
                     ),
-                ),
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    fabTrait.copy(containerColorWrapper = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        fabTrait.copy(containerColorWrapper = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -72,12 +75,13 @@ fun FabParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    fabTrait.copy(containerColorWrapper = null)
+                    fabTrait.copy(containerColorWrapper = null),
                 )
             },
-            modifier = Modifier
-                .hoverOverlay()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .hoverOverlay()
+                    .fillMaxWidth(),
         )
 
         AssignableColorPropertyEditor(
@@ -85,19 +89,21 @@ fun FabParamsInspector(
             node = node,
             label = "Content color",
             acceptableType = ComposeFlowType.Color(),
-            initialProperty = fabTrait.contentColorWrapper
-                ?: ColorProperty.ColorIntrinsicValue(
-                    ColorWrapper(
-                        themeColor = null,
-                        color = contentColorFor(FloatingActionButtonDefaults.containerColor),
+            initialProperty =
+                fabTrait.contentColorWrapper
+                    ?: ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(
+                            themeColor = null,
+                            color = contentColorFor(FloatingActionButtonDefaults.containerColor),
+                        ),
                     ),
-                ),
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    fabTrait.copy(contentColorWrapper = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        fabTrait.copy(contentColorWrapper = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -107,9 +113,10 @@ fun FabParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(node, fabTrait.copy(contentColorWrapper = null))
             },
-            modifier = Modifier
-                .hoverOverlay()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .hoverOverlay()
+                    .fillMaxWidth(),
         )
 
         Row {
@@ -126,9 +133,10 @@ fun FabParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
             BasicDropdownPropertyEditor(
                 project = project,
@@ -143,9 +151,10 @@ fun FabParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
         }
 
@@ -162,7 +171,7 @@ fun FabParamsInspector(
                     ),
                 )
             },
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         )
     }
 }

@@ -23,19 +23,20 @@ fun GridCellsInspector(
     dropdownLabel: String,
     onGridCellsUpdated: (LazyGridCells) -> Unit,
 ) {
-    val params = when (node.trait.value) {
-        is LazyVerticalGridTrait -> {
-            node.trait.value as LazyVerticalGridTrait
-        }
+    val params =
+        when (node.trait.value) {
+            is LazyVerticalGridTrait -> {
+                node.trait.value as LazyVerticalGridTrait
+            }
 
-        is LazyHorizontalGridTrait -> {
-            node.trait.value as LazyHorizontalGridTrait
-        }
+            is LazyHorizontalGridTrait -> {
+                node.trait.value as LazyHorizontalGridTrait
+            }
 
-        else -> {
-            null
+            else -> {
+                null
+            }
         }
-    }
     if (params == null) return
     Row {
         BasicDropdownPropertyEditor(
@@ -46,13 +47,16 @@ fun GridCellsInspector(
             },
             label = dropdownLabel,
             selectedItem = params.lazyGridCells,
-            modifier = Modifier.weight(1f).hoverOverlay()
+            modifier = Modifier.weight(1f).hoverOverlay(),
         )
         Column(modifier = Modifier.weight(1f).hoverOverlay()) {
             when (val gridCells = params.lazyGridCells) {
                 is LazyGridCells.Adaptive -> {
                     BasicEditableTextProperty(
-                        initialValue = gridCells.minSize.value.toInt().toString(),
+                        initialValue =
+                            gridCells.minSize.value
+                                .toInt()
+                                .toString(),
                         onValidValueChanged = {
                             onGridCellsUpdated(LazyGridCells.Adaptive(it.toInt().dp))
                         },
@@ -76,7 +80,10 @@ fun GridCellsInspector(
 
                 is LazyGridCells.FixedSize -> {
                     BasicEditableTextProperty(
-                        initialValue = gridCells.size.value.toInt().toString(),
+                        initialValue =
+                            gridCells.size.value
+                                .toInt()
+                                .toString(),
                         onValidValueChanged = {
                             onGridCellsUpdated(LazyGridCells.FixedSize(it.toInt().dp))
                         },

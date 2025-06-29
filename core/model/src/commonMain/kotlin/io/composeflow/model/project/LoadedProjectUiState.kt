@@ -11,17 +11,20 @@ import kotlinx.coroutines.flow.stateIn
 
 sealed interface LoadedProjectUiState {
     data object Loading : LoadedProjectUiState
+
     data object NotFound : LoadedProjectUiState
-    data class Success(val project: Project) : LoadedProjectUiState
+
+    data class Success(
+        val project: Project,
+    ) : LoadedProjectUiState
+
     data class Error(
         val yamlFileName: String,
         val throwable: Throwable,
     ) : LoadedProjectUiState
 }
 
-fun Result<Project?, Throwable>.asLoadedProjectUiState(
-    projectId: String,
-): LoadedProjectUiState =
+fun Result<Project?, Throwable>.asLoadedProjectUiState(projectId: String): LoadedProjectUiState =
     mapBoth(
         success = {
             it?.let { project ->

@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 object ArrangementVerticalWrapperSerializer : FallbackEnumSerializer<ArrangementVerticalWrapper>(ArrangementVerticalWrapper::class)
 
 @Serializable(ArrangementVerticalWrapperSerializer::class)
-enum class ArrangementVerticalWrapper(val arrangement: Arrangement.Vertical) {
+enum class ArrangementVerticalWrapper(
+    val arrangement: Arrangement.Vertical,
+) {
     Top(Arrangement.Top),
     Center(Arrangement.Center),
     Bottom(Arrangement.Bottom),
@@ -17,7 +19,6 @@ enum class ArrangementVerticalWrapper(val arrangement: Arrangement.Vertical) {
     ;
 
     companion object {
-        fun fromArrangement(arrangement: Arrangement.Vertical?) =
-            entries.firstOrNull { it.arrangement == arrangement } ?: Top
+        fun fromArrangement(arrangement: Arrangement.Vertical?) = entries.firstOrNull { it.arrangement == arrangement } ?: Top
     }
 }

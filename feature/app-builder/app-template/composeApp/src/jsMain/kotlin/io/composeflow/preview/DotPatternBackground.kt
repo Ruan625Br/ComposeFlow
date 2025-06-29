@@ -36,6 +36,11 @@ fun DotPatternBackground(
     }
 }
 
-private fun DrawScope.drawDotPattern(x: Float, y: Float, radius: Float, color: Color) {
+private fun DrawScope.drawDotPattern(
+    x: Float,
+    y: Float,
+    radius: Float,
+    color: Color,
+) {
     drawCircle(color, radius, center = Offset(x + radius, y + radius))
 }

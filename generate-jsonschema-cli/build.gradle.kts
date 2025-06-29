@@ -18,4 +18,3 @@ tasks.withType<AbstractArchiveTask>().configureEach {
 application {
     mainClass.set("io.composeflow.MainKt")
 }
-

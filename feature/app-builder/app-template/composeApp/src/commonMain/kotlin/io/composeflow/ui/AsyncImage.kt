@@ -37,17 +37,19 @@ fun AsyncImage(
                     alignment = alignment,
                     contentScale = contentScale,
                     alpha = alpha,
-                    modifier = modifier
+                    modifier = modifier,
                 )
             }
 
             is ImageAction.Loading -> {
                 Box(
-                    modifier = modifier.shimmer()
-                        .background(
-                            color = MaterialTheme.colorScheme.outlineVariant,
-                            shape = RoundedCornerShape(8.dp)
-                        )
+                    modifier =
+                        modifier
+                            .shimmer()
+                            .background(
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(8.dp),
+                            ),
                 ) {}
             }
 

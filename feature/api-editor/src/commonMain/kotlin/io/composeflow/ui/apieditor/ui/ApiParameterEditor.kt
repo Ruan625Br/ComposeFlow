@@ -81,13 +81,16 @@ fun ApiParameterEditor(
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
     val textFieldEnabled =
         (initialProperty is ApiProperty.IntrinsicValue || initialProperty == null)
-    val errorText = if (initialProperty is ApiProperty.StringParameter) {
-        if (initialProperty !in parameters) {
-            stringResource(Res.string.invalid_api_parameter_reference)
-        } else null
-    } else {
-        null
-    }
+    val errorText =
+        if (initialProperty is ApiProperty.StringParameter) {
+            if (initialProperty !in parameters) {
+                stringResource(Res.string.invalid_api_parameter_reference)
+            } else {
+                null
+            }
+        } else {
+            null
+        }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
@@ -97,11 +100,12 @@ fun ApiParameterEditor(
             onValidValueChanged = {
                 onApiPropertyChanged(ApiProperty.IntrinsicValue(it))
             },
-            initialValue = when (initialProperty) {
-                is ApiProperty.IntrinsicValue -> initialProperty.value
-                is ApiProperty.StringParameter -> "[param: ${initialProperty.name}]"
-                null -> "[Unknown]"
-            },
+            initialValue =
+                when (initialProperty) {
+                    is ApiProperty.IntrinsicValue -> initialProperty.value
+                    is ApiProperty.StringParameter -> "[param: ${initialProperty.name}]"
+                    null -> "[Unknown]"
+                },
             label = label,
             placeholder = placeholder,
             singleLine = true,
@@ -185,37 +189,38 @@ private fun SelectApiParameterDialog(
                 TextButton(
                     onClick = {
                         openAddParameterDialog = true
-                    }
+                    },
                 ) {
                     Text("+ ${stringResource(Res.string.add_parameter)}")
                 }
                 LazyColumn {
                     itemsIndexed(parameters) { paramIndex, parameter ->
-                        val selectedModifier = if (initialProperty is ApiProperty.StringParameter &&
-                            initialProperty.parameterId == parameter.parameterId
-                        ) {
-                            Modifier.border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                                .padding(2.dp)
-                        } else {
-                            Modifier
-                        }
+                        val selectedModifier =
+                            if (initialProperty is ApiProperty.StringParameter &&
+                                initialProperty.parameterId == parameter.parameterId
+                            ) {
+                                Modifier
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.7f),
+                                        shape = RoundedCornerShape(8.dp),
+                                    ).padding(2.dp)
+                            } else {
+                                Modifier
+                            }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .hoverIconClickable()
-                                .hoverOverlay()
-                                .padding(vertical = 8.dp)
-                                .padding(start = 8.dp)
-                                .clickable {
-                                    onApiParameterSelected(parameter)
-                                    onCloseDialog()
-                                }
-                                .then(selectedModifier)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .hoverIconClickable()
+                                    .hoverOverlay()
+                                    .padding(vertical = 8.dp)
+                                    .padding(start = 8.dp)
+                                    .clickable {
+                                        onApiParameterSelected(parameter)
+                                        onCloseDialog()
+                                    }.then(selectedModifier),
                         ) {
                             Text(
                                 text = parameter.name,
@@ -235,7 +240,7 @@ private fun SelectApiParameterDialog(
                                 text = "default: ${parameter.defaultValue}",
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(start = 8.dp)
+                                modifier = Modifier.padding(start = 8.dp),
                             )
 
                             Spacer(Modifier.weight(1f))
@@ -245,7 +250,7 @@ private fun SelectApiParameterDialog(
                                 ComposeFlowIconButton(
                                     onClick = {
                                         parameterToBeRemovedIndex = paramIndex
-                                    }
+                                    },
                                 ) {
                                     ComposeFlowIcon(
                                         imageVector = Icons.Outlined.Delete,
@@ -267,8 +272,9 @@ private fun SelectApiParameterDialog(
                         onClick = {
                             onCloseDialog()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -284,7 +290,7 @@ private fun SelectApiParameterDialog(
                 },
                 onCloseDialog = {
                     openAddParameterDialog = false
-                }
+                },
             )
         }
 
@@ -299,7 +305,7 @@ private fun SelectApiParameterDialog(
                     parameterToBeRemovedIndex = null
                     onRemoveParameterAt(removedIndexAt)
                 },
-                positiveText = "Remove"
+                positiveText = "Remove",
             )
         }
     }
@@ -349,9 +355,10 @@ fun AddApiParameterDialog(
         }
         Surface {
             Column(
-                modifier = modifier
-                    .size(width = 320.dp, height = 360.dp)
-                    .padding(16.dp),
+                modifier =
+                    modifier
+                        .size(width = 320.dp, height = 360.dp)
+                        .padding(16.dp),
             ) {
                 val fieldWidth = 300.dp
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -361,7 +368,6 @@ fun AddApiParameterDialog(
                         modifier = Modifier.padding(bottom = 16.dp),
                     )
                 }
-
 
                 SmallOutlinedTextField(
                     value = editedParameter.variableName,
@@ -378,23 +384,26 @@ fun AddApiParameterDialog(
                     },
                     singleLine = true,
                     isError = parameterNameValidateResult is ValidateResult.Failure,
-                    supportingText = (parameterNameValidateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .width(width = fieldWidth)
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && parameterNameValidateResult is ValidateResult.Success) {
-                                onConfirmParameter()
-                                true
-                            } else {
-                                false
+                    supportingText =
+                        (parameterNameValidateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
                             }
                         },
+                    shape = RoundedCornerShape(8.dp),
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .width(width = fieldWidth)
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && parameterNameValidateResult is ValidateResult.Success) {
+                                    onConfirmParameter()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
 
                 SmallOutlinedTextField(
@@ -411,17 +420,19 @@ fun AddApiParameterDialog(
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.focusRequester(second)
-                        .moveFocusOnTab()
-                        .width(width = fieldWidth)
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && isFormValid) {
-                                onConfirmParameter()
-                                true
-                            } else {
-                                false
-                            }
-                        },
+                    modifier =
+                        Modifier
+                            .focusRequester(second)
+                            .moveFocusOnTab()
+                            .width(width = fieldWidth)
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && isFormValid) {
+                                    onConfirmParameter()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
                 Spacer(Modifier.weight(1f))
                 Row(
@@ -432,9 +443,10 @@ fun AddApiParameterDialog(
                         onClick = {
                             onCloseDialog()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -443,8 +455,9 @@ fun AddApiParameterDialog(
                             onConfirmParameter()
                         },
                         enabled = isFormValid,
-                        modifier = Modifier
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }

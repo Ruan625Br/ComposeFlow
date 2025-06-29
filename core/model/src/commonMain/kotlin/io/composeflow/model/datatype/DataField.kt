@@ -15,7 +15,6 @@ typealias DataFieldId = String
 
 @Serializable
 sealed interface DataFieldType {
-
     /**
      * Field name that is used to specify this field type.
      */
@@ -30,7 +29,7 @@ sealed interface DataFieldType {
     data class DocumentId(
         val firestoreCollectionId: CollectionId,
     ) : DataFieldType {
-        override fun fieldName(project: Project): String = ".${firestoreDocumentId}"
+        override fun fieldName(project: Project): String = ".$firestoreDocumentId"
     }
 
     @Serializable
@@ -63,13 +62,9 @@ data class DataField(
     val variableName = name.asVariableName()
 
     @Composable
-    override fun asDropdownText(): AnnotatedString {
-        return AnnotatedString("$name ${fieldType.asDropdownText().text}")
-    }
+    override fun asDropdownText(): AnnotatedString = AnnotatedString("$name ${fieldType.asDropdownText().text}")
 
-    override fun isSameItem(item: Any): Boolean {
-        return item is DataField && item.id == id
-    }
+    override fun isSameItem(item: Any): Boolean = item is DataField && item.id == id
 }
 
 data class DocumentIdDropdownItem(

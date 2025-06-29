@@ -6,13 +6,13 @@ import io.composeflow.model.datatype.DataType
 import io.composeflow.ui.propertyeditor.DropdownItem
 
 sealed interface DataTypeToAssociate : DropdownItem {
-
-    data class ExistingDataType(val dataType: DataType) : DataTypeToAssociate {
+    data class ExistingDataType(
+        val dataType: DataType,
+    ) : DataTypeToAssociate {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString(dataType.className)
 
-        override fun isSameItem(item: Any): Boolean =
-            (item is ExistingDataType) && item.dataType.id == dataType.id
+        override fun isSameItem(item: Any): Boolean = (item is ExistingDataType) && item.dataType.id == dataType.id
     }
 
     data object CreateNewDataType : DataTypeToAssociate {

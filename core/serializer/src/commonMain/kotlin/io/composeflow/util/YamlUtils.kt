@@ -15,39 +15,45 @@ import kotlin.uuid.Uuid
  * @param idPrefix The actual prefix string (e.g., "screenId:").
  * @return The potentially modified YamlNode.
  */
-fun prefixIdInYamlNode(node: YamlNode, screenId: String, idPrefix: String): YamlNode {
-    return when (node) {
+fun prefixIdInYamlNode(
+    node: YamlNode,
+    screenId: String,
+    idPrefix: String,
+): YamlNode =
+    when (node) {
         is YamlMap -> {
             // Process maps (YAML objects)
             // Create new entries, potentially modifying values
-            val newEntries = node.entries.mapValues { (keyNode, valueNode) ->
-                // Key must be a scalar for map keys
-                val key = (keyNode as? YamlScalar)?.content ?: keyNode.toString() // Get key string
-                // Recursively process the value node
-                val processedValueNode = prefixIdInYamlNode(valueNode, screenId, idPrefix)
+            val newEntries =
+                node.entries.mapValues { (keyNode, valueNode) ->
+                    // Key must be a scalar for map keys
+                    val key = (keyNode as? YamlScalar)?.content ?: keyNode.toString() // Get key string
+                    // Recursively process the value node
+                    val processedValueNode = prefixIdInYamlNode(valueNode, screenId, idPrefix)
 
-                // screenId is used to navigate to other screens. Thus, excluding it from prefixed
-                if (key == "id" || key.endsWith("Id") && key != "screenId") {
-                    // Check if the key indicates an ID field
-                    if (processedValueNode is YamlScalar && !processedValueNode.content.startsWith(
-                            idPrefix
-                        )
-                    ) {
-                        // If the value is a scalar string and not prefixed, create a new scalar with the prefix
-                        // Use the location from the original value node
-                        YamlScalar(
-                            content = "$idPrefix${processedValueNode.content}",
-                            path = processedValueNode.path
-                        )
+                    // screenId is used to navigate to other screens. Thus, excluding it from prefixed
+                    if (key == "id" || key.endsWith("Id") && key != "screenId") {
+                        // Check if the key indicates an ID field
+                        if (processedValueNode is YamlScalar &&
+                            !processedValueNode.content.startsWith(
+                                idPrefix,
+                            )
+                        ) {
+                            // If the value is a scalar string and not prefixed, create a new scalar with the prefix
+                            // Use the location from the original value node
+                            YamlScalar(
+                                content = "$idPrefix${processedValueNode.content}",
+                                path = processedValueNode.path,
+                            )
+                        } else {
+                            // Otherwise, keep the processed value node as is
+                            processedValueNode
+                        }
                     } else {
-                        // Otherwise, keep the processed value node as is
+                        // Not an ID field, just use the processed value node
                         processedValueNode
                     }
-                } else {
-                    // Not an ID field, just use the processed value node
-                    processedValueNode
                 }
-            }
             // Return a new YamlMap with original keys but potentially modified values
             // Use the newEntries map directly, keys are already YamlNodes
             YamlMap(newEntries, node.path) // Use location from original map
@@ -71,11 +77,9 @@ fun prefixIdInYamlNode(node: YamlNode, screenId: String, idPrefix: String): Yaml
         }
 
         is YamlScalar -> node // Base case: Return scalar nodes as is
-        is YamlNull -> node   // Base case: Return null nodes as is
+        is YamlNull -> node // Base case: Return null nodes as is
         else -> node // Should not happen for typical YAML
     }
-}
-
 
 /**
  * Recursively traverses a kaml YamlNode structure
@@ -87,26 +91,27 @@ fun prefixIdInYamlNode(node: YamlNode, screenId: String, idPrefix: String): Yaml
  */
 fun replaceIdInYamlNode(
     node: YamlNode,
-    idMap: MutableMap<String, String> = mutableMapOf()
-): YamlNode {
-    return when (node) {
+    idMap: MutableMap<String, String> = mutableMapOf(),
+): YamlNode =
+    when (node) {
         is YamlMap -> {
-            val newEntries = node.entries.mapValues { (keyNode, valueNode) ->
-                val key = (keyNode as? YamlScalar)?.content ?: keyNode.toString()
-                val processedValueNode = replaceIdInYamlNode(valueNode, idMap)
+            val newEntries =
+                node.entries.mapValues { (keyNode, valueNode) ->
+                    val key = (keyNode as? YamlScalar)?.content ?: keyNode.toString()
+                    val processedValueNode = replaceIdInYamlNode(valueNode, idMap)
 
-                if (key == "id" || (key.endsWith("Id"))) {
-                    if (processedValueNode is YamlScalar) {
-                        val originalId = processedValueNode.content
-                        val newId = idMap.getOrPut(originalId) { Uuid.random().toString() }
-                        YamlScalar(content = newId, path = processedValueNode.path)
+                    if (key == "id" || (key.endsWith("Id"))) {
+                        if (processedValueNode is YamlScalar) {
+                            val originalId = processedValueNode.content
+                            val newId = idMap.getOrPut(originalId) { Uuid.random().toString() }
+                            YamlScalar(content = newId, path = processedValueNode.path)
+                        } else {
+                            processedValueNode
+                        }
                     } else {
                         processedValueNode
                     }
-                } else {
-                    processedValueNode
                 }
-            }
             YamlMap(newEntries, node.path)
         }
 
@@ -125,4 +130,3 @@ fun replaceIdInYamlNode(
         is YamlNull -> node
         else -> node
     }
-}

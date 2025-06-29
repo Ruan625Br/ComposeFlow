@@ -117,10 +117,11 @@ private fun ProjectListBody(
                         createProjectDialogOpen = true
                         onAnyDialogIsShown()
                     },
-                    modifier = Modifier.padding(
-                        start = 16.dp,
-                        bottom = 8.dp,
-                    ),
+                    modifier =
+                        Modifier.padding(
+                            start = 16.dp,
+                            bottom = 8.dp,
+                        ),
                 ) {
                     Text("+ ${stringResource(Res.string.new_project)}")
                 }
@@ -133,19 +134,20 @@ private fun ProjectListBody(
             ) {
                 items(items = projectUiStateList) { projectUiState ->
                     Column(
-                        modifier = Modifier.size(
-                            width = 280.dp,
-                            height = 420.dp,
-                        )
-                            .clickable {
-                                when (projectUiState) {
-                                    is LoadedProjectUiState.Success -> {
-                                        onProjectSelected(projectUiState.project)
-                                    }
+                        modifier =
+                            Modifier
+                                .size(
+                                    width = 280.dp,
+                                    height = 420.dp,
+                                ).clickable {
+                                    when (projectUiState) {
+                                        is LoadedProjectUiState.Success -> {
+                                            onProjectSelected(projectUiState.project)
+                                        }
 
-                                    else -> {}
-                                }
-                            }
+                                        else -> {}
+                                    }
+                                },
                     ) {
                         Box(modifier = Modifier.fillMaxSize()) {
                             when (projectUiState) {
@@ -201,7 +203,7 @@ private fun ProjectListBody(
                     createProjectDialogOpen = false
                     onCreateProjectWithScreens(projectName, packageName, screens)
                     onAllDialogsClosed()
-                }
+                },
             )
         }
         if (deleteProjectDialogOpen) {
@@ -254,7 +256,7 @@ fun AddNewProjectDialog(
                 projectName,
                 packageName.ifEmpty {
                     "com.example"
-                }
+                },
             )
         }
         val (first, second, third, fourth) = remember { FocusRequester.createRefs() }
@@ -263,14 +265,15 @@ fun AddNewProjectDialog(
         }
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 280.dp, height = 320.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 280.dp, height = 320.dp)
+                        .padding(16.dp),
             ) {
                 val isFormValid by remember {
                     derivedStateOf {
                         projectNameValidateResult is ValidateResult.Success &&
-                                packageNameValidateResult is ValidateResult.Success
+                            packageNameValidateResult is ValidateResult.Success
                     }
                 }
 
@@ -298,16 +301,19 @@ fun AddNewProjectDialog(
                     },
                     singleLine = true,
                     isError = projectNameValidateResult !is ValidateResult.Success,
-                    modifier = Modifier.focusRequester(first).moveFocusOnTab().onKeyEvent {
-                        if (it.key == Key.Enter && isFormValid) {
-                            confirmDialog()
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && isFormValid) {
+                                    confirmDialog()
+                                    true
+                                } else {
+                                    false
+                                }
+                            }.fillMaxWidth()
+                            .padding(bottom = 8.dp),
                 )
 
                 SmallOutlinedTextField(
@@ -327,7 +333,7 @@ fun AddNewProjectDialog(
                         Text(
                             "com.example",
                             style = MaterialTheme.typography.labelMedium,
-                            modifier = Modifier.alpha(0.6f)
+                            modifier = Modifier.alpha(0.6f),
                         )
                     },
                     supportingText = {
@@ -341,15 +347,18 @@ fun AddNewProjectDialog(
                     },
                     singleLine = true,
                     isError = packageNameValidateResult !is ValidateResult.Success,
-                    modifier = Modifier.focusRequester(second).moveFocusOnTab().onKeyEvent {
-                        if (it.key == Key.Enter && isFormValid) {
-                            confirmDialog()
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .focusRequester(second)
+                            .moveFocusOnTab()
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && isFormValid) {
+                                    confirmDialog()
+                                    true
+                                } else {
+                                    false
+                                }
+                            }.fillMaxWidth(),
                 )
 
                 Row(
@@ -385,20 +394,24 @@ private fun ProjectThumbnailErrorContent(
     onDeleteProjectClicked: (String) -> Unit,
 ) {
     Box(
-        modifier = Modifier.fillMaxSize()
-            .clip(RoundedCornerShape(16.dp))
-            .switchByHovered(
-                hovered = Modifier.border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .clip(RoundedCornerShape(16.dp))
+                .switchByHovered(
+                    hovered =
+                        Modifier.border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(16.dp),
+                        ),
+                    notHovered =
+                        Modifier.alpha(0.5f).border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(16.dp),
+                        ),
                 ),
-                notHovered = Modifier.alpha(0.5f).border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(16.dp),
-                ),
-            ),
     ) {
         Row(
             modifier = Modifier.zIndex(1f).padding(top = 16.dp, end = 16.dp),
@@ -417,9 +430,10 @@ private fun ProjectThumbnailErrorContent(
             }
         }
         Column(
-            modifier = Modifier
-                .align(Alignment.TopCenter)
-                .padding(top = 64.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 64.dp),
         ) {
             Icon(
                 imageVector = Icons.Outlined.ErrorOutline,
@@ -442,19 +456,20 @@ private fun ProjectThumbnail(
         defaultScreen.thumbnail(
             project = project,
             thumbnailName = project.name,
-            modifier = Modifier.pointerInput(Unit) {
-                awaitPointerEventScope {
-                    // To consume the click event in this Composable.
-                    // (Not let the children handle click event in the thumbnail)
-                    while (true) {
-                        val event = awaitPointerEvent()
-                        if (event.changes.any { it.pressed }) {
-                            onProjectSelected(project)
-                            event.changes.forEach { it.consume() }
+            modifier =
+                Modifier.pointerInput(Unit) {
+                    awaitPointerEventScope {
+                        // To consume the click event in this Composable.
+                        // (Not let the children handle click event in the thumbnail)
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            if (event.changes.any { it.pressed }) {
+                                onProjectSelected(project)
+                                event.changes.forEach { it.consume() }
+                            }
                         }
                     }
-                }
-            }
+                },
         )
 
         Row(

@@ -13,28 +13,30 @@ import org.koin.dsl.KoinAppDeclaration
 import org.koin.dsl.module
 
 fun initKoin(appDeclaration: KoinAppDeclaration = {}) {
-    val koinApplication = startKoin {
-        appDeclaration()
-        modules(
-            commonModule(),
-            platformModule(),
-            screenViewModelModule(),
-            componentViewModelModule(),
-        )
-    }
+    val koinApplication =
+        startKoin {
+            appDeclaration()
+            modules(
+                commonModule(),
+                platformModule(),
+                screenViewModelModule(),
+                componentViewModelModule(),
+            )
+        }
 }
 
 fun initKoin() = initKoin {}
 
-fun commonModule() = module {
-    single { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
-    single {
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
+fun commonModule() =
+    module {
+        single { CoroutineScope(Dispatchers.Default + SupervisorJob()) }
+        single {
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+            }
+        }
+        single {
+            Firebase.firestore
         }
     }
-    single {
-        Firebase.firestore
-    }
-}

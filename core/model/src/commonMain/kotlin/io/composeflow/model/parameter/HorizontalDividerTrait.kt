@@ -37,21 +37,26 @@ data class HorizontalDividerTrait(
     @Serializable(DpSerializer::class)
     override val thickness: Dp? = null,
     override val color: AssignableProperty? = null,
-) : DividerTrait(thickness, color), ComposeTrait {
+) : DividerTrait(thickness, color),
+    ComposeTrait {
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
     override fun iconText(): String = "H Divider"
+
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
-            trait = mutableStateOf(
-                HorizontalDividerTrait(),
-            ),
+            trait =
+                mutableStateOf(
+                    HorizontalDividerTrait(),
+                ),
             modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.Padding(8.dp)),
         )
 
     override fun icon(): ImageVector = Icons.Outlined.HorizontalRule
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_horizontal_divider_trait
+
     override fun isResizeable(): Boolean = false
 
     @Composable
@@ -65,18 +70,21 @@ data class HorizontalDividerTrait(
     ) {
         HorizontalDivider(
             thickness = thickness ?: DividerDefaults.Thickness,
-            color = (color as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                ?: DividerDefaults.color,
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                    ),
-            ),
+            color =
+                (color as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                    ?: DividerDefaults.color,
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                        ),
+                ),
         )
     }
 
@@ -96,10 +104,10 @@ data class HorizontalDividerTrait(
                 project = project,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()

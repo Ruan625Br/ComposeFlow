@@ -75,27 +75,29 @@ fun AiAssistantDialog(
     val viewModel =
         viewModel(modelClass = AiAssistantViewModel::class) {
             AiAssistantViewModel(
-                projectCreationQuery = projectCreationPrompt
+                projectCreationQuery = projectCreationPrompt,
             )
         }
     val uiState by viewModel.uiState.collectAsState()
     val messages by viewModel.messages.collectAsState()
-    val updateCallbacks = callbacks.copy(
-        onScreenTitleUpdated = viewModel::onScreenTitleUpdated,
-        onScreenPromptUpdated = viewModel::onScreenPromptUpdated,
-        onScreenPromptDeleted = viewModel::onScreenPromptDeleted,
-        onProceedToGenerateScreens = viewModel::onProceedToGenerateScreens,
-        onRenderedErrorDetected = viewModel::onRenderedErrorDetected,
-        onConfirmProjectWithScreens = onConfirmProjectWithScreens,
-    )
+    val updateCallbacks =
+        callbacks.copy(
+            onScreenTitleUpdated = viewModel::onScreenTitleUpdated,
+            onScreenPromptUpdated = viewModel::onScreenPromptUpdated,
+            onScreenPromptDeleted = viewModel::onScreenPromptDeleted,
+            onProceedToGenerateScreens = viewModel::onProceedToGenerateScreens,
+            onRenderedErrorDetected = viewModel::onRenderedErrorDetected,
+            onConfirmProjectWithScreens = onConfirmProjectWithScreens,
+        )
     PositionCustomizablePopup(
         onDismissRequest = {
             onCloseClick()
         },
-        popupPositionProvider = rememberComponentRectPositionProvider(
-            anchor = Alignment.Center,
-            alignment = Alignment.Center,
-        ),
+        popupPositionProvider =
+            rememberComponentRectPositionProvider(
+                anchor = Alignment.Center,
+                alignment = Alignment.Center,
+            ),
         onKeyEvent = {
             if (it.key == Key.Escape) {
                 onCloseClick()
@@ -119,16 +121,20 @@ fun AiAssistantDialog(
                     messages = messages,
                     uiState = uiState,
                     onSendUserInput = viewModel::onSendCreateScreenRequest,
-                    modifier = Modifier.weight(4f)
-                        .fillMaxSize()
+                    modifier =
+                        Modifier
+                            .weight(4f)
+                            .fillMaxSize(),
                 )
 
                 AiWorkspaceArea(
                     project = project,
                     uiState = uiState,
                     callbacks = updateCallbacks,
-                    modifier = Modifier.weight(9f)
-                        .fillMaxSize()
+                    modifier =
+                        Modifier
+                            .weight(9f)
+                            .fillMaxSize(),
                 )
             }
         }
@@ -152,22 +158,25 @@ private fun AiConversationArea(
     }
     Column(modifier = modifier.fillMaxHeight()) {
         Column(
-            modifier = Modifier.padding(
-                top = 16.dp,
-                start = 16.dp,
-                bottom = 16.dp,
-                end = 8.dp
-            )
-                .fillMaxHeight()
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(8.dp)
-                )
+            modifier =
+                Modifier
+                    .padding(
+                        top = 16.dp,
+                        start = 16.dp,
+                        bottom = 16.dp,
+                        end = 8.dp,
+                    ).fillMaxHeight()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        shape = RoundedCornerShape(8.dp),
+                    ),
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(16.dp),
-                modifier = Modifier.weight(1f)
-                    .fillMaxWidth()
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .fillMaxWidth(),
             ) {
                 items(messages) {
                     ChatMessage(it)
@@ -184,10 +193,10 @@ private fun AiConversationArea(
                     text = stringResource(Res.string.ai_generating_response),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(bottom = 4.dp)
+                    modifier = Modifier.padding(bottom = 4.dp),
                 )
                 LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
             OutlinedTextField(
@@ -196,18 +205,19 @@ private fun AiConversationArea(
                     inputValue = it
                 },
                 maxLines = 10,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .onKeyEvent {
-                        if (it.key == Key.Enter) {
-                            onSendUserInput(inputValue)
-                            inputValue = ""
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester)
+                        .onKeyEvent {
+                            if (it.key == Key.Enter) {
+                                onSendUserInput(inputValue)
+                                inputValue = ""
+                                true
+                            } else {
+                                false
+                            }
+                        },
             )
         }
     }
@@ -218,45 +228,51 @@ private fun ChatMessage(
     messageModel: MessageModel,
     modifier: Modifier = Modifier,
 ) {
-    val hhmmFormat = Format {
-        hour(Padding.NONE)
-        chars(":")
-        minute(Padding.ZERO)
-    }
+    val hhmmFormat =
+        Format {
+            hour(Padding.NONE)
+            chars(":")
+            minute(Padding.ZERO)
+        }
     if (messageModel.messageOwner == MessageOwner.User) {
         Column(modifier = modifier) {
             Row(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.End,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text(
                     messageModel.createdAt.format(
                         hhmmFormat,
-                        offset = TimeZone.currentSystemDefault()
-                            .offsetAt(messageModel.createdAt)
+                        offset =
+                            TimeZone
+                                .currentSystemDefault()
+                                .offsetAt(messageModel.createdAt),
                     ),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 )
                 Column(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        shape = RoundedCornerShape(
-                            topStart = 16.dp,
-                            topEnd = 0.dp,
-                            bottomEnd = 16.dp,
-                            bottomStart = 16.dp
-                        )
-                    ).weight(1f)
+                    modifier =
+                        Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                shape =
+                                    RoundedCornerShape(
+                                        topStart = 16.dp,
+                                        topEnd = 0.dp,
+                                        bottomEnd = 16.dp,
+                                        bottomStart = 16.dp,
+                                    ),
+                            ).weight(1f),
                 ) {
                     SelectionContainer {
                         Text(
                             text = messageModel.message,
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp),
                         )
                     }
                 }
@@ -268,41 +284,47 @@ private fun ChatMessage(
             Row(
                 verticalAlignment = Alignment.Bottom,
                 horizontalArrangement = Arrangement.Start,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Column(
-                    modifier = Modifier.background(
-                        color = MaterialTheme.colorScheme.primaryContainer,
-                        shape = RoundedCornerShape(
-                            topStart = 0.dp,
-                            topEnd = 16.dp,
-                            bottomEnd = 16.dp,
-                            bottomStart = 16.dp
-                        )
-                    ).weight(1f)
+                    modifier =
+                        Modifier
+                            .background(
+                                color = MaterialTheme.colorScheme.primaryContainer,
+                                shape =
+                                    RoundedCornerShape(
+                                        topStart = 0.dp,
+                                        topEnd = 16.dp,
+                                        bottomEnd = 16.dp,
+                                        bottomStart = 16.dp,
+                                    ),
+                            ).weight(1f),
                 ) {
                     SelectionContainer {
                         Text(
                             text = messageModel.message,
-                            color = if (messageModel.isFailed) {
-                                MaterialTheme.colorScheme.error
-                            } else {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            },
+                            color =
+                                if (messageModel.isFailed) {
+                                    MaterialTheme.colorScheme.error
+                                } else {
+                                    MaterialTheme.colorScheme.onPrimaryContainer
+                                },
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp)
+                            modifier = Modifier.padding(16.dp),
                         )
                     }
                 }
                 Text(
                     messageModel.createdAt.format(
                         hhmmFormat,
-                        offset = TimeZone.currentSystemDefault()
-                            .offsetAt(messageModel.createdAt)
+                        offset =
+                            TimeZone
+                                .currentSystemDefault()
+                                .offsetAt(messageModel.createdAt),
                     ),
                     color = MaterialTheme.colorScheme.secondary,
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(8.dp)
+                    modifier = Modifier.padding(8.dp),
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -318,20 +340,21 @@ private fun AiWorkspaceArea(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.fillMaxSize(),
     ) {
         Column(
-            modifier = Modifier.padding(
-                top = 16.dp,
-                start = 8.dp,
-                bottom = 16.dp,
-                end = 16.dp
-            )
-                .fillMaxSize()
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
-                    shape = RoundedCornerShape(8.dp)
-                )
+            modifier =
+                Modifier
+                    .padding(
+                        top = 16.dp,
+                        start = 8.dp,
+                        bottom = 16.dp,
+                        end = 16.dp,
+                    ).fillMaxSize()
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                        shape = RoundedCornerShape(8.dp),
+                    ),
         ) {
             when (uiState) {
                 is AiAssistantUiState.Success.NewScreenCreated -> {
@@ -339,22 +362,24 @@ private fun AiWorkspaceArea(
                     val density = LocalDensity.current
                     Column(
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth()
-                            .background(Color.Transparent),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .background(Color.Transparent),
                     ) {
                         ProvideDeviceSizeDp(deviceSizeDp) {
                             AppTheme {
                                 Surface(
-                                    modifier = Modifier
-                                        .clip(
-                                            RoundedCornerShape(
-                                                8.dp
-                                            )
-                                        )
-                                        .align(Alignment.CenterHorizontally)
-                                        .onGloballyPositioned {
-                                            deviceSizeDp = it.size / density.density.toInt()
-                                        },
+                                    modifier =
+                                        Modifier
+                                            .clip(
+                                                RoundedCornerShape(
+                                                    8.dp,
+                                                ),
+                                            ).align(Alignment.CenterHorizontally)
+                                            .onGloballyPositioned {
+                                                deviceSizeDp = it.size / density.density.toInt()
+                                            },
                                 ) {
                                     // To catch the RuntimeException when rendering the generated screen.
                                     // There is a little chance that a RuntimeException such as nested
@@ -366,10 +391,11 @@ private fun AiWorkspaceArea(
                                             canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                                             paletteRenderParams = PaletteRenderParams(isThumbnail = true),
                                             zoomableContainerStateHolder = ZoomableContainerStateHolder(),
-                                            modifier = Modifier
-                                                .onClick(enabled = false, onClick = {})
-                                                .align(Alignment.CenterHorizontally)
-                                                .size(width = 416.dp, height = 886.dp),
+                                            modifier =
+                                                Modifier
+                                                    .onClick(enabled = false, onClick = {})
+                                                    .align(Alignment.CenterHorizontally)
+                                                    .size(width = 416.dp, height = 886.dp),
                                         )
                                     }.onFailure {
                                         Text(
@@ -387,12 +413,11 @@ private fun AiWorkspaceArea(
                 is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                     ScreenPromptsCreatedContent(
                         callbacks = callbacks,
-                        uiState = uiState
+                        uiState = uiState,
                     )
                 }
 
                 is AiAssistantUiState.Error -> {
-
                 }
 
                 AiAssistantUiState.Idle -> {}

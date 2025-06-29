@@ -31,17 +31,12 @@ data class FirestoreCollection(
     val name: String,
     val dataTypeId: DataTypeId? = null,
 ) : DropdownItem {
-
-    fun findCompanionDataType(project: Project): DataType? {
-        return project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId }
-    }
+    fun findCompanionDataType(project: Project): DataType? = project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId }
 
     @Composable
     override fun asDropdownText(): AnnotatedString = AnnotatedString(name)
 
-    override fun isSameItem(item: Any): Boolean {
-        return item is FirestoreCollection && item.id == id
-    }
+    override fun isSameItem(item: Any): Boolean = item is FirestoreCollection && item.id == id
 
     fun getReadVariableName(project: Project): String {
         val dataType = findCompanionDataType(project) ?: return "firestoreCollection"
@@ -53,19 +48,26 @@ data class FirestoreCollection(
         val dataType = firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
         if (dataType == null) return emptyList()
 
-        val listDataType = ClassName("kotlin.collections", "List").parameterizedBy(
-            dataType.asKotlinPoetClassName(project)
-        )
-        val queryResultType = ClassHolder.ComposeFlow.DataResult.parameterizedBy(
-            listDataType
-        )
-        val stateFlowType = ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(queryResultType)
-        val optInAnnotation = AnnotationSpec.builder(ClassName("kotlin", "OptIn"))
-            .addMember("%T::class", ClassName("kotlinx.coroutines", "ExperimentalCoroutinesApi"))
-            .build()
+        val listDataType =
+            ClassName("kotlin.collections", "List").parameterizedBy(
+                dataType.asKotlinPoetClassName(project),
+            )
+        val queryResultType =
+            ClassHolder.ComposeFlow.DataResult.parameterizedBy(
+                listDataType,
+            )
+        val stateFlowType =
+            ClassHolder.Coroutines.Flow.StateFlow
+                .parameterizedBy(queryResultType)
+        val optInAnnotation =
+            AnnotationSpec
+                .builder(ClassName("kotlin", "OptIn"))
+                .addMember("%T::class", ClassName("kotlinx.coroutines", "ExperimentalCoroutinesApi"))
+                .build()
 
         val collectionStateFlowProperty =
-            PropertySpec.builder(getReadVariableName(project), stateFlowType)
+            PropertySpec
+                .builder(getReadVariableName(project), stateFlowType)
                 .addAnnotation(optInAnnotation)
                 .initializer(
                     CodeBlock.of(
@@ -89,9 +91,8 @@ data class FirestoreCollection(
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.Flow.SharingStarted,
                         ClassHolder.ComposeFlow.DataResult,
-                    )
-                )
-                .build()
+                    ),
+                ).build()
         return listOf(collectionStateFlowProperty)
     }
 
@@ -104,7 +105,7 @@ data class FirestoreCollection(
         builder.addStatement(
             "val ${getReadVariableName(project)} = ${context.currentEditable.viewModelName}.${
                 getReadVariableName(
-                    project
+                    project,
                 )
             }.%M().value",
             MemberHolder.AndroidX.Runtime.collectAsState,

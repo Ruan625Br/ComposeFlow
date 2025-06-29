@@ -37,25 +37,26 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("TabsTrait")
 data object TabsTrait : ComposeTrait {
-
     override fun defaultConstraints(): Set<Constraint> =
         defaultConstraints().toMutableSet().apply {
             add(Constraint.NestedTabs)
         }
 
     override fun defaultComposeNode(project: Project): ComposeNode {
-        val tabContainer = ComposeNode(
-            trait = mutableStateOf(TabsTrait),
-            modifierList = mutableStateListEqualsOverrideOf(
-                ModifierWrapper.FillMaxSize(),
-            ),
-        ).apply {
-            addChild(
-                ComposeNode(
-                    trait = mutableStateOf(TabRowTrait()),
-                ),
-            )
-        }
+        val tabContainer =
+            ComposeNode(
+                trait = mutableStateOf(TabsTrait),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.FillMaxSize(),
+                    ),
+            ).apply {
+                addChild(
+                    ComposeNode(
+                        trait = mutableStateOf(TabRowTrait()),
+                    ),
+                )
+            }
         for (i in 1..ComposeTrait.NumOfDefaultTabs) {
             tabContainer.addTab()
         }
@@ -63,9 +64,10 @@ data object TabsTrait : ComposeTrait {
     }
 
     override fun icon(): ImageVector = Icons.Outlined.Tab
+
     override fun iconText(): String = "Tabs"
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Container, TraitCategory.Basic)
+
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container, TraitCategory.Basic)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_tabs_trait
 
@@ -89,16 +91,18 @@ data object TabsTrait : ComposeTrait {
             return
         }
         Column(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         ) {
             val tabRow = node.children.first()
             assert(tabRow.trait.value is TabRowTrait)
@@ -106,39 +110,46 @@ data object TabsTrait : ComposeTrait {
             val tabContents = node.children.filterNot { it.trait.value is TabRowTrait }
 
             @Composable
-            fun LocalTab(tab: ComposeNode, index: Int) {
+            fun LocalTab(
+                tab: ComposeNode,
+                index: Int,
+            ) {
                 val tabTrait = tab.trait.value as TabTrait
                 Tab(
                     selected = node.selectedIndex.value == index,
-                    text = tabTrait.text?.let { text ->
-                        {
-                            Text(
-                                text = text.transformedValueExpression(project),
-                            )
-                        }
-                    },
-                    icon = tabTrait.icon?.let { icon ->
-                        {
-                            Icon(
-                                imageVector = icon.imageVector,
-                                contentDescription = null,
-                            )
-                        }
-                    },
+                    text =
+                        tabTrait.text?.let { text ->
+                            {
+                                Text(
+                                    text = text.transformedValueExpression(project),
+                                )
+                            }
+                        },
+                    icon =
+                        tabTrait.icon?.let { icon ->
+                            {
+                                Icon(
+                                    imageVector = icon.imageVector,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
                     onClick = {
                         if (!paletteRenderParams.isThumbnail) {
                             node.selectedIndex.value = index
                         }
                     },
-                    modifier = tab.modifierList
-                        .toModifierChain().modifierForCanvas(
-                            project = project,
-                            node = tab,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            isDraggable = false,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
+                    modifier =
+                        tab.modifierList
+                            .toModifierChain()
+                            .modifierForCanvas(
+                                project = project,
+                                node = tab,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                isDraggable = false,
+                                paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            ),
                 )
             }
 
@@ -146,15 +157,17 @@ data object TabsTrait : ComposeTrait {
             if (tabRowTrait.scrollable) {
                 ScrollableTabRow(
                     selectedTabIndex = node.selectedIndex.value,
-                    modifier = tabRow.modifierList.toModifierChain()
-                        .modifierForCanvas(
-                            project = project,
-                            node = tabRow,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            isDraggable = false,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
+                    modifier =
+                        tabRow.modifierList
+                            .toModifierChain()
+                            .modifierForCanvas(
+                                project = project,
+                                node = tabRow,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                isDraggable = false,
+                                paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            ),
                 ) {
                     tabs.forEachIndexed { i, tab ->
                         LocalTab(tab = tab, index = i)
@@ -163,15 +176,17 @@ data object TabsTrait : ComposeTrait {
             } else {
                 TabRow(
                     selectedTabIndex = node.selectedIndex.value,
-                    modifier = tabRow.modifierList.toModifierChain()
-                        .modifierForCanvas(
-                            project = project,
-                            node = tabRow,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            isDraggable = false,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
+                    modifier =
+                        tabRow.modifierList
+                            .toModifierChain()
+                            .modifierForCanvas(
+                                project = project,
+                                node = tabRow,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                isDraggable = false,
+                                paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            ),
                 ) {
                     tabs.forEachIndexed { i, tab ->
                         LocalTab(tab = tab, index = i)
@@ -207,16 +222,18 @@ data object TabsTrait : ComposeTrait {
         } else {
             codeBlockBuilder.addStatement("%M(", MemberHolder.AndroidX.Layout.Column)
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
         }
         val selectedIndexInitialName = "selectedIndex"
         val indexVariable =
-            context.getCurrentComposableContext()
+            context
+                .getCurrentComposableContext()
                 .addComposeFileVariable(
-                    id = "${node.id}-${selectedIndexInitialName}",
-                    initialIdentifier = selectedIndexInitialName, dryRun
+                    id = "${node.id}-$selectedIndexInitialName",
+                    initialIdentifier = selectedIndexInitialName,
+                    dryRun,
                 )
         codeBlockBuilder.addStatement(
             "var $indexVariable by %M { %M(0) }",
@@ -230,7 +247,6 @@ data object TabsTrait : ComposeTrait {
             tabTrait.selectedTabIndexVariableName = indexVariable
         }
 
-
         codeBlockBuilder.add(
             generateTabRowCode(
                 project = project,
@@ -238,7 +254,7 @@ data object TabsTrait : ComposeTrait {
                 context = context,
                 dryRun = dryRun,
                 scrollable = (tabRow.trait.value as? TabRowTrait)?.scrollable == true,
-            )
+            ),
         )
 
         codeBlockBuilder.addStatement(" when ($indexVariable) { ")
@@ -249,7 +265,7 @@ data object TabsTrait : ComposeTrait {
                     project = project,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
             codeBlockBuilder.addStatement("} ")
         }
@@ -267,11 +283,12 @@ data object TabsTrait : ComposeTrait {
         scrollable: Boolean,
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
-        val tabRowMember = if (scrollable) {
-            MemberName("androidx.compose.material3", "ScrollableTabRow")
-        } else {
-            MemberName("androidx.compose.material3", "TabRow")
-        }
+        val tabRowMember =
+            if (scrollable) {
+                MemberName("androidx.compose.material3", "ScrollableTabRow")
+            } else {
+                MemberName("androidx.compose.material3", "TabRow")
+            }
         codeBlockBuilder.addStatement(
             """%M(
                 selectedTabIndex = selectedIndex,
@@ -279,7 +296,7 @@ data object TabsTrait : ComposeTrait {
             tabRowMember,
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {")
         node.children.forEachIndexed { i, child ->
@@ -290,11 +307,10 @@ data object TabsTrait : ComposeTrait {
                     project = project,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
         }
         codeBlockBuilder.addStatement("}")
         return codeBlockBuilder.build()
     }
 }
-

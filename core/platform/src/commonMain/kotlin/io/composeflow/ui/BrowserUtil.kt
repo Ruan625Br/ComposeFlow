@@ -11,11 +11,12 @@ fun openInBrowser(uri: URI) {
     val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
 
     when {
-        desktop?.isSupported(Desktop.Action.BROWSE) == true -> try {
-            desktop.browse(uri)
-        } catch (e: Exception) {
-            fallbackOpen(uri, osName)
-        }
+        desktop?.isSupported(Desktop.Action.BROWSE) == true ->
+            try {
+                desktop.browse(uri)
+            } catch (e: Exception) {
+                fallbackOpen(uri, osName)
+            }
 
         "mac" in osName -> Runtime.getRuntime().exec(arrayOf("open", uri.toString()))
         "nix" in osName || "nux" in osName -> Runtime.getRuntime().exec(arrayOf("xdg-open", uri.toString()))
@@ -23,7 +24,10 @@ fun openInBrowser(uri: URI) {
     }
 }
 
-private fun fallbackOpen(uri: URI, osName: String) {
+private fun fallbackOpen(
+    uri: URI,
+    osName: String,
+) {
     try {
         when {
             "mac" in osName -> Runtime.getRuntime().exec(arrayOf("open", uri.toString()))

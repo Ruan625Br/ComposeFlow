@@ -64,7 +64,6 @@ import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
 import org.jetbrains.compose.resources.stringResource
 
-
 @Composable
 fun EnumListHeader(
     onEnumAdded: (String) -> Unit,
@@ -87,9 +86,10 @@ fun EnumListHeader(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = contentDesc,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(18.dp),
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(18.dp),
                 )
             }
         }
@@ -101,9 +101,10 @@ fun EnumListHeader(
                 onClick = {
                     nameDialogOpen = true
                 },
-                modifier = Modifier
-                    .hoverIconClickable()
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .hoverIconClickable()
+                        .hoverOverlay(),
             ) {
                 Icon(
                     Icons.Outlined.Add,
@@ -142,32 +143,34 @@ fun EnumList(
 ) {
     Column(
         Modifier
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         val dataTypes = project.customEnumHolder.enumList
         LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
             itemsIndexed(dataTypes) { i, enum ->
-                val focusedModifier = if (i == enumFocusedIndex) {
-                    Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                alpha = 0.8f,
-                            ),
-                        )
-                } else {
-                    Modifier.alpha(0.4f)
-                }
+                val focusedModifier =
+                    if (i == enumFocusedIndex) {
+                        Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                    alpha = 0.8f,
+                                ),
+                            )
+                    } else {
+                        Modifier.alpha(0.4f)
+                    }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .hoverIconClickable()
-                        .then(focusedModifier)
-                        .clickable {
-                            onFocusedEnumIndexUpdated(i)
-                        },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .hoverIconClickable()
+                            .then(focusedModifier)
+                            .clickable {
+                                onFocusedEnumIndexUpdated(i)
+                            },
                 ) {
                     Text(
                         enum.enumName,
@@ -206,10 +209,11 @@ fun EnumDetail(
     onSwapEnumValueIndexes: (Int, Int) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundContainerNeutral()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .backgroundContainerNeutral()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.weight(1f))
         EnumDetailContent(
@@ -224,7 +228,6 @@ fun EnumDetail(
         Spacer(Modifier.weight(1f))
     }
 }
-
 
 @Composable
 private fun EnumDetailContent(
@@ -241,14 +244,14 @@ private fun EnumDetailContent(
     var indexOfEnumToBeDeleted by remember { mutableStateOf<Int?>(null) }
 
     Column(
-        modifier = Modifier
-            .width(960.dp)
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier =
+            Modifier
+                .width(960.dp)
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surface),
     ) {
-
         val enum =
             focusedEnumIndex?.let { project.customEnumHolder.enumList[it] }
         Column(
@@ -284,9 +287,11 @@ private fun EnumDetailContent(
                 EnumDetailContentHeader()
                 LazyColumn(
                     state = reorderableLazyListState.listState,
-                    modifier = Modifier.heightIn(max = 800.dp)
-                        .detectReorder(reorderableLazyListState)
-                        .reorderable(reorderableLazyListState)
+                    modifier =
+                        Modifier
+                            .heightIn(max = 800.dp)
+                            .detectReorder(reorderableLazyListState)
+                            .reorderable(reorderableLazyListState),
                 ) {
                     itemsIndexed(enum.values) { i, value ->
                         ComposeFlowReorderableItem(
@@ -326,9 +331,10 @@ private fun EnumDetailContent(
                 addEnumValueDialogOpen = false
                 onAllDialogsClosed()
             }
-            val initialValue = indexOfEnumToBeEdited?.let {
-                enum?.values?.get(it)
-            }
+            val initialValue =
+                indexOfEnumToBeEdited?.let {
+                    enum?.values?.get(it)
+                }
 
             SingleTextInputDialog(
                 textLabel = "Enum value",
@@ -344,7 +350,7 @@ private fun EnumDetailContent(
                     dialogClosed()
                 },
                 initialValue = initialValue,
-                validator = KotlinVariableNameValidator()::validate
+                validator = KotlinVariableNameValidator()::validate,
             )
         }
 
@@ -362,7 +368,7 @@ private fun EnumDetailContent(
                 },
                 onCloseClick = {
                     closeDialog()
-                }
+                },
             )
         }
     }
@@ -420,8 +426,9 @@ private fun EnumFieldRow(
             }
         }
         HorizontalDivider(
-            modifier = Modifier
-                .padding(vertical = 8.dp),
+            modifier =
+                Modifier
+                    .padding(vertical = 8.dp),
         )
     }
 }

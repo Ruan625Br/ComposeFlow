@@ -35,28 +35,35 @@ data class NavigationDrawerTrait(
     @Transient
     val expandedInCanvas: MutableState<Boolean> = mutableStateOf(false),
 ) : ComposeTrait {
-
     override fun icon(): ImageVector = ComposeFlowIcons.NavigationDrawer
+
     override fun visibleInPalette(): Boolean = true
+
     override fun isDroppable(): Boolean = true
+
     override fun isResizeable(): Boolean = false
+
     override fun isEditable(): Boolean = true
+
     override fun iconText(): String = "Nav Drawer"
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
+
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_navigation_drawer_trait
 
     override fun isVisibilityConditional(): Boolean = false
+
     override fun defaultComposeNode(project: Project): ComposeNode {
-        val navDrawer = ComposeNode(
-            label = mutableStateOf("NavigationDrawer"),
-            trait = mutableStateOf(
-                NavigationDrawerTrait(
-                    expandedInCanvas = mutableStateOf(true)
-                ),
-            ),
-        )
+        val navDrawer =
+            ComposeNode(
+                label = mutableStateOf("NavigationDrawer"),
+                trait =
+                    mutableStateOf(
+                        NavigationDrawerTrait(
+                            expandedInCanvas = mutableStateOf(true),
+                        ),
+                    ),
+            )
         return navDrawer
     }
 
@@ -70,17 +77,19 @@ data class NavigationDrawerTrait(
         modifier: Modifier,
     ) {
         ModalDrawerSheet(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        isDraggable = false,
-                    ),
-            )
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            isDraggable = false,
+                        ),
+                ),
         ) {
             node.children.forEach { child ->
                 child.RenderedNodeInCanvas(
@@ -103,16 +112,16 @@ data class NavigationDrawerTrait(
         codeBlockBuilder.add(
             CodeBlock.of(
                 "%M(",
-                MemberName("androidx.compose.material3", "ModalDrawerSheet")
-            )
+                MemberName("androidx.compose.material3", "ModalDrawerSheet"),
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {")
         node.children.forEach { child ->
             codeBlockBuilder.add(
-                child.generateCode(project, context, dryRun = dryRun)
+                child.generateCode(project, context, dryRun = dryRun),
             )
         }
         codeBlockBuilder.addStatement("}")
@@ -126,12 +135,10 @@ object NavigationDrawerTypeSerializer :
 @Serializable(NavigationDrawerTypeSerializer::class)
 enum class NavigationDrawerType {
     Default {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "ModalNavigationDrawer")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "ModalNavigationDrawer")
     },
     Dismissible {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "DismissibleNavigationDrawer")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "DismissibleNavigationDrawer")
     },
     ;
 

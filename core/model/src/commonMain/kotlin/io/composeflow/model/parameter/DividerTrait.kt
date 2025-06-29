@@ -19,13 +19,12 @@ abstract class DividerTrait(
     @Transient
     open val color: AssignableProperty? = null,
 ) : ComposeTrait {
-
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Color", color, ComposeFlowType.Color()),
         )
-    }
 
     fun generateParamsCode(
         project: Project,
@@ -46,12 +45,11 @@ abstract class DividerTrait(
                     project,
                     context,
                     ComposeFlowType.Color(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
         }
         return codeBlockBuilder.build()
     }
 }
-

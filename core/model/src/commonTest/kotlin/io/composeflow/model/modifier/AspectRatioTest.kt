@@ -10,7 +10,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class AspectRatioTest {
-
     @Test
     fun toComposeCode_alpha_ratioOnly() {
         val modifierList = listOf(ModifierWrapper.AspectRatio(1f))
@@ -20,8 +19,7 @@ class AspectRatioTest {
 
         assertEquals(
             """modifier = 
-                androidx.compose.ui.Modifier.androidx.compose.foundation.layout.aspectRatio(ratio=1.0f,),"""
-                .trimForCompare(),
+                androidx.compose.ui.Modifier.androidx.compose.foundation.layout.aspectRatio(ratio=1.0f,),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }

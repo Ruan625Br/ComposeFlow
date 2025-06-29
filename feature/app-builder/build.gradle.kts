@@ -28,7 +28,6 @@ kotlin {
     }
 }
 
-
 tasks {
     val compressAppTemplateZip by registering(Zip::class) {
         into("app-template") {
@@ -39,31 +38,32 @@ tasks {
         }
         into("app-template/gradle") {
             from(rootProject.file("gradle/libs.versions.toml"))
-            val composeFlowOnlyDependencies = listOf(
-                "compose-code-editor",
-                "compose-color-picker",
-                "commons-compress",
-                "conveyor",
-                "atomicfu",
-                "buildconfig-plugin",
-                "filekit-compose",
-                "jewel",
-                "logback",
-                "kaml",
-                "kermit-test",
-                "kotlinpoet",
-                "ktlint",
-                "logback-core",
-                "google-cloud",
-                "gradle-tooling",
-                "http4k",
-                "material-kolor",
-                "reorderable",
-                "roborazzi",
-                "slf4j",
-                "sentry",
-                "testparameterinjector",
-            )
+            val composeFlowOnlyDependencies =
+                listOf(
+                    "compose-code-editor",
+                    "compose-color-picker",
+                    "commons-compress",
+                    "conveyor",
+                    "atomicfu",
+                    "buildconfig-plugin",
+                    "filekit-compose",
+                    "jewel",
+                    "logback",
+                    "kaml",
+                    "kermit-test",
+                    "kotlinpoet",
+                    "ktlint",
+                    "logback-core",
+                    "google-cloud",
+                    "gradle-tooling",
+                    "http4k",
+                    "material-kolor",
+                    "reorderable",
+                    "roborazzi",
+                    "slf4j",
+                    "sentry",
+                    "testparameterinjector",
+                )
             filter { line ->
                 if (composeFlowOnlyDependencies.any { line.contains(it) || line.startsWith("#") }) {
                     logger.lifecycle("Removing \"$line\" for app-template")

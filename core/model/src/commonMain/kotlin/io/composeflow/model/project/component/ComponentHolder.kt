@@ -19,17 +19,20 @@ data class ComponentHolder(
     val components: MutableList<Component> = mutableStateListEqualsOverrideOf(),
 ) {
     fun generateKoinViewModelModule(project: Project): FileSpec {
-        val fileBuilder = FileSpec.builder(
-            fileName = "ViewModelModule",
-            packageName = "${COMPOSEFLOW_PACKAGE}.components"
-        )
-        val funSpecBuilder = FunSpec.builder("componentViewModelModule")
-            .returns(org.koin.core.module.Module::class)
-            .addCode("return %M {", MemberName("org.koin.dsl", "module"))
+        val fileBuilder =
+            FileSpec.builder(
+                fileName = "ViewModelModule",
+                packageName = "${COMPOSEFLOW_PACKAGE}.components",
+            )
+        val funSpecBuilder =
+            FunSpec
+                .builder("componentViewModelModule")
+                .returns(org.koin.core.module.Module::class)
+                .addCode("return %M {", MemberName("org.koin.dsl", "module"))
         components.forEach {
             funSpecBuilder.addStatement(
                 "factory { %T() } ",
-                ClassName(it.getPackageName(project), it.viewModelFileName)
+                ClassName(it.getPackageName(project), it.viewModelFileName),
             )
         }
         funSpecBuilder.addCode("}")

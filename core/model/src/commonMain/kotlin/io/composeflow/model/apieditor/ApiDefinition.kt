@@ -40,9 +40,7 @@ data class ApiDefinition(
     @Serializable(FallbackMutableStateListSerializer::class)
     val parameters: MutableList<ApiProperty.StringParameter> = mutableStateListEqualsOverrideOf(),
 ) {
-    fun isValid(): Boolean {
-        return exampleJsonResponse != null && generateTrackableIssue().isEmpty()
-    }
+    fun isValid(): Boolean = exampleJsonResponse != null && generateTrackableIssue().isEmpty()
 
     fun generateCodeBlock(): CodeBlock {
         val authCodeBlock = authorization.generateCodeBlock()
@@ -50,15 +48,15 @@ data class ApiDefinition(
         builder.add(
             CodeBlock.of(
                 "%M(",
-                MemberName("${COMPOSEFLOW_PACKAGE}.model.apieditor", "ApiDefinition")
-            )
+                MemberName("${COMPOSEFLOW_PACKAGE}.model.apieditor", "ApiDefinition"),
+            ),
         )
         builder.add("""name = "${name.asVariableName().trim()}",""")
         builder.add(
             CodeBlock.of(
                 "method = %M.${method.name},",
-                MemberName("${COMPOSEFLOW_PACKAGE}.model.apieditor", "Method")
-            )
+                MemberName("${COMPOSEFLOW_PACKAGE}.model.apieditor", "Method"),
+            ),
         )
         val headersBlockBuilder = CodeBlock.builder().add(headers.generateCodeBlock())
         authCodeBlock?.let {
@@ -71,44 +69,48 @@ data class ApiDefinition(
           headers = listOf(${headersBlockBuilder.build()}),
           queryParameters = listOf(${queryParameters.generateCodeBlock()}), 
           )
-        """
+        """,
         )
         return builder.build()
     }
 
-    private fun createApiResultFunName(): String =
-        "create" + name.asClassName().capitalize(Locale.current) + "Result"
+    private fun createApiResultFunName(): String = "create" + name.asClassName().capitalize(Locale.current) + "Result"
 
     fun callApiFunName() = "onCall${name.asClassName().capitalize(Locale.current)}Api"
+
     fun apiResultName(): String = name.asVariableName() + "Result"
 
-    private fun updateApiResultFunName(): String =
-        "update" + name.asClassName().capitalize(Locale.current) + "Result"
+    private fun updateApiResultFunName(): String = "update" + name.asClassName().capitalize(Locale.current) + "Result"
 
     fun generateInitApiResultInViewModelFunSpec(): FunSpec {
-        val funSpecBuilder = FunSpec.builder("init${name.asClassName().capitalize(Locale.current)}")
-            .addCode(
-                CodeBlock.of(
-                    """${updateApiResultFunName()}()
-                    """
+        val funSpecBuilder =
+            FunSpec
+                .builder("init${name.asClassName().capitalize(Locale.current)}")
+                .addCode(
+                    CodeBlock.of(
+                        """${updateApiResultFunName()}()
+                    """,
+                    ),
                 )
-            )
         return funSpecBuilder.build()
     }
 
     fun generateUpdateApiResultFunSpec(): FunSpec {
-        val argumentString = buildString {
-            parameters.forEachIndexed { index, parameter ->
-                append("${parameter.name} = ${parameter.name}")
-                if (index != parameters.lastIndex) {
-                    append(",")
+        val argumentString =
+            buildString {
+                parameters.forEachIndexed { index, parameter ->
+                    append("${parameter.name} = ${parameter.name}")
+                    if (index != parameters.lastIndex) {
+                        append(",")
+                    }
                 }
             }
-        }
-        val funSpecBuilder = FunSpec.builder(updateApiResultFunName())
-            .addModifiers(KModifier.PRIVATE)
-            .addCode(
-                """
+        val funSpecBuilder =
+            FunSpec
+                .builder(updateApiResultFunName())
+                .addModifiers(KModifier.PRIVATE)
+                .addCode(
+                    """
             %M.%M {
                 _${apiResultName()}.value = %T.Loading
                 _${apiResultName()}.value = try {
@@ -118,12 +120,12 @@ data class ApiDefinition(
                 }
             }
             """,
-                MemberHolder.PreCompose.viewModelScope,
-                MemberHolder.Coroutines.launch,
-                ClassHolder.ComposeFlow.DataResult,
-                ClassHolder.ComposeFlow.DataResult,
-                ClassHolder.ComposeFlow.DataResult,
-            )
+                    MemberHolder.PreCompose.viewModelScope,
+                    MemberHolder.Coroutines.launch,
+                    ClassHolder.ComposeFlow.DataResult,
+                    ClassHolder.ComposeFlow.DataResult,
+                    ClassHolder.ComposeFlow.DataResult,
+                )
         parameters.forEach {
             funSpecBuilder.addParameter(it.generateArgumentParameterSpec())
         }
@@ -131,16 +133,19 @@ data class ApiDefinition(
     }
 
     fun generateCallApiFunSpec(): FunSpec {
-        val argumentString = buildString {
-            parameters.forEachIndexed { index, parameter ->
-                append("${parameter.name} = ${parameter.name}")
-                if (index != parameters.lastIndex) {
-                    append(",")
+        val argumentString =
+            buildString {
+                parameters.forEachIndexed { index, parameter ->
+                    append("${parameter.name} = ${parameter.name}")
+                    if (index != parameters.lastIndex) {
+                        append(",")
+                    }
                 }
             }
-        }
-        val funSpecBuilder = FunSpec.builder(callApiFunName())
-            .addCode("${updateApiResultFunName()}($argumentString)")
+        val funSpecBuilder =
+            FunSpec
+                .builder(callApiFunName())
+                .addCode("${updateApiResultFunName()}($argumentString)")
         parameters.forEach {
             funSpecBuilder.addParameter(it.generateArgumentParameterSpec())
         }
@@ -148,12 +153,14 @@ data class ApiDefinition(
     }
 
     fun generateApiResultFunSpec(): FunSpec {
-        val funSpecBuilder = FunSpec.builder(createApiResultFunName())
-            .addModifiers(KModifier.PRIVATE)
-            .addModifiers(KModifier.SUSPEND)
-            .returns(
-                ClassHolder.Kotlinx.Serialization.JsonElement
-            )
+        val funSpecBuilder =
+            FunSpec
+                .builder(createApiResultFunName())
+                .addModifiers(KModifier.PRIVATE)
+                .addModifiers(KModifier.SUSPEND)
+                .returns(
+                    ClassHolder.Kotlinx.Serialization.JsonElement,
+                )
 
         with(funSpecBuilder) {
             addCode("return %M(", MemberName("${COMPOSEFLOW_PACKAGE}.api", "callApi"))
@@ -173,58 +180,64 @@ data class ApiDefinition(
     }
 
     fun generateApiResultFlowProperties(): List<PropertySpec> {
-        val dataResultType = ClassHolder.ComposeFlow.DataResult
-            .parameterizedBy(ClassHolder.Kotlinx.Serialization.JsonElement)
-        val backingProperty = PropertySpec.builder(
-            "_${apiResultName()}",
-            ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(dataResultType)
-        )
-            .addModifiers(KModifier.PRIVATE)
-            .initializer(
-                "%T(%T.Idle)",
-                ClassHolder.Coroutines.Flow.MutableStateFlow,
-                ClassHolder.ComposeFlow.DataResult,
-            )
-            .build()
-        val property = PropertySpec.builder(
-            apiResultName(),
-            ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(dataResultType)
-        )
-            .initializer("_${apiResultName()}")
-            .build()
+        val dataResultType =
+            ClassHolder.ComposeFlow.DataResult
+                .parameterizedBy(ClassHolder.Kotlinx.Serialization.JsonElement)
+        val backingProperty =
+            PropertySpec
+                .builder(
+                    "_${apiResultName()}",
+                    ClassHolder.Coroutines.Flow.MutableStateFlow
+                        .parameterizedBy(dataResultType),
+                ).addModifiers(KModifier.PRIVATE)
+                .initializer(
+                    "%T(%T.Idle)",
+                    ClassHolder.Coroutines.Flow.MutableStateFlow,
+                    ClassHolder.ComposeFlow.DataResult,
+                ).build()
+        val property =
+            PropertySpec
+                .builder(
+                    apiResultName(),
+                    ClassHolder.Coroutines.Flow.StateFlow
+                        .parameterizedBy(dataResultType),
+                ).initializer("_${apiResultName()}")
+                .build()
         return listOf(
             backingProperty,
-            property
+            property,
         )
     }
 
-    private fun apiParameters(): List<ApiProperty> {
-        return buildList {
-            addAll(headers.filter { it.second is ApiProperty.StringParameter }.map { it.second } +
-                    queryParameters.filter { it.second is ApiProperty.StringParameter }
-                        .map { it.second }
+    private fun apiParameters(): List<ApiProperty> =
+        buildList {
+            addAll(
+                headers.filter { it.second is ApiProperty.StringParameter }.map { it.second } +
+                    queryParameters
+                        .filter { it.second is ApiProperty.StringParameter }
+                        .map { it.second },
             )
         }
-    }
 
-    fun generateTrackableIssue(): List<TrackableIssue> {
-        return buildList {
+    fun generateTrackableIssue(): List<TrackableIssue> =
+        buildList {
             apiParameters().forEach {
                 if (it !in parameters) {
                     add(
                         TrackableIssue(
-                            destinationContext = DestinationContext.ApiEditorScreen(
-                                apiId = id
-                            ),
-                            issue = Issue.InvalidApiParameterReference(
-                                destination = NavigatableDestination.ApiEditorScreen
-                            )
-                        )
+                            destinationContext =
+                                DestinationContext.ApiEditorScreen(
+                                    apiId = id,
+                                ),
+                            issue =
+                                Issue.InvalidApiParameterReference(
+                                    destination = NavigatableDestination.ApiEditorScreen,
+                                ),
+                        ),
                     )
                 }
             }
         }
-    }
 
     private fun List<Pair<String, ApiProperty>>.generateCodeBlock(): String {
         val builder = StringBuilder()

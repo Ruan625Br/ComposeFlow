@@ -6,7 +6,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class DpSerializerTest {
-
     @Test
     fun normalValue() {
         verifySerializeDeserialize(8.dp)
@@ -31,10 +30,11 @@ class DpSerializerTest {
     fun negativeValue() {
         val dp = Dp(-2f)
         val encoded = yamlSerializer.encodeToString(serializer = DpNonNegativeSerializer, dp)
-        val decoded = yamlSerializer.decodeFromString(
-            deserializer = DpNonNegativeSerializer,
-            encoded
-        )
+        val decoded =
+            yamlSerializer.decodeFromString(
+                deserializer = DpNonNegativeSerializer,
+                encoded,
+            )
         assertEquals(Dp(0f), decoded)
     }
 

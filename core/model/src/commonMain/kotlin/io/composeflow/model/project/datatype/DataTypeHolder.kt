@@ -15,13 +15,13 @@ data class DataTypeHolder(
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val dataTypes: MutableList<DataType> = mutableStateListEqualsOverrideOf(),
 ) {
-    fun generateDataTypeFiles(project: Project): List<FileSpec?> {
-        return dataTypes.map { dataType ->
+    fun generateDataTypeFiles(project: Project): List<FileSpec?> =
+        dataTypes.map { dataType ->
             dataType.generateDataClassSpec(project)?.let {
-                FileSpec.builder("${project.packageName}.${DataTypePackage}", dataType.className)
+                FileSpec
+                    .builder("${project.packageName}.$DataTypePackage", dataType.className)
                     .addType(it)
                     .build()
             }
         }
-    }
 }

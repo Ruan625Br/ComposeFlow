@@ -66,9 +66,11 @@ fun TabRowInspector(
                 onClick = {
                     tabContainer?.addTab()
                 },
-                modifier = Modifier.padding(start = 16.dp)
-                    .hoverOverlay()
-                    .hoverIconClickable(),
+                modifier =
+                    Modifier
+                        .padding(start = 16.dp)
+                        .hoverOverlay()
+                        .hoverIconClickable(),
             ) {
                 val contentDesc = stringResource(Res.string.add_tab)
                 Tooltip(contentDesc) {
@@ -84,9 +86,11 @@ fun TabRowInspector(
                 onClick = {
                     openEditTabRowDialog = true
                 },
-                modifier = Modifier.padding(start = 16.dp)
-                    .hoverOverlay()
-                    .hoverIconClickable(),
+                modifier =
+                    Modifier
+                        .padding(start = 16.dp)
+                        .hoverOverlay()
+                        .hoverIconClickable(),
             ) {
                 val contentDesc = stringResource(Res.string.edit)
                 Tooltip(contentDesc) {
@@ -104,11 +108,12 @@ fun TabRowInspector(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .hoverOverlay()
-                    .fillMaxWidth()
-                    .height(42.dp)
-                    .padding(start = 16.dp),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .padding(start = 16.dp),
             ) {
                 Text(
                     text = tabTrait.text?.displayText(project) ?: "",
@@ -141,7 +146,7 @@ fun TabRowInspector(
             node = node,
             onCloseDialog = {
                 openEditTabRowDialog = false
-            }
+            },
         )
     }
 }
@@ -159,7 +164,7 @@ private fun EditTabRowDialog(
     modifier: Modifier = Modifier,
 ) {
     PositionCustomizablePopup(
-        onDismissRequest = onCloseDialog
+        onDismissRequest = onCloseDialog,
     ) {
         Surface(
             modifier = modifier.size(width = 420.dp, height = 460.dp),
@@ -180,9 +185,11 @@ private fun EditTabRowDialog(
                         onClick = {
                             tabContainer?.addTab()
                         },
-                        modifier = Modifier.padding(start = 16.dp)
-                            .hoverOverlay()
-                            .hoverIconClickable(),
+                        modifier =
+                            Modifier
+                                .padding(start = 16.dp)
+                                .hoverOverlay()
+                                .hoverIconClickable(),
                     ) {
                         val contentDesc = stringResource(Res.string.add_tab)
                         Tooltip(contentDesc) {
@@ -201,9 +208,10 @@ private fun EditTabRowDialog(
                     })
                 LazyColumn(
                     state = reorderableLazyListState.listState,
-                    modifier = Modifier
-                        .reorderable(reorderableLazyListState)
-                        .detectReorder(reorderableLazyListState),
+                    modifier =
+                        Modifier
+                            .reorderable(reorderableLazyListState)
+                            .detectReorder(reorderableLazyListState),
                 ) {
                     itemsIndexed(tabs) { i, tab ->
                         val tabTrait = tab.trait.value as TabTrait
@@ -214,11 +222,12 @@ private fun EditTabRowDialog(
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .hoverOverlay()
-                                    .fillMaxWidth()
-                                    .height(42.dp)
-                                    .padding(start = 16.dp),
+                                modifier =
+                                    Modifier
+                                        .hoverOverlay()
+                                        .fillMaxWidth()
+                                        .height(42.dp)
+                                        .padding(start = 16.dp),
                             ) {
                                 Text(
                                     text = tabTrait.text?.displayText(project) ?: "",

@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             PreComposeApp {
                 CompositionLocalProvider(
-                    LocalImageLoader provides ImageLoader.createDefaultAndroid(applicationContext)
+                    LocalImageLoader provides ImageLoader.createDefaultAndroid(applicationContext),
                 ) {
                     MainView()
                 }
@@ -37,7 +37,8 @@ class MainActivity : ComponentActivity() {
      */
     private fun updateStatusBarIconsForTheme() {
         // Check if we're in dark mode
-        val isDarkTheme = resources.configuration.uiMode and
+        val isDarkTheme =
+            resources.configuration.uiMode and
                 Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -46,12 +47,12 @@ class MainActivity : ComponentActivity() {
                     if (isDarkTheme) {
                         win.insetsController?.setSystemBarsAppearance(
                             0, // Clear the appearance flags
-                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
                         )
                     } else {
                         win.insetsController?.setSystemBarsAppearance(
                             WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
-                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS
+                            WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS,
                         )
                     }
                 }

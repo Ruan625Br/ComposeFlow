@@ -53,9 +53,10 @@ fun NavigateToActionContent(
     Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                navigationActionsOpened = !navigationActionsOpened
-            },
+            modifier =
+                Modifier.clickable {
+                    navigationActionsOpened = !navigationActionsOpened
+                },
         ) {
             Text(
                 text = "Navigate to",
@@ -75,32 +76,34 @@ fun NavigateToActionContent(
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                Navigation.NavigateTo(screenId = screen.id),
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    Navigation.NavigateTo(screenId = screen.id),
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is Navigation.NavigateTo &&
                                         actionInEdit.screenId == screen.id
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Note,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(start = 4.dp)
-                            .size(16.dp),
+                        modifier =
+                            Modifier
+                                .padding(start = 4.dp)
+                                .size(16.dp),
                     )
 
                     Text(
@@ -123,23 +126,24 @@ fun NavigateBackContent(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable {
-            onActionSelected(Navigation.NavigateBack)
-        }
-            .fillMaxWidth()
-            .hoverIconClickable()
-            .hoverOverlay()
-            .padding(vertical = 4.dp)
-            .padding(start = 4.dp)
-            .then(
-                Modifier.selectedActionModifier(
-                    actionInEdit = actionInEdit,
-                    predicate = {
-                        it != null &&
+        modifier =
+            Modifier
+                .clickable {
+                    onActionSelected(Navigation.NavigateBack)
+                }.fillMaxWidth()
+                .hoverIconClickable()
+                .hoverOverlay()
+                .padding(vertical = 4.dp)
+                .padding(start = 4.dp)
+                .then(
+                    Modifier.selectedActionModifier(
+                        actionInEdit = actionInEdit,
+                        predicate = {
+                            it != null &&
                                 it is Navigation.NavigateBack
-                    },
+                        },
+                    ),
                 ),
-            ),
     ) {
         Text(
             text = "Navigate back",
@@ -175,7 +179,7 @@ fun NavigateToActionDetail(
                 onInitializeProperty = {
                     initialParamsMap.remove(parameter.id)
                     onParametersMapUpdated(initialParamsMap)
-                }
+                },
             )
         }
         TextButton(onClick = {

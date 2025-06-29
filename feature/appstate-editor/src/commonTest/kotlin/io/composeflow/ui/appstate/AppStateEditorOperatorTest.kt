@@ -23,7 +23,6 @@ import kotlin.test.assertTrue
  * concrete types from the LLM tools.
  */
 class AppStateEditorOperatorTest {
-
     private lateinit var appStateEditorOperator: AppStateEditorOperator
     private lateinit var project: Project
 
@@ -36,18 +35,20 @@ class AppStateEditorOperatorTest {
     @Test
     fun testGlobalStateHolderOperations() {
         // Test basic state operations
-        val state1 = AppState.StringAppState(
-            name = "testString",
-            defaultValue = "test value"
-        )
+        val state1 =
+            AppState.StringAppState(
+                name = "testString",
+                defaultValue = "test value",
+            )
         project.globalStateHolder.addState(state1)
 
         assertEquals(1, project.globalStateHolder.getStates(project).size)
 
-        val state2 = AppState.BooleanAppState(
-            name = "testBoolean",
-            defaultValue = true
-        )
+        val state2 =
+            AppState.BooleanAppState(
+                name = "testBoolean",
+                defaultValue = true,
+            )
         project.globalStateHolder.addState(state2)
 
         assertEquals(2, project.globalStateHolder.getStates(project).size)
@@ -71,7 +72,11 @@ class AppStateEditorOperatorTest {
         project.globalStateHolder.addState(state1)
 
         // Manually test unique name generation
-        val existingNames = project.globalStateHolder.getStates(project).map { it.name }.toSet()
+        val existingNames =
+            project.globalStateHolder
+                .getStates(project)
+                .map { it.name }
+                .toSet()
         assertTrue("duplicate" in existingNames)
 
         // The operator would generate unique names like "duplicate2", "duplicate3" etc
@@ -85,16 +90,18 @@ class AppStateEditorOperatorTest {
 
     @Test
     fun testUpdateState() {
-        val originalState = AppState.StringAppState(
-            name = "original",
-            defaultValue = "original value"
-        )
+        val originalState =
+            AppState.StringAppState(
+                name = "original",
+                defaultValue = "original value",
+            )
         project.globalStateHolder.addState(originalState)
 
-        val updatedState = originalState.copy(
-            name = "updated",
-            defaultValue = "updated value"
-        )
+        val updatedState =
+            originalState.copy(
+                name = "updated",
+                defaultValue = "updated value",
+            )
         project.globalStateHolder.updateState(updatedState)
 
         assertEquals(1, project.globalStateHolder.getStates(project).size)
@@ -106,31 +113,36 @@ class AppStateEditorOperatorTest {
     @Test
     fun testCustomDataTypeListAppState() {
         // Create a DataType
-        val dataType = DataType(
-            name = "TestDataType",
-            fields = mutableListOf(
-                DataField(name = "field1", fieldType = FieldType.String()),
-                DataField(name = "field2", fieldType = FieldType.String())
+        val dataType =
+            DataType(
+                name = "TestDataType",
+                fields =
+                    mutableListOf(
+                        DataField(name = "field1", fieldType = FieldType.String()),
+                        DataField(name = "field2", fieldType = FieldType.String()),
+                    ),
             )
-        )
         project.dataTypeHolder.dataTypes.add(dataType)
 
         // Create CustomDataTypeListAppState
-        val appState = AppState.CustomDataTypeListAppState(
-            name = "customList",
-            dataTypeId = dataType.id,
-            defaultValue = listOf(
-                DataTypeDefaultValue(
-                    dataTypeId = dataType.id,
-                    defaultFields = mutableListOf(
-                        FieldDefaultValue(
-                            fieldId = dataType.fields[0].id,
-                            defaultValue = StringProperty.StringIntrinsicValue("value1")
-                        )
-                    )
-                )
+        val appState =
+            AppState.CustomDataTypeListAppState(
+                name = "customList",
+                dataTypeId = dataType.id,
+                defaultValue =
+                    listOf(
+                        DataTypeDefaultValue(
+                            dataTypeId = dataType.id,
+                            defaultFields =
+                                mutableListOf(
+                                    FieldDefaultValue(
+                                        fieldId = dataType.fields[0].id,
+                                        defaultValue = StringProperty.StringIntrinsicValue("value1"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         project.globalStateHolder.addState(appState)
 
@@ -179,10 +191,11 @@ class AppStateEditorOperatorTest {
 
     @Test
     fun testOnGetAppState() {
-        val state = AppState.StringAppState(
-            name = "testState",
-            defaultValue = "test value"
-        )
+        val state =
+            AppState.StringAppState(
+                name = "testState",
+                defaultValue = "test value",
+            )
         project.globalStateHolder.addState(state)
 
         // Test getting existing state

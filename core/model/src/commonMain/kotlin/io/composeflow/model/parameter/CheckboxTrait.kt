@@ -41,13 +41,11 @@ data class CheckboxTrait(
     val checked: AssignableProperty = BooleanProperty.BooleanIntrinsicValue(false),
     val enabled: AssignableProperty = BooleanProperty.BooleanIntrinsicValue(true),
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Checked", checked, ComposeFlowType.BooleanType()),
             PropertyContainer("Enabled", enabled, ComposeFlowType.BooleanType()),
         )
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -79,8 +77,8 @@ data class CheckboxTrait(
                     project,
                     canvasEditable,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
         }
         codeBlockBuilder.addStatement("},")
@@ -95,29 +93,36 @@ data class CheckboxTrait(
 
     // onCheckedChange is included in params. Handle the onClick in that method
     override fun onClickIncludedInParams(): Boolean = true
+
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
-            trait = mutableStateOf(
-                CheckboxTrait(
-                    checked = BooleanProperty.BooleanIntrinsicValue(false),
-                    enabled = BooleanProperty.BooleanIntrinsicValue(true),
-                )
-            )
+            trait =
+                mutableStateOf(
+                    CheckboxTrait(
+                        checked = BooleanProperty.BooleanIntrinsicValue(false),
+                        enabled = BooleanProperty.BooleanIntrinsicValue(true),
+                    ),
+                ),
         )
 
     override fun icon(): ImageVector = Icons.Outlined.CheckBox
+
     override fun iconText(): String = "Checkbox"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_checkbox_trait
+
     override fun isResizeable(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
-    override fun companionState(composeNode: ComposeNode): ScreenState<*> {
-        return ScreenState.BooleanScreenState(
+
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> =
+        ScreenState.BooleanScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
             companionNodeId = composeNode.id,
         )
-    }
 
     override fun onAttachStateToNode(
         project: Project,
@@ -149,16 +154,18 @@ data class CheckboxTrait(
             onCheckedChange = {
             },
             enabled = enabled.asBooleanValue(),
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         )
     }
 
@@ -179,13 +186,12 @@ data class CheckboxTrait(
                 node = node,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()
     }
 }
-

@@ -33,20 +33,22 @@ fun TreeExpander(
         modifier = modifier,
     ) {
         val vector = Icons.Outlined.ChevronRight
-        val contentDesc = if (expanded) {
-            stringResource(Res.string.tap_to_collapse)
-        } else {
-            stringResource(
-                Res.string.tap_to_expand,
-            )
-        }
+        val contentDesc =
+            if (expanded) {
+                stringResource(Res.string.tap_to_collapse)
+            } else {
+                stringResource(
+                    Res.string.tap_to_expand,
+                )
+            }
         ComposeFlowIcon(
             imageVector = vector,
             contentDescription = contentDesc,
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .rotate(rotationDegrees)
-                .hoverIconClickable(),
+            modifier =
+                Modifier
+                    .rotate(rotationDegrees)
+                    .hoverIconClickable(),
         )
     }
 }
@@ -67,19 +69,21 @@ fun TreeExpanderInverse(
         enabled = enabled,
     ) {
         val vector = Icons.Outlined.ChevronLeft
-        val contentDesc = if (expanded) {
-            stringResource(Res.string.tap_to_collapse)
-        } else {
-            stringResource(
-                Res.string.tap_to_expand,
-            )
-        }
+        val contentDesc =
+            if (expanded) {
+                stringResource(Res.string.tap_to_collapse)
+            } else {
+                stringResource(
+                    Res.string.tap_to_expand,
+                )
+            }
         ComposeFlowIcon(
             imageVector = vector,
             contentDescription = contentDesc,
             tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier
-                .rotate(rotationDegrees)
+            modifier =
+                Modifier
+                    .rotate(rotationDegrees),
         )
     }
 }

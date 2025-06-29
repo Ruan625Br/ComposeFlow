@@ -21,10 +21,10 @@ import kotlin.io.path.inputStream
 
 sealed interface DownloadableJdk {
     fun getDownloadUrl(): String
+
     fun getJdkDirName(): String
 
     data object OpenJdk17 : DownloadableJdk {
-
         override fun getJdkDirName(): String = "openjdk-17"
 
         override fun getDownloadUrl(): String {
@@ -32,38 +32,41 @@ sealed interface DownloadableJdk {
                 "https://download.java.net/java/GA/jdk17/0d483333a00540d886896bac774ff48b/35/GPL/openjdk-17"
 
             val osName = getProperty("os.name").lowercase()
-            val os: String = when {
-                osName.contains("windows") -> "windows"
-                osName.contains("mac") || osName.contains("darwin") -> "macos"
-                osName.contains("linux") -> "linux"
-                else -> throw UnsupportedOperationException("Unsupported Operating System: $osName")
-            }
+            val os: String =
+                when {
+                    osName.contains("windows") -> "windows"
+                    osName.contains("mac") || osName.contains("darwin") -> "macos"
+                    osName.contains("linux") -> "linux"
+                    else -> throw UnsupportedOperationException("Unsupported Operating System: $osName")
+                }
 
             val osArch = getProperty("os.arch").lowercase()
-            val arch: String = when {
-                osArch in listOf("amd64", "x86_64") -> "x64"
-                osArch == "aarch64" -> "aarch64"
-                else -> throw UnsupportedOperationException("Unsupported CPU Architecture: $osArch")
-            }
+            val arch: String =
+                when {
+                    osArch in listOf("amd64", "x86_64") -> "x64"
+                    osArch == "aarch64" -> "aarch64"
+                    else -> throw UnsupportedOperationException("Unsupported CPU Architecture: $osArch")
+                }
 
-            val fileExtension = when (os) {
-                "windows" -> "zip"
-                else -> "tar.gz"
-            }
+            val fileExtension =
+                when (os) {
+                    "windows" -> "zip"
+                    else -> "tar.gz"
+                }
 
-            val downloadUrl = when (os) {
-                "windows" -> "${baseUrl}_${os}-x64_bin.$fileExtension"
-                "macos" -> "${baseUrl}_${os}-${arch}_bin.$fileExtension"
-                "linux" -> "${baseUrl}_${os}-${arch}_bin.$fileExtension"
-                else -> throw UnsupportedOperationException("Unsupported Operating System: $os")
-            }
+            val downloadUrl =
+                when (os) {
+                    "windows" -> "${baseUrl}_$os-x64_bin.$fileExtension"
+                    "macos" -> "${baseUrl}_$os-${arch}_bin.$fileExtension"
+                    "linux" -> "${baseUrl}_$os-${arch}_bin.$fileExtension"
+                    else -> throw UnsupportedOperationException("Unsupported Operating System: $os")
+                }
             return downloadUrl
         }
     }
 }
 
 object JdkDownloader {
-
     // TODO: Maybe replace with DI
     private val okHttpClient: OkHttpClient = OkHttpClient()
 
@@ -71,13 +74,13 @@ object JdkDownloader {
         downloadableJdk: DownloadableJdk = DownloadableJdk.OpenJdk17,
         tarExtractor: TarExtractor = TarExtractor(),
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
-    ): String? {
-        return withContext(dispatcher) {
+    ): String? =
+        withContext(dispatcher) {
             val tempFile = kotlin.io.path.createTempFile()
             download(
                 downloadableJdk = DownloadableJdk.OpenJdk17,
                 destFile = tempFile.toFile(),
-                dispatcher = dispatcher
+                dispatcher = dispatcher,
             )
 
             val jdkDir = getCacheDir().resolve("jdk")
@@ -109,7 +112,6 @@ object JdkDownloader {
             }
             extractedJavaHome
         }
-    }
 
     suspend fun download(
         destFile: File,
@@ -159,7 +161,7 @@ object JdkDownloader {
                                 parentDirectories.add(parentDir)
                             } else {
                                 Logger.i(
-                                    "Found 'bin' directory with 'java' file but no parent: ${file.absolutePath}\n"
+                                    "Found 'bin' directory with 'java' file but no parent: ${file.absolutePath}\n",
                                 )
                             }
                         }

@@ -46,32 +46,35 @@ enum class FontFamilyWrapper(
     fun fontFamilyName(): String = "${name}FontFamily"
 
     fun generateFontFamilyFunSpec(): FunSpec {
-        val funSpecBuilder = FunSpec.builder(fontFamilyName())
-            .addAnnotation(Composable::class)
-            .returns(FontFamily::class)
-            .addCode(
-                CodeBlock.of(
-                    "return %M(",
-                    MemberName("androidx.compose.ui.text.font", "FontFamily")
+        val funSpecBuilder =
+            FunSpec
+                .builder(fontFamilyName())
+                .addAnnotation(Composable::class)
+                .returns(FontFamily::class)
+                .addCode(
+                    CodeBlock.of(
+                        "return %M(",
+                        MemberName("androidx.compose.ui.text.font", "FontFamily"),
+                    ),
                 )
-            )
 
         fontFileWrappers.forEach { fontFile ->
             val weightWrapper = FontWeightWrapper.fromFontWeight(fontFile.fontWeight)
-            val styleAsString = when (fontFile.fontStyle) {
-                FontStyle.Normal -> "Normal"
-                FontStyle.Italic -> "Italic"
-                else -> "Normal"
-            }
+            val styleAsString =
+                when (fontFile.fontStyle) {
+                    FontStyle.Normal -> "Normal"
+                    FontStyle.Italic -> "Italic"
+                    else -> "Normal"
+                }
             funSpecBuilder.addCode(
                 CodeBlock.of(
-                    "%M(%M.font.%M, weight = %M.${weightWrapper.name}, style = %M.${styleAsString}),",
+                    "%M(%M.font.%M, weight = %M.${weightWrapper.name}, style = %M.$styleAsString),",
                     MemberName("org.jetbrains.compose.resources", "Font"),
                     MemberName("io.composeflow", "Res"),
                     MemberName("io.composeflow", fontFile.fontResourceName),
                     MemberName("androidx.compose.ui.text.font", "FontWeight"),
                     MemberName("androidx.compose.ui.text.font", "FontStyle"),
-                )
+                ),
             )
         }
         funSpecBuilder.addCode(")")
@@ -85,14 +88,16 @@ data class FontFileWrapper(
     val fontWeight: FontWeight = FontWeight.Normal,
     val fontStyle: FontStyle = FontStyle.Normal,
 ) {
-    val fontResourceName = fontFileName
-        .replace("-", "_")
-        .replace(".ttf", "")
+    val fontResourceName =
+        fontFileName
+            .replace("-", "_")
+            .replace(".ttf", "")
 
     @Composable
-    fun asFont(): Font = Font(
-        resource = fontResource,
-        weight = fontWeight,
-        style = fontStyle,
-    )
+    fun asFont(): Font =
+        Font(
+            resource = fontResource,
+            weight = fontWeight,
+            style = fontStyle,
+        )
 }

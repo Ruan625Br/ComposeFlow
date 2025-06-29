@@ -19,8 +19,9 @@ import io.composeflow.ui.uibuilder.ToggleTopAppBarButtonTestTag
 import io.composeflow.ui.uibuilder.UiBuilderScreenBuilderTabTestTag
 
 @OptIn(ExperimentalTestApi::class)
-class UiBuilderRobot(val screenTestRule: ScreenTestRule) {
-
+class UiBuilderRobot(
+    val screenTestRule: ScreenTestRule,
+) {
     context (DesktopComposeUiTest)
     fun dragToCanvas(composeTrait: ComposeTrait) {
         onAllNodesWithTag("$PaletteTestTag/$composeTrait")
@@ -33,7 +34,10 @@ class UiBuilderRobot(val screenTestRule: ScreenTestRule) {
     }
 
     context (DesktopComposeUiTest)
-    fun dragToCanvasNodeLeftTopEdge(composeTrait: ComposeTrait, canvasNode: ComposeTrait) {
+    fun dragToCanvasNodeLeftTopEdge(
+        composeTrait: ComposeTrait,
+        canvasNode: ComposeTrait,
+    ) {
         onAllNodesWithTag("$PaletteTestTag/${composeTrait.iconText()}")
             .onFirst()
             .dragTo(
@@ -46,7 +50,10 @@ class UiBuilderRobot(val screenTestRule: ScreenTestRule) {
     }
 
     context (DesktopComposeUiTest)
-    fun dragToCanvasNode(paletteNode: ComposeTrait, canvasNode: ComposeTrait) {
+    fun dragToCanvasNode(
+        paletteNode: ComposeTrait,
+        canvasNode: ComposeTrait,
+    ) {
         onAllNodesWithTag("$PaletteTestTag/$paletteNode")
             .onFirst()
             .dragTo(

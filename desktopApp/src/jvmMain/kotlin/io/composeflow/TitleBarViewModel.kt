@@ -14,7 +14,6 @@ import moe.tlaster.precompose.viewmodel.viewModelScope
 class TitleBarViewModel(
     private val settingsRepository: SettingsRepository = SettingsRepository(),
 ) : ViewModel() {
-
     /**
      * The content of the title bar.
      * This is to set the content of the title bar from the Composable which is guarded until
@@ -29,20 +28,22 @@ class TitleBarViewModel(
     private var _titleBarLeftContent = MutableStateFlow<TitleBarContent>({})
     val titleBarLeftContent: StateFlow<TitleBarContent> = _titleBarLeftContent
 
-    private val settings = settingsRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ComposeBuilderSettings(),
-    )
-
-    val versionAskedToUpdate = settings.map {
-        VersionAskedToUpdate.Ready(it.versionAskedToUpdate)
-    }
-        .stateIn(
+    private val settings =
+        settingsRepository.settings.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = VersionAskedToUpdate.NotReady,
+            initialValue = ComposeBuilderSettings(),
         )
+
+    val versionAskedToUpdate =
+        settings
+            .map {
+                VersionAskedToUpdate.Ready(it.versionAskedToUpdate)
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = VersionAskedToUpdate.NotReady,
+            )
 
     fun onTitleBarRightContentSet(content: TitleBarContent) {
         _titleBarRightContent.value = content

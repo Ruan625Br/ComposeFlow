@@ -35,36 +35,42 @@ import org.jetbrains.compose.resources.StringResource
 data class BottomAppBarTrait(
     val showFab: Boolean = true,
 ) : ComposeTrait {
-
     override fun icon(): ImageVector = ComposeFlowIcons.BottomAppBar
+
     override fun iconText(): String = "Bottom bar"
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
+
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container, TraitCategory.ScreenOnly)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_bottom_app_bar_trait
 
     override fun visibleInPalette(): Boolean = true
+
     override fun isDroppable(): Boolean = false
+
     override fun isResizeable(): Boolean = false
+
     override fun isEditable(): Boolean = true
+
     override fun isVisibilityConditional(): Boolean = false
-    override fun defaultComposeNode(project: Project): ComposeNode {
-        return ComposeNode(
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
             label = mutableStateOf("BottomAppBar"),
-            trait = mutableStateOf(
-                BottomAppBarTrait(),
-            ),
+            trait =
+                mutableStateOf(
+                    BottomAppBarTrait(),
+                ),
         ).apply {
             addChild(
                 ComposeNode(
                     label = mutableStateOf("Fab"),
-                    trait = mutableStateOf(
-                        FabTrait(imageVectorHolder = Outlined.Add),
-                    ),
+                    trait =
+                        mutableStateOf(
+                            FabTrait(imageVectorHolder = Outlined.Add),
+                        ),
                 ),
             )
         }
-    }
 
     @Composable
     override fun RenderedNode(
@@ -83,15 +89,17 @@ data class BottomAppBarTrait(
                     Icon(
                         imageVector = it.imageVector,
                         contentDescription = null,
-                        modifier = iconNode.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = iconNode,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
+                        modifier =
+                            iconNode
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = iconNode,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
                     )
                 }
             }
@@ -105,31 +113,37 @@ data class BottomAppBarTrait(
                     BottomAppBarIconButton(it)
                 }
             },
-            floatingActionButton = if (showFab) {
-                {
-                    fabNode.trait.value.RenderedNode(
-                        project = project,
-                        node = fabNode,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = PaletteRenderParams(),
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        modifier = fabNode
-                            .modifierList
-                            .toModifierChain(),
-                    )
-                }
-            } else null,
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        isDraggable = false,
-                    ),
-            ),
+            floatingActionButton =
+                if (showFab) {
+                    {
+                        fabNode.trait.value.RenderedNode(
+                            project = project,
+                            node = fabNode,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = PaletteRenderParams(),
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            modifier =
+                                fabNode
+                                    .modifierList
+                                    .toModifierChain(),
+                        )
+                    }
+                } else {
+                    null
+                },
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            isDraggable = false,
+                        ),
+                ),
         )
     }
 
@@ -144,19 +158,23 @@ data class BottomAppBarTrait(
 
         codeBlockBuilder.addStatement(
             "%M(",
-            MemberName("androidx.compose.material3", "BottomAppBar")
+            MemberName("androidx.compose.material3", "BottomAppBar"),
         )
 
-        fun writeIconButton(iconNode: ComposeNode, builder: CodeBlock.Builder) {
+        fun writeIconButton(
+            iconNode: ComposeNode,
+            builder: CodeBlock.Builder,
+        ) {
             val iconTrait = iconNode.trait.value as IconTrait
             iconTrait.imageVectorHolder?.let { imageVectorHolder ->
                 val iconMember = MemberName("androidx.compose.material3", "Icon")
                 val iconButtonMember = MemberName("androidx.compose.material3", "IconButton")
                 val iconsMember = MemberName("androidx.compose.material.icons", "Icons")
-                val imageVectorMember = MemberName(
-                    "androidx.compose.material.icons.${imageVectorHolder.packageDescriptor}",
-                    imageVectorHolder.name,
-                )
+                val imageVectorMember =
+                    MemberName(
+                        "androidx.compose.material.icons.${imageVectorHolder.packageDescriptor}",
+                        imageVectorHolder.name,
+                    )
                 builder.addStatement("%M(onClick = {", iconButtonMember)
                 iconNode.actionsMap[ActionType.OnClick]?.forEach {
                     builder.add(it.generateCodeBlock(project, context, dryRun = dryRun))
@@ -189,14 +207,14 @@ data class BottomAppBarTrait(
                     project = project,
                     node = fabNode,
                     context = context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement("},")
         }
 
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()

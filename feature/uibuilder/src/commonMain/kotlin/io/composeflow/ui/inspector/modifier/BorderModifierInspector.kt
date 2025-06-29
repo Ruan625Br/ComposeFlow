@@ -49,9 +49,10 @@ fun BorderModifierInspector(
                         wrapper.copy(width = it.toFloat().dp),
                     )
                 },
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .padding(end = 8.dp)
+                        .hoverOverlay(),
             )
             AssignableColorPropertyEditor(
                 project = project,
@@ -73,8 +74,9 @@ fun BorderModifierInspector(
                         wrapper.copy(colorWrapper = wrapper.defaultColorProperty()),
                     )
                 },
-                modifier = Modifier
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .hoverOverlay(),
             )
             ShapePropertyEditor(
                 initialShape = wrapper.shapeWrapper,

@@ -9,7 +9,6 @@ import org.junit.Assert
 import org.junit.Test
 
 class KotlinIdentifierValidatorTest {
-
     @Test
     fun testValidateVariableName() {
         val validator = KotlinVariableNameValidator()

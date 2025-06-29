@@ -10,7 +10,6 @@ import org.junit.Assert.assertEquals
 import kotlin.test.Test
 
 class FloatValidatorTest {
-
     @Test
     fun invalidFloat() {
         val validator = FloatValidator()

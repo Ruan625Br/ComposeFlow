@@ -3,7 +3,10 @@ package io.composeflow.platform
 import java.io.File
 
 internal enum class OperatingSystem {
-    Windows, Linux, MacOS, Unknown
+    Windows,
+    Linux,
+    MacOS,
+    Unknown,
 }
 
 internal val currentOperatingSystem: OperatingSystem
@@ -20,9 +23,10 @@ internal val currentOperatingSystem: OperatingSystem
         }
     }
 
-actual fun getCacheDir(): File = when (currentOperatingSystem) {
-    OperatingSystem.Windows -> File(System.getenv("AppData"), "compose_flow/cache")
-    OperatingSystem.Linux -> File(System.getProperty("user.home"), ".cache/compose_flow")
-    OperatingSystem.MacOS -> File(System.getProperty("user.home"), "Library/Caches/compose_flow")
-    else -> throw IllegalStateException("Unsupported operating system")
-}
+actual fun getCacheDir(): File =
+    when (currentOperatingSystem) {
+        OperatingSystem.Windows -> File(System.getenv("AppData"), "compose_flow/cache")
+        OperatingSystem.Linux -> File(System.getProperty("user.home"), ".cache/compose_flow")
+        OperatingSystem.MacOS -> File(System.getProperty("user.home"), "Library/Caches/compose_flow")
+        else -> throw IllegalStateException("Unsupported operating system")
+    }

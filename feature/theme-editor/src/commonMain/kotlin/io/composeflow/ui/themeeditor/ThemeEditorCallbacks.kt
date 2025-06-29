@@ -2,10 +2,10 @@ package io.composeflow.ui.themeeditor
 
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
+import com.materialkolor.PaletteStyle
 import io.composeflow.font.FontFamilyWrapper
 import io.composeflow.model.enumwrapper.TextStyleWrapper
 import io.composeflow.model.project.theme.TextStyleOverride
-import com.materialkolor.PaletteStyle
 
 data class ThemeEditorCallbacks(
     val onColorSchemeUpdated: (

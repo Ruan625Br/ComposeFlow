@@ -31,66 +31,66 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalComposeUiApi::class)
-fun Modifier.hoverIconClickable(): Modifier = composed {
-    var isHovered by remember { mutableStateOf(false) }
+fun Modifier.hoverIconClickable(): Modifier =
+    composed {
+        var isHovered by remember { mutableStateOf(false) }
 
-    onPointerEvent(PointerEventType.Enter) {
-        isHovered = true
-    }.onPointerEvent(PointerEventType.Exit) {
-        isHovered = false
-    }.then(
-        if (isHovered) {
-            pointerHoverIcon(PointerIcon.Hand)
-        } else {
-            this
-        },
-    )
-}
+        onPointerEvent(PointerEventType.Enter) {
+            isHovered = true
+        }.onPointerEvent(PointerEventType.Exit) {
+            isHovered = false
+        }.then(
+            if (isHovered) {
+                pointerHoverIcon(PointerIcon.Hand)
+            } else {
+                this
+            },
+        )
+    }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Modifier.hoverOverlay(
     overlayColor: Color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.4f),
     clipRadius: Dp = 16.dp,
-): Modifier = composed {
-    var isHovered by remember { mutableStateOf(false) }
+): Modifier =
+    composed {
+        var isHovered by remember { mutableStateOf(false) }
 
-    onPointerEvent(PointerEventType.Enter) {
-        isHovered = true
-    }.onPointerEvent(PointerEventType.Exit) {
-        isHovered = false
-    }
-        .then(
+        onPointerEvent(PointerEventType.Enter) {
+            isHovered = true
+        }.onPointerEvent(PointerEventType.Exit) {
+            isHovered = false
+        }.then(
             if (isHovered) {
                 clip(shape = RoundedCornerShape(clipRadius)).background(overlayColor)
             } else {
                 this
             },
         ).then(Modifier.padding(horizontal = 4.dp))
-}
-
-@Composable
-fun Modifier.moveFocusOnTab(
-    focusManager: FocusManager = LocalFocusManager.current,
-) = onPreviewKeyEvent {
-    if (it.type == KeyEventType.KeyDown && it.key == Key.Tab) {
-        focusManager.moveFocus(
-            if (it.isShiftPressed) {
-                FocusDirection.Previous
-            } else {
-                FocusDirection.Next
-            },
-        )
-        true
-    } else {
-        false
     }
-}
 
 @Composable
-fun Modifier.backgroundContainerNeutral(): Modifier {
-    return this.then(
-        Modifier.background(MaterialTheme.colorScheme.surfaceContainerHighest)
+fun Modifier.moveFocusOnTab(focusManager: FocusManager = LocalFocusManager.current) =
+    onPreviewKeyEvent {
+        if (it.type == KeyEventType.KeyDown && it.key == Key.Tab) {
+            focusManager.moveFocus(
+                if (it.isShiftPressed) {
+                    FocusDirection.Previous
+                } else {
+                    FocusDirection.Next
+                },
+            )
+            true
+        } else {
+            false
+        }
+    }
+
+@Composable
+fun Modifier.backgroundContainerNeutral(): Modifier =
+    this.then(
+        Modifier
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
             .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
     )
-}

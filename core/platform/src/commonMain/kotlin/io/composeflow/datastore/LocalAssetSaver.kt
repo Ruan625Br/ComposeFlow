@@ -14,7 +14,11 @@ class LocalAssetSaver(
             Dispatchers.IO
         },
 ) {
-    suspend fun saveAsset(userId: String, projectId: String, blobInfoWrapper: BlobInfoWrapper) {
+    suspend fun saveAsset(
+        userId: String,
+        projectId: String,
+        blobInfoWrapper: BlobInfoWrapper,
+    ) {
         withContext(ioDispatcher) {
             val assetDir = prepareAssetDir(userId, projectId)
             val file = assetDir.resolve(blobInfoWrapper.fileName)
@@ -24,7 +28,11 @@ class LocalAssetSaver(
         }
     }
 
-    suspend fun deleteAsset(userId: String, projectId: String, blobInfoWrapper: BlobInfoWrapper) {
+    suspend fun deleteAsset(
+        userId: String,
+        projectId: String,
+        blobInfoWrapper: BlobInfoWrapper,
+    ) {
         withContext(ioDispatcher) {
             val assetDir = prepareAssetDir(userId, projectId)
             val file = assetDir.resolve(blobInfoWrapper.fileName)
@@ -33,11 +41,16 @@ class LocalAssetSaver(
     }
 }
 
-private fun prepareAssetDir(userId: String, projectId: String): File {
-    val assetsDir = getCacheDir().resolve("projects")
-        .resolve(userId)
-        .resolve(projectId)
-        .resolve("assets")
+private fun prepareAssetDir(
+    userId: String,
+    projectId: String,
+): File {
+    val assetsDir =
+        getCacheDir()
+            .resolve("projects")
+            .resolve(userId)
+            .resolve(projectId)
+            .resolve("assets")
     assetsDir.mkdirs()
     return assetsDir
 }

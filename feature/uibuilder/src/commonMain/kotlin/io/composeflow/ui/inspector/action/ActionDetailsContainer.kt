@@ -62,8 +62,9 @@ fun ActionDetailsContainer(
     var selectActionDialogOpen by remember { mutableStateOf(false) }
     val action = focusableActionNode?.getFocusedAction()
     Column(
-        modifier = Modifier
-            .padding(top = 8.dp),
+        modifier =
+            Modifier
+                .padding(top = 8.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Column(modifier = Modifier.padding(start = 8.dp)) {
@@ -118,7 +119,7 @@ fun ActionDetailsContainer(
                         screen?.name ?: "",
                         color = MaterialTheme.colorScheme.tertiary,
                         style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(bottom = 8.dp)
+                        modifier = Modifier.padding(bottom = 8.dp),
                     )
 
                     screen?.let {
@@ -131,7 +132,7 @@ fun ActionDetailsContainer(
                             onParametersMapUpdated = { newParamsMap ->
                                 val newAction = action.copy(paramsMap = newParamsMap)
                                 onEditAction(newAction)
-                            }
+                            },
                         )
                     }
                 }
@@ -154,7 +155,7 @@ fun ActionDetailsContainer(
                             api.name,
                             color = MaterialTheme.colorScheme.tertiary,
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(bottom = 8.dp)
+                            modifier = Modifier.padding(bottom = 8.dp),
                         )
 
                         CallApiActionDetail(
@@ -166,7 +167,7 @@ fun ActionDetailsContainer(
                             onParametersMapUpdated = { newParamsMap ->
                                 val newAction = action.copy(paramsMap = newParamsMap)
                                 onEditAction(newAction)
-                            }
+                            },
                         )
                     }
                 }
@@ -178,7 +179,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -189,7 +190,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -200,7 +201,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -218,7 +219,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -229,7 +230,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -240,7 +241,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -251,7 +252,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -263,7 +264,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -274,7 +275,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -286,7 +287,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -297,7 +298,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 
@@ -308,7 +309,7 @@ fun ActionDetailsContainer(
                         initialAction = action,
                         onEditAction = {
                             onEditAction(it)
-                        }
+                        },
                     )
                 }
 

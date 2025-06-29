@@ -15,7 +15,6 @@ class AppStateEditorViewModel(
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
     private val appStateEditorOperator: AppStateEditorOperator = AppStateEditorOperator(),
 ) : ViewModel() {
-
     fun onAppStateAdded(appState: AppState<*>) {
         val result = appStateEditorOperator.addAppState(project, appState)
         if (result.errorMessages.isEmpty()) {
@@ -41,11 +40,12 @@ class AppStateEditorViewModel(
         appState: AppState<*>,
         defaultValues: List<DataTypeDefaultValue>,
     ) {
-        val result = appStateEditorOperator.updateCustomDataTypeListDefaultValues(
-            project,
-            appState.id,
-            defaultValues
-        )
+        val result =
+            appStateEditorOperator.updateCustomDataTypeListDefaultValues(
+                project,
+                appState.id,
+                defaultValues,
+            )
         if (result.errorMessages.isEmpty()) {
             saveAppStates()
         }

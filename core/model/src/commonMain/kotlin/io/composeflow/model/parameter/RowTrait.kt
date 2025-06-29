@@ -39,7 +39,7 @@ data class RowTrait(
 ) : ComposeTrait {
     override fun areAllParamsEmpty(): Boolean =
         horizontalArrangement == null &&
-                verticalAlignment == null
+            verticalAlignment == null
 
     private fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -67,13 +67,16 @@ data class RowTrait(
         )
 
     override fun icon(): ImageVector = ComposeFlowIcons.Row
+
     override fun iconText(): String = "Row"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Common,
-        TraitCategory.Container,
-        TraitCategory.WrapContainer,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Common,
+            TraitCategory.Container,
+            TraitCategory.WrapContainer,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_row_trait
 
@@ -94,18 +97,21 @@ data class RowTrait(
         modifier: Modifier,
     ) {
         Row(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
-            horizontalArrangement = horizontalArrangement?.arrangement
-                ?: Arrangement.Start,
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
+            horizontalArrangement =
+                horizontalArrangement?.arrangement
+                    ?: Arrangement.Start,
             verticalAlignment = verticalAlignment?.alignment ?: Alignment.Top,
         ) {
             node.children.forEach { child ->
@@ -133,10 +139,10 @@ data class RowTrait(
         } else {
             codeBlockBuilder.addStatement("%M(", rowMember)
             codeBlockBuilder.add(
-                generateParamsCode()
+                generateParamsCode(),
             )
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
         }
@@ -146,7 +152,7 @@ data class RowTrait(
                     project = project,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
         }
         codeBlockBuilder.addStatement("}")

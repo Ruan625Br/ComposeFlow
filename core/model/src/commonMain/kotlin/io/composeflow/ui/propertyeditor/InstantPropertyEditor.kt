@@ -48,13 +48,14 @@ fun InstantPropertyEditor(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .wrapContentHeight()
-            .hoverIconClickable()
-            .clickable {
-                dialogOpen = true
-            },
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .wrapContentHeight()
+                .hoverIconClickable()
+                .clickable {
+                    dialogOpen = true
+                },
     ) {
         LabeledBorderBox(
             label = label.ifEmpty { "Instant" },
@@ -85,9 +86,10 @@ fun InstantPropertyEditor(
         }
     }
     if (dialogOpen) {
-        val datePickerState = rememberDatePickerState(
-            initialSelectedDateMillis = initialInstant?.instant?.toEpochMilliseconds()
-        )
+        val datePickerState =
+            rememberDatePickerState(
+                initialSelectedDateMillis = initialInstant?.instant?.toEpochMilliseconds(),
+            )
 
         DatePickerDialog(
             onDismissRequest = {
@@ -102,7 +104,7 @@ fun InstantPropertyEditor(
                                 datePickerState.selectedDateMillis?.let {
                                     onInstantUpdated(InstantWrapper(Instant.fromEpochMilliseconds(it)))
                                 }
-                            }
+                            },
                         ) {
                             Text("Confirm")
                         }
@@ -115,11 +117,11 @@ fun InstantPropertyEditor(
                 TextButton(
                     onClick = {
                         dialogOpen = false
-                    }
+                    },
                 ) {
                     Text("Cancel")
                 }
-            }
+            },
         ) {
             DatePicker(datePickerState)
         }

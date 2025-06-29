@@ -36,15 +36,15 @@ fun PreferencesContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .padding(16.dp),
     ) {
-
         Text(
             "Preferences",
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = 8.dp),
         )
 
         DarkThemeSettingSetter(
@@ -77,7 +77,7 @@ fun InitialScreenContent(
                 text = "Initial screen",
                 color = MaterialTheme.colorScheme.onBackground,
                 style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(bottom = 4.dp, end = 8.dp)
+                modifier = Modifier.padding(bottom = 4.dp, end = 8.dp),
             )
             val initialScreenDesc = stringResource(Res.string.initial_screen_description)
             Tooltip(initialScreenDesc) {
@@ -88,13 +88,15 @@ fun InitialScreenContent(
             }
         }
 
-        val screens = buildList {
-            add(Screen(name = ""))
-            project.screenHolder.screens.forEach { add(it) }
-        }
-        val currentLoginScreen = project.screenHolder.loginScreenId.value?.let {
-            project.findScreenOrNull(it)
-        }
+        val screens =
+            buildList {
+                add(Screen(name = ""))
+                project.screenHolder.screens.forEach { add(it) }
+            }
+        val currentLoginScreen =
+            project.screenHolder.loginScreenId.value?.let {
+                project.findScreenOrNull(it)
+            }
         Row(verticalAlignment = Alignment.CenterVertically) {
             BasicDropdownPropertyEditor(
                 project = project,
@@ -104,14 +106,14 @@ fun InitialScreenContent(
                 },
                 selectedItem = currentLoginScreen,
                 label = "Not logged in",
-                modifier = Modifier.width(280.dp).padding(end = 8.dp)
+                modifier = Modifier.width(280.dp).padding(end = 8.dp),
             )
             val initialScreenNotLoggedInDesc =
                 stringResource(Res.string.initial_screen_not_logged_in_description)
             Tooltip(initialScreenNotLoggedInDesc) {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.Info,
-                    contentDescription = initialScreenNotLoggedInDesc
+                    contentDescription = initialScreenNotLoggedInDesc,
                 )
             }
         }

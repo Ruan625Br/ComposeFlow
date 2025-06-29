@@ -8,12 +8,12 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class ButtonTraitTest {
-
     @Test
     fun serialize_deserialize() {
-        val buttonParams = ButtonTrait(
-            textProperty = StringProperty.StringIntrinsicValue("button"),
-        )
+        val buttonParams =
+            ButtonTrait(
+                textProperty = StringProperty.StringIntrinsicValue("button"),
+            )
 
         val encoded = yamlSerializer.encodeToString(buttonParams)
         val decoded = yamlSerializer.decodeFromString<ButtonTrait>(encoded)

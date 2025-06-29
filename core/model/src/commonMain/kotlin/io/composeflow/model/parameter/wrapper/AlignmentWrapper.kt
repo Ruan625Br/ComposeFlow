@@ -7,7 +7,9 @@ import kotlinx.serialization.Serializable
 object AlignmentWrapperSerializer : FallbackEnumSerializer<AlignmentWrapper>(AlignmentWrapper::class)
 
 @Serializable(AlignmentWrapperSerializer::class)
-enum class AlignmentWrapper(val alignment: Alignment) {
+enum class AlignmentWrapper(
+    val alignment: Alignment,
+) {
     TopStart(Alignment.TopStart),
     TopCenter(Alignment.TopCenter),
     TopEnd(Alignment.TopEnd),
@@ -20,8 +22,6 @@ enum class AlignmentWrapper(val alignment: Alignment) {
     ;
 
     companion object {
-
-        fun fromAlignment(alignment: Alignment?) =
-            entries.firstOrNull { it.alignment == alignment } ?: TopStart
+        fun fromAlignment(alignment: Alignment?) = entries.firstOrNull { it.alignment == alignment } ?: TopStart
     }
 }

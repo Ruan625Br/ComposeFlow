@@ -70,9 +70,10 @@ class MainViewRobot(
 
     context(DesktopComposeUiTest)
     fun clickRunButton(): List<TestLogWriter.LogEntry> {
-        val testLogWriter = TestLogWriter(
-            loggable = Severity.Verbose, // accept everything
-        )
+        val testLogWriter =
+            TestLogWriter(
+                loggable = Severity.Verbose, // accept everything
+            )
         AppRunner.buildLogger = Logger(loggerConfigInit(testLogWriter))
         onNodeWithTag(ToolbarRunButtonTestTag)
             .performClick()

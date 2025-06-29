@@ -5,7 +5,6 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class SnapshotStateMapEqualsOverrideTest {
-
     @Test
     fun testEquals() {
         val map: MutableMap<String, String> = mutableStateMapEqualsOverrideOf()

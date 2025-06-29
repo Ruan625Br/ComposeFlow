@@ -17,13 +17,12 @@ import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
 
 @Composable
-fun PlaceholderContainer(
-    modifier: Modifier = Modifier,
-) {
+fun PlaceholderContainer(modifier: Modifier = Modifier) {
     Column(
-        modifier = modifier
-            .padding(16.dp)
-            .fillMaxWidth()
+        modifier =
+            modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
     ) {
         PlaceholderItem(
             height = 48.dp,
@@ -68,19 +67,19 @@ private fun PlaceholderItem(
     width: Dp? = null,
     startPadding: Dp = 16.dp,
     endPadding: Dp = 16.dp,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .padding(start = startPadding, end = endPadding)
-            .then(
-                if (width != null) Modifier.width(width) else Modifier.fillMaxWidth()
-            )
-            .height(height)
-            .shimmer()
-            .background(
-                color = MaterialTheme.colorScheme.surfaceVariant,
-                shape = RoundedCornerShape(8.dp)
-            )
+        modifier =
+            modifier
+                .padding(start = startPadding, end = endPadding)
+                .then(
+                    if (width != null) Modifier.width(width) else Modifier.fillMaxWidth(),
+                ).height(height)
+                .shimmer()
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceVariant,
+                    shape = RoundedCornerShape(8.dp),
+                ),
     )
 }

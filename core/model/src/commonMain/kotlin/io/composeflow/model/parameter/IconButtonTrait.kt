@@ -39,14 +39,15 @@ data class IconButtonTrait(
     override val imageVectorHolder: ImageVectorHolder? = Outlined.Add,
     override val blobInfoWrapper: BlobInfoWrapper? = null,
     override val contentDescription: String = "Icon for ${imageVectorHolder?.name}",
-    override val tint: AssignableProperty? = ColorProperty.ColorIntrinsicValue(
-        value = ColorWrapper(
-            themeColor = Material3ColorWrapper.OnSurface
-        )
-    ),
+    override val tint: AssignableProperty? =
+        ColorProperty.ColorIntrinsicValue(
+            value =
+                ColorWrapper(
+                    themeColor = Material3ColorWrapper.OnSurface,
+                ),
+        ),
 ) : AbstractIconTrait(assetType, imageVectorHolder, blobInfoWrapper, contentDescription, tint),
     ComposeTrait {
-
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
             trait = mutableStateOf(IconButtonTrait(imageVectorHolder = Outlined.Add)),
@@ -54,19 +55,22 @@ data class IconButtonTrait(
             addChild(
                 ComposeNode(
                     trait = mutableStateOf(IconTrait.defaultTrait()),
-                )
+                ),
             )
         }
 
     override fun icon(): ImageVector = Icons.Outlined.AddCircle
+
     override fun iconText(): String = "IconButton"
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_icon_trait
+
     override fun isResizeable(): Boolean = false
+
     override fun visibleInPalette(): Boolean = false
 
     // Has Container category as it can hold icons as its children
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Common, TraitCategory.Basic, TraitCategory.Container)
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Common, TraitCategory.Basic, TraitCategory.Container)
 
     override fun generateCode(
         project: Project,
@@ -79,7 +83,7 @@ data class IconButtonTrait(
         // Click handler should be set in the modifier of the IconTrait
         codeBlockBuilder.addStatement("%M(onClick = {},", iconButtonMember)
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {", iconButtonMember)
         val iconMember = MemberName("androidx.compose.material3", "Icon")
@@ -89,7 +93,7 @@ data class IconButtonTrait(
                 project = project,
                 context = context,
                 dryRun,
-            )
+            ),
         )
         codeBlockBuilder.addStatement(")")
 

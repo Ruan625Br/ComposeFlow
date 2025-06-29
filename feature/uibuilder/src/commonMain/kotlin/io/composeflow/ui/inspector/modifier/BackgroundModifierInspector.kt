@@ -54,9 +54,10 @@ fun BackgroundModifierInspector(
                         wrapper.copy(colorWrapper = wrapper.defaultColorProperty()),
                     )
                 },
-                modifier = Modifier
-                    .hoverOverlay()
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .fillMaxWidth(),
             )
             ShapePropertyEditor(
                 initialShape = wrapper.shapeWrapper,
@@ -64,7 +65,7 @@ fun BackgroundModifierInspector(
                     composeNodeCallbacks.onModifierUpdatedAt(
                         node,
                         modifierIndex,
-                        wrapper.copy(shapeWrapper = it)
+                        wrapper.copy(shapeWrapper = it),
                     )
                 },
             )

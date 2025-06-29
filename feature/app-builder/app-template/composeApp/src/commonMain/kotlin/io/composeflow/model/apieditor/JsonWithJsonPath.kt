@@ -12,16 +12,18 @@ data class JsonWithJsonPath(
 )
 
 fun JsonElement.isList(): Boolean = this is JsonArray
-fun JsonElement.asDisplayText(): String = when (this) {
-    is JsonArray -> "List<JsonElement>"
-    is JsonObject -> "JsonElement"
-    is JsonPrimitive -> {
-        if (isString) {
-            "String"
-        } else {
-            "primitive"
-        }
-    }
 
-    JsonNull -> "null"
-}
+fun JsonElement.asDisplayText(): String =
+    when (this) {
+        is JsonArray -> "List<JsonElement>"
+        is JsonObject -> "JsonElement"
+        is JsonPrimitive -> {
+            if (isString) {
+                "String"
+            } else {
+                "primitive"
+            }
+        }
+
+        JsonNull -> "null"
+    }

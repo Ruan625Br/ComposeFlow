@@ -27,9 +27,10 @@ fun StatusBar(
 ) {
     Surface {
         Row(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(24.dp),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .height(24.dp),
         ) {
             when (uiState) {
                 is StatusBarUiState.Failure -> {
@@ -54,16 +55,15 @@ fun StatusBar(
 }
 
 @Composable
-private fun StatusBarLoading(
-    uiState: StatusBarUiState.Loading,
-) {
+private fun StatusBarLoading(uiState: StatusBarUiState.Loading) {
     Column(
         modifier = Modifier.fillMaxSize(),
     ) {
         LinearProgressIndicator(
-            modifier = Modifier
-                .heightIn(max = 2.dp)
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .heightIn(max = 2.dp)
+                    .fillMaxWidth(),
             strokeCap = Round,
         )
         uiState.message?.let {
@@ -78,19 +78,20 @@ private fun StatusBarLoading(
 }
 
 @Composable
-private fun StatusBarSuccess(
-    uiState: StatusBarUiState,
-) {
+private fun StatusBarSuccess(uiState: StatusBarUiState) {
     Column(
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.tertiary),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.tertiary),
     ) {
-        val message = when (uiState) {
-            is StatusBarUiState.JsBrowserRunSuccess -> uiState.message
-            is StatusBarUiState.Success -> uiState.message
-            else -> error("Invalid uiState. $uiState")
-        }
+        val message =
+            when (uiState) {
+                is StatusBarUiState.JsBrowserRunSuccess -> uiState.message
+                is StatusBarUiState.Success -> uiState.message
+                else -> error("Invalid uiState. $uiState")
+            }
         message?.let {
             Text(
                 text = it,
@@ -104,13 +105,13 @@ private fun StatusBarSuccess(
 }
 
 @Composable
-private fun StatusBarFailure(
-    uiState: StatusBarUiState.Failure,
-) {
+private fun StatusBarFailure(uiState: StatusBarUiState.Failure) {
     Column(
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxSize()
-            .background(color = MaterialTheme.colorScheme.errorContainer),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(color = MaterialTheme.colorScheme.errorContainer),
     ) {
         uiState.message?.let {
             Text(
@@ -125,7 +126,10 @@ private fun StatusBarFailure(
 }
 
 @Composable
-private fun ThemedStatusBarPreview(useDarkTheme: Boolean, uiState: StatusBarUiState) {
+private fun ThemedStatusBarPreview(
+    useDarkTheme: Boolean,
+    uiState: StatusBarUiState,
+) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
         StatusBar(uiState = uiState)
     }
@@ -148,7 +152,7 @@ fun StatusBarPreview_Normal_Dark() {
 fun StatusBarPreview_Loading_Light() {
     ThemedStatusBarPreview(
         useDarkTheme = false,
-        uiState = StatusBarUiState.Loading("Building application...")
+        uiState = StatusBarUiState.Loading("Building application..."),
     )
 }
 
@@ -157,7 +161,7 @@ fun StatusBarPreview_Loading_Light() {
 fun StatusBarPreview_Loading_Dark() {
     ThemedStatusBarPreview(
         useDarkTheme = true,
-        uiState = StatusBarUiState.Loading("Building application...")
+        uiState = StatusBarUiState.Loading("Building application..."),
     )
 }
 
@@ -166,7 +170,7 @@ fun StatusBarPreview_Loading_Dark() {
 fun StatusBarPreview_Success_Light() {
     ThemedStatusBarPreview(
         useDarkTheme = false,
-        uiState = StatusBarUiState.Success("Build completed successfully")
+        uiState = StatusBarUiState.Success("Build completed successfully"),
     )
 }
 
@@ -175,7 +179,7 @@ fun StatusBarPreview_Success_Light() {
 fun StatusBarPreview_Success_Dark() {
     ThemedStatusBarPreview(
         useDarkTheme = true,
-        uiState = StatusBarUiState.Success("Build completed successfully")
+        uiState = StatusBarUiState.Success("Build completed successfully"),
     )
 }
 
@@ -184,7 +188,7 @@ fun StatusBarPreview_Success_Dark() {
 fun StatusBarPreview_Failure_Light() {
     ThemedStatusBarPreview(
         useDarkTheme = false,
-        uiState = StatusBarUiState.Failure("Build failed: compilation error")
+        uiState = StatusBarUiState.Failure("Build failed: compilation error"),
     )
 }
 
@@ -193,6 +197,6 @@ fun StatusBarPreview_Failure_Light() {
 fun StatusBarPreview_Failure_Dark() {
     ThemedStatusBarPreview(
         useDarkTheme = true,
-        uiState = StatusBarUiState.Failure("Build failed: compilation error")
+        uiState = StatusBarUiState.Failure("Build failed: compilation error"),
     )
 }

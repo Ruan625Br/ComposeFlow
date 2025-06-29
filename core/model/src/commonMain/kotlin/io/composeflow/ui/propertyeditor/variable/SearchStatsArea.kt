@@ -42,7 +42,7 @@ fun SearchStateArea(
     }
 
     Column(
-        modifier = modifier.padding(start = 8.dp, bottom = 8.dp, end = 8.dp)
+        modifier = modifier.padding(start = 8.dp, bottom = 8.dp, end = 8.dp),
     ) {
         SmallOutlinedTextField(
             value = params.searchText,
@@ -52,46 +52,52 @@ fun SearchStateArea(
             leadingIcon = {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.Search,
-                    contentDescription = ""
+                    contentDescription = "",
                 )
             },
-            trailingIcon = if (params.searchText.isNotBlank()) {
-                {
-                    ComposeFlowIconButton(onClick = {
-                        onSearchParamsUpdated(
-                            params.copy(searchText = "")
-                        )
-                    }) {
-                        ComposeFlowIcon(
-                            imageVector = Icons.Outlined.Clear,
-                            contentDescription = "Clear search text"
-                        )
+            trailingIcon =
+                if (params.searchText.isNotBlank()) {
+                    {
+                        ComposeFlowIconButton(onClick = {
+                            onSearchParamsUpdated(
+                                params.copy(searchText = ""),
+                            )
+                        }) {
+                            ComposeFlowIcon(
+                                imageVector = Icons.Outlined.Clear,
+                                contentDescription = "Clear search text",
+                            )
+                        }
                     }
-                }
-            } else {
-                null
-            },
-            modifier = Modifier.fillMaxWidth()
-                .padding(end = 32.dp)
-                .focusRequester(focusRequester)
+                } else {
+                    null
+                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(end = 32.dp)
+                    .focusRequester(focusRequester),
         )
 
         Tooltip(stringResource(Res.string.search_only_target_type_description)) {
-            Row(verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(8.dp)
-                    .clickable {
-                        onSearchParamsUpdated(
-                            params.copy(
-                                searchOnlyAcceptableType = !params.searchOnlyAcceptableType
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier =
+                    Modifier
+                        .padding(8.dp)
+                        .clickable {
+                            onSearchParamsUpdated(
+                                params.copy(
+                                    searchOnlyAcceptableType = !params.searchOnlyAcceptableType,
+                                ),
                             )
-                        )
-                    }
+                        },
             ) {
                 ComposeFlowSwitch(
                     checked = params.searchOnlyAcceptableType,
                     onCheckedChange = {
                         onSearchParamsUpdated(params.copy(searchOnlyAcceptableType = it))
-                    }
+                    },
                 )
                 Spacer(Modifier.width(8.dp))
                 Text(

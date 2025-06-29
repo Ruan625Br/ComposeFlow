@@ -20,13 +20,19 @@ import io.composeflow.swap
  * Interface that defines specific functionalities for TabNode
  */
 interface TabsNode {
-
     var self: ComposeNode
     val selectedIndex: MutableState<Int>
+
     fun addTab()
+
     fun removeTab(index: Int)
+
     fun isVisibleInCanvas(): Boolean
-    fun swapTabIndex(from: Int, to: Int)
+
+    fun swapTabIndex(
+        from: Int,
+        to: Int,
+    )
 
     /**
      * Updated to selectedIndex of the Tabs node to the index where this node belongs to.
@@ -71,34 +77,38 @@ class TabsNodeImpl : TabsNode {
         val nextIndex = tabRow.children.size + 1
         tabRow.addChild(
             ComposeNode(
-                trait = mutableStateOf(
-                    TabTrait(
-                        text = StringProperty.StringIntrinsicValue("Tab $nextIndex"),
-                        index = nextIndex - 1,
+                trait =
+                    mutableStateOf(
+                        TabTrait(
+                            text = StringProperty.StringIntrinsicValue("Tab $nextIndex"),
+                            index = nextIndex - 1,
+                        ),
                     ),
-                ),
             ),
         )
         self.addChild(
             ComposeNode(
                 trait = mutableStateOf(TabContentTrait),
-                modifierList = mutableStateListEqualsOverrideOf(
-                    ModifierWrapper.FillMaxSize(),
-                ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.FillMaxSize(),
+                    ),
             ).apply {
                 children.add(
                     ComposeNode(
                         modifierList = mutableStateListEqualsOverrideOf(ModifierWrapper.Padding(8.dp)),
-                        trait = mutableStateOf(
-                            TextTrait(
-                                text = StringProperty.StringIntrinsicValue("Tab content $nextIndex"),
-                                colorWrapper = ColorProperty.ColorIntrinsicValue(
-                                    ColorWrapper(
-                                        themeColor = Material3ColorWrapper.OnBackground
-                                    )
+                        trait =
+                            mutableStateOf(
+                                TextTrait(
+                                    text = StringProperty.StringIntrinsicValue("Tab content $nextIndex"),
+                                    colorWrapper =
+                                        ColorProperty.ColorIntrinsicValue(
+                                            ColorWrapper(
+                                                themeColor = Material3ColorWrapper.OnBackground,
+                                            ),
+                                        ),
                                 ),
                             ),
-                        ),
                     ),
                 )
             },
@@ -118,18 +128,22 @@ class TabsNodeImpl : TabsNode {
 
     override fun setTabSelectedIndex() {
         getNearestTabIndex()?.let { index ->
-            val tabs = self.findNodesUntilRoot(includeSelf = true)
-                .firstOrNull { it.trait.value is TabsTrait }
+            val tabs =
+                self
+                    .findNodesUntilRoot(includeSelf = true)
+                    .firstOrNull { it.trait.value is TabsTrait }
             tabs?.selectedIndex?.value = index
         }
     }
 
-    override fun isVisibleInCanvas(): Boolean {
-        return !isPartOfTabContent() ||
-                getNearestTabIndex() == getNearestSelectedTabIndex()
-    }
+    override fun isVisibleInCanvas(): Boolean =
+        !isPartOfTabContent() ||
+            getNearestTabIndex() == getNearestSelectedTabIndex()
 
-    override fun swapTabIndex(from: Int, to: Int) {
+    override fun swapTabIndex(
+        from: Int,
+        to: Int,
+    ) {
         check(self.trait.value is TabsTrait)
         val tabs = self.children.first().children
         tabs.swap(from, to)
@@ -143,10 +157,14 @@ class TabsNodeImpl : TabsNode {
      * a Tabs
      */
     private fun getNearestTabIndex(): Int? {
-        val tabs = self.findNodesUntilRoot(includeSelf = true)
-            .firstOrNull { it.trait.value is TabsTrait }
-        val tabContent = self.findNodesUntilRoot(includeSelf = true)
-            .firstOrNull { it.trait.value == TabContentTrait }
+        val tabs =
+            self
+                .findNodesUntilRoot(includeSelf = true)
+                .firstOrNull { it.trait.value is TabsTrait }
+        val tabContent =
+            self
+                .findNodesUntilRoot(includeSelf = true)
+                .firstOrNull { it.trait.value == TabContentTrait }
         val tabContents = tabs?.children?.drop(1)
         var result: Int? = null
         tabContents?.forEachIndexed { i, content ->
@@ -158,10 +176,14 @@ class TabsNodeImpl : TabsNode {
     }
 
     private fun getNearestSelectedTabIndex(): Int? =
-        self.findNodesUntilRoot(includeSelf = true)
-            .firstOrNull { it.trait.value == TabsTrait }?.selectedIndex?.value
+        self
+            .findNodesUntilRoot(includeSelf = true)
+            .firstOrNull { it.trait.value == TabsTrait }
+            ?.selectedIndex
+            ?.value
 
     private fun isPartOfTabContent(): Boolean =
-        self.findNodesUntilRoot(includeSelf = true)
+        self
+            .findNodesUntilRoot(includeSelf = true)
             .any { TraitCategory.TabContent in it.trait.value.paletteCategories() }
 }

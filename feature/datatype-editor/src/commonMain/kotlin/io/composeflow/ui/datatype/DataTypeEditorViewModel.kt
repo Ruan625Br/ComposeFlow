@@ -35,25 +35,32 @@ class DataTypeEditorViewModel(
         private set
 
     fun onDataTypeAdded(dataTypeName: String) {
-        val newName = generateUniqueName(
-            dataTypeName,
-            (project.dataTypeHolder.dataTypes.map { it.className } + firestoreDocumentId).toSet(),
-        )
+        val newName =
+            generateUniqueName(
+                dataTypeName,
+                (project.dataTypeHolder.dataTypes.map { it.className } + firestoreDocumentId).toSet(),
+            )
         project.dataTypeHolder.dataTypes.add(DataType(name = newName))
         focusedDataTypeIndex = project.dataTypeHolder.dataTypes.size - 1
         saveProject()
     }
 
-    fun onDataTypeWithFieldsAdded(dataTypeName: String, fields: List<DataField> = emptyList()) {
-        val newName = generateUniqueName(
-            dataTypeName,
-            project.dataTypeHolder.dataTypes.map { it.className }.toSet(),
-        )
+    fun onDataTypeWithFieldsAdded(
+        dataTypeName: String,
+        fields: List<DataField> = emptyList(),
+    ) {
+        val newName =
+            generateUniqueName(
+                dataTypeName,
+                project.dataTypeHolder.dataTypes
+                    .map { it.className }
+                    .toSet(),
+            )
         project.dataTypeHolder.dataTypes.add(
             DataType(
                 name = newName,
-                fields = fields.toMutableList()
-            )
+                fields = fields.toMutableList(),
+            ),
         )
         focusedDataTypeIndex = project.dataTypeHolder.dataTypes.size - 1
         saveProject()
@@ -69,32 +76,45 @@ class DataTypeEditorViewModel(
 
     fun onDataFieldAdded(dataField: DataField) {
         focusedDataTypeIndex?.let { focusedIndex ->
-            val newName = generateUniqueName(
-                dataField.variableName,
-                project.dataTypeHolder.dataTypes[focusedIndex].fields.map { it.variableName }
-                    .toSet(),
-            )
+            val newName =
+                generateUniqueName(
+                    dataField.variableName,
+                    project.dataTypeHolder.dataTypes[focusedIndex]
+                        .fields
+                        .map { it.variableName }
+                        .toSet(),
+                )
             val editedDataType = project.dataTypeHolder.dataTypes[focusedIndex]
             editedDataType.fields.add(dataField.copy(name = newName))
             saveProject()
         }
     }
 
-    fun onDataFieldNameUpdated(index: Int, inputName: String) {
+    fun onDataFieldNameUpdated(
+        index: Int,
+        inputName: String,
+    ) {
         focusedDataTypeIndex?.let { focusedIndex ->
             val editedDataType = project.dataTypeHolder.dataTypes[focusedIndex]
             val newName =
-                if (project.dataTypeHolder.dataTypes[focusedIndex].fields[index].variableName == inputName) {
+                if (project.dataTypeHolder.dataTypes[focusedIndex]
+                        .fields[index]
+                        .variableName == inputName
+                ) {
                     inputName
                 } else {
                     generateUniqueName(
                         inputName,
-                        project.dataTypeHolder.dataTypes[focusedIndex].fields.map { it.variableName }
+                        project.dataTypeHolder.dataTypes[focusedIndex]
+                            .fields
+                            .map { it.variableName }
                             .toSet(),
                     )
                 }
             editedDataType.fields[index] =
-                project.dataTypeHolder.dataTypes[focusedIndex].fields[index].copy(name = newName)
+                project.dataTypeHolder.dataTypes[focusedIndex]
+                    .fields[index]
+                    .copy(name = newName)
             saveProject()
         }
     }
@@ -116,10 +136,13 @@ class DataTypeEditorViewModel(
     }
 
     fun onEnumAdded(enumName: String) {
-        val newName = generateUniqueName(
-            enumName,
-            project.customEnumHolder.enumList.map { it.enumName }.toSet(),
-        )
+        val newName =
+            generateUniqueName(
+                enumName,
+                project.customEnumHolder.enumList
+                    .map { it.enumName }
+                    .toSet(),
+            )
         project.customEnumHolder.enumList.add(CustomEnum(name = newName))
         focusedEnumIndex = project.customEnumHolder.enumList.size - 1
         saveProject()
@@ -127,26 +150,35 @@ class DataTypeEditorViewModel(
 
     fun onEnumValueAdded(enumValue: String) {
         focusedEnumIndex?.let { focusedIndex ->
-            val newName = generateUniqueName(
-                enumValue,
-                project.customEnumHolder.enumList[focusedIndex].values.toSet(),
-            )
+            val newName =
+                generateUniqueName(
+                    enumValue,
+                    project.customEnumHolder.enumList[focusedIndex]
+                        .values
+                        .toSet(),
+                )
             val editedEnum = project.customEnumHolder.enumList[focusedIndex]
             editedEnum.values.add(newName)
             saveProject()
         }
     }
 
-    fun onEnumValueUpdated(index: Int, value: String) {
+    fun onEnumValueUpdated(
+        index: Int,
+        value: String,
+    ) {
         focusedEnumIndex?.let { focusedIndex ->
             val editedEnum = project.customEnumHolder.enumList[focusedIndex]
             if (editedEnum.enumName == value.asClassName()) {
                 return
             }
-            val newName = generateUniqueName(
-                value,
-                project.customEnumHolder.enumList[focusedIndex].values.toSet(),
-            )
+            val newName =
+                generateUniqueName(
+                    value,
+                    project.customEnumHolder.enumList[focusedIndex]
+                        .values
+                        .toSet(),
+                )
             editedEnum.values[index] = newName
             saveProject()
         }
@@ -168,7 +200,10 @@ class DataTypeEditorViewModel(
         }
     }
 
-    fun onSwapEnumValueIndexes(from: Int, to: Int) {
+    fun onSwapEnumValueIndexes(
+        from: Int,
+        to: Int,
+    ) {
         focusedEnumIndex?.let {
             val editedEnum = project.customEnumHolder.enumList[it]
             editedEnum.values.swap(from, to)

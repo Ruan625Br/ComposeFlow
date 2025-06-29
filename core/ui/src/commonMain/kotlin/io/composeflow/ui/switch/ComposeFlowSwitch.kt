@@ -26,9 +26,11 @@ fun ComposeFlowSwitch(
     Switch(
         checked = checked,
         onCheckedChange = onCheckedChange,
-        modifier = modifier.size(minimumInteractiveComponentSize)
-            .scale(0.65f)
-            .padding(end = 8.dp),
+        modifier =
+            modifier
+                .size(minimumInteractiveComponentSize)
+                .scale(0.65f)
+                .padding(end = 8.dp),
         thumbContent = thumbContent,
         enabled = enabled,
         colors = colors,

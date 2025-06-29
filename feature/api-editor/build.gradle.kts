@@ -5,7 +5,6 @@ plugins {
 
 version = "1.0-SNAPSHOT"
 
-
 kotlin {
     jvm("desktop")
 
@@ -56,4 +55,3 @@ kotlin {
         }
     }
 }
-

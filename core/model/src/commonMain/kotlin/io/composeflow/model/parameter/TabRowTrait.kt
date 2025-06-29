@@ -19,20 +19,25 @@ import org.jetbrains.compose.resources.StringResource
 data class TabRowTrait(
     val scrollable: Boolean = false,
 ) : ComposeTrait {
-
     override fun icon(): ImageVector = Icons.Outlined.TableChart
+
     override fun iconText(): String = "TabRow"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_tab_row_trait
+
     override fun visibleInPalette(): Boolean = false
+
     override fun isDroppable(): Boolean = false
+
     override fun isEditable(): Boolean = false
+
     override fun generateCode(
         project: Project,
         node: ComposeNode,
         context: GenerationContext,
-        dryRun: Boolean
+        dryRun: Boolean,
     ): CodeBlock {
         // TabRow code is generated in TabsTrait
         return CodeBlock.builder().build()

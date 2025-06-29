@@ -22,18 +22,18 @@ import kotlinx.serialization.encoding.Encoder
 class FallbackMutableStateListSerializer<T>(
     private val dataSerializer: KSerializer<T>,
 ) : KSerializer<MutableList<T>> {
-
     override val descriptor = listSerialDescriptor(dataSerializer.descriptor)
 
-    override fun serialize(encoder: Encoder, value: MutableList<T>) =
-        ListSerializer(dataSerializer).serialize(encoder, value.toList())
+    override fun serialize(
+        encoder: Encoder,
+        value: MutableList<T>,
+    ) = ListSerializer(dataSerializer).serialize(encoder, value.toList())
 
-    override fun deserialize(decoder: Decoder): MutableList<T> {
-        return try {
+    override fun deserialize(decoder: Decoder): MutableList<T> =
+        try {
             ListSerializer(dataSerializer).deserialize(decoder).toMutableStateListEqualsOverride()
         } catch (e: SerializationException) {
             Logger.e { "Failed to deserialize list: ${e.message}, returning empty list" }
             listOf<T>().toMutableStateListEqualsOverride()
         }
-    }
 }

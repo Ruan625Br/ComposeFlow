@@ -74,19 +74,19 @@ fun FirebaseSettingsContent(
     Column(modifier = modifier.padding(16.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(bottom = 16.dp)
+            modifier = Modifier.padding(bottom = 16.dp),
         ) {
             val firebaseIntegrationDesc =
                 stringResource(Res.string.firebase_integration_description)
             Text(
                 "Firebase integration",
                 style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 8.dp),
             )
             Tooltip(firebaseIntegrationDesc) {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.Info,
-                    contentDescription = firebaseIntegrationDesc
+                    contentDescription = firebaseIntegrationDesc,
                 )
             }
         }
@@ -102,7 +102,7 @@ fun FirebaseSettingsContent(
         ) {
             FirebaseAuthContent(
                 firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
-                modifier = Modifier.padding(top = 32.dp)
+                modifier = Modifier.padding(top = 32.dp),
             )
         }
     }
@@ -122,7 +122,7 @@ private fun FirebaseProjectIdEditor(
 ) {
     var firebaseProjectIdInEdit by remember {
         mutableStateOf(
-            firebaseAppInfo.firebaseProjectId ?: ""
+            firebaseAppInfo.firebaseProjectId ?: "",
         )
     }
     var idInEdit by remember { mutableStateOf(firebaseAppInfo.firebaseProjectId.isNullOrEmpty()) }
@@ -134,21 +134,22 @@ private fun FirebaseProjectIdEditor(
     }
     Column(modifier = modifier) {
         Text(
-            text = buildAnnotatedString {
-                withStyle(
-                    style = MaterialTheme.typography.bodySmall.toSpanStyle()
-                ) {
-                    append("Create a new Firebase project at ")
+            text =
+                buildAnnotatedString {
+                    withStyle(
+                        style = MaterialTheme.typography.bodySmall.toSpanStyle(),
+                    ) {
+                        append("Create a new Firebase project at ")
 
-                    withLink(LinkAnnotation.Url(url = firebaseConsoleUrl)) {
-                        withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
-                            append("Firebase console")
+                        withLink(LinkAnnotation.Url(url = firebaseConsoleUrl)) {
+                            withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+                                append("Firebase console")
+                            }
                         }
+                        append(" and enter the project Id below to connect with ComposeFlow.")
                     }
-                    append(" and enter the project Id below to connect with ComposeFlow.")
-                }
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
+                },
+            modifier = Modifier.padding(bottom = 8.dp),
         )
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -161,25 +162,27 @@ private fun FirebaseProjectIdEditor(
                         Text(
                             "Firebase Project Id",
                             style = MaterialTheme.typography.bodySmall,
-                            modifier = Modifier.alpha(0.6f)
+                            modifier = Modifier.alpha(0.6f),
                         )
                     },
                     singleLine = true,
                     readOnly = !idInEdit,
-                    modifier = Modifier.width(350.dp)
-                        .focusRequester(focusRequester)
+                    modifier =
+                        Modifier
+                            .width(350.dp)
+                            .focusRequester(focusRequester),
                 )
 
                 ComposeFlowIconButton(
                     onClick = {
                         idInEdit = true
                     },
-                    enabled = !idInEdit
+                    enabled = !idInEdit,
                 ) {
                     val editFirebaseProjectId = stringResource(Res.string.edit_firebase_project_id)
                     ComposeFlowIcon(
                         imageVector = Icons.Outlined.Edit,
-                        contentDescription = editFirebaseProjectId
+                        contentDescription = editFirebaseProjectId,
                     )
                 }
             }
@@ -191,18 +194,21 @@ private fun FirebaseProjectIdEditor(
                     onClick = {
                         settingsCallbacks.onConnectFirebaseProjectId(firebaseProjectIdInEdit)
                     },
-                    enabled = (firebaseProjectIdInEdit.isNotEmpty() &&
-                            firebaseProjectIdInEdit != firebaseAppInfo.firebaseProjectId) ||
+                    enabled =
+                        (
+                            firebaseProjectIdInEdit.isNotEmpty() &&
+                                firebaseProjectIdInEdit != firebaseAppInfo.firebaseProjectId
+                        ) ||
                             (
-                                    firebaseProjectIdInEdit.isNotEmpty() &&
-                                            firebaseAppInfo.getConnectedStatus() == FirebaseConnectedStatus.PartiallyConnected
-                                    )
+                                firebaseProjectIdInEdit.isNotEmpty() &&
+                                    firebaseAppInfo.getConnectedStatus() == FirebaseConnectedStatus.PartiallyConnected
+                            ),
                 ) {
                     Row {
                         ComposeFlowIcon(
                             imageVector = ComposeFlowIcons.Plugin,
                             contentDescription = "",
-                            modifier = Modifier.padding(end = 8.dp)
+                            modifier = Modifier.padding(end = 8.dp),
                         )
                         Text("Connect")
                     }
@@ -238,16 +244,18 @@ private fun FirebaseProjectIdEditor(
                     "Android app",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.border(
-                            width = 1.dp,
-                            color = androidAppBorderColor,
-                            shape = CircleShape
-                        ).size(42.dp)
+                        modifier =
+                            Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = androidAppBorderColor,
+                                    shape = CircleShape,
+                                ).size(42.dp),
                     ) {
                         ComposeFlowIcon(
                             imageVector = Icons.Outlined.Android,
@@ -262,16 +270,18 @@ private fun FirebaseProjectIdEditor(
                     "iOS app",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.border(
-                            width = 1.dp,
-                            color = iOSAppBorderColor,
-                            shape = CircleShape
-                        ).size(42.dp)
+                        modifier =
+                            Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = iOSAppBorderColor,
+                                    shape = CircleShape,
+                                ).size(42.dp),
                     ) {
                         ComposeFlowIcon(
                             imageVector = ComposeFlowIcons.Apple,
@@ -287,16 +297,18 @@ private fun FirebaseProjectIdEditor(
                     "Web app",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.border(
-                            width = 1.dp,
-                            color = webAppBorderColor,
-                            shape = CircleShape
-                        ).size(42.dp)
+                        modifier =
+                            Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = webAppBorderColor,
+                                    shape = CircleShape,
+                                ).size(42.dp),
                     ) {
                         ComposeFlowIcon(
                             imageVector = ComposeFlowIcons.Web,
@@ -323,7 +335,7 @@ private fun FirebaseAppLabelContainer(firebaseApiAppResult: FirebaseApiAppResult
         } else if (firebaseApiAppResult.isLoading) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 CircularProgressIndicator(
-                    modifier = Modifier.padding(end = 8.dp)
+                    modifier = Modifier.padding(end = 8.dp),
                 )
                 firebaseApiAppResult.loadingMessage?.let {
                     Text(
@@ -347,7 +359,7 @@ private fun FirebaseAppLabelContainer(firebaseApiAppResult: FirebaseApiAppResult
                             text = displayName,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            modifier = Modifier.padding(bottom = 4.dp),
                         )
                         Text(
                             text = bundleName,
@@ -360,14 +372,14 @@ private fun FirebaseAppLabelContainer(firebaseApiAppResult: FirebaseApiAppResult
                         text = displayName,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = 4.dp),
                     )
                 } else if (bundleName != null) {
                     Text(
                         text = bundleName,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 4.dp)
+                        modifier = Modifier.padding(bottom = 4.dp),
                     )
                 }
 
@@ -376,9 +388,10 @@ private fun FirebaseAppLabelContainer(firebaseApiAppResult: FirebaseApiAppResult
                         onClick = {
                             openInBrowser(URI(it))
                         },
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .hoverIconClickable()
+                        modifier =
+                            Modifier
+                                .padding(start = 8.dp)
+                                .hoverIconClickable(),
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
@@ -401,12 +414,12 @@ private fun FirebaseAuthContent(
         Text(
             "Firebase Authentication",
             style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(end = 8.dp)
+            modifier = Modifier.padding(end = 8.dp),
         )
 
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
         ) {
             if (firebaseAppInfo.authenticationEnabled.value) {
                 Text(
@@ -427,17 +440,17 @@ private fun FirebaseAuthContent(
                     openInBrowser(
                         URI(
                             "${firebaseConsoleUrl}project/${firebaseAppInfo.firebaseProjectId}/authentication",
-                        )
+                        ),
                     )
                 },
-                modifier = Modifier.hoverIconClickable()
+                modifier = Modifier.hoverIconClickable(),
             ) {
                 val enableAuthOnFirebase = stringResource(Res.string.enable_auth_on_firebase)
                 Row {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
                         contentDescription = enableAuthOnFirebase,
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 8.dp),
                     )
                     Text(enableAuthOnFirebase)
                 }
@@ -448,7 +461,7 @@ private fun FirebaseAuthContent(
             stringResource(Res.string.firebase_auth_description),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(top = 4.dp)
+            modifier = Modifier.padding(top = 4.dp),
         )
     }
 }

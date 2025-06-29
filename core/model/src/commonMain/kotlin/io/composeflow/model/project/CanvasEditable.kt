@@ -33,7 +33,6 @@ import org.koin.core.component.KoinComponent
  * UI builder
  */
 interface CanvasEditable : StateHolder {
-
     val id: String
 
     /**
@@ -49,6 +48,7 @@ interface CanvasEditable : StateHolder {
     fun getContentRootNode(): ComposeNode
 
     fun findFocusedNodeOrNull(): ComposeNode?
+
     fun findNodeById(id: String): ComposeNode?
 
     fun clearIsHoveredRecursively()
@@ -60,19 +60,25 @@ interface CanvasEditable : StateHolder {
     fun clearIndexToBeDroppedRecursively()
 
     fun updateFocusedNode(eventPosition: Offset)
+
     fun updateHoveredNode(eventPosition: Offset)
+
     fun findDeepestChildAtOrNull(position: Offset): ComposeNode?
 
     fun getAllComposeNodes(): List<ComposeNode>
 
-    fun newComposableContext(): ComposeEditableContext = ComposeEditableContext(
-        typeSpecBuilder = TypeSpec.classBuilder(viewModelFileName)
-            .superclass(ViewModel::class)
-            .addSuperinterface(KoinComponent::class),
-        canvasEditable = this,
-    )
+    fun newComposableContext(): ComposeEditableContext =
+        ComposeEditableContext(
+            typeSpecBuilder =
+                TypeSpec
+                    .classBuilder(viewModelFileName)
+                    .superclass(ViewModel::class)
+                    .addSuperinterface(KoinComponent::class),
+            canvasEditable = this,
+        )
 
     fun getPackageName(project: Project): String
+
     val name: String
     val viewModelFileName: String
     val viewModelName: String
@@ -92,25 +98,23 @@ interface CanvasEditable : StateHolder {
         dryRun: Boolean = false,
     ): FileSpec
 
-    fun getAllActions(project: Project): List<Action> {
-        return getAllComposeNodes().flatMap {
-            it.allActions()
-        }
-            .sortedBy { it.argumentName(project) }
-    }
+    fun getAllActions(project: Project): List<Action> =
+        getAllComposeNodes()
+            .flatMap {
+                it.allActions()
+            }.sortedBy { it.argumentName(project) }
 
-    fun getAllActionNodes(): List<ActionNode> {
-        return getAllComposeNodes().flatMap {
+    fun getAllActionNodes(): List<ActionNode> =
+        getAllComposeNodes().flatMap {
             it.allActionNodes()
         }
-    }
 
-    fun hasComposeNode(node: ComposeNode): Boolean {
-        return getAllComposeNodes().any { it.fallbackId == node.fallbackId }
-    }
+    fun hasComposeNode(node: ComposeNode): Boolean = getAllComposeNodes().any { it.fallbackId == node.fallbackId }
 
     fun generateViewModelFileSpec(
-        project: Project, context: GenerationContext, dryRun: Boolean = false,
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean = false,
     ): FileSpec {
         val fileBuilder =
             FileSpec.builder(getPackageName(project), viewModelFileName.toKotlinFileName())
@@ -148,34 +152,37 @@ interface CanvasEditable : StateHolder {
 
         if (getRootNode().actionsMap[ActionType.OnInitialLoad]?.isNotEmpty() == true) {
             val allProperties = context.getCurrentComposableContext().allProperties()
-            val backingFieldName = generateUniqueName(
-                initial = "_$screenInitiallyLoadedFlag",
-                existing = allProperties.map { it.name }.toSet()
-            )
-            val fieldName = generateUniqueName(
-                initial = screenInitiallyLoadedFlag,
-                existing = allProperties.map { it.name }.toSet()
-            )
-            context.addProperty(
-                PropertySpec.builder(
-                    name = backingFieldName,
-                    MutableStateFlow::class.parameterizedBy(Boolean::class)
+            val backingFieldName =
+                generateUniqueName(
+                    initial = "_$screenInitiallyLoadedFlag",
+                    existing = allProperties.map { it.name }.toSet(),
                 )
-                    .initializer("%T(false)", MutableStateFlow::class)
+            val fieldName =
+                generateUniqueName(
+                    initial = screenInitiallyLoadedFlag,
+                    existing = allProperties.map { it.name }.toSet(),
+                )
+            context.addProperty(
+                PropertySpec
+                    .builder(
+                        name = backingFieldName,
+                        MutableStateFlow::class.parameterizedBy(Boolean::class),
+                    ).initializer("%T(false)", MutableStateFlow::class)
                     .build(),
-                dryRun = dryRun
+                dryRun = dryRun,
             )
             context.addProperty(
-                PropertySpec.builder(
-                    name = fieldName,
-                    StateFlow::class.parameterizedBy(Boolean::class)
-                )
-                    .initializer(backingFieldName)
+                PropertySpec
+                    .builder(
+                        name = fieldName,
+                        StateFlow::class.parameterizedBy(Boolean::class),
+                    ).initializer(backingFieldName)
                     .build(),
                 dryRun = dryRun,
             )
             context.addFunction(
-                FunSpec.builder(onScreenInitiallyLoaded)
+                FunSpec
+                    .builder(onScreenInitiallyLoaded)
                     .addCode("$backingFieldName.value = true")
                     .build(),
                 dryRun = dryRun,
@@ -219,7 +226,7 @@ interface CanvasEditable : StateHolder {
                 }
                 context.addFunctionInConstructor(
                     apiDefinition.generateInitApiResultInViewModelFunSpec(),
-                    dryRun
+                    dryRun,
                 )
                 context.addFunction(apiDefinition.generateUpdateApiResultFunSpec(), dryRun)
                 context.addFunction(apiDefinition.generateApiResultFunSpec(), dryRun)
@@ -242,35 +249,39 @@ interface CanvasEditable : StateHolder {
     private fun anyActionHasWriteDependency(
         project: Project,
         readableState: ReadableState,
-    ): Boolean =
-        anyActionsDependOn(project = project, readableState = readableState)
+    ): Boolean = anyActionsDependOn(project = project, readableState = readableState)
 
     private fun anyActionHasReadDependency(
         project: Project,
         readableState: ReadableState,
-    ): Boolean =
-        anyActionsDependOn(project = project, readableState = readableState)
+    ): Boolean = anyActionsDependOn(project = project, readableState = readableState)
 
     private fun anyActionsDependOn(
         project: Project,
         readableState: ReadableState,
-    ): Boolean {
-        return getAllComposeNodes().any { node ->
+    ): Boolean =
+        getAllComposeNodes().any { node ->
             node.actionHandler.allActions().any { action ->
                 action.isDependent(readableState.id)
             }
         }
-    }
 
-    private fun anyNodeHasReadDependency(project: Project, readableState: ReadableState): Boolean =
+    private fun anyNodeHasReadDependency(
+        project: Project,
+        readableState: ReadableState,
+    ): Boolean =
         getAllComposeNodes().any { node ->
             node.isDependent(readableState.id)
         }
 
-    fun isDependentOn(project: Project, readableState: ReadableState): Boolean =
-        anyActionHasWriteDependency(project, readableState) || anyActionHasReadDependency(
-            project,
-            readableState
-        ) ||
-                anyNodeHasReadDependency(project, readableState)
+    fun isDependentOn(
+        project: Project,
+        readableState: ReadableState,
+    ): Boolean =
+        anyActionHasWriteDependency(project, readableState) ||
+            anyActionHasReadDependency(
+                project,
+                readableState,
+            ) ||
+            anyNodeHasReadDependency(project, readableState)
 }

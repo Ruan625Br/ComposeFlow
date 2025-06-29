@@ -61,19 +61,20 @@ fun ScaleModifierInspector(
                         onCheckedChange = {
                             selectedScaleSpec = scaleSpec
                         },
-                        modifier = Modifier.then(
-                            if (thisItemSelected) {
-                                Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                            alpha = 0.3f,
-                                        ),
-                                    )
-                            } else {
-                                Modifier
-                            },
-                        ),
+                        modifier =
+                            Modifier.then(
+                                if (thisItemSelected) {
+                                    Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                                alpha = 0.3f,
+                                            ),
+                                        )
+                                } else {
+                                    Modifier
+                                },
+                            ),
                     ) {
                         imageVector?.let {
                             Icon(
@@ -166,7 +167,6 @@ private fun XandYScaleInspector(
                 composeNodeCallbacks.onModifierUpdatedAt(
                     node,
                     modifierIndex,
-
                     ModifierWrapper.Scale(
                         scaleX = it.toFloat(),
                         scaleY = wrapper.scaleY,
@@ -184,7 +184,6 @@ private fun XandYScaleInspector(
                 composeNodeCallbacks.onModifierUpdatedAt(
                     node,
                     modifierIndex,
-
                     ModifierWrapper.Scale(
                         scaleX = wrapper.scaleX,
                         scaleY = it.toFloat(),

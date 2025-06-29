@@ -25,9 +25,10 @@ data class FirebaseIdToken(
     val rawToken: String? = null,
 )
 
-val LocalFirebaseIdToken = staticCompositionLocalOf<FirebaseIdToken> {
-    throw IllegalStateException("No FirebaseUserInfo provided")
-}
+val LocalFirebaseIdToken =
+    staticCompositionLocalOf<FirebaseIdToken> {
+        throw IllegalStateException("No FirebaseUserInfo provided")
+    }
 
 @Composable
 fun ProvideFirebaseIdToken(

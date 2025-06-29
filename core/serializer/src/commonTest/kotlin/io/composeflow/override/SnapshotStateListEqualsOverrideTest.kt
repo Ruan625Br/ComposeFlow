@@ -5,7 +5,6 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 class SnapshotStateListEqualsOverrideTest {
-
     @Test
     fun testEquals() {
         val list: MutableList<String> = mutableStateListEqualsOverrideOf()

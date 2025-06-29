@@ -57,9 +57,10 @@ fun ShowModalActionContent(
     Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                showDialogActionsOpened = !showDialogActionsOpened
-            },
+            modifier =
+                Modifier.clickable {
+                    showDialogActionsOpened = !showDialogActionsOpened
+                },
         ) {
             Text(
                 text = stringResource(Res.string.dialog_bottom_sheet_drawer),
@@ -78,25 +79,25 @@ fun ShowModalActionContent(
             ShowModal.entries().forEach { showDialogAction ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                showDialogAction
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    showDialogAction,
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is ShowModal &&
                                         actionInEdit.name == showDialogAction.name
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = showDialogAction.name,
@@ -313,7 +314,6 @@ fun ShowModalWithComponentContent(
                 label = "Inside Component",
                 modifier = Modifier.weight(1f),
             ) {
-
                 DropdownProperty(
                     project = project,
                     items = components.map { it.name },
@@ -321,12 +321,12 @@ fun ShowModalWithComponentContent(
                         if (index <= components.size) {
                             onEditAction(
                                 ShowCustomDialog(
-                                    componentId = components[index].id
-                                )
+                                    componentId = components[index].id,
+                                ),
                             )
                         }
                     },
-                    selectedIndex = if (selectedIndex == -1) 0 else selectedIndex
+                    selectedIndex = if (selectedIndex == -1) 0 else selectedIndex,
                 )
             }
         }
@@ -334,39 +334,41 @@ fun ShowModalWithComponentContent(
         val selectedComponent = if (selectedIndex != -1) components[selectedIndex] else null
         selectedComponent?.let { component ->
             if (component.parameters.isNotEmpty()) {
-
                 Column(modifier = Modifier.padding(start = 8.dp)) {
                     Text(
                         stringResource(Res.string.parameters),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        modifier = Modifier.padding(vertical = 8.dp),
                     )
 
                     component.parameters.forEach { parameter ->
-                        val initialProperty = initialAction.paramsMap[parameter.id]
-                            ?: parameter.defaultValueAsAssignableProperty
+                        val initialProperty =
+                            initialAction.paramsMap[parameter.id]
+                                ?: parameter.defaultValueAsAssignableProperty
                         ParameterEditor(
                             project = project,
                             node = composeNode,
                             parameter = parameter,
                             initialProperty = initialProperty,
                             onValidPropertyChanged = { newProperty, _ ->
-                                val newMap = initialAction.paramsMap.copyAsMutableStateMap().apply {
-                                    putAll(initialAction.paramsMap)
-                                }
+                                val newMap =
+                                    initialAction.paramsMap.copyAsMutableStateMap().apply {
+                                        putAll(initialAction.paramsMap)
+                                    }
                                 newMap[parameter.id] = newProperty
                                 val newAction = initialAction.copy(paramsMap = newMap)
                                 onEditAction(newAction)
                             },
                             onInitializeProperty = {
-                                val newMap = initialAction.paramsMap.copyAsMutableStateMap().apply {
-                                    putAll(initialAction.paramsMap)
-                                }
+                                val newMap =
+                                    initialAction.paramsMap.copyAsMutableStateMap().apply {
+                                        putAll(initialAction.paramsMap)
+                                    }
                                 newMap.remove(parameter.id)
                                 val newAction = initialAction.copy(paramsMap = newMap)
                                 onEditAction(newAction)
-                            }
+                            },
                         )
                     }
                 }
@@ -382,13 +384,14 @@ fun ShowNavigationDrawerContent(
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
-        val screenHavingThisAction = project.screenHolder.screens.firstOrNull { screen ->
-            screen.getAllComposeNodes().firstOrNull { node ->
-                node.allActions().any { action ->
-                    action.id == initialAction.id
-                }
-            } != null
-        }
+        val screenHavingThisAction =
+            project.screenHolder.screens.firstOrNull { screen ->
+                screen.getAllComposeNodes().firstOrNull { node ->
+                    node.allActions().any { action ->
+                        action.id == initialAction.id
+                    }
+                } != null
+            }
         if (screenHavingThisAction != null && screenHavingThisAction.navigationDrawerNode.value == null) {
             Text(
                 text = stringResource(Res.string.show_navigation_warning_screen_does_not_have_nav_drawer),

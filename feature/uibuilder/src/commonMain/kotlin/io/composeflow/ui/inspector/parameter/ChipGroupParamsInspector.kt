@@ -39,7 +39,7 @@ fun ChipGroupParamsInspector(
             leadingIcon = {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.FormatListNumbered,
-                    contentDescription = ""
+                    contentDescription = "",
                 )
             },
             variableAssignable = true,

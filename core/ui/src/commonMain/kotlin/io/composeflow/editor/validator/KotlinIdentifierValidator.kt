@@ -10,20 +10,18 @@ object KotlinIdentifierValidator {
 }
 
 private object KotlinVariableNameValidatorInternal : InputValidatorInternal {
-
     private val kotlinVariableNameRegex = Regex("^[a-zA-Z_][a-zA-Z0-9_]*$")
 
-    override fun validate(
-        input: String,
-    ) = runCatching {
-        if (input.isEmpty()) {
-            ValidateResult.Failure(MUST_NOT_BE_EMPTY)
-        } else if (!input.matches(kotlinVariableNameRegex)) {
-            ValidateResult.Failure(CONTAINS_INVALID_CHARS)
-        } else {
-            ValidateResult.Success
+    override fun validate(input: String) =
+        runCatching {
+            if (input.isEmpty()) {
+                ValidateResult.Failure(MUST_NOT_BE_EMPTY)
+            } else if (!input.matches(kotlinVariableNameRegex)) {
+                ValidateResult.Failure(CONTAINS_INVALID_CHARS)
+            } else {
+                ValidateResult.Success
+            }
         }
-    }
 }
 
 class KotlinVariableNameValidator(
@@ -32,20 +30,18 @@ class KotlinVariableNameValidator(
 ) : InputValidator by delegate
 
 private object KotlinClassNameValidatorInternal : InputValidatorInternal {
-
     private val kotlinClassNameRegex = Regex("^[a-zA-Z][a-zA-Z0-9_]*$")
 
-    override fun validate(
-        input: String,
-    ) = runCatching {
-        if (input.isEmpty()) {
-            ValidateResult.Failure(MUST_NOT_BE_EMPTY)
-        } else if (!input.matches(kotlinClassNameRegex)) {
-            ValidateResult.Failure(CONTAINS_INVALID_CHARS)
-        } else {
-            ValidateResult.Success
+    override fun validate(input: String) =
+        runCatching {
+            if (input.isEmpty()) {
+                ValidateResult.Failure(MUST_NOT_BE_EMPTY)
+            } else if (!input.matches(kotlinClassNameRegex)) {
+                ValidateResult.Failure(CONTAINS_INVALID_CHARS)
+            } else {
+                ValidateResult.Success
+            }
         }
-    }
 }
 
 class KotlinClassNameValidator(
@@ -56,25 +52,23 @@ class KotlinClassNameValidator(
 private class KotlinPackageNameValidatorInternal(
     private val allowEmpty: Boolean,
 ) : InputValidatorInternal {
-
     private val kotlinClassNameRegex =
         Regex("^[a-zA-Z_][a-zA-Z0-9_]*(\\.[a-zA-Z_][a-zA-Z0-9_]*)*\$")
 
-    override fun validate(
-        input: String,
-    ) = runCatching {
-        if (allowEmpty && input.isEmpty()) {
-            ValidateResult.Success
-        } else {
-            if (input.isEmpty()) {
-                ValidateResult.Failure(MUST_NOT_BE_EMPTY)
-            } else if (!input.matches(kotlinClassNameRegex)) {
-                ValidateResult.Failure(CONTAINS_INVALID_CHARS)
-            } else {
+    override fun validate(input: String) =
+        runCatching {
+            if (allowEmpty && input.isEmpty()) {
                 ValidateResult.Success
+            } else {
+                if (input.isEmpty()) {
+                    ValidateResult.Failure(MUST_NOT_BE_EMPTY)
+                } else if (!input.matches(kotlinClassNameRegex)) {
+                    ValidateResult.Failure(CONTAINS_INVALID_CHARS)
+                } else {
+                    ValidateResult.Success
+                }
             }
         }
-    }
 }
 
 class KotlinPackageNameValidator(
@@ -82,6 +76,3 @@ class KotlinPackageNameValidator(
     private val delegate: InputValidatorImpl =
         InputValidatorImpl(delegate = KotlinPackageNameValidatorInternal(allowEmpty)),
 ) : InputValidator by delegate
-
-
-

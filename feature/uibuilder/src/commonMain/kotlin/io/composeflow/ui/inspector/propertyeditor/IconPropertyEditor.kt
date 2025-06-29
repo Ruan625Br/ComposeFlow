@@ -60,6 +60,9 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
 import androidx.compose.ui.window.rememberDialogState
+import io.composeflow.Res
+import io.composeflow.configure_icon
+import io.composeflow.delete_icon
 import io.composeflow.materialicons.Filled
 import io.composeflow.materialicons.ImageVectorHolder
 import io.composeflow.materialicons.MaterialIcon
@@ -67,6 +70,7 @@ import io.composeflow.materialicons.Outlined
 import io.composeflow.materialicons.Rounded
 import io.composeflow.materialicons.Sharp
 import io.composeflow.materialicons.TwoTone
+import io.composeflow.select_icon
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.icon.ComposeFlowIcon
@@ -75,10 +79,6 @@ import io.composeflow.ui.labeledbox.LabeledBorderBox
 import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.propertyeditor.propertyEditorMinWidth
 import io.composeflow.ui.textfield.SmallOutlinedTextField
-import io.composeflow.Res
-import io.composeflow.configure_icon
-import io.composeflow.delete_icon
-import io.composeflow.select_icon
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -92,16 +92,17 @@ fun IconPropertyEditor(
     var dialogOpen by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .wrapContentHeight()
-            .clickable {
-                dialogOpen = true
-            },
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .wrapContentHeight()
+                .clickable {
+                    dialogOpen = true
+                },
     ) {
         LabeledBorderBox(
             label = label,
-            modifier = Modifier.width(propertyEditorMinWidth)
+            modifier = Modifier.width(propertyEditorMinWidth),
         ) {
             Row {
                 ComposeFlowIconButton(
@@ -159,24 +160,26 @@ fun IconPropertyEditor(
         ) {
             var selectedIcon: ImageVectorHolder? by remember { mutableStateOf(null) }
             Surface(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .size(width = 600.dp, height = 540.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .size(width = 600.dp, height = 540.dp),
             ) {
                 Column(
-                    modifier = Modifier
-                        .padding(all = 16.dp)
-                        .onKeyEvent { keyEvent ->
-                            if (keyEvent.key == Key.Enter) {
-                                selectedIcon?.let {
-                                    onIconSelected(it)
-                                    onCloseDialog()
-                                    true
-                                } ?: false
-                            } else {
-                                false
-                            }
-                        },
+                    modifier =
+                        Modifier
+                            .padding(all = 16.dp)
+                            .onKeyEvent { keyEvent ->
+                                if (keyEvent.key == Key.Enter) {
+                                    selectedIcon?.let {
+                                        onIconSelected(it)
+                                        onCloseDialog()
+                                        true
+                                    } ?: false
+                                } else {
+                                    false
+                                }
+                            },
                 ) {
                     Text(
                         text = stringResource(Res.string.select_icon),
@@ -201,50 +204,54 @@ fun IconPropertyEditor(
                             )
                         },
                         singleLine = true,
-                        modifier = Modifier
-                            .padding(bottom = 16.dp)
-                            .focusable()
-                            .focusRequester(focusRequester),
+                        modifier =
+                            Modifier
+                                .padding(bottom = 16.dp)
+                                .focusable()
+                                .focusRequester(focusRequester),
                     )
+
                     @Composable
-                    fun runFilterChip(materialIcon: MaterialIcon) = run {
-                        val selected = filter == materialIcon
-                        FilterChip(
-                            selected = selected,
-                            onClick = {
-                                filter = materialIcon
-                            },
-                            label = {
-                                Text(materialIcon.name)
-                            },
-                            leadingIcon = {
-                                Box(
-                                    Modifier.animateContentSize(keyframes { durationMillis = 200 }),
-                                ) {
-                                    if (selected) {
-                                        Icon(
-                                            imageVector = Icons.Outlined.Check,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(FilterChipDefaults.IconSize),
-                                        )
+                    fun runFilterChip(materialIcon: MaterialIcon) =
+                        run {
+                            val selected = filter == materialIcon
+                            FilterChip(
+                                selected = selected,
+                                onClick = {
+                                    filter = materialIcon
+                                },
+                                label = {
+                                    Text(materialIcon.name)
+                                },
+                                leadingIcon = {
+                                    Box(
+                                        Modifier.animateContentSize(keyframes { durationMillis = 200 }),
+                                    ) {
+                                        if (selected) {
+                                            Icon(
+                                                imageVector = Icons.Outlined.Check,
+                                                contentDescription = null,
+                                                modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                            )
+                                        }
                                     }
-                                }
-                            },
-                            modifier = Modifier.padding(end = 8.dp),
-                        )
-                    }
+                                },
+                                modifier = Modifier.padding(end = 8.dp),
+                            )
+                        }
                     FlowRow {
                         MaterialIcon.entries.forEach {
                             runFilterChip(it)
                         }
                     }
-                    val icons = when (filter) {
-                        MaterialIcon.Outlined -> Outlined.entries.toTypedArray()
-                        MaterialIcon.Filled -> Filled.entries.toTypedArray()
-                        MaterialIcon.Rounded -> Rounded.entries.toTypedArray()
-                        MaterialIcon.Sharp -> Sharp.entries.toTypedArray()
-                        MaterialIcon.TwoTone -> TwoTone.entries.toTypedArray()
-                    }
+                    val icons =
+                        when (filter) {
+                            MaterialIcon.Outlined -> Outlined.entries.toTypedArray()
+                            MaterialIcon.Filled -> Filled.entries.toTypedArray()
+                            MaterialIcon.Rounded -> Rounded.entries.toTypedArray()
+                            MaterialIcon.Sharp -> Sharp.entries.toTypedArray()
+                            MaterialIcon.TwoTone -> TwoTone.entries.toTypedArray()
+                        }
                     LazyVerticalGrid(
                         columns = GridCells.Adaptive(104.dp),
                         modifier = Modifier.weight(1f),
@@ -254,39 +261,43 @@ fun IconPropertyEditor(
                             icons.filter { it.name.contains(filterText, ignoreCase = true) },
                         ) {
                             val selected = selectedIcon == it
-                            val selectedModifier = Modifier
-                                .clip(shape = RoundedCornerShape(16.dp))
-                                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
+                            val selectedModifier =
+                                Modifier
+                                    .clip(shape = RoundedCornerShape(16.dp))
+                                    .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f))
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier
-                                    .hoverOverlay()
-                                    .width(98.dp)
-                                    .height(78.dp)
-                                    .onClick {
-                                        selectedIcon = when (filter) {
-                                            MaterialIcon.Outlined -> it as Outlined
-                                            MaterialIcon.Filled -> it as Filled
-                                            MaterialIcon.Rounded -> it as Rounded
-                                            MaterialIcon.Sharp -> it as Sharp
-                                            MaterialIcon.TwoTone -> it as TwoTone
-                                        }
-                                    }.then(
-                                        if (selected) {
-                                            selectedModifier
-                                        } else {
-                                            Modifier
-                                        },
-                                    ),
+                                modifier =
+                                    Modifier
+                                        .hoverOverlay()
+                                        .width(98.dp)
+                                        .height(78.dp)
+                                        .onClick {
+                                            selectedIcon =
+                                                when (filter) {
+                                                    MaterialIcon.Outlined -> it as Outlined
+                                                    MaterialIcon.Filled -> it as Filled
+                                                    MaterialIcon.Rounded -> it as Rounded
+                                                    MaterialIcon.Sharp -> it as Sharp
+                                                    MaterialIcon.TwoTone -> it as TwoTone
+                                                }
+                                        }.then(
+                                            if (selected) {
+                                                selectedModifier
+                                            } else {
+                                                Modifier
+                                            },
+                                        ),
                             ) {
                                 Image(
                                     imageVector = it.imageVector,
                                     contentDescription = "Icon for ${it.name}",
                                     contentScale = ContentScale.FillWidth,
                                     colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
-                                    modifier = Modifier
-                                        .width(42.dp)
-                                        .padding(4.dp),
+                                    modifier =
+                                        Modifier
+                                            .width(42.dp)
+                                            .padding(4.dp),
                                 )
 
                                 Text(
@@ -295,8 +306,9 @@ fun IconPropertyEditor(
                                     style = MaterialTheme.typography.labelSmall,
                                     overflow = TextOverflow.Visible,
                                     softWrap = true,
-                                    modifier = Modifier
-                                        .padding(4.dp),
+                                    modifier =
+                                        Modifier
+                                            .padding(4.dp),
                                 )
                             }
                         }

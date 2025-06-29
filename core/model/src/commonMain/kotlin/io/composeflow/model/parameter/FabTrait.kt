@@ -50,42 +50,52 @@ data class FabTrait(
     val fabPositionWrapper: FabPositionWrapper? = null,
     val containerColorWrapper: AssignableProperty? =
         ColorProperty.ColorIntrinsicValue(
-            value = ColorWrapper(
-                themeColor = Material3ColorWrapper.PrimaryContainer
-            )
+            value =
+                ColorWrapper(
+                    themeColor = Material3ColorWrapper.PrimaryContainer,
+                ),
         ),
-    val contentColorWrapper: AssignableProperty? = ColorProperty.ColorIntrinsicValue(
-        value = ColorWrapper(
-            themeColor = Material3ColorWrapper.Primary
-        )
-    ),
+    val contentColorWrapper: AssignableProperty? =
+        ColorProperty.ColorIntrinsicValue(
+            value =
+                ColorWrapper(
+                    themeColor = Material3ColorWrapper.Primary,
+                ),
+        ),
     val fabElevationWrapper: FabElevationWrapper? = null,
     val fabType: FabType = FabType.Default,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Container color", containerColorWrapper, ComposeFlowType.Color()),
             PropertyContainer("Content color", contentColorWrapper, ComposeFlowType.Color()),
         )
-    }
 
     override fun icon(): ImageVector = Icons.Outlined.AddCircle
+
     override fun iconText(): String = "Fab"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.ScreenOnly)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_fab_trait
+
     override fun visibleInPalette(): Boolean = true
+
     override fun isResizeable(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)
+
     override fun onClickIncludedInParams(): Boolean = true
+
     override fun isVisibilityConditional(): Boolean = false
+
     override fun isEditable(): Boolean = true
-    override fun defaultComposeNode(project: Project): ComposeNode {
-        return ComposeNode(
+
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
             trait = mutableStateOf(FabTrait(imageVectorHolder = Outlined.Add)),
             label = mutableStateOf("Fab"),
         )
-    }
 
     @Composable
     override fun RenderedNode(
@@ -100,26 +110,31 @@ data class FabTrait(
             FabType.Default -> {
                 FloatingActionButton(
                     onClick = {},
-                    containerColor = (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: containerColor,
-                    contentColor = (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: contentColorFor(containerColor),
-                    elevation = when (fabElevationWrapper) {
-                        FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
-                        FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
-                        null -> FloatingActionButtonDefaults.elevation()
-                    },
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    containerColor =
+                        (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: containerColor,
+                    contentColor =
+                        (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: contentColorFor(containerColor),
+                    elevation =
+                        when (fabElevationWrapper) {
+                            FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
+                            FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
+                            null -> FloatingActionButtonDefaults.elevation()
+                        },
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 ) {
                     Icon(
                         imageVector = imageVectorHolder.imageVector,
@@ -131,26 +146,31 @@ data class FabTrait(
             FabType.Small -> {
                 SmallFloatingActionButton(
                     onClick = {},
-                    containerColor = (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: containerColor,
-                    contentColor = (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: contentColorFor(containerColor),
-                    elevation = when (fabElevationWrapper) {
-                        FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
-                        FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
-                        null -> FloatingActionButtonDefaults.elevation()
-                    },
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                paletteRenderParams = paletteRenderParams,
-                                isDraggable = false,
-                            ),
-                    ),
+                    containerColor =
+                        (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: containerColor,
+                    contentColor =
+                        (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: contentColorFor(containerColor),
+                    elevation =
+                        when (fabElevationWrapper) {
+                            FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
+                            FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
+                            null -> FloatingActionButtonDefaults.elevation()
+                        },
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    paletteRenderParams = paletteRenderParams,
+                                    isDraggable = false,
+                                ),
+                        ),
                 ) {
                     Icon(
                         imageVector = imageVectorHolder.imageVector,
@@ -162,26 +182,31 @@ data class FabTrait(
             FabType.Large -> {
                 LargeFloatingActionButton(
                     onClick = {},
-                    containerColor = (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: containerColor,
-                    contentColor = (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: contentColorFor(containerColor),
-                    elevation = when (fabElevationWrapper) {
-                        FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
-                        FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
-                        null -> FloatingActionButtonDefaults.elevation()
-                    },
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    containerColor =
+                        (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: containerColor,
+                    contentColor =
+                        (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: contentColorFor(containerColor),
+                    elevation =
+                        when (fabElevationWrapper) {
+                            FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
+                            FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
+                            null -> FloatingActionButtonDefaults.elevation()
+                        },
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 ) {
                     Icon(
                         imageVector = imageVectorHolder.imageVector,
@@ -193,26 +218,31 @@ data class FabTrait(
             FabType.Extended -> {
                 ExtendedFloatingActionButton(
                     onClick = {},
-                    containerColor = (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: containerColor,
-                    contentColor = (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: contentColorFor(containerColor),
-                    elevation = when (fabElevationWrapper) {
-                        FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
-                        FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
-                        null -> FloatingActionButtonDefaults.elevation()
-                    },
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                isDraggable = false,
-                            ),
-                    ),
+                    containerColor =
+                        (containerColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: containerColor,
+                    contentColor =
+                        (contentColorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: contentColorFor(containerColor),
+                    elevation =
+                        when (fabElevationWrapper) {
+                            FabElevationWrapper.Default -> FloatingActionButtonDefaults.elevation()
+                            FabElevationWrapper.Lowered -> FloatingActionButtonDefaults.loweredElevation()
+                            null -> FloatingActionButtonDefaults.elevation()
+                        },
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    isDraggable = false,
+                                ),
+                        ),
                 ) {
                     Icon(
                         imageVector = imageVectorHolder.imageVector,
@@ -246,8 +276,8 @@ data class FabTrait(
                     project,
                     context,
                     ComposeFlowType.Color(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
         }
@@ -258,27 +288,30 @@ data class FabTrait(
                     project,
                     context,
                     ComposeFlowType.Color(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
         }
         fabElevationWrapper?.let {
-            val elevationMember = when (it) {
-                FabElevationWrapper.Default -> MemberName(
-                    "androidx.compose.material3.FloatingActionButtonDefaults",
-                    "elevation",
-                )
+            val elevationMember =
+                when (it) {
+                    FabElevationWrapper.Default ->
+                        MemberName(
+                            "androidx.compose.material3.FloatingActionButtonDefaults",
+                            "elevation",
+                        )
 
-                FabElevationWrapper.Lowered -> MemberName(
-                    "androidx.compose.material3.FloatingActionButtonDefaults",
-                    "loweredElevation",
-                )
-            }
+                    FabElevationWrapper.Lowered ->
+                        MemberName(
+                            "androidx.compose.material3.FloatingActionButtonDefaults",
+                            "loweredElevation",
+                        )
+                }
             codeBlockBuilder.addStatement("elevation = %M(),", elevationMember)
         }
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {")
 
@@ -294,7 +327,7 @@ data class FabTrait(
 }
 
 object FabElevationWrapperSerializer : FallbackEnumSerializer<FabElevationWrapper>(
-    FabElevationWrapper::class
+    FabElevationWrapper::class,
 )
 
 @Serializable(FabElevationWrapperSerializer::class)
@@ -304,7 +337,7 @@ enum class FabElevationWrapper {
 }
 
 object FabPositionWrapperSerializer : FallbackEnumSerializer<FabPositionWrapper>(
-    FabPositionWrapper::class
+    FabPositionWrapper::class,
 )
 
 @Serializable(FabPositionWrapperSerializer::class)
@@ -318,22 +351,17 @@ object FabTypeSerializer : FallbackEnumSerializer<FabType>(FabType::class)
 @Serializable(FabTypeSerializer::class)
 enum class FabType {
     Default {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "FloatingActionButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "FloatingActionButton")
     },
     Small {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "SmallFloatingActionButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "SmallFloatingActionButton")
     },
     Large {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "LargeFloatingActionButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "LargeFloatingActionButton")
     },
     Extended {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "ExtendedFloatingActionButton")
-    }
-    ;
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "ExtendedFloatingActionButton")
+    }, ;
 
     abstract fun toMemberName(): MemberName
 }

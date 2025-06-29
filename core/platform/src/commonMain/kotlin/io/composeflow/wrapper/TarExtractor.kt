@@ -9,8 +9,10 @@ import java.nio.file.Files
 import java.nio.file.attribute.PosixFilePermission
 
 class TarExtractor {
-
-    fun extractTarGz(tarGzFile: File, destinationDirectory: File) {
+    fun extractTarGz(
+        tarGzFile: File,
+        destinationDirectory: File,
+    ) {
         File(tarGzFile.absolutePath).inputStream().use { fileInputStream ->
             GzipCompressorInputStream(fileInputStream).use { gzipInputStream ->
                 TarArchiveInputStream(gzipInputStream).use { tarInputStream ->
@@ -50,7 +52,10 @@ class TarExtractor {
         }
     }
 
-    private fun setFilePermissions(file: File, mode: Int) {
+    private fun setFilePermissions(
+        file: File,
+        mode: Int,
+    ) {
         // POSIX permissions are only supported on UNIX-like systems
         if (File.separatorChar == '/') {
             val perms = mutableSetOf<PosixFilePermission>()

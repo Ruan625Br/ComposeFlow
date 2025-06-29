@@ -8,29 +8,30 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 class DataTypeTest {
-
     private val project = Project()
 
     @Test
     fun emptyFields_verify_nullTypeSpec() {
-        val dataType = DataType(
-            name = "NullDataClass",
-        )
+        val dataType =
+            DataType(
+                name = "NullDataClass",
+            )
         assertNull(dataType.generateDataClassSpec(project))
     }
 
     @Test
     fun stringField_verifyGeneratedDataClass() {
-        val dataType = DataType(
-            name = "DataClass",
-        ).apply {
-            fields.add(
-                DataField(
-                    name = "str",
-                    fieldType = FieldType.String(),
-                ),
-            )
-        }
+        val dataType =
+            DataType(
+                name = "DataClass",
+            ).apply {
+                fields.add(
+                    DataField(
+                        name = "str",
+                        fieldType = FieldType.String(),
+                    ),
+                )
+            }
         val typeSpec = dataType.generateDataClassSpec(project)
         assertEquals(
             """
@@ -45,16 +46,17 @@ public data class DataClass(
 
     @Test
     fun intField_verifyGeneratedDataClass() {
-        val dataType = DataType(
-            name = "DataClass",
-        ).apply {
-            fields.add(
-                DataField(
-                    name = "int",
-                    fieldType = FieldType.Int(),
-                ),
-            )
-        }
+        val dataType =
+            DataType(
+                name = "DataClass",
+            ).apply {
+                fields.add(
+                    DataField(
+                        name = "int",
+                        fieldType = FieldType.Int(),
+                    ),
+                )
+            }
         val typeSpec = dataType.generateDataClassSpec(project)
         assertEquals(
             """
@@ -69,16 +71,17 @@ public data class DataClass(
 
     @Test
     fun booleanField_verifyGeneratedDataClass() {
-        val dataType = DataType(
-            name = "DataClass",
-        ).apply {
-            fields.add(
-                DataField(
-                    name = "boolean",
-                    fieldType = FieldType.Boolean(),
-                ),
-            )
-        }
+        val dataType =
+            DataType(
+                name = "DataClass",
+            ).apply {
+                fields.add(
+                    DataField(
+                        name = "boolean",
+                        fieldType = FieldType.Boolean(),
+                    ),
+                )
+            }
         val typeSpec = dataType.generateDataClassSpec(project)
         assertEquals(
             """
@@ -93,28 +96,29 @@ public data class DataClass(
 
     @Test
     fun multipleFields_verifyGeneratedDataClass() {
-        val dataType = DataType(
-            name = "DataClass",
-        ).apply {
-            fields.add(
-                DataField(
-                    name = "str",
-                    fieldType = FieldType.String(),
-                ),
-            )
-            fields.add(
-                DataField(
-                    name = "int",
-                    fieldType = FieldType.Int(),
-                ),
-            )
-            fields.add(
-                DataField(
-                    name = "boolean",
-                    fieldType = FieldType.Boolean(),
-                ),
-            )
-        }
+        val dataType =
+            DataType(
+                name = "DataClass",
+            ).apply {
+                fields.add(
+                    DataField(
+                        name = "str",
+                        fieldType = FieldType.String(),
+                    ),
+                )
+                fields.add(
+                    DataField(
+                        name = "int",
+                        fieldType = FieldType.Int(),
+                    ),
+                )
+                fields.add(
+                    DataField(
+                        name = "boolean",
+                        fieldType = FieldType.Boolean(),
+                    ),
+                )
+            }
         val typeSpec = dataType.generateDataClassSpec(project)
         assertEquals(
             """
@@ -131,28 +135,29 @@ public data class DataClass(
 
     @Test
     fun multipleFields_withDefaultValue_verifyGeneratedDataClass() {
-        val dataType = DataType(
-            name = "DataClass",
-        ).apply {
-            fields.add(
-                DataField(
-                    name = "str",
-                    fieldType = FieldType.String(defaultValue = "default"),
-                ),
-            )
-            fields.add(
-                DataField(
-                    name = "int",
-                    fieldType = FieldType.Int(defaultValue = 3),
-                ),
-            )
-            fields.add(
-                DataField(
-                    name = "boolean",
-                    fieldType = FieldType.Boolean(defaultValue = true),
-                ),
-            )
-        }
+        val dataType =
+            DataType(
+                name = "DataClass",
+            ).apply {
+                fields.add(
+                    DataField(
+                        name = "str",
+                        fieldType = FieldType.String(defaultValue = "default"),
+                    ),
+                )
+                fields.add(
+                    DataField(
+                        name = "int",
+                        fieldType = FieldType.Int(defaultValue = 3),
+                    ),
+                )
+                fields.add(
+                    DataField(
+                        name = "boolean",
+                        fieldType = FieldType.Boolean(defaultValue = true),
+                    ),
+                )
+            }
         val typeSpec = dataType.generateDataClassSpec(project)
         assertEquals(
             """
@@ -169,33 +174,34 @@ public data class DataClass(
 
     @Test
     fun multipleFields_usedAsFirestoreCollection_verifyDocumentId_included() {
-        val dataType = DataType(
-            name = "DataClass",
-        ).apply {
-            fields.add(
-                DataField(
-                    name = "str",
-                    fieldType = FieldType.String(defaultValue = "default"),
-                ),
-            )
-            fields.add(
-                DataField(
-                    name = "int",
-                    fieldType = FieldType.Int(defaultValue = 3),
-                ),
-            )
-            fields.add(
-                DataField(
-                    name = "boolean",
-                    fieldType = FieldType.Boolean(defaultValue = true),
-                ),
-            )
-        }
+        val dataType =
+            DataType(
+                name = "DataClass",
+            ).apply {
+                fields.add(
+                    DataField(
+                        name = "str",
+                        fieldType = FieldType.String(defaultValue = "default"),
+                    ),
+                )
+                fields.add(
+                    DataField(
+                        name = "int",
+                        fieldType = FieldType.Int(defaultValue = 3),
+                    ),
+                )
+                fields.add(
+                    DataField(
+                        name = "boolean",
+                        fieldType = FieldType.Boolean(defaultValue = true),
+                    ),
+                )
+            }
         project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.add(
             FirestoreCollection(
                 name = "testCollection",
-                dataTypeId = dataType.id
-            )
+                dataTypeId = dataType.id,
+            ),
         )
         val typeSpec = dataType.generateDataClassSpec(project)
         assertEquals(

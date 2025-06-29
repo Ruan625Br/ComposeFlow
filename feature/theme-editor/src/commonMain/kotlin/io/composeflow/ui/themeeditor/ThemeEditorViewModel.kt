@@ -29,18 +29,17 @@ class ThemeEditorViewModel(
     private val project: Project,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
-
     // Primary font family edited in the ThemeEditorScreen. This isn't reflected to the persisted project
     var primaryFontFamily by mutableStateOf(
         project.themeHolder.fontHolder.primaryFontFamily,
-        policy = structuralEqualityPolicy()
+        policy = structuralEqualityPolicy(),
     )
         private set
 
     // Secondary font family edited in the ThemeEditorScreen. This isn't reflected to the persisted project
     var secondaryFontFamily by mutableStateOf(
         project.themeHolder.fontHolder.secondaryFontFamily,
-        policy = structuralEqualityPolicy()
+        policy = structuralEqualityPolicy(),
     )
         private set
 
@@ -106,8 +105,10 @@ class ThemeEditorViewModel(
     fun onApplyFontEditableParams() {
         project.themeHolder.fontHolder.primaryFontFamily = primaryFontFamily
         project.themeHolder.fontHolder.secondaryFontFamily = secondaryFontFamily
-        project.themeHolder.fontHolder.textStyleOverrides.clear()
-        project.themeHolder.fontHolder.textStyleOverrides.putAll(textStyleOverrides)
+        project.themeHolder.fontHolder.textStyleOverrides
+            .clear()
+        project.themeHolder.fontHolder.textStyleOverrides
+            .putAll(textStyleOverrides)
 
         saveProject()
     }

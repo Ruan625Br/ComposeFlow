@@ -18,7 +18,6 @@ private val Context.dataStore by preferencesDataStore(
 )
 
 class MainApplication : Application() {
-
     @OptIn(ExperimentalSettingsApi::class, ExperimentalSettingsImplementation::class)
     override fun onCreate() {
         super.onCreate()

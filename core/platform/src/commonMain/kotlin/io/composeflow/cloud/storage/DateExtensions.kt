@@ -5,8 +5,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.time.OffsetDateTime
 
-fun OffsetDateTime.toKotlinxInstant(): Instant =
-    Instant.fromEpochSeconds(this.toEpochSecond(), this.nano.toLong())
+fun OffsetDateTime.toKotlinxInstant(): Instant = Instant.fromEpochSeconds(this.toEpochSecond(), this.nano.toLong())
 
 fun Instant.asDateString(timeZone: TimeZone? = null): String {
     val date = toLocalDateTime(timeZone ?: TimeZone.currentSystemDefault()).date

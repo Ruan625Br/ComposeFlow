@@ -46,15 +46,19 @@ data class LazyRowTrait(
     val horizontalArrangement: ArrangementHorizontalWrapper? = null,
     val verticalAlignment: AlignmentVerticalWrapper? = null,
     val userScrollEnabled: Boolean? = null,
-) : LazyListTrait, ComposeTrait {
+) : LazyListTrait,
+    ComposeTrait {
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
     override var defaultChildNumOfItems: Int = ComposeTrait.NumOfItemsInLazyList
 
     override fun areAllParamsEmpty(): Boolean =
-        contentPadding == null && reverseLayout == null && horizontalArrangement == null &&
-                verticalAlignment == null && userScrollEnabled == null
+        contentPadding == null &&
+            reverseLayout == null &&
+            horizontalArrangement == null &&
+            verticalAlignment == null &&
+            userScrollEnabled == null
 
     override fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -66,7 +70,7 @@ data class LazyRowTrait(
                 .addStatement(
                     "contentPadding = %M(${it.value.toInt()}.%M),",
                     paddingValuesMember,
-                    dpMember
+                    dpMember,
                 )
         }
         reverseLayout?.let {
@@ -96,12 +100,15 @@ data class LazyRowTrait(
     override fun hasDynamicItems(): Boolean = true
 
     override fun icon(): ImageVector = ComposeFlowIcons.LazyRow
+
     override fun iconText(): String = "LazyRow"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Container,
-        TraitCategory.WrapContainer,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Container,
+            TraitCategory.WrapContainer,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_lazy_row_trait
 
@@ -131,24 +138,28 @@ data class LazyRowTrait(
         LazyRow(
             contentPadding = PaddingValues(contentPadding?.value?.dp ?: 0.dp),
             reverseLayout = reverseLayout ?: false,
-            horizontalArrangement = horizontalArrangement?.arrangement
-                ?: Arrangement.Start,
+            horizontalArrangement =
+                horizontalArrangement?.arrangement
+                    ?: Arrangement.Start,
             verticalAlignment = verticalAlignment?.alignment ?: Alignment.Top,
-            userScrollEnabled = if (paletteRenderParams.isThumbnail) {
-                false
-            } else {
-                userScrollEnabled ?: true
-            },
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            userScrollEnabled =
+                if (paletteRenderParams.isThumbnail) {
+                    false
+                } else {
+                    userScrollEnabled ?: true
+                },
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         ) {
             node.children.forEach { child ->
                 item {
@@ -160,10 +171,11 @@ data class LazyRowTrait(
                     )
                 }
                 items(
-                    count = child.lazyListChildParams.value.getNumOfItems(
-                        project = project,
-                        lazyList = node,
-                    ) - 1,
+                    count =
+                        child.lazyListChildParams.value.getNumOfItems(
+                            project = project,
+                            lazyList = node,
+                        ) - 1,
                 ) {
                     child.RenderedNodeInCanvas(
                         project = project,

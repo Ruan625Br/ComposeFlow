@@ -28,7 +28,6 @@ data class TabTrait(
     val index: Int = 0, // index of this tab within parent TabRow (or other TabRow variants)
     var selectedTabIndexVariableName: String = "selectedIndex",
 ) : ComposeTrait {
-
     private fun generateParamsCode(
         project: Project,
         context: GenerationContext,
@@ -53,8 +52,8 @@ data class TabTrait(
                     project,
                     context,
                     ComposeFlowType.StringType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(") },")
         }
@@ -81,13 +80,19 @@ data class TabTrait(
     }
 
     override fun icon(): ImageVector = Icons.AutoMirrored.Outlined.Notes
+
     override fun iconText(): String = "Tab"
+
     override fun paletteCategories(): List<TraitCategory> = listOf()
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_tab_trait
+
     override fun visibleInPalette(): Boolean = false
+
     override fun isResizeable(): Boolean = false
+
     override fun isEditable(): Boolean = false
+
     override fun generateCode(
         project: Project,
         node: ComposeNode,
@@ -103,11 +108,11 @@ data class TabTrait(
             generateParamsCode(
                 project = project,
                 context = context,
-                dryRun = dryRun
-            )
+                dryRun = dryRun,
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()

@@ -7,11 +7,14 @@ import io.composeflow.model.parameter.IconTrait
  * Interface that defines specific functionalities for TopAppBar
  */
 interface TopAppBarNode {
-
     var self: ComposeNode
+
     fun getTopAppBarNavigationIcon(): ComposeNode?
+
     fun addTopAppBarActionIcon()
+
     fun removeTopAppBarActionIcon(i: Int)
+
     fun getTopAppBarActionIcons(): List<ComposeNode>
 }
 
@@ -25,11 +28,12 @@ interface TopAppBarNode {
 class TopAppBarNodeImpl : TopAppBarNode {
     override lateinit var self: ComposeNode
 
-    override fun getTopAppBarNavigationIcon(): ComposeNode? = if (self.children.size > 0) {
-        self.children[0]
-    } else {
-        null
-    }
+    override fun getTopAppBarNavigationIcon(): ComposeNode? =
+        if (self.children.size > 0) {
+            self.children[0]
+        } else {
+            null
+        }
 
     override fun addTopAppBarActionIcon() {
         self.addChild(

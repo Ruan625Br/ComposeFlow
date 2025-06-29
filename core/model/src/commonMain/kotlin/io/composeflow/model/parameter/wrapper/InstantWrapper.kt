@@ -19,12 +19,13 @@ data class InstantWrapper(
     val instant: Instant? = null,
 ) {
     @Transient
-    private val dateFormat = DateTimeComponents.Format {
-        date(LocalDate.Formats.ISO)
-    }
+    private val dateFormat =
+        DateTimeComponents.Format {
+            date(LocalDate.Formats.ISO)
+        }
 
-    fun generateCode(): CodeBlock {
-        return if (instant == null) {
+    fun generateCode(): CodeBlock =
+        if (instant == null) {
             CodeBlock.of("%T.System.now()", Clock::class.asClassName())
         } else {
             CodeBlock.of(
@@ -34,7 +35,6 @@ data class InstantWrapper(
                 TimeZone::class.asClassName(),
             )
         }
-    }
 
     fun asString(): String {
         // TODO: Other candidates

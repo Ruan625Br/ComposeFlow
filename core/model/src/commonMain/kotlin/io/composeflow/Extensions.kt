@@ -12,14 +12,19 @@ import io.github.nomisrev.path
 import kotlinx.serialization.json.JsonElement
 import java.util.Collections.addAll
 
-fun <T> MutableList<T>.swap(index1: Int, index2: Int) {
+fun <T> MutableList<T>.swap(
+    index1: Int,
+    index2: Int,
+) {
     val tmp = this[index1]
     this[index1] = this[index2]
     this[index2] = tmp
 }
 
-fun String.withoutNewLines() = this.split("\n")
-    .joinToString("")
+fun String.withoutNewLines() =
+    this
+        .split("\n")
+        .joinToString("")
 
 fun String.trimForCompare() = this.trim().withoutNewLines().filterNot { it.isWhitespace() }
 
@@ -43,7 +48,10 @@ fun String.getSubsequenceMatchIndices(sub: String): Set<Int> {
     return if (subIndex == sub.length) indices else emptySet()
 }
 
-fun JsonElement.selectString(jsonPath: String, replaceQuotation: Boolean = false): String {
+fun JsonElement.selectString(
+    jsonPath: String,
+    replaceQuotation: Boolean = false,
+): String {
     val extracted = JsonPath.path(jsonPath).getOrNull(this).toString()
     return if (replaceQuotation) {
         extracted.replace("\"", "")
@@ -71,16 +79,19 @@ fun <T> List<T>.eachEquals(
 
 fun String.removeLineBreak() = this.replace("\r\n|\r|\n".toRegex(), "")
 
-fun <K, V> MutableMap<K, V>.copyAsMutableStateMap(): MutableMap<K, V> =
-    mutableStateMapOf<K, V>().apply { addAll(entries) }
+fun <K, V> MutableMap<K, V>.copyAsMutableStateMap(): MutableMap<K, V> = mutableStateMapOf<K, V>().apply { addAll(entries) }
 
-fun String.asClassName() = this.replace("-", "_")
-    .replace(" ", "")
-    .capitalize(Locale.current)
+fun String.asClassName() =
+    this
+        .replace("-", "_")
+        .replace(" ", "")
+        .capitalize(Locale.current)
 
-fun String.asVariableName() = this.replace("-", "_")
-    .replace(" ", "")
-    .replaceFirstChar { it.lowercase() }
+fun String.asVariableName() =
+    this
+        .replace("-", "_")
+        .replace(" ", "")
+        .replaceFirstChar { it.lowercase() }
 
 @Composable
 fun String.toRichHtmlString(): AnnotatedString {

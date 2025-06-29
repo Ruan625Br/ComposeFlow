@@ -35,39 +35,42 @@ import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
 
 class AuthRepository {
-
     @OptIn(ExperimentalTime::class)
-    val firebaseIdToken: Flow<FirebaseIdToken?> = dataStore.data.map { preferences ->
-        preferences[serializedFirebaseUserInfoKey]?.let {
-            val firebaseIdToken = jsonSerializer.decodeFromString<FirebaseIdToken>(it)
-            val expirationTime = Instant.fromEpochSeconds(firebaseIdToken.exp)
-            val currentTime = Clock.System.now()
-            
-            if (expirationTime > currentTime) {
-                Logger.i("New firebaseIdToken detected. ${firebaseIdToken.user_id}")
-                firebaseIdToken
-            } else {
-                Logger.i("FirebaseIdToken expired. ${firebaseIdToken.user_id}, expirationTime: ${expirationTime}, currentTime: ${Clock.System.now()}")
-                if (firebaseIdToken.googleTokenResponse != null && firebaseIdToken.googleTokenResponse.refresh_token !== "") {
-                    googleOAuth2.refreshToken(firebaseIdToken.googleTokenResponse)
-                        .mapBoth({ refreshedToken ->
+    val firebaseIdToken: Flow<FirebaseIdToken?> =
+        dataStore.data.map { preferences ->
+            preferences[serializedFirebaseUserInfoKey]?.let {
+                val firebaseIdToken = jsonSerializer.decodeFromString<FirebaseIdToken>(it)
+                val expirationTime = Instant.fromEpochSeconds(firebaseIdToken.exp)
+                val currentTime = Clock.System.now()
 
-                            // Save refreshed token into DataStore
-                            dataStore.edit { prefs ->
-                                prefs[serializedFirebaseUserInfoKey] =
-                                    jsonSerializer.encodeToString(refreshedToken)
-                            }
-                            return@let refreshedToken
-                        }, { error ->
-                            Logger.e("Failed to refresh token. ", error)
-                            null
-                        })
+                if (expirationTime > currentTime) {
+                    Logger.i("New firebaseIdToken detected. ${firebaseIdToken.user_id}")
+                    firebaseIdToken
                 } else {
-                    null
+                    Logger.i(
+                        "FirebaseIdToken expired. ${firebaseIdToken.user_id}, expirationTime: $expirationTime, currentTime: ${Clock.System.now()}",
+                    )
+                    if (firebaseIdToken.googleTokenResponse != null && firebaseIdToken.googleTokenResponse.refresh_token !== "") {
+                        googleOAuth2
+                            .refreshToken(firebaseIdToken.googleTokenResponse)
+                            .mapBoth({ refreshedToken ->
+
+                                // Save refreshed token into DataStore
+                                dataStore.edit { prefs ->
+                                    prefs[serializedFirebaseUserInfoKey] =
+                                        jsonSerializer.encodeToString(refreshedToken)
+                                }
+                                return@let refreshedToken
+                            }, { error ->
+                                Logger.e("Failed to refresh token. ", error)
+                                null
+                            })
+                    } else {
+                        null
+                    }
                 }
             }
         }
-    }
 
     fun startGoogleSignInFlow() {
         // Open the default web browser to the OAuth authorization URL
@@ -91,10 +94,11 @@ class AuthRepository {
         private val serializedFirebaseUserInfoKey = stringPreferencesKey("firebase_user_info")
         private val scope: CoroutineScope = CoroutineScope(Dispatchers.IO)
         private val callbackPort = findAvailablePort()
-        private val googleOAuth2 = GoogleOAuth2Client(
-            callbackPort = callbackPort,
-            OkHttpClient(),
-        )
+        private val googleOAuth2 =
+            GoogleOAuth2Client(
+                callbackPort = callbackPort,
+                OkHttpClient(),
+            )
 
         private fun isPortAvailable(port: Int): Boolean {
             ServerSocket().use { serverSocket ->
@@ -108,13 +112,17 @@ class AuthRepository {
             }
         }
 
-        private fun findAvailablePort(startPort: Int = 8090, endPort: Int = 8110): Int {
+        private fun findAvailablePort(
+            startPort: Int = 8090,
+            endPort: Int = 8110,
+        ): Int {
             var port = startPort
-            val end = if (startPort > endPort) {
-                startPort
-            } else {
-                endPort
-            }
+            val end =
+                if (startPort > endPort) {
+                    startPort
+                } else {
+                    endPort
+                }
 
             while (port <= end) {
                 if (isPortAvailable(port)) {
@@ -130,33 +138,37 @@ class AuthRepository {
         // The local server definition that receives the callback as part of OAuth2 flow.
         // Defining this as a singleton to avoid duplicate ports are used
         @Suppress("unused")
-        private val callbackServer = routes(
-            "/callback" bind Method.GET to { request: Request ->
-                val res = request.query("res")
+        private val callbackServer =
+            routes(
+                "/callback" bind Method.GET to { request: Request ->
+                    val res = request.query("res")
 
-                if (res != null) {
-                    val token = jsonSerializer.decodeFromString<TokenResponse>(res)
-                    googleOAuth2.signInWithGoogleIdToken(token)
-                        .mapBoth(
-                            success = { firebaseIdToken ->
-                                scope.launch {
-                                    // Store the serialized FirebaseIdToken to DataStore, which is
-                                    // the source of truth of the authorized user
-                                    dataStore.edit { preferences ->
-                                        preferences[serializedFirebaseUserInfoKey] =
-                                            jsonSerializer.encodeToString(firebaseIdToken)
+                    if (res != null) {
+                        val token = jsonSerializer.decodeFromString<TokenResponse>(res)
+                        googleOAuth2
+                            .signInWithGoogleIdToken(token)
+                            .mapBoth(
+                                success = { firebaseIdToken ->
+                                    scope.launch {
+                                        // Store the serialized FirebaseIdToken to DataStore, which is
+                                        // the source of truth of the authorized user
+                                        dataStore.edit { preferences ->
+                                            preferences[serializedFirebaseUserInfoKey] =
+                                                jsonSerializer.encodeToString(firebaseIdToken)
+                                        }
                                     }
-                                }
-                                Response(Status.OK).body("Authorization successful, you can close this window.")
-                            },
-                            failure = {
-                                Response(Status.INTERNAL_SERVER_ERROR).body("Internal server error. ${it.message} ${it.stackTraceToString()}")
-                            },
-                        )
-                } else {
-                    Response(Status.BAD_REQUEST).body("Missing 'res' parameter.")
-                }
-            },
-        ).asServer(Netty(callbackPort)).start()
+                                    Response(Status.OK).body("Authorization successful, you can close this window.")
+                                },
+                                failure = {
+                                    Response(
+                                        Status.INTERNAL_SERVER_ERROR,
+                                    ).body("Internal server error. ${it.message} ${it.stackTraceToString()}")
+                                },
+                            )
+                    } else {
+                        Response(Status.BAD_REQUEST).body("Missing 'res' parameter.")
+                    }
+                },
+            ).asServer(Netty(callbackPort)).start()
     }
 }

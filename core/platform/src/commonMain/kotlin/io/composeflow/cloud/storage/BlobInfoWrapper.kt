@@ -20,7 +20,6 @@ data class BlobInfoWrapper(
     val updateTime: Instant? = null,
     val deleteTime: Instant? = null,
 ) {
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -34,7 +33,9 @@ data class BlobInfoWrapper(
         if (contentBytes != null) {
             if (other.contentBytes == null) return false
             if (!contentBytes.contentEquals(other.contentBytes)) return false
-        } else if (other.contentBytes != null) return false
+        } else if (other.contentBytes != null) {
+            return false
+        }
         if (createTime != other.createTime) return false
         if (updateTime != other.updateTime) return false
         if (deleteTime != other.deleteTime) return false
@@ -55,9 +56,7 @@ data class BlobInfoWrapper(
     }
 }
 
-fun BlobInfo.toKotlinWrapper(
-    contentBytes: ByteArray? = null,
-): BlobInfoWrapper {
+fun BlobInfo.toKotlinWrapper(contentBytes: ByteArray? = null): BlobInfoWrapper {
     val split = blobId.name.split("/")
     return BlobInfoWrapper(
         blobId = blobId.toKotlinWrapper(),
@@ -72,9 +71,7 @@ fun BlobInfo.toKotlinWrapper(
     )
 }
 
-fun Reference.toKotlinWrapper(
-    contentBytes: ByteArray? = null
-): BlobInfoWrapper {
+fun Reference.toKotlinWrapper(contentBytes: ByteArray? = null): BlobInfoWrapper {
     val split = location.path.split("/")
     return BlobInfoWrapper(
         blobId = BlobIdWrapper(location.bucket, location.path, generation = null),

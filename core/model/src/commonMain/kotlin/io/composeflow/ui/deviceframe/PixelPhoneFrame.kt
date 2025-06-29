@@ -23,17 +23,20 @@ fun PixelPhoneFrame(
     modifier: Modifier = Modifier,
     content: (@Composable () -> Unit)? = null,
 ) {
-
     val cornerRadius = 16.dp
-    Box(modifier = modifier
-        .clip(RoundedCornerShape(cornerRadius)),
-        contentAlignment = Alignment.Center) {
+    Box(
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(cornerRadius)),
+        contentAlignment = Alignment.Center,
+    ) {
         // Main contents area
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(cornerRadius))
-                .padding(contentPadding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(cornerRadius))
+                    .padding(contentPadding),
         ) {
             content?.let { it() }
         }
@@ -44,11 +47,10 @@ fun PixelPhoneFrame(
             val width = size.width
             val height = size.height
 
-
             // Shadow #1
             drawRoundRect(
                 color = Color(0xFF6E707D),
-                style = Stroke(width = 30.dp.toPx())
+                style = Stroke(width = 30.dp.toPx()),
             )
             // Shadow #2
             drawRoundRect(
@@ -56,13 +58,13 @@ fun PixelPhoneFrame(
                 size = Size(width = width - 6.dp.toPx(), height = height - 6.dp.toPx()),
                 color = Color(0xFF767676),
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 3.dp.toPx())
+                style = Stroke(width = 3.dp.toPx()),
             )
             // Shadow #1
             drawRoundRect(
                 color = Color(0xFF6E707D),
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 3.dp.toPx())
+                style = Stroke(width = 3.dp.toPx()),
             )
             // Silver frame
             drawRoundRect(
@@ -70,7 +72,7 @@ fun PixelPhoneFrame(
                 size = Size(width = width - 16.dp.toPx(), height = height - 16.dp.toPx()),
                 color = Color(0xFFA2A2A2),
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 10.dp.toPx())
+                style = Stroke(width = 10.dp.toPx()),
             )
             // Very thin black frame
             drawRoundRect(
@@ -78,7 +80,7 @@ fun PixelPhoneFrame(
                 size = Size(width = width - 28.dp.toPx(), height = height - 28.dp.toPx()),
                 color = Color(0xFF242422),
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 6.dp.toPx())
+                style = Stroke(width = 6.dp.toPx()),
             )
             // Thin gray frame
             drawRoundRect(
@@ -86,7 +88,7 @@ fun PixelPhoneFrame(
                 size = Size(width = width - 30.dp.toPx(), height = height - 30.dp.toPx()),
                 color = Color(0xFF444444),
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 4.dp.toPx())
+                style = Stroke(width = 4.dp.toPx()),
             )
 
             // Black frame
@@ -95,7 +97,7 @@ fun PixelPhoneFrame(
                 size = Size(width = width - 40.dp.toPx(), height = height - 40.dp.toPx()),
                 color = Color.Black,
                 cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx),
-                style = Stroke(width = 10.dp.toPx())
+                style = Stroke(width = 10.dp.toPx()),
             )
 
             // ---- Top speaker -----
@@ -108,7 +110,7 @@ fun PixelPhoneFrame(
                 color = Color.DarkGray,
                 topLeft = Offset(speakerX, speakerY),
                 size = Size(speakerWidth, speakerHeight),
-                cornerRadius = CornerRadius(4.dp.toPx())
+                cornerRadius = CornerRadius(4.dp.toPx()),
             )
 
             // ---- Bottom home bar ----
@@ -121,7 +123,7 @@ fun PixelPhoneFrame(
                 color = Color.DarkGray,
                 topLeft = Offset(barX, barY),
                 size = Size(barWidth, barHeight),
-                cornerRadius = CornerRadius(2.dp.toPx())
+                cornerRadius = CornerRadius(2.dp.toPx()),
             )
         }
     }

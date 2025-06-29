@@ -28,31 +28,38 @@ class FirestoreEditorViewModel(
         dataTypeToAssociate: DataTypeToAssociate,
     ): FirestoreOperationResult {
         val existingNames =
-            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.map { it.name }
+            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
+                .map { it.name }
                 .toSet()
         if (existingNames.contains(collectionName)) {
             return FirestoreOperationResult.Failure(Res.string.firestore_collection_same_name_exists)
         }
 
-        val firestoreCollection = when (dataTypeToAssociate) {
-            DataTypeToAssociate.CreateNewDataType -> {
-                val dataTypeName = generateUniqueName(
-                    initial = collectionName,
-                    existing = project.dataTypeHolder.dataTypes.map { it.className }.toSet()
-                )
-                val dataType = DataType(name = dataTypeName)
-                project.dataTypeHolder.dataTypes.add(dataType)
-                FirestoreCollection(name = collectionName, dataTypeId = dataType.id)
-            }
+        val firestoreCollection =
+            when (dataTypeToAssociate) {
+                DataTypeToAssociate.CreateNewDataType -> {
+                    val dataTypeName =
+                        generateUniqueName(
+                            initial = collectionName,
+                            existing =
+                                project.dataTypeHolder.dataTypes
+                                    .map { it.className }
+                                    .toSet(),
+                        )
+                    val dataType = DataType(name = dataTypeName)
+                    project.dataTypeHolder.dataTypes.add(dataType)
+                    FirestoreCollection(name = collectionName, dataTypeId = dataType.id)
+                }
 
-            is DataTypeToAssociate.ExistingDataType -> {
-                FirestoreCollection(
-                    name = collectionName,
-                    dataTypeId = dataTypeToAssociate.dataType.id
-                )
+                is DataTypeToAssociate.ExistingDataType -> {
+                    FirestoreCollection(
+                        name = collectionName,
+                        dataTypeId = dataTypeToAssociate.dataType.id,
+                    )
+                }
             }
-        }
-        project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.add(firestoreCollection)
+        project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
+            .add(firestoreCollection)
         focusedFirestoreCollectionIndex =
             project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.size - 1
         saveProject()
@@ -66,33 +73,42 @@ class FirestoreEditorViewModel(
     fun onDataFieldAdded(dataField: DataField) {
         focusedFirestoreCollectionIndex?.let { focusedIndex ->
             val dataTypeId =
-                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedIndex].dataTypeId
+                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedIndex]
+                    .dataTypeId
             val dataType =
                 project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
-            val newName = generateUniqueName(
-                dataField.variableName,
-                dataType.fields.map { it.variableName }.toSet(),
-            )
+            val newName =
+                generateUniqueName(
+                    dataField.variableName,
+                    dataType.fields.map { it.variableName }.toSet(),
+                )
             dataType.fields.add(dataField.copy(name = newName))
             saveProject()
         }
     }
 
-    fun onDataFieldNameUpdated(dataFieldIndex: Int, inputName: String) {
+    fun onDataFieldNameUpdated(
+        dataFieldIndex: Int,
+        inputName: String,
+    ) {
         focusedFirestoreCollectionIndex?.let { focusedIndex ->
             val dataTypeId =
-                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedIndex].dataTypeId
+                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedIndex]
+                    .dataTypeId
             val dataType =
                 project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
-            val newName = if (dataType.fields[dataFieldIndex].variableName == inputName) {
-                inputName
-            } else {
-                generateUniqueName(
-                    inputName,
-                    project.dataTypeHolder.dataTypes[focusedIndex].fields.map { it.variableName }
-                        .toSet(),
-                )
-            }
+            val newName =
+                if (dataType.fields[dataFieldIndex].variableName == inputName) {
+                    inputName
+                } else {
+                    generateUniqueName(
+                        inputName,
+                        project.dataTypeHolder.dataTypes[focusedIndex]
+                            .fields
+                            .map { it.variableName }
+                            .toSet(),
+                    )
+                }
             dataType.fields[dataFieldIndex] = dataType.fields[dataFieldIndex].copy(name = newName)
             saveProject()
         }
@@ -101,7 +117,8 @@ class FirestoreEditorViewModel(
     fun onDeleteDataField(dataFieldIndex: Int) {
         focusedFirestoreCollectionIndex?.let {
             val dataTypeId =
-                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[it].dataTypeId
+                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[it]
+                    .dataTypeId
             val dataType =
                 project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
             dataType.fields.removeAt(dataFieldIndex)
@@ -111,11 +128,18 @@ class FirestoreEditorViewModel(
 
     fun onDeleteFirestoreCollectionRelationship() {
         focusedFirestoreCollectionIndex?.let {
-            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.removeAt(it)
+            project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
+                .removeAt(it)
             saveProject()
         }
         focusedFirestoreCollectionIndex =
-            if (project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.isNotEmpty()) 0 else null
+            if (project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
+                    .isNotEmpty()
+            ) {
+                0
+            } else {
+                null
+            }
     }
 
     private fun saveProject() {

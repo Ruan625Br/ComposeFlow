@@ -12,7 +12,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class SizeTest {
-
     @Test
     fun toComposeCode_differentConstructor() {
         val modifierList = listOf(ModifierWrapper.Size(50.dp))

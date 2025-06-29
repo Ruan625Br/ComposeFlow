@@ -16,18 +16,19 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class ImageTraitTest {
-
     @Test
     fun toComposeCode_onlyRequiredParams() {
-        val imageParams = ImageTrait(
-            url = StringProperty.StringIntrinsicValue("https://example.com/image1"),
-        )
+        val imageParams =
+            ImageTrait(
+                url = StringProperty.StringIntrinsicValue("https://example.com/image1"),
+            )
 
         val code =
             imageParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -42,18 +43,20 @@ class ImageTraitTest {
 
     @Test
     fun toComposeCode_withOptionalParams() {
-        val imageParams = ImageTrait(
-            url = StringProperty.StringIntrinsicValue("https://example.com/image1"),
-            alignmentWrapper = AlignmentWrapper.BottomCenter,
-            contentScaleWrapper = EnumProperty(ContentScaleWrapper.FillBounds),
-            alpha = 0.5f,
-        )
+        val imageParams =
+            ImageTrait(
+                url = StringProperty.StringIntrinsicValue("https://example.com/image1"),
+                alignmentWrapper = AlignmentWrapper.BottomCenter,
+                contentScaleWrapper = EnumProperty(ContentScaleWrapper.FillBounds),
+                alpha = 0.5f,
+            )
 
         val code =
             imageParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -71,18 +74,21 @@ class ImageTraitTest {
 
     @Test
     fun toComposeCode_fromJsonElement() {
-        val imageParams = ImageTrait(
-            url = StringProperty.ValueByJsonPath(
-                "result",
-                jsonElement = Json.parseToJsonElement("""{ "result": "test" }"""),
-            ),
-        )
+        val imageParams =
+            ImageTrait(
+                url =
+                    StringProperty.ValueByJsonPath(
+                        "result",
+                        jsonElement = Json.parseToJsonElement("""{ "result": "test" }"""),
+                    ),
+            )
 
         val code =
             imageParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -97,12 +103,14 @@ class ImageTraitTest {
 
     @Test
     fun serialize_deserialize() {
-        val imageParams = ImageTrait(
-            url = StringProperty.ValueByJsonPath(
-                "result",
-                jsonElement = Json.parseToJsonElement("""{ "result": "test" }"""),
-            ),
-        )
+        val imageParams =
+            ImageTrait(
+                url =
+                    StringProperty.ValueByJsonPath(
+                        "result",
+                        jsonElement = Json.parseToJsonElement("""{ "result": "test" }"""),
+                    ),
+            )
 
         val encoded = yamlSerializer.encodeToString(imageParams)
         val decoded = yamlSerializer.decodeFromString<ImageTrait>(encoded)

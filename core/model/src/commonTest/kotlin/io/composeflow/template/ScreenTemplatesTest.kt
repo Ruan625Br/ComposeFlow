@@ -6,7 +6,6 @@ import junit.framework.TestCase.assertTrue
 import kotlin.test.Test
 
 class ScreenTemplatesTest {
-
     @Test
     fun restoreMessages_verifyNoCrash() {
         val messagesScreen = ScreenTemplates.messagesScreen

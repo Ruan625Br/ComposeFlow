@@ -15,7 +15,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class BorderTest {
-
     @Test
     fun toComposeCode_border_default() {
         val modifierList = listOf(ModifierWrapper.Border(width = 2.dp))
@@ -35,16 +34,18 @@ class BorderTest {
 
     @Test
     fun serialize_verify_restored_instance() {
-        val border = ModifierWrapper.Border(
-            width = 2.dp,
-            colorWrapper = ColorProperty.ColorIntrinsicValue(
-                ColorWrapper(
-                    themeColor = null,
-                    color = Color.Blue
-                )
-            ),
-            shapeWrapper = ShapeWrapper.RoundedCorner(16.dp),
-        )
+        val border =
+            ModifierWrapper.Border(
+                width = 2.dp,
+                colorWrapper =
+                    ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(
+                            themeColor = null,
+                            color = Color.Blue,
+                        ),
+                    ),
+                shapeWrapper = ShapeWrapper.RoundedCorner(16.dp),
+            )
 
         val encodedString = yamlSerializer.encodeToString(border)
         val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Border>(encodedString)

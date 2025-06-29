@@ -52,29 +52,28 @@ fun LogicalFilterEditor(
     level: Int = 0,
 ) {
     var overlayVisible by remember { mutableStateOf(false) }
-    val overlayModifier = if (overlayVisible) {
-        Modifier.background(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
-            shape = RoundedCornerShape(8.dp),
-        )
-    } else {
-        Modifier
-    }
-    Column(
-        modifier = modifier
-            .padding(start = (level * 16).dp)
-            .dashedBorder(
-                strokeWidth = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline,
+    val overlayModifier =
+        if (overlayVisible) {
+            Modifier.background(
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
                 shape = RoundedCornerShape(8.dp),
             )
-            .onPointerEvent(PointerEventType.Enter) {
-                overlayVisible = true
-            }
-            .onPointerEvent(PointerEventType.Exit) {
-                overlayVisible = false
-            }
-            .then(overlayModifier),
+        } else {
+            Modifier
+        }
+    Column(
+        modifier =
+            modifier
+                .padding(start = (level * 16).dp)
+                .dashedBorder(
+                    strokeWidth = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp),
+                ).onPointerEvent(PointerEventType.Enter) {
+                    overlayVisible = true
+                }.onPointerEvent(PointerEventType.Exit) {
+                    overlayVisible = false
+                }.then(overlayModifier),
     ) {
         var openAddFilterMenu by remember { mutableStateOf(false) }
 
@@ -103,7 +102,7 @@ fun LogicalFilterEditor(
                     ComposeFlowIconButton(
                         onClick = {
                             onRemoveFilter()
-                        }
+                        },
                     ) {
                         ComposeFlowIcon(
                             imageVector = Icons.Outlined.Delete,
@@ -130,9 +129,11 @@ fun LogicalFilterEditor(
                             onFiltersChange(updatedFilters)
                         },
                         onRemoveFilter = {
-                            onFiltersChange(filters.toMutableList().apply {
-                                removeAt(index)
-                            })
+                            onFiltersChange(
+                                filters.toMutableList().apply {
+                                    removeAt(index)
+                                },
+                            )
                         },
                         level = level + 1,
                     )
@@ -142,25 +143,29 @@ fun LogicalFilterEditor(
             if (openAddFilterMenu) {
                 AddFilterMenu(
                     onAndFilterAdded = {
-                        val newFilters = filters.toMutableList().apply {
-                            add(AndFilter())
-                        }
+                        val newFilters =
+                            filters.toMutableList().apply {
+                                add(AndFilter())
+                            }
                         onFiltersChange(newFilters)
                     },
                     onOrFilterAdded = {
-                        val newFilters = filters.toMutableList().apply {
-                            add(OrFilter())
-                        }
+                        val newFilters =
+                            filters.toMutableList().apply {
+                                add(OrFilter())
+                            }
                         onFiltersChange(newFilters)
                     },
                     onCloseMenu = {
                         openAddFilterMenu = false
                     },
                     onSingleFilterAdded = {
-                        onFiltersChange(filters.toMutableList().apply {
-                            add(SingleFilter())
-                        })
-                    }
+                        onFiltersChange(
+                            filters.toMutableList().apply {
+                                add(SingleFilter())
+                            },
+                        )
+                    },
                 )
             }
         }

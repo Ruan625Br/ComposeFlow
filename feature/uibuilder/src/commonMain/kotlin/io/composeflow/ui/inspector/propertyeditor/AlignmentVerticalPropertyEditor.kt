@@ -20,6 +20,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
+import io.composeflow.Res
+import io.composeflow.alignment_bottom
+import io.composeflow.alignment_center_vertical
+import io.composeflow.alignment_top
 import io.composeflow.model.parameter.wrapper.AlignmentVerticalWrapper
 import io.composeflow.platform.AsyncImage
 import io.composeflow.ui.Tooltip
@@ -27,10 +31,6 @@ import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconToggleButton
 import io.composeflow.ui.inspector.ParamInspectorHeaderRow
 import io.composeflow.ui.modifier.hoverOverlay
-import io.composeflow.Res
-import io.composeflow.alignment_bottom
-import io.composeflow.alignment_center_vertical
-import io.composeflow.alignment_top
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -61,19 +61,20 @@ fun AlignmentVerticalPropertyEditor(
                     onCheckedChange = {
                         onAlignmentSelected(verticalAlignment)
                     },
-                    modifier = Modifier.then(
-                        if (thisItemSelected) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                        alpha = 0.3f,
-                                    ),
-                                )
-                        } else {
-                            Modifier
-                        },
-                    ),
+                    modifier =
+                        Modifier.then(
+                            if (thisItemSelected) {
+                                Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                            alpha = 0.3f,
+                                        ),
+                                    )
+                            } else {
+                                Modifier
+                            },
+                        ),
                 ) {
                     imageVector?.let {
                         ComposeFlowIcon(

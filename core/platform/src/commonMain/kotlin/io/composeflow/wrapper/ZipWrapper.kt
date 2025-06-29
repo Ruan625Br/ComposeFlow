@@ -18,7 +18,10 @@ private const val UNZIP_MAX_FILE_SIZE: Long = 1024L * 1024L * 1024L * 5L // 5GiB
 private const val UNZIP_TOTAL_MAX_SIZE: Long = 1024L * 1024L * 1024L * 5L // 5GiB
 private const val UNZIP_BUFFER_SIZE: Int = 1024 * 1024 // 1MiB
 
-fun InputStream.unzip(destDirPath: Path, zipFileCoding: Charset = Charset.forName("UTF-8")) {
+fun InputStream.unzip(
+    destDirPath: Path,
+    zipFileCoding: Charset = Charset.forName("UTF-8"),
+) {
     ZipInputStream(this, zipFileCoding).use { f ->
         var zipEntry: ZipEntry?
         var nEntries = 0
@@ -63,14 +66,17 @@ fun InputStream.unzip(destDirPath: Path, zipFileCoding: Charset = Charset.forNam
     }
 }
 
-fun zipDirectory(input: File, output: File) {
+fun zipDirectory(
+    input: File,
+    output: File,
+) {
     ZipArchiveOutputStream(BufferedOutputStream(FileOutputStream(output))).use { zos ->
-        input.walkTopDown()
+        input
+            .walkTopDown()
             .filter { file ->
                 // Exclude any file that is in a directory named "build"
                 !file.absolutePath.split(File.separator).contains("build")
-            }
-            .forEach { file ->
+            }.forEach { file ->
                 val zipFileName =
                     file.absolutePath.removePrefix(input.absolutePath).removePrefix("/")
                 val entry = ZipArchiveEntry(file, zipFileName)

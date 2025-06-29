@@ -10,7 +10,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class AlphaTest {
-
     @Test
     fun toComposeCode_alpha_default() {
         val modifierList = listOf(ModifierWrapper.Alpha())

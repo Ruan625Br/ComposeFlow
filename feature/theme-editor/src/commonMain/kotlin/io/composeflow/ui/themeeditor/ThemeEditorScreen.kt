@@ -33,11 +33,11 @@ enum class ThemeEditorNavigationDestination(
 ) {
     ColorEditor(
         icon = Icons.Outlined.Palette,
-        destinationName = "Colors"
+        destinationName = "Colors",
     ),
     FontEditor(
         icon = Icons.Outlined.TextFields,
-        destinationName = "Fonts"
+        destinationName = "Fonts",
     ),
 }
 
@@ -47,30 +47,34 @@ fun ThemeEditorScreen(
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = ThemeEditorViewModel::class) {
-        ThemeEditorViewModel(
-            firebaseIdToken = firebaseIdToken, project = project
+    val viewModel =
+        viewModel(modelClass = ThemeEditorViewModel::class) {
+            ThemeEditorViewModel(
+                firebaseIdToken = firebaseIdToken,
+                project = project,
+            )
+        }
+    val callbacks =
+        ThemeEditorCallbacks(
+            onColorSchemeUpdated = viewModel::onColorSchemeUpdated,
+            onColorResetToDefault = viewModel::onColorResetToDefault,
+            onPrimaryFontFamilyChanged = viewModel::onPrimaryFontFamilyChanged,
+            onSecondaryFontFamilyChanged = viewModel::onSecondaryFontFamilyChanged,
+            onTextStyleOverridesChanged = viewModel::onTextStyleOverrideChanged,
+            onApplyFontEditableParams = viewModel::onApplyFontEditableParams,
+            onResetFonts = viewModel::onResetFonts,
         )
-    }
-    val callbacks = ThemeEditorCallbacks(
-        onColorSchemeUpdated = viewModel::onColorSchemeUpdated,
-        onColorResetToDefault = viewModel::onColorResetToDefault,
-        onPrimaryFontFamilyChanged = viewModel::onPrimaryFontFamilyChanged,
-        onSecondaryFontFamilyChanged = viewModel::onSecondaryFontFamilyChanged,
-        onTextStyleOverridesChanged = viewModel::onTextStyleOverrideChanged,
-        onApplyFontEditableParams = viewModel::onApplyFontEditableParams,
-        onResetFonts = viewModel::onResetFonts,
-    )
-    val fontEditableParams = FontEditableParams(
-        primaryFontFamily = viewModel.primaryFontFamily,
-        secondaryFontFamily = viewModel.secondaryFontFamily,
-        textStyleOverrides = viewModel.textStyleOverrides,
-    )
+    val fontEditableParams =
+        FontEditableParams(
+            primaryFontFamily = viewModel.primaryFontFamily,
+            secondaryFontFamily = viewModel.secondaryFontFamily,
+            textStyleOverrides = viewModel.textStyleOverrides,
+        )
     ThemeEditorContent(
         project = project,
         callbacks = callbacks,
         fontEditableParams = fontEditableParams,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -106,9 +110,10 @@ fun ThemeEditorContent(
                         onClick = {
                             selectedDestination = destination
                         },
-                        modifier = Modifier
-                            .heightIn(max = 40.dp)
-                            .padding(horizontal = 12.dp),
+                        modifier =
+                            Modifier
+                                .heightIn(max = 40.dp)
+                                .padding(horizontal = 12.dp),
                     )
                 }
             }

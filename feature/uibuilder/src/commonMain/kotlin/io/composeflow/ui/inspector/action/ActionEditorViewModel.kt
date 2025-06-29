@@ -13,7 +13,6 @@ import io.composeflow.model.action.FocusableActionNode
 import moe.tlaster.precompose.viewmodel.ViewModel
 
 class ActionEditorViewModel : ViewModel() {
-
     val actionsMap: MutableMap<ActionType, MutableList<ActionNode>> = mutableStateMapOf()
 
     var currentActionType: MutableState<ActionType> = mutableStateOf(ActionType.OnClick)
@@ -35,25 +34,29 @@ class ActionEditorViewModel : ViewModel() {
                     .associateWith { mutableStateListOf() }
             },
         )
-        currentActionType.value = if (actionsMap.entries.isNotEmpty()) {
-            actionsMap.entries.minByOrNull { it.key.priority }!!.key
-        } else {
-            ActionType.OnClick
-        }
+        currentActionType.value =
+            if (actionsMap.entries.isNotEmpty()) {
+                actionsMap.entries.minByOrNull { it.key.priority }!!.key
+            } else {
+                ActionType.OnClick
+            }
     }
 
-    fun findFocusableActionNodeOrNull(id: ActionNodeId?): FocusableActionNode? {
-        return id?.let { actionNodeId ->
-            actionsMap[currentActionType.value]?.firstOrNull { it.hasActionNode(id) }
+    fun findFocusableActionNodeOrNull(id: ActionNodeId?): FocusableActionNode? =
+        id?.let { actionNodeId ->
+            actionsMap[currentActionType.value]
+                ?.firstOrNull { it.hasActionNode(id) }
                 ?.findFocusableActionOrNull(actionNodeId)
         }
-    }
 
     fun onActionTypeSelected(actionType: ActionType) {
         currentActionType.value = actionType
     }
 
-    fun onActionNodesUpdated(actionType: ActionType, actionNodes: List<ActionNode>) {
+    fun onActionNodesUpdated(
+        actionType: ActionType,
+        actionNodes: List<ActionNode>,
+    ) {
         actionsMap[actionType] = actionNodes.toMutableStateList()
     }
 
@@ -61,7 +64,10 @@ class ActionEditorViewModel : ViewModel() {
         focusedActionNodeId.value = focusableActionNode.id
     }
 
-    fun onUpdateActionWithActionNodeId(actionNodeId: ActionNodeId, action: Action) {
+    fun onUpdateActionWithActionNodeId(
+        actionNodeId: ActionNodeId,
+        action: Action,
+    ) {
         val index =
             actionsMap[currentActionType.value]?.indexOfFirst { it.hasActionNode(actionNodeId) }
         if (index != null && index != -1) {
@@ -69,7 +75,7 @@ class ActionEditorViewModel : ViewModel() {
                 index,
                 actionsMap[currentActionType.value]!![index].replaceAction(
                     id = actionNodeId,
-                    action = action
+                    action = action,
                 ),
             )
         }
@@ -85,4 +91,3 @@ class ActionEditorViewModel : ViewModel() {
         }
     }
 }
-

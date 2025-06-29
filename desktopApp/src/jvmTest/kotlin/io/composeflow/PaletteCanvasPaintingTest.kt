@@ -20,12 +20,13 @@ import kotlin.test.Test
 @OptIn(ExperimentalTestApi::class)
 @RunWith(TestParameterInjector::class)
 class PaletteCanvasPaintingTest {
-
     @get:Rule
     val screenTestRule = ScreenTestRule()
 
     @Test
-    fun checkPaletteNodePaintingShot(@TestParameter paletteNode: ComposeTrait) {
+    fun checkPaletteNodePaintingShot(
+        @TestParameter paletteNode: ComposeTrait,
+    ) {
         if (!paletteNode.visibleInPalette()) {
             return
         }

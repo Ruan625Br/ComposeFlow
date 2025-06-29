@@ -71,11 +71,12 @@ fun TopAppBarParamsInspector(
         AssignableEditableTextPropertyEditor(
             project = project,
             node = node,
-            initialProperty = if (currentEditable.showOnNavigation.value) {
-                StringProperty.StringIntrinsicValue(currentEditable.title.value)
-            } else {
-                topAppBarTrait.title
-            },
+            initialProperty =
+                if (currentEditable.showOnNavigation.value) {
+                    StringProperty.StringIntrinsicValue(currentEditable.title.value)
+                } else {
+                    topAppBarTrait.title
+                },
             onValidPropertyChanged = { property, _ ->
                 if (property is StringProperty.StringIntrinsicValue) {
                     currentEditable.title.value = property.value
@@ -99,7 +100,7 @@ fun TopAppBarParamsInspector(
             label = "Title",
             modifier = Modifier.hoverOverlay().fillMaxWidth(),
             // The variable is only visible if the TopAppBar is
-            variableAssignable = !currentEditable.showOnNavigation.value
+            variableAssignable = !currentEditable.showOnNavigation.value,
         )
 
         if (topAppBarTrait.title !is IntrinsicProperty<*>) {
@@ -108,19 +109,21 @@ fun TopAppBarParamsInspector(
                 BooleanPropertyEditor(
                     checked = topAppBarTrait.titlePlaceholderText is PlaceholderText.Used,
                     onCheckedChange = { placeHolderUsed ->
-                        val usage = if (placeHolderUsed) {
-                            PlaceholderText.Used()
-                        } else {
-                            PlaceholderText.NoUsage
-                        }
+                        val usage =
+                            if (placeHolderUsed) {
+                                PlaceholderText.Used()
+                            } else {
+                                PlaceholderText.NoUsage
+                            }
                         composeNodeCallbacks.onTraitUpdated(
                             node,
                             topAppBarTrait.copy(titlePlaceholderText = usage),
                         )
                     },
                     label = "Use placeholder text",
-                    modifier = Modifier
-                        .hoverOverlay()
+                    modifier =
+                        Modifier
+                            .hoverOverlay(),
                 )
             }
 
@@ -133,16 +136,19 @@ fun TopAppBarParamsInspector(
                             composeNodeCallbacks.onTraitUpdated(
                                 node,
                                 topAppBarTrait.copy(
-                                    titlePlaceholderText = PlaceholderText.Used(
-                                        StringProperty.StringIntrinsicValue(
-                                            it
-                                        )
-                                    )
-                                )
+                                    titlePlaceholderText =
+                                        PlaceholderText.Used(
+                                            StringProperty.StringIntrinsicValue(
+                                                it,
+                                            ),
+                                        ),
+                                ),
                             )
                         },
-                        modifier = Modifier.fillMaxWidth()
-                            .hoverOverlay(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .hoverOverlay(),
                         label = "Placeholder text",
                         placeholder = "placeholder text",
                         singleLine = true,
@@ -166,25 +172,30 @@ fun TopAppBarParamsInspector(
             },
             onIconSelected = {
                 val navIconTrait = (navIcon?.trait?.value as? IconTrait) ?: IconTrait()
-                val navIconComposeNode = navIcon ?: ComposeNode(
-                    label = mutableStateOf("Nav Icon"),
-                    trait = mutableStateOf(
-                        IconTrait(imageVectorHolder = null),
-                    ),
-                )
+                val navIconComposeNode =
+                    navIcon ?: ComposeNode(
+                        label = mutableStateOf("Nav Icon"),
+                        trait =
+                            mutableStateOf(
+                                IconTrait(imageVectorHolder = null),
+                            ),
+                    )
                 composeNodeCallbacks.onTraitUpdated(
                     navIconComposeNode,
                     navIconTrait.copy(imageVectorHolder = it),
                 )
             },
             currentIcon = (navIcon?.trait?.value as? IconTrait)?.imageVectorHolder?.imageVector,
-            modifier = Modifier
-                .hoverOverlay(),
+            modifier =
+                Modifier
+                    .hoverOverlay(),
         )
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 4.dp)
-                .height(42.dp),
+            modifier =
+                Modifier
+                    .padding(horizontal = 4.dp)
+                    .height(42.dp),
         ) {
             Text(
                 text = "Action Icons",
@@ -197,10 +208,11 @@ fun TopAppBarParamsInspector(
                     topAppBarNode.addTopAppBarActionIcon()
                     composeNodeCallbacks.onTraitUpdated(node, topAppBarTrait)
                 },
-                modifier = Modifier
-                    .padding(start = 28.dp)
-                    .hoverOverlay()
-                    .hoverIconClickable(),
+                modifier =
+                    Modifier
+                        .padding(start = 28.dp)
+                        .hoverOverlay()
+                        .hoverIconClickable(),
             ) {
                 val contentDesc = stringResource(Res.string.add_action_icon)
                 Tooltip(contentDesc) {
@@ -229,9 +241,10 @@ fun TopAppBarParamsInspector(
                     }
                 },
                 currentIcon = iconTrait?.imageVectorHolder?.imageVector,
-                modifier = Modifier
-                    .hoverOverlay()
-                    .padding(start = 24.dp),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .padding(start = 24.dp),
             )
         }
         BasicDropdownPropertyEditor(

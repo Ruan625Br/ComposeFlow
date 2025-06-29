@@ -42,7 +42,7 @@ fun IconParamsInspector(
     Column {
         LabeledBorderBox(
             label = "Icon type",
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         ) {
             DropdownProperty(
                 project = project,
@@ -65,20 +65,23 @@ fun IconParamsInspector(
                     onIconSelected = {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            iconTrait.copy(imageVectorHolder = it)
+                            iconTrait.copy(imageVectorHolder = it),
                         )
                     },
                     currentIcon = iconTrait.imageVectorHolder?.imageVector,
-                    modifier = Modifier
-                        .hoverOverlay(),
+                    modifier =
+                        Modifier
+                            .hoverOverlay(),
                 )
             }
 
             IconAssetType.CustomAsset -> {
                 LabeledBorderBox(
                     label = "Asset",
-                    modifier = Modifier.hoverOverlay()
-                        .fillMaxWidth()
+                    modifier =
+                        Modifier
+                            .hoverOverlay()
+                            .fillMaxWidth(),
                 ) {
                     val iconAssets = project.assetHolder.icons
                     val userId = LocalFirebaseIdToken.current.user_id
@@ -94,7 +97,7 @@ fun IconParamsInspector(
 
                                 Text(
                                     it.fileName,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                    modifier = Modifier.padding(start = 8.dp),
                                 )
                             }
                         },
@@ -127,19 +130,21 @@ fun IconParamsInspector(
             node = node,
             label = "Color",
             acceptableType = ComposeFlowType.Color(),
-            initialProperty = iconTrait.tint
-                ?: ColorProperty.ColorIntrinsicValue(
-                    ColorWrapper(
-                        themeColor = null,
-                        color = LocalContentColor.current
-                    )
-                ),
+            initialProperty =
+                iconTrait.tint
+                    ?: ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(
+                            themeColor = null,
+                            color = LocalContentColor.current,
+                        ),
+                    ),
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    iconTrait.copy(tint = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        iconTrait.copy(tint = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -149,9 +154,10 @@ fun IconParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(node, iconTrait.copy(tint = null))
             },
-            modifier = Modifier
-                .hoverOverlay()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .hoverOverlay()
+                    .fillMaxWidth(),
         )
     }
 }

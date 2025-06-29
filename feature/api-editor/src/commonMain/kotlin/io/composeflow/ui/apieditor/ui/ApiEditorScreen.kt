@@ -113,9 +113,7 @@ import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.jewel.foundation.lazy.tree.rememberTreeState
 
 @Composable
-fun ApiEditorScreen(
-    project: Project,
-) {
+fun ApiEditorScreen(project: Project) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel =
         viewModel(modelClass = ApiEditorViewModel::class) {
@@ -124,11 +122,12 @@ fun ApiEditorScreen(
                 firebaseIdToken = firebaseIdToken,
             )
         }
-    val callbacks = ApiEditorCallbacks(
-        onFocusedApiDefinitionUpdated = viewModel::onFocusedApiDefinitionUpdated,
-        onApiDefinitionCopied = viewModel::onApiDefinitionCopied,
-        onApiDefinitionDeleted = viewModel::onApiDefinitionDeleted,
-    )
+    val callbacks =
+        ApiEditorCallbacks(
+            onFocusedApiDefinitionUpdated = viewModel::onFocusedApiDefinitionUpdated,
+            onApiDefinitionCopied = viewModel::onApiDefinitionCopied,
+            onApiDefinitionDeleted = viewModel::onApiDefinitionDeleted,
+        )
     val editingProject = viewModel.editingProject.collectAsState().value
     editingProject.screenHolder.pendingDestinationContext?.let {
         (it as? DestinationContext.ApiEditorScreen)?.let { screen ->
@@ -158,8 +157,10 @@ fun ApiEditorScreen(
                 }
             }
             VerticalDivider(
-                modifier = Modifier.fillMaxHeight()
-                    .width(1.dp),
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .width(1.dp),
                 color = MaterialTheme.colorScheme.surfaceContainerHigh,
             )
 
@@ -182,45 +183,48 @@ private fun ApiRow(
     var optionMenuOpen by remember { mutableStateOf(false) }
     var deleteApiDefinitionOpen by remember(apiDefinition) { mutableStateOf(false) }
 
-    val border = if (!apiDefinition.isValid()) {
-        Modifier.border(
-            width = 2.dp,
-            color = MaterialTheme.colorScheme.error,
-            shape = RoundedCornerShape(8.dp),
-        )
-    } else {
-        Modifier.border(
-            width = 1.dp,
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            shape = RoundedCornerShape(8.dp),
-        )
-    }
+    val border =
+        if (!apiDefinition.isValid()) {
+            Modifier.border(
+                width = 2.dp,
+                color = MaterialTheme.colorScheme.error,
+                shape = RoundedCornerShape(8.dp),
+            )
+        } else {
+            Modifier.border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                shape = RoundedCornerShape(8.dp),
+            )
+        }
 
-    val focusedModifier = if (isFocused) {
-        Modifier.background(
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-            shape = RoundedCornerShape(8.dp)
-        )
-    } else {
-        Modifier
-    }
+    val focusedModifier =
+        if (isFocused) {
+            Modifier.background(
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(8.dp),
+            )
+        } else {
+            Modifier
+        }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(62.dp)
-            .padding(horizontal = 16.dp, vertical = 4.dp)
-            .clickable {
-                callbacks.onFocusedApiDefinitionUpdated(index)
-            }
-            .then(border)
-            .then(focusedModifier),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .heightIn(62.dp)
+                .padding(horizontal = 16.dp, vertical = 4.dp)
+                .clickable {
+                    callbacks.onFocusedApiDefinitionUpdated(index)
+                }.then(border)
+                .then(focusedModifier),
     ) {
         Column(
-            modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-                .fillMaxHeight(),
+            modifier =
+                Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                    .fillMaxHeight(),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -229,22 +233,25 @@ private fun ApiRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                 )
                 apiDefinition.exampleJsonResponse?.let { json ->
                     Text(
-                        text = buildAnnotatedString {
-                            append(": ")
-                            withStyle(
-                                style = SpanStyle(
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                ),
-                            ) {
-                                append(json.jsonElement.asDisplayText())
-                            }
-                        },
+                        text =
+                            buildAnnotatedString {
+                                append(": ")
+                                withStyle(
+                                    style =
+                                        SpanStyle(
+                                            color = MaterialTheme.colorScheme.tertiary,
+                                        ),
+                                ) {
+                                    append(json.jsonElement.asDisplayText())
+                                }
+                            },
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -255,8 +262,9 @@ private fun ApiRow(
                 style = MaterialTheme.typography.bodySmall,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .padding(horizontal = 8.dp),
+                modifier =
+                    Modifier
+                        .padding(horizontal = 8.dp),
             )
         }
 
@@ -264,11 +272,11 @@ private fun ApiRow(
             onClick = {
                 optionMenuOpen = true
             },
-            modifier = Modifier.hoverIconClickable()
+            modifier = Modifier.hoverIconClickable(),
         ) {
             Icon(
                 imageVector = Icons.Outlined.MoreVert,
-                contentDescription = "API options"
+                contentDescription = "API options",
             )
         }
 
@@ -281,7 +289,7 @@ private fun ApiRow(
                 },
                 onDeleteApiDefinitionDialogOpen = {
                     deleteApiDefinitionOpen = true
-                }
+                },
             )
         }
 
@@ -301,7 +309,7 @@ private fun ApiRow(
                 },
                 onCloseClick = {
                     closeDialog()
-                }
+                },
             )
         }
     }
@@ -316,10 +324,10 @@ private fun ApiEditorRowOptionMenu(
 ) {
     CursorDropdownMenu(
         expanded = true,
-        onDismissRequest = onDismissRequest
+        onDismissRequest = onDismissRequest,
     ) {
         Surface(
-            color = MaterialTheme.colorScheme.surface
+            color = MaterialTheme.colorScheme.surface,
         ) {
             Column {
                 DropdownMenuItem(text = {
@@ -371,8 +379,10 @@ private fun RowScope.ApiEditorPane(
     allApiDefinitions: List<ApiDefinition>,
 ) {
     Column(
-        modifier = Modifier.weight(4f)
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .weight(4f)
+                .padding(16.dp),
     ) {
         ApiDefinitionEditor(
             project = project,
@@ -403,12 +413,15 @@ private fun ApiDefinitionEditor(
     val coroutineScope = rememberCoroutineScope()
 
     Row(
-        modifier = modifier
-            .fillMaxSize(),
+        modifier =
+            modifier
+                .fillMaxSize(),
     ) {
         Column(
-            modifier = Modifier.weight(1f)
-                .fillMaxHeight()
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight(),
         ) {
             Row {
                 SmallOutlinedTextField(
@@ -447,27 +460,26 @@ private fun ApiDefinitionEditor(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.TopStart)
-                        .padding(end = 16.dp),
+                    modifier =
+                        Modifier
+                            .wrapContentSize(Alignment.TopStart)
+                            .padding(end = 16.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .clickable(onClick = { methodExpanded = true })
-                            .background(
-                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .border(
-                                width = 2.dp,
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(vertical = 6.dp)
-                            .padding(horizontal = 8.dp),
-
-                        ) {
+                        modifier =
+                            Modifier
+                                .clickable(onClick = { methodExpanded = true })
+                                .background(
+                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+                                    shape = RoundedCornerShape(8.dp),
+                                ).border(
+                                    width = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(8.dp),
+                                ).padding(vertical = 6.dp)
+                                .padding(horizontal = 8.dp),
+                    ) {
                         Text(methods[methodSelectedIndex].name)
                         Icon(
                             imageVector = Icons.Outlined.ExpandMore,
@@ -484,9 +496,10 @@ private fun ApiDefinitionEditor(
                                 onClick = {
                                     viewModel.onApiDefinitionUpdated(
                                         initialApiDefinition.copy(
-                                            method = Method.fromOrdinal(
-                                                index,
-                                            ),
+                                            method =
+                                                Method.fromOrdinal(
+                                                    index,
+                                                ),
                                         ),
                                     )
                                     methodExpanded = false
@@ -587,18 +600,26 @@ private fun ApiDefinitionEditor(
                 val step3Completed =
                     step2Completed && initialApiDefinition.exampleJsonResponse != null
                 val step4Completed =
-                    step3Completed && (allApiDefinitions.firstOrNull { it.id == initialApiDefinition.id }
-                        ?.isValid() == true
-                            )
+                    step3Completed &&
+                        (
+                            allApiDefinitions
+                                .firstOrNull { it.id == initialApiDefinition.id }
+                                ?.isValid() == true
+                        )
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         stringResource(Res.string.api_editor_instruction_1),
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier.padding(bottom = 12.dp),
-                        color = if (step1Completed) MaterialTheme.colorScheme.onSurface.copy(
-                            alpha = 0.5f
-                        ) else MaterialTheme.colorScheme.onSurface
+                        color =
+                            if (step1Completed) {
+                                MaterialTheme.colorScheme.onSurface.copy(
+                                    alpha = 0.5f,
+                                )
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            },
                     )
 
                     if (step1Completed) {
@@ -617,9 +638,14 @@ private fun ApiDefinitionEditor(
                             stringResource(Res.string.api_editor_instruction_2),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 12.dp),
-                            color = if (step2Completed) MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.5f
-                            ) else MaterialTheme.colorScheme.onSurface
+                            color =
+                                if (step2Completed) {
+                                    MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.5f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                         )
                         if (step2Completed) {
                             Spacer(Modifier.size(16.dp))
@@ -638,9 +664,14 @@ private fun ApiDefinitionEditor(
                             stringResource(Res.string.api_editor_instruction_3),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 12.dp),
-                            color = if (step3Completed) MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.5f
-                            ) else MaterialTheme.colorScheme.onSurface
+                            color =
+                                if (step3Completed) {
+                                    MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.5f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                         )
                         if (step3Completed) {
                             Spacer(Modifier.size(16.dp))
@@ -659,9 +690,14 @@ private fun ApiDefinitionEditor(
                             stringResource(Res.string.api_editor_instruction_4),
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(bottom = 12.dp),
-                            color = if (step4Completed) MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.5f
-                            ) else MaterialTheme.colorScheme.onSurface
+                            color =
+                                if (step4Completed) {
+                                    MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.5f,
+                                    )
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                },
                         )
                         if (step4Completed) {
                             Spacer(Modifier.size(16.dp))
@@ -677,9 +713,10 @@ private fun ApiDefinitionEditor(
         }
 
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(horizontal = 16.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(horizontal = 16.dp),
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 when (apiResponse) {
@@ -729,7 +766,7 @@ private fun ApiDefinitionEditor(
             onConfirmClick = {
                 viewModel.onFocusedApiDefinitionDeleted()
                 closeDialog()
-            }
+            },
         )
     }
 }
@@ -808,9 +845,10 @@ private fun RequestHeaderEditor(
         items(count = initialValue.headers.size) { index ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 4.dp),
             ) {
                 val header = initialValue.headers[index]
                 SmallOutlinedTextField(
@@ -835,8 +873,10 @@ private fun RequestHeaderEditor(
                         )
                     },
                     singleLine = true,
-                    modifier = Modifier.weight(2f)
-                        .padding(end = 16.dp, bottom = 12.dp),
+                    modifier =
+                        Modifier
+                            .weight(2f)
+                            .padding(end = 16.dp, bottom = 12.dp),
                 )
 
                 ApiParameterEditor(
@@ -857,7 +897,7 @@ private fun RequestHeaderEditor(
                     },
                     label = "Value",
                     placeholder = "application/json",
-                    modifier = Modifier.weight(3f)
+                    modifier = Modifier.weight(3f),
                 )
 
                 ComposeFlowIconButton(
@@ -866,7 +906,7 @@ private fun RequestHeaderEditor(
                         headers.removeAt(index)
                         onApiDefinitionChanged(initialValue.copy(headers = headers))
                     },
-                    modifier = Modifier.padding(bottom = 12.dp)
+                    modifier = Modifier.padding(bottom = 12.dp),
                 ) {
                     ComposeFlowIcon(
                         imageVector = Icons.Outlined.Delete,
@@ -904,9 +944,10 @@ private fun QueryParametersEditor(
         items(count = initialValue.queryParameters.size) { index ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 4.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 4.dp),
             ) {
                 val queryParam = initialValue.queryParameters[index]
                 SmallOutlinedTextField(
@@ -924,8 +965,10 @@ private fun QueryParametersEditor(
                         )
                     },
                     singleLine = true,
-                    modifier = Modifier.weight(2f)
-                        .padding(end = 16.dp, bottom = 12.dp),
+                    modifier =
+                        Modifier
+                            .weight(2f)
+                            .padding(end = 16.dp, bottom = 12.dp),
                 )
 
                 ApiParameterEditor(
@@ -945,7 +988,7 @@ private fun QueryParametersEditor(
                         onApiDefinitionChanged(initialValue)
                     },
                     label = "Value",
-                    modifier = Modifier.weight(3f)
+                    modifier = Modifier.weight(3f),
                 )
 
                 ComposeFlowIconButton(
@@ -994,10 +1037,9 @@ private fun AuthorizationParametersEditor(
             project = project,
             items = Authorization.entries(),
             onValueChanged = { _, item ->
-
             },
             selectedItem = initialValue.authorization,
-            modifier = Modifier.width(320.dp)
+            modifier = Modifier.width(320.dp),
         )
     }
 
@@ -1008,14 +1050,15 @@ private fun AuthorizationParametersEditor(
                 onValidValueChanged = {
                     onApiDefinitionChanged(
                         initialValue.copy(
-                            authorization = authorization.copy(
-                                username = it
-                            )
-                        )
+                            authorization =
+                                authorization.copy(
+                                    username = it,
+                                ),
+                        ),
                     )
                 },
                 label = "Username",
-                modifier = Modifier.width(320.dp)
+                modifier = Modifier.width(320.dp),
             )
 
             var keyboardTypePassword by remember { mutableStateOf(true) }
@@ -1025,26 +1068,29 @@ private fun AuthorizationParametersEditor(
                     onValidValueChanged = {
                         onApiDefinitionChanged(
                             initialValue.copy(
-                                authorization = authorization.copy(
-                                    password = it
-                                )
-                            )
+                                authorization =
+                                    authorization.copy(
+                                        password = it,
+                                    ),
+                            ),
                         )
                     },
                     label = "Password",
                     modifier = Modifier.width(320.dp),
-                    visualTransformation = if (keyboardTypePassword) {
-                        PasswordVisualTransformation()
-                    } else {
-                        VisualTransformation.None
-                    },
-                    keyboardOptions = if (keyboardTypePassword) {
-                        KeyboardOptions(
-                            keyboardType = KeyboardType.Password,
-                        )
-                    } else {
-                        KeyboardOptions.Default
-                    }
+                    visualTransformation =
+                        if (keyboardTypePassword) {
+                            PasswordVisualTransformation()
+                        } else {
+                            VisualTransformation.None
+                        },
+                    keyboardOptions =
+                        if (keyboardTypePassword) {
+                            KeyboardOptions(
+                                keyboardType = KeyboardType.Password,
+                            )
+                        } else {
+                            KeyboardOptions.Default
+                        },
                 )
 
                 Spacer(Modifier.size(8.dp))
@@ -1054,11 +1100,12 @@ private fun AuthorizationParametersEditor(
                         keyboardTypePassword = !keyboardTypePassword
                     }) {
                         ComposeFlowIcon(
-                            imageVector = if (keyboardTypePassword) {
-                                Icons.Outlined.VisibilityOff
-                            } else {
-                                Icons.Outlined.Visibility
-                            },
+                            imageVector =
+                                if (keyboardTypePassword) {
+                                    Icons.Outlined.VisibilityOff
+                                } else {
+                                    Icons.Outlined.Visibility
+                                },
                             contentDescription = toggleVisibility,
                         )
                     }
@@ -1076,28 +1123,32 @@ private fun JsonPreviewPanel(
     if (jsonWithJsonPath == null) return
     Column(modifier = modifier) {
         Text(
-            text = buildAnnotatedString {
-                append("Preview: ")
-                withStyle(
-                    style = SpanStyle(
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                ) {
-                    append(jsonWithJsonPath.jsonElement.asDisplayText())
-                }
-            },
+            text =
+                buildAnnotatedString {
+                    append("Preview: ")
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                    ) {
+                        append(jsonWithJsonPath.jsonElement.asDisplayText())
+                    }
+                },
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier.padding(bottom = 16.dp),
         )
 
         Column(
-            modifier = Modifier.border(
-                width = 1.dp,
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.secondaryContainer,
-            ).padding(8.dp),
+            modifier =
+                Modifier
+                    .border(
+                        width = 1.dp,
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer,
+                    ).padding(8.dp),
         ) {
             val tree = createJsonTreeWithJsonPath(jsonWithJsonPath.jsonElement.toString())
             val treeState = rememberTreeState()
@@ -1105,12 +1156,13 @@ private fun JsonPreviewPanel(
             NoneSelectionLazyTree(
                 tree = tree,
                 treeState = treeState,
-                modifier = Modifier.onGloballyPositioned {
-                    if (!initiallyExpanded) {
-                        treeState.openNodes(tree.roots.map { it.id })
-                        initiallyExpanded = true
-                    }
-                },
+                modifier =
+                    Modifier.onGloballyPositioned {
+                        if (!initiallyExpanded) {
+                            treeState.openNodes(tree.roots.map { it.id })
+                            initiallyExpanded = true
+                        }
+                    },
             ) {
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
@@ -1140,12 +1192,13 @@ private fun JsonTreeViewer(
                 onJsonElementSelected(element.data)
             }
         },
-        modifier = Modifier.onGloballyPositioned {
-            if (!initiallyExpanded) {
-                treeState.openNodes(tree.roots.map { it.id })
-                initiallyExpanded = true
-            }
-        },
+        modifier =
+            Modifier.onGloballyPositioned {
+                if (!initiallyExpanded) {
+                    treeState.openNodes(tree.roots.map { it.id })
+                    initiallyExpanded = true
+                }
+            },
     ) {
         Row(modifier = Modifier.fillMaxWidth()) {
             Text(

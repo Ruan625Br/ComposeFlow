@@ -22,5 +22,5 @@ fun FirebaseUser.toWrapper(): FirebaseUserWrapper =
         photoURL = this.photoURL,
         isAnonymous = this.isAnonymous,
         isEmailVerified = this.isEmailVerified,
-        providerId = this.providerId
+        providerId = this.providerId,
     )

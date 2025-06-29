@@ -14,33 +14,38 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface AssignablePropertyValue {
-
     fun isDependent(sourceId: String): Boolean
-    fun asCodeBlock(project: Project, context: GenerationContext, dryRun: Boolean): CodeBlock
-    fun asSimplifiedText(project: Project, context: GenerationContext, dryRun: Boolean): String
+
+    fun asCodeBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock
+
+    fun asSimplifiedText(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): String
 
     @Serializable
     @SerialName("ForPrimitive")
-    data class ForPrimitive(val property: AssignableProperty = StringProperty.StringIntrinsicValue("")) :
-        AssignablePropertyValue {
-
+    data class ForPrimitive(
+        val property: AssignableProperty = StringProperty.StringIntrinsicValue(""),
+    ) : AssignablePropertyValue {
         override fun isDependent(sourceId: String): Boolean = property.isDependent(sourceId)
 
         override fun asCodeBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return property.transformedCodeBlock(project, context, dryRun = dryRun)
-        }
+        ): CodeBlock = property.transformedCodeBlock(project, context, dryRun = dryRun)
 
         override fun asSimplifiedText(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): String {
-            return property.transformedCodeBlock(project, context, dryRun = dryRun).toString()
-        }
+        ): String = property.transformedCodeBlock(project, context, dryRun = dryRun).toString()
     }
 
     @Serializable
@@ -48,13 +53,13 @@ sealed interface AssignablePropertyValue {
     data class ForDataType(
         val dataTypeId: DataTypeId,
         @Serializable(FallbackMutableStateMapSerializer::class)
-        val properties: MutableMap<DataFieldId, AssignableProperty>
-        = mutableStateMapOf(),
+        val properties: MutableMap<DataFieldId, AssignableProperty> =
+            mutableStateMapOf(),
     ) : AssignablePropertyValue {
-
-        override fun isDependent(sourceId: String): Boolean = properties.any {
-            it.value.isDependent(sourceId)
-        }
+        override fun isDependent(sourceId: String): Boolean =
+            properties.any {
+                it.value.isDependent(sourceId)
+            }
 
         override fun asCodeBlock(
             project: Project,
@@ -65,10 +70,13 @@ sealed interface AssignablePropertyValue {
             val builder = CodeBlock.builder()
             builder.add("%T(", dataType.asKotlinPoetClassName(project))
             dataType.fields.forEach { dataField ->
-                val fieldValue = properties.entries.firstOrNull { it.key == dataField.id }
-                    ?.value?.transformedCodeBlock(project, context, dryRun = dryRun)
-                    ?: dataField.fieldType.defaultValueAsCodeBlock(project)
-                builder.add("${dataField.variableName} = ${fieldValue},")
+                val fieldValue =
+                    properties.entries
+                        .firstOrNull { it.key == dataField.id }
+                        ?.value
+                        ?.transformedCodeBlock(project, context, dryRun = dryRun)
+                        ?: dataField.fieldType.defaultValueAsCodeBlock(project)
+                builder.add("${dataField.variableName} = $fieldValue,")
             }
             builder.add(")")
             return builder.build()
@@ -90,9 +98,9 @@ sealed interface AssignablePropertyValue {
                                 property.value.transformedCodeBlock(
                                     project,
                                     context,
-                                    dryRun = dryRun
+                                    dryRun = dryRun,
                                 )
-                            }"
+                            }",
                         )
                     }
                     if (i != properties.entries.toList().lastIndex) {

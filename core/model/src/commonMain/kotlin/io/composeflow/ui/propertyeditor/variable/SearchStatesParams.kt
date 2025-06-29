@@ -13,52 +13,66 @@ data class SearchStatesParams(
 ) {
     val isFilterEnabled: Boolean = searchText.isNotBlank() || searchOnlyAcceptableType
 
-    fun matchCriteria(project: Project, assignableProperty: AssignableProperty): Boolean {
-        return matchCriteria(
+    fun matchCriteria(
+        project: Project,
+        assignableProperty: AssignableProperty,
+    ): Boolean =
+        matchCriteria(
             project,
             displayText = assignableProperty.displayText(project),
-            type = assignableProperty.valueType(project)
+            type = assignableProperty.valueType(project),
         )
-    }
 
-    fun matchCriteria(project: Project, displayText: String, type: ComposeFlowType): Boolean {
-        val typeMatch = if (searchOnlyAcceptableType) {
-            val ableToAssign = acceptableType.isAbleToAssign(type, exactMatch = true)
-            val hasFieldsAbleToAssign =
-                type.hasTypeThatIsAbleToAssign(project, acceptableType, exactMatch = true)
-            ableToAssign || hasFieldsAbleToAssign
-        } else {
-            true
-        }
+    fun matchCriteria(
+        project: Project,
+        displayText: String,
+        type: ComposeFlowType,
+    ): Boolean {
+        val typeMatch =
+            if (searchOnlyAcceptableType) {
+                val ableToAssign = acceptableType.isAbleToAssign(type, exactMatch = true)
+                val hasFieldsAbleToAssign =
+                    type.hasTypeThatIsAbleToAssign(project, acceptableType, exactMatch = true)
+                ableToAssign || hasFieldsAbleToAssign
+            } else {
+                true
+            }
         val textMatch = matchText(displayText)
         return typeMatch && textMatch
     }
 
-    fun matchCriteria(project: Project, parameter: ParameterWrapper<*>): Boolean {
+    fun matchCriteria(
+        project: Project,
+        parameter: ParameterWrapper<*>,
+    ): Boolean {
         val typeMatch = matchType(project, parameter.parameterType)
         val textMatch = matchText(parameter.variableName)
         return typeMatch && textMatch
     }
 
-    private fun matchText(text: String): Boolean {
-        return if (searchText.isNotBlank()) {
+    private fun matchText(text: String): Boolean =
+        if (searchText.isNotBlank()) {
             text.contains(searchText, ignoreCase = true)
         } else {
             true
         }
-    }
 
-    private fun matchType(project: Project, type: ComposeFlowType): Boolean {
-        val result = if (type is ComposeFlowType.CustomDataType && !type.isList) {
-            val dataType = (type as? ComposeFlowType.CustomDataType)?.dataTypeId?.let {
-                project.findDataTypeOrNull(it)
+    private fun matchType(
+        project: Project,
+        type: ComposeFlowType,
+    ): Boolean {
+        val result =
+            if (type is ComposeFlowType.CustomDataType && !type.isList) {
+                val dataType =
+                    (type as? ComposeFlowType.CustomDataType)?.dataTypeId?.let {
+                        project.findDataTypeOrNull(it)
+                    }
+                dataType?.fields?.any {
+                    matchType(project, it.fieldType.type())
+                }
+            } else {
+                acceptableType.isAbleToAssign(type)
             }
-            dataType?.fields?.any {
-                matchType(project, it.fieldType.type())
-            }
-        } else {
-            acceptableType.isAbleToAssign(type)
-        }
         return result == true
     }
 }

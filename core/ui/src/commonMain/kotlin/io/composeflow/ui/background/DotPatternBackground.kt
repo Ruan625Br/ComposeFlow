@@ -30,18 +30,19 @@ fun DotPatternBackground(
     Box(modifier = modifier.fillMaxSize()) {
         // A transparent layer for catching mouse events
         Box(
-            modifier = Modifier
-                .matchParentSize()
-                .pointerInput(Unit) {
-                    detectDragGestures { change, dragAmount ->
-                        change.consume()
-                        if (onDrag == null) {
-                            return@detectDragGestures
+            modifier =
+                Modifier
+                    .matchParentSize()
+                    .pointerInput(Unit) {
+                        detectDragGestures { change, dragAmount ->
+                            change.consume()
+                            if (onDrag == null) {
+                                return@detectDragGestures
+                            }
+                            backgroundOffset += dragAmount
+                            onDrag(dragAmount)
                         }
-                        backgroundOffset += dragAmount
-                        onDrag(dragAmount)
-                    }
-                }
+                    },
         )
         Canvas(modifier = modifier.fillMaxSize()) {
             val patternSize = dotRadius * 2 + dotMargin
@@ -69,6 +70,11 @@ fun DotPatternBackground(
     }
 }
 
-private fun DrawScope.drawDotPattern(x: Float, y: Float, radius: Float, color: Color) {
+private fun DrawScope.drawDotPattern(
+    x: Float,
+    y: Float,
+    radius: Float,
+    color: Color,
+) {
     drawCircle(color, radius, center = Offset(x + radius, y + radius))
 }

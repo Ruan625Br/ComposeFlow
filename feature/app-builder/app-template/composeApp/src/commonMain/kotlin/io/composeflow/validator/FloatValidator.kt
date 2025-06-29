@@ -12,32 +12,30 @@ private class FloatValidatorInternal(
     private val maxValue: Float? = null,
     private val minValue: Float? = null,
 ) : InputValidatorInternal {
-
-    override fun validate(
-        input: String,
-    ) = runCatching {
-        val value = input.toFloatOrNull()
-        if (value == null) {
-            ValidateResult.Failure(Res.string.invalid_float_format)
-        } else {
-            if (!allowLessThanZero && value <= 0) {
-                ValidateResult.Failure(Res.string.must_be_greater_than_zero)
-            }
-            if (maxValue != null && value > maxValue) {
-                ValidateResult.Failure(
-                    Res.string.must_be_smaller_than_or_equal_to,
-                    listOf(maxValue)
-                )
-            } else if (minValue != null && value < minValue) {
-                ValidateResult.Failure(
-                    Res.string.must_be_greater_than_or_equal_to,
-                    listOf(minValue)
-                )
+    override fun validate(input: String) =
+        runCatching {
+            val value = input.toFloatOrNull()
+            if (value == null) {
+                ValidateResult.Failure(Res.string.invalid_float_format)
             } else {
-                ValidateResult.Success
+                if (!allowLessThanZero && value <= 0) {
+                    ValidateResult.Failure(Res.string.must_be_greater_than_zero)
+                }
+                if (maxValue != null && value > maxValue) {
+                    ValidateResult.Failure(
+                        Res.string.must_be_smaller_than_or_equal_to,
+                        listOf(maxValue),
+                    )
+                } else if (minValue != null && value < minValue) {
+                    ValidateResult.Failure(
+                        Res.string.must_be_greater_than_or_equal_to,
+                        listOf(minValue),
+                    )
+                } else {
+                    ValidateResult.Success
+                }
             }
         }
-    }
 }
 
 class FloatValidator(
@@ -46,10 +44,11 @@ class FloatValidator(
     minValue: Float? = null,
     private val delegate: InputValidatorImpl =
         InputValidatorImpl(
-            delegate = FloatValidatorInternal(
-                allowLessThanZero = allowLessThanZero,
-                maxValue = maxValue,
-                minValue = minValue,
-            ),
+            delegate =
+                FloatValidatorInternal(
+                    allowLessThanZero = allowLessThanZero,
+                    maxValue = maxValue,
+                    minValue = minValue,
+                ),
         ),
 ) : InputValidator by delegate

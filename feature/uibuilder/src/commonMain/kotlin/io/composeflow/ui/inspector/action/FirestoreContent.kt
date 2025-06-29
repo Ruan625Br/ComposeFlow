@@ -53,9 +53,10 @@ fun FirestoreContent(
         if (firebaseConnected) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                    firestoreActionsOpened = !firestoreActionsOpened
-                },
+                modifier =
+                    Modifier.clickable {
+                        firestoreActionsOpened = !firestoreActionsOpened
+                    },
             ) {
                 Text(
                     text = "Firebase Firestore",
@@ -78,8 +79,10 @@ fun FirestoreContent(
                     Text(
                         text = "Firestore",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 8.dp)
-                            .alpha(0.5f),
+                        modifier =
+                            Modifier
+                                .padding(start = 8.dp)
+                                .alpha(0.5f),
                     )
                     Spacer(Modifier.weight(1f))
                     TreeExpanderInverse(
@@ -87,7 +90,7 @@ fun FirestoreContent(
                         onClick = {
                             firestoreActionsOpened = !firestoreActionsOpened
                         },
-                        enabled = false
+                        enabled = false,
                     )
                 }
             }
@@ -96,25 +99,25 @@ fun FirestoreContent(
             FirestoreAction.entries().forEach { firestoreAction ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                firestoreAction
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    firestoreAction,
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is Share &&
                                         actionInEdit.name == firestoreAction.name
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = firestoreAction.name,
@@ -147,23 +150,28 @@ fun SaveToFirestoreContentDetail(
                 val dataType =
                     firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
 
-                val updatedAction = initialAction.copy(
-                    collectionId = item.id,
-                    dataFieldUpdateProperties = dataType?.fields?.map {
-                        DataFieldUpdateProperty(
-                            dataFieldId = it.id,
-                            assignableProperty = it.fieldType.type().defaultValue(),
-                        )
-                    }?.toMutableList() ?: mutableListOf()
-                )
+                val updatedAction =
+                    initialAction.copy(
+                        collectionId = item.id,
+                        dataFieldUpdateProperties =
+                            dataType
+                                ?.fields
+                                ?.map {
+                                    DataFieldUpdateProperty(
+                                        dataFieldId = it.id,
+                                        assignableProperty = it.fieldType.type().defaultValue(),
+                                    )
+                                }?.toMutableList() ?: mutableListOf(),
+                    )
                 onEditAction(updatedAction)
             },
-            selectedItem = initialAction.collectionId?.let {
-                project.findFirestoreCollectionOrNull(
-                    it
-                )
-            },
-            label = "Collection"
+            selectedItem =
+                initialAction.collectionId?.let {
+                    project.findFirestoreCollectionOrNull(
+                        it,
+                    )
+                },
+            label = "Collection",
         )
 
         val firestoreCollection =
@@ -178,9 +186,9 @@ fun SaveToFirestoreContentDetail(
                 dataType = dataType,
                 onDataFieldUpdatePropertiesUpdated = {
                     onEditAction(
-                        initialAction.copy(dataFieldUpdateProperties = it.toMutableList())
+                        initialAction.copy(dataFieldUpdateProperties = it.toMutableList()),
                     )
-                }
+                },
             )
         }
     }
@@ -200,17 +208,19 @@ fun UpdateFirestoreDocumentContentDetail(
             project = project,
             items = firestoreCollections,
             onValueChanged = { i, item ->
-                val updatedAction = initialAction.copy(
-                    collectionId = item.id,
-                )
+                val updatedAction =
+                    initialAction.copy(
+                        collectionId = item.id,
+                    )
                 onEditAction(updatedAction)
             },
-            selectedItem = initialAction.collectionId?.let {
-                project.findFirestoreCollectionOrNull(
-                    it
-                )
-            },
-            label = "Collection"
+            selectedItem =
+                initialAction.collectionId?.let {
+                    project.findFirestoreCollectionOrNull(
+                        it,
+                    )
+                },
+            label = "Collection",
         )
 
         val firestoreCollection =
@@ -225,9 +235,9 @@ fun UpdateFirestoreDocumentContentDetail(
                 dataType = dataType,
                 onDataFieldUpdatePropertiesUpdated = {
                     onEditAction(
-                        initialAction.copy(dataFieldUpdateProperties = it.toMutableList())
+                        initialAction.copy(dataFieldUpdateProperties = it.toMutableList()),
                     )
-                }
+                },
             )
 
             WhereExpressionEditor(
@@ -238,7 +248,7 @@ fun UpdateFirestoreDocumentContentDetail(
                 filterExpression = initialAction.filterExpression,
                 onFilterExpressionUpdated = {
                     onEditAction(initialAction.copy(filterExpression = it))
-                }
+                },
             )
         }
     }
@@ -258,17 +268,19 @@ fun DeleteFirestoreDocumentContentDetail(
             project = project,
             items = firestoreCollections,
             onValueChanged = { i, item ->
-                val updatedAction = initialAction.copy(
-                    collectionId = item.id,
-                )
+                val updatedAction =
+                    initialAction.copy(
+                        collectionId = item.id,
+                    )
                 onEditAction(updatedAction)
             },
-            selectedItem = initialAction.collectionId?.let {
-                project.findFirestoreCollectionOrNull(
-                    it
-                )
-            },
-            label = "Collection"
+            selectedItem =
+                initialAction.collectionId?.let {
+                    project.findFirestoreCollectionOrNull(
+                        it,
+                    )
+                },
+            label = "Collection",
         )
 
         val firestoreCollection =
@@ -283,7 +295,7 @@ fun DeleteFirestoreDocumentContentDetail(
                 filterExpression = initialAction.filterExpression,
                 onFilterExpressionUpdated = {
                     onEditAction(initialAction.copy(filterExpression = it))
-                }
+                },
             )
         }
     }

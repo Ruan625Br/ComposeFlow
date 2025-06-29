@@ -14,7 +14,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class LazyColumnTraitTest {
-
     @Test
     fun toComposeCode_emptyParams() {
         val lazyColumnParams = LazyColumnTrait()
@@ -23,7 +22,8 @@ class LazyColumnTraitTest {
             lazyColumnParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -35,19 +35,21 @@ class LazyColumnTraitTest {
 
     @Test
     fun toComposeCode_nonEmptyParams() {
-        val lazyColumnParams = LazyColumnTrait(
-            contentPadding = 8.dp,
-            reverseLayout = true,
-            verticalArrangement = ArrangementVerticalWrapper.Bottom,
-            horizontalAlignment = AlignmentHorizontalWrapper.CenterHorizontally,
-            userScrollEnabled = false,
-        )
+        val lazyColumnParams =
+            LazyColumnTrait(
+                contentPadding = 8.dp,
+                reverseLayout = true,
+                verticalArrangement = ArrangementVerticalWrapper.Bottom,
+                horizontalAlignment = AlignmentHorizontalWrapper.CenterHorizontally,
+                userScrollEnabled = false,
+            )
 
         val code =
             lazyColumnParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -65,11 +67,12 @@ class LazyColumnTraitTest {
 
     @Test
     fun serialize_deserialize() {
-        val lazyColumnParams = LazyColumnTrait(
-            contentPadding = 16.dp,
-            verticalArrangement = ArrangementVerticalWrapper.Bottom,
-            horizontalAlignment = AlignmentHorizontalWrapper.End,
-        )
+        val lazyColumnParams =
+            LazyColumnTrait(
+                contentPadding = 16.dp,
+                verticalArrangement = ArrangementVerticalWrapper.Bottom,
+                horizontalAlignment = AlignmentHorizontalWrapper.End,
+            )
 
         val encoded = yamlSerializer.encodeToString(lazyColumnParams)
         val decoded = yamlSerializer.decodeFromString<LazyColumnTrait>(encoded)

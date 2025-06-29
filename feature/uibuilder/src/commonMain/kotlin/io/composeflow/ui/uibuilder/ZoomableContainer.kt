@@ -11,9 +11,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 
 @Composable
-fun rememberZoomableContainerState(): ZoomableContainerStateHolder {
-    return remember { ZoomableContainerStateHolder() }
-}
+fun rememberZoomableContainerState(): ZoomableContainerStateHolder = remember { ZoomableContainerStateHolder() }
 
 @Composable
 fun ZoomableContainer(
@@ -22,14 +20,16 @@ fun ZoomableContainer(
     content: @Composable BoxScope.() -> Unit,
 ) {
     Box(
-        modifier = modifier.fillMaxSize()
-            .graphicsLayer(
-                scaleX = zoomableContainerStateHolder.scale,
-                scaleY = zoomableContainerStateHolder.scale,
-                transformOrigin = TransformOrigin(0f, 0f),
-                translationX = zoomableContainerStateHolder.offset.x,
-                translationY = zoomableContainerStateHolder.offset.y,
-            ),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .graphicsLayer(
+                    scaleX = zoomableContainerStateHolder.scale,
+                    scaleY = zoomableContainerStateHolder.scale,
+                    transformOrigin = TransformOrigin(0f, 0f),
+                    translationX = zoomableContainerStateHolder.offset.x,
+                    translationY = zoomableContainerStateHolder.offset.y,
+                ),
         content = content,
     )
 }

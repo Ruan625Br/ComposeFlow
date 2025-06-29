@@ -33,132 +33,114 @@ data class TrackableIssue(
 }
 
 sealed interface Issue {
-
     val destination: NavigatableDestination
 
     /**
      * Context where this issue is generated. E.g. Action
      */
     val issueContext: Any?
-    fun issueContextLabel(): String? {
-        return when (val context = issueContext) {
+
+    fun issueContextLabel(): String? =
+        when (val context = issueContext) {
             is Action -> {
                 "(Action: ${context.name})"
             }
 
             else -> null
         }
-    }
-
 
     @Composable
     fun errorMessage(project: Project): String
 
     data class ResolvedToUnknownType(
         val property: AssignableProperty,
-        override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(
-            inspectorTabDestination = InspectorTabDestination.Inspector
-        ),
-        override
-        val issueContext: Any? = null,
+        override val destination: NavigatableDestination =
+            NavigatableDestination.UiBuilderScreen(
+                inspectorTabDestination = InspectorTabDestination.Inspector,
+            ),
+        override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_reference) + " " + property.transformedValueExpression(
-                project
-            )
-        }
+        override fun errorMessage(project: Project): String =
+            stringResource(Res.string.invalid_reference) + " " +
+                property.transformedValueExpression(
+                    project,
+                )
     }
 
     data class ResolvedToTypeNotAssignable(
         val property: AssignableProperty,
         val acceptableType: ComposeFlowType,
-        override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(
-            inspectorTabDestination = InspectorTabDestination.Inspector
-        ),
+        override val destination: NavigatableDestination =
+            NavigatableDestination.UiBuilderScreen(
+                inspectorTabDestination = InspectorTabDestination.Inspector,
+            ),
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.not_assignable_to) + " " + acceptableType.displayName(
-                project
-            )
-        }
+        override fun errorMessage(project: Project): String =
+            stringResource(Res.string.not_assignable_to) + " " +
+                acceptableType.displayName(
+                    project,
+                )
     }
 
     data class InvalidScreenReference(
         val screenId: ScreenId,
-        override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(
-            inspectorTabDestination = InspectorTabDestination.Inspector
-        ),
+        override val destination: NavigatableDestination =
+            NavigatableDestination.UiBuilderScreen(
+                inspectorTabDestination = InspectorTabDestination.Inspector,
+            ),
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_screen_reference)
-        }
+        override fun errorMessage(project: Project): String = stringResource(Res.string.invalid_screen_reference)
     }
 
     data class InvalidApiReference(
         val apiId: ApiId,
-        override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(
-            inspectorTabDestination = InspectorTabDestination.Inspector
-        ),
+        override val destination: NavigatableDestination =
+            NavigatableDestination.UiBuilderScreen(
+                inspectorTabDestination = InspectorTabDestination.Inspector,
+            ),
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_api_reference)
-        }
+        override fun errorMessage(project: Project): String = stringResource(Res.string.invalid_api_reference)
     }
 
     data class InvalidAssetReference(
-        override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(
-            inspectorTabDestination = InspectorTabDestination.Inspector
-        ),
+        override val destination: NavigatableDestination =
+            NavigatableDestination.UiBuilderScreen(
+                inspectorTabDestination = InspectorTabDestination.Inspector,
+            ),
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_asset_reference)
-        }
+        override fun errorMessage(project: Project): String = stringResource(Res.string.invalid_asset_reference)
     }
 
     data class InvalidApiParameterReference(
         override val destination: NavigatableDestination = NavigatableDestination.ApiEditorScreen,
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_api_parameter_reference)
-        }
+        override fun errorMessage(project: Project): String = stringResource(Res.string.invalid_api_parameter_reference)
     }
 
     data class NavigationDrawerIsNotSet(
         override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(),
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_api_parameter_reference)
-        }
+        override fun errorMessage(project: Project): String = stringResource(Res.string.invalid_api_parameter_reference)
     }
 
     data class InvalidModifierRelation(
         override val destination: NavigatableDestination = NavigatableDestination.UiBuilderScreen(),
         override val issueContext: Any? = null,
     ) : Issue {
-
         @Composable
-        override fun errorMessage(project: Project): String {
-            return stringResource(Res.string.invalid_modifier_wrong_parent_relation)
-        }
+        override fun errorMessage(project: Project): String = stringResource(Res.string.invalid_modifier_wrong_parent_relation)
     }
 }

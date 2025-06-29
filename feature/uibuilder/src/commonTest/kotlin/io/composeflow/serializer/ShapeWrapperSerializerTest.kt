@@ -8,7 +8,6 @@ import org.junit.Assert
 import org.junit.Test
 
 class ShapeWrapperSerializerTest {
-
     @Test
     fun rectangle() {
         verifySerializeDeserialize(ShapeWrapper.Rectangle)

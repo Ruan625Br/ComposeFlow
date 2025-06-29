@@ -7,5 +7,4 @@ import io.composeflow.platform.getOrCreateDataStore
 
 class MessageRepository(
     private val dataStore: DataStore<Preferences> = ServiceLocator.getOrPut { getOrCreateDataStore() },
-) {
-}
+)

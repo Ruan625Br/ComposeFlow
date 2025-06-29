@@ -10,7 +10,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class ScaleTest {
-
     @Test
     fun toComposeCode_default_args() {
         val modifierList = listOf(ModifierWrapper.Scale())

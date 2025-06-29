@@ -130,9 +130,10 @@ fun PropertyInspector(
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             state = lazyListState,
-            modifier = modifier
-                .background(MaterialTheme.colorScheme.surface)
-                .fillMaxSize(),
+            modifier =
+                modifier
+                    .background(MaterialTheme.colorScheme.surface)
+                    .fillMaxSize(),
         ) {
             item {
                 SizeInspector(composeNode)
@@ -249,11 +250,12 @@ fun ParamsInspector(
         var expanded by remember(composeNode.id) { mutableStateOf(true) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { expanded = !expanded }
-                .hoverIconClickable(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { expanded = !expanded }
+                    .hoverIconClickable(),
         ) {
             EditableText(
                 initialText = composeNode.label.value,
@@ -383,7 +385,7 @@ fun ParamsInspector(
                         CardParamsInspector(
                             project = project,
                             node = composeNode,
-                            composeNodeCallbacks = composeNodeCallbacks
+                            composeNodeCallbacks = composeNodeCallbacks,
                         )
                     }
 
@@ -496,7 +498,6 @@ fun ParamsInspector(
                         )
                     }
 
-
                     is SpacerTrait -> {}
                     is ComponentTrait -> {
                         composeNode.componentId?.let {
@@ -540,22 +541,27 @@ private fun EmptyInspector() {
 private fun SizeInspector(composeNode: ComposeNode) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-            .padding(vertical = 4.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
     ) {
         NonEditableTextProperty(
             "Width",
-            composeNode.boundsInWindow.value.size.width.toInt().toString(),
+            composeNode.boundsInWindow.value.size.width
+                .toInt()
+                .toString(),
             modifier = Modifier.weight(1f),
         )
         NonEditableTextProperty(
             "Height",
-            composeNode.boundsInWindow.value.size.height.toInt().toString(),
+            composeNode.boundsInWindow.value.size.height
+                .toInt()
+                .toString(),
             modifier = Modifier.weight(1f),
         )
     }
 }
-
 
 @Composable
 fun ParamInspectorHeaderRow(
@@ -574,7 +580,6 @@ fun ParamInspectorHeaderRow(
         Spacer(modifier = Modifier.weight(1f))
     }
 }
-
 
 @Composable
 private fun SectionDivider() {

@@ -22,40 +22,43 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 
 object ShapeWrapperSerializer : KSerializer<ShapeWrapper> {
-    private val delegate = FallbackSealedSerializer(
-        defaultInstance = ShapeWrapper.Rectangle,
-        serializer = PolymorphicSerializer(ShapeWrapper::class)
-    )
+    private val delegate =
+        FallbackSealedSerializer(
+            defaultInstance = ShapeWrapper.Rectangle,
+            serializer = PolymorphicSerializer(ShapeWrapper::class),
+        )
 
     override val descriptor: SerialDescriptor
         get() = delegate.descriptor
 
     override fun deserialize(decoder: Decoder): ShapeWrapper = delegate.deserialize(decoder)
-    override fun serialize(encoder: Encoder, value: ShapeWrapper) =
-        delegate.serialize(encoder, value)
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ShapeWrapper,
+    ) = delegate.serialize(encoder, value)
 }
 
-
-val shapeWrapperModule = SerializersModule {
-    polymorphic(ShapeWrapper::class) {
-        subclass(ShapeWrapper.Circle::class, ShapeWrapper.Circle.serializer())
-        subclass(ShapeWrapper.Rectangle::class, ShapeWrapper.Rectangle.serializer())
-        subclass(ShapeWrapper.RoundedCorner::class, ShapeWrapper.RoundedCorner.serializer())
-        subclass(ShapeWrapper.CutCorner::class, ShapeWrapper.CutCorner.serializer())
+val shapeWrapperModule =
+    SerializersModule {
+        polymorphic(ShapeWrapper::class) {
+            subclass(ShapeWrapper.Circle::class, ShapeWrapper.Circle.serializer())
+            subclass(ShapeWrapper.Rectangle::class, ShapeWrapper.Rectangle.serializer())
+            subclass(ShapeWrapper.RoundedCorner::class, ShapeWrapper.RoundedCorner.serializer())
+            subclass(ShapeWrapper.CutCorner::class, ShapeWrapper.CutCorner.serializer())
+        }
     }
-}
 
 /**
  * The wrapper class for [Shape].
  */
 @Serializable(ShapeWrapperSerializer::class)
 sealed interface ShapeWrapper {
-
     @Serializable
     @SerialName("Rectangle")
     data object Rectangle : ShapeWrapper {
-
         override fun toShape(): Shape = RectangleShape
+
         override fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder {
             val memberName = MemberName("androidx.compose.ui.graphics", "RectangleShape")
             codeBlockBuilder.addStatement("shape = %M,", memberName)
@@ -66,8 +69,8 @@ sealed interface ShapeWrapper {
     @Serializable
     @SerialName("Circle")
     data object Circle : ShapeWrapper {
-
         override fun toShape(): Shape = CircleShape
+
         override fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder {
             val memberName = MemberName("androidx.compose.foundation.shape", "CircleShape")
             codeBlockBuilder.addStatement("shape = %M,", memberName)
@@ -86,12 +89,13 @@ sealed interface ShapeWrapper {
         override val bottomEnd: Dp = 0.dp,
         @Serializable(with = DpSerializer::class)
         override val bottomStart: Dp = 0.dp,
-    ) : ShapeWrapper, CornerValueHolder {
-
+    ) : ShapeWrapper,
+        CornerValueHolder {
         constructor(all: Dp) :
-                this(topStart = all, topEnd = all, bottomEnd = all, bottomStart = all)
+            this(topStart = all, topEnd = all, bottomEnd = all, bottomStart = all)
 
         override fun toShape(): Shape = RoundedCornerShape(topStart, topEnd, bottomEnd, bottomStart)
+
         override fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder {
             val memberName = MemberName("androidx.compose.foundation.shape", "RoundedCornerShape")
             val dpMemberName = MemberName("androidx.compose.ui.unit", "dp")
@@ -135,9 +139,10 @@ sealed interface ShapeWrapper {
         override val bottomEnd: Dp = 0.dp,
         @Serializable(with = DpSerializer::class)
         override val bottomStart: Dp = 0.dp,
-    ) : ShapeWrapper, CornerValueHolder {
-
+    ) : ShapeWrapper,
+        CornerValueHolder {
         override fun toShape(): Shape = CutCornerShape(topStart, topEnd, bottomEnd, bottomStart)
+
         override fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder {
             val memberName = MemberName("androidx.compose.foundation.shape", "CutCornerShape")
             val dpMemberName = MemberName("androidx.compose.ui.unit", "dp")
@@ -173,7 +178,6 @@ sealed interface ShapeWrapper {
     fun toShape(): Shape
 
     fun generateCode(codeBlockBuilder: CodeBlock.Builder): CodeBlock.Builder
-
 }
 
 enum class ShapeCornerSpec {

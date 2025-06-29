@@ -13,7 +13,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class BackgroundTest {
-
     @Test
     fun toComposeCode_background_default() {
         val modifierList = listOf(ModifierWrapper.Background())
@@ -32,11 +31,13 @@ class BackgroundTest {
 
     @Test
     fun serialize_verify_restored_instance() {
-        val background = ModifierWrapper.Background(
-            colorWrapper = ColorProperty.ColorIntrinsicValue(
-                ColorWrapper(themeColor = Material3ColorWrapper.Background),
-            ),
-        )
+        val background =
+            ModifierWrapper.Background(
+                colorWrapper =
+                    ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(themeColor = Material3ColorWrapper.Background),
+                    ),
+            )
 
         val encodedString = yamlSerializer.encodeToString(background)
         val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Background>(encodedString)

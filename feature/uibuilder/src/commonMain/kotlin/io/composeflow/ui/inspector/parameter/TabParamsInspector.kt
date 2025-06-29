@@ -31,7 +31,7 @@ fun TabParamsInspector(
                     node,
                     tabTrait.copy(
                         text =
-                        if (it.isEmpty()) null else StringProperty.StringIntrinsicValue(it),
+                            if (it.isEmpty()) null else StringProperty.StringIntrinsicValue(it),
                     ),
                 )
             },
@@ -46,9 +46,10 @@ fun TabParamsInspector(
             onIconDeleted = {
                 composeNodeCallbacks.onTraitUpdated(node, tabTrait.copy(icon = null))
             },
-            modifier = Modifier
-                .hoverOverlay()
-                .padding(horizontal = 8.dp),
+            modifier =
+                Modifier
+                    .hoverOverlay()
+                    .padding(horizontal = 8.dp),
         )
     }
 }

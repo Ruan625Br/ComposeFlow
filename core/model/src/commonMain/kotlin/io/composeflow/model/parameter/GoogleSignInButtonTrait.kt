@@ -36,7 +36,6 @@ import org.jetbrains.compose.resources.StringResource
 data class GoogleSignInButtonTrait(
     val iconOnly: Boolean = false,
 ) : ComposeTrait {
-
     private fun generateParamsCode(
         project: Project,
         node: ComposeNode,
@@ -58,34 +57,39 @@ data class GoogleSignInButtonTrait(
                 validatorNode.getCompanionStateOrNull(project)?.getValidateResultName(context)
             validateResultBuilder.add(
                 CodeBlock.of(
-                    "${validateResultName}.%M()",
-                    MemberHolder.ComposeFlow.isSuccess
-                )
+                    "$validateResultName.%M()",
+                    MemberHolder.ComposeFlow.isSuccess,
+                ),
             )
             if (index != validatorNodes.lastIndex) {
                 validateResultBuilder.add(" && ")
             }
         }
 
-
         return codeBlockBuilder.build()
     }
-
 
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
             trait = mutableStateOf(GoogleSignInButtonTrait()),
-            modifierList = mutableStateListEqualsOverrideOf(
-                ModifierWrapper.Padding(8.dp),
-            )
+            modifierList =
+                mutableStateListEqualsOverrideOf(
+                    ModifierWrapper.Padding(8.dp),
+                ),
         )
 
     override fun iconText(): String = "GoogleSignIn"
+
     override fun icon(): ImageVector = ComposeFlowIcons.Google
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Auth)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_google_sign_in_button_trait
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)
+
     override fun onClickIncludedInParams(): Boolean = true
+
     override fun isResizeable(): Boolean = false
 
     @Composable
@@ -97,16 +101,18 @@ data class GoogleSignInButtonTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        val modifierForCanvas = modifier.then(
-            node.modifierChainForCanvas()
-                .modifierForCanvas(
-                    project = project,
-                    node = node,
-                    canvasNodeCallbacks = canvasNodeCallbacks,
-                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    paletteRenderParams = paletteRenderParams,
-                ),
-        )
+        val modifierForCanvas =
+            modifier.then(
+                node
+                    .modifierChainForCanvas()
+                    .modifierForCanvas(
+                        project = project,
+                        node = node,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        paletteRenderParams = paletteRenderParams,
+                    ),
+            )
         if (iconOnly) {
             GoogleSignInButtonIconOnly(
                 onClick = {},
@@ -116,7 +122,7 @@ data class GoogleSignInButtonTrait(
             GoogleSignInButton(
                 onClick = {},
                 fontSize = 18.sp,
-                modifier = modifierForCanvas
+                modifier = modifierForCanvas,
             )
         }
     }
@@ -127,11 +133,12 @@ data class GoogleSignInButtonTrait(
         context: GenerationContext,
         dryRun: Boolean,
     ): CodeBlock {
-        val buttonMember = if (iconOnly) {
-            MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButtonIconOnly")
-        } else {
-            MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButton")
-        }
+        val buttonMember =
+            if (iconOnly) {
+                MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButtonIconOnly")
+            } else {
+                MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButton")
+            }
         val builder = CodeBlock.builder()
         builder.add("%M(", buttonMember)
         builder.add(
@@ -140,11 +147,10 @@ data class GoogleSignInButtonTrait(
                 node = node,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         builder.add(node.generateModifierCode(project, context, dryRun = dryRun))
         builder.addStatement(")")
         return builder.build()
     }
 }
-

@@ -64,9 +64,7 @@ fun LoginScreen(
 }
 
 @Composable
-private fun InitialContent(
-    onGoogleSignInClicked: () -> Unit,
-) {
+private fun InitialContent(onGoogleSignInClicked: () -> Unit) {
     Column(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -75,23 +73,26 @@ private fun InitialContent(
         val density = LocalDensity.current
         val scale = density.density / 2
         Image(
-            bitmap = useResource("ComposeFlow_inverted_800x600.png") {
-                loadImageBitmap(it)
-            },
+            bitmap =
+                useResource("ComposeFlow_inverted_800x600.png") {
+                    loadImageBitmap(it)
+                },
             contentDescription = stringResource(Res.string.composeflow_main_logo),
             modifier = Modifier.scale(scale),
         )
         Image(
-            bitmap = useResource("btn_google_signin_dark.png") {
-                loadImageBitmap(it)
-            },
-            contentDescription = stringResource(Res.string.sign_in_with_google),
-            modifier = Modifier
-                .scale(scale * 1.7f)
-                .hoverIconClickable()
-                .clickable {
-                    onGoogleSignInClicked()
+            bitmap =
+                useResource("btn_google_signin_dark.png") {
+                    loadImageBitmap(it)
                 },
+            contentDescription = stringResource(Res.string.sign_in_with_google),
+            modifier =
+                Modifier
+                    .scale(scale * 1.7f)
+                    .hoverIconClickable()
+                    .clickable {
+                        onGoogleSignInClicked()
+                    },
         )
     }
 }

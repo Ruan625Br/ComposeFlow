@@ -45,13 +45,12 @@ import org.jetbrains.compose.resources.stringResource
 
 @Serializable
 sealed interface StateOperation {
-
     fun isDependent(sourceId: String): Boolean
 
     fun getUpdateMethodName(
         project: Project,
         context: GenerationContext,
-        writeState: WriteableState
+        writeState: WriteableState,
     ): String
 
     fun getUpdateMethodParamsAsString(
@@ -78,41 +77,44 @@ sealed interface StateOperation {
     @SerialName("SetValue")
     data class SetValue(
         override val readProperty: AssignableProperty,
-    ) : StateOperation, StateOperationWithReadProperty, DropdownItem {
-
-        override fun isDependent(sourceId: String): Boolean {
-            return readProperty.isDependent(sourceId)
-        }
+    ) : StateOperation,
+        StateOperationWithReadProperty,
+        DropdownItem {
+        override fun isDependent(sourceId: String): Boolean = readProperty.isDependent(sourceId)
 
         override fun getUpdateMethodParamsAsString(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): String {
-            return readProperty.generateParameterSpec(project)?.let {
+        ): String =
+            readProperty.generateParameterSpec(project)?.let {
                 "${it.name} = ${readProperty.generateCodeBlock(project, context, dryRun = dryRun)}"
             } ?: ""
-        }
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val writeStateIdentifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name,
-            ).asVariableName()
+            val writeStateIdentifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return if (readProperty is ValueFromState) {
                 val readState = project.findLocalStateOrNull(readProperty.readFromStateId)
                 if (readState != null) {
                     val readStateIdentifier =
-                        context.getCurrentComposableContext().getOrAddIdentifier(
-                            id = readState.id,
-                            initialIdentifier = readState.name,
-                        ).asVariableName()
+                        context
+                            .getCurrentComposableContext()
+                            .getOrAddIdentifier(
+                                id = readState.id,
+                                initialIdentifier = readState.name,
+                            ).asVariableName()
                     "onSet${writeStateIdentifier.capitalize(Locale.current)}" +
-                            readState.let { "From${readStateIdentifier.capitalize(Locale.current)}" }
+                        readState.let { "From${readStateIdentifier.capitalize(Locale.current)}" }
                 } else {
                     "onSet${writeStateIdentifier.capitalize(Locale.current)}"
                 }
@@ -127,34 +129,37 @@ sealed interface StateOperation {
             writeState: WriteableState,
             dryRun: Boolean,
         ) {
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(
-                    project = project,
-                    context = context,
-                    writeState = writeState,
-                ),
-            )
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(
+                        project = project,
+                        context = context,
+                        writeState = writeState,
+                    ),
+                )
             readProperty.generateParameterSpec(project)?.let {
                 funSpecBuilder.addParameter(it)
             }
 
             val wrapCodeBlock =
                 readProperty.generateWrapWithViewModelBlock(project, CodeBlock.of(""))
-            val updateStateCodeBlock = writeState.generateUpdateStateCodeToViewModel(
-                project,
-                context,
-                readProperty,
-                dryRun = dryRun,
-            )
+            val updateStateCodeBlock =
+                writeState.generateUpdateStateCodeToViewModel(
+                    project,
+                    context,
+                    readProperty,
+                    dryRun = dryRun,
+                )
             context.addFunction(
-                funSpecBuilder.addCode(
-                    wrapCodeBlock?.let {
-                        readProperty.generateWrapWithViewModelBlock(
-                            project,
-                            updateStateCodeBlock,
-                        )
-                    } ?: updateStateCodeBlock,
-                ).build(),
+                funSpecBuilder
+                    .addCode(
+                        wrapCodeBlock?.let {
+                            readProperty.generateWrapWithViewModelBlock(
+                                project,
+                                updateStateCodeBlock,
+                            )
+                        } ?: updateStateCodeBlock,
+                    ).build(),
                 dryRun = dryRun,
             )
 
@@ -166,12 +171,9 @@ sealed interface StateOperation {
         @Composable
         override fun displayName(): String = stringResource(Res.string.set_value)
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return readProperty.getDependentComposeNodes(project)
-        }
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> = readProperty.getDependentComposeNodes(project)
 
-        override fun getAssignableProperties(): List<AssignableProperty> =
-            readProperty.getAssignableProperties()
+        override fun getAssignableProperties(): List<AssignableProperty> = readProperty.getAssignableProperties()
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
@@ -182,18 +184,20 @@ sealed interface StateOperation {
     @Serializable
     @SerialName("ClearValue")
     data object ClearValue : StateOperation, DropdownItem {
-
         override fun isDependent(sourceId: String): Boolean = false
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name
-            ).asVariableName()
+            val identifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return "onClear${identifier.capitalize(Locale.current)}"
         }
 
@@ -203,17 +207,19 @@ sealed interface StateOperation {
             writeState: WriteableState,
             dryRun: Boolean,
         ) {
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(
-                    project = project,
-                    context = context,
-                    writeState = writeState,
-                ),
-            )
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(
+                        project = project,
+                        context = context,
+                        writeState = writeState,
+                    ),
+                )
             context.addFunction(
-                funSpecBuilder.addCode(writeState.generateClearStateCodeToViewModel(context))
+                funSpecBuilder
+                    .addCode(writeState.generateClearStateCodeToViewModel(context))
                     .build(),
-                dryRun = dryRun
+                dryRun = dryRun,
             )
         }
 
@@ -229,18 +235,20 @@ sealed interface StateOperation {
     @Serializable
     @SerialName("ToggleValue")
     data object ToggleValue : StateOperation, DropdownItem {
-
         override fun isDependent(sourceId: String): Boolean = false
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name
-            ).asVariableName()
+            val identifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return "onToggle${identifier.capitalize(Locale.current)}"
         }
 
@@ -250,19 +258,21 @@ sealed interface StateOperation {
             writeState: WriteableState,
             dryRun: Boolean,
         ) {
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(
-                    project = project,
-                    context = context,
-                    writeState = writeState,
-                ),
-            )
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(
+                        project = project,
+                        context = context,
+                        writeState = writeState,
+                    ),
+                )
             if (writeState is BooleanState) {
                 context.addFunction(
-                    funSpecBuilder.addCode(
-                        writeState.generateToggleStateCodeToViewModel(context),
-                    ).build(),
-                    dryRun = dryRun
+                    funSpecBuilder
+                        .addCode(
+                            writeState.generateToggleStateCodeToViewModel(context),
+                        ).build(),
+                    dryRun = dryRun,
                 )
                 writeState.generateStatePropertiesToViewModel(project, context).forEach {
                     context.addProperty(it, dryRun)
@@ -282,7 +292,6 @@ sealed interface StateOperation {
 
 @Serializable
 sealed interface FieldUpdateType {
-
     @Composable
     fun displayName(): String
 
@@ -323,18 +332,20 @@ sealed interface FieldUpdateType {
     }
 
     object Normal {
-        fun entries(): List<FieldUpdateType> = listOf(
-            SetValue,
-            ClearValue,
-        )
+        fun entries(): List<FieldUpdateType> =
+            listOf(
+                SetValue,
+                ClearValue,
+            )
     }
 
     object Boolean {
-        fun entries(): List<FieldUpdateType> = listOf(
-            SetValue,
-            ClearValue,
-            ToggleValue,
-        )
+        fun entries(): List<FieldUpdateType> =
+            listOf(
+                SetValue,
+                ClearValue,
+                ToggleValue,
+            )
     }
 }
 
@@ -343,7 +354,6 @@ sealed interface FieldUpdateType {
 data class DataFieldUpdateProperty(
     val dataFieldId: DataFieldId,
     val assignableProperty: AssignableProperty,
-
     /**
      * Update type of the dataField. Only used when the operation is [StateOperationForList.UpdateValueAtIndexForCustomDataType]
      * to express how to update the each field.
@@ -353,30 +363,27 @@ data class DataFieldUpdateProperty(
 
 @Serializable
 sealed interface StateOperationForDataType : StateOperation {
-
     val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty>
 
     @Serializable
     @SerialName("DataTypeSetValue")
     data class DataTypeSetValue(
         override val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
-    ) : StateOperationForDataType, DropdownItem {
-
-        override fun isDependent(sourceId: String): Boolean {
-            return dataFieldUpdateProperties.any {
+    ) : StateOperationForDataType,
+        DropdownItem {
+        override fun isDependent(sourceId: String): Boolean =
+            dataFieldUpdateProperties.any {
                 it.assignableProperty.isDependent(
-                    sourceId
+                    sourceId,
                 )
             }
-        }
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return dataFieldUpdateProperties.flatMap {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            dataFieldUpdateProperties.flatMap {
                 it.assignableProperty.getDependentComposeNodes(
-                    project
+                    project,
                 )
             }
-        }
 
         override fun getAssignableProperties(): List<AssignableProperty> =
             dataFieldUpdateProperties.flatMap {
@@ -386,7 +393,7 @@ sealed interface StateOperationForDataType : StateOperation {
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
             check(writeState is AppState.CustomDataTypeAppState)
             val dataTypeId = writeState.dataTypeId
@@ -398,8 +405,8 @@ sealed interface StateOperationForDataType : StateOperation {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): String {
-            return buildString {
+        ): String =
+            buildString {
                 dataFieldUpdateProperties.forEach { (_, readProperty) ->
                     readProperty.generateParameterSpec(project)?.let {
                         append(
@@ -407,14 +414,13 @@ sealed interface StateOperationForDataType : StateOperation {
                                 readProperty.generateCodeBlock(
                                     project,
                                     context,
-                                    dryRun = dryRun
+                                    dryRun = dryRun,
                                 )
-                            },"
+                            },",
                         )
                     }
                 }
             }
-        }
 
         override fun addUpdateMethodAndReadProperty(
             project: Project,
@@ -426,29 +432,33 @@ sealed interface StateOperationForDataType : StateOperation {
             val dataTypeId = writeState.dataTypeId
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(project = project, context = context, writeState = writeState),
-            )
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(project = project, context = context, writeState = writeState),
+                )
 
-            val updateString = buildString {
-                dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
-                    val dataField = dataType.findDataFieldOrNull(dataFieldId)
-                    dataField?.let {
-                        readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
-                            .let { codeBlock ->
-                                val expression = dataField.fieldType.type().convertCodeFromType(
-                                    inputType = readProperty.valueType(project),
-                                    codeBlock = codeBlock,
-                                )
-                                append("${dataField.variableName} = $expression,\n")
-                            }
-                    }
+            val updateString =
+                buildString {
+                    dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
+                        val dataField = dataType.findDataFieldOrNull(dataFieldId)
+                        dataField?.let {
+                            readProperty
+                                .transformedCodeBlock(project, context, dryRun = dryRun)
+                                .let { codeBlock ->
+                                    val expression =
+                                        dataField.fieldType.type().convertCodeFromType(
+                                            inputType = readProperty.valueType(project),
+                                            codeBlock = codeBlock,
+                                        )
+                                    append("${dataField.variableName} = $expression,\n")
+                                }
+                        }
 
-                    readProperty.generateParameterSpec(project)?.let {
-                        funSpecBuilder.addParameter(it)
+                        readProperty.generateParameterSpec(project)?.let {
+                            funSpecBuilder.addParameter(it)
+                        }
                     }
                 }
-            }
 
             funSpecBuilder.addCode(
                 """%M.%M {
@@ -477,53 +487,52 @@ sealed interface StateOperationForDataType : StateOperation {
 
 @Serializable
 sealed interface StateOperationForList : StateOperation {
-
     @Serializable
     @SerialName("AddValue")
     data class AddValue(
         override val readProperty: AssignableProperty,
-    ) : StateOperationForList, StateOperationWithReadProperty, DropdownItem {
+    ) : StateOperationForList,
+        StateOperationWithReadProperty,
+        DropdownItem {
+        override fun isDependent(sourceId: String): Boolean = readProperty.isDependent(sourceId)
 
-        override fun isDependent(sourceId: String): Boolean {
-            return readProperty.isDependent(sourceId)
-        }
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> = readProperty.getDependentComposeNodes(project)
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return readProperty.getDependentComposeNodes(project)
-        }
-
-        override fun getAssignableProperties(): List<AssignableProperty> =
-            readProperty.getAssignableProperties()
+        override fun getAssignableProperties(): List<AssignableProperty> = readProperty.getAssignableProperties()
 
         override fun getUpdateMethodParamsAsString(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): String {
-            return readProperty.generateParameterSpec(project)?.let {
+        ): String =
+            readProperty.generateParameterSpec(project)?.let {
                 "${it.name} = ${readProperty.generateCodeBlock(project, context, dryRun = dryRun)}"
             } ?: ""
-        }
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val writeStateIdentifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name
-            ).asVariableName()
+            val writeStateIdentifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return if (readProperty is ValueFromState) {
                 val readState = project.findLocalStateOrNull(readProperty.readFromStateId)
                 if (readState != null) {
                     val readStateIdentifier =
-                        context.getCurrentComposableContext().getOrAddIdentifier(
-                            id = readState.id,
-                            initialIdentifier = readState.name
-                        ).asVariableName()
+                        context
+                            .getCurrentComposableContext()
+                            .getOrAddIdentifier(
+                                id = readState.id,
+                                initialIdentifier = readState.name,
+                            ).asVariableName()
                     "onAddValueTo${writeStateIdentifier.capitalize(Locale.current)}" +
-                            readState.let { "From${readStateIdentifier.capitalize(Locale.current)}" }
+                        readState.let { "From${readStateIdentifier.capitalize(Locale.current)}" }
                 } else {
                     "onAddValueTo${writeStateIdentifier.capitalize(Locale.current)}"
                 }
@@ -538,26 +547,28 @@ sealed interface StateOperationForList : StateOperation {
             writeState: WriteableState,
             dryRun: Boolean,
         ) {
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(
-                    project = project,
-                    context = context,
-                    writeState = writeState,
-                ),
-            )
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(
+                        project = project,
+                        context = context,
+                        writeState = writeState,
+                    ),
+                )
             if (writeState !is ListAppState) return
             readProperty.generateParameterSpec(project)?.let {
                 funSpecBuilder.addParameter(it)
             }
             context.addFunction(
-                funSpecBuilder.addCode(
-                    writeState.generateAddValueToStateCode(
-                        project,
-                        context,
-                        readProperty,
-                        dryRun = dryRun
-                    ),
-                ).build(),
+                funSpecBuilder
+                    .addCode(
+                        writeState.generateAddValueToStateCode(
+                            project,
+                            context,
+                            readProperty,
+                            dryRun = dryRun,
+                        ),
+                    ).build(),
                 dryRun,
             )
             writeState.generateStatePropertiesToViewModel(project, context).forEach {
@@ -578,23 +589,22 @@ sealed interface StateOperationForList : StateOperation {
     @SerialName("AddValueForCustomDataType")
     data class AddValueForCustomDataType(
         override val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
-    ) : StateOperationForDataType, StateOperationForList, DropdownItem {
-
-        override fun isDependent(sourceId: String): Boolean {
-            return dataFieldUpdateProperties.any {
+    ) : StateOperationForDataType,
+        StateOperationForList,
+        DropdownItem {
+        override fun isDependent(sourceId: String): Boolean =
+            dataFieldUpdateProperties.any {
                 it.assignableProperty.isDependent(
-                    sourceId
+                    sourceId,
                 )
             }
-        }
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return dataFieldUpdateProperties.flatMap {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            dataFieldUpdateProperties.flatMap {
                 it.assignableProperty.getDependentComposeNodes(
-                    project
+                    project,
                 )
             }
-        }
 
         override fun getAssignableProperties(): List<AssignableProperty> =
             dataFieldUpdateProperties.flatMap {
@@ -604,7 +614,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
             check(writeState is AppState.CustomDataTypeListAppState)
             val dataTypeId = writeState.dataTypeId
@@ -616,8 +626,8 @@ sealed interface StateOperationForList : StateOperation {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): String {
-            return buildString {
+        ): String =
+            buildString {
                 dataFieldUpdateProperties.forEach { (_, readProperty) ->
                     readProperty.generateParameterSpec(project)?.let {
                         append(
@@ -625,14 +635,13 @@ sealed interface StateOperationForList : StateOperation {
                                 readProperty.generateCodeBlock(
                                     project,
                                     context,
-                                    dryRun = dryRun
+                                    dryRun = dryRun,
                                 )
-                            },"
+                            },",
                         )
                     }
                 }
             }
-        }
 
         override fun addUpdateMethodAndReadProperty(
             project: Project,
@@ -644,31 +653,33 @@ sealed interface StateOperationForList : StateOperation {
             val dataTypeId = writeState.dataTypeId
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(project = project, context = context, writeState = writeState),
-            )
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(project = project, context = context, writeState = writeState),
+                )
 
-            val updateString = buildString {
-                dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
-                    val dataField = dataType.findDataFieldOrNull(dataFieldId)
-                    dataField?.let {
-                        append(
-                            "${dataField.variableName} = ${
-                                readProperty.transformedCodeBlock(
-                                    project,
-                                    context,
-                                    writeType = dataField.fieldType.type(),
-                                    dryRun = dryRun,
-                                )
-                            },\n",
-                        )
-                    }
+            val updateString =
+                buildString {
+                    dataFieldUpdateProperties.forEach { (dataFieldId, readProperty) ->
+                        val dataField = dataType.findDataFieldOrNull(dataFieldId)
+                        dataField?.let {
+                            append(
+                                "${dataField.variableName} = ${
+                                    readProperty.transformedCodeBlock(
+                                        project,
+                                        context,
+                                        writeType = dataField.fieldType.type(),
+                                        dryRun = dryRun,
+                                    )
+                                },\n",
+                            )
+                        }
 
-                    readProperty.generateParameterSpec(project)?.let {
-                        funSpecBuilder.addParameter(it)
+                        readProperty.generateParameterSpec(project)?.let {
+                            funSpecBuilder.addParameter(it)
+                        }
                     }
                 }
-            }
 
             funSpecBuilder.addCode(
                 """%M.%M {
@@ -694,8 +705,7 @@ sealed interface StateOperationForList : StateOperation {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
-        override fun isSameItem(item: Any): Boolean =
-            item is AddValueForCustomDataType
+        override fun isSameItem(item: Any): Boolean = item is AddValueForCustomDataType
     }
 
     @Serializable
@@ -704,30 +714,30 @@ sealed interface StateOperationForList : StateOperation {
         // Represents the index to update
         override val indexProperty: IntProperty = IntProperty.IntIntrinsicValue(),
         override val readProperty: AssignableProperty,
-    ) : StateOperationForList, StateOperationWithReadProperty, StateOperationWithIndexProperty,
+    ) : StateOperationForList,
+        StateOperationWithReadProperty,
+        StateOperationWithIndexProperty,
         DropdownItem {
+        override fun isDependent(sourceId: String): Boolean =
+            readProperty.isDependent(sourceId) ||
+                indexProperty.isDependent(sourceId)
 
-        override fun isDependent(sourceId: String): Boolean {
-            return readProperty.isDependent(sourceId) ||
-                    indexProperty.isDependent(sourceId)
-        }
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> = readProperty.getDependentComposeNodes(project)
 
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return readProperty.getDependentComposeNodes(project)
-        }
-
-        override fun getAssignableProperties(): List<AssignableProperty> =
-            readProperty.getAssignableProperties()
+        override fun getAssignableProperties(): List<AssignableProperty> = readProperty.getAssignableProperties()
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.id,
-            ).asVariableName()
+            val identifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.id,
+                    ).asVariableName()
             return "onUpdateValueFor${identifier.capitalize(Locale.current)}AtIndex"
         }
 
@@ -744,7 +754,7 @@ sealed interface StateOperationForList : StateOperation {
                         readProperty.generateCodeBlock(
                             project,
                             context,
-                            dryRun = dryRun
+                            dryRun = dryRun,
                         )
                     }"
                 }
@@ -764,27 +774,31 @@ sealed interface StateOperationForList : StateOperation {
             }
 
             readProperty.transformedCodeBlock(project, context, dryRun = dryRun).let { codeBlock ->
-                val funSpecBuilder = writeState.generateUpdateValueAtIndexFunBuilder(
-                    project = project,
-                    context = context,
-                    functionName = getUpdateMethodName(
+                val funSpecBuilder =
+                    writeState.generateUpdateValueAtIndexFunBuilder(
                         project = project,
                         context = context,
+                        functionName =
+                            getUpdateMethodName(
+                                project = project,
+                                context = context,
+                                writeState = writeState,
+                            ),
                         writeState = writeState,
-                    ),
-                    writeState = writeState,
-                    readCodeBlock = writeState.valueType(project, asNonList = true)
-                        .convertCodeFromType(
-                            readProperty.valueType(project),
-                            codeBlock = codeBlock,
-                        ),
-                )
+                        readCodeBlock =
+                            writeState
+                                .valueType(project, asNonList = true)
+                                .convertCodeFromType(
+                                    readProperty.valueType(project),
+                                    codeBlock = codeBlock,
+                                ),
+                    )
                 readProperty.generateParameterSpec(project)?.let {
                     funSpecBuilder.addParameter(it)
                 }
                 context.addFunction(
                     funSpecBuilder.build(),
-                    dryRun
+                    dryRun,
                 )
             }
         }
@@ -795,8 +809,7 @@ sealed interface StateOperationForList : StateOperation {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString(displayName())
 
-        override fun isSameItem(item: Any): Boolean =
-            item is UpdateValueAtIndex
+        override fun isSameItem(item: Any): Boolean = item is UpdateValueAtIndex
     }
 
     @Serializable
@@ -805,25 +818,24 @@ sealed interface StateOperationForList : StateOperation {
         // Represents the index to update
         override val indexProperty: IntProperty = IntProperty.IntIntrinsicValue(),
         override val dataFieldUpdateProperties: MutableList<DataFieldUpdateProperty> = mutableListOf(),
-    ) : StateOperationForDataType, StateOperationWithIndexProperty, StateOperationForList,
+    ) : StateOperationForDataType,
+        StateOperationWithIndexProperty,
+        StateOperationForList,
         DropdownItem {
+        override fun isDependent(sourceId: String): Boolean =
+            indexProperty.isDependent(sourceId) ||
+                dataFieldUpdateProperties.any {
+                    it.assignableProperty.isDependent(
+                        sourceId,
+                    )
+                }
 
-        override fun isDependent(sourceId: String): Boolean {
-            return indexProperty.isDependent(sourceId) ||
-                    dataFieldUpdateProperties.any {
-                        it.assignableProperty.isDependent(
-                            sourceId
-                        )
-                    }
-        }
-
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> {
-            return dataFieldUpdateProperties.flatMap {
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            dataFieldUpdateProperties.flatMap {
                 it.assignableProperty.getDependentComposeNodes(
-                    project
+                    project,
                 )
             }
-        }
 
         override fun getAssignableProperties(): List<AssignableProperty> =
             dataFieldUpdateProperties.flatMap {
@@ -833,7 +845,7 @@ sealed interface StateOperationForList : StateOperation {
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
             check(writeState is AppState.CustomDataTypeListAppState)
             val dataTypeId = writeState.dataTypeId
@@ -848,7 +860,7 @@ sealed interface StateOperationForList : StateOperation {
         ): String {
             val indexString = getUpdateIndexParamsAsString(project, context)
             return buildString {
-                append("${indexString},")
+                append("$indexString,")
                 dataFieldUpdateProperties.forEach { (_, readProperty) ->
                     readProperty.generateParameterSpec(project)?.let {
                         append(
@@ -856,9 +868,9 @@ sealed interface StateOperationForList : StateOperation {
                                 readProperty.generateCodeBlock(
                                     project,
                                     context,
-                                    dryRun = dryRun
+                                    dryRun = dryRun,
                                 )
-                            },"
+                            },",
                         )
                     }
                 }
@@ -876,55 +888,62 @@ sealed interface StateOperationForList : StateOperation {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
             val indexToUpdate = "indexToUpdate"
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(project = project, context = context, writeState = writeState),
-            ).addParameter(
-                ParameterSpec.builder(name = indexToUpdate, Int::class).build(),
-            )
+            val funSpecBuilder =
+                FunSpec
+                    .builder(
+                        getUpdateMethodName(project = project, context = context, writeState = writeState),
+                    ).addParameter(
+                        ParameterSpec.builder(name = indexToUpdate, Int::class).build(),
+                    )
 
             val item = "item"
-            val updateString = buildString {
-                dataFieldUpdateProperties.forEach { properties ->
-                    val dataField = dataType.findDataFieldOrNull(properties.dataFieldId)
+            val updateString =
+                buildString {
+                    dataFieldUpdateProperties.forEach { properties ->
+                        val dataField = dataType.findDataFieldOrNull(properties.dataFieldId)
 
-                    dataField?.let {
-                        val readCodeBlock: CodeBlock = when (properties.fieldUpdateType) {
-                            FieldUpdateType.ClearValue -> dataField.fieldType.defaultValueAsCodeBlock(
-                                project,
-                            )
+                        dataField?.let {
+                            val readCodeBlock: CodeBlock =
+                                when (properties.fieldUpdateType) {
+                                    FieldUpdateType.ClearValue ->
+                                        dataField.fieldType.defaultValueAsCodeBlock(
+                                            project,
+                                        )
 
-                            FieldUpdateType.ToggleValue -> {
-                                when (dataField.fieldType.type()) {
-                                    is ComposeFlowType.BooleanType -> CodeBlock.of("!$item.${dataField.variableName}")
-                                    else -> throw IllegalArgumentException()
+                                    FieldUpdateType.ToggleValue -> {
+                                        when (dataField.fieldType.type()) {
+                                            is ComposeFlowType.BooleanType -> CodeBlock.of("!$item.${dataField.variableName}")
+                                            else -> throw IllegalArgumentException()
+                                        }
+                                    }
+
+                                    FieldUpdateType.SetValue ->
+                                        properties.assignableProperty.transformedCodeBlock(
+                                            project,
+                                            context,
+                                            dryRun = dryRun,
+                                        )
                                 }
+                            readCodeBlock.let {
+                                val expression =
+                                    dataField.fieldType.type().convertCodeFromType(
+                                        inputType = properties.assignableProperty.valueType(project),
+                                        codeBlock = it,
+                                    )
+                                append("${dataField.variableName} = $expression,\n")
                             }
-
-                            FieldUpdateType.SetValue -> properties.assignableProperty.transformedCodeBlock(
-                                project,
-                                context,
-                                dryRun = dryRun,
-                            )
                         }
-                        readCodeBlock.let {
-                            val expression = dataField.fieldType.type().convertCodeFromType(
-                                inputType = properties.assignableProperty.valueType(project),
-                                codeBlock = it,
-                            )
-                            append("${dataField.variableName} = $expression,\n")
-                        }
-                    }
 
-                    properties.assignableProperty.addReadProperty(
-                        project,
-                        context,
-                        dryRun = dryRun,
-                    )
-                    properties.assignableProperty.generateParameterSpec(project)?.let {
-                        funSpecBuilder.addParameter(it)
+                        properties.assignableProperty.addReadProperty(
+                            project,
+                            context,
+                            dryRun = dryRun,
+                        )
+                        properties.assignableProperty.generateParameterSpec(project)?.let {
+                            funSpecBuilder.addParameter(it)
+                        }
                     }
                 }
-            }
 
             funSpecBuilder.addCode(
                 """
@@ -959,21 +978,23 @@ sealed interface StateOperationForList : StateOperation {
     data class RemoveValueAtIndex(
         // Represents the index to remove
         override val indexProperty: IntProperty = IntProperty.IntIntrinsicValue(),
-    ) : StateOperationForList, StateOperationWithIndexProperty, DropdownItem {
-
-        override fun isDependent(sourceId: String): Boolean {
-            return indexProperty.isDependent(sourceId)
-        }
+    ) : StateOperationForList,
+        StateOperationWithIndexProperty,
+        DropdownItem {
+        override fun isDependent(sourceId: String): Boolean = indexProperty.isDependent(sourceId)
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name,
-            ).asVariableName()
+            val identifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return "onRemoveValueFrom${identifier.capitalize(Locale.current)}AtIndex"
         }
 
@@ -995,14 +1016,15 @@ sealed interface StateOperationForList : StateOperation {
                 writeState.generateRemoveValueAtIndexFun(
                     project = project,
                     context = context,
-                    functionName = getUpdateMethodName(
-                        project = project,
-                        context = context,
-                        writeState = writeState,
-                    ),
+                    functionName =
+                        getUpdateMethodName(
+                            project = project,
+                            context = context,
+                            writeState = writeState,
+                        ),
                     writeState = writeState,
                 ),
-                dryRun = dryRun
+                dryRun = dryRun,
             )
             writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
@@ -1021,18 +1043,20 @@ sealed interface StateOperationForList : StateOperation {
     @Serializable
     @SerialName("RemoveFirstValue")
     data object RemoveFirstValue : StateOperationForList, DropdownItem {
-
         override fun isDependent(sourceId: String): Boolean = false
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name,
-            ).asVariableName()
+            val identifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return "onRemoveFirstValueFrom${identifier.capitalize(Locale.current)}"
         }
 
@@ -1042,22 +1066,24 @@ sealed interface StateOperationForList : StateOperation {
             writeState: WriteableState,
             dryRun: Boolean,
         ) {
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(
-                    project = project,
-                    context = context,
-                    writeState = writeState,
-                ),
-            )
-            if (writeState !is ListAppState) return
-            context.addFunction(
-                funSpecBuilder.addCode(
-                    writeState.generateRemoveFirstValueCode(
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(
                         project = project,
                         context = context,
                         writeState = writeState,
                     ),
-                ).build(),
+                )
+            if (writeState !is ListAppState) return
+            context.addFunction(
+                funSpecBuilder
+                    .addCode(
+                        writeState.generateRemoveFirstValueCode(
+                            project = project,
+                            context = context,
+                            writeState = writeState,
+                        ),
+                    ).build(),
                 dryRun = dryRun,
             )
             writeState.generateStatePropertiesToViewModel(project, context).forEach {
@@ -1077,18 +1103,20 @@ sealed interface StateOperationForList : StateOperation {
     @Serializable
     @SerialName("RemoveLastValue")
     data object RemoveLastValue : StateOperationForList, DropdownItem {
-
         override fun isDependent(sourceId: String): Boolean = false
 
         override fun getUpdateMethodName(
             project: Project,
             context: GenerationContext,
-            writeState: WriteableState
+            writeState: WriteableState,
         ): String {
-            val identifier = context.getCurrentComposableContext().getOrAddIdentifier(
-                id = writeState.id,
-                initialIdentifier = writeState.name,
-            ).asVariableName()
+            val identifier =
+                context
+                    .getCurrentComposableContext()
+                    .getOrAddIdentifier(
+                        id = writeState.id,
+                        initialIdentifier = writeState.name,
+                    ).asVariableName()
             return "onRemoveLastValueFrom${identifier.capitalize(Locale.current)}"
         }
 
@@ -1098,23 +1126,25 @@ sealed interface StateOperationForList : StateOperation {
             writeState: WriteableState,
             dryRun: Boolean,
         ) {
-            val funSpecBuilder = FunSpec.builder(
-                getUpdateMethodName(
-                    project = project,
-                    context = context,
-                    writeState = writeState,
-                ),
-            )
-            if (writeState !is ListAppState) return
-            context.addFunction(
-                funSpecBuilder.addCode(
-                    writeState.generateRemoveLastValueCode(
+            val funSpecBuilder =
+                FunSpec.builder(
+                    getUpdateMethodName(
                         project = project,
                         context = context,
                         writeState = writeState,
                     ),
-                ).build(),
-                dryRun = dryRun
+                )
+            if (writeState !is ListAppState) return
+            context.addFunction(
+                funSpecBuilder
+                    .addCode(
+                        writeState.generateRemoveLastValueCode(
+                            project = project,
+                            context = context,
+                            writeState = writeState,
+                        ),
+                    ).build(),
+                dryRun = dryRun,
             )
             writeState.generateStatePropertiesToViewModel(project, context).forEach {
                 context.addProperty(it, dryRun)
@@ -1134,8 +1164,8 @@ sealed interface StateOperationForList : StateOperation {
 sealed interface StateOperationWithReadProperty : StateOperation {
     val readProperty: AssignableProperty
 
-    fun copyWith(readProperty: AssignableProperty): StateOperationWithReadProperty {
-        return when (this) {
+    fun copyWith(readProperty: AssignableProperty): StateOperationWithReadProperty =
+        when (this) {
             is StateOperationForList.AddValue -> {
                 this.copy(readProperty = readProperty)
             }
@@ -1148,27 +1178,30 @@ sealed interface StateOperationWithReadProperty : StateOperation {
                 this.copy(readProperty = readProperty)
             }
         }
-    }
 }
 
 sealed interface StateOperationWithIndexProperty : StateOperation {
     val indexProperty: IntProperty
 
-    fun getUpdateIndexParamsAsString(project: Project, context: GenerationContext): String {
-        return when (val property = indexProperty) {
+    fun getUpdateIndexParamsAsString(
+        project: Project,
+        context: GenerationContext,
+    ): String =
+        when (val property = indexProperty) {
             is IntProperty.IntIntrinsicValue -> {
                 property.value.toString()
             }
 
             is IntProperty.ValueFromLazyListIndex -> {
                 val lazyList = project.findComposeNodeOrThrow(property.lazyListNodeId)
-                lazyList.trait.value.iconText().replaceFirstChar { it.lowercase() } + "Index"
+                lazyList.trait.value
+                    .iconText()
+                    .replaceFirstChar { it.lowercase() } + "Index"
             }
         }
-    }
 
-    fun copyWith(indexProperty: IntProperty): StateOperationWithIndexProperty {
-        return when (this) {
+    fun copyWith(indexProperty: IntProperty): StateOperationWithIndexProperty =
+        when (this) {
             is StateOperationForList.RemoveValueAtIndex -> {
                 this.copy(indexProperty = indexProperty)
             }
@@ -1181,7 +1214,6 @@ sealed interface StateOperationWithIndexProperty : StateOperation {
                 this.copy(indexProperty = indexProperty)
             }
         }
-    }
 }
 
 sealed interface StateOperationProvider {
@@ -1189,92 +1221,102 @@ sealed interface StateOperationProvider {
 }
 
 data object StateOperationForString : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperation.SetValue(readProperty = StringProperty.StringIntrinsicValue()),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperation.SetValue(readProperty = StringProperty.StringIntrinsicValue()),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForInt : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperation.SetValue(readProperty = IntProperty.IntIntrinsicValue()),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperation.SetValue(readProperty = IntProperty.IntIntrinsicValue()),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForFloat : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperation.SetValue(readProperty = FloatProperty.FloatIntrinsicValue()),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperation.SetValue(readProperty = FloatProperty.FloatIntrinsicValue()),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForBoolean : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperation.SetValue(readProperty = BooleanProperty.BooleanIntrinsicValue()),
-        StateOperation.ClearValue,
-        StateOperation.ToggleValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperation.SetValue(readProperty = BooleanProperty.BooleanIntrinsicValue()),
+            StateOperation.ClearValue,
+            StateOperation.ToggleValue,
+        )
 }
 
 data object StateOperationForStringList : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperationForList.AddValue(readProperty = StringProperty.StringIntrinsicValue()),
-        StateOperationForList.UpdateValueAtIndex(readProperty = StringProperty.StringIntrinsicValue()),
-        StateOperationForList.RemoveFirstValue,
-        StateOperationForList.RemoveLastValue,
-        StateOperationForList.RemoveValueAtIndex(),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperationForList.AddValue(readProperty = StringProperty.StringIntrinsicValue()),
+            StateOperationForList.UpdateValueAtIndex(readProperty = StringProperty.StringIntrinsicValue()),
+            StateOperationForList.RemoveFirstValue,
+            StateOperationForList.RemoveLastValue,
+            StateOperationForList.RemoveValueAtIndex(),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForIntList : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperationForList.AddValue(readProperty = IntProperty.IntIntrinsicValue()),
-        StateOperationForList.UpdateValueAtIndex(readProperty = IntProperty.IntIntrinsicValue()),
-        StateOperationForList.RemoveFirstValue,
-        StateOperationForList.RemoveLastValue,
-        StateOperationForList.RemoveValueAtIndex(),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperationForList.AddValue(readProperty = IntProperty.IntIntrinsicValue()),
+            StateOperationForList.UpdateValueAtIndex(readProperty = IntProperty.IntIntrinsicValue()),
+            StateOperationForList.RemoveFirstValue,
+            StateOperationForList.RemoveLastValue,
+            StateOperationForList.RemoveValueAtIndex(),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForFloatList : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperationForList.AddValue(readProperty = FloatProperty.FloatIntrinsicValue()),
-        StateOperationForList.UpdateValueAtIndex(readProperty = FloatProperty.FloatIntrinsicValue()),
-        StateOperationForList.RemoveFirstValue,
-        StateOperationForList.RemoveLastValue,
-        StateOperationForList.RemoveValueAtIndex(),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperationForList.AddValue(readProperty = FloatProperty.FloatIntrinsicValue()),
+            StateOperationForList.UpdateValueAtIndex(readProperty = FloatProperty.FloatIntrinsicValue()),
+            StateOperationForList.RemoveFirstValue,
+            StateOperationForList.RemoveLastValue,
+            StateOperationForList.RemoveValueAtIndex(),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForBooleanList : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperationForList.AddValue(readProperty = BooleanProperty.BooleanIntrinsicValue()),
-        StateOperationForList.UpdateValueAtIndex(readProperty = BooleanProperty.BooleanIntrinsicValue()),
-        StateOperationForList.RemoveFirstValue,
-        StateOperationForList.RemoveLastValue,
-        StateOperationForList.RemoveValueAtIndex(),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperationForList.AddValue(readProperty = BooleanProperty.BooleanIntrinsicValue()),
+            StateOperationForList.UpdateValueAtIndex(readProperty = BooleanProperty.BooleanIntrinsicValue()),
+            StateOperationForList.RemoveFirstValue,
+            StateOperationForList.RemoveLastValue,
+            StateOperationForList.RemoveValueAtIndex(),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForCustomDataType : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperationForDataType.DataTypeSetValue(),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperationForDataType.DataTypeSetValue(),
+            StateOperation.ClearValue,
+        )
 }
 
 data object StateOperationForCustomDataTypeList : StateOperationProvider {
-    override fun entries(): List<StateOperation> = listOf(
-        StateOperationForList.AddValueForCustomDataType(),
-        StateOperationForList.UpdateValueAtIndexForCustomDataType(),
-        StateOperationForList.RemoveFirstValue,
-        StateOperationForList.RemoveLastValue,
-        StateOperationForList.RemoveValueAtIndex(),
-        StateOperation.ClearValue,
-    )
+    override fun entries(): List<StateOperation> =
+        listOf(
+            StateOperationForList.AddValueForCustomDataType(),
+            StateOperationForList.UpdateValueAtIndexForCustomDataType(),
+            StateOperationForList.RemoveFirstValue,
+            StateOperationForList.RemoveLastValue,
+            StateOperationForList.RemoveValueAtIndex(),
+            StateOperation.ClearValue,
+        )
 }

@@ -24,12 +24,13 @@ inline fun <reified T> BasicDropdownPropertyEditor(
     selectedItem: T? = null,
     supportTooltipText: String? = null,
     crossinline displayText: @Composable (T) -> Unit = {
-        val text: AnnotatedString? = when (it) {
-            is String -> AnnotatedString(it)
-            is DropdownTextDisplayable -> it.asDropdownText()
-            is Enum<*> -> AnnotatedString(it.name)
-            else -> null
-        }
+        val text: AnnotatedString? =
+            when (it) {
+                is String -> AnnotatedString(it)
+                is DropdownTextDisplayable -> it.asDropdownText()
+                is Enum<*> -> AnnotatedString(it.name)
+                else -> null
+            }
         text?.let { t ->
             Text(
                 text = t,
@@ -42,12 +43,13 @@ inline fun <reified T> BasicDropdownPropertyEditor(
     crossinline dropDownMenuText: @Composable (T) -> Unit = {
         // Extracting this to a function mysteriously throws an IR lowring error, thus inlining the
         // default function
-        val text: AnnotatedString? = when (it) {
-            is String -> AnnotatedString(it)
-            is DropdownTextDisplayable -> it.asDropdownText()
-            is Enum<*> -> AnnotatedString(it.name)
-            else -> null
-        }
+        val text: AnnotatedString? =
+            when (it) {
+                is String -> AnnotatedString(it)
+                is DropdownTextDisplayable -> it.asDropdownText()
+                is Enum<*> -> AnnotatedString(it.name)
+                else -> null
+            }
         text?.let { t ->
             Text(
                 text = t,

@@ -24,10 +24,12 @@ actual fun Tooltip(
                 Text(
                     text = text,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(8.dp)
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .padding(8.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant)
+                            .padding(8.dp),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }

@@ -2,8 +2,14 @@ package io.composeflow.ui.statusbar
 
 sealed interface StatusBarUiState {
     data object Normal : StatusBarUiState
-    data class Loading(val message: String?) : StatusBarUiState
-    data class Success(val message: String?) : StatusBarUiState
+
+    data class Loading(
+        val message: String?,
+    ) : StatusBarUiState
+
+    data class Success(
+        val message: String?,
+    ) : StatusBarUiState
 
     /**
      * Special status only for representing the success state for jsBrowserRun.
@@ -19,6 +25,11 @@ sealed interface StatusBarUiState {
      * <i> [webpack-dev-server] Content not from webpack is served from 'kotlin, ../../../../jsApp/build/processedResources/js/main' directory
      * <i> [webpack-dev-middleware] wait until bundle finished: /
      */
-    data class JsBrowserRunSuccess(val message: String?) : StatusBarUiState
-    data class Failure(val message: String?) : StatusBarUiState
+    data class JsBrowserRunSuccess(
+        val message: String?,
+    ) : StatusBarUiState
+
+    data class Failure(
+        val message: String?,
+    ) : StatusBarUiState
 }

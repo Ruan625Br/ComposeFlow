@@ -8,12 +8,14 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.FileSpec
 
 object Formatter {
-    private val ruleSets = setOf(
-        StandardRuleSetProvider().get(),
-    )
-    private val userData = mapOf(
-        "android" to true.toString(),
-    )
+    private val ruleSets =
+        setOf(
+            StandardRuleSetProvider().get(),
+        )
+    private val userData =
+        mapOf(
+            "android" to true.toString(),
+        )
 
     fun format(fileSpec: FileSpec): String =
         KtLint.format(
@@ -29,27 +31,34 @@ object Formatter {
             ),
         )
 
-    fun format(codeBlock: CodeBlock, withImports: Boolean = false): String {
-        val fileSpec = FileSpec
-            .scriptBuilder("")
-            .addCode(codeBlock)
-            .build()
-        val formatted = KtLint.format(
-            KtLint.Params(
-                fileName = null,
-                text = fileSpec.toString(),
-                ruleSets = ruleSets,
-                userData = userData,
-                cb = { _, _ -> run {} },
-                script = true,
-                editorConfigPath = null,
-                debug = false,
-            ),
-        )
+    fun format(
+        codeBlock: CodeBlock,
+        withImports: Boolean = false,
+    ): String {
+        val fileSpec =
+            FileSpec
+                .scriptBuilder("")
+                .addCode(codeBlock)
+                .build()
+        val formatted =
+            KtLint.format(
+                KtLint.Params(
+                    fileName = null,
+                    text = fileSpec.toString(),
+                    ruleSets = ruleSets,
+                    userData = userData,
+                    cb = { _, _ -> run {} },
+                    script = true,
+                    editorConfigPath = null,
+                    debug = false,
+                ),
+            )
         return if (withImports) {
             formatted
         } else {
-            formatted.lines().filter { it.isNotEmpty() && !it.startsWith("import") }
+            formatted
+                .lines()
+                .filter { it.isNotEmpty() && !it.startsWith("import") }
                 .joinToString("\n")
         }
     }
@@ -62,7 +71,8 @@ fun FileSpec.Builder.suppressWarningTypes(vararg types: String) {
 
     val format = "%S,".repeat(types.count()).trimEnd(',')
     addAnnotation(
-        AnnotationSpec.builder(ClassName("", "Suppress"))
+        AnnotationSpec
+            .builder(ClassName("", "Suppress"))
             .addMember(format, *types)
             .build(),
     )

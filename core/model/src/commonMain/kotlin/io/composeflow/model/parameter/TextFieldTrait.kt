@@ -70,26 +70,21 @@ data class TextFieldTrait(
     val textFieldValidator: TextFieldValidator? = TextFieldValidator.StringValidator(),
     val passwordField: Boolean? = null,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Value", value, ComposeFlowType.StringType()),
             PropertyContainer("Enabled", enabled, ComposeFlowType.BooleanType()),
             PropertyContainer("Read only", readOnly, ComposeFlowType.BooleanType()),
             PropertyContainer("Label", label, ComposeFlowType.StringType()),
             PropertyContainer("Placeholder", placeholder, ComposeFlowType.StringType()),
         )
-    }
 
-    override fun companionState(
-        composeNode: ComposeNode,
-    ): ScreenState<*> {
-        return ScreenState.StringScreenState(
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> =
+        ScreenState.StringScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
             companionNodeId = composeNode.id,
         )
-    }
 
     override fun onAttachStateToNode(
         project: Project,
@@ -120,8 +115,8 @@ data class TextFieldTrait(
                 project,
                 context,
                 ComposeFlowType.StringType(),
-                dryRun = dryRun
-            )
+                dryRun = dryRun,
+            ),
         )
         codeBlockBuilder.addStatement(",")
 
@@ -139,8 +134,8 @@ data class TextFieldTrait(
                     project,
                     canvasEditable,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
 
             if (node.actionsMap[ActionType.OnChange]?.isNotEmpty() == true) {
@@ -149,7 +144,7 @@ data class TextFieldTrait(
                         CodeBlock.of(
                             "if (${writeState.getValidateResultName(context)}.%M()) {",
                             MemberHolder.ComposeFlow.isSuccess,
-                        )
+                        ),
                     )
                 }
                 node.actionsMap[ActionType.OnChange]?.forEach {
@@ -188,8 +183,8 @@ data class TextFieldTrait(
                     project,
                     context,
                     ComposeFlowType.StringType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(
                 """, 
@@ -210,8 +205,8 @@ data class TextFieldTrait(
                     project,
                     context,
                     ComposeFlowType.StringType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(
                 """, 
@@ -266,7 +261,7 @@ data class TextFieldTrait(
                     MemberHolder.AndroidX.Ui.Color,
                     MemberHolder.AndroidX.Ui.Color,
                     MemberHolder.AndroidX.Ui.Color,
-                )
+                ),
             )
         }
         if (node.actionsMap[ActionType.OnSubmit]?.isNotEmpty() == true) {
@@ -275,12 +270,12 @@ data class TextFieldTrait(
                 imeAction = %T.Done
             ),""",
                 ClassName("androidx.compose.foundation.text", "KeyboardOptions"),
-                ClassName("androidx.compose.ui.text.input", "ImeAction")
+                ClassName("androidx.compose.ui.text.input", "ImeAction"),
             )
 
             codeBlockBuilder.add(
                 "keyboardActions = %T(",
-                ClassName("androidx.compose.foundation.text", "KeyboardActions")
+                ClassName("androidx.compose.foundation.text", "KeyboardActions"),
             )
             codeBlockBuilder.add("onDone = {")
 
@@ -289,7 +284,7 @@ data class TextFieldTrait(
                     CodeBlock.of(
                         "if (${writeState.getValidateResultName(context)}.%M()) {",
                         MemberHolder.ComposeFlow.isSuccess,
-                    )
+                    ),
                 )
             }
             node.actionsMap[ActionType.OnSubmit]?.forEach {
@@ -305,7 +300,7 @@ data class TextFieldTrait(
         if (enableValidator == true && writeState != null && writeState is WriteableState) {
             codeBlockBuilder.add(
                 "isError = ${writeState.getValidateResultName(context)} is %M.Failure,",
-                MemberHolder.ComposeFlow.ValidateResult
+                MemberHolder.ComposeFlow.ValidateResult,
             )
             codeBlockBuilder.add(
                 CodeBlock.of(
@@ -318,7 +313,7 @@ data class TextFieldTrait(
             """,
                     MemberHolder.ComposeFlow.asErrorMessage,
                     MemberHolder.Material3.Text,
-                )
+                ),
             )
         }
         passwordField?.let {
@@ -331,30 +326,33 @@ data class TextFieldTrait(
                 ClassName("androidx.compose.ui.text.input", "PasswordVisualTransformation"),
                 ClassName("androidx.compose.foundation.text", "KeyboardOptions"),
                 ClassName("androidx.compose.ui.text.input", "KeyboardType"),
-                ClassName("androidx.compose.ui.text.input", "ImeAction")
+                ClassName("androidx.compose.ui.text.input", "ImeAction"),
             )
         }
         return codeBlockBuilder.build()
     }
 
-    override fun defaultComposeNode(project: Project): ComposeNode {
-        return ComposeNode(
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
             modifierList = defaultModifierList(),
             trait = mutableStateOf(TextFieldTrait(value = StringProperty.StringIntrinsicValue(""))),
         )
-    }
 
     override fun icon(): ImageVector = Icons.Outlined.EditNote
+
     override fun iconText(): String = "TextField"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_textfield_trait
 
-    override fun actionTypes(): List<ActionType> = listOf(
-        ActionType.OnSubmit,
-        ActionType.OnChange,
-        ActionType.OnFocused,
-        ActionType.OnUnfocused,
-    )
+    override fun actionTypes(): List<ActionType> =
+        listOf(
+            ActionType.OnSubmit,
+            ActionType.OnChange,
+            ActionType.OnFocused,
+            ActionType.OnUnfocused,
+        )
 
     @Composable
     override fun RenderedNode(
@@ -365,23 +363,24 @@ data class TextFieldTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        val colors = if (shouldUseTransparentIndicator()) {
-            TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent,
-            )
-        } else {
-            when (textFieldType) {
-                TextFieldType.Default -> {
-                    TextFieldDefaults.colors()
-                }
+        val colors =
+            if (shouldUseTransparentIndicator()) {
+                TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent,
+                )
+            } else {
+                when (textFieldType) {
+                    TextFieldType.Default -> {
+                        TextFieldDefaults.colors()
+                    }
 
-                TextFieldType.Outlined -> {
-                    OutlinedTextFieldDefaults.colors()
+                    TextFieldType.Outlined -> {
+                        OutlinedTextFieldDefaults.colors()
+                    }
                 }
             }
-        }
         when (textFieldType) {
             TextFieldType.Default -> {
                 TextField(
@@ -390,52 +389,58 @@ data class TextFieldTrait(
                     enabled = enabled.asBooleanValue(),
                     // Always true to not show the caret inside so that it can be deleted with delete key
                     readOnly = true,
-                    label = label?.let {
-                        {
-                            Text(
-                                text = it.transformedValueExpression(project),
-                                modifier = Modifier.alpha(0.7f),
-                            )
-                        }
-                    },
-                    placeholder = placeholder?.let {
-                        {
-                            Text(
-                                it.transformedValueExpression(project),
-                                modifier = Modifier.alpha(0.7f),
-                            )
-                        }
-                    },
-                    leadingIcon = leadingIcon?.let {
-                        {
-                            Icon(
-                                imageVector = it.imageVector,
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                    trailingIcon = trailingIcon?.let {
-                        {
-                            Icon(
-                                imageVector = it.imageVector,
-                                contentDescription = null,
-                            )
-                        }
-                    },
+                    label =
+                        label?.let {
+                            {
+                                Text(
+                                    text = it.transformedValueExpression(project),
+                                    modifier = Modifier.alpha(0.7f),
+                                )
+                            }
+                        },
+                    placeholder =
+                        placeholder?.let {
+                            {
+                                Text(
+                                    it.transformedValueExpression(project),
+                                    modifier = Modifier.alpha(0.7f),
+                                )
+                            }
+                        },
+                    leadingIcon =
+                        leadingIcon?.let {
+                            {
+                                Icon(
+                                    imageVector = it.imageVector,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
+                    trailingIcon =
+                        trailingIcon?.let {
+                            {
+                                Icon(
+                                    imageVector = it.imageVector,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
                     singleLine = singleLine ?: false,
                     maxLines = maxLines ?: Integer.MAX_VALUE,
                     shape = shapeWrapper?.toShape() ?: TextFieldDefaults.shape,
                     colors = colors,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 )
             }
 
@@ -446,52 +451,58 @@ data class TextFieldTrait(
                     enabled = enabled.asBooleanValue(),
                     // Always true to not show the caret inside so that it can be deleted with delete key
                     readOnly = true,
-                    label = label?.let {
-                        {
-                            Text(
-                                text = it.transformedValueExpression(project),
-                                modifier = Modifier.alpha(0.7f),
-                            )
-                        }
-                    },
-                    placeholder = placeholder?.let {
-                        {
-                            Text(
-                                it.transformedValueExpression(project),
-                                modifier = Modifier.alpha(0.7f),
-                            )
-                        }
-                    },
-                    leadingIcon = leadingIcon?.let {
-                        {
-                            Icon(
-                                imageVector = it.imageVector,
-                                contentDescription = null,
-                            )
-                        }
-                    },
-                    trailingIcon = trailingIcon?.let {
-                        {
-                            Icon(
-                                imageVector = it.imageVector,
-                                contentDescription = null,
-                            )
-                        }
-                    },
+                    label =
+                        label?.let {
+                            {
+                                Text(
+                                    text = it.transformedValueExpression(project),
+                                    modifier = Modifier.alpha(0.7f),
+                                )
+                            }
+                        },
+                    placeholder =
+                        placeholder?.let {
+                            {
+                                Text(
+                                    it.transformedValueExpression(project),
+                                    modifier = Modifier.alpha(0.7f),
+                                )
+                            }
+                        },
+                    leadingIcon =
+                        leadingIcon?.let {
+                            {
+                                Icon(
+                                    imageVector = it.imageVector,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
+                    trailingIcon =
+                        trailingIcon?.let {
+                            {
+                                Icon(
+                                    imageVector = it.imageVector,
+                                    contentDescription = null,
+                                )
+                            }
+                        },
                     singleLine = singleLine ?: false,
                     maxLines = maxLines ?: Integer.MAX_VALUE,
                     shape = shapeWrapper?.toShape() ?: TextFieldDefaults.shape,
                     colors = colors,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 )
             }
         }
@@ -511,54 +522,55 @@ data class TextFieldTrait(
                 node = node,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         val hasFocusedActions = node.actionsMap[ActionType.OnFocused]?.isNotEmpty() == true
         val hasUnfocusedActions = node.actionsMap[ActionType.OnUnfocused]?.isNotEmpty() == true
-        val focusModifierCode = if (hasFocusedActions || hasUnfocusedActions) {
-            val additionalCodeBuilder = CodeBlock.builder()
-            additionalCodeBuilder.addStatement(
-                ".%M {",
-                MemberName("androidx.compose.ui.focus", "onFocusChanged")
-            )
-            if (hasFocusedActions) {
-                additionalCodeBuilder.addStatement("if (it.isFocused) {")
-                node.actionsMap[ActionType.OnFocused]?.forEach {
-                    additionalCodeBuilder.add(
-                        it.generateCodeBlock(
-                            project,
-                            context,
-                            dryRun = dryRun
+        val focusModifierCode =
+            if (hasFocusedActions || hasUnfocusedActions) {
+                val additionalCodeBuilder = CodeBlock.builder()
+                additionalCodeBuilder.addStatement(
+                    ".%M {",
+                    MemberName("androidx.compose.ui.focus", "onFocusChanged"),
+                )
+                if (hasFocusedActions) {
+                    additionalCodeBuilder.addStatement("if (it.isFocused) {")
+                    node.actionsMap[ActionType.OnFocused]?.forEach {
+                        additionalCodeBuilder.add(
+                            it.generateCodeBlock(
+                                project,
+                                context,
+                                dryRun = dryRun,
+                            ),
                         )
-                    )
+                    }
+                    additionalCodeBuilder.addStatement("}")
+                }
+                if (hasUnfocusedActions) {
+                    additionalCodeBuilder.addStatement("if (!it.isFocused) {")
+                    node.actionsMap[ActionType.OnUnfocused]?.forEach {
+                        additionalCodeBuilder.add(
+                            it.generateCodeBlock(
+                                project,
+                                context,
+                                dryRun = dryRun,
+                            ),
+                        )
+                    }
+                    additionalCodeBuilder.addStatement("}")
                 }
                 additionalCodeBuilder.addStatement("}")
+                additionalCodeBuilder.build()
+            } else {
+                null
             }
-            if (hasUnfocusedActions) {
-                additionalCodeBuilder.addStatement("if (!it.isFocused) {")
-                node.actionsMap[ActionType.OnUnfocused]?.forEach {
-                    additionalCodeBuilder.add(
-                        it.generateCodeBlock(
-                            project,
-                            context,
-                            dryRun = dryRun
-                        )
-                    )
-                }
-                additionalCodeBuilder.addStatement("}")
-            }
-            additionalCodeBuilder.addStatement("}")
-            additionalCodeBuilder.build()
-        } else {
-            null
-        }
         codeBlockBuilder.add(
             node.generateModifierCode(
                 project,
                 context,
                 additionalCode = focusModifierCode,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.addStatement(")")
 
@@ -573,7 +585,7 @@ data class TextFieldTrait(
                     %M(Unit) {
                         ${context.currentEditable.viewModelName}.${
                             companionState.getFlowName(
-                                context
+                                context,
                             )
                         }.%M {
                 """,
@@ -585,8 +597,8 @@ data class TextFieldTrait(
                             it.generateCodeBlock(
                                 project,
                                 context,
-                                dryRun = dryRun
-                            )
+                                dryRun = dryRun,
+                            ),
                         )
                     }
                     launchedEffectBuilder.addStatement("}") // End of collectLatest
@@ -594,7 +606,7 @@ data class TextFieldTrait(
 
                     context.addLaunchedEffectBlock(
                         launchedEffectBuilder.build(),
-                        dryRun = dryRun
+                        dryRun = dryRun,
                     )
                 }
             }
@@ -603,31 +615,27 @@ data class TextFieldTrait(
         return codeBlockBuilder.build()
     }
 
-    private fun shouldUseTransparentIndicator(): Boolean =
-        transparentIndicator == true && textFieldType == TextFieldType.Default
+    private fun shouldUseTransparentIndicator(): Boolean = transparentIndicator == true && textFieldType == TextFieldType.Default
 
-    override fun getStateValidator(): ComposeStateValidator? {
-        return if (enableValidator == true) {
+    override fun getStateValidator(): ComposeStateValidator? =
+        if (enableValidator == true) {
             textFieldValidator
         } else {
             null
         }
-    }
 }
 
 object TextFieldTypeSerializer : FallbackEnumSerializer<TextFieldType>(
-    TextFieldType::class
+    TextFieldType::class,
 )
 
 @Serializable(TextFieldTypeSerializer::class)
 enum class TextFieldType {
     Default {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "TextField")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "TextField")
     },
     Outlined {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "OutlinedTextField")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "OutlinedTextField")
     },
     ;
 

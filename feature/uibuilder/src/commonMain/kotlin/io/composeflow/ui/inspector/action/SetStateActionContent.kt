@@ -112,23 +112,24 @@ fun SetStateActionContent(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable {
-            onActionSelected(StateAction.SetAppStateValue())
-        }
-            .fillMaxWidth()
-            .hoverIconClickable()
-            .hoverOverlay()
-            .padding(vertical = 4.dp)
-            .padding(start = 4.dp)
-            .then(
-                Modifier.selectedActionModifier(
-                    actionInEdit = actionInEdit,
-                    predicate = {
-                        it != null &&
+        modifier =
+            Modifier
+                .clickable {
+                    onActionSelected(StateAction.SetAppStateValue())
+                }.fillMaxWidth()
+                .hoverIconClickable()
+                .hoverOverlay()
+                .padding(vertical = 4.dp)
+                .padding(start = 4.dp)
+                .then(
+                    Modifier.selectedActionModifier(
+                        actionInEdit = actionInEdit,
+                        predicate = {
+                            it != null &&
                                 it is StateAction.SetAppStateValue
-                    },
+                        },
+                    ),
                 ),
-            ),
     ) {
         Text(
             text = stringResource(Res.string.set_state),
@@ -148,10 +149,11 @@ fun SetStateContentDetail(
     Column {
         action.setValueToStates.forEachIndexed { i, setValueToState ->
             Column(
-                modifier = Modifier.hoverOverlay(
-                    MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
-                    clipRadius = 8.dp,
-                ),
+                modifier =
+                    Modifier.hoverOverlay(
+                        MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.6f),
+                        clipRadius = 8.dp,
+                    ),
             ) {
                 EditStateArea(
                     project = project,
@@ -188,23 +190,24 @@ fun SetStateContentDetail(
 
                 if (writeState != null) {
                     val type = writeState.valueType(project)
-                    val operation = if (type.isList) {
-                        if (type is ComposeFlowType.CustomDataType) {
-                            StateOperationForList.AddValueForCustomDataType()
+                    val operation =
+                        if (type.isList) {
+                            if (type is ComposeFlowType.CustomDataType) {
+                                StateOperationForList.AddValueForCustomDataType()
+                            } else {
+                                StateOperationForList.AddValue(
+                                    readProperty = type.defaultValue(),
+                                )
+                            }
                         } else {
-                            StateOperationForList.AddValue(
-                                readProperty = type.defaultValue(),
-                            )
+                            if (type is ComposeFlowType.CustomDataType) {
+                                StateOperationForDataType.DataTypeSetValue()
+                            } else {
+                                StateOperation.SetValue(
+                                    readProperty = type.defaultValue(),
+                                )
+                            }
                         }
-                    } else {
-                        if (type is ComposeFlowType.CustomDataType) {
-                            StateOperationForDataType.DataTypeSetValue()
-                        } else {
-                            StateOperation.SetValue(
-                                readProperty = type.defaultValue(),
-                            )
-                        }
-                    }
                     action.setValueToStates.add(
                         SetValueToState(writeToStateId = it.id, operation = operation),
                     )
@@ -250,9 +253,7 @@ private fun EditStateArea(
         }
 
         @Composable
-        fun StateOperationEditor(
-            stateOperationProvider: StateOperationProvider,
-        ) {
+        fun StateOperationEditor(stateOperationProvider: StateOperationProvider) {
             val entries = stateOperationProvider.entries()
             BasicDropdownPropertyEditor(
                 project = project,
@@ -365,9 +366,10 @@ private fun EditStateArea(
                     onValidPropertyChanged = { property, _ ->
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copyWith(
-                                    indexProperty = property as IntProperty,
-                                ),
+                                operation =
+                                    operation.copyWith(
+                                        indexProperty = property as IntProperty,
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -378,9 +380,10 @@ private fun EditStateArea(
                     onInitializeProperty = {
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copyWith(
-                                    indexProperty = IntProperty.IntIntrinsicValue(),
-                                ),
+                                operation =
+                                    operation.copyWith(
+                                        indexProperty = IntProperty.IntIntrinsicValue(),
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -397,9 +400,10 @@ private fun EditStateArea(
                     onValidPropertyChanged = { property, _ ->
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copyWith(
-                                    indexProperty = property as IntProperty,
-                                ),
+                                operation =
+                                    operation.copyWith(
+                                        indexProperty = property as IntProperty,
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -410,9 +414,10 @@ private fun EditStateArea(
                     onInitializeProperty = {
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copyWith(
-                                    indexProperty = IntProperty.IntIntrinsicValue(),
-                                ),
+                                operation =
+                                    operation.copyWith(
+                                        indexProperty = IntProperty.IntIntrinsicValue(),
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -467,9 +472,10 @@ private fun EditStateArea(
                     onValidPropertyChanged = { property, _ ->
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copyWith(
-                                    indexProperty = property as IntProperty,
-                                ),
+                                operation =
+                                    operation.copyWith(
+                                        indexProperty = property as IntProperty,
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -480,9 +486,10 @@ private fun EditStateArea(
                     onInitializeProperty = {
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copyWith(
-                                    indexProperty = IntProperty.IntIntrinsicValue(),
-                                ),
+                                operation =
+                                    operation.copyWith(
+                                        indexProperty = IntProperty.IntIntrinsicValue(),
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -532,9 +539,10 @@ private fun StateOperationEditor(
         onInitializeProperty = {
             action.setValueToStates[indexInAction] =
                 setValueToState.copy(
-                    operation = operation.copyWith(
-                        readProperty = acceptableType.defaultValue(),
-                    ),
+                    operation =
+                        operation.copyWith(
+                            readProperty = acceptableType.defaultValue(),
+                        ),
                 )
             onActionUpdated(action)
         },
@@ -558,9 +566,10 @@ private fun StateOperationEditorForCustomDataType(
     onActionUpdated: (Action) -> Unit,
 ) {
     check(acceptableType is ComposeFlowType.CustomDataType)
-    val dataType = acceptableType.dataTypeId.let { dataTypeId ->
-        project.findDataTypeOrThrow(dataTypeId)
-    }
+    val dataType =
+        acceptableType.dataTypeId.let { dataTypeId ->
+            project.findDataTypeOrThrow(dataTypeId)
+        }
 
     Column {
         when (operation) {
@@ -572,9 +581,10 @@ private fun StateOperationEditorForCustomDataType(
                     onDataFieldUpdatePropertiesUpdated = {
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copy(
-                                    dataFieldUpdateProperties = it.toMutableList()
-                                )
+                                operation =
+                                    operation.copy(
+                                        dataFieldUpdateProperties = it.toMutableList(),
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -591,9 +601,10 @@ private fun StateOperationEditorForCustomDataType(
                     onDataFieldUpdatePropertiesUpdated = {
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copy(
-                                    dataFieldUpdateProperties = it.toMutableList()
-                                )
+                                operation =
+                                    operation.copy(
+                                        dataFieldUpdateProperties = it.toMutableList(),
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -610,9 +621,10 @@ private fun StateOperationEditorForCustomDataType(
                     onDataFieldUpdatePropertiesUpdated = {
                         action.setValueToStates[indexInAction] =
                             setValueToState.copy(
-                                operation = operation.copy(
-                                    dataFieldUpdateProperties = it.toMutableList()
-                                )
+                                operation =
+                                    operation.copy(
+                                        dataFieldUpdateProperties = it.toMutableList(),
+                                    ),
                             )
                         onActionUpdated(action)
                     },
@@ -643,25 +655,26 @@ fun EditUpdatePropertiesForDataType(
         val fieldUpdateProperties = dataFieldUpdateProperties[fieldIndex]
 
         Column(
-            modifier = Modifier
-                .padding(start = 8.dp, end = 8.dp)
-                .hoverOverlay(
-                    overlayColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.9f),
-                    clipRadius = 8.dp,
-                ),
+            modifier =
+                Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .hoverOverlay(
+                        overlayColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.9f),
+                        clipRadius = 8.dp,
+                    ),
         ) {
             Row {
                 Text(
                     text = dataField.variableName,
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier.padding(4.dp),
                 )
                 Text(
                     text = dataField.fieldType.type().displayName(project),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.tertiary,
-                    modifier = Modifier.padding(4.dp)
+                    modifier = Modifier.padding(4.dp),
                 )
             }
             when (dataField.fieldType) {
@@ -680,7 +693,7 @@ fun EditUpdatePropertiesForDataType(
                                                 fieldUpdateType = item,
                                             ),
                                         )
-                                    }
+                                    },
                                 )
                             },
                             selectedItem = fieldUpdateType,
@@ -702,26 +715,30 @@ fun EditUpdatePropertiesForDataType(
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
                                                     assignableProperty = property,
                                                     fieldUpdateType = fieldUpdateType,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 onInitializeProperty = {
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
-                                                    assignableProperty = dataField.fieldType.type()
-                                                        .defaultValue(),
-                                                )
+                                                    assignableProperty =
+                                                        dataField.fieldType
+                                                            .type()
+                                                            .defaultValue(),
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 label = dataField.variableName,
@@ -739,11 +756,12 @@ fun EditUpdatePropertiesForDataType(
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
-                                            fieldIndex, fieldUpdateProperties.copy(
+                                            fieldIndex,
+                                            fieldUpdateProperties.copy(
                                                 fieldUpdateType = item,
-                                            )
+                                            ),
                                         )
-                                    }
+                                    },
                                 )
                             },
                             selectedItem = fieldUpdateType,
@@ -763,26 +781,30 @@ fun EditUpdatePropertiesForDataType(
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
                                                     assignableProperty = property,
                                                     fieldUpdateType = fieldUpdateType,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 onInitializeProperty = {
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
-                                                    assignableProperty = dataField.fieldType.type()
-                                                        .defaultValue(),
-                                                )
+                                                    assignableProperty =
+                                                        dataField.fieldType
+                                                            .type()
+                                                            .defaultValue(),
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 validateInput = IntValidator()::validate,
@@ -801,11 +823,12 @@ fun EditUpdatePropertiesForDataType(
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
-                                            fieldIndex, fieldUpdateProperties.copy(
+                                            fieldIndex,
+                                            fieldUpdateProperties.copy(
                                                 fieldUpdateType = item,
-                                            )
+                                            ),
                                         )
-                                    }
+                                    },
                                 )
                             },
                             selectedItem = fieldUpdateType,
@@ -825,26 +848,30 @@ fun EditUpdatePropertiesForDataType(
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
                                                     assignableProperty = property,
                                                     fieldUpdateType = fieldUpdateType,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 onInitializeProperty = {
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
-                                                    assignableProperty = dataField.fieldType.type()
-                                                        .defaultValue(),
-                                                )
+                                                    assignableProperty =
+                                                        dataField.fieldType
+                                                            .type()
+                                                            .defaultValue(),
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 validateInput = FloatValidator()::validate,
@@ -863,11 +890,12 @@ fun EditUpdatePropertiesForDataType(
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
-                                            fieldIndex, fieldUpdateProperties.copy(
+                                            fieldIndex,
+                                            fieldUpdateProperties.copy(
                                                 fieldUpdateType = item,
-                                            )
+                                            ),
                                         )
-                                    }
+                                    },
                                 )
                             },
                             selectedItem = fieldUpdateType,
@@ -887,26 +915,30 @@ fun EditUpdatePropertiesForDataType(
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
                                                     assignableProperty = property,
                                                     fieldUpdateType = fieldUpdateType,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 onInitializeProperty = {
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
-                                                    assignableProperty = dataField.fieldType.type()
-                                                        .defaultValue(),
-                                                )
+                                                    assignableProperty =
+                                                        dataField.fieldType
+                                                            .type()
+                                                            .defaultValue(),
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 label = dataField.variableName,
@@ -924,11 +956,12 @@ fun EditUpdatePropertiesForDataType(
                                 onDataFieldUpdatePropertiesUpdated(
                                     dataFieldUpdateProperties.toMutableList().apply {
                                         set(
-                                            fieldIndex, fieldUpdateProperties.copy(
+                                            fieldIndex,
+                                            fieldUpdateProperties.copy(
                                                 fieldUpdateType = item,
-                                            )
+                                            ),
                                         )
-                                    }
+                                    },
                                 )
                             },
                             selectedItem = fieldUpdateType,
@@ -948,26 +981,30 @@ fun EditUpdatePropertiesForDataType(
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
                                                     assignableProperty = property,
                                                     fieldUpdateType = fieldUpdateType,
-                                                )
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 onInitializeProperty = {
                                     onDataFieldUpdatePropertiesUpdated(
                                         dataFieldUpdateProperties.toMutableList().apply {
                                             set(
-                                                fieldIndex, fieldUpdateProperties.copy(
+                                                fieldIndex,
+                                                fieldUpdateProperties.copy(
                                                     dataFieldId = fieldId,
-                                                    assignableProperty = dataField.fieldType.type()
-                                                        .defaultValue(),
-                                                )
+                                                    assignableProperty =
+                                                        dataField.fieldType
+                                                            .type()
+                                                            .defaultValue(),
+                                                ),
                                             )
-                                        }
+                                        },
                                     )
                                 },
                                 label = dataField.variableName,
@@ -1005,7 +1042,7 @@ fun EditUpdatePropertiesForDataType(
                     dataFieldUpdateProperties.toMutableList().apply {
                         clear()
                         addAll(it)
-                    }
+                    },
                 )
             },
             onDismissRequest = closeDialog,
@@ -1026,19 +1063,21 @@ fun AddFieldToSetDialog(
     ) {
         Surface(modifier = Modifier.size(480.dp)) {
             Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .verticalScroll(state = rememberScrollState()),
+                modifier =
+                    Modifier
+                        .padding(16.dp)
+                        .verticalScroll(state = rememberScrollState()),
             ) {
                 Text(
                     text = stringResource(Res.string.select_fields_to_update),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
-                val editedSelectedFieldIds = remember {
-                    mutableStateListEqualsOverrideOf<DataFieldUpdateProperty>()
-                        .apply { addAll(initialFieldIdToReadProperties) }
-                }
+                val editedSelectedFieldIds =
+                    remember {
+                        mutableStateListEqualsOverrideOf<DataFieldUpdateProperty>()
+                            .apply { addAll(initialFieldIdToReadProperties) }
+                    }
 
                 fun addDataFieldIfNotPresentInEdit(dataField: DataField) {
                     editedSelectedFieldIds.add(
@@ -1075,7 +1114,9 @@ fun AddFieldToSetDialog(
                 }
                 dataType.fields.forEach { dataField ->
                     val selectedModifier =
-                        if (dataField.id in editedSelectedFieldIds.toList()
+                        if (dataField.id in
+                            editedSelectedFieldIds
+                                .toList()
                                 .map { it.dataFieldId }
                         ) {
                             Modifier
@@ -1083,8 +1124,7 @@ fun AddFieldToSetDialog(
                                 .background(
                                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
+                                ).padding(8.dp)
                         } else {
                             Modifier.padding(start = 16.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                         }
@@ -1092,8 +1132,10 @@ fun AddFieldToSetDialog(
                         project = project,
                         fieldName = dataField.variableName,
                         type = dataField.fieldType.type(),
-                        modifier = Modifier.padding(top = 4.dp)
-                            .then(selectedModifier),
+                        modifier =
+                            Modifier
+                                .padding(top = 4.dp)
+                                .then(selectedModifier),
                         onClick = {
                             toggleDataFieldInEdit(dataField)
                         },
@@ -1143,25 +1185,27 @@ private fun AddStateToSetDialog(
                 var selectedState by remember { mutableStateOf<ReadableState?>(null) }
                 var treeInitiallyExpanded by remember { mutableStateOf(false) }
 
-                val statesMap = project
-                    .screenHolder
-                    .currentEditable()
-                    .getStateResults(project)
-                    .groupBy { it.first }
-                val tree = buildTree {
-                    statesMap.forEach { entry ->
-                        if (entry.value.isNotEmpty()) {
-                            addNode(entry.value.first(), id = entry.key) {
-                                entry.value.forEach { state ->
-                                    val writeState = state.second
-                                    if (writeState is WriteableState && writeState.userWritable) {
-                                        addLeaf(state, id = state.second.id)
+                val statesMap =
+                    project
+                        .screenHolder
+                        .currentEditable()
+                        .getStateResults(project)
+                        .groupBy { it.first }
+                val tree =
+                    buildTree {
+                        statesMap.forEach { entry ->
+                            if (entry.value.isNotEmpty()) {
+                                addNode(entry.value.first(), id = entry.key) {
+                                    entry.value.forEach { state ->
+                                        val writeState = state.second
+                                        if (writeState is WriteableState && writeState.userWritable) {
+                                            addLeaf(state, id = state.second.id)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
-                }
                 val lazyListState = rememberLazyListState()
                 val selectableLazyListState = remember { SelectableLazyListState(lazyListState) }
                 val treeState = rememberTreeState(selectableLazyListState = selectableLazyListState)
@@ -1188,12 +1232,13 @@ private fun AddStateToSetDialog(
                             }
                         }
                     },
-                    modifier = Modifier.onGloballyPositioned {
-                        if (!treeInitiallyExpanded) {
-                            treeState.openNodes(tree.roots.map { it.id })
-                            treeInitiallyExpanded = true
-                        }
-                    },
+                    modifier =
+                        Modifier.onGloballyPositioned {
+                            if (!treeInitiallyExpanded) {
+                                treeState.openNodes(tree.roots.map { it.id })
+                                treeInitiallyExpanded = true
+                            }
+                        },
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         when (it.depth) {

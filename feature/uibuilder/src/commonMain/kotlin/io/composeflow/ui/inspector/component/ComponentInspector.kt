@@ -42,9 +42,10 @@ fun ComponentInspector(
                 parameter = parameter,
                 initialProperty = initialProperty,
                 onValidPropertyChanged = { newProperty, lazyListSource ->
-                    val newMap = trait.paramsMap.copyAsMutableStateMap().apply {
-                        putAll(trait.paramsMap)
-                    }
+                    val newMap =
+                        trait.paramsMap.copyAsMutableStateMap().apply {
+                            putAll(trait.paramsMap)
+                        }
                     newMap[parameter.id] = newProperty
                     composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
                         node,
@@ -53,16 +54,17 @@ fun ComponentInspector(
                     )
                 },
                 onInitializeProperty = {
-                    val newMap = trait.paramsMap.copyAsMutableStateMap().apply {
-                        putAll(trait.paramsMap)
-                    }
+                    val newMap =
+                        trait.paramsMap.copyAsMutableStateMap().apply {
+                            putAll(trait.paramsMap)
+                        }
                     newMap.remove(parameter.id)
                     composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
                         node,
                         trait.copy(paramsMap = newMap),
                         null,
                     )
-                }
+                },
             )
         }
         TextButton(onClick = {

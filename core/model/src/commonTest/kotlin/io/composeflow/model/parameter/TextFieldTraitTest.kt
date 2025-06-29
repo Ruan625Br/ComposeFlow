@@ -16,18 +16,19 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class TextFieldTraitTest {
-
     @Test
     fun toComposeCode_color() {
-        val textFieldParams = TextFieldTrait(
-            value = StringProperty.StringIntrinsicValue("test"),
-        )
+        val textFieldParams =
+            TextFieldTrait(
+                value = StringProperty.StringIntrinsicValue("test"),
+            )
 
         val code =
             textFieldParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -43,16 +44,18 @@ class TextFieldTraitTest {
 
     @Test
     fun toComposeCode_shape() {
-        val textFieldParams = TextFieldTrait(
-            value = StringProperty.StringIntrinsicValue("test"),
-            shapeWrapper = ShapeWrapper.RoundedCorner(32.dp),
-        )
+        val textFieldParams =
+            TextFieldTrait(
+                value = StringProperty.StringIntrinsicValue("test"),
+                shapeWrapper = ShapeWrapper.RoundedCorner(32.dp),
+            )
 
         val code =
             textFieldParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -69,16 +72,18 @@ class TextFieldTraitTest {
 
     @Test
     fun toComposeCode_transparentIndicator() {
-        val textFieldParams = TextFieldTrait(
-            value = StringProperty.StringIntrinsicValue("test"),
-            transparentIndicator = true,
-        )
+        val textFieldParams =
+            TextFieldTrait(
+                value = StringProperty.StringIntrinsicValue("test"),
+                transparentIndicator = true,
+            )
 
         val code =
             textFieldParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -100,17 +105,19 @@ class TextFieldTraitTest {
 
     @Test
     fun toComposeCode_outlinedTextFieldType() {
-        val textFieldParams = TextFieldTrait(
-            value = StringProperty.StringIntrinsicValue("test"),
-            transparentIndicator = true,
-            textFieldType = TextFieldType.Outlined
-        )
+        val textFieldParams =
+            TextFieldTrait(
+                value = StringProperty.StringIntrinsicValue("test"),
+                transparentIndicator = true,
+                textFieldType = TextFieldType.Outlined,
+            )
 
         val code =
             textFieldParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -126,11 +133,12 @@ class TextFieldTraitTest {
 
     @Test
     fun serialize_deserialize() {
-        val textFieldParams = TextFieldTrait(
-            value = StringProperty.StringIntrinsicValue("textField"),
-            trailingIcon = Outlined.Icecream,
-            shapeWrapper = ShapeWrapper.Circle,
-        )
+        val textFieldParams =
+            TextFieldTrait(
+                value = StringProperty.StringIntrinsicValue("textField"),
+                trailingIcon = Outlined.Icecream,
+                shapeWrapper = ShapeWrapper.Circle,
+            )
 
         val encoded = yamlSerializer.encodeToString(textFieldParams)
         val decoded = yamlSerializer.decodeFromString<TextFieldTrait>(encoded)

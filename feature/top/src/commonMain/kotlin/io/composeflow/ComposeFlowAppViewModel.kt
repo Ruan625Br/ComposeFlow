@@ -16,24 +16,24 @@ class ComposeFlowAppViewModel(
     private val authRepository: AuthRepository = AuthRepository(),
     private val projectSaver: ProjectSaver = LocalFirstProjectSaver(),
 ) : ViewModel() {
-
     @OptIn(ExperimentalCoroutinesApi::class)
     val loginResultUiState: StateFlow<LoginResultUiState> =
-        authRepository.firebaseIdToken.mapLatest {
-            when (it) {
-                null -> {
-                    LoginResultUiState.NotStarted
-                }
+        authRepository.firebaseIdToken
+            .mapLatest {
+                when (it) {
+                    null -> {
+                        LoginResultUiState.NotStarted
+                    }
 
-                else -> {
-                    LoginResultUiState.Success(it)
+                    else -> {
+                        LoginResultUiState.Success(it)
+                    }
                 }
-            }
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = LoginResultUiState.Loading,
-        )
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = LoginResultUiState.Loading,
+            )
 
     fun onGoogleSignClicked() {
         authRepository.startGoogleSignInFlow()
@@ -47,6 +47,10 @@ class ComposeFlowAppViewModel(
 
 sealed interface LoginResultUiState {
     data object NotStarted : LoginResultUiState
+
     data object Loading : LoginResultUiState
-    data class Success(val firebaseIdToken: FirebaseIdToken) : LoginResultUiState
+
+    data class Success(
+        val firebaseIdToken: FirebaseIdToken,
+    ) : LoginResultUiState
 }

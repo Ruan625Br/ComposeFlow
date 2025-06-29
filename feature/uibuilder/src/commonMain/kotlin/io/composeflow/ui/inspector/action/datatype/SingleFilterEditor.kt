@@ -59,14 +59,15 @@ fun SingleFilterEditor(
     modifier: Modifier = Modifier,
 ) {
     var overlayVisible by remember { mutableStateOf(false) }
-    val overlayModifier = if (overlayVisible) {
-        Modifier.background(
-            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-            shape = RoundedCornerShape(8.dp),
-        )
-    } else {
-        Modifier
-    }
+    val overlayModifier =
+        if (overlayVisible) {
+            Modifier.background(
+                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                shape = RoundedCornerShape(8.dp),
+            )
+        } else {
+            Modifier
+        }
     var menuOpened by remember { mutableStateOf(false) }
     if (menuOpened) {
         CursorDropdownMenu(
@@ -128,19 +129,17 @@ fun SingleFilterEditor(
     }
 
     Box(
-        modifier = modifier
-            .dashedBorder(
-                strokeWidth = 0.5.dp,
-                color = MaterialTheme.colorScheme.outline,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .onPointerEvent(PointerEventType.Enter) {
-                overlayVisible = true
-            }
-            .onPointerEvent(PointerEventType.Exit) {
-                overlayVisible = false
-            }
-            .then(overlayModifier),
+        modifier =
+            modifier
+                .dashedBorder(
+                    strokeWidth = 0.5.dp,
+                    color = MaterialTheme.colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp),
+                ).onPointerEvent(PointerEventType.Enter) {
+                    overlayVisible = true
+                }.onPointerEvent(PointerEventType.Exit) {
+                    overlayVisible = false
+                }.then(overlayModifier),
     ) {
         if (overlayVisible) {
             ComposeFlowIconButton(
@@ -157,15 +156,17 @@ fun SingleFilterEditor(
         }
 
         Column(modifier = Modifier.padding(8.dp)) {
-            val selectedItem = when (val fieldType = filter.filterFieldType) {
-                is FilterFieldType.DataField -> {
-                    dataType.findDataFieldOrNull(fieldType.dataFieldId)
-                }
+            val selectedItem =
+                when (val fieldType = filter.filterFieldType) {
+                    is FilterFieldType.DataField -> {
+                        dataType.findDataFieldOrNull(fieldType.dataFieldId)
+                    }
 
-                is FilterFieldType.DocumentId -> DocumentIdDropdownItem(
-                    fieldType.firestoreCollectionId ?: firestoreCollection.id
-                )
-            }
+                    is FilterFieldType.DocumentId ->
+                        DocumentIdDropdownItem(
+                            fieldType.firestoreCollectionId ?: firestoreCollection.id,
+                        )
+                }
 
             BasicDropdownPropertyEditor(
                 project = project,
@@ -173,37 +174,41 @@ fun SingleFilterEditor(
                 onValueChanged = { _, item ->
                     val itemChanged = selectedItem != item
 
-                    val newFilter = if (item is DocumentIdDropdownItem) {
-                        if (itemChanged) {
-                            filter.copy(
-                                filterFieldType = FilterFieldType.DocumentId(item.firestoreCollectionId),
-                                property = DocumentIdProperty.EmptyDocumentId
-                            )
-                        } else {
-                            filter.copy(filterFieldType = FilterFieldType.DocumentId(item.firestoreCollectionId))
-                        }
-                    } else if (item is DataField) {
-                        if (itemChanged) {
-                            val dataField = dataType.findDataFieldOrNull(item.id)
-                            filter.copy(
-                                filterFieldType = FilterFieldType.DataField(
-                                    dataTypeId = dataType.id,
-                                    dataFieldId = item.id
-                                ),
-                                property = dataField?.fieldType?.type()?.defaultValue()
-                                    ?: DocumentIdProperty.EmptyDocumentId
-                            )
-                        } else {
-                            filter.copy(
-                                filterFieldType = FilterFieldType.DataField(
-                                    dataTypeId = dataType.id,
-                                    dataFieldId = item.id
+                    val newFilter =
+                        if (item is DocumentIdDropdownItem) {
+                            if (itemChanged) {
+                                filter.copy(
+                                    filterFieldType = FilterFieldType.DocumentId(item.firestoreCollectionId),
+                                    property = DocumentIdProperty.EmptyDocumentId,
                                 )
-                            )
+                            } else {
+                                filter.copy(filterFieldType = FilterFieldType.DocumentId(item.firestoreCollectionId))
+                            }
+                        } else if (item is DataField) {
+                            if (itemChanged) {
+                                val dataField = dataType.findDataFieldOrNull(item.id)
+                                filter.copy(
+                                    filterFieldType =
+                                        FilterFieldType.DataField(
+                                            dataTypeId = dataType.id,
+                                            dataFieldId = item.id,
+                                        ),
+                                    property =
+                                        dataField?.fieldType?.type()?.defaultValue()
+                                            ?: DocumentIdProperty.EmptyDocumentId,
+                                )
+                            } else {
+                                filter.copy(
+                                    filterFieldType =
+                                        FilterFieldType.DataField(
+                                            dataTypeId = dataType.id,
+                                            dataFieldId = item.id,
+                                        ),
+                                )
+                            }
+                        } else {
+                            throw UnsupportedOperationException("Invalid data field")
                         }
-                    } else {
-                        throw UnsupportedOperationException("Invalid data field")
-                    }
 
                     onFilterChange(newFilter)
                 },
@@ -212,15 +217,15 @@ fun SingleFilterEditor(
                 displayText = {
                     DropdownDisplayText(
                         project = project,
-                        it
+                        it,
                     )
                 },
                 dropDownMenuText = {
                     DropdownDisplayText(
                         project = project,
-                        it
+                        it,
                     )
-                }
+                },
             )
 
             BasicDropdownPropertyEditor(
@@ -235,10 +240,10 @@ fun SingleFilterEditor(
 
             when (val fieldType = filter.filterFieldType) {
                 is FilterFieldType.DocumentId -> {
-                    DocumentIdProperty.FirestoreDocumentIdProperty(
-                        fieldType.firestoreCollectionId ?: firestoreCollection.id
-                    )
-                        .Editor(
+                    DocumentIdProperty
+                        .FirestoreDocumentIdProperty(
+                            fieldType.firestoreCollectionId ?: firestoreCollection.id,
+                        ).Editor(
                             project = project,
                             node = composeNode,
                             initialProperty = filter.property,
@@ -253,7 +258,7 @@ fun SingleFilterEditor(
                             modifier = Modifier,
                             destinationStateId = null,
                             validateInput = null,
-                            editable = true
+                            editable = true,
                         )
                 }
 
@@ -270,8 +275,8 @@ fun SingleFilterEditor(
                             onInitializeProperty = {
                                 onFilterChange(
                                     filter.copy(
-                                        property = it.fieldType.type().defaultValue()
-                                    )
+                                        property = it.fieldType.type().defaultValue(),
+                                    ),
                                 )
                             },
                             functionScopeProperties = emptyList(),
@@ -304,7 +309,7 @@ private fun DropdownDisplayText(
                 item.variableName,
                 color = MaterialTheme.colorScheme.onSurface,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 8.dp),
             )
             Text(
                 item.fieldType.type().displayName(project),

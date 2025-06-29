@@ -22,9 +22,10 @@ fun NonEditableTextProperty(
             text = label,
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .padding(end = 16.dp)
-                .width(labelWidth),
+            modifier =
+                Modifier
+                    .padding(end = 16.dp)
+                    .width(labelWidth),
         )
 
         Text(

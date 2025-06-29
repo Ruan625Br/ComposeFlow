@@ -14,29 +14,27 @@ private class IntValidatorInternal(
     private val maxValue: Int = Int.MAX_VALUE,
     private val minValue: Int = Int.MIN_VALUE,
 ) : InputValidatorInternal {
-
-    override fun validate(
-        input: String,
-    ) = runCatching {
-        if (!allowEmpty && input.isEmpty()) {
-            ValidateResult.Failure(MUST_NOT_BE_EMPTY)
-        } else {
-            val value = input.toIntOrNull()
-            if (value == null) {
-                ValidateResult.Failure(INVALID_FORMAT)
+    override fun validate(input: String) =
+        runCatching {
+            if (!allowEmpty && input.isEmpty()) {
+                ValidateResult.Failure(MUST_NOT_BE_EMPTY)
             } else {
-                if (!allowLessThanZero && value <= 0) {
-                    ValidateResult.Failure(MUST_BE_GREATER_THAN_ZERO)
-                } else if (value > maxValue) {
-                    ValidateResult.Failure(String.format(MUST_BE_SMALLER_THAN, maxValue))
-                } else if (value < minValue) {
-                    ValidateResult.Failure(String.format(MUST_BE_GREATER_THAN, minValue))
+                val value = input.toIntOrNull()
+                if (value == null) {
+                    ValidateResult.Failure(INVALID_FORMAT)
                 } else {
-                    ValidateResult.Success
+                    if (!allowLessThanZero && value <= 0) {
+                        ValidateResult.Failure(MUST_BE_GREATER_THAN_ZERO)
+                    } else if (value > maxValue) {
+                        ValidateResult.Failure(String.format(MUST_BE_SMALLER_THAN, maxValue))
+                    } else if (value < minValue) {
+                        ValidateResult.Failure(String.format(MUST_BE_GREATER_THAN, minValue))
+                    } else {
+                        ValidateResult.Success
+                    }
                 }
             }
         }
-    }
 }
 
 class IntValidator(
@@ -46,30 +44,33 @@ class IntValidator(
     minValue: Int = Int.MIN_VALUE,
     private val delegate: InputValidatorImpl =
         InputValidatorImpl(
-            delegate = IntValidatorInternal(
-                allowEmpty = allowEmpty,
-                allowLessThanZero = allowLessThanZero,
-                maxValue = maxValue,
-                minValue = minValue,
-            ),
+            delegate =
+                IntValidatorInternal(
+                    allowEmpty = allowEmpty,
+                    allowLessThanZero = allowLessThanZero,
+                    maxValue = maxValue,
+                    minValue = minValue,
+                ),
         ),
 ) : InputValidator by delegate
 
 class NotEmptyIntValidator(
     private val delegate: InputValidatorImpl =
         InputValidatorImpl(
-            delegate = IntValidatorInternal(
-                allowEmpty = false,
-            ),
+            delegate =
+                IntValidatorInternal(
+                    allowEmpty = false,
+                ),
         ),
 ) : InputValidator by delegate
 
 class NotEmptyNotLessThanZeroIntValidator(
     private val delegate: InputValidatorImpl =
         InputValidatorImpl(
-            delegate = IntValidatorInternal(
-                allowEmpty = false,
-                allowLessThanZero = false,
-            ),
+            delegate =
+                IntValidatorInternal(
+                    allowEmpty = false,
+                    allowLessThanZero = false,
+                ),
         ),
 ) : InputValidator by delegate

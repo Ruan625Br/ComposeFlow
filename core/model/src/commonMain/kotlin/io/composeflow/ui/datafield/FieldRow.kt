@@ -23,16 +23,18 @@ fun FieldRow(
     enabled: Boolean = true,
     displayNameListAware: Boolean = false,
 ) {
-    val enabledModifier = if (enabled) {
-        Modifier
-    } else {
-        Modifier.alpha(0.4f)
-    }
+    val enabledModifier =
+        if (enabled) {
+            Modifier
+        } else {
+            Modifier.alpha(0.4f)
+        }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .then(enabledModifier)
-            .clickable { onClick() },
+        modifier =
+            modifier
+                .then(enabledModifier)
+                .clickable { onClick() },
     ) {
         Text(
             fieldName,

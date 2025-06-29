@@ -51,9 +51,10 @@ fun OpenDateOrTimePickerContent(
     Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                showMessagingActionsOpened = !showMessagingActionsOpened
-            },
+            modifier =
+                Modifier.clickable {
+                    showMessagingActionsOpened = !showMessagingActionsOpened
+                },
         ) {
             Text(
                 text = "Open date/time picker",
@@ -72,25 +73,25 @@ fun OpenDateOrTimePickerContent(
             DateOrTimePicker.entries().forEach { dateOrTimePickerAction ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                dateOrTimePickerAction
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    dateOrTimePickerAction,
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is ShowModal &&
                                         actionInEdit.name == dateOrTimePickerAction.name
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = dateOrTimePickerAction.name,
@@ -130,10 +131,11 @@ fun OpenDatePickerContent(
                 onEditAction(initialAction)
             },
             validateInput = IntValidator(
-                maxValue = when (val maxYear = initialAction.maxSelectableYear.value) {
-                    is IntProperty.IntIntrinsicValue -> maxYear.value
-                    else -> Integer.MAX_VALUE
-                }
+                maxValue =
+                    when (val maxYear = initialAction.maxSelectableYear.value) {
+                        is IntProperty.IntIntrinsicValue -> maxYear.value
+                        else -> Integer.MAX_VALUE
+                    },
             )::validate,
             leadingIcon = {
                 ComposeFlowIcon(
@@ -159,10 +161,11 @@ fun OpenDatePickerContent(
                 onEditAction(initialAction)
             },
             validateInput = IntValidator(
-                minValue = when (val minYear = initialAction.minSelectableYear.value) {
-                    is IntProperty.IntIntrinsicValue -> minYear.value
-                    else -> Integer.MIN_VALUE
-                }
+                minValue =
+                    when (val minYear = initialAction.minSelectableYear.value) {
+                        is IntProperty.IntIntrinsicValue -> minYear.value
+                        else -> Integer.MIN_VALUE
+                    },
             )::validate,
             leadingIcon = {
                 ComposeFlowIcon(
@@ -204,7 +207,7 @@ fun OpenDatePickerContent(
                     onEditAction(initialAction)
                 },
                 enabled = false,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }

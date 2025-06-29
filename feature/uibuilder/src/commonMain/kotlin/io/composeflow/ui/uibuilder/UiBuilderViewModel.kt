@@ -78,16 +78,16 @@ class UiBuilderViewModel(
     private val uiBuilderOperator: UiBuilderOperator = UiBuilderOperator(),
     private val onUpdateProject: (Project) -> Unit,
 ) : ViewModel() {
-
     // Project that is updated when the the project that is being edited.
     // This may conflicts with the [project] field in this ViewModel, but to detect the real time
     // updates when the Project.ScreenHolder.pending* fields, having this field.
     // This may need to be commonized with the [project] field
-    val editingProject = projectRepository.editingProject.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = Project(),
-    )
+    val editingProject =
+        projectRepository.editingProject.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = Project(),
+        )
 
     var draggedNode by mutableStateOf<ComposeNode?>(null)
         private set
@@ -95,38 +95,41 @@ class UiBuilderViewModel(
     var copiedNode by mutableStateOf<ComposeNode?>(null)
         private set
 
-    private val appDarkThemeSetting = settingsRepository.appDarkThemeSetting.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = false,
-    )
+    private val appDarkThemeSetting =
+        settingsRepository.appDarkThemeSetting.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false,
+        )
 
-    private val composeBuilderSettings = settingsRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ComposeBuilderSettings(),
-    )
+    private val composeBuilderSettings =
+        settingsRepository.settings.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ComposeBuilderSettings(),
+        )
 
     private val canvasTopToolbarUiState: StateFlow<CanvasTopToolbarUiState> =
         viewModelScope.buildUiState(
             appDarkThemeSetting,
-            composeBuilderSettings
+            composeBuilderSettings,
         ) { appDarkThemeSetting, composeBuilderSettings ->
             CanvasTopToolbarUiState(
                 isDarkMode = appDarkThemeSetting,
                 onDarkModeChanged = { isDarkMode ->
                     settingsRepository.saveAppDarkTheme(
-                        darkThemeSetting = if (isDarkMode) {
-                            DarkThemeSetting.Dark
-                        } else {
-                            DarkThemeSetting.Light
-                        },
+                        darkThemeSetting =
+                            if (isDarkMode) {
+                                DarkThemeSetting.Dark
+                            } else {
+                                DarkThemeSetting.Light
+                            },
                     )
                 },
                 showBorders = composeBuilderSettings.showBordersInCanvas,
                 onShowBordersChanged = {
                     settingsRepository.saveShowBorders(it)
-                }
+                },
             )
         }
 
@@ -167,13 +170,14 @@ class UiBuilderViewModel(
         val maximumAvailableWidth = uiBuilderCanvasSizeDp.width
         val maximumAvailableHeight = uiBuilderCanvasSizeDp.height
 
-        val scale = calculateScale(
-            formFactor = formFactor,
-            Size(
-                maximumAvailableWidth.toFloat(),
-                maximumAvailableHeight.toFloat()
+        val scale =
+            calculateScale(
+                formFactor = formFactor,
+                Size(
+                    maximumAvailableWidth.toFloat(),
+                    maximumAvailableHeight.toFloat(),
+                ),
             )
-        )
         zoomableContainerStateHolder.onToolbarZoomScaleChanged(scale)
     }
 
@@ -193,7 +197,10 @@ class UiBuilderViewModel(
         inspectorTabWidth = newWidth
     }
 
-    fun onDraggedPositionUpdated(draggedPosition: Offset, paletteDraggable: PaletteDraggable) {
+    fun onDraggedPositionUpdated(
+        draggedPosition: Offset,
+        paletteDraggable: PaletteDraggable,
+    ) {
         val root = project.screenHolder.findDeepestChildAtOrNull(draggedPosition)?.findRoot()
         project.screenHolder.currentEditable().clearIsDraggedOnBoundsRecursively()
         project.screenHolder.currentEditable().clearIndexToBeDroppedRecursively()
@@ -218,8 +225,8 @@ class UiBuilderViewModel(
         }
     }
 
-    fun onKeyPressed(keyEvent: KeyEvent): EventResult {
-        return if (keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace) {
+    fun onKeyPressed(keyEvent: KeyEvent): EventResult =
+        if (keyEvent.key == Key.Delete || keyEvent.key == Key.Backspace) {
             onDeleteKey()
         } else if (keyEvent.key == Key.Z && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
             onUndo()
@@ -232,7 +239,6 @@ class UiBuilderViewModel(
         } else {
             EventResult(consumed = false)
         }
-    }
 
     fun onDeleteKey(): EventResult {
         val focused = project.screenHolder.currentEditable().findFocusedNodeOrNull()
@@ -246,15 +252,18 @@ class UiBuilderViewModel(
         return focused?.let { focusedNode ->
             recordOperation(
                 project = project,
-                userOperation = UserOperation.ComposableDeleted(
-                    node = focusedNode.restoreInstance(
-                        sameId = true,
+                userOperation =
+                    UserOperation.ComposableDeleted(
+                        node =
+                            focusedNode.restoreInstance(
+                                sameId = true,
+                            ),
                     ),
-                ),
             )
 
             uiBuilderOperator.onRemoveComposeNode(
-                project, focusedNode.id,
+                project,
+                focusedNode.id,
             )
 
             saveProject(project)
@@ -275,10 +284,11 @@ class UiBuilderViewModel(
     fun onRedo(): EventResult {
         val undoableOperation = OperationHistory.redo(project)
         undoableOperation?.let {
-            val restored = project.copy(
-                screenHolder =
-                    Project.deserializeFromString(undoableOperation.serializedProject).screenHolder,
-            )
+            val restored =
+                project.copy(
+                    screenHolder =
+                        Project.deserializeFromString(undoableOperation.serializedProject).screenHolder,
+                )
             onUpdateProject(restored)
             saveProject(restored)
         }
@@ -299,19 +309,22 @@ class UiBuilderViewModel(
     fun onPaste(): EventResult {
         val result = EventResult()
         copiedNode?.let { copied ->
-            val container = project.screenHolder.currentEditable()
-                .findFocusedNodeOrNull()
-                ?.findNearestContainerOrNull()
-                ?: project.screenHolder.currentRootNode()
+            val container =
+                project.screenHolder
+                    .currentEditable()
+                    .findFocusedNodeOrNull()
+                    ?.findNearestContainerOrNull()
+                    ?: project.screenHolder.currentRootNode()
 
             container.let {
                 val toBePasted = copied.restoreInstance(sameId = false)
 
                 if (TraitCategory.ScreenOnly in copied.trait.value.paletteCategories()) {
-                    val error = UiBuilderHelper.checkIfNodeCanBeAddedDueToScreenOnlyNode(
-                        currentEditable = project.screenHolder.currentEditable(),
-                        composeNode = copied,
-                    )
+                    val error =
+                        UiBuilderHelper.checkIfNodeCanBeAddedDueToScreenOnlyNode(
+                            currentEditable = project.screenHolder.currentEditable(),
+                            composeNode = copied,
+                        )
                     error?.let {
                         result.errorMessages.add(error)
                         return result
@@ -345,11 +358,12 @@ class UiBuilderViewModel(
         val dropTarget = rootNode?.findDeepestContainerAtOrNull(dropPosition)
         var eventResult = EventResult()
         dropTarget?.let {
-            eventResult = onAddComposeNodeToContainerNode(
-                containerNodeId = it.id,
-                composeNode = composeNode,
-                indexToDrop = it.indexToBeDropped.value,
-            )
+            eventResult =
+                onAddComposeNodeToContainerNode(
+                    containerNodeId = it.id,
+                    composeNode = composeNode,
+                    indexToDrop = it.indexToBeDropped.value,
+                )
         }
         return eventResult
     }
@@ -359,33 +373,41 @@ class UiBuilderViewModel(
         composeNode: ComposeNode,
         indexToDrop: Int,
     ): EventResult {
-        val result = uiBuilderOperator.onPreAddComposeNodeToContainerNode(
-            project, containerNodeId, composeNode
-        )
+        val result =
+            uiBuilderOperator.onPreAddComposeNodeToContainerNode(
+                project,
+                containerNodeId,
+                composeNode,
+            )
         return if (result.errorMessages.isNotEmpty()) {
             result
         } else {
             recordOperation(
                 project = project,
-                userOperation = UserOperation.ComposableDropped(
-                    node = composeNode.restoreInstance(
-                        sameId = true,
+                userOperation =
+                    UserOperation.ComposableDropped(
+                        node =
+                            composeNode.restoreInstance(
+                                sameId = true,
+                            ),
                     ),
-                ),
             )
 
             uiBuilderOperator.onAddComposeNodeToContainerNode(
                 project,
                 containerNodeId,
                 composeNode,
-                indexToDrop
+                indexToDrop,
             )
             saveProject(project)
             result
         }
     }
 
-    fun onNodeDropToPosition(dropPosition: Offset, node: ComposeNode): EventResult {
+    fun onNodeDropToPosition(
+        dropPosition: Offset,
+        node: ComposeNode,
+    ): EventResult {
         val deepestChild = project.screenHolder.findDeepestChildAtOrNull(dropPosition)
         val rootNode = deepestChild?.findRoot()
         val dropTarget = rootNode?.findDeepestContainerAtOrNull(dropPosition)
@@ -406,11 +428,13 @@ class UiBuilderViewModel(
             val operationNode = node.getOperationTargetNode(project)
             recordOperation(
                 project = project,
-                userOperation = UserOperation.ComposableMoved(
-                    node = operationNode.restoreInstance(
-                        sameId = true,
+                userOperation =
+                    UserOperation.ComposableMoved(
+                        node =
+                            operationNode.restoreInstance(
+                                sameId = true,
+                            ),
                     ),
-                ),
             )
 
             uiBuilderOperator.onMoveComposeNodeToContainer(
@@ -424,7 +448,10 @@ class UiBuilderViewModel(
         return result
     }
 
-    fun onBoundsInNodeUpdated(node: ComposeNode, boundsInWindow: Rect) {
+    fun onBoundsInNodeUpdated(
+        node: ComposeNode,
+        boundsInWindow: Rect,
+    ) {
         node.boundsInWindow.value = boundsInWindow
     }
 
@@ -440,7 +467,10 @@ class UiBuilderViewModel(
         project.screenHolder.updateHoveredNode(eventPosition)
     }
 
-    fun onHoveredStatusUpdated(node: ComposeNode, isHovered: Boolean) {
+    fun onHoveredStatusUpdated(
+        node: ComposeNode,
+        isHovered: Boolean,
+    ) {
         project.screenHolder.clearIsHovered()
         node.isHovered.value = isHovered
     }
@@ -450,52 +480,66 @@ class UiBuilderViewModel(
         node.setFocus()
     }
 
-    fun onModifierUpdatedAt(node: ComposeNode, index: Int, wrapper: ModifierWrapper) {
+    fun onModifierUpdatedAt(
+        node: ComposeNode,
+        index: Int,
+        wrapper: ModifierWrapper,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ModifierUpdated(
-                node = node.restoreInstance(sameId = true),
-                modifier = wrapper,
-            ),
+            userOperation =
+                UserOperation.ModifierUpdated(
+                    node = node.restoreInstance(sameId = true),
+                    modifier = wrapper,
+                ),
         )
 
         uiBuilderOperator.onUpdateModifier(
             project = project,
             composeNodeId = node.id,
             index = index,
-            modifier = wrapper
+            modifier = wrapper,
         )
         saveProject(project)
     }
 
-    fun onModifierRemovedAt(node: ComposeNode, index: Int) {
+    fun onModifierRemovedAt(
+        node: ComposeNode,
+        index: Int,
+    ) {
         val toBeRemoved = node.modifierList[index]
         recordOperation(
             project = project,
-            userOperation = UserOperation.ModifierDeleted(
-                node = node.restoreInstance(sameId = true),
-                modifier = toBeRemoved,
-            ),
+            userOperation =
+                UserOperation.ModifierDeleted(
+                    node = node.restoreInstance(sameId = true),
+                    modifier = toBeRemoved,
+                ),
         )
 
         // Use the UiBuilderOperator to remove the modifier
         uiBuilderOperator.onRemoveModifier(
             project = project,
             composeNodeId = node.id,
-            index = index
+            index = index,
         )
 
         saveProject(project)
     }
 
-    fun onModifierSwapped(node: ComposeNode, from: Int, to: Int) {
+    fun onModifierSwapped(
+        node: ComposeNode,
+        from: Int,
+        to: Int,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ModifierSwapped(
-                node = node.restoreInstance(sameId = true),
-                from = from,
-                to = to,
-            ),
+            userOperation =
+                UserOperation.ModifierSwapped(
+                    node = node.restoreInstance(sameId = true),
+                    from = from,
+                    to = to,
+                ),
         )
 
         // Use the UiBuilderOperator to swap the modifiers
@@ -503,25 +547,29 @@ class UiBuilderViewModel(
             project = project,
             composeNodeId = node.id,
             fromIndex = from,
-            toIndex = to
+            toIndex = to,
         )
 
         saveProject(project)
     }
 
-    fun onModifierAdded(node: ComposeNode, wrapper: ModifierWrapper) {
+    fun onModifierAdded(
+        node: ComposeNode,
+        wrapper: ModifierWrapper,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ModifierAdded(
-                node = node.restoreInstance(sameId = true),
-                modifier = wrapper,
-            ),
+            userOperation =
+                UserOperation.ModifierAdded(
+                    node = node.restoreInstance(sameId = true),
+                    modifier = wrapper,
+                ),
         )
 
         uiBuilderOperator.onAddModifier(
             project = project,
             composeNodeId = node.id,
-            modifier = wrapper
+            modifier = wrapper,
         )
 
         saveProject(project)
@@ -532,9 +580,10 @@ class UiBuilderViewModel(
         focused?.let {
             recordOperation(
                 project = project,
-                userOperation = UserOperation.BringToFront(
-                    node = it.restoreInstance(sameId = true),
-                ),
+                userOperation =
+                    UserOperation.BringToFront(
+                        node = it.restoreInstance(sameId = true),
+                    ),
             )
 
             it.bringToFront()
@@ -547,9 +596,10 @@ class UiBuilderViewModel(
         focused?.let {
             recordOperation(
                 project = project,
-                userOperation = UserOperation.SendToBack(
-                    node = it.restoreInstance(sameId = true),
-                ),
+                userOperation =
+                    UserOperation.SendToBack(
+                        node = it.restoreInstance(sameId = true),
+                    ),
             )
 
             it.sendToBack()
@@ -557,13 +607,17 @@ class UiBuilderViewModel(
         }
     }
 
-    fun onParamsUpdated(node: ComposeNode, trait: ComposeTrait) {
+    fun onParamsUpdated(
+        node: ComposeNode,
+        trait: ComposeTrait,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ParameterUpdated(
-                node = node.restoreInstance(sameId = true),
-                params = trait,
-            ),
+            userOperation =
+                UserOperation.ParameterUpdated(
+                    node = node.restoreInstance(sameId = true),
+                    params = trait,
+                ),
         )
 
         node.trait.value = trait
@@ -593,10 +647,11 @@ class UiBuilderViewModel(
             } else {
                 recordOperation(
                     project = project,
-                    userOperation = UserOperation.ParameterUpdated(
-                        node = node.restoreInstance(sameId = true),
-                        params = trait,
-                    ),
+                    userOperation =
+                        UserOperation.ParameterUpdated(
+                            node = node.restoreInstance(sameId = true),
+                            params = trait,
+                        ),
                 )
                 node.setSourceForLazyListChild(lazyListSource)
                 node.trait.value = trait
@@ -606,12 +661,16 @@ class UiBuilderViewModel(
         }
     }
 
-    fun onDynamicItemsUpdated(node: ComposeNode, assignableProperty: AssignableProperty?) {
+    fun onDynamicItemsUpdated(
+        node: ComposeNode,
+        assignableProperty: AssignableProperty?,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.DynamicItemsUpdated(
-                assignableProperty = assignableProperty
-            ),
+            userOperation =
+                UserOperation.DynamicItemsUpdated(
+                    assignableProperty = assignableProperty,
+                ),
         )
 
         node.dynamicItems.value = assignableProperty
@@ -619,12 +678,16 @@ class UiBuilderViewModel(
         saveProject(project)
     }
 
-    fun onLazyListChildParamsUpdated(node: ComposeNode, lazyListChildParams: LazyListChildParams) {
+    fun onLazyListChildParamsUpdated(
+        node: ComposeNode,
+        lazyListChildParams: LazyListChildParams,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.LazyListChildParamsUpdated(
-                lazyListChildParams = lazyListChildParams,
-            ),
+            userOperation =
+                UserOperation.LazyListChildParamsUpdated(
+                    lazyListChildParams = lazyListChildParams,
+                ),
         )
 
         node.lazyListChildParams.value = lazyListChildParams
@@ -632,12 +695,16 @@ class UiBuilderViewModel(
         saveProject(project)
     }
 
-    fun onVisibilityParamsUpdated(node: ComposeNode, visibilityParams: VisibilityParams) {
+    fun onVisibilityParamsUpdated(
+        node: ComposeNode,
+        visibilityParams: VisibilityParams,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.VisibilityParamsUpdated(
-                visibilityParams = visibilityParams,
-            ),
+            userOperation =
+                UserOperation.VisibilityParamsUpdated(
+                    visibilityParams = visibilityParams,
+                ),
         )
 
         node.visibilityParams.value = visibilityParams
@@ -645,13 +712,17 @@ class UiBuilderViewModel(
         saveProject(project)
     }
 
-    fun onComposeNodeLabelUpdated(node: ComposeNode, label: String) {
+    fun onComposeNodeLabelUpdated(
+        node: ComposeNode,
+        label: String,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ComposableLabelUpdated(
-                node = node,
-                label = label,
-            ),
+            userOperation =
+                UserOperation.ComposableLabelUpdated(
+                    node = node,
+                    label = label,
+                ),
         )
         val currentEditable = project.screenHolder.currentEditable()
         val newLabel = currentEditable.createUniqueLabel(project, node, label)
@@ -660,22 +731,28 @@ class UiBuilderViewModel(
         saveProject(project)
     }
 
-    fun onWrapWithContainerComposable(targetComposable: ComposeNode, wrapContainer: ComposeTrait) {
+    fun onWrapWithContainerComposable(
+        targetComposable: ComposeNode,
+        wrapContainer: ComposeTrait,
+    ) {
         val parent = targetComposable.parentNode ?: return
         recordOperation(
             project = project,
-            userOperation = UserOperation.WrapComposable(
-                node = targetComposable,
-                wrapContainer = wrapContainer
-            ),
+            userOperation =
+                UserOperation.WrapComposable(
+                    node = targetComposable,
+                    wrapContainer = wrapContainer,
+                ),
         )
 
-        val wrapComposable = ComposeNode(
-            trait = mutableStateOf(wrapContainer),
-            modifierList = mutableStateListEqualsOverrideOf(
-                ModifierWrapper.Padding(8.dp),
+        val wrapComposable =
+            ComposeNode(
+                trait = mutableStateOf(wrapContainer),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Padding(8.dp),
+                    ),
             )
-        )
         wrapComposable.addChild(targetComposable)
         var insertIndex = parent.children.lastIndex
         parent.children.forEachIndexed { i, child ->
@@ -689,13 +766,17 @@ class UiBuilderViewModel(
         saveProject(project)
     }
 
-    fun onAddScreenFromTemplate(name: String, screenTemplatePair: ScreenTemplatePair) {
+    fun onAddScreenFromTemplate(
+        name: String,
+        screenTemplatePair: ScreenTemplatePair,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ScreenAddedFromTemplate(
-                name = name,
-                screenTemplatePair = screenTemplatePair,
-            ),
+            userOperation =
+                UserOperation.ScreenAddedFromTemplate(
+                    name = name,
+                    screenTemplatePair = screenTemplatePair,
+                ),
         )
         val newScreen = ScreenTemplates.createNewScreen(screenTemplatePair)
         val addedScreen = project.screenHolder.addScreen(name, newScreen)
@@ -706,14 +787,15 @@ class UiBuilderViewModel(
     fun onAddScreen(screen: Screen) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ScreenAdded(
-                screen = screen
-            ),
+            userOperation =
+                UserOperation.ScreenAdded(
+                    screen = screen,
+                ),
         )
         val addedScreen =
             project.screenHolder.addScreen(
                 screen.label.value,
-                screen.copy(id = Uuid.random().toString())
+                screen.copy(id = Uuid.random().toString()),
             )
         project.screenHolder.selectScreen(addedScreen)
         saveProject(project)
@@ -722,9 +804,10 @@ class UiBuilderViewModel(
     fun onScreenUpdated(screen: Screen) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ScreenUpdated(
-                screen = screen,
-            ),
+            userOperation =
+                UserOperation.ScreenUpdated(
+                    screen = screen,
+                ),
         )
 
         saveProject(project)
@@ -738,16 +821,20 @@ class UiBuilderViewModel(
     fun onDeleteScreen(screen: Screen) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ScreenDeleted(
-                screen = screen,
-            ),
+            userOperation =
+                UserOperation.ScreenDeleted(
+                    screen = screen,
+                ),
         )
 
         project.screenHolder.deleteScreen(screen)
         saveProject(project)
     }
 
-    fun onScreensSwapped(from: Int, to: Int) {
+    fun onScreensSwapped(
+        from: Int,
+        to: Int,
+    ) {
         project.screenHolder.screens.swap(from, to)
         saveProject(project)
     }
@@ -755,10 +842,11 @@ class UiBuilderViewModel(
     fun onPendingHeightModifierCommitted(node: ComposeNode) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.PendingModifierCommitted(
-                node = node,
-                pending = node.pendingModifier.value,
-            ),
+            userOperation =
+                UserOperation.PendingModifierCommitted(
+                    node = node,
+                    pending = node.pendingModifier.value,
+                ),
         )
         node.commitPendingHeightModifier()
         saveProject(project)
@@ -767,10 +855,11 @@ class UiBuilderViewModel(
     fun onPendingWidthModifierCommitted(node: ComposeNode) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.PendingModifierCommitted(
-                node = node,
-                pending = node.pendingModifier.value,
-            ),
+            userOperation =
+                UserOperation.PendingModifierCommitted(
+                    node = node,
+                    pending = node.pendingModifier.value,
+                ),
         )
         node.commitPendingWidthModifier()
         saveProject(project)
@@ -782,10 +871,11 @@ class UiBuilderViewModel(
     ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ActionsMapUpdated(
-                node = node,
-                actionsMap = actionsMap,
-            ),
+            userOperation =
+                UserOperation.ActionsMapUpdated(
+                    node = node,
+                    actionsMap = actionsMap,
+                ),
         )
         node.actionHandler.actionsMap = actionsMap
 
@@ -795,26 +885,31 @@ class UiBuilderViewModel(
     fun onCreateComponent(componentName: String) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.CreateComponent(
-                componentName = componentName,
-            ),
+            userOperation =
+                UserOperation.CreateComponent(
+                    componentName = componentName,
+                ),
         )
-        val newComponentName = generateUniqueName(
-            componentName,
-            project.getAllCanvasEditable().map { it.name.asClassName() }.toSet(),
-        )
-        val component = Component(
-            name = newComponentName,
-            componentRoot = mutableStateOf(
-                ComposeNode(
-                    modifierList = mutableStateListEqualsOverrideOf(
-                        ModifierWrapper.Width(400.dp),
-                        ModifierWrapper.Height(300.dp)
+        val newComponentName =
+            generateUniqueName(
+                componentName,
+                project.getAllCanvasEditable().map { it.name.asClassName() }.toSet(),
+            )
+        val component =
+            Component(
+                name = newComponentName,
+                componentRoot =
+                    mutableStateOf(
+                        ComposeNode(
+                            modifierList =
+                                mutableStateListEqualsOverrideOf(
+                                    ModifierWrapper.Width(400.dp),
+                                    ModifierWrapper.Height(300.dp),
+                                ),
+                            trait = mutableStateOf(ColumnTrait()),
+                        ),
                     ),
-                    trait = mutableStateOf(ColumnTrait()),
-                )
-            ),
-        )
+            )
 
         project.componentHolder.components.add(component)
         project.screenHolder.editedComponent.value = component
@@ -822,23 +917,29 @@ class UiBuilderViewModel(
         saveProject(project)
     }
 
-    fun onConvertToComponent(componentName: String, node: ComposeNode) {
+    fun onConvertToComponent(
+        componentName: String,
+        node: ComposeNode,
+    ) {
         recordOperation(
             project = project,
-            userOperation = UserOperation.ConvertToComponent(
-                componentName = componentName,
-                node = node,
-            ),
+            userOperation =
+                UserOperation.ConvertToComponent(
+                    componentName = componentName,
+                    node = node,
+                ),
         )
-        val newComponentName = generateUniqueName(
-            componentName,
-            project.getAllCanvasEditable().map { it.name.asClassName() }.toSet(),
-        )
+        val newComponentName =
+            generateUniqueName(
+                componentName,
+                project.getAllCanvasEditable().map { it.name.asClassName() }.toSet(),
+            )
         // Clear the focused state before converting
-        val component = Component(
-            name = newComponentName,
-            componentRoot = mutableStateOf(node.restoreInstance(sameId = false)),
-        )
+        val component =
+            Component(
+                name = newComponentName,
+                componentRoot = mutableStateOf(node.restoreInstance(sameId = false)),
+            )
 
         // Add new states to the Component
         component.getRootNode().allChildren().forEach {
@@ -885,7 +986,9 @@ class UiBuilderViewModel(
             project,
             userOperation = UserOperation.RemoveComponent(component),
         )
-        if (project.screenHolder.editedComponent.value?.id == component.id) {
+        if (project.screenHolder.editedComponent.value
+                ?.id == component.id
+        ) {
             project.screenHolder.editedComponent.value = null
         }
         project.componentHolder.components.remove(component)
@@ -899,14 +1002,17 @@ class UiBuilderViewModel(
     ) {
         recordOperation(
             project,
-            userOperation = UserOperation.AddParameterToCanvasEditable(
-                canvasEditable = canvasEditable, parameter = parameter
-            ),
+            userOperation =
+                UserOperation.AddParameterToCanvasEditable(
+                    canvasEditable = canvasEditable,
+                    parameter = parameter,
+                ),
         )
-        val newName = generateUniqueName(
-            initial = parameter.variableName,
-            canvasEditable.parameters.map { it.variableName }.toSet(),
-        )
+        val newName =
+            generateUniqueName(
+                initial = parameter.variableName,
+                canvasEditable.parameters.map { it.variableName }.toSet(),
+            )
         canvasEditable.parameters.add(parameter.copy(newName = newName))
         saveProject(project)
     }
@@ -917,16 +1023,20 @@ class UiBuilderViewModel(
     ) {
         recordOperation(
             project,
-            userOperation = UserOperation.UpdateParameterInCanvasEditable(
-                canvasEditable = canvasEditable, parameter = parameter
-            ),
+            userOperation =
+                UserOperation.UpdateParameterInCanvasEditable(
+                    canvasEditable = canvasEditable,
+                    parameter = parameter,
+                ),
         )
-        val newName = generateUniqueName(
-            initial = parameter.variableName,
-            canvasEditable.parameters
-                .filterNot { it.id == parameter.id }
-                .map { it.variableName }.toSet(),
-        )
+        val newName =
+            generateUniqueName(
+                initial = parameter.variableName,
+                canvasEditable.parameters
+                    .filterNot { it.id == parameter.id }
+                    .map { it.variableName }
+                    .toSet(),
+            )
         val index = canvasEditable.parameters.indexOfFirst { it.id == parameter.id }
         canvasEditable.parameters[index] = parameter.copy(newName = newName)
         saveProject(project)
@@ -938,9 +1048,11 @@ class UiBuilderViewModel(
     ) {
         recordOperation(
             project,
-            userOperation = UserOperation.RemoveParameterFromCanvasEditable(
-                canvasEditable = canvasEditable, parameter = parameter
-            ),
+            userOperation =
+                UserOperation.RemoveParameterFromCanvasEditable(
+                    canvasEditable = canvasEditable,
+                    parameter = parameter,
+                ),
         )
         canvasEditable.parameters.remove(parameter)
         saveProject(project)

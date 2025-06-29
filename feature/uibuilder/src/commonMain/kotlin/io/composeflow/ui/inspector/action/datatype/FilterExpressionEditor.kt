@@ -40,8 +40,9 @@ fun FilterExpressionEditor(
     level: Int = 0,
 ) {
     Column(
-        modifier = modifier
-            .padding(start = (level * 16).dp)
+        modifier =
+            modifier
+                .padding(start = (level * 16).dp),
     ) {
         when (filterExpression) {
             is AndFilter -> {
@@ -54,7 +55,7 @@ fun FilterExpressionEditor(
                     filters = filterExpression.filters,
                     onFiltersChange = {
                         onFilterExpressionUpdated(
-                            filterExpression.copy(filters = it)
+                            filterExpression.copy(filters = it),
                         )
                     },
                     onRemoveFilter = onRemoveFilter,
@@ -71,7 +72,7 @@ fun FilterExpressionEditor(
                     filters = filterExpression.filters,
                     onFiltersChange = {
                         onFilterExpressionUpdated(
-                            filterExpression.copy(filters = it)
+                            filterExpression.copy(filters = it),
                         )
                     },
                     onRemoveFilter = onRemoveFilter,
@@ -109,9 +110,10 @@ fun AddFilterMenu(
         onDismissRequest = {
             onCloseMenu()
         },
-        modifier = Modifier
-            .width(280.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant),
+        modifier =
+            Modifier
+                .width(280.dp)
+                .background(color = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         if (onSingleFilterAdded != null) {
             DropdownMenuItem(text = {

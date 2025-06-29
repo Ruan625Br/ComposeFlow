@@ -18,15 +18,15 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class PropertyTransformerTest {
-
     private val project = Project()
     private val context = GenerationContext()
 
     @Test
     fun testAddBefore() {
-        val transformer = FromString.ToString.AddBefore(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("before string ")),
-        )
+        val transformer =
+            FromString.ToString.AddBefore(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("before string ")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
@@ -37,9 +37,10 @@ class PropertyTransformerTest {
 
     @Test
     fun testAddAfter() {
-        val transformer = FromString.ToString.AddAfter(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("after string")),
-        )
+        val transformer =
+            FromString.ToString.AddAfter(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("after string")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
@@ -50,9 +51,10 @@ class PropertyTransformerTest {
 
     @Test
     fun testSubstringBefore() {
-        val transformer = FromString.ToString.SubstringBefore(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("?")),
-        )
+        val transformer =
+            FromString.ToString.SubstringBefore(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("?")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string?afterquestion")
         property.propertyTransformers.add(transformer)
@@ -63,9 +65,10 @@ class PropertyTransformerTest {
 
     @Test
     fun testSubstringAfter() {
-        val transformer = FromString.ToString.SubstringAfter(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("?")),
-        )
+        val transformer =
+            FromString.ToString.SubstringAfter(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("?")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string?afterquestion")
         property.propertyTransformers.add(transformer)
@@ -74,57 +77,62 @@ class PropertyTransformerTest {
         assertEquals(result.toString(), """"test string?afterquestion".substringAfter("?")""")
     }
 
-
     @Test
     fun testContains() {
-        val transformer = FromString.ToBoolean.StringContains(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("contains")),
-        )
+        val transformer =
+            FromString.ToBoolean.StringContains(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("contains")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
-        val result = property.transformedCodeBlock(
-            project,
-            context,
-            writeType = ComposeFlowType.BooleanType(),
-            dryRun = false
-        )
+        val result =
+            property.transformedCodeBlock(
+                project,
+                context,
+                writeType = ComposeFlowType.BooleanType(),
+                dryRun = false,
+            )
 
         assertEquals(result.toString(), """"test string".contains("contains")""")
     }
 
     @Test
     fun testStartsWith() {
-        val transformer = FromString.ToBoolean.StartsWith(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("argument")),
-        )
+        val transformer =
+            FromString.ToBoolean.StartsWith(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("argument")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
-        val result = property.transformedCodeBlock(
-            project,
-            context,
-            writeType = ComposeFlowType.BooleanType(),
-            dryRun = false
-        )
+        val result =
+            property.transformedCodeBlock(
+                project,
+                context,
+                writeType = ComposeFlowType.BooleanType(),
+                dryRun = false,
+            )
 
         assertEquals(result.toString(), """"test string".startsWith("argument")""")
     }
 
     @Test
     fun testEndsWith() {
-        val transformer = FromString.ToBoolean.EndsWith(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("argument")),
-        )
+        val transformer =
+            FromString.ToBoolean.EndsWith(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("argument")),
+            )
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
-        val result = property.transformedCodeBlock(
-            project,
-            context,
-            writeType = ComposeFlowType.BooleanType(),
-            dryRun = false
-        )
+        val result =
+            property.transformedCodeBlock(
+                project,
+                context,
+                writeType = ComposeFlowType.BooleanType(),
+                dryRun = false,
+            )
 
         assertEquals(result.toString(), """"test string".endsWith("argument")""")
     }
@@ -135,12 +143,13 @@ class PropertyTransformerTest {
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
-        val result = property.transformedCodeBlock(
-            project,
-            context,
-            writeType = ComposeFlowType.BooleanType(),
-            dryRun = false
-        )
+        val result =
+            property.transformedCodeBlock(
+                project,
+                context,
+                writeType = ComposeFlowType.BooleanType(),
+                dryRun = false,
+            )
 
         assertEquals(result.toString(), """"test string".isEmpty()""")
     }
@@ -151,12 +160,13 @@ class PropertyTransformerTest {
 
         val property = StringProperty.StringIntrinsicValue("test string")
         property.propertyTransformers.add(transformer)
-        val result = property.transformedCodeBlock(
-            project,
-            context,
-            writeType = ComposeFlowType.IntType(),
-            dryRun = false
-        )
+        val result =
+            property.transformedCodeBlock(
+                project,
+                context,
+                writeType = ComposeFlowType.IntType(),
+                dryRun = false,
+            )
 
         assertEquals(result.toString(), """"test string".length""")
     }
@@ -168,12 +178,13 @@ class PropertyTransformerTest {
 
         val property = StringProperty.StringIntrinsicValue("test,string")
         property.propertyTransformers.add(transformer)
-        val result = property.transformedCodeBlock(
-            project,
-            context,
-            writeType = ComposeFlowType.StringType(isList = true),
-            dryRun = false
-        )
+        val result =
+            property.transformedCodeBlock(
+                project,
+                context,
+                writeType = ComposeFlowType.StringType(isList = true),
+                dryRun = false,
+            )
 
         assertEquals(result.toString(), """("test,string").split(",")""")
     }
@@ -325,9 +336,9 @@ class PropertyTransformerTest {
             FromFloat.ToBoolean.FloatLessThanOrEqualTo(
                 mutableStateOf(
                     FloatProperty.FloatIntrinsicValue(
-                        3f
-                    )
-                )
+                        3f,
+                    ),
+                ),
             )
 
         val property = FloatProperty.FloatIntrinsicValue(2f)
@@ -355,9 +366,9 @@ class PropertyTransformerTest {
             FromFloat.ToBoolean.FloatGreaterThanOrEqualTo(
                 mutableStateOf(
                     FloatProperty.FloatIntrinsicValue(
-                        3f
-                    )
-                )
+                        3f,
+                    ),
+                ),
             )
 
         val property = FloatProperty.FloatIntrinsicValue(2f)
@@ -385,15 +396,16 @@ class PropertyTransformerTest {
             FromInstant.ToInstant.PlusDay(mutableStateOf(IntProperty.IntIntrinsicValue(3)))
 
         val instant = LocalDate(2024, 7, 15).atStartOfDayIn(TimeZone.UTC)
-        val property = InstantProperty.InstantIntrinsicValue(
-            InstantWrapper(instant)
-        )
+        val property =
+            InstantProperty.InstantIntrinsicValue(
+                InstantWrapper(instant),
+            )
         property.propertyTransformers.add(transformer)
         val result = property.transformedCodeBlock(project, context, dryRun = false)
 
         assertEquals(
             result.toString(),
-            "kotlinx.datetime.LocalDate.parse(\"2024-07-15\").kotlinx.datetime.atStartOfDayIn(kotlinx.datetime.TimeZone.UTC).kotlinx.datetime.plus(3, kotlinx.datetime.DateTimeUnit.DAY, kotlinx.datetime.TimeZone.currentSystemDefault())"
+            "kotlinx.datetime.LocalDate.parse(\"2024-07-15\").kotlinx.datetime.atStartOfDayIn(kotlinx.datetime.TimeZone.UTC).kotlinx.datetime.plus(3, kotlinx.datetime.DateTimeUnit.DAY, kotlinx.datetime.TimeZone.currentSystemDefault())",
         )
     }
 
@@ -403,15 +415,16 @@ class PropertyTransformerTest {
             FromInstant.ToInstant.PlusMonth(mutableStateOf(IntProperty.IntIntrinsicValue(3)))
 
         val instant = LocalDate(2024, 7, 15).atStartOfDayIn(TimeZone.UTC)
-        val property = InstantProperty.InstantIntrinsicValue(
-            InstantWrapper(instant)
-        )
+        val property =
+            InstantProperty.InstantIntrinsicValue(
+                InstantWrapper(instant),
+            )
         property.propertyTransformers.add(transformer)
         val result = property.transformedCodeBlock(project, context, dryRun = false)
 
         assertEquals(
             result.toString(),
-            "kotlinx.datetime.LocalDate.parse(\"2024-07-15\").kotlinx.datetime.atStartOfDayIn(kotlinx.datetime.TimeZone.UTC).kotlinx.datetime.plus(3, kotlinx.datetime.DateTimeUnit.MONTH, kotlinx.datetime.TimeZone.currentSystemDefault())"
+            "kotlinx.datetime.LocalDate.parse(\"2024-07-15\").kotlinx.datetime.atStartOfDayIn(kotlinx.datetime.TimeZone.UTC).kotlinx.datetime.plus(3, kotlinx.datetime.DateTimeUnit.MONTH, kotlinx.datetime.TimeZone.currentSystemDefault())",
         )
     }
 
@@ -421,24 +434,26 @@ class PropertyTransformerTest {
             FromInstant.ToInstant.PlusYear(mutableStateOf(IntProperty.IntIntrinsicValue(3)))
 
         val instant = LocalDate(2024, 7, 15).atStartOfDayIn(TimeZone.UTC)
-        val property = InstantProperty.InstantIntrinsicValue(
-            InstantWrapper(instant)
-        )
+        val property =
+            InstantProperty.InstantIntrinsicValue(
+                InstantWrapper(instant),
+            )
         property.propertyTransformers.add(transformer)
         val result = property.transformedCodeBlock(project, context, dryRun = false)
 
         assertEquals(
             result.toString(),
-            "kotlinx.datetime.LocalDate.parse(\"2024-07-15\").kotlinx.datetime.atStartOfDayIn(kotlinx.datetime.TimeZone.UTC).kotlinx.datetime.plus(3 * 12, kotlinx.datetime.DateTimeUnit.MONTH, kotlinx.datetime.TimeZone.currentSystemDefault())"
+            "kotlinx.datetime.LocalDate.parse(\"2024-07-15\").kotlinx.datetime.atStartOfDayIn(kotlinx.datetime.TimeZone.UTC).kotlinx.datetime.plus(3 * 12, kotlinx.datetime.DateTimeUnit.MONTH, kotlinx.datetime.TimeZone.currentSystemDefault())",
         )
     }
 
     @Test
     fun testListContains() {
-        val transformer = FromList.ToBoolean.ListContains(
-            innerType = ComposeFlowType.StringType(),
-            mutableStateOf(StringProperty.StringIntrinsicValue("textIncluded"))
-        )
+        val transformer =
+            FromList.ToBoolean.ListContains(
+                innerType = ComposeFlowType.StringType(),
+                mutableStateOf(StringProperty.StringIntrinsicValue("textIncluded")),
+            )
 
         val stringListState = AppState.StringListAppState(name = "stringList")
         project.globalStateHolder.addState(stringListState)
@@ -451,21 +466,24 @@ class PropertyTransformerTest {
 
     @Test
     fun testListFilter() {
-        val transformer = FromList.ToList.Filter(
-            innerType = ComposeFlowType.StringType(), mutableStateOf(
-                FunctionScopeParameterProperty(
-                    functionName = "filter",
-                    variableType = ComposeFlowType.StringType(),
-                ).apply {
-                    propertyTransformers.add(
-                        FromString.ToBoolean.StringContains(
-                            mutableStateOf(
-                                StringProperty.StringIntrinsicValue("filtered")
-                            )
+        val transformer =
+            FromList.ToList.Filter(
+                innerType = ComposeFlowType.StringType(),
+                mutableStateOf(
+                    FunctionScopeParameterProperty(
+                        functionName = "filter",
+                        variableType = ComposeFlowType.StringType(),
+                    ).apply {
+                        propertyTransformers.add(
+                            FromString.ToBoolean.StringContains(
+                                mutableStateOf(
+                                    StringProperty.StringIntrinsicValue("filtered"),
+                                ),
+                            ),
                         )
-                    )
-                })
-        )
+                    },
+                ),
+            )
 
         val stringListState = AppState.StringListAppState(name = "stringList")
         project.globalStateHolder.addState(stringListState)
@@ -480,31 +498,35 @@ class PropertyTransformerTest {
     fun testListFilter_dataType() {
         val stringField = DataField(name = "stringField", fieldType = FieldType.String())
         val intField = DataField(name = "intField", fieldType = FieldType.Int())
-        val dataType = DataType(name = "dataType").apply {
-            fields.add(stringField)
-            fields.add(intField)
-        }
+        val dataType =
+            DataType(name = "dataType").apply {
+                fields.add(stringField)
+                fields.add(intField)
+            }
         project.dataTypeHolder.dataTypes.add(dataType)
-        val transformer = FromList.ToList.Filter(
-            innerType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id), mutableStateOf(
-                FunctionScopeParameterProperty(
-                    functionName = "filter",
-                    variableType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
-                    dataFieldType = DataFieldType.FieldInDataType(
-                        dataType.id,
-                        fieldId = stringField.id
-                    ),
-                ).apply {
-                    propertyTransformers.add(
-                        FromString.ToBoolean.StringContains(
-                            mutableStateOf(
-                                StringProperty.StringIntrinsicValue("filtered")
-                            )
+        val transformer =
+            FromList.ToList.Filter(
+                innerType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
+                mutableStateOf(
+                    FunctionScopeParameterProperty(
+                        functionName = "filter",
+                        variableType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
+                        dataFieldType =
+                            DataFieldType.FieldInDataType(
+                                dataType.id,
+                                fieldId = stringField.id,
+                            ),
+                    ).apply {
+                        propertyTransformers.add(
+                            FromString.ToBoolean.StringContains(
+                                mutableStateOf(
+                                    StringProperty.StringIntrinsicValue("filtered"),
+                                ),
+                            ),
                         )
-                    )
-                }
+                    },
+                ),
             )
-        )
 
         val dataTypeListState =
             AppState.CustomDataTypeListAppState(name = "dataTypeList", dataTypeId = dataType.id)
@@ -515,7 +537,7 @@ class PropertyTransformerTest {
 
         assertEquals(
             result.toString(),
-            """dataTypeList.filter { it.stringField.contains("filtered") }"""
+            """dataTypeList.filter { it.stringField.contains("filtered") }""",
         )
     }
 
@@ -523,30 +545,36 @@ class PropertyTransformerTest {
     fun testListMap_dataType() {
         val stringField = DataField(name = "stringField", fieldType = FieldType.String())
         val intField = DataField(name = "intField", fieldType = FieldType.Int())
-        val dataType = DataType(name = "dataType").apply {
-            fields.add(stringField)
-            fields.add(intField)
-        }
+        val dataType =
+            DataType(name = "dataType").apply {
+                fields.add(stringField)
+                fields.add(intField)
+            }
         project.dataTypeHolder.dataTypes.add(dataType)
-        val transformer = FromList.ToList.Map(
-            innerType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
-            outputType = mutableStateOf(ComposeFlowType.CustomDataType(dataTypeId = dataType.id)),
-            value = mutableStateOf(
-                AssignablePropertyValue.ForDataType(
-                    dataTypeId = dataType.id,
-                    properties = mutableMapOf(
-                        stringField.id to FunctionScopeParameterProperty(
-                            functionName = "map",
-                            variableType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
-                            dataFieldType = DataFieldType.FieldInDataType(
-                                dataType.id,
-                                fieldId = stringField.id
-                            ),
-                        )
-                    )
-                )
-            ),
-        )
+        val transformer =
+            FromList.ToList.Map(
+                innerType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
+                outputType = mutableStateOf(ComposeFlowType.CustomDataType(dataTypeId = dataType.id)),
+                value =
+                    mutableStateOf(
+                        AssignablePropertyValue.ForDataType(
+                            dataTypeId = dataType.id,
+                            properties =
+                                mutableMapOf(
+                                    stringField.id to
+                                        FunctionScopeParameterProperty(
+                                            functionName = "map",
+                                            variableType = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
+                                            dataFieldType =
+                                                DataFieldType.FieldInDataType(
+                                                    dataType.id,
+                                                    fieldId = stringField.id,
+                                                ),
+                                        ),
+                                ),
+                        ),
+                    ),
+            )
 
         val dataTypeListState =
             AppState.CustomDataTypeListAppState(name = "dataTypeList", dataTypeId = dataType.id)
@@ -557,7 +585,7 @@ class PropertyTransformerTest {
 
         assertEquals(
             result.toString(),
-            """dataTypeList.map { com.example.datatype.DataType(stringField = it.stringField,intField = 0,) }"""
+            """dataTypeList.map { com.example.datatype.DataType(stringField = it.stringField,intField = 0,) }""",
         )
     }
 
@@ -590,9 +618,10 @@ class PropertyTransformerTest {
     // Tests for getAssignableProperties() method
     @Test
     fun testGetAssignableProperties_singleProperty() {
-        val transformer = FromString.ToString.AddBefore(
-            value = mutableStateOf(StringProperty.StringIntrinsicValue("test"))
-        )
+        val transformer =
+            FromString.ToString.AddBefore(
+                value = mutableStateOf(StringProperty.StringIntrinsicValue("test")),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         assertEquals(2, assignableProperties.size) // transformer value + self
@@ -605,7 +634,7 @@ class PropertyTransformerTest {
         // Create a nested property with a transformer
         val nestedProperty = StringProperty.StringIntrinsicValue("nested")
         nestedProperty.propertyTransformers.add(
-            FromString.ToString.AddAfter(mutableStateOf(StringProperty.StringIntrinsicValue("suffix")))
+            FromString.ToString.AddAfter(mutableStateOf(StringProperty.StringIntrinsicValue("suffix"))),
         )
 
         val transformer = FromString.ToString.AddBefore(value = mutableStateOf(nestedProperty))
@@ -621,10 +650,11 @@ class PropertyTransformerTest {
 
     @Test
     fun testGetAssignableProperties_multipleFields() {
-        val transformer = FromInt.ToBoolean.IntModEqualsTo(
-            mod = mutableStateOf(IntProperty.IntIntrinsicValue(5)),
-            equalsTo = mutableStateOf(IntProperty.IntIntrinsicValue(0))
-        )
+        val transformer =
+            FromInt.ToBoolean.IntModEqualsTo(
+                mod = mutableStateOf(IntProperty.IntIntrinsicValue(5)),
+                equalsTo = mutableStateOf(IntProperty.IntIntrinsicValue(0)),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         assertEquals(4, assignableProperties.size) // mod + equalsTo + their selfs
@@ -639,18 +669,19 @@ class PropertyTransformerTest {
         // Create nested properties for both fields
         val modProperty = IntProperty.IntIntrinsicValue(5)
         modProperty.propertyTransformers.add(
-            FromInt.ToInt.IntPlus(mutableStateOf(IntProperty.IntIntrinsicValue(1)))
+            FromInt.ToInt.IntPlus(mutableStateOf(IntProperty.IntIntrinsicValue(1))),
         )
 
         val equalsToProperty = IntProperty.IntIntrinsicValue(0)
         equalsToProperty.propertyTransformers.add(
-            FromInt.ToInt.IntMultipliedBy(mutableStateOf(IntProperty.IntIntrinsicValue(2)))
+            FromInt.ToInt.IntMultipliedBy(mutableStateOf(IntProperty.IntIntrinsicValue(2))),
         )
 
-        val transformer = FromInt.ToBoolean.IntModEqualsTo(
-            mod = mutableStateOf(modProperty),
-            equalsTo = mutableStateOf(equalsToProperty)
-        )
+        val transformer =
+            FromInt.ToBoolean.IntModEqualsTo(
+                mod = mutableStateOf(modProperty),
+                equalsTo = mutableStateOf(equalsToProperty),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         // Should contain: modProperty, equalsToProperty, and their nested properties + selfs + transformer self
@@ -658,7 +689,7 @@ class PropertyTransformerTest {
         // Check that all expected values are present, order may vary due to self-inclusion
         val intValues = assignableProperties.filterIsInstance<IntProperty.IntIntrinsicValue>().map { it.value }
         // Check that all expected values are present, allowing for self-inclusion effects
-        assertTrue(intValues.count { it == 5 } >= 2) // modProperty + self + possible more from transformers 
+        assertTrue(intValues.count { it == 5 } >= 2) // modProperty + self + possible more from transformers
         assertTrue(intValues.count { it == 0 } >= 2) // equalsToProperty + self + possible more
         assertTrue(intValues.count { it == 1 } >= 2) // nested + self + possible more
         assertTrue(intValues.count { it == 2 } >= 2) // nested + self + possible more
@@ -666,21 +697,23 @@ class PropertyTransformerTest {
 
     @Test
     fun testGetAssignableProperties_listFilter() {
-        val conditionProperty = FunctionScopeParameterProperty(
-            functionName = "filter",
-            variableType = ComposeFlowType.StringType(),
-        ).apply {
-            propertyTransformers.add(
-                FromString.ToBoolean.StringContains(
-                    mutableStateOf(StringProperty.StringIntrinsicValue("filtered"))
+        val conditionProperty =
+            FunctionScopeParameterProperty(
+                functionName = "filter",
+                variableType = ComposeFlowType.StringType(),
+            ).apply {
+                propertyTransformers.add(
+                    FromString.ToBoolean.StringContains(
+                        mutableStateOf(StringProperty.StringIntrinsicValue("filtered")),
+                    ),
                 )
-            )
-        }
+            }
 
-        val transformer = FromList.ToList.Filter(
-            innerType = ComposeFlowType.StringType(),
-            condition = mutableStateOf(conditionProperty)
-        )
+        val transformer =
+            FromList.ToList.Filter(
+                innerType = ComposeFlowType.StringType(),
+                condition = mutableStateOf(conditionProperty),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         // Should contain: conditionProperty + StringIntrinsicValue from transformer + conditionProperty self + transformer self
@@ -696,13 +729,14 @@ class PropertyTransformerTest {
     fun testGetAssignableProperties_listContains() {
         val valueProperty = StringProperty.StringIntrinsicValue("searchValue")
         valueProperty.propertyTransformers.add(
-            FromString.ToString.AddBefore(mutableStateOf(StringProperty.StringIntrinsicValue("prefix_")))
+            FromString.ToString.AddBefore(mutableStateOf(StringProperty.StringIntrinsicValue("prefix_"))),
         )
 
-        val transformer = FromList.ToBoolean.ListContains(
-            innerType = ComposeFlowType.StringType(),
-            value = mutableStateOf(valueProperty)
-        )
+        val transformer =
+            FromList.ToBoolean.ListContains(
+                innerType = ComposeFlowType.StringType(),
+                value = mutableStateOf(valueProperty),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         // Should contain: valueProperty + prefix property from transformer + valueProperty self + transformer self
@@ -715,10 +749,11 @@ class PropertyTransformerTest {
 
     @Test
     fun testGetAssignableProperties_floatModEqualsTo() {
-        val transformer = FromFloat.ToBoolean.FloatModEqualsTo(
-            mod = mutableStateOf(FloatProperty.FloatIntrinsicValue(3.5f)),
-            equalsTo = mutableStateOf(FloatProperty.FloatIntrinsicValue(1.5f))
-        )
+        val transformer =
+            FromFloat.ToBoolean.FloatModEqualsTo(
+                mod = mutableStateOf(FloatProperty.FloatIntrinsicValue(3.5f)),
+                equalsTo = mutableStateOf(FloatProperty.FloatIntrinsicValue(1.5f)),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         assertEquals(4, assignableProperties.size) // mod + equalsTo + their selfs
@@ -730,9 +765,10 @@ class PropertyTransformerTest {
 
     @Test
     fun testGetAssignableProperties_dateTransformers() {
-        val transformer = FromInstant.ToInstant.PlusDay(
-            value = mutableStateOf(IntProperty.IntIntrinsicValue(7))
-        )
+        val transformer =
+            FromInstant.ToInstant.PlusDay(
+                value = mutableStateOf(IntProperty.IntIntrinsicValue(7)),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         assertEquals(2, assignableProperties.size) // value + self
@@ -744,12 +780,13 @@ class PropertyTransformerTest {
     fun testGetAssignableProperties_splitTransformer() {
         val delimiterProperty = StringProperty.StringIntrinsicValue(",")
         delimiterProperty.propertyTransformers.add(
-            FromString.ToString.AddAfter(mutableStateOf(StringProperty.StringIntrinsicValue(" ")))
+            FromString.ToString.AddAfter(mutableStateOf(StringProperty.StringIntrinsicValue(" "))),
         )
 
-        val transformer = FromString.ToStringList.Split(
-            value = mutableStateOf(delimiterProperty)
-        )
+        val transformer =
+            FromString.ToStringList.Split(
+                value = mutableStateOf(delimiterProperty),
+            )
 
         val assignableProperties = transformer.getAssignableProperties()
         // Should contain: delimiterProperty + space property from transformer + delimiterProperty self + transformer self

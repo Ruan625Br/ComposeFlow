@@ -38,9 +38,7 @@ data class ColumnTrait(
     val verticalArrangementWrapper: ArrangementVerticalWrapper? = null,
     val horizontalAlignmentWrapper: AlignmentHorizontalWrapper? = null,
 ) : ComposeTrait {
-
-    override fun areAllParamsEmpty(): Boolean =
-        verticalArrangementWrapper == null && horizontalAlignmentWrapper == null
+    override fun areAllParamsEmpty(): Boolean = verticalArrangementWrapper == null && horizontalAlignmentWrapper == null
 
     private fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -65,13 +63,16 @@ data class ColumnTrait(
         )
 
     override fun icon(): ImageVector = ComposeFlowIcons.Column
+
     override fun iconText(): String = "Column"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Common,
-        TraitCategory.Container,
-        TraitCategory.WrapContainer,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Common,
+            TraitCategory.Container,
+            TraitCategory.WrapContainer,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_column_trait
 
@@ -92,20 +93,24 @@ data class ColumnTrait(
         modifier: Modifier,
     ) {
         Column(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
-            verticalArrangement = verticalArrangementWrapper?.arrangement
-                ?: Arrangement.Top,
-            horizontalAlignment = horizontalAlignmentWrapper?.alignment
-                ?: Alignment.Start,
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
+            verticalArrangement =
+                verticalArrangementWrapper?.arrangement
+                    ?: Arrangement.Top,
+            horizontalAlignment =
+                horizontalAlignmentWrapper?.alignment
+                    ?: Alignment.Start,
         ) {
             node.children.forEach { child ->
                 child.RenderedNodeInCanvas(
@@ -131,10 +136,10 @@ data class ColumnTrait(
         } else {
             codeBlockBuilder.addStatement("%M(", MemberHolder.AndroidX.Layout.Column)
             codeBlockBuilder.add(
-                generateParamsCode()
+                generateParamsCode(),
             )
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
         }
@@ -144,7 +149,7 @@ data class ColumnTrait(
                     project = project,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
         }
         codeBlockBuilder.addStatement("}")

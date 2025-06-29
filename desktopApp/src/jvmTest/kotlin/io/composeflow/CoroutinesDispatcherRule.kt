@@ -12,6 +12,7 @@ import org.junit.rules.TestWatcher
 class CoroutinesDispatcherRule : TestWatcher() {
     val standardTestDispatcher = StandardTestDispatcher()
     private val unconfinedTestDispatcher = UnconfinedTestDispatcher()
+
     override fun starting(description: org.junit.runner.Description) {
         Dispatchers.setMain(unconfinedTestDispatcher)
     }

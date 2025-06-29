@@ -38,13 +38,14 @@ inline fun <reified T> DropdownProperty(
     crossinline onValueChanged: (Int, T) -> Unit,
     modifier: Modifier = Modifier,
     crossinline displayText: @Composable (T) -> Unit = {
-        val text: AnnotatedString? = when (it) {
-            is CustomizedDropdownTextDisplayable -> it.asDropdownText(project)
-            is DropdownTextDisplayable -> it.asDropdownText()
-            is String -> AnnotatedString(it)
-            is Enum<*> -> AnnotatedString(it.name)
-            else -> null
-        }
+        val text: AnnotatedString? =
+            when (it) {
+                is CustomizedDropdownTextDisplayable -> it.asDropdownText(project)
+                is DropdownTextDisplayable -> it.asDropdownText()
+                is String -> AnnotatedString(it)
+                is Enum<*> -> AnnotatedString(it.name)
+                else -> null
+            }
         text?.let { t ->
             Text(
                 text = t,
@@ -55,13 +56,14 @@ inline fun <reified T> DropdownProperty(
         }
     },
     crossinline dropDownMenuText: @Composable (T) -> Unit = {
-        val text: AnnotatedString? = when (it) {
-            is CustomizedDropdownTextDisplayable -> it.asDropdownText(project)
-            is DropdownTextDisplayable -> it.asDropdownText()
-            is String -> AnnotatedString(it)
-            is Enum<*> -> AnnotatedString(it.name)
-            else -> null
-        }
+        val text: AnnotatedString? =
+            when (it) {
+                is CustomizedDropdownTextDisplayable -> it.asDropdownText(project)
+                is DropdownTextDisplayable -> it.asDropdownText()
+                is String -> AnnotatedString(it)
+                is Enum<*> -> AnnotatedString(it.name)
+                else -> null
+            }
         text?.let { t ->
             Text(
                 text = t,
@@ -78,36 +80,39 @@ inline fun <reified T> DropdownProperty(
     var expanded by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .wrapContentHeight()
-            .onClick {
-                if (editable) {
-                    expanded = true
-                }
-            },
+        modifier =
+            modifier
+                .wrapContentHeight()
+                .onClick {
+                    if (editable) {
+                        expanded = true
+                    }
+                },
     ) {
         Box(modifier = Modifier.wrapContentSize(Alignment.Center)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 if (items.isNotEmpty()) {
-                    val item = items.firstOrNull {
-                        if (it is DropdownItemComparable && selectedItem != null) {
-                            it.isSameItem(selectedItem)
-                        } else {
-                            it == selectedItem
+                    val item =
+                        items.firstOrNull {
+                            if (it is DropdownItemComparable && selectedItem != null) {
+                                it.isSameItem(selectedItem)
+                            } else {
+                                it == selectedItem
+                            }
                         }
-                    }
-                        ?: selectedIndex?.let {
-                            items[selectedIndex]
-                        }
+                            ?: selectedIndex?.let {
+                                items[selectedIndex]
+                            }
                     item?.let {
                         displayText(it)
                     } ?: Text(
                         text = "",
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .alpha(if (editable) 1f else 0.5f),
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .alpha(if (editable) 1f else 0.5f),
                     )
                 }
                 ComposeFlowIcon(
@@ -142,15 +147,19 @@ inline fun <reified T> DropdownProperty(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = it,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .size(18.dp),
+                    modifier =
+                        Modifier
+                            .size(18.dp),
                 )
             }
         }
     }
 }
 
-interface DropdownItem : DropdownTextDisplayable, DropdownItemComparable
+interface DropdownItem :
+    DropdownTextDisplayable,
+    DropdownItemComparable
+
 interface DropdownTextDisplayable {
     @Composable
     fun asDropdownText(): AnnotatedString
@@ -159,7 +168,6 @@ interface DropdownTextDisplayable {
 interface DropdownItemComparable {
     fun isSameItem(item: Any): Boolean
 }
-
 
 /**
  * Same as [DropdownTextDisplayable] except that [asDropdownText] takes a [Project]

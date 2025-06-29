@@ -15,13 +15,13 @@ import kotlinx.serialization.json.JsonElement
  * other serializers (e.g. YamlSerializer) are able to serialize [JsonElement].
  */
 object JsonAsStringSerializer : KSerializer<JsonElement> {
-
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("JsonAsString", PrimitiveKind.STRING)
 
-    override fun deserialize(decoder: Decoder): JsonElement =
-        Json.parseToJsonElement(decoder.decodeString())
+    override fun deserialize(decoder: Decoder): JsonElement = Json.parseToJsonElement(decoder.decodeString())
 
-    override fun serialize(encoder: Encoder, value: JsonElement) =
-        encoder.encodeString(value.toString())
+    override fun serialize(
+        encoder: Encoder,
+        value: JsonElement,
+    ) = encoder.encodeString(value.toString())
 }

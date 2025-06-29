@@ -61,11 +61,12 @@ fun TextParamsInspector(
                 )
             },
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    textTrait.copy(text = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        textTrait.copy(text = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -82,19 +83,21 @@ fun TextParamsInspector(
                 BooleanPropertyEditor(
                     checked = textTrait.placeholderText is PlaceholderText.Used,
                     onCheckedChange = { placeHolderUsed ->
-                        val usage = if (placeHolderUsed) {
-                            PlaceholderText.Used()
-                        } else {
-                            PlaceholderText.NoUsage
-                        }
+                        val usage =
+                            if (placeHolderUsed) {
+                                PlaceholderText.Used()
+                            } else {
+                                PlaceholderText.NoUsage
+                            }
                         composeNodeCallbacks.onTraitUpdated(
                             node,
                             textTrait.copy(placeholderText = usage),
                         )
                     },
                     label = "Use placeholder text",
-                    modifier = Modifier
-                        .hoverOverlay()
+                    modifier =
+                        Modifier
+                            .hoverOverlay(),
                 )
             }
 
@@ -107,16 +110,19 @@ fun TextParamsInspector(
                             composeNodeCallbacks.onTraitUpdated(
                                 node,
                                 textTrait.copy(
-                                    placeholderText = PlaceholderText.Used(
-                                        StringProperty.StringIntrinsicValue(
-                                            it
-                                        )
-                                    )
-                                )
+                                    placeholderText =
+                                        PlaceholderText.Used(
+                                            StringProperty.StringIntrinsicValue(
+                                                it,
+                                            ),
+                                        ),
+                                ),
                             )
                         },
-                        modifier = Modifier.fillMaxWidth()
-                            .hoverOverlay(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .hoverOverlay(),
                         label = "Placeholder text",
                         placeholder = "placeholder text",
                         singleLine = true,
@@ -142,18 +148,20 @@ fun TextParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(node, textTrait.copy(colorWrapper = null))
             },
-            modifier = Modifier
-                .hoverOverlay()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .hoverOverlay()
+                    .fillMaxWidth(),
         )
 
         AssignableEnumPropertyEditor(
             project = project,
             node = node,
-            acceptableType = ComposeFlowType.Enum(
-                isList = false,
-                enumClass = TextStyleWrapper::class.java,
-            ),
+            acceptableType =
+                ComposeFlowType.Enum(
+                    isList = false,
+                    enumClass = TextStyleWrapper::class.java,
+                ),
             initialProperty = textTrait.textStyleWrapper,
             items = TextStyleWrapper.entries,
             label = "Style",
@@ -173,19 +181,21 @@ fun TextParamsInspector(
                     ),
                 )
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .hoverOverlay(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .hoverOverlay(),
         )
 
         Row(verticalAlignment = Alignment.CenterVertically) {
             AssignableEnumPropertyEditor(
                 project = project,
                 node = node,
-                acceptableType = ComposeFlowType.Enum(
-                    isList = false,
-                    enumClass = TextDecorationWrapper::class.java,
-                ),
+                acceptableType =
+                    ComposeFlowType.Enum(
+                        isList = false,
+                        enumClass = TextDecorationWrapper::class.java,
+                    ),
                 initialProperty = textTrait.textDecoration,
                 items = TextDecorationWrapper.entries,
                 label = "Decoration",
@@ -205,17 +215,20 @@ fun TextParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier.hoverOverlay()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .weight(1f),
             )
 
             AssignableEnumPropertyEditor(
                 project = project,
                 node = node,
-                acceptableType = ComposeFlowType.Enum(
-                    isList = false,
-                    enumClass = FontStyleWrapper::class.java,
-                ),
+                acceptableType =
+                    ComposeFlowType.Enum(
+                        isList = false,
+                        enumClass = FontStyleWrapper::class.java,
+                    ),
                 initialProperty = textTrait.fontStyle,
                 items = FontStyleWrapper.entries,
                 label = "Font style",
@@ -235,8 +248,10 @@ fun TextParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier.hoverOverlay()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .weight(1f),
             )
         }
 
@@ -244,10 +259,11 @@ fun TextParamsInspector(
             AssignableEnumPropertyEditor(
                 project = project,
                 node = node,
-                acceptableType = ComposeFlowType.Enum(
-                    isList = false,
-                    enumClass = TextAlignWrapper::class.java,
-                ),
+                acceptableType =
+                    ComposeFlowType.Enum(
+                        isList = false,
+                        enumClass = TextAlignWrapper::class.java,
+                    ),
                 initialProperty = textTrait.textAlign,
                 items = TextAlignWrapper.entries,
                 label = "Align",
@@ -267,17 +283,20 @@ fun TextParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier.hoverOverlay()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .weight(1f),
             )
 
             AssignableEnumPropertyEditor(
                 project = project,
                 node = node,
-                acceptableType = ComposeFlowType.Enum(
-                    isList = false,
-                    enumClass = TextOverflowWrapper::class.java,
-                ),
+                acceptableType =
+                    ComposeFlowType.Enum(
+                        isList = false,
+                        enumClass = TextOverflowWrapper::class.java,
+                    ),
                 initialProperty = textTrait.overflow,
                 items = TextOverflowWrapper.entries,
                 label = "Overflow",
@@ -297,8 +316,10 @@ fun TextParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier.hoverOverlay()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .weight(1f),
             )
         }
 
@@ -309,10 +330,11 @@ fun TextParamsInspector(
                 onCheckedChange = {
                     composeNodeCallbacks.onTraitUpdated(node, textTrait.copy(softWrap = it))
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(end = 8.dp)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .padding(end = 8.dp)
+                        .hoverOverlay(),
             )
 
             BasicEditableTextProperty(
@@ -327,9 +349,10 @@ fun TextParamsInspector(
                         allowLessThanZero = false,
                     ).validate(input = it)
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
                 singleLine = true,
             )
         }
@@ -343,10 +366,11 @@ fun TextParamsInspector(
                     onCheckedChange = {
                         composeNodeCallbacks.onTraitUpdated(node, textTrait.copy(parseHtml = it))
                     },
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 8.dp)
-                        .hoverOverlay(),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .padding(end = 8.dp)
+                            .hoverOverlay(),
                 )
             }
 

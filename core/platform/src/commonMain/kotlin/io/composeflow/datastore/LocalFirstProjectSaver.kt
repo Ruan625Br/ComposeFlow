@@ -5,18 +5,25 @@ import io.composeflow.platform.createCloudProjectSaver
 import io.composeflow.platform.createLocalProjectSaver
 
 class LocalFirstProjectSaver(
-    private val cloudProjectSaver: ProjectSaver = createCloudProjectSaver(
-        GoogleCloudStorageWrapper()
-    ),
+    private val cloudProjectSaver: ProjectSaver =
+        createCloudProjectSaver(
+            GoogleCloudStorageWrapper(),
+        ),
     private val localProjectSaver: ProjectSaver = createLocalProjectSaver(),
 ) : ProjectSaver {
-
-    override suspend fun saveProjectYaml(userId: String, projectId: String, yamlContent: String) {
+    override suspend fun saveProjectYaml(
+        userId: String,
+        projectId: String,
+        yamlContent: String,
+    ) {
         localProjectSaver.saveProjectYaml(userId, projectId, yamlContent)
         // Don't save to the cloud unless CloudProjectSaver is used explicitly
     }
 
-    override suspend fun deleteProject(userId: String, projectId: String) {
+    override suspend fun deleteProject(
+        userId: String,
+        projectId: String,
+    ) {
         localProjectSaver.deleteProject(userId, projectId)
         cloudProjectSaver.deleteProject(userId, projectId)
     }

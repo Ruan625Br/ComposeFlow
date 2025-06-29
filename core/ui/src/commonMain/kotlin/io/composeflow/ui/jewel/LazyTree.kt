@@ -71,15 +71,16 @@ fun <T> NoneSelectionLazyTree(
     style: LazyTreeStyle = JewelTheme.treeStyle,
     nodeContent: @Composable (SelectableLazyItemScope.(Tree.Element<T>) -> Unit),
 ) {
-    val colors = LazyTreeColors(
-        elementBackgroundFocused = style.colors.elementBackgroundFocused,
-        elementBackgroundSelected = Color.Transparent,
-        elementBackgroundSelectedFocused = Color.Transparent,
-        content = style.colors.content,
-        contentFocused = style.colors.contentFocused,
-        contentSelected = style.colors.contentSelected,
-        contentSelectedFocused = style.colors.contentSelectedFocused,
-    )
+    val colors =
+        LazyTreeColors(
+            elementBackgroundFocused = style.colors.elementBackgroundFocused,
+            elementBackgroundSelected = Color.Transparent,
+            elementBackgroundSelectedFocused = Color.Transparent,
+            content = style.colors.content,
+            contentFocused = style.colors.contentFocused,
+            contentSelected = style.colors.contentSelected,
+            contentSelectedFocused = style.colors.contentSelectedFocused,
+        )
     LazyTreeWithSelectionMode(
         tree = tree,
         selectionMode = SelectionMode.None,
@@ -89,11 +90,12 @@ fun <T> NoneSelectionLazyTree(
         onElementDoubleClick = onElementDoubleClick,
         onSelectionChange = onSelectionChange,
         keyActions = keyActions,
-        style = LazyTreeStyle(
-            colors = colors,
-            metrics = style.metrics,
-            icons = style.icons,
-        ),
+        style =
+            LazyTreeStyle(
+                colors = colors,
+                metrics = style.metrics,
+                icons = style.icons,
+            ),
         nodeContent = nodeContent,
     )
 }
@@ -143,15 +145,16 @@ private fun <T> LazyTreeWithSelectionMode(
             Icon(painter = painter, contentDescription = null)
         },
     ) {
-        val resolvedContentColor = style.colors
-            .contentFor(
-                TreeElementState.of(
-                    focused = isActive,
-                    selected = isSelected,
-                    expanded = false,
-                ),
-            )
-            .value.takeOrElse { LocalContentColor.current }
+        val resolvedContentColor =
+            style.colors
+                .contentFor(
+                    TreeElementState.of(
+                        focused = isActive,
+                        selected = isSelected,
+                        expanded = false,
+                    ),
+                ).value
+                .takeOrElse { LocalContentColor.current }
 
         CompositionLocalProvider(LocalContentColor provides resolvedContentColor) {
             nodeContent(it)
@@ -160,31 +163,32 @@ private fun <T> LazyTreeWithSelectionMode(
 }
 
 @Composable
-fun ProvideLazyTreeStyle(
-    content: @Composable () -> Unit,
-) {
+fun ProvideLazyTreeStyle(content: @Composable () -> Unit) {
     val localTreeStyle = LocalLazyTreeStyle.current
-    val lazyTreeColors = LazyTreeColors(
-        elementBackgroundFocused = MaterialTheme.colorScheme.surface,
-        elementBackgroundSelected = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
-        elementBackgroundSelectedFocused = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
-        content = MaterialTheme.colorScheme.onSurface,
-        contentFocused = localTreeStyle.colors.contentFocused,
-        contentSelected = localTreeStyle.colors.contentSelected,
-        contentSelectedFocused = localTreeStyle.colors.contentSelectedFocused,
-    )
-    val treeStyle = LazyTreeStyle(
-        colors = lazyTreeColors,
-        metrics = LazyTreeMetrics(
-            indentSize = localTreeStyle.metrics.indentSize,
-            elementBackgroundCornerSize = CornerSize(8.dp),
-            elementPadding = localTreeStyle.metrics.elementPadding,
-            elementContentPadding = localTreeStyle.metrics.elementContentPadding,
-            elementMinHeight = localTreeStyle.metrics.elementMinHeight,
-            chevronContentGap = localTreeStyle.metrics.chevronContentGap,
-        ),
-        icons = localTreeStyle.icons,
-    )
+    val lazyTreeColors =
+        LazyTreeColors(
+            elementBackgroundFocused = MaterialTheme.colorScheme.surface,
+            elementBackgroundSelected = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
+            elementBackgroundSelectedFocused = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
+            content = MaterialTheme.colorScheme.onSurface,
+            contentFocused = localTreeStyle.colors.contentFocused,
+            contentSelected = localTreeStyle.colors.contentSelected,
+            contentSelectedFocused = localTreeStyle.colors.contentSelectedFocused,
+        )
+    val treeStyle =
+        LazyTreeStyle(
+            colors = lazyTreeColors,
+            metrics =
+                LazyTreeMetrics(
+                    indentSize = localTreeStyle.metrics.indentSize,
+                    elementBackgroundCornerSize = CornerSize(8.dp),
+                    elementPadding = localTreeStyle.metrics.elementPadding,
+                    elementContentPadding = localTreeStyle.metrics.elementContentPadding,
+                    elementMinHeight = localTreeStyle.metrics.elementMinHeight,
+                    chevronContentGap = localTreeStyle.metrics.chevronContentGap,
+                ),
+            icons = localTreeStyle.icons,
+        )
     CompositionLocalProvider(LocalLazyTreeStyle provides treeStyle) {
         content()
     }

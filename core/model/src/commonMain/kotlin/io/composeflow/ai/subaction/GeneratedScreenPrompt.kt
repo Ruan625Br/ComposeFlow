@@ -4,7 +4,6 @@ import io.composeflow.model.project.appscreen.screen.Screen
 import kotlin.uuid.Uuid
 
 sealed interface GeneratedScreenPrompt {
-
     val id: String
     val screenName: String
 

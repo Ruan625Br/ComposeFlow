@@ -47,14 +47,12 @@ data class SliderTrait(
     val enabled: AssignableProperty? = null,
     val steps: AssignableProperty? = null,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Value", value, ComposeFlowType.FloatType()),
             PropertyContainer("Enabled", enabled, ComposeFlowType.BooleanType()),
             PropertyContainer("Steps", steps, ComposeFlowType.IntType()),
         )
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -86,8 +84,8 @@ data class SliderTrait(
                     project,
                     canvasEditable,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
         }
         codeBlockBuilder.addStatement("},")
@@ -106,26 +104,32 @@ data class SliderTrait(
 
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
-            trait = mutableStateOf(
-                SliderTrait(
-                    value = FloatProperty.FloatIntrinsicValue()
-                )
-            )
+            trait =
+                mutableStateOf(
+                    SliderTrait(
+                        value = FloatProperty.FloatIntrinsicValue(),
+                    ),
+                ),
         )
 
     override fun icon(): ImageVector = ComposeFlowIcons.Slider
+
     override fun iconText(): String = "Slider"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_slider_trait
+
     override fun isResizeable(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
-    override fun companionState(composeNode: ComposeNode): ScreenState<*> {
-        return ScreenState.FloatScreenState(
+
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> =
+        ScreenState.FloatScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
             companionNodeId = composeNode.id,
         )
-    }
 
     override fun onAttachStateToNode(
         project: Project,
@@ -158,10 +162,11 @@ data class SliderTrait(
             onValueChange = {
                 value = it
             },
-            steps = when (steps) {
-                is IntProperty.IntIntrinsicValue -> steps.value
-                else -> 0
-            },
+            steps =
+                when (steps) {
+                    is IntProperty.IntIntrinsicValue -> steps.value
+                    else -> 0
+                },
             enabled =
                 when (enabled) {
                     is BooleanProperty.BooleanIntrinsicValue -> enabled.value
@@ -169,16 +174,18 @@ data class SliderTrait(
                     BooleanProperty.Empty -> false
                     else -> true
                 },
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         )
     }
 
@@ -199,13 +206,12 @@ data class SliderTrait(
                 node = node,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()
     }
 }
-

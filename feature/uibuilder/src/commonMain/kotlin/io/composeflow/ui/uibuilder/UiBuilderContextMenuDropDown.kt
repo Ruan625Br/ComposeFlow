@@ -94,9 +94,10 @@ fun UiBuilderContextMenuDropDown(
         onDismissRequest = {
             onCloseMenu()
         },
-        modifier = Modifier
-            .width(280.dp)
-            .background(color = MaterialTheme.colorScheme.surfaceVariant)
+        modifier =
+            Modifier
+                .width(280.dp)
+                .background(color = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         DropdownMenuItem(text = {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -229,7 +230,8 @@ fun UiBuilderContextMenuDropDown(
 
         if (focusedNode?.isRoot() == false &&
             !focusedNode.isContentRoot() &&
-            focusedNode.trait.value.isEditable() && !focusedNode.isContentRoot() &&
+            focusedNode.trait.value.isEditable() &&
+            !focusedNode.isContentRoot() &&
             TraitCategory.ScreenOnly !in focusedNode.trait.value.paletteCategories()
         ) {
             HorizontalDivider(
@@ -254,11 +256,12 @@ fun UiBuilderContextMenuDropDown(
                         imageVector = Icons.Outlined.ChevronRight,
                         contentDescription = "",
                         tint = MaterialTheme.colorScheme.secondary,
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .onPointerEvent(PointerEventType.Enter) {
-                                wrapWithMenuExpanded = true
-                            },
+                        modifier =
+                            Modifier
+                                .padding(start = 8.dp)
+                                .onPointerEvent(PointerEventType.Enter) {
+                                    wrapWithMenuExpanded = true
+                                },
                     )
                 }
             }, onClick = {
@@ -271,7 +274,7 @@ fun UiBuilderContextMenuDropDown(
                     onDismissRequest = {
                         wrapWithMenuExpanded = false
                     },
-                    modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant)
+                    modifier = Modifier.background(color = MaterialTheme.colorScheme.surfaceVariant),
                 ) {
                     ComposeTrait.entries
                         .filter { TraitCategory.WrapContainer in it.paletteCategories() }
@@ -298,7 +301,7 @@ fun UiBuilderContextMenuDropDown(
                                         container,
                                     )
                                     onCloseMenu()
-                                }
+                                },
                             )
                         }
                 }
@@ -321,11 +324,12 @@ fun UiBuilderContextMenuDropDown(
                 DropdownMenuItem(text = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.mousePointerEvents(
-                            node = it,
-                            onFocusedStatusUpdated = onFocusedStatusUpdated,
-                            onHoveredStatusUpdated = onHoveredStatusUpdated,
-                        ),
+                        modifier =
+                            Modifier.mousePointerEvents(
+                                node = it,
+                                onFocusedStatusUpdated = onFocusedStatusUpdated,
+                                onHoveredStatusUpdated = onHoveredStatusUpdated,
+                            ),
                     ) {
                         Icon(
                             imageVector = it.trait.value.icon(),
@@ -503,5 +507,4 @@ private fun ContextMenuEditItems(
         canvasNodeCallbacks.onSendToBack()
         onCloseMenu()
     })
-
 }

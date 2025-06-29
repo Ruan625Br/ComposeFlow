@@ -39,11 +39,12 @@ class ApiEditorViewModel(
     // This may conflicts with the [project] field in this ViewModel, but to detect the real time
     // updates when the Project.ScreenHolder.pending* fields, having this field.
     // This may need to be commonized with the [project] field
-    val editingProject = projectRepository.editingProject.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = Project(),
-    )
+    val editingProject =
+        projectRepository.editingProject.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = Project(),
+        )
 
     var focusedApiIndex by mutableStateOf<Int?>(null)
         private set
@@ -98,17 +99,20 @@ class ApiEditorViewModel(
     }
 
     fun onApiDefinitionCopied(apiDefinition: ApiDefinition) {
-        val newName = generateUniqueName(
-            initial = "${apiDefinition.name}_copy",
-            existing = project.apiHolder.apiDefinitions.map { it.name }.toSet()
-        )
+        val newName =
+            generateUniqueName(
+                initial = "${apiDefinition.name}_copy",
+                existing =
+                    project.apiHolder.apiDefinitions
+                        .map { it.name }
+                        .toSet(),
+            )
         project.apiHolder.apiDefinitions.add(
             apiDefinition.copy(
                 id = Uuid.random().toString(),
-                name = newName
-            )
+                name = newName,
+            ),
         )
-
 
         saveProject()
     }
@@ -128,15 +132,18 @@ class ApiEditorViewModel(
         val api = apiDefinitionInEdit ?: return
         coroutineScope.launch {
             _apiResponse.value = ApiResponseUiState.Loading
-            _apiResponse.value = apiCallRepository.makeApiCall(
-                api,
-            ).asResult().map {
-                when (it) {
-                    is Result.Error -> ApiResponseUiState.Error(it.exception)
-                    Result.Loading -> ApiResponseUiState.Loading
-                    is Result.Success -> ApiResponseUiState.Success(it.data)
-                }
-            }.last()
+            _apiResponse.value =
+                apiCallRepository
+                    .makeApiCall(
+                        api,
+                    ).asResult()
+                    .map {
+                        when (it) {
+                            is Result.Error -> ApiResponseUiState.Error(it.exception)
+                            Result.Loading -> ApiResponseUiState.Loading
+                            is Result.Success -> ApiResponseUiState.Success(it.data)
+                        }
+                    }.last()
         }
     }
 

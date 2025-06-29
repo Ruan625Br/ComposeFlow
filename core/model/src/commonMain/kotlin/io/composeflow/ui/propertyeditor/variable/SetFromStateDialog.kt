@@ -131,17 +131,19 @@ fun <P : AssignableProperty> SetFromStateDialog(
                 initialProperty is ConditionalProperty,
             )
         }
-        val overlayModifier = if (conditionalPropertyDialogOpen) {
-            Modifier.alpha(0.2f)
-        } else {
-            Modifier
-        }
+        val overlayModifier =
+            if (conditionalPropertyDialogOpen) {
+                Modifier.alpha(0.2f)
+            } else {
+                Modifier
+            }
         Surface(
             modifier = Modifier.size(width = 860.dp, height = 920.dp),
         ) {
             Column(
-                modifier = overlayModifier
-                    .padding(all = 16.dp),
+                modifier =
+                    overlayModifier
+                        .padding(all = 16.dp),
             ) {
                 var selectedProperty by remember(initialProperty) { mutableStateOf(initialProperty) }
                 var selectedLazyListSource by remember(initialProperty) {
@@ -153,8 +155,8 @@ fun <P : AssignableProperty> SetFromStateDialog(
                 var searchParams by remember {
                     mutableStateOf(
                         SearchStatesParams(
-                            acceptableType = acceptableType
-                        )
+                            acceptableType = acceptableType,
+                        ),
                     )
                 }
 
@@ -170,27 +172,29 @@ fun <P : AssignableProperty> SetFromStateDialog(
                     modifier = Modifier.weight(1f),
                 ) {
                     Column(
-                        modifier = Modifier.weight(4f)
+                        modifier = Modifier.weight(4f),
                     ) {
                         Text(
                             buildAnnotatedString {
                                 val textStyle = MaterialTheme.typography.bodyMedium
                                 withStyle(
-                                    style = SpanStyle(
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        fontSize = textStyle.fontSize,
-                                        fontWeight = textStyle.fontWeight,
-                                        fontStyle = textStyle.fontStyle,
-                                    ),
-                                ) {
-                                    append(stringResource(Res.string.set_from_state_for))
-                                    withStyle(
-                                        style = SpanStyle(
-                                            color = MaterialTheme.colorScheme.tertiary,
+                                    style =
+                                        SpanStyle(
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             fontSize = textStyle.fontSize,
                                             fontWeight = textStyle.fontWeight,
                                             fontStyle = textStyle.fontStyle,
                                         ),
+                                ) {
+                                    append(stringResource(Res.string.set_from_state_for))
+                                    withStyle(
+                                        style =
+                                            SpanStyle(
+                                                color = MaterialTheme.colorScheme.tertiary,
+                                                fontSize = textStyle.fontSize,
+                                                fontWeight = textStyle.fontWeight,
+                                                fontStyle = textStyle.fontStyle,
+                                            ),
                                     ) {
                                         append(acceptableType.displayName(project))
                                     }
@@ -203,12 +207,14 @@ fun <P : AssignableProperty> SetFromStateDialog(
                             params = searchParams,
                             onSearchParamsUpdated = {
                                 searchParams = it
-                            }
+                            },
                         )
 
-                        val nodeToDynamicItems = node.findNodesUntilRoot()
-                            .filter { it.dynamicItems.value != null }
-                            .associateWith { it.dynamicItems.value!! }
+                        val nodeToDynamicItems =
+                            node
+                                .findNodesUntilRoot()
+                                .filter { it.dynamicItems.value != null }
+                                .associateWith { it.dynamicItems.value!! }
 
                         val currentEditable = project.screenHolder.currentEditable()
 
@@ -218,9 +224,10 @@ fun <P : AssignableProperty> SetFromStateDialog(
                                 onPropertySelected = {
                                     selectedProperty = it
                                 },
-                                properties = AuthenticatedUserState.entries().map {
-                                    ValueFromGlobalProperty(it)
-                                },
+                                properties =
+                                    AuthenticatedUserState.entries().map {
+                                        ValueFromGlobalProperty(it)
+                                    },
                                 selectedProperty = selectedProperty,
                                 searchParams = searchParams,
                             )
@@ -239,10 +246,12 @@ fun <P : AssignableProperty> SetFromStateDialog(
 
                             AppStateViewer(
                                 project = project,
-                                properties = currentEditable.getStateResults(project)
-                                    .filter { it.first == StateHolderType.Global }
-                                    .map { it.second }
-                                    .map { ValueFromState(it.id) },
+                                properties =
+                                    currentEditable
+                                        .getStateResults(project)
+                                        .filter { it.first == StateHolderType.Global }
+                                        .map { it.second }
+                                        .map { ValueFromState(it.id) },
                                 onStateSelected = {
                                     selectedProperty = it
                                 },
@@ -255,10 +264,12 @@ fun <P : AssignableProperty> SetFromStateDialog(
                                 ScreenStateViewer(
                                     project = project,
                                     screen = currentEditable,
-                                    properties = currentEditable.getStateResults(project)
-                                        .filter { it.first is StateHolderType.Screen }
-                                        .map { it.second }
-                                        .map { ValueFromState(it.id) },
+                                    properties =
+                                        currentEditable
+                                            .getStateResults(project)
+                                            .filter { it.first is StateHolderType.Screen }
+                                            .map { it.second }
+                                            .map { ValueFromState(it.id) },
                                     onStateSelected = {
                                         selectedProperty = it
                                     },
@@ -270,10 +281,12 @@ fun <P : AssignableProperty> SetFromStateDialog(
                                 ComponentStateViewer(
                                     project = project,
                                     component = currentEditable,
-                                    properties = currentEditable.getStateResults(project)
-                                        .filter { it.first is StateHolderType.Component }
-                                        .map { it.second }
-                                        .map { ValueFromState(it.id) },
+                                    properties =
+                                        currentEditable
+                                            .getStateResults(project)
+                                            .filter { it.first is StateHolderType.Component }
+                                            .map { it.second }
+                                            .map { ValueFromState(it.id) },
                                     onStateSelected = {
                                         selectedProperty = it
                                     },
@@ -282,12 +295,15 @@ fun <P : AssignableProperty> SetFromStateDialog(
                                     destinationStateId = destinationStateId,
                                 )
                             }
-                            if (project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.isNotEmpty()) {
+                            if (project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections
+                                    .isNotEmpty()
+                            ) {
                                 FirestoreCollectionViewer(
                                     project = project,
-                                    properties = project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.map {
-                                        FirestoreCollectionProperty(collectionId = it.id)
-                                    },
+                                    properties =
+                                        project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.map {
+                                            FirestoreCollectionProperty(collectionId = it.id)
+                                        },
                                     onPropertySelected = {
                                         selectedProperty = it
                                     },
@@ -298,9 +314,10 @@ fun <P : AssignableProperty> SetFromStateDialog(
                             if (project.customEnumHolder.enumList.isNotEmpty()) {
                                 EnumViewer(
                                     project = project,
-                                    properties = project.customEnumHolder.enumList.map {
-                                        CustomEnumValuesProperty(customEnumId = it.customEnumId)
-                                    },
+                                    properties =
+                                        project.customEnumHolder.enumList.map {
+                                            CustomEnumValuesProperty(customEnumId = it.customEnumId)
+                                        },
                                     onPropertySelected = {
                                         selectedProperty = it
                                     },
@@ -311,9 +328,10 @@ fun <P : AssignableProperty> SetFromStateDialog(
                             if (project.apiHolder.getValidApiDefinitions().isNotEmpty()) {
                                 ApiDefinitionViewer(
                                     project = project,
-                                    properties = project.apiHolder.apiDefinitions.map {
-                                        ApiResultProperty(it.id)
-                                    },
+                                    properties =
+                                        project.apiHolder.apiDefinitions.map {
+                                            ApiResultProperty(it.id)
+                                        },
                                     onPropertySelected = {
                                         selectedProperty = it
                                     },
@@ -348,9 +366,10 @@ fun <P : AssignableProperty> SetFromStateDialog(
                             lazyLists.forEach { lazyList ->
                                 LazyListChildViewer(
                                     project = project,
-                                    property = IntProperty.ValueFromLazyListIndex(
-                                        lazyListNodeId = lazyList.id,
-                                    ),
+                                    property =
+                                        IntProperty.ValueFromLazyListIndex(
+                                            lazyListNodeId = lazyList.id,
+                                        ),
                                     onAssignablePropertyChanged = { assignableProperty, _ ->
                                         selectedProperty = assignableProperty
                                     },
@@ -372,15 +391,17 @@ fun <P : AssignableProperty> SetFromStateDialog(
                                     onDismissRequest = closeConditionalPropertyDialog,
                                 ) {
                                     Surface(
-                                        modifier = Modifier
-                                            .width(616.dp)
-                                            .height(720.dp),
+                                        modifier =
+                                            Modifier
+                                                .width(616.dp)
+                                                .height(720.dp),
                                     ) {
                                         Column(
-                                            modifier = Modifier.background(
-                                                MaterialTheme.colorScheme.surfaceContainer
-                                            )
-                                                .fillMaxSize()
+                                            modifier =
+                                                Modifier
+                                                    .background(
+                                                        MaterialTheme.colorScheme.surfaceContainer,
+                                                    ).fillMaxSize(),
                                         ) {
                                             val conditionalProperty =
                                                 if (initialProperty is ConditionalProperty) {
@@ -407,10 +428,11 @@ fun <P : AssignableProperty> SetFromStateDialog(
 
                     Row(modifier = Modifier.weight(3f)) {
                         VerticalDivider(
-                            modifier = Modifier.padding(
-                                end = 16.dp,
-                                bottom = 16.dp,
-                            ),
+                            modifier =
+                                Modifier.padding(
+                                    end = 16.dp,
+                                    bottom = 16.dp,
+                                ),
                         )
                         SelectedPropertyEditor(
                             project = project,
@@ -558,48 +580,54 @@ private fun AuthenticatedUserStateViewer(
     searchParams: SearchStatesParams,
 ) {
     val authEnabled = project.firebaseAppInfoHolder.firebaseAppInfo.authenticationEnabled.value
-    val filteredProperties = if (!authEnabled) {
-        emptyList()
-    } else {
-        properties.filter {
-            searchParams.matchCriteria(
-                project,
-                it
-            )
-        }
-    }
-    val initiallyExpanded = if (selectedProperty is ValueFromGlobalProperty &&
-        selectedProperty.readableState is AuthenticatedUserState
-    ) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredProperties.isNotEmpty()
+    val filteredProperties =
+        if (!authEnabled) {
+            emptyList()
         } else {
-            false
+            properties.filter {
+                searchParams.matchCriteria(
+                    project,
+                    it,
+                )
+            }
         }
-    }
+    val initiallyExpanded =
+        if (selectedProperty is ValueFromGlobalProperty &&
+            selectedProperty.readableState is AuthenticatedUserState
+        ) {
+            true
+        } else {
+            if (searchParams.isFilterEnabled) {
+                filteredProperties.isNotEmpty()
+            } else {
+                false
+            }
+        }
 
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val authEnabledAndValidPropertiesExist = authEnabled && filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (authEnabledAndValidPropertiesExist) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (authEnabledAndValidPropertiesExist) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         val enableAuthToProceed = stringResource(Res.string.enable_auth_to_proceed)
         if (authEnabled) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-                    .then(switchedModifier),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .then(switchedModifier),
             ) {
                 TreeExpander(
                     expanded = expanded,
@@ -619,8 +647,10 @@ private fun AuthenticatedUserStateViewer(
             Tooltip(enableAuthToProceed) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                        .then(switchedModifier),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .then(switchedModifier),
                 ) {
                     TreeExpander(
                         expanded = expanded,
@@ -633,8 +663,10 @@ private fun AuthenticatedUserStateViewer(
                         text = "Authenticated user (${filteredProperties.size})",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                            .alpha(0.5f),
+                        modifier =
+                            Modifier
+                                .padding(vertical = 8.dp)
+                                .alpha(0.5f),
                     )
                 }
             }
@@ -650,8 +682,7 @@ private fun AuthenticatedUserStateViewer(
                                 .background(
                                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
+                                ).padding(8.dp)
                         } else {
                             Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                         }
@@ -692,21 +723,25 @@ private fun StateViewer(
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-                .then(switchedModifier),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(switchedModifier),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -733,23 +768,23 @@ private fun StateViewer(
                                 .background(
                                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
+                                ).padding(8.dp)
                         } else {
                             Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                         }
                     val isDestinationEqualToSource =
                         destinationStateId != null &&
-                                destinationStateId == (property as? ValueFromState)?.readFromStateId
+                            destinationStateId == (property as? ValueFromState)?.readFromStateId
 
                     val isValidState = !isDestinationEqualToSource
-                    val onLabelClicked: ((AssignableProperty) -> Unit)? = if (isValidState) {
-                        {
-                            onStateSelected(it)
+                    val onLabelClicked: ((AssignableProperty) -> Unit)? =
+                        if (isValidState) {
+                            {
+                                onStateSelected(it)
+                            }
+                        } else {
+                            null
                         }
-                    } else {
-                        null
-                    }
 
                     if (isValidState) {
                         AssignablePropertyLabel(
@@ -757,23 +792,24 @@ private fun StateViewer(
                             enabled = true,
                             onLabelClicked = onLabelClicked,
                             property = property,
-                            modifier = selectedModifier
+                            modifier = selectedModifier,
                         )
                     } else {
                         val destinationState =
                             destinationStateId?.let { project.findLocalStateOrNull(it) }
-                        val tooltipText = stringResource(
-                            Res.string.is_not_assignable_state,
-                            property.displayText(project),
-                            destinationState?.name ?: "",
-                        )
+                        val tooltipText =
+                            stringResource(
+                                Res.string.is_not_assignable_state,
+                                property.displayText(project),
+                                destinationState?.name ?: "",
+                            )
                         Tooltip(tooltipText) {
                             AssignablePropertyLabel(
                                 project = project,
                                 enabled = false,
                                 onLabelClicked = onLabelClicked,
                                 property = property,
-                                modifier = selectedModifier
+                                modifier = selectedModifier,
                             )
                         }
                     }
@@ -827,21 +863,25 @@ private fun EnumViewer(
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-                .then(switchedModifier),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(switchedModifier),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -868,19 +908,18 @@ private fun EnumViewer(
                                 .background(
                                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
+                                ).padding(8.dp)
                         } else {
                             Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                         }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = modifier
-                            .clickable {
-                                onPropertySelected(property)
-                            }
-                            .then(selectedModifier),
+                        modifier =
+                            modifier
+                                .clickable {
+                                    onPropertySelected(property)
+                                }.then(selectedModifier),
                     ) {
                         Text(
                             property.displayText(project),
@@ -923,21 +962,25 @@ private fun FirestoreCollectionViewer(
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-                .then(switchedModifier),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(switchedModifier),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -964,19 +1007,18 @@ private fun FirestoreCollectionViewer(
                                 .background(
                                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
+                                ).padding(8.dp)
                         } else {
                             Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                         }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = modifier
-                            .clickable {
-                                onPropertySelected(property)
-                            }
-                            .then(selectedModifier),
+                        modifier =
+                            modifier
+                                .clickable {
+                                    onPropertySelected(property)
+                                }.then(selectedModifier),
                     ) {
                         Text(
                             property.displayText(project),
@@ -1019,21 +1061,25 @@ private fun ApiDefinitionViewer(
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-                .then(switchedModifier),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(switchedModifier),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -1060,19 +1106,18 @@ private fun ApiDefinitionViewer(
                                 .background(
                                     color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                                     shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
+                                ).padding(8.dp)
                         } else {
                             Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                         }
 
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = modifier
-                            .clickable {
-                                onPropertySelected(property)
-                            }
-                            .then(selectedModifier),
+                        modifier =
+                            modifier
+                                .clickable {
+                                    onPropertySelected(property)
+                                }.then(selectedModifier),
                     ) {
                         Text(
                             property.displayText(project),
@@ -1111,35 +1156,40 @@ private fun ParameterViewer(
 ) {
     val filteredParameters = parameters.filter { searchParams.matchCriteria(project, it) }
 
-    val initiallyExpanded = if (selectedProperty is ComposableParameterProperty &&
-        parameters.any { it.id == selectedProperty.parameterId }
-    ) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredParameters.isNotEmpty()
+    val initiallyExpanded =
+        if (selectedProperty is ComposableParameterProperty &&
+            parameters.any { it.id == selectedProperty.parameterId }
+        ) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                filteredParameters.isNotEmpty()
+            } else {
+                false
+            }
         }
-    }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredParameters.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-                .then(switchedModifier),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(switchedModifier),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -1148,11 +1198,12 @@ private fun ParameterViewer(
                     onExpandClick()
                 },
             )
-            val paramName = when (canvasEditable) {
-                is Screen -> stringResource(Res.string.screen_parameters)
-                is Component -> stringResource(Res.string.component_parameters)
-                else -> stringResource(Res.string.parameters)
-            }
+            val paramName =
+                when (canvasEditable) {
+                    is Screen -> stringResource(Res.string.screen_parameters)
+                    is Component -> stringResource(Res.string.component_parameters)
+                    else -> stringResource(Res.string.parameters)
+                }
             Text(
                 text = "$paramName (${filteredParameters.size})",
                 style = MaterialTheme.typography.bodyMedium,
@@ -1164,20 +1215,20 @@ private fun ParameterViewer(
         if (expanded) {
             Column {
                 filteredParameters.forEach { parameter ->
-                    val selectedModifier = if (
-                        selectedProperty is ComposableParameterProperty &&
-                        selectedProperty.parameterId == parameter.id
-                    ) {
-                        Modifier
-                            .padding(start = 24.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(8.dp)
-                    } else {
-                        Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-                    }
+                    val selectedModifier =
+                        if (
+                            selectedProperty is ComposableParameterProperty &&
+                            selectedProperty.parameterId == parameter.id
+                        ) {
+                            Modifier
+                                .padding(start = 24.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                ).padding(8.dp)
+                        } else {
+                            Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                        }
                     if (parameter.parameterType is ComposeFlowType.CustomDataType && !parameter.parameterType.isList) {
                         val dataType =
                             project.findDataTypeOrNull((parameter.parameterType as ComposeFlowType.CustomDataType).dataTypeId)
@@ -1189,23 +1240,23 @@ private fun ParameterViewer(
                                 selectedProperty = selectedProperty,
                                 initiallyExpanded = {
                                     selectedProperty is ComposableParameterProperty &&
-                                            selectedProperty.parameterId == parameter.id &&
-                                            selectedProperty.dataFieldType is DataFieldType.FieldInDataType
+                                        selectedProperty.parameterId == parameter.id &&
+                                        selectedProperty.dataFieldType is DataFieldType.FieldInDataType
                                 },
                                 dataFieldSelected = { dataField ->
                                     selectedProperty is ComposableParameterProperty &&
-                                            selectedProperty.parameterId == parameter.id &&
-                                            selectedProperty.dataFieldType is DataFieldType.FieldInDataType &&
-                                            selectedProperty.dataFieldType.fieldId == dataField.id
+                                        selectedProperty.parameterId == parameter.id &&
+                                        selectedProperty.dataFieldType is DataFieldType.FieldInDataType &&
+                                        selectedProperty.dataFieldType.fieldId == dataField.id
                                 },
                                 primitiveFieldSelected = {
                                     selectedProperty is ComposableParameterProperty &&
-                                            selectedProperty.parameterId == parameter.id &&
-                                            selectedProperty.dataFieldType is DataFieldType.Primitive
+                                        selectedProperty.parameterId == parameter.id &&
+                                        selectedProperty.dataFieldType is DataFieldType.Primitive
                                 },
                                 onDataFieldSelected = { selectedDataField ->
                                     onParameterFieldSelected(parameter, selectedDataField)
-                                }
+                                },
                             )
                         }
                     } else {
@@ -1213,8 +1264,10 @@ private fun ParameterViewer(
                             project = project,
                             fieldName = parameter.variableName,
                             type = parameter.parameterType,
-                            modifier = Modifier.padding(top = 4.dp)
-                                .then(selectedModifier),
+                            modifier =
+                                Modifier
+                                    .padding(top = 4.dp)
+                                    .then(selectedModifier),
                             onClick = {
                                 onParameterFieldSelected(parameter, DataFieldType.Primitive)
                             },
@@ -1237,37 +1290,42 @@ private fun FunctionParameterViewer(
     selectedProperty: AssignableProperty? = null,
 ) {
     val filteredProperties = functionParameters.filter { searchParams.matchCriteria(project, it) }
-    val initiallyExpanded = if (selectedProperty is FunctionScopeParameterProperty &&
-        functionParameters.any {
-            it.id == selectedProperty.id
-        }
-    ) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredProperties.isNotEmpty()
+    val initiallyExpanded =
+        if (selectedProperty is FunctionScopeParameterProperty &&
+            functionParameters.any {
+                it.id == selectedProperty.id
+            }
+        ) {
+            true
         } else {
-            false
+            if (searchParams.isFilterEnabled) {
+                filteredProperties.isNotEmpty()
+            } else {
+                false
+            }
         }
-    }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredProperties.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-                .then(switchedModifier),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .then(switchedModifier),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -1297,48 +1355,50 @@ private fun FunctionParameterViewer(
                                 selectedProperty = selectedProperty,
                                 initiallyExpanded = {
                                     selectedProperty is FunctionScopeParameterProperty &&
-                                            selectedProperty.id == parameter.id &&
-                                            selectedProperty.dataFieldType is DataFieldType.FieldInDataType
+                                        selectedProperty.id == parameter.id &&
+                                        selectedProperty.dataFieldType is DataFieldType.FieldInDataType
                                 },
                                 dataFieldSelected = { dataField ->
                                     selectedProperty is FunctionScopeParameterProperty &&
-                                            selectedProperty.id == parameter.id &&
-                                            selectedProperty.dataFieldType is DataFieldType.FieldInDataType &&
-                                            dataField.id == selectedProperty.dataFieldType.fieldId
+                                        selectedProperty.id == parameter.id &&
+                                        selectedProperty.dataFieldType is DataFieldType.FieldInDataType &&
+                                        dataField.id == selectedProperty.dataFieldType.fieldId
                                 },
                                 primitiveFieldSelected = {
                                     selectedProperty is FunctionScopeParameterProperty &&
-                                            selectedProperty.id == parameter.id &&
-                                            selectedProperty.dataFieldType is DataFieldType.Primitive
+                                        selectedProperty.id == parameter.id &&
+                                        selectedProperty.dataFieldType is DataFieldType.Primitive
                                 },
                                 onDataFieldSelected = { selectedDataField ->
                                     onFunctionParameterSelected(
-                                        parameter.copy(dataFieldType = selectedDataField)
+                                        parameter.copy(dataFieldType = selectedDataField),
                                     )
-                                }
+                                },
                             )
                         }
                     } else {
-                        val selectedModifier = if (
-                            selectedProperty is FunctionScopeParameterProperty &&
-                            selectedProperty.id == parameter.id
-                        ) {
-                            Modifier
-                                .padding(start = 24.dp)
-                                .background(
-                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                                    shape = RoundedCornerShape(8.dp),
-                                )
-                                .padding(8.dp)
-                        } else {
-                            Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-                        }
+                        val selectedModifier =
+                            if (
+                                selectedProperty is FunctionScopeParameterProperty &&
+                                selectedProperty.id == parameter.id
+                            ) {
+                                Modifier
+                                    .padding(start = 24.dp)
+                                    .background(
+                                        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                        shape = RoundedCornerShape(8.dp),
+                                    ).padding(8.dp)
+                            } else {
+                                Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                            }
                         FieldRow(
                             project = project,
                             fieldName = parameter.variableName,
                             type = parameter.variableType,
-                            modifier = Modifier.padding(top = 4.dp)
-                                .then(selectedModifier),
+                            modifier =
+                                Modifier
+                                    .padding(top = 4.dp)
+                                    .then(selectedModifier),
                             onClick = {
                                 onFunctionParameterSelected(parameter)
                             },
@@ -1368,8 +1428,9 @@ private fun DataTypeViewer(
 
     val basePadding = (level * 32 - 8).dp
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1382,24 +1443,27 @@ private fun DataTypeViewer(
                 },
                 modifier = Modifier.padding(top = 4.dp),
             )
-            val selectedModifier = if (primitiveFieldSelected()) {
-                Modifier
-                    .background(
-                        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(8.dp),
-                    ).padding(4.dp)
-                    .padding(bottom = 4.dp)
-            } else {
-                Modifier.padding(4.dp)
-                    .padding(bottom = 4.dp)
-            }
+            val selectedModifier =
+                if (primitiveFieldSelected()) {
+                    Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(8.dp),
+                        ).padding(4.dp)
+                        .padding(bottom = 4.dp)
+                } else {
+                    Modifier
+                        .padding(4.dp)
+                        .padding(bottom = 4.dp)
+                }
             FieldRow(
                 project = project,
                 fieldName = fieldName,
                 type = ComposeFlowType.CustomDataType(dataTypeId = dataType.id),
-                modifier = Modifier
-                    .then(selectedModifier)
-                    .padding(top = 4.dp),
+                modifier =
+                    Modifier
+                        .then(selectedModifier)
+                        .padding(top = 4.dp),
                 onClick = {
                     // TODO: Consider nested DataType
                     onDataFieldSelected(DataFieldType.Primitive)
@@ -1409,17 +1473,17 @@ private fun DataTypeViewer(
         if (dataTypeExpanded) {
             Column(modifier = Modifier.padding(start = basePadding)) {
                 dataType.fields.forEach { field ->
-                    val selectedModifier = if (dataFieldSelected(field)) {
-                        Modifier
-                            .padding(start = 24.dp)
-                            .background(
-                                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .padding(8.dp)
-                    } else {
-                        Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-                    }
+                    val selectedModifier =
+                        if (dataFieldSelected(field)) {
+                            Modifier
+                                .padding(start = 24.dp)
+                                .background(
+                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                                    shape = RoundedCornerShape(8.dp),
+                                ).padding(8.dp)
+                        } else {
+                            Modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+                        }
                     if (field.fieldType is FieldType.CustomDataType) {
                         val childDataType = project.findDataTypeOrThrow(field.fieldType.dataTypeId)
                         DataTypeViewer(
@@ -1443,8 +1507,8 @@ private fun DataTypeViewer(
                                 onDataFieldSelected(
                                     DataFieldType.FieldInDataType(
                                         dataTypeId = dataType.id,
-                                        fieldId = field.id
-                                    )
+                                        fieldId = field.id,
+                                    ),
                                 )
                             },
                         )
@@ -1464,40 +1528,46 @@ private fun DynamicItemsViewer(
     modifier: Modifier = Modifier,
     selectedProperty: AssignableProperty? = null,
 ) {
-    val filteredNodeToDynamicItems = nodeToDynamicItems.filter {
-        searchParams.matchCriteria(
-            project,
-            displayText = it.value.displayText(project),
-            type = it.value.valueType(project).copyWith(newIsList = false)
-        )
-    }
-
-    val initiallyExpanded = if (nodeToDynamicItems.any {
-            selectedProperty is ValueFromDynamicItem &&
-                    it.key.id == selectedProperty.composeNodeId
-        }) {
-        true
-    } else {
-        if (searchParams.isFilterEnabled) {
-            filteredNodeToDynamicItems.isNotEmpty()
-        } else {
-            false
+    val filteredNodeToDynamicItems =
+        nodeToDynamicItems.filter {
+            searchParams.matchCriteria(
+                project,
+                displayText = it.value.displayText(project),
+                type = it.value.valueType(project).copyWith(newIsList = false),
+            )
         }
-    }
+
+    val initiallyExpanded =
+        if (nodeToDynamicItems.any {
+                selectedProperty is ValueFromDynamicItem &&
+                    it.key.id == selectedProperty.composeNodeId
+            }
+        ) {
+            true
+        } else {
+            if (searchParams.isFilterEnabled) {
+                filteredNodeToDynamicItems.isNotEmpty()
+            } else {
+                false
+            }
+        }
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val enabled = filteredNodeToDynamicItems.entries.isNotEmpty()
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
+                onExpandClick()
+            }
+        } else {
+            Modifier.alpha(0.6f)
         }
-    } else {
-        Modifier.alpha(0.6f)
-    }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
-            .then(switchedModifier),
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .then(switchedModifier),
     ) {
         TreeExpander(
             expanded = expanded,
@@ -1568,11 +1638,13 @@ private fun JsonElementContent(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-            .padding(start = 32.dp)
-            .clickable {
-                onExpandClick()
-            },
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(start = 32.dp)
+                .clickable {
+                    onExpandClick()
+                },
     ) {
         Row {
             Text(
@@ -1583,8 +1655,11 @@ private fun JsonElementContent(
             )
 
             Text(
-                text = property.transformedValueType(project).copyWith(newIsList = false)
-                    .displayName(project),
+                text =
+                    property
+                        .transformedValueType(project)
+                        .copyWith(newIsList = false)
+                        .displayName(project),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.tertiary,
             )
@@ -1608,7 +1683,7 @@ private fun JsonElementContent(
                         it,
                         LazyListChildParams.DynamicItemsSource(dynamicItemEntry.key.id),
                     )
-                }
+                },
             )
         }
     }
@@ -1625,33 +1700,35 @@ private fun DynamicItemsListContent(
     val (composeNode, dynamicItem) = dynamicItemEntry
     val sourceType = dynamicItem.transformedValueType(project)
     if (sourceType.isPrimitive()) {
-        val selectedModifier = if (
-            selectedProperty is ValueFromDynamicItem &&
-            selectedProperty.composeNodeId == composeNode.id
-        ) {
-            modifier
-                .padding(start = 24.dp)
-                .background(
-                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .padding(8.dp)
-        } else {
-            modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
-        }
+        val selectedModifier =
+            if (
+                selectedProperty is ValueFromDynamicItem &&
+                selectedProperty.composeNodeId == composeNode.id
+            ) {
+                modifier
+                    .padding(start = 24.dp)
+                    .background(
+                        color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
+                        shape = RoundedCornerShape(8.dp),
+                    ).padding(8.dp)
+            } else {
+                modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
+            }
         FieldRow(
             project = project,
             fieldName = "item: ${dynamicItem.transformedValueExpression(project)}",
             type = sourceType,
-            modifier = Modifier.padding(top = 4.dp)
-                .then(selectedModifier),
+            modifier =
+                Modifier
+                    .padding(top = 4.dp)
+                    .then(selectedModifier),
             onClick = {
                 onAssignablePropertyChanged(
                     ValueFromDynamicItem(
                         composeNodeId = composeNode.id,
                         fieldType = DataFieldType.Primitive,
                     ),
-                    LazyListChildParams.DynamicItemsSource(composeNode.id)
+                    LazyListChildParams.DynamicItemsSource(composeNode.id),
                 )
             },
         )
@@ -1663,8 +1740,10 @@ private fun DynamicItemsListContent(
         val onExpandClick = { expanded = !expanded }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.fillMaxWidth()
-                .padding(start = 24.dp),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp),
         ) {
             TreeExpander(
                 expanded = expanded,
@@ -1687,23 +1766,23 @@ private fun DynamicItemsListContent(
                         .background(
                             color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(8.dp),
-                        )
-                        .padding(8.dp)
+                        ).padding(8.dp)
                 } else {
                     Modifier.padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                 }
             Row(
-                modifier = Modifier
-                    .then(selectedModifier)
-                    .clickable {
-                        onAssignablePropertyChanged(
-                            ValueFromDynamicItem(
-                                composeNodeId = composeNode.id,
-                                fieldType = DataFieldType.DataType(dataTypeId = dataType.id),
-                            ),
-                            LazyListChildParams.DynamicItemsSource(composeNode.id)
-                        )
-                    }
+                modifier =
+                    Modifier
+                        .then(selectedModifier)
+                        .clickable {
+                            onAssignablePropertyChanged(
+                                ValueFromDynamicItem(
+                                    composeNodeId = composeNode.id,
+                                    fieldType = DataFieldType.DataType(dataTypeId = dataType.id),
+                                ),
+                                LazyListChildParams.DynamicItemsSource(composeNode.id),
+                            )
+                        },
             ) {
                 Text(
                     text = dynamicItem.displayText(project),
@@ -1732,19 +1811,17 @@ private fun DynamicItemsListContent(
                 }
 
             @Composable
-            fun SelectedModifier(selected: Boolean): Modifier {
-                return if (selected) {
+            fun SelectedModifier(selected: Boolean): Modifier =
+                if (selected) {
                     Modifier
                         .padding(start = 56.dp)
                         .background(
                             color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(8.dp),
-                        )
-                        .padding(8.dp)
+                        ).padding(8.dp)
                 } else {
                     Modifier.padding(start = 64.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                 }
-            }
 
             if (dynamicItemEntry.value is FirestoreCollectionProperty) {
                 val collectionId =
@@ -1760,17 +1837,20 @@ private fun DynamicItemsListContent(
                                 composeNodeId = composeNode.id,
                                 fieldType = DataFieldType.DocumentId(collectionId),
                             ),
-                            LazyListChildParams.DynamicItemsSource(composeNode.id)
+                            LazyListChildParams.DynamicItemsSource(composeNode.id),
                         )
                     },
-                    modifier = Modifier.padding(top = 4.dp)
-                        .then(
-                            SelectedModifier(
-                                selected = selectedProperty is ValueFromDynamicItem &&
-                                        selectedProperty.fieldType is DataFieldType.DocumentId &&
-                                        selectedProperty.fieldType.firestoreCollectionId == collectionId
-                            )
-                        )
+                    modifier =
+                        Modifier
+                            .padding(top = 4.dp)
+                            .then(
+                                SelectedModifier(
+                                    selected =
+                                        selectedProperty is ValueFromDynamicItem &&
+                                            selectedProperty.fieldType is DataFieldType.DocumentId &&
+                                            selectedProperty.fieldType.firestoreCollectionId == collectionId,
+                                ),
+                            ),
                 )
             }
 
@@ -1779,22 +1859,25 @@ private fun DynamicItemsListContent(
                     project = project,
                     fieldName = "item: ${dataField.variableName}",
                     type = dataField.fieldType.type(),
-                    modifier = Modifier.padding(top = 4.dp)
-                        .then(
-                            SelectedModifier(
-                                selected = dataField.id == initialDataFieldId
-                            )
-                        ),
+                    modifier =
+                        Modifier
+                            .padding(top = 4.dp)
+                            .then(
+                                SelectedModifier(
+                                    selected = dataField.id == initialDataFieldId,
+                                ),
+                            ),
                     onClick = {
                         onAssignablePropertyChanged(
                             ValueFromDynamicItem(
                                 composeNodeId = composeNode.id,
-                                fieldType = DataFieldType.FieldInDataType(
-                                    dataTypeId = dataType.id,
-                                    fieldId = dataField.id
-                                ),
+                                fieldType =
+                                    DataFieldType.FieldInDataType(
+                                        dataTypeId = dataType.id,
+                                        fieldId = dataField.id,
+                                    ),
                             ),
-                            LazyListChildParams.DynamicItemsSource(composeNode.id)
+                            LazyListChildParams.DynamicItemsSource(composeNode.id),
                         )
                     },
                 )
@@ -1827,27 +1910,29 @@ private fun LazyListChildViewer(
         if (searchParams.isFilterEnabled) searchParams.matchCriteria(project, property) else true
     var expanded by remember(searchParams.isFilterEnabled) { mutableStateOf(initiallyExpanded) }
     val onExpandClick = { expanded = !expanded }
-    val switchedModifier = if (enabled) {
-        Modifier.clickable {
-            onExpandClick()
-        }
-    } else {
-        Modifier.alpha(0.6f)
-    }
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.fillMaxWidth()
-            .clickable {
+    val switchedModifier =
+        if (enabled) {
+            Modifier.clickable {
                 onExpandClick()
             }
-            .then(switchedModifier),
+        } else {
+            Modifier.alpha(0.6f)
+        }
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .clickable {
+                    onExpandClick()
+                }.then(switchedModifier),
     ) {
         TreeExpander(
             expanded = expanded,
             onClick = {
                 onExpandClick()
             },
-            enabled = enabled
+            enabled = enabled,
         )
         Text(
             text = "${property.displayText(project)} properties",
@@ -1868,8 +1953,7 @@ private fun LazyListChildViewer(
                         .background(
                             color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.5f),
                             shape = RoundedCornerShape(8.dp),
-                        )
-                        .padding(8.dp)
+                        ).padding(8.dp)
                 } else {
                     modifier.padding(start = 32.dp, top = 8.dp, bottom = 8.dp, end = 8.dp)
                 }

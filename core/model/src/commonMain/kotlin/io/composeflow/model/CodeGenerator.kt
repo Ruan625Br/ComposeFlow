@@ -6,7 +6,6 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 
 interface CodeGenerator {
-
     /**
      * Generate the Compose code that represents this node
      */

@@ -46,15 +46,19 @@ data class LazyColumnTrait(
     val verticalArrangement: ArrangementVerticalWrapper? = null,
     val horizontalAlignment: AlignmentHorizontalWrapper? = null,
     val userScrollEnabled: Boolean? = null,
-) : LazyListTrait, ComposeTrait {
+) : LazyListTrait,
+    ComposeTrait {
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
     override var defaultChildNumOfItems: Int = ComposeTrait.NumOfItemsInLazyList
 
     override fun areAllParamsEmpty(): Boolean =
-        contentPadding == null && reverseLayout == null && verticalArrangement == null &&
-                horizontalAlignment == null && userScrollEnabled == null
+        contentPadding == null &&
+            reverseLayout == null &&
+            verticalArrangement == null &&
+            horizontalAlignment == null &&
+            userScrollEnabled == null
 
     override fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -97,12 +101,15 @@ data class LazyColumnTrait(
     override fun hasDynamicItems(): Boolean = true
 
     override fun icon(): ImageVector = ComposeFlowIcons.LazyColumn
+
     override fun iconText(): String = "LazyColumn"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Container,
-        TraitCategory.WrapContainer,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Container,
+            TraitCategory.WrapContainer,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_lazy_column_trait
 
@@ -132,25 +139,30 @@ data class LazyColumnTrait(
         LazyColumn(
             contentPadding = PaddingValues(contentPadding?.value?.dp ?: 0.dp),
             reverseLayout = reverseLayout ?: false,
-            verticalArrangement = verticalArrangement?.arrangement
-                ?: Arrangement.Top,
-            horizontalAlignment = horizontalAlignment?.alignment
-                ?: Alignment.Start,
-            userScrollEnabled = if (paletteRenderParams.isThumbnail) {
-                false
-            } else {
-                userScrollEnabled ?: true
-            },
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            verticalArrangement =
+                verticalArrangement?.arrangement
+                    ?: Arrangement.Top,
+            horizontalAlignment =
+                horizontalAlignment?.alignment
+                    ?: Alignment.Start,
+            userScrollEnabled =
+                if (paletteRenderParams.isThumbnail) {
+                    false
+                } else {
+                    userScrollEnabled ?: true
+                },
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         ) {
             node.children.forEach { child ->
                 item {
@@ -162,10 +174,11 @@ data class LazyColumnTrait(
                     )
                 }
                 items(
-                    count = child.lazyListChildParams.value.getNumOfItems(
-                        project = project,
-                        lazyList = node,
-                    ) - 1,
+                    count =
+                        child.lazyListChildParams.value.getNumOfItems(
+                            project = project,
+                            lazyList = node,
+                        ) - 1,
                 ) {
                     child.RenderedNodeInCanvas(
                         project = project,

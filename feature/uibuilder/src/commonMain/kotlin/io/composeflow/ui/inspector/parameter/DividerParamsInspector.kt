@@ -35,7 +35,11 @@ fun DividerParamsInspector(
     val onShowSnackbar = LocalOnShowSnackbar.current
     Column {
         BasicEditableTextProperty(
-            initialValue = dividerTrait.thickness?.value?.toInt()?.toString() ?: "",
+            initialValue =
+                dividerTrait.thickness
+                    ?.value
+                    ?.toInt()
+                    ?.toString() ?: "",
             label = "Thickness",
             validateInput = DpValidator(allowEmpty = true)::validate,
             onValidValueChanged = {
@@ -44,14 +48,14 @@ fun DividerParamsInspector(
                     is HorizontalDividerTrait -> {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            dividerTrait.copy(thickness = newValue)
+                            dividerTrait.copy(thickness = newValue),
                         )
                     }
 
                     is VerticalDividerTrait -> {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            dividerTrait.copy(thickness = newValue)
+                            dividerTrait.copy(thickness = newValue),
                         )
                     }
 
@@ -66,23 +70,25 @@ fun DividerParamsInspector(
             node = node,
             label = "Color",
             acceptableType = ComposeFlowType.Color(),
-            initialProperty = dividerTrait.color
-                ?: ColorProperty.ColorIntrinsicValue(
-                    ColorWrapper(
-                        themeColor = null,
-                        color = DividerDefaults.color,
+            initialProperty =
+                dividerTrait.color
+                    ?: ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(
+                            themeColor = null,
+                            color = DividerDefaults.color,
+                        ),
                     ),
-                ),
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    when (dividerTrait) {
-                        is HorizontalDividerTrait -> dividerTrait.copy(color = property)
-                        is VerticalDividerTrait -> dividerTrait.copy(color = property)
-                        else -> dividerTrait // Should not happen for sealed class
-                    },
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        when (dividerTrait) {
+                            is HorizontalDividerTrait -> dividerTrait.copy(color = property)
+                            is VerticalDividerTrait -> dividerTrait.copy(color = property)
+                            else -> dividerTrait // Should not happen for sealed class
+                        },
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -90,23 +96,24 @@ fun DividerParamsInspector(
                 }
             },
             onInitializeProperty = {
-                val defaultColor = ColorProperty.ColorIntrinsicValue(
-                    ColorWrapper(
-                        Material3ColorWrapper.OnSurfaceVariant
+                val defaultColor =
+                    ColorProperty.ColorIntrinsicValue(
+                        ColorWrapper(
+                            Material3ColorWrapper.OnSurfaceVariant,
+                        ),
                     )
-                )
                 when (dividerTrait) {
                     is HorizontalDividerTrait -> {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            dividerTrait.copy(color = defaultColor)
+                            dividerTrait.copy(color = defaultColor),
                         )
                     }
 
                     is VerticalDividerTrait -> {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            dividerTrait.copy(color = defaultColor)
+                            dividerTrait.copy(color = defaultColor),
                         )
                     }
 
@@ -115,9 +122,10 @@ fun DividerParamsInspector(
                     }
                 }
             },
-            modifier = Modifier
-                .hoverOverlay()
-                .fillMaxWidth(),
+            modifier =
+                Modifier
+                    .hoverOverlay()
+                    .fillMaxWidth(),
         )
     }
 }

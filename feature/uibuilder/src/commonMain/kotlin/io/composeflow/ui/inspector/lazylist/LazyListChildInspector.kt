@@ -106,7 +106,7 @@ private fun DynamicSourceChildrenInspector(
         initialValue = "${
             childParams.getNumOfItems(
                 project,
-                lazyList = lazyList
+                lazyList = lazyList,
             )
         } [set from ${lazyList.label.value}]",
         label = "Items",

@@ -89,9 +89,10 @@ fun AddParameterDialog(
 
         Surface {
             Column(
-                modifier = modifier
-                    .size(width = 320.dp, height = 360.dp)
-                    .padding(16.dp),
+                modifier =
+                    modifier
+                        .size(width = 320.dp, height = 360.dp)
+                        .padding(16.dp),
             ) {
                 val fieldWidth = 300.dp
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -120,23 +121,26 @@ fun AddParameterDialog(
                     },
                     singleLine = true,
                     isError = parameterNameValidateResult is ValidateResult.Failure,
-                    supportingText = (parameterNameValidateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-                    shape = RoundedCornerShape(8.dp),
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .width(width = fieldWidth)
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && parameterNameValidateResult is ValidateResult.Success) {
-                                onConfirmParameter()
-                                true
-                            } else {
-                                false
+                    supportingText =
+                        (parameterNameValidateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
                             }
                         },
+                    shape = RoundedCornerShape(8.dp),
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .width(width = fieldWidth)
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && parameterNameValidateResult is ValidateResult.Success) {
+                                    onConfirmParameter()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
                 var dropDownSelectedIndex by remember {
                     mutableStateOf(
@@ -150,25 +154,29 @@ fun AddParameterDialog(
 
                 BasicDropdownPropertyEditor(
                     project = project,
-                    items = availableParameters
-                        .map {
-                            it.parameterType.displayName(
-                                project = project,
-                                listAware = false,
-                            )
-                        },
+                    items =
+                        availableParameters
+                            .map {
+                                it.parameterType.displayName(
+                                    project = project,
+                                    listAware = false,
+                                )
+                            },
                     onValueChanged = { index, _ ->
                         val newType = availableParameters[index].parameterType
-                        editedParameterWrapper = editedParameterWrapper.copy(
-                            newType = newType,
-                        )
+                        editedParameterWrapper =
+                            editedParameterWrapper.copy(
+                                newType = newType,
+                            )
                         dropDownSelectedIndex = index
                     },
                     selectedIndex = dropDownSelectedIndex,
                     label = stringResource(Res.string.data_type),
-                    modifier = Modifier.padding(top = 8.dp)
-                        .focusRequester(second)
-                        .moveFocusOnTab(),
+                    modifier =
+                        Modifier
+                            .padding(top = 8.dp)
+                            .focusRequester(second)
+                            .moveFocusOnTab(),
                 )
 
                 if (listTypeAllowed) {
@@ -194,7 +202,7 @@ fun AddParameterDialog(
                 val isFormValid by remember {
                     derivedStateOf {
                         defaultValueValidateResult is ValidateResult.Success &&
-                                parameterNameValidateResult is ValidateResult.Success
+                            parameterNameValidateResult is ValidateResult.Success
                     }
                 }
                 Column(
@@ -205,9 +213,10 @@ fun AddParameterDialog(
                             SmallOutlinedTextField(
                                 value = parameter.defaultValue,
                                 onValueChange = {
-                                    editedParameterWrapper = parameter.copy(
-                                        defaultValue = it,
-                                    )
+                                    editedParameterWrapper =
+                                        parameter.copy(
+                                            defaultValue = it,
+                                        )
                                 },
                                 label = {
                                     Text(
@@ -218,17 +227,19 @@ fun AddParameterDialog(
                                 },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onConfirmParameter()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onConfirmParameter()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -236,13 +247,16 @@ fun AddParameterDialog(
                             BooleanPropertyEditor(
                                 checked = parameter.defaultValue,
                                 onCheckedChange = {
-                                    editedParameterWrapper = parameter.copy(
-                                        newDefaultValue = it,
-                                    )
+                                    editedParameterWrapper =
+                                        parameter.copy(
+                                            newDefaultValue = it,
+                                        )
                                 },
                                 label = stringResource(Res.string.default_value),
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab(),
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab(),
                             )
                         }
 
@@ -273,25 +287,28 @@ fun AddParameterDialog(
                                         modifier = Modifier.alpha(0.6f),
                                     )
                                 },
-                                supportingText = (defaultValueValidateResult as? ValidateResult.Failure)?.let {
-                                    {
-                                        Text(it.message)
-                                    }
-                                },
+                                supportingText =
+                                    (defaultValueValidateResult as? ValidateResult.Failure)?.let {
+                                        {
+                                            Text(it.message)
+                                        }
+                                    },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 isError = defaultValueValidateResult is ValidateResult.Failure,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onParameterConfirmed(editedParameterWrapper)
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onParameterConfirmed(editedParameterWrapper)
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -322,25 +339,28 @@ fun AddParameterDialog(
                                         modifier = Modifier.alpha(0.6f),
                                     )
                                 },
-                                supportingText = (defaultValueValidateResult as? ValidateResult.Failure)?.let {
-                                    {
-                                        Text(it.message)
-                                    }
-                                },
+                                supportingText =
+                                    (defaultValueValidateResult as? ValidateResult.Failure)?.let {
+                                        {
+                                            Text(it.message)
+                                        }
+                                    },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 isError = defaultValueValidateResult is ValidateResult.Failure,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onParameterConfirmed(editedParameterWrapper)
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onParameterConfirmed(editedParameterWrapper)
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
                     }
@@ -355,9 +375,10 @@ fun AddParameterDialog(
                         onClick = {
                             onDialogClosed()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -366,8 +387,9 @@ fun AddParameterDialog(
                             onConfirmParameter()
                         },
                         enabled = isFormValid,
-                        modifier = Modifier
-                            .focusRequester(fourth),
+                        modifier =
+                            Modifier
+                                .focusRequester(fourth),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }

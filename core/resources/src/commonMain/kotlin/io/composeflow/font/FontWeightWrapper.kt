@@ -44,8 +44,8 @@ enum class FontWeightWrapper {
     abstract fun asFontWeight(): FontWeight
 
     companion object {
-        fun fromFontWeight(fontWeight: FontWeight?): FontWeightWrapper {
-            return when (fontWeight) {
+        fun fromFontWeight(fontWeight: FontWeight?): FontWeightWrapper =
+            when (fontWeight) {
                 W100 -> Thin
                 W200 -> ExtraLight
                 W300 -> Light
@@ -57,6 +57,5 @@ enum class FontWeightWrapper {
                 W900 -> Black
                 else -> Normal
             }
-        }
     }
 }

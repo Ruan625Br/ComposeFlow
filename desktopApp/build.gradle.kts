@@ -13,7 +13,6 @@ plugins {
     id("dev.hydraulic.conveyor") version "1.10"
 }
 
-
 group = "io.composeflow"
 version = "0.8.7"
 
@@ -131,12 +130,13 @@ compose.desktop {
     }
 }
 
-val localProps = Properties().apply {
-    val localPropsFile = File(rootProject.rootDir, "local.properties")
-    if (localPropsFile.exists()) {
-        load(FileInputStream(localPropsFile))
+val localProps =
+    Properties().apply {
+        val localPropsFile = File(rootProject.rootDir, "local.properties")
+        if (localPropsFile.exists()) {
+            load(FileInputStream(localPropsFile))
+        }
     }
-}
 
 sentry {
     // Generates a JVM (Java, Kotlin, etc.) source bundle and uploads your source code to Sentry.

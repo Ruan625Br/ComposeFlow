@@ -10,51 +10,58 @@ import kotlinx.coroutines.flow.stateIn
 fun <T1, R> CoroutineScope.buildUiState(
     flow: StateFlow<T1>,
     transform: (T1) -> R,
-): StateFlow<R> = flow.map(transform = transform)
-    .stateIn(
-        scope = this,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = transform(
-            flow.value,
-        ),
-    )
+): StateFlow<R> =
+    flow
+        .map(transform = transform)
+        .stateIn(
+            scope = this,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue =
+                transform(
+                    flow.value,
+                ),
+        )
 
 fun <T1, T2, R> CoroutineScope.buildUiState(
     flow: StateFlow<T1>,
     flow2: StateFlow<T2>,
     transform: (T1, T2) -> R,
-): StateFlow<R> = combine(
-    flow = flow,
-    flow2 = flow2,
-    transform = transform,
-).stateIn(
-    scope = this,
-    started = SharingStarted.WhileSubscribed(5_000),
-    initialValue = transform(
-        flow.value,
-        flow2.value,
-    ),
-)
+): StateFlow<R> =
+    combine(
+        flow = flow,
+        flow2 = flow2,
+        transform = transform,
+    ).stateIn(
+        scope = this,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue =
+            transform(
+                flow.value,
+                flow2.value,
+            ),
+    )
 
 fun <T1, T2, T3, R> CoroutineScope.buildUiState(
     flow: StateFlow<T1>,
     flow2: StateFlow<T2>,
     flow3: StateFlow<T3>,
     transform: (T1, T2, T3) -> R,
-): StateFlow<R> = combine(
-    flow = flow,
-    flow2 = flow2,
-    flow3 = flow3,
-    transform = transform,
-).stateIn(
-    scope = this,
-    started = SharingStarted.WhileSubscribed(5_000),
-    initialValue = transform(
-        flow.value,
-        flow2.value,
-        flow3.value,
-    ),
-)
+): StateFlow<R> =
+    combine(
+        flow = flow,
+        flow2 = flow2,
+        flow3 = flow3,
+        transform = transform,
+    ).stateIn(
+        scope = this,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue =
+            transform(
+                flow.value,
+                flow2.value,
+                flow3.value,
+            ),
+    )
 
 fun <T1, T2, T3, T4, R> CoroutineScope.buildUiState(
     flow: StateFlow<T1>,
@@ -62,19 +69,21 @@ fun <T1, T2, T3, T4, R> CoroutineScope.buildUiState(
     flow3: StateFlow<T3>,
     flow4: StateFlow<T4>,
     transform: (T1, T2, T3, T4) -> R,
-): StateFlow<R> = combine(
-    flow = flow,
-    flow2 = flow2,
-    flow3 = flow3,
-    flow4 = flow4,
-    transform = transform,
-).stateIn(
-    scope = this,
-    started = SharingStarted.WhileSubscribed(5_000),
-    initialValue = transform(
-        flow.value,
-        flow2.value,
-        flow3.value,
-        flow4.value,
-    ),
-)
+): StateFlow<R> =
+    combine(
+        flow = flow,
+        flow2 = flow2,
+        flow3 = flow3,
+        flow4 = flow4,
+        transform = transform,
+    ).stateIn(
+        scope = this,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue =
+            transform(
+                flow.value,
+                flow2.value,
+                flow3.value,
+                flow4.value,
+            ),
+    )

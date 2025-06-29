@@ -42,9 +42,10 @@ fun ShareContent(
     Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.clickable {
-                shareActionsOpened = !shareActionsOpened
-            },
+            modifier =
+                Modifier.clickable {
+                    shareActionsOpened = !shareActionsOpened
+                },
         ) {
             Text(
                 text = "Share",
@@ -63,25 +64,25 @@ fun ShareContent(
             Share.entries().forEach { shareAction ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                shareAction
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    shareAction,
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is Share &&
                                         actionInEdit.name == shareAction.name
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = shareAction.name,

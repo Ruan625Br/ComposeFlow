@@ -71,21 +71,23 @@ fun <P : AssignableProperty> ConditionalPropertyEditor(
             buildAnnotatedString {
                 val textStyle = MaterialTheme.typography.bodyLarge
                 withStyle(
-                    style = SpanStyle(
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = textStyle.fontSize,
-                        fontWeight = textStyle.fontWeight,
-                        fontStyle = textStyle.fontStyle,
-                    ),
-                ) {
-                    append(stringResource(Res.string.conditional_property_for))
-                    withStyle(
-                        style = SpanStyle(
-                            color = MaterialTheme.colorScheme.tertiary,
+                    style =
+                        SpanStyle(
+                            color = MaterialTheme.colorScheme.onSurface,
                             fontSize = textStyle.fontSize,
                             fontWeight = textStyle.fontWeight,
                             fontStyle = textStyle.fontStyle,
                         ),
+                ) {
+                    append(stringResource(Res.string.conditional_property_for))
+                    withStyle(
+                        style =
+                            SpanStyle(
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontSize = textStyle.fontSize,
+                                fontWeight = textStyle.fontWeight,
+                                fontStyle = textStyle.fontStyle,
+                            ),
                     ) {
                         append(defaultValue.valueType(project).displayName(project))
                     }
@@ -95,9 +97,10 @@ fun <P : AssignableProperty> ConditionalPropertyEditor(
         )
 
         LazyColumn(
-            modifier = Modifier
-                .weight(1f)
-                .padding(vertical = 8.dp),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .padding(vertical = 8.dp),
         ) {
             item {
                 IfBlock(
@@ -106,21 +109,24 @@ fun <P : AssignableProperty> ConditionalPropertyEditor(
                     initialIfThen = conditionalProperty.ifThen,
                     defaultValue = defaultValue,
                     onIfExpressionChanged = {
-                        conditionalProperty = conditionalProperty.copyWith(
-                            newIfThenBlock =
-                            conditionalProperty.ifThen.copy(ifExpression = it),
-                        )
+                        conditionalProperty =
+                            conditionalProperty.copyWith(
+                                newIfThenBlock =
+                                    conditionalProperty.ifThen.copy(ifExpression = it),
+                            )
                     },
                     onMetIfTrueChanged = {
-                        conditionalProperty = conditionalProperty.copyWith(
-                            conditionalProperty.ifThen.copy(metIfTrue = it),
-                        )
+                        conditionalProperty =
+                            conditionalProperty.copyWith(
+                                conditionalProperty.ifThen.copy(metIfTrue = it),
+                            )
                     },
                     onThenValueChanged = {
-                        conditionalProperty = conditionalProperty.copyWith(
-                            newIfThenBlock =
-                            conditionalProperty.ifThen.copy(thenValue = it),
-                        )
+                        conditionalProperty =
+                            conditionalProperty.copyWith(
+                                newIfThenBlock =
+                                    conditionalProperty.ifThen.copy(thenValue = it),
+                            )
                     },
                     elseIf = false,
                 )
@@ -172,14 +178,15 @@ fun <P : AssignableProperty> ConditionalPropertyEditor(
 
             item {
                 Column(
-                    modifier = Modifier.border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.outlineVariant,
-                        shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
-                    )
-                        .wrapContentHeight()
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier =
+                        Modifier
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
+                            ).wrapContentHeight()
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -199,10 +206,11 @@ fun <P : AssignableProperty> ConditionalPropertyEditor(
                             label = "",
                             onValidPropertyChanged = { property, _ ->
                                 @Suppress("UNCHECKED_CAST")
-                                conditionalProperty = conditionalProperty.copyWith(
-                                    newElseBlock =
-                                    conditionalProperty.elseBlock.copy(value = property as P),
-                                )
+                                conditionalProperty =
+                                    conditionalProperty.copyWith(
+                                        newElseBlock =
+                                            conditionalProperty.elseBlock.copy(value = property as P),
+                                    )
                             },
                             modifier = Modifier.padding(top = 8.dp),
                             destinationStateId = null,
@@ -244,9 +252,7 @@ fun <P : AssignableProperty> ConditionalPropertyEditor(
 }
 
 @Composable
-private fun AddElseIfBlockContainer(
-    onAddClicked: () -> Unit,
-) {
+private fun AddElseIfBlockContainer(onAddClicked: () -> Unit) {
     val addElseIf = stringResource(Res.string.add_else_if_block)
     Tooltip(addElseIf) {
         ComposeFlowIconButton(
@@ -277,21 +283,23 @@ private fun <P : AssignableProperty> IfBlock(
     onDeleteBlock: (() -> Unit)? = null,
 ) {
     Box(
-        modifier = Modifier
-            .border(
-                width = 1.dp,
-                color = MaterialTheme.colorScheme.outlineVariant,
-                shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
-            )
-            .wrapContentHeight()
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier =
+            Modifier
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colorScheme.outlineVariant,
+                    shape = RoundedCornerShape(8.dp, 8.dp, 8.dp, 8.dp),
+                ).wrapContentHeight()
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
     ) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.height(88.dp)
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .height(88.dp)
+                        .fillMaxWidth(),
             ) {
                 Text(
                     text = if (elseIf) "ELSE IF" else "IF",
@@ -309,8 +317,10 @@ private fun <P : AssignableProperty> IfBlock(
                     onInitializeProperty = {
                         onIfExpressionChanged(BooleanProperty.Empty)
                     },
-                    modifier = Modifier.width(360.dp)
-                        .padding(top = 12.dp),
+                    modifier =
+                        Modifier
+                            .width(360.dp)
+                            .padding(top = 12.dp),
                 )
                 Text(
                     text = "IS",
@@ -329,10 +339,11 @@ private fun <P : AssignableProperty> IfBlock(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .wrapContentHeight()
-                    .padding(vertical = 4.dp)
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .wrapContentHeight()
+                        .padding(vertical = 4.dp)
+                        .fillMaxWidth(),
             ) {
                 Text(
                     text = "THEN",

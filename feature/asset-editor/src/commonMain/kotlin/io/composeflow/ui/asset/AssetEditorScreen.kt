@@ -83,11 +83,11 @@ enum class AssetEditorNavigationDestination(
 ) {
     ImageEditor(
         icon = Icons.Outlined.Image,
-        destinationName = "Images"
+        destinationName = "Images",
     ),
     IconEditor(
         icon = Icons.Outlined.AddCircle,
-        destinationName = "Icons"
+        destinationName = "Icons",
     ),
 }
 
@@ -97,13 +97,14 @@ fun AssetEditorScreen(
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = AssetEditorViewModel::class) {
-        AssetEditorViewModel(
-            firebaseIdToken = firebaseIdToken,
-            project = project,
-            storageWrapper = GoogleCloudStorageWrapper()
-        )
-    }
+    val viewModel =
+        viewModel(modelClass = AssetEditorViewModel::class) {
+            AssetEditorViewModel(
+                firebaseIdToken = firebaseIdToken,
+                project = project,
+                storageWrapper = GoogleCloudStorageWrapper(),
+            )
+        }
     val coroutineScope = rememberCoroutineScope()
     val uploadResult by viewModel.uploadResult.collectAsState()
     val removeResult by viewModel.removeResult.collectAsState()
@@ -112,12 +113,13 @@ fun AssetEditorScreen(
 
     var selectedDestination by remember { mutableStateOf(AssetEditorNavigationDestination.ImageEditor) }
 
-    val assetEditorCallbacks = AssetEditorCallbacks(
-        onUploadImageFile = viewModel::onUploadImageFile,
-        onUploadIconFile = viewModel::onUploadIconFile,
-        onDeleteImageAsset = viewModel::onDeleteImageAsset,
-        onDeleteIconAsset = viewModel::onDeleteIconAsset,
-    )
+    val assetEditorCallbacks =
+        AssetEditorCallbacks(
+            onUploadImageFile = viewModel::onUploadImageFile,
+            onUploadIconFile = viewModel::onUploadIconFile,
+            onDeleteImageAsset = viewModel::onDeleteImageAsset,
+            onDeleteIconAsset = viewModel::onDeleteIconAsset,
+        )
     val onShowSnackbar = LocalOnShowSnackbar.current
     when (val result = uploadResult) {
         UploadResult.Failure -> {}
@@ -126,7 +128,7 @@ fun AssetEditorScreen(
             coroutineScope.launch {
                 onShowSnackbar(
                     uploadSucceeded + ": ${result.blobInfoWrapper.fileName}",
-                    null
+                    null,
                 )
                 viewModel.onResetUploadResult()
             }
@@ -143,7 +145,7 @@ fun AssetEditorScreen(
             coroutineScope.launch {
                 onShowSnackbar(
                     removeSucceeded + ": ${result.blobInfoWrapper.fileName}",
-                    null
+                    null,
                 )
                 viewModel.onResetRemoveResult()
             }
@@ -157,7 +159,7 @@ fun AssetEditorScreen(
                 onDestinationChanged = {
                     selectedDestination = it
                 },
-                modifier = Modifier.width(196.dp)
+                modifier = Modifier.width(196.dp),
             )
             when (selectedDestination) {
                 AssetEditorNavigationDestination.ImageEditor -> {
@@ -212,9 +214,10 @@ fun AssetEditorContentNavigation(
                         onClick = {
                             onDestinationChanged(destination)
                         },
-                        modifier = Modifier
-                            .heightIn(max = 40.dp)
-                            .padding(horizontal = 12.dp),
+                        modifier =
+                            Modifier
+                                .heightIn(max = 40.dp)
+                                .padding(horizontal = 12.dp),
                     )
                 }
             }
@@ -232,10 +235,11 @@ private fun ImageAssetDetails(
     uploadResult: UploadResult,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundContainerNeutral()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .backgroundContainerNeutral()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.width(128.dp))
         ImageAssetDetailsContent(
@@ -243,7 +247,7 @@ private fun ImageAssetDetails(
             assetEditorCallbacks = assetEditorCallbacks,
             removeResult = removeResult,
             uploadResult = uploadResult,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         Spacer(Modifier.width(128.dp))
     }
@@ -259,25 +263,29 @@ private fun ImageAssetDetailsContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
     Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surface),
     ) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.wrapContentHeight()
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .wrapContentHeight()
+                        .padding(16.dp),
             ) {
                 TextButton(onClick = {
                     coroutineScope.launch {
-                        val file = FileKit.pickFile(
-                            type = PickerType.Image,
-                            mode = PickerMode.Single,
-                            title = "Pick an image",
-                        )
+                        val file =
+                            FileKit.pickFile(
+                                type = PickerType.Image,
+                                mode = PickerMode.Single,
+                                title = "Pick an image",
+                            )
                         file?.let {
                             assetEditorCallbacks.onUploadImageFile(it)
                         }
@@ -294,13 +302,12 @@ private fun ImageAssetDetailsContent(
             HorizontalDivider(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 8.dp),
             )
 
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
-
                 val assets = project.assetHolder.images
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(220.dp),
@@ -332,23 +339,25 @@ private fun AssetItem(
 ) {
     var deleteDialogOpen by remember { mutableStateOf(false) }
     Box(
-        modifier = modifier.clip(RoundedCornerShape(8.dp))
-            .background(
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-            )
-            .switchByHovered(
-                hovered = Modifier.border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(8.dp),
-                ),
-                notHovered = Modifier.alpha(0.5f).border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(8.dp),
-                ),
-            )
-            .size(width = 180.dp, height = 296.dp)
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                ).switchByHovered(
+                    hovered =
+                        Modifier.border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(8.dp),
+                        ),
+                    notHovered =
+                        Modifier.alpha(0.5f).border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(8.dp),
+                        ),
+                ).size(width = 180.dp, height = 296.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row {
@@ -357,19 +366,22 @@ private fun AssetItem(
                     removeResult.blobInfoWrapper.blobId == blobInfoWrapper.blobId
                 ) {
                     Box(
-                        modifier = Modifier.shimmer()
-                            .background(
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                        modifier =
+                            Modifier
+                                .shimmer()
+                                .background(
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = RoundedCornerShape(8.dp),
+                                ),
                     ) {}
                 } else {
                     val userId = LocalFirebaseIdToken.current.user_id
                     blobInfoWrapper.asImageComposable(
                         userId = userId,
                         projectId = project.id.toString(),
-                        Modifier.widthIn(max = 160.dp)
-                            .heightIn(max = 180.dp)
+                        Modifier
+                            .widthIn(max = 160.dp)
+                            .heightIn(max = 180.dp),
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -388,15 +400,17 @@ private fun AssetItem(
                     "Updated: ${updateTime.asDateString()}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
         }
 
         val removeAsset = stringResource(Res.string.remove_asset)
         Column(
-            modifier = Modifier.align(Alignment.TopEnd)
-                .padding(top = 8.dp, end = 8.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 8.dp),
         ) {
             Tooltip(removeAsset) {
                 ComposeFlowIconButton(
@@ -425,7 +439,7 @@ private fun AssetItem(
             onAllDialogsClosed()
         }
         SimpleConfirmationDialog(
-            text = "${removeAsset}?",
+            text = "$removeAsset?",
             positiveText = remove,
             onCloseClick = {
                 closeDialog()
@@ -433,7 +447,7 @@ private fun AssetItem(
             onConfirmClick = {
                 onDeleteAsset(blobInfoWrapper)
                 closeDialog()
-            }
+            },
         )
     }
 }

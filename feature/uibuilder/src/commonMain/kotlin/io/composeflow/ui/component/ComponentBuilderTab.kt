@@ -46,11 +46,12 @@ fun ComponentBuilderTab(
 ) {
     var addNewComponentDialogOpen by remember { mutableStateOf(false) }
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(horizontal = 16.dp)
-            .padding(top = 16.dp),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(horizontal = 16.dp)
+                .padding(top = 16.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -66,8 +67,10 @@ fun ComponentBuilderTab(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = componentDescription,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.padding(start = 8.dp)
-                        .size(16.dp),
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(16.dp),
                 )
             }
             Spacer(Modifier.size(8.dp))
@@ -76,11 +79,11 @@ fun ComponentBuilderTab(
                 ComposeFlowIconButton(
                     onClick = {
                         addNewComponentDialogOpen = true
-                    }
+                    },
                 ) {
                     ComposeFlowIcon(
                         imageVector = Icons.Outlined.Add,
-                        contentDescription = addNewComponent
+                        contentDescription = addNewComponent,
                     )
                 }
             }
@@ -118,7 +121,7 @@ fun ComponentBuilderTab(
                 composeNodeCallbacks.onCreateComponent(it)
                 onCloseDialog()
             },
-            onDismissDialog = onCloseDialog
+            onDismissDialog = onCloseDialog,
         )
     }
 }

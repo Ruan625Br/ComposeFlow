@@ -79,13 +79,15 @@ fun AddModifierDialogContent(
     onCloseClick: () -> Unit,
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .size(width = 800.dp, height = 960.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .size(width = 800.dp, height = 960.dp),
     ) {
         Column(
-            modifier = Modifier
-                .padding(all = 16.dp),
+            modifier =
+                Modifier
+                    .padding(all = 16.dp),
         ) {
             Text(
                 text = "Add modifier",
@@ -120,28 +122,31 @@ fun AddModifierDialogContent(
                 leadingIcon = {
                     ComposeFlowIcon(
                         imageVector = Icons.Outlined.Search,
-                        contentDescription = "search modifier"
+                        contentDescription = "search modifier",
                     )
                 },
                 singleLine = true,
-                modifier = Modifier
-                    .width(280.dp)
-                    .padding(start = 16.dp)
-                    .focusRequester(focusRequester)
-                    .onKeyEvent {
-                        if (it.key == Key.Enter && filteredModifiers.size == 1) {
-                            onModifierSelected(filteredModifiers[0].first.first)
-                            true
-                        } else {
-                            false
-                        }
-                    }
+                modifier =
+                    Modifier
+                        .width(280.dp)
+                        .padding(start = 16.dp)
+                        .focusRequester(focusRequester)
+                        .onKeyEvent {
+                            if (it.key == Key.Enter && filteredModifiers.size == 1) {
+                                onModifierSelected(filteredModifiers[0].first.first)
+                                true
+                            } else {
+                                false
+                            }
+                        },
             )
             Spacer(Modifier.size(8.dp))
 
-            val filteredCategories = filteredModifiers.map {
-                it.first.second.category()
-            }.distinct()
+            val filteredCategories =
+                filteredModifiers
+                    .map {
+                        it.first.second.category()
+                    }.distinct()
 
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(148.dp),
@@ -155,7 +160,7 @@ fun AddModifierDialogContent(
                             text = category.name,
                             color = MaterialTheme.colorScheme.secondary,
                             style = MaterialTheme.typography.titleSmall,
-                            modifier = Modifier.padding(bottom = 4.dp)
+                            modifier = Modifier.padding(bottom = 4.dp),
                         )
                     }
                     items(items = filteredModifiers.filter { it.first.second.category() == category }) { pair ->
@@ -168,12 +173,13 @@ fun AddModifierDialogContent(
                                 label = {
                                     HighlightedText(
                                         fullText = pair.first.second.displayName(),
-                                        indicesToHighlight = pair.second
+                                        indicesToHighlight = pair.second,
                                     )
                                 },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(end = 8.dp, bottom = 8.dp)
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(end = 8.dp, bottom = 8.dp),
                             )
                         }
                     }
@@ -206,18 +212,20 @@ fun HighlightedText(
     normalColor: Color = MaterialTheme.colorScheme.onSurface,
     highlightColor: Color = MaterialTheme.colorScheme.tertiary,
 ) {
-    val annotated = buildAnnotatedString {
-        fullText.forEachIndexed { index, char ->
-            val style = if (index in indicesToHighlight) {
-                SpanStyle(color = highlightColor)
-            } else {
-                SpanStyle(color = normalColor)
-            }
-            withStyle(style) {
-                append(char)
+    val annotated =
+        buildAnnotatedString {
+            fullText.forEachIndexed { index, char ->
+                val style =
+                    if (index in indicesToHighlight) {
+                        SpanStyle(color = highlightColor)
+                    } else {
+                        SpanStyle(color = normalColor)
+                    }
+                withStyle(style) {
+                    append(char)
+                }
             }
         }
-    }
 
     Text(text = annotated)
 }

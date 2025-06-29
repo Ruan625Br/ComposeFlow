@@ -16,18 +16,20 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class IconTraitTest {
-
     @Test
     fun toComposeCode_onlyRequiredParams() {
-        val iconParams = IconTrait(
-            imageVectorHolder = Outlined.ImageSearch,
-        )
+        val iconParams =
+            IconTrait(
+                imageVectorHolder = Outlined.ImageSearch,
+            )
 
-        val code = iconParams.generateCode(
-            Project(),
-            node = ComposeNode(),
-            context = GenerationContext(), dryRun = false
-        )
+        val code =
+            iconParams.generateCode(
+                Project(),
+                node = ComposeNode(),
+                context = GenerationContext(),
+                dryRun = false,
+            )
         assertEquals(
             """
             androidx.compose.material3.Icon(
@@ -42,16 +44,19 @@ class IconTraitTest {
 
     @Test
     fun toComposeCode_withTint() {
-        val iconParams = IconTrait(
-            imageVectorHolder = Outlined.ImageSearch,
-            tint = ColorProperty.ColorIntrinsicValue(ColorWrapper(Material3ColorWrapper.Secondary)),
-        )
+        val iconParams =
+            IconTrait(
+                imageVectorHolder = Outlined.ImageSearch,
+                tint = ColorProperty.ColorIntrinsicValue(ColorWrapper(Material3ColorWrapper.Secondary)),
+            )
 
-        val code = iconParams.generateCode(
-            Project(),
-            node = ComposeNode(),
-            context = GenerationContext(), dryRun = false
-        )
+        val code =
+            iconParams.generateCode(
+                Project(),
+                node = ComposeNode(),
+                context = GenerationContext(),
+                dryRun = false,
+            )
         assertEquals(
             """
             androidx.compose.material3.Icon(

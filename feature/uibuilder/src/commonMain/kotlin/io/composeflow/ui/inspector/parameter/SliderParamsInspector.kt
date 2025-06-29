@@ -37,7 +37,7 @@ fun SliderParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    sliderTrait.copy(value = FloatProperty.FloatIntrinsicValue())
+                    sliderTrait.copy(value = FloatProperty.FloatIntrinsicValue()),
                 )
             },
             validateInput = FloatValidator(
@@ -59,7 +59,7 @@ fun SliderParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    sliderTrait.copy(steps = IntProperty.IntIntrinsicValue())
+                    sliderTrait.copy(steps = IntProperty.IntIntrinsicValue()),
                 )
             },
             validateInput = IntValidator(
@@ -80,7 +80,7 @@ fun SliderParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    sliderTrait.copy(enabled = BooleanProperty.BooleanIntrinsicValue())
+                    sliderTrait.copy(enabled = BooleanProperty.BooleanIntrinsicValue()),
                 )
             },
             modifier = Modifier.hoverOverlay(),

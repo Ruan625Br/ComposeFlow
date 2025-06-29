@@ -11,9 +11,8 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-actual fun createCloudProjectSaver(
-    cloudStorageWrapper: GoogleCloudStorageWrapper,
-): ProjectSaver = CloudProjectSaverImpl(cloudStorageWrapper)
+actual fun createCloudProjectSaver(cloudStorageWrapper: GoogleCloudStorageWrapper): ProjectSaver =
+    CloudProjectSaverImpl(cloudStorageWrapper)
 
 class CloudProjectSaverImpl(
     private val cloudStorageWrapper: GoogleCloudStorageWrapper,
@@ -22,54 +21,61 @@ class CloudProjectSaverImpl(
             Dispatchers.IO
         },
 ) : ProjectSaver {
-    override suspend fun saveProjectYaml(userId: String, projectId: String, yamlContent: String) =
-        withContext(ioDispatcher) {
-            cloudStorageWrapper.uploadFile(
+    override suspend fun saveProjectYaml(
+        userId: String,
+        projectId: String,
+        yamlContent: String,
+    ) = withContext(ioDispatcher) {
+        cloudStorageWrapper
+            .uploadFile(
                 userId = userId,
                 projectId = projectId,
                 fileName = projectYamlFileName,
-                content = yamlContent
+                content = yamlContent,
             ).mapBoth(
                 success = {
                     // Do nothing
                 },
                 failure = {
                     Logger.e("Failed to save the project yaml", it)
-                }
-            )
-        }
-
-    override suspend fun deleteProject(userId: String, projectId: String) =
-        withContext(ioDispatcher) {
-            cloudStorageWrapper.deleteFolder("$userId/$projectId/").mapBoth(
-                success = {
-                    // Do nothing
                 },
-                failure = {
-                    Logger.e("Failed to delete the project yaml", it)
-                }
             )
-        }
+    }
+
+    override suspend fun deleteProject(
+        userId: String,
+        projectId: String,
+    ) = withContext(ioDispatcher) {
+        cloudStorageWrapper.deleteFolder("$userId/$projectId/").mapBoth(
+            success = {
+                // Do nothing
+            },
+            failure = {
+                Logger.e("Failed to delete the project yaml", it)
+            },
+        )
+    }
 
     override suspend fun loadProject(
         userId: String,
         projectId: String,
-    ): ProjectYamlNameWithLastModified? = withContext(ioDispatcher) {
-        cloudStorageWrapper.getFile("$userId/$projectId/$projectYamlFileName").mapBoth(
-            success = {
-                it.contentBytes?.let { contentBytes ->
-                    ProjectYamlNameWithLastModified(
-                        contentBytes.toString(Charsets.UTF_8),
-                        it.updateTime
-                    )
-                }
-            },
-            failure = {
-                Logger.e("Failed to load project", it)
-                null
-            }
-        )
-    }
+    ): ProjectYamlNameWithLastModified? =
+        withContext(ioDispatcher) {
+            cloudStorageWrapper.getFile("$userId/$projectId/$projectYamlFileName").mapBoth(
+                success = {
+                    it.contentBytes?.let { contentBytes ->
+                        ProjectYamlNameWithLastModified(
+                            contentBytes.toString(Charsets.UTF_8),
+                            it.updateTime,
+                        )
+                    }
+                },
+                failure = {
+                    Logger.e("Failed to load project", it)
+                    null
+                },
+            )
+        }
 
     override suspend fun loadProjectIdList(userId: String): List<String> =
         withContext(ioDispatcher) {
@@ -82,7 +88,7 @@ class CloudProjectSaverImpl(
                 failure = {
                     Logger.e("Failed to load projectId list", it)
                     emptyList()
-                }
+                },
             )
         }
 

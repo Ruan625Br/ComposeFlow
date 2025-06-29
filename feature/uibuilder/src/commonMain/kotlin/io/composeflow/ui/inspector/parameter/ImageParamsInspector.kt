@@ -73,7 +73,7 @@ fun ImageParamsInspector(
     Column {
         LabeledBorderBox(
             label = "Image type",
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         ) {
             DropdownProperty(
                 project = project,
@@ -103,11 +103,12 @@ fun ImageParamsInspector(
                         )
                     },
                     onValidPropertyChanged = { property, lazyListSource ->
-                        val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                            node,
-                            imageTrait.copy(url = property),
-                            lazyListSource,
-                        )
+                        val result =
+                            composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                                node,
+                                imageTrait.copy(url = property),
+                                lazyListSource,
+                            )
                         result.errorMessages.forEach {
                             coroutineScope.launch {
                                 onShowSnackbar(it, null)
@@ -123,23 +124,25 @@ fun ImageParamsInspector(
                         BooleanPropertyEditor(
                             checked = imageTrait.placeholderUrl is PlaceholderUrl.Used,
                             onCheckedChange = { placeHolderUsed ->
-                                val usage = if (placeHolderUsed) {
-                                    PlaceholderUrl.Used(
-                                        StringProperty.StringIntrinsicValue(
-                                            DefaultUrl
+                                val usage =
+                                    if (placeHolderUsed) {
+                                        PlaceholderUrl.Used(
+                                            StringProperty.StringIntrinsicValue(
+                                                DefaultUrl,
+                                            ),
                                         )
-                                    )
-                                } else {
-                                    PlaceholderUrl.NoUsage
-                                }
+                                    } else {
+                                        PlaceholderUrl.NoUsage
+                                    }
                                 composeNodeCallbacks.onTraitUpdated(
                                     node,
                                     imageTrait.copy(placeholderUrl = usage),
                                 )
                             },
                             label = "Use placeholder image",
-                            modifier = Modifier
-                                .hoverOverlay()
+                            modifier =
+                                Modifier
+                                    .hoverOverlay(),
                         )
                     }
 
@@ -152,14 +155,17 @@ fun ImageParamsInspector(
                                     composeNodeCallbacks.onTraitUpdated(
                                         node,
                                         imageTrait.copy(
-                                            placeholderUrl = PlaceholderUrl.Used(
-                                                StringProperty.StringIntrinsicValue(it)
-                                            )
-                                        )
+                                            placeholderUrl =
+                                                PlaceholderUrl.Used(
+                                                    StringProperty.StringIntrinsicValue(it),
+                                                ),
+                                        ),
                                     )
                                 },
-                                modifier = Modifier.fillMaxWidth()
-                                    .hoverOverlay(),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .hoverOverlay(),
                                 label = "Placeholder image URL",
                                 placeholder = "https://example.com/image1",
                                 singleLine = true,
@@ -173,8 +179,10 @@ fun ImageParamsInspector(
             ImageAssetType.Asset -> {
                 LabeledBorderBox(
                     label = "Asset",
-                    modifier = Modifier.hoverOverlay()
-                        .fillMaxWidth()
+                    modifier =
+                        Modifier
+                            .hoverOverlay()
+                            .fillMaxWidth(),
                 ) {
                     val assets = project.assetHolder.images
                     val userId = LocalFirebaseIdToken.current.user_id
@@ -187,12 +195,12 @@ fun ImageParamsInspector(
                                     userId = userId,
                                     projectId = project.id,
                                     contentScale = ContentScale.Fit,
-                                    modifier = Modifier.size(48.dp)
+                                    modifier = Modifier.size(48.dp),
                                 )
 
                                 Text(
                                     it.fileName,
-                                    modifier = Modifier.padding(start = 8.dp)
+                                    modifier = Modifier.padding(start = 8.dp),
                                 )
                             }
                         },
@@ -226,10 +234,11 @@ fun ImageParamsInspector(
             AssignableEnumPropertyEditor(
                 project = project,
                 node = node,
-                acceptableType = ComposeFlowType.Enum(
-                    isList = false,
-                    enumClass = ContentScaleWrapper::class.java,
-                ),
+                acceptableType =
+                    ComposeFlowType.Enum(
+                        isList = false,
+                        enumClass = ContentScaleWrapper::class.java,
+                    ),
                 initialProperty = imageTrait.contentScaleWrapper,
                 items = ContentScaleWrapper.entries,
                 label = "Content scale",
@@ -249,8 +258,10 @@ fun ImageParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier.hoverOverlay()
-                    .weight(1f),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .weight(1f),
             )
         }
 
@@ -267,9 +278,10 @@ fun ImageParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
         }
     }
@@ -302,22 +314,23 @@ private fun AlignmentInspector(
                     onCheckedChange = {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            params.copy(alignmentWrapper = AlignmentWrapper.fromAlignment(alignment))
+                            params.copy(alignmentWrapper = AlignmentWrapper.fromAlignment(alignment)),
                         )
                     },
-                    modifier = Modifier.padding(horizontal = 8.dp).size(24.dp).then(
-                        if (thisItemSelected) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                        alpha = 0.3f,
-                                    ),
-                                )
-                        } else {
-                            Modifier
-                        },
-                    ),
+                    modifier =
+                        Modifier.padding(horizontal = 8.dp).size(24.dp).then(
+                            if (thisItemSelected) {
+                                Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                            alpha = 0.3f,
+                                        ),
+                                    )
+                            } else {
+                                Modifier
+                            },
+                        ),
                 ) {
                     imageVector?.let {
                         Icon(

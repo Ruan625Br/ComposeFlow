@@ -11,8 +11,8 @@ class AdbWrapper {
         System.getenv("ANDROID_SDK_ROOT") ?: null
     private val adbPath = sdkPath?.let { "$sdkPath/platform-tools/adb" }
 
-    suspend fun listDevices(): List<Device.AndroidEmulator> {
-        return adbPath?.let {
+    suspend fun listDevices(): List<Device.AndroidEmulator> =
+        adbPath?.let {
             val command = arrayOf(adbPath, "devices")
             val output = CommandUtil.runCommandAndWait(command)
             output
@@ -32,7 +32,6 @@ class AdbWrapper {
                     }
                 }
         } ?: emptyList()
-    }
 
     private suspend fun getDeviceNameFromEmulatorPort(portNumber: Int): String? {
         if (adbPath == null) {
@@ -40,14 +39,15 @@ class AdbWrapper {
             return null
         }
         return adbPath.let { adb ->
-            val command = arrayOf(
-                adb,
-                "-s",
-                "emulator-$portNumber",
-                "emu",
-                "avd",
-                "name",
-            )
+            val command =
+                arrayOf(
+                    adb,
+                    "-s",
+                    "emulator-$portNumber",
+                    "emu",
+                    "avd",
+                    "name",
+                )
             val output = CommandUtil.runCommandAndWait(command)
             val lines = output.lines()
             lines.firstOrNull { it.isNotBlank() && it != "OK" }?.trim()
@@ -60,34 +60,40 @@ class AdbWrapper {
         apkRelativePath: String = "./composeApp/build/outputs/apk/debug/composeApp-debug.apk",
     ) {
         adbPath?.let {
-            val command = arrayOf(
-                it,
-                "-s",
-                deviceId,
-                "install",
-                "-r",
-                appDir.resolve(apkRelativePath).path,
-            )
+            val command =
+                arrayOf(
+                    it,
+                    "-s",
+                    deviceId,
+                    "install",
+                    "-r",
+                    appDir.resolve(apkRelativePath).path,
+                )
             CommandUtil.runCommandAndWait(command)
         } ?: Logger.w("Adb path not found")
     }
 
-    suspend fun launchActivity(deviceId: String, applicationId: String, activityName: String) {
+    suspend fun launchActivity(
+        deviceId: String,
+        applicationId: String,
+        activityName: String,
+    ) {
         adbPath?.let {
-            val command = arrayOf(
-                it,
-                "-s",
-                deviceId,
-                "shell",
-                "am",
-                "start",
-                "-n",
-                "$applicationId/$activityName",
-                "-a",
-                "android.intent.action.MAIN",
-                "-c",
-                "android.intent.category.LAUNCHER",
-            )
+            val command =
+                arrayOf(
+                    it,
+                    "-s",
+                    deviceId,
+                    "shell",
+                    "am",
+                    "start",
+                    "-n",
+                    "$applicationId/$activityName",
+                    "-a",
+                    "android.intent.action.MAIN",
+                    "-c",
+                    "android.intent.category.LAUNCHER",
+                )
             CommandUtil.runCommandAndWait(command)
         } ?: Logger.w("Adb path not found")
     }

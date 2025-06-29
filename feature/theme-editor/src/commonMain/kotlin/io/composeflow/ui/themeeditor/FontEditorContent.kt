@@ -77,17 +77,18 @@ fun FontEditorContent(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(16.dp),
     ) {
         Spacer(Modifier.weight(1f))
         FontEditorDetailContent(
             project = project,
             callbacks = callbacks,
             fontEditableParams = fontEditableParams,
-            modifier = modifier
+            modifier = modifier,
         )
         Spacer(Modifier.weight(1f))
     }
@@ -101,12 +102,13 @@ private fun FontEditorDetailContent(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = Modifier
-            .width(1120.dp)
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surfaceContainerLow),
+        modifier =
+            Modifier
+                .width(1120.dp)
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surfaceContainerLow),
     ) {
         Column(modifier = Modifier.padding(top = 16.dp, start = 16.dp)) {
             FontDetailContentHeader(
@@ -122,7 +124,7 @@ private fun FontEditorDetailContent(
                 project = project,
                 callbacks = callbacks,
                 fontEditableParams = fontEditableParams,
-                modifier = modifier
+                modifier = modifier,
             )
         }
     }
@@ -152,16 +154,17 @@ private fun FontDetailContentHeader(
             readOnly = true,
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
             label = { Text("Primary font family") },
-            interactionSource = remember { MutableInteractionSource() }
-                .also { interactionSource ->
-                    LaunchedEffect(interactionSource) {
-                        interactionSource.interactions.collect {
-                            if (it is PressInteraction.Release) {
-                                changeFontFamilyCallback = callbacks.onPrimaryFontFamilyChanged
+            interactionSource =
+                remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    changeFontFamilyCallback = callbacks.onPrimaryFontFamilyChanged
+                                }
                             }
                         }
-                    }
-                },
+                    },
         )
         Spacer(Modifier.size(16.dp))
         SmallOutlinedTextField(
@@ -170,25 +173,30 @@ private fun FontDetailContentHeader(
             readOnly = true,
             textStyle = MaterialTheme.typography.bodyMedium.copy(fontFamily = secondaryFontFamily.asFontFamily()),
             label = { Text("Secondary font family") },
-            interactionSource = remember { MutableInteractionSource() }
-                .also { interactionSource ->
-                    LaunchedEffect(interactionSource) {
-                        interactionSource.interactions.collect {
-                            if (it is PressInteraction.Release) {
-                                changeFontFamilyCallback = callbacks.onSecondaryFontFamilyChanged
+            interactionSource =
+                remember { MutableInteractionSource() }
+                    .also { interactionSource ->
+                        LaunchedEffect(interactionSource) {
+                            interactionSource.interactions.collect {
+                                if (it is PressInteraction.Release) {
+                                    changeFontFamilyCallback = callbacks.onSecondaryFontFamilyChanged
+                                }
                             }
                         }
-                    }
-                },
+                    },
         )
 
         val onShowSnackbar = LocalOnShowSnackbar.current
         Spacer(Modifier.size(16.dp))
         val updatedFonts = stringResource(Res.string.updated_fonts)
         val existingTextOverrides =
-            project.themeHolder.fontHolder.textStyleOverrides.entries.map { it.toPair() }.toSet()
+            project.themeHolder.fontHolder.textStyleOverrides.entries
+                .map { it.toPair() }
+                .toSet()
         val editedTextOverriddes =
-            fontEditableParams.textStyleOverrides.entries.map { it.toPair() }.toSet()
+            fontEditableParams.textStyleOverrides.entries
+                .map { it.toPair() }
+                .toSet()
         TextButton(
             onClick = {
                 callbacks.onApplyFontEditableParams()
@@ -196,9 +204,10 @@ private fun FontDetailContentHeader(
                     onShowSnackbar(updatedFonts, null)
                 }
             },
-            enabled = project.themeHolder.fontHolder.primaryFontFamily != fontEditableParams.primaryFontFamily ||
+            enabled =
+                project.themeHolder.fontHolder.primaryFontFamily != fontEditableParams.primaryFontFamily ||
                     project.themeHolder.fontHolder.secondaryFontFamily != fontEditableParams.secondaryFontFamily ||
-                    existingTextOverrides != editedTextOverriddes
+                    existingTextOverrides != editedTextOverriddes,
         ) {
             Text(stringResource(Res.string.apply_change))
         }
@@ -211,7 +220,7 @@ private fun FontDetailContentHeader(
         ) {
             Text(
                 stringResource(Res.string.reset_fonts),
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.error,
             )
         }
         Spacer(Modifier.size(32.dp))
@@ -231,7 +240,7 @@ private fun FontDetailContentHeader(
             Surface {
                 ChangeFontFamilyDialogContent(
                     closeDialog = closeDialog,
-                    changeFontFamilyCallback = it
+                    changeFontFamilyCallback = it,
                 )
             }
         }
@@ -258,7 +267,7 @@ private fun FontDetailContentHeader(
                 coroutineScope.launch {
                     onShowSnackbar(resetFontsToDefaults, null)
                 }
-            }
+            },
         )
     }
 }
@@ -269,8 +278,10 @@ private fun ChangeFontFamilyDialogContent(
     changeFontFamilyCallback: (FontFamilyWrapper) -> Unit,
 ) {
     Column(
-        modifier = Modifier.size(980.dp)
-            .padding(16.dp)
+        modifier =
+            Modifier
+                .size(980.dp)
+                .padding(16.dp),
     ) {
         Text(
             text = stringResource(Res.string.change_font_family),
@@ -285,15 +296,17 @@ private fun ChangeFontFamilyDialogContent(
                         changeFontFamilyCallback(fontFamily)
                         closeDialog()
                     },
-                    modifier = Modifier.fillMaxWidth()
-                        .hoverIconClickable()
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable(),
                 ) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = fontFamily.displayName,
                             style = MaterialTheme.typography.titleLarge.copy(fontFamily = FontFamilyWrapper.Roboto.asFontFamily()),
                             color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 16.dp),
                         )
                         Text(
                             text = stringResource(Res.string.lorem_ipsum),
@@ -364,11 +377,12 @@ private fun FontTable(
     fontEditableParams: FontEditableParams,
     modifier: Modifier,
 ) {
-    val typography = MaterialTheme.typography.generateWithOverrides(
-        fontEditableParams.primaryFontFamily,
-        fontEditableParams.secondaryFontFamily,
-        fontEditableParams.textStyleOverrides
-    )
+    val typography =
+        MaterialTheme.typography.generateWithOverrides(
+            fontEditableParams.primaryFontFamily,
+            fontEditableParams.secondaryFontFamily,
+            fontEditableParams.textStyleOverrides,
+        )
     LazyColumn(modifier = modifier) {
         items(TextStyleWrapper.entries) { textStyleWrapper ->
             val textStyle = typography.matchingTextStyle(textStyleWrapper)
@@ -376,21 +390,23 @@ private fun FontTable(
                 fontEditableParams.textStyleOverrides[textStyleWrapper] ?: TextStyleOverride()
             var fontSizeStr by remember {
                 mutableStateOf(
-                    textStyle.fontSize.value.toInt().toString()
+                    textStyle.fontSize.value
+                        .toInt()
+                        .toString(),
                 )
             }
             val fontSizeValidateResult: ValidateResult by remember(fontSizeStr) {
                 mutableStateOf(
                     IntValidator(
                         allowLessThanZero = false,
-                        maxValue = 120
-                    ).validate(fontSizeStr)
+                        maxValue = 120,
+                    ).validate(fontSizeStr),
                 )
             }
             var letterSpacingStr by remember { mutableStateOf(textStyle.letterSpacing.value.toString()) }
             val letterSpacingValidateResult: ValidateResult by remember(letterSpacingStr) {
                 mutableStateOf(
-                    FloatValidator().validate(letterSpacingStr)
+                    FloatValidator().validate(letterSpacingStr),
                 )
             }
 
@@ -411,12 +427,12 @@ private fun FontTable(
                             if (fontSizeValidateResult is ValidateResult.Success) {
                                 callbacks.onTextStyleOverridesChanged(
                                     textStyleWrapper,
-                                    textStyleOverride.copy(fontSize = fontSizeStr.toIntOrNull())
+                                    textStyleOverride.copy(fontSize = fontSizeStr.toIntOrNull()),
                                 )
                             }
                         },
                         isError = fontSizeValidateResult is ValidateResult.Failure,
-                        modifier = Modifier.width(fontSizeDp).padding(end = 16.dp)
+                        modifier = Modifier.width(fontSizeDp).padding(end = 16.dp),
                     )
                     SmallOutlinedTextField(
                         value = letterSpacingStr,
@@ -425,12 +441,12 @@ private fun FontTable(
                             if (letterSpacingValidateResult is ValidateResult.Success) {
                                 callbacks.onTextStyleOverridesChanged(
                                     textStyleWrapper,
-                                    textStyleOverride.copy(letterSpacing = letterSpacingStr.toFloatOrNull())
+                                    textStyleOverride.copy(letterSpacing = letterSpacingStr.toFloatOrNull()),
                                 )
                             }
                         },
                         isError = letterSpacingValidateResult is ValidateResult.Failure,
-                        modifier = Modifier.width(letterSpacingDp).padding(end = 16.dp)
+                        modifier = Modifier.width(letterSpacingDp).padding(end = 16.dp),
                     )
                     BasicDropdownPropertyEditor(
                         project = project,
@@ -438,7 +454,7 @@ private fun FontTable(
                         onValueChanged = { _, item ->
                             callbacks.onTextStyleOverridesChanged(
                                 textStyleWrapper,
-                                textStyleOverride.copy(fontWeight = item)
+                                textStyleOverride.copy(fontWeight = item),
                             )
                         },
                         selectedItem = FontWeightWrapper.fromFontWeight(textStyle.fontWeight),
@@ -450,7 +466,7 @@ private fun FontTable(
                         onValueChanged = { _, item ->
                             callbacks.onTextStyleOverridesChanged(
                                 textStyleWrapper,
-                                textStyleOverride.copy(fontFamilyCandidate = item)
+                                textStyleOverride.copy(fontFamilyCandidate = item),
                             )
                         },
                         selectedItem = textStyleOverride.fontFamilyCandidate,
@@ -463,8 +479,8 @@ private fun FontTable(
     }
 }
 
-fun Typography.matchingTextStyle(textStyleWrapper: TextStyleWrapper): TextStyle {
-    return when (textStyleWrapper) {
+fun Typography.matchingTextStyle(textStyleWrapper: TextStyleWrapper): TextStyle =
+    when (textStyleWrapper) {
         TextStyleWrapper.DisplayLarge -> displayLarge
         TextStyleWrapper.DisplayMedium -> displayMedium
         TextStyleWrapper.DisplaySmall -> displaySmall
@@ -481,4 +497,3 @@ fun Typography.matchingTextStyle(textStyleWrapper: TextStyleWrapper): TextStyle 
         TextStyleWrapper.LabelMedium -> labelMedium
         TextStyleWrapper.LabelSmall -> labelSmall
     }
-}

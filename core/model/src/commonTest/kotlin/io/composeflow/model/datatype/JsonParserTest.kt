@@ -5,7 +5,6 @@ import kotlin.test.Test
 import kotlin.test.assertTrue
 
 class JsonParserTest {
-
     private val parser = JsonParser()
 
     @Test
@@ -43,39 +42,61 @@ class JsonParserTest {
         assert(parseResult is DataTypeParseResult.Success)
         val dataType = (parseResult as DataTypeParseResult.Success).dataType
 
-        assertTrue(dataType.fields.any {
-            it.variableName == "plantId" && it.fieldType is FieldType.String
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "name" && it.fieldType is FieldType.String
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "description" && it.fieldType is FieldType.String
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "growZoneNumber" && it.fieldType is FieldType.Int
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "wateringInterval" && it.fieldType is FieldType.Int
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "float" && it.fieldType is FieldType.Float
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "booleanLiteral" && it.fieldType is FieldType.Boolean
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "booleanString" && it.fieldType is FieldType.Boolean
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "instant" && it.fieldType is FieldType.Instant
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "instantDate" && it.fieldType is FieldType.String
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "imageUrl" && it.fieldType is FieldType.String
-        })
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "plantId" && it.fieldType is FieldType.String
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "name" && it.fieldType is FieldType.String
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "description" && it.fieldType is FieldType.String
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "growZoneNumber" && it.fieldType is FieldType.Int
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "wateringInterval" && it.fieldType is FieldType.Int
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "float" && it.fieldType is FieldType.Float
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "booleanLiteral" && it.fieldType is FieldType.Boolean
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "booleanString" && it.fieldType is FieldType.Boolean
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "instant" && it.fieldType is FieldType.Instant
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "instantDate" && it.fieldType is FieldType.String
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "imageUrl" && it.fieldType is FieldType.String
+            },
+        )
     }
 
     @Test
@@ -90,12 +111,16 @@ class JsonParserTest {
         assert(parseResult is DataTypeParseResult.Success)
         val dataType = (parseResult as DataTypeParseResult.Success).dataType
 
-        assertTrue(dataType.fields.any {
-            it.variableName == "string" && it.fieldType is FieldType.String
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "stringList" && it.fieldType is FieldType.String
-        })
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "string" && it.fieldType is FieldType.String
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "stringList" && it.fieldType is FieldType.String
+            },
+        )
     }
 
     @Test
@@ -113,12 +138,16 @@ class JsonParserTest {
         assert(parseResult is DataTypeParseResult.SuccessWithWarning)
         val dataType = (parseResult as DataTypeParseResult.SuccessWithWarning).dataType
 
-        assertTrue(dataType.fields.any {
-            it.variableName == "string" && it.fieldType is FieldType.String
-        })
-        assertTrue(dataType.fields.any {
-            it.variableName == "nestedObject" && it.fieldType is FieldType.String
-        })
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "string" && it.fieldType is FieldType.String
+            },
+        )
+        assertTrue(
+            dataType.fields.any {
+                it.variableName == "nestedObject" && it.fieldType is FieldType.String
+            },
+        )
     }
 
     @Test
@@ -126,14 +155,16 @@ class JsonParserTest {
         val stringField = DataField(name = "string", fieldType = FieldType.String())
         val intField = DataField(name = "int", fieldType = FieldType.Int())
         val booleanField = DataField(name = "boolean", fieldType = FieldType.Boolean())
-        val dataType = DataType(
-            name = "dataType",
-            fields = mutableListOf(
-                stringField,
-                intField,
-                booleanField,
+        val dataType =
+            DataType(
+                name = "dataType",
+                fields =
+                    mutableListOf(
+                        stringField,
+                        intField,
+                        booleanField,
+                    ),
             )
-        )
         val jsonText = """
        [
          {

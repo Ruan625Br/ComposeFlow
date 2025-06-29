@@ -31,12 +31,13 @@ fun JsonElementSelectionDialog(
     modifier: Modifier = Modifier,
 ) {
     PositionCustomizablePopup(
-        onDismissRequest = onCloseDialog
+        onDismissRequest = onCloseDialog,
     ) {
         Surface(
-            modifier = modifier.size(600.dp, 700.dp)
+            modifier = modifier.size(600.dp, 700.dp),
         ) {
-            (apiDefinition.exampleJsonResponse?.jsonElement as? JsonArray)?.get(0)
+            (apiDefinition.exampleJsonResponse?.jsonElement as? JsonArray)
+                ?.get(0)
                 ?.let { firstItem ->
                     val tree = createJsonTreeWithJsonPath(firstItem.toString())
                     val treeState = rememberTreeState()
@@ -55,13 +56,14 @@ fun JsonElementSelectionDialog(
                                 )
                             }
                         },
-                        modifier = Modifier
-                            .onGloballyPositioned {
-                                if (!initiallyExpanded) {
-                                    treeState.openNodes(tree.roots.map { it.id })
-                                    initiallyExpanded = true
-                                }
-                            }
+                        modifier =
+                            Modifier
+                                .onGloballyPositioned {
+                                    if (!initiallyExpanded) {
+                                        treeState.openNodes(tree.roots.map { it.id })
+                                        initiallyExpanded = true
+                                    }
+                                },
                     ) {
                         val element = it.data
                         Row(modifier = Modifier.fillMaxWidth()) {

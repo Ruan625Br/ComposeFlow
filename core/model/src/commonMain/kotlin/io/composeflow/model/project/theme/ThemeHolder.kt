@@ -10,9 +10,7 @@ class ThemeHolder(
     val colorSchemeHolder: ColorSchemeHolder = ColorSchemeHolder(),
     val fontHolder: FontHolder = FontHolder(),
 ) {
-    fun generateThemeFiles(): List<FileSpec> {
-        return listOf(colorSchemeHolder.generateColorFile(), fontHolder.generateFontFile())
-    }
+    fun generateThemeFiles(): List<FileSpec> = listOf(colorSchemeHolder.generateColorFile(), fontHolder.generateFontFile())
 }
 
 fun ThemeHolder.copyContents(other: ThemeHolder) {

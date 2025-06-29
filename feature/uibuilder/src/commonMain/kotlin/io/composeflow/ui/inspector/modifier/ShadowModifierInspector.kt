@@ -45,9 +45,10 @@ fun ShadowModifierInspector(
                         wrapper.copy(elevation = it.toFloat().dp),
                     )
                 },
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .padding(end = 8.dp)
+                        .hoverOverlay(),
             )
             ShapePropertyEditor(
                 initialShape = wrapper.shapeWrapper,
@@ -55,7 +56,7 @@ fun ShadowModifierInspector(
                     composeNodeCallbacks.onModifierUpdatedAt(
                         node,
                         modifierIndex,
-                        wrapper.copy(shapeWrapper = it)
+                        wrapper.copy(shapeWrapper = it),
                     )
                 },
             )

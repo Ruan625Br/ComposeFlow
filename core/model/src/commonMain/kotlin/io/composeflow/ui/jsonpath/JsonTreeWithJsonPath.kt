@@ -11,9 +11,7 @@ import org.jetbrains.jewel.foundation.lazy.tree.Tree
 import org.jetbrains.jewel.foundation.lazy.tree.TreeGeneratorScope
 import org.jetbrains.jewel.foundation.lazy.tree.buildTree
 
-fun createJsonTreeWithJsonPath(
-    json: String,
-): Tree<JsonWithJsonPath> =
+fun createJsonTreeWithJsonPath(json: String): Tree<JsonWithJsonPath> =
     buildTree {
         jsonNode(
             key = null,
@@ -38,8 +36,9 @@ private fun TreeGeneratorScope<JsonWithJsonPath>.jsonPrimitiveNode(
     jsonPrimitive: JsonWithJsonPath,
 ) {
     addLeaf(
-        data = jsonPrimitive
-            .copy(displayName = "${getFormattedKey(key)}${getFormattedValue(jsonPrimitive.jsonElement as JsonPrimitive)}"),
+        data =
+            jsonPrimitive
+                .copy(displayName = "${getFormattedKey(key)}${getFormattedValue(jsonPrimitive.jsonElement as JsonPrimitive)}"),
     )
 }
 

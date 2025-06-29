@@ -15,11 +15,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface FieldType<T> : DropdownItem {
-
     fun defaultValue(): T
+
     fun defaultValueAsCodeBlock(project: Project): CodeBlock
 
     fun type(): ComposeFlowType
+
     fun isList(): kotlin.Boolean
 
     @Serializable
@@ -28,10 +29,12 @@ sealed interface FieldType<T> : DropdownItem {
         private val defaultValue: kotlin.String = "",
     ) : FieldType<kotlin.String> {
         override fun isList(): kotlin.Boolean = false
+
         override fun type() = ComposeFlowType.StringType(isList = false)
+
         override fun defaultValue(): kotlin.String = defaultValue
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock =
-            CodeBlock.of("\"${defaultValue}\"")
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("\"${defaultValue}\"")
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("String")
@@ -45,11 +48,12 @@ sealed interface FieldType<T> : DropdownItem {
         private val defaultValue: kotlin.Int = 0,
     ) : FieldType<kotlin.Int> {
         override fun isList(): kotlin.Boolean = false
+
         override fun type() = ComposeFlowType.IntType(isList = false)
+
         override fun defaultValue(): kotlin.Int = defaultValue
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock {
-            return CodeBlock.of("$defaultValue")
-        }
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("$defaultValue")
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
@@ -63,11 +67,12 @@ sealed interface FieldType<T> : DropdownItem {
         private val defaultValue: kotlin.Float = 0f,
     ) : FieldType<kotlin.Float> {
         override fun isList(): kotlin.Boolean = false
+
         override fun type() = ComposeFlowType.FloatType(isList = false)
+
         override fun defaultValue(): kotlin.Float = defaultValue
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock {
-            return CodeBlock.of("${defaultValue}f")
-        }
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("${defaultValue}f")
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
@@ -81,11 +86,12 @@ sealed interface FieldType<T> : DropdownItem {
         private val defaultValue: kotlin.Boolean = false,
     ) : FieldType<kotlin.Boolean> {
         override fun isList(): kotlin.Boolean = false
+
         override fun type() = ComposeFlowType.BooleanType(isList = false)
+
         override fun defaultValue(): kotlin.Boolean = defaultValue
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock {
-            return CodeBlock.of("$defaultValue")
-        }
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("$defaultValue")
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Boolean")
@@ -99,13 +105,12 @@ sealed interface FieldType<T> : DropdownItem {
         private val defaultValue: InstantWrapper = InstantWrapper(),
     ) : FieldType<kotlinx.datetime.Instant> {
         override fun isList(): kotlin.Boolean = false
-        override fun type() = ComposeFlowType.InstantType(isList = false)
-        override fun defaultValue(): kotlinx.datetime.Instant =
-            defaultValue.instant ?: Clock.System.now()
 
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock {
-            return defaultValue.generateCode()
-        }
+        override fun type() = ComposeFlowType.InstantType(isList = false)
+
+        override fun defaultValue(): kotlinx.datetime.Instant = defaultValue.instant ?: Clock.System.now()
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = defaultValue.generateCode()
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Instant")
@@ -120,8 +125,11 @@ sealed interface FieldType<T> : DropdownItem {
         val dataTypeId: DataTypeId,
     ) : FieldType<DataType> {
         override fun isList(): kotlin.Boolean = false
+
         override fun type() = ComposeFlowType.CustomDataType(isList = false, dataTypeId)
+
         override fun defaultValue(): DataType = defaultValue
+
         override fun defaultValueAsCodeBlock(project: Project): CodeBlock {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
             return CodeBlock.of("%T()", dataType.asKotlinPoetClassName(project))
@@ -139,16 +147,16 @@ sealed interface FieldType<T> : DropdownItem {
         val firestoreCollectionId: CollectionId,
     ) : FieldType<kotlin.String> {
         override fun isList(): kotlin.Boolean = false
+
         override fun type() =
             ComposeFlowType.DocumentIdType(
                 isList = false,
-                firestoreCollectionId = firestoreCollectionId
+                firestoreCollectionId = firestoreCollectionId,
             )
 
         override fun defaultValue(): kotlin.String = ""
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock {
-            return CodeBlock.of("")
-        }
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("")
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("DocumentId")
@@ -156,8 +164,8 @@ sealed interface FieldType<T> : DropdownItem {
         override fun isSameItem(item: Any): kotlin.Boolean = item is DataFieldType.DocumentId
     }
 
-    fun copyWithDefaultValue(defaultValue: Any): FieldType<*> {
-        return when (this) {
+    fun copyWithDefaultValue(defaultValue: Any): FieldType<*> =
+        when (this) {
             is Boolean -> copy(defaultValue = defaultValue as kotlin.Boolean)
             is Int -> copy(defaultValue = defaultValue as kotlin.Int)
             is Float -> copy(defaultValue = defaultValue as kotlin.Float)
@@ -166,15 +174,15 @@ sealed interface FieldType<T> : DropdownItem {
             is CustomDataType -> copy(defaultValue = defaultValue as DataType)
             is DocumentId -> this
         }
-    }
 
     companion object {
-        fun entries(): List<FieldType<*>> = listOf(
-            String(),
-            Int(),
-            Float(),
-            Boolean(),
-            Instant(),
-        )
+        fun entries(): List<FieldType<*>> =
+            listOf(
+                String(),
+                Int(),
+                Float(),
+                Boolean(),
+                Instant(),
+            )
     }
 }

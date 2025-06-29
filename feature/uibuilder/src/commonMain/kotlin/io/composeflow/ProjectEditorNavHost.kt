@@ -32,7 +32,7 @@ fun ProjectEditorNavHost(
             project = project,
             aiAssistantUiState = aiAssistantUiState,
             onUpdateProject = onUpdateProject,
-            screenMaxSize = screenMaxSize
+            screenMaxSize = screenMaxSize,
         )
         dataTypeEditorScreen(
             project = project,

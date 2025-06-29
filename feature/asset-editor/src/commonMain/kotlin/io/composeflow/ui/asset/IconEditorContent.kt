@@ -71,10 +71,11 @@ fun IconAssetDetails(
     uploadResult: UploadResult,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundContainerNeutral()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .backgroundContainerNeutral()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.width(128.dp))
         IconAssetDetailsContent(
@@ -82,7 +83,7 @@ fun IconAssetDetails(
             assetEditorCallbacks = assetEditorCallbacks,
             removeResult = removeResult,
             uploadResult = uploadResult,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         )
         Spacer(Modifier.width(128.dp))
     }
@@ -98,26 +99,30 @@ private fun IconAssetDetailsContent(
 ) {
     val coroutineScope = rememberCoroutineScope()
     Column(
-        modifier = modifier
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier =
+            modifier
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surface),
     ) {
         Column {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.wrapContentHeight()
-                    .padding(16.dp)
+                modifier =
+                    Modifier
+                        .wrapContentHeight()
+                        .padding(16.dp),
             ) {
                 val pickIconDescription = stringResource(Res.string.pick_icon_description)
                 TextButton(onClick = {
                     coroutineScope.launch {
-                        val file = FileKit.pickFile(
-                            type = PickerType.File(extensions = listOf("xml", "png")),
-                            mode = PickerMode.Single,
-                            title = pickIconDescription,
-                        )
+                        val file =
+                            FileKit.pickFile(
+                                type = PickerType.File(extensions = listOf("xml", "png")),
+                                mode = PickerMode.Single,
+                                title = pickIconDescription,
+                            )
                         file?.let {
                             assetEditorCallbacks.onUploadIconFile(it)
                         }
@@ -134,13 +139,12 @@ private fun IconAssetDetailsContent(
             HorizontalDivider(
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp)
+                    .padding(horizontal = 8.dp),
             )
 
             Column(
                 modifier = Modifier.padding(horizontal = 16.dp),
             ) {
-
                 val assets = project.assetHolder.icons
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(220.dp),
@@ -172,23 +176,25 @@ private fun IconAssetItem(
 ) {
     var deleteDialogOpen by remember { mutableStateOf(false) }
     Box(
-        modifier = modifier.clip(RoundedCornerShape(8.dp))
-            .background(
-                color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-            )
-            .switchByHovered(
-                hovered = Modifier.border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.primary,
-                    shape = RoundedCornerShape(8.dp),
-                ),
-                notHovered = Modifier.alpha(0.5f).border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.secondary,
-                    shape = RoundedCornerShape(8.dp),
-                ),
-            )
-            .size(width = 180.dp, height = 168.dp)
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .background(
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                ).switchByHovered(
+                    hovered =
+                        Modifier.border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(8.dp),
+                        ),
+                    notHovered =
+                        Modifier.alpha(0.5f).border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.secondary,
+                            shape = RoundedCornerShape(8.dp),
+                        ),
+                ).size(width = 180.dp, height = 168.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row {
@@ -197,17 +203,19 @@ private fun IconAssetItem(
                     removeResult.blobInfoWrapper.blobId == blobInfoWrapper.blobId
                 ) {
                     Box(
-                        modifier = Modifier.shimmer()
-                            .background(
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                        modifier =
+                            Modifier
+                                .shimmer()
+                                .background(
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = RoundedCornerShape(8.dp),
+                                ),
                     ) {}
                 } else {
                     blobInfoWrapper.asIconComposable(
                         userId = LocalFirebaseIdToken.current.user_id,
                         projectId = project.id,
-                        modifier = Modifier.heightIn(max = 72.dp)
+                        modifier = Modifier.heightIn(max = 72.dp),
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -226,15 +234,17 @@ private fun IconAssetItem(
                     "Updated: ${updateTime.asDateString()}",
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                    modifier = Modifier.padding(top = 8.dp)
+                    modifier = Modifier.padding(top = 8.dp),
                 )
             }
         }
 
         val removeAsset = stringResource(Res.string.remove_asset)
         Column(
-            modifier = Modifier.align(Alignment.TopEnd)
-                .padding(top = 8.dp, end = 8.dp)
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 8.dp),
         ) {
             Tooltip(removeAsset) {
                 ComposeFlowIconButton(
@@ -263,7 +273,7 @@ private fun IconAssetItem(
             onAllDialogsClosed()
         }
         SimpleConfirmationDialog(
-            text = "${removeAsset}?",
+            text = "$removeAsset?",
             positiveText = remove,
             onCloseClick = {
                 closeDialog()
@@ -271,7 +281,7 @@ private fun IconAssetItem(
             onConfirmClick = {
                 onDeleteAsset(blobInfoWrapper)
                 closeDialog()
-            }
+            },
         )
     }
 }

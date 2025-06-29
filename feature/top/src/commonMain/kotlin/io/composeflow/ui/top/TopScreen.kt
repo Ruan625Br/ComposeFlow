@@ -77,14 +77,15 @@ fun TopScreen(
     val viewModel =
         viewModel(
             modelClass = TopScreenViewModel::class,
-            keys = listOf(firebaseIdToken.user_id)
+            keys = listOf(firebaseIdToken.user_id),
         ) { TopScreenViewModel(firebaseIdToken) }
     val settings = viewModel.settings.collectAsState()
-    val useComposeFlowDarkTheme = when (settings.value.composeBuilderDarkThemeSetting) {
-        DarkThemeSetting.System -> isSystemInDarkTheme()
-        DarkThemeSetting.Light -> false
-        DarkThemeSetting.Dark -> true
-    }
+    val useComposeFlowDarkTheme =
+        when (settings.value.composeBuilderDarkThemeSetting) {
+            DarkThemeSetting.System -> isSystemInDarkTheme()
+            DarkThemeSetting.Light -> false
+            DarkThemeSetting.Dark -> true
+        }
 
     val projectUiState = viewModel.projectListUiState.collectAsState().value
 
@@ -104,40 +105,44 @@ fun TopScreen(
                                     anyDialogShown = false
                                 },
                             ) {
-                                val overlayModifier = if (anyDialogShown) {
-                                    Modifier.alpha(0.2f)
-                                        .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                                } else {
-                                    Modifier
-                                }
+                                val overlayModifier =
+                                    if (anyDialogShown) {
+                                        Modifier
+                                            .alpha(0.2f)
+                                            .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                                    } else {
+                                        Modifier
+                                    }
 
                                 Box(modifier = overlayModifier) {
                                     when (projectUiState) {
-                                        is ProjectUiState.HasNotSelected.ProjectListLoaded -> TopNavigationDrawerScreen(
-                                            onCreateProject = viewModel::onCreateProject,
-                                            onCreateProjectWithScreens = viewModel::onCreateProjectWithScreens,
-                                            onDeleteProject = viewModel::onDeleteProject,
-                                            onProjectSelected = viewModel::onProjectSelected,
-                                            onLogOut = onLogOut,
-                                            projectUiState = projectUiState,
-                                            useComposeFlowDarkTheme = useComposeFlowDarkTheme,
-                                        )
+                                        is ProjectUiState.HasNotSelected.ProjectListLoaded ->
+                                            TopNavigationDrawerScreen(
+                                                onCreateProject = viewModel::onCreateProject,
+                                                onCreateProjectWithScreens = viewModel::onCreateProjectWithScreens,
+                                                onDeleteProject = viewModel::onDeleteProject,
+                                                onProjectSelected = viewModel::onProjectSelected,
+                                                onLogOut = onLogOut,
+                                                projectUiState = projectUiState,
+                                                useComposeFlowDarkTheme = useComposeFlowDarkTheme,
+                                            )
 
-                                        ProjectUiState.HasNotSelected.ProjectListLoading -> TopNavigationDrawerScreen(
-                                            onCreateProject = viewModel::onCreateProject,
-                                            onCreateProjectWithScreens = viewModel::onCreateProjectWithScreens,
-                                            onDeleteProject = viewModel::onDeleteProject,
-                                            onProjectSelected = viewModel::onProjectSelected,
-                                            onLogOut = onLogOut,
-                                            projectUiState = ProjectUiState.HasNotSelected.ProjectListLoading,
-                                            useComposeFlowDarkTheme = useComposeFlowDarkTheme,
-                                        )
+                                        ProjectUiState.HasNotSelected.ProjectListLoading ->
+                                            TopNavigationDrawerScreen(
+                                                onCreateProject = viewModel::onCreateProject,
+                                                onCreateProjectWithScreens = viewModel::onCreateProjectWithScreens,
+                                                onDeleteProject = viewModel::onDeleteProject,
+                                                onProjectSelected = viewModel::onProjectSelected,
+                                                onLogOut = onLogOut,
+                                                projectUiState = ProjectUiState.HasNotSelected.ProjectListLoading,
+                                                useComposeFlowDarkTheme = useComposeFlowDarkTheme,
+                                            )
 
                                         is ProjectUiState.Selected -> {
                                             ProjectEditorView(
                                                 projectId = projectUiState.project.id,
                                                 onTitleBarRightContentSet = onTitleBarRightContentSet,
-                                                onTitleBarLeftContentSet = onTitleBarLeftContentSet
+                                                onTitleBarLeftContentSet = onTitleBarLeftContentSet,
                                             )
                                         }
                                     }
@@ -152,21 +157,21 @@ fun TopScreen(
 }
 
 @Composable
-private fun DestinationScreenWrapper(
-    content: @Composable () -> Unit,
-) {
+private fun DestinationScreenWrapper(content: @Composable () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.width(48.dp))
         Column(
-            modifier = Modifier
-                .weight(1f)
-                .fillMaxHeight()
-                .padding(vertical = 16.dp)
-                .background(color = MaterialTheme.colorScheme.surface),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(vertical = 16.dp)
+                    .background(color = MaterialTheme.colorScheme.surface),
         ) {
             content()
         }
@@ -205,9 +210,10 @@ private fun TopNavigationDrawerScreen(
                         onClick = {
                             selectedDestination = it
                         },
-                        modifier = Modifier
-                            .heightIn(max = 40.dp)
-                            .padding(horizontal = 12.dp),
+                        modifier =
+                            Modifier
+                                .heightIn(max = 40.dp)
+                                .padding(horizontal = 12.dp),
                     )
                 }
 
@@ -228,7 +234,6 @@ private fun TopNavigationDrawerScreen(
                             }
 
                             is ProjectUiState.HasNotSelected.ProjectListLoaded -> {
-
                                 when (selectedDestination) {
                                     TopDestination.Project -> {
                                         ProjectScreen(
@@ -237,7 +242,7 @@ private fun TopNavigationDrawerScreen(
                                             onCreateProjectWithScreens = onCreateProjectWithScreens,
                                             onDeleteProject = onDeleteProject,
                                             onProjectSelected = onProjectSelected,
-                                            modifier = Modifier.padding(16.dp)
+                                            modifier = Modifier.padding(16.dp),
                                         )
                                     }
 
@@ -263,9 +268,7 @@ private fun TopNavigationDrawerScreen(
 }
 
 @Composable
-private fun UserProfileContainer(
-    onLogOut: () -> Unit,
-) {
+private fun UserProfileContainer(onLogOut: () -> Unit) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     Column {
         Row(
@@ -275,10 +278,14 @@ private fun UserProfileContainer(
             AsyncImage(
                 url = firebaseIdToken.picture,
                 contentDescription = stringResource(Res.string.profile_image),
-                modifier = Modifier.padding(all = 8.dp).size(
-                    width = 48.dp,
-                    height = 48.dp,
-                ).clip(shape = CircleShape).hoverIconClickable(),
+                modifier =
+                    Modifier
+                        .padding(all = 8.dp)
+                        .size(
+                            width = 48.dp,
+                            height = 48.dp,
+                        ).clip(shape = CircleShape)
+                        .hoverIconClickable(),
             )
             Column(
                 modifier = Modifier.wrapContentSize().padding(vertical = 8.dp),

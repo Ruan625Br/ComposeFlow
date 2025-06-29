@@ -30,8 +30,9 @@ fun LeftToolbar(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .testTag(ToolbarTestTag),
+        modifier =
+            modifier
+                .testTag(ToolbarTestTag),
     ) {
         Spacer(Modifier.width(32.dp))
 
@@ -39,14 +40,17 @@ fun LeftToolbar(
         Tooltip(openAiAssistant + " (${getCtrlKeyStr()} + K)") {
             Box(
                 contentAlignment = Alignment.Center,
-                modifier = Modifier
-                    .padding(6.dp)
-                    .background(
-                        color = Color.White,
-                        shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)
-                    ).clickable {
-                        onToggleVisibilityOfAiChatDialog()
-                    }.hoverIconClickable()
+                modifier =
+                    Modifier
+                        .padding(6.dp)
+                        .background(
+                            color = Color.White,
+                            shape =
+                                androidx.compose.foundation.shape
+                                    .RoundedCornerShape(4.dp),
+                        ).clickable {
+                            onToggleVisibilityOfAiChatDialog()
+                        }.hoverIconClickable(),
             ) {
                 Icon(
                     imageVector = ComposeFlowIcons.NounAi,

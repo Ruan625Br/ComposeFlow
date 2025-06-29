@@ -14,7 +14,6 @@ import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.replaceSpaces
 
 object PagerTraitNode {
-
     fun generateCode(
         project: Project,
         node: ComposeNode,
@@ -25,36 +24,41 @@ object PagerTraitNode {
     ): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
         val itemName =
-            node.trait.value.iconText().replaceSpaces().replaceFirstChar { it.lowercase() }
+            node.trait.value
+                .iconText()
+                .replaceSpaces()
+                .replaceFirstChar { it.lowercase() }
 
-        val childrenDependOnDynamicItems = node.children.any {
-            it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
-        }
+        val childrenDependOnDynamicItems =
+            node.children.any {
+                it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
+            }
 
         codeBlockBuilder.add("%M(", MemberHolder.AndroidX.Layout.Box)
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {")
         val initialPagerStateName = "pagerState"
         val pagerStateName =
-            context.getCurrentComposableContext()
+            context
+                .getCurrentComposableContext()
                 .addComposeFileVariable(
-                    id = "${node.id}-${initialPagerStateName}",
+                    id = "${node.id}-$initialPagerStateName",
                     initialPagerStateName,
-                    dryRun
+                    dryRun,
                 )
         if (!childrenDependOnDynamicItems) {
             codeBlockBuilder.addStatement(
                 "val $pagerStateName = %M(pageCount = {${node.children.size}})",
-                MemberName("androidx.compose.foundation.pager", "rememberPagerState")
+                MemberName("androidx.compose.foundation.pager", "rememberPagerState"),
             )
-            codeBlockBuilder.addStatement("%M(state = ${pagerStateName},", pagerMember)
+            codeBlockBuilder.addStatement("%M(state = $pagerStateName,", pagerMember)
             codeBlockBuilder.add(
-                pagerTrait.generateParamsCode()
+                pagerTrait.generateParamsCode(),
             )
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") { ${itemName}Index -> ")
 
@@ -66,25 +70,28 @@ object PagerTraitNode {
                         project = project,
                         context = context,
                         dryRun = dryRun,
-                    )
+                    ),
                 )
                 codeBlockBuilder.add("},")
             }
             codeBlockBuilder.addStatement(")[${itemName}Index]()")
             codeBlockBuilder.addStatement("}")
         } else {
-            val child = node.children.first {
-                it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
-            }
+            val child =
+                node.children.first {
+                    it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
+                }
             val dynamicItem =
-                project.findComposeNodeOrNull(
-                    (child.lazyListChildParams.value as LazyListChildParams.DynamicItemsSource).composeNodeId
-                )?.dynamicItems?.value
+                project
+                    .findComposeNodeOrNull(
+                        (child.lazyListChildParams.value as LazyListChildParams.DynamicItemsSource).composeNodeId,
+                    )?.dynamicItems
+                    ?.value
 
             dynamicItem?.let {
                 codeBlockBuilder.add(
                     "val $pagerStateName = %M(pageCount = {",
-                    MemberName("androidx.compose.foundation.pager", "rememberPagerState")
+                    MemberName("androidx.compose.foundation.pager", "rememberPagerState"),
                 )
                 val transformedItemCodeBlock =
                     dynamicItem.transformedCodeBlock(project, context, dryRun = dryRun)
@@ -92,24 +99,26 @@ object PagerTraitNode {
                 codeBlockBuilder.add(".size")
                 codeBlockBuilder.addStatement("})")
 
-                codeBlockBuilder.addStatement("%M(state = ${pagerStateName},", pagerMember)
+                codeBlockBuilder.addStatement("%M(state = $pagerStateName,", pagerMember)
                 codeBlockBuilder.add(
-                    pagerTrait.generateParamsCode()
+                    pagerTrait.generateParamsCode(),
                 )
                 codeBlockBuilder.add(
-                    node.generateModifierCode(project, context, dryRun = dryRun)
+                    node.generateModifierCode(project, context, dryRun = dryRun),
                 )
                 codeBlockBuilder.addStatement(") { ${itemName}Index -> ")
 
                 val initialComposableListName = "composableList"
-                val composableListName = context.getCurrentComposableContext()
-                    .addComposeFileVariable(
-                        id = "${node.id}-${initialComposableListName}",
-                        initialComposableListName,
-                        dryRun
-                    )
+                val composableListName =
+                    context
+                        .getCurrentComposableContext()
+                        .addComposeFileVariable(
+                            id = "${node.id}-$initialComposableListName",
+                            initialComposableListName,
+                            dryRun,
+                        )
 
-                codeBlockBuilder.add("val ${composableListName}: List<@Composable () -> Unit> = ")
+                codeBlockBuilder.add("val $composableListName: List<@Composable () -> Unit> = ")
                 codeBlockBuilder.add(transformedItemCodeBlock)
                 codeBlockBuilder.add(".map { ${itemName}Item ->")
 
@@ -119,7 +128,7 @@ object PagerTraitNode {
                         project = project,
                         context = context,
                         dryRun = dryRun,
-                    )
+                    ),
                 )
                 codeBlockBuilder.addStatement("}")
                 codeBlockBuilder.addStatement("}")
@@ -150,13 +159,16 @@ object PagerTraitNode {
             if (!childrenDependOnDynamicItems) {
                 codeBlockBuilder.add("${node.children.size}")
             } else {
-                val child = node.children.first {
-                    it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
-                }
+                val child =
+                    node.children.first {
+                        it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
+                    }
                 val dynamicItem =
-                    project.findComposeNodeOrNull(
-                        (child.lazyListChildParams.value as LazyListChildParams.DynamicItemsSource).composeNodeId
-                    )?.dynamicItems?.value
+                    project
+                        .findComposeNodeOrNull(
+                            (child.lazyListChildParams.value as LazyListChildParams.DynamicItemsSource).composeNodeId,
+                        )?.dynamicItems
+                        ?.value
                 dynamicItem?.let {
                     val transformedItemCodeBlock =
                         dynamicItem.transformedCodeBlock(project, context, dryRun = dryRun)
@@ -167,7 +179,7 @@ object PagerTraitNode {
             codeBlockBuilder.addStatement(") { index ->")
             codeBlockBuilder.addStatement(
                 """
-               val isSelected = ${pagerStateName}.currentPage == index
+               val isSelected = $pagerStateName.currentPage == index
                %M(
                    modifier = %M
                        .%M(horizontal = 4.%M)
@@ -191,7 +203,7 @@ object PagerTraitNode {
                     context,
                     writeType = ComposeFlowType.Color(),
                     dryRun,
-                )
+                ),
             )
             codeBlockBuilder.addStatement("} else {")
             codeBlockBuilder.add(
@@ -200,12 +212,12 @@ object PagerTraitNode {
                     context,
                     writeType = ComposeFlowType.Color(),
                     dryRun,
-                )
+                ),
             )
             codeBlockBuilder.addStatement("},")
             codeBlockBuilder.addStatement(
                 "shape = %M",
-                MemberName("androidx.compose.foundation.shape", "CircleShape")
+                MemberName("androidx.compose.foundation.shape", "CircleShape"),
             )
             codeBlockBuilder.addStatement(")") // background
             codeBlockBuilder.addStatement(")") // Box

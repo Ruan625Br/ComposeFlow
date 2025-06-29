@@ -75,8 +75,10 @@ fun LazyListScope.modifierInspector(
                 onClick = {
                     addModifierDialogVisible = true
                 },
-                modifier = Modifier.padding(start = 16.dp)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .padding(start = 16.dp)
+                        .hoverOverlay(),
             ) {
                 val contentDesc = stringResource(Res.string.add_new_modifier)
                 Tooltip(contentDesc) {
@@ -92,8 +94,10 @@ fun LazyListScope.modifierInspector(
                 onClick = {
                     editModifierDialogVisible = true
                 },
-                modifier = Modifier.padding(start = 4.dp)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .padding(start = 4.dp)
+                        .hoverOverlay(),
             ) {
                 val contentDesc = stringResource(Res.string.edit_modifier_in_editor)
                 Tooltip(contentDesc) {
@@ -109,13 +113,16 @@ fun LazyListScope.modifierInspector(
             val onAllDialogsClosed = LocalOnAllDialogsClosed.current
             if (addModifierDialogVisible) {
                 onAnyDialogIsShown()
-                val modifiers = ModifierWrapper.values().filter { modifier ->
-                    composeNode.parentNode?.let {
-                        modifier.hasValidParent(it.trait.value)
-                    } ?: true
-                }.mapIndexed { i, modifier ->
-                    i to modifier
-                }
+                val modifiers =
+                    ModifierWrapper
+                        .values()
+                        .filter { modifier ->
+                            composeNode.parentNode?.let {
+                                modifier.hasValidParent(it.trait.value)
+                            } ?: true
+                        }.mapIndexed { i, modifier ->
+                            i to modifier
+                        }
 
                 AddModifierDialog(
                     modifiers = modifiers,
@@ -140,7 +147,7 @@ fun LazyListScope.modifierInspector(
                     composeNodeCallbacks = composeNodeCallbacks,
                     onCloseDialog = {
                         editModifierDialogVisible = false
-                    }
+                    },
                 )
             }
         }
@@ -176,16 +183,15 @@ fun SingleModifierInspector(
     onVisibilityToggleClicked: () -> Unit = {},
     reorderableLazyListState: ReorderableLazyListState? = null,
 ) {
-    val issues = if (!composeNode.isContentRoot()) {
-        chain.generateIssues(composeNode.parentNode?.trait?.value)
-    } else {
-        emptyList()
-    }
+    val issues =
+        if (!composeNode.isContentRoot()) {
+            chain.generateIssues(composeNode.parentNode?.trait?.value)
+        } else {
+            emptyList()
+        }
 
     @Composable
-    fun ModifierItem(
-        content: @Composable () -> Unit,
-    ) {
+    fun ModifierItem(content: @Composable () -> Unit) {
         var isHighlighted by remember { mutableStateOf(false) }
         val highlightAlpha = animateFloatAsState(if (isHighlighted) 0.4f else 0f)
         if (composeNode.pendingModifierCommittedIndex.value == i) {
@@ -196,23 +202,25 @@ fun SingleModifierInspector(
                 composeNode.pendingModifierCommittedIndex.value = null
             }
         }
-        val highlight = if (isHighlighted) {
-            Modifier.background(
-                color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = highlightAlpha.value),
-                shape = RoundedCornerShape(16.dp),
-            )
-        } else {
-            Modifier
-        }
+        val highlight =
+            if (isHighlighted) {
+                Modifier.background(
+                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = highlightAlpha.value),
+                    shape = RoundedCornerShape(16.dp),
+                )
+            } else {
+                Modifier
+            }
 
-        val issueContainer = if (issues.isNotEmpty()) {
-            Modifier.background(
-                color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(8.dp)
-            )
-        } else {
-            Modifier
-        }
+        val issueContainer =
+            if (issues.isNotEmpty()) {
+                Modifier.background(
+                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(8.dp),
+                )
+            } else {
+                Modifier
+            }
         reorderableLazyListState?.let {
             ReorderableItem(
                 reorderableLazyListState,
@@ -231,11 +239,12 @@ fun SingleModifierInspector(
                 val clipShape =
                     if (isDragging) RoundedCornerShape(16.dp) else RectangleShape
                 Column(
-                    modifier = Modifier
-                        .clip(clipShape)
-                        .shadow(elevation.value)
-                        .background(backgroundColor)
-                        .then(highlight)
+                    modifier =
+                        Modifier
+                            .clip(clipShape)
+                            .shadow(elevation.value)
+                            .background(backgroundColor)
+                            .then(highlight),
                 ) {
                     content()
                 }
@@ -244,19 +253,18 @@ fun SingleModifierInspector(
             if (issues.isNotEmpty()) {
                 Tooltip(issues.first().errorMessage(project)) {
                     Column(
-                        modifier = highlight.then(issueContainer)
+                        modifier = highlight.then(issueContainer),
                     ) {
                         content()
                     }
                 }
             } else {
                 Column(
-                    modifier = highlight.then(issueContainer)
+                    modifier = highlight.then(issueContainer),
                 ) {
                     content()
                 }
             }
-
         }
     }
 
@@ -586,17 +594,18 @@ fun EditModifierDialog(
 ) {
     val composeNode = project.screenHolder.findFocusedNodeOrNull() ?: return
     PositionCustomizablePopup(
-        onDismissRequest = onCloseDialog
+        onDismissRequest = onCloseDialog,
     ) {
         Surface(
             modifier = modifier.size(width = 420.dp, height = 460.dp),
             color = MaterialTheme.colorScheme.surfaceContainer,
         ) {
-            val reorderableLazyListState = rememberReorderableLazyListState(onMove = { from, to ->
-                project.screenHolder.findFocusedNodeOrNull()?.let {
-                    composeNodeCallbacks.onModifierSwapped(it, from.index, to.index)
-                }
-            })
+            val reorderableLazyListState =
+                rememberReorderableLazyListState(onMove = { from, to ->
+                    project.screenHolder.findFocusedNodeOrNull()?.let {
+                        composeNodeCallbacks.onModifierSwapped(it, from.index, to.index)
+                    }
+                })
             Column {
                 var addModifierDialogVisible by remember { mutableStateOf(false) }
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -611,8 +620,10 @@ fun EditModifierDialog(
                         onClick = {
                             addModifierDialogVisible = true
                         },
-                        modifier = Modifier.padding(start = 16.dp)
-                            .hoverOverlay(),
+                        modifier =
+                            Modifier
+                                .padding(start = 16.dp)
+                                .hoverOverlay(),
                     ) {
                         val contentDesc = stringResource(Res.string.add_new_modifier)
                         Tooltip(contentDesc) {
@@ -628,13 +639,16 @@ fun EditModifierDialog(
                     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
                     if (addModifierDialogVisible) {
                         onAnyDialogIsShown()
-                        val modifiers = ModifierWrapper.values().filter { modifier ->
-                            composeNode.parentNode?.let {
-                                modifier.hasValidParent(it.trait.value)
-                            } ?: true
-                        }.mapIndexed { i, modifier ->
-                            i to modifier
-                        }
+                        val modifiers =
+                            ModifierWrapper
+                                .values()
+                                .filter { modifier ->
+                                    composeNode.parentNode?.let {
+                                        modifier.hasValidParent(it.trait.value)
+                                    } ?: true
+                                }.mapIndexed { i, modifier ->
+                                    i to modifier
+                                }
 
                         AddModifierDialog(
                             modifiers = modifiers,
@@ -642,7 +656,7 @@ fun EditModifierDialog(
                                 addModifierDialogVisible = false
                                 composeNodeCallbacks.onModifierAdded(
                                     composeNode,
-                                    modifiers[it].second
+                                    modifiers[it].second,
                                 )
                                 onAllDialogsClosed()
                             },
@@ -657,11 +671,11 @@ fun EditModifierDialog(
                 ProvideModifierReorderAllowed(reorderAllowed = true) {
                     LazyColumn(
                         state = reorderableLazyListState.listState,
-                        modifier = Modifier
-                            .reorderable(reorderableLazyListState)
-                            .detectReorder(reorderableLazyListState),
+                        modifier =
+                            Modifier
+                                .reorderable(reorderableLazyListState)
+                                .detectReorder(reorderableLazyListState),
                     ) {
-
                         composeNode.modifierList.forEachIndexed { i, chain ->
 
                             val onVisibilityToggleClicked = {

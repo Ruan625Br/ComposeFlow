@@ -129,26 +129,26 @@ private fun ScreenPromptItemBeforeGeneration(
     isGenerating: Boolean = false,
 ) {
     Column(
-        modifier = modifier
-            .background(
-                color = MaterialTheme.colorScheme.surfaceContainerHighest,
-                shape = MaterialTheme.shapes.small
-            )
-            .padding(8.dp)
-            .height(640.dp)
+        modifier =
+            modifier
+                .background(
+                    color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    shape = MaterialTheme.shapes.small,
+                ).padding(8.dp)
+                .height(640.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             EditableText(
                 initialText = screenName,
                 onValueChange = {
                     callbacks.onScreenPromptUpdated(id, it)
-                }
+                },
             )
             if (isGenerating) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(28.dp),
                     strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
             Spacer(Modifier.weight(1f))
@@ -175,9 +175,10 @@ private fun ScreenPromptItemBeforeGeneration(
                         Text("Description")
                     },
                     enabled = !isGenerating,
-                    modifier = Modifier.alpha(
-                        if (isGenerating) 0.4f else 1f
-                    )
+                    modifier =
+                        Modifier.alpha(
+                            if (isGenerating) 0.4f else 1f,
+                        ),
                 )
             } else {
                 Text(
@@ -199,14 +200,15 @@ private fun ScreenPromptItemScreenGenerated(
     callbacks: AiAssistantDialogCallbacks,
     modifier: Modifier = Modifier,
 ) {
-
     Column(modifier = modifier) {
         var deviceSizeDp by remember { mutableStateOf(IntSize.Zero) }
         val density = LocalDensity.current
         Column(
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxWidth()
-                .background(Color.Transparent),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(Color.Transparent),
         ) {
             ProvideDeviceSizeDp(deviceSizeDp) {
                 ProvideAppThemeTokens(
@@ -214,16 +216,16 @@ private fun ScreenPromptItemScreenGenerated(
                 ) {
                     AppTheme {
                         Surface(
-                            modifier = Modifier
-                                .clip(
-                                    RoundedCornerShape(
-                                        8.dp
-                                    )
-                                )
-                                .align(Alignment.CenterHorizontally)
-                                .onGloballyPositioned {
-                                    deviceSizeDp = it.size / density.density.toInt()
-                                },
+                            modifier =
+                                Modifier
+                                    .clip(
+                                        RoundedCornerShape(
+                                            8.dp,
+                                        ),
+                                    ).align(Alignment.CenterHorizontally)
+                                    .onGloballyPositioned {
+                                        deviceSizeDp = it.size / density.density.toInt()
+                                    },
                         ) {
                             screenPrompt.screen.contentRootNode().RenderedNodeInCanvas(
                                 // Workaround to pass a project
@@ -231,10 +233,11 @@ private fun ScreenPromptItemScreenGenerated(
                                 canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                                 paletteRenderParams = PaletteRenderParams(isThumbnail = true),
                                 zoomableContainerStateHolder = ZoomableContainerStateHolder(),
-                                modifier = Modifier
-                                    .onClick(enabled = false, onClick = {})
-                                    .align(Alignment.CenterHorizontally)
-                                    .size(width = 416.dp, height = 886.dp),
+                                modifier =
+                                    Modifier
+                                        .onClick(enabled = false, onClick = {})
+                                        .align(Alignment.CenterHorizontally)
+                                        .size(width = 416.dp, height = 886.dp),
                             )
                         }
                     }

@@ -30,7 +30,7 @@ fun SwitchParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    switchTrait.copy(checked = BooleanProperty.BooleanIntrinsicValue())
+                    switchTrait.copy(checked = BooleanProperty.BooleanIntrinsicValue()),
                 )
             },
             modifier = Modifier.hoverOverlay(),
@@ -47,7 +47,7 @@ fun SwitchParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    switchTrait.copy(enabled = BooleanProperty.BooleanIntrinsicValue(true))
+                    switchTrait.copy(enabled = BooleanProperty.BooleanIntrinsicValue(true)),
                 )
             },
             modifier = Modifier.hoverOverlay(),

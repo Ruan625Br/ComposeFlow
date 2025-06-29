@@ -51,13 +51,11 @@ data class ButtonTrait(
     val shapeWrapper: ShapeWrapper? = null,
     val buttonType: ButtonType = ButtonType.Default,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Text", textProperty, ComposeFlowType.StringType()),
-            PropertyContainer("Enabled", enabled, ComposeFlowType.BooleanType())
+            PropertyContainer("Enabled", enabled, ComposeFlowType.BooleanType()),
         )
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -80,9 +78,9 @@ data class ButtonTrait(
                 validatorNode.getCompanionStateOrNull(project)?.getValidateResultName(context)
             validateResultBuilder.add(
                 CodeBlock.of(
-                    "${validateResultName}.%M()",
-                    MemberHolder.ComposeFlow.isSuccess
-                )
+                    "$validateResultName.%M()",
+                    MemberHolder.ComposeFlow.isSuccess,
+                ),
             )
             if (index != validatorNodes.lastIndex) {
                 validateResultBuilder.add(" && ")
@@ -92,7 +90,7 @@ data class ButtonTrait(
         codeBlockBuilder.add("enabled = ")
         if (enabled != null) {
             codeBlockBuilder.add(
-                enabled.transformedCodeBlock(project, context, dryRun = dryRun)
+                enabled.transformedCodeBlock(project, context, dryRun = dryRun),
             )
         }
         if (validatorNodes.isNotEmpty()) {
@@ -110,23 +108,29 @@ data class ButtonTrait(
         return codeBlockBuilder.build()
     }
 
-    override fun defaultComposeNode(project: Project): ComposeNode {
-        return ComposeNode(
+    override fun defaultComposeNode(project: Project): ComposeNode =
+        ComposeNode(
             modifierList = defaultModifierList(),
-            trait = mutableStateOf(
-                ButtonTrait(
-                    textProperty = StringProperty.StringIntrinsicValue("Example button")
-                )
-            )
+            trait =
+                mutableStateOf(
+                    ButtonTrait(
+                        textProperty = StringProperty.StringIntrinsicValue("Example button"),
+                    ),
+                ),
         )
-    }
 
     override fun icon(): ImageVector = Icons.Outlined.SmartButton
+
     override fun iconText(): String = "Button"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_button_trait
+
     override fun isDroppable(): Boolean = false
+
     override fun onClickIncludedInParams(): Boolean = true
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)
 
     @Composable
@@ -144,16 +148,18 @@ data class ButtonTrait(
                     onClick = {},
                     enabled = enabled.asBooleanValue(),
                     shape = shapeWrapper?.toShape() ?: ButtonDefaults.shape,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     imageVectorHolder?.let {
                         Icon(
@@ -170,16 +176,18 @@ data class ButtonTrait(
                     onClick = {},
                     enabled = enabled.asBooleanValue(),
                     shape = shapeWrapper?.toShape() ?: ButtonDefaults.shape,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     imageVectorHolder?.let {
                         Icon(
@@ -196,16 +204,18 @@ data class ButtonTrait(
                     onClick = {},
                     enabled = enabled.asBooleanValue(),
                     shape = shapeWrapper?.toShape() ?: ButtonDefaults.shape,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     imageVectorHolder?.let {
                         Icon(
@@ -222,16 +232,18 @@ data class ButtonTrait(
                     onClick = {},
                     enabled = enabled.asBooleanValue(),
                     shape = shapeWrapper?.toShape() ?: ButtonDefaults.shape,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     imageVectorHolder?.let {
                         Icon(
@@ -248,16 +260,18 @@ data class ButtonTrait(
                     onClick = {},
                     enabled = enabled.asBooleanValue(),
                     shape = shapeWrapper?.toShape() ?: ButtonDefaults.shape,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     imageVectorHolder?.let {
                         Icon(
@@ -286,10 +300,10 @@ data class ButtonTrait(
                 context = context,
                 node = node,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {")
         imageVectorHolder?.let {
@@ -324,20 +338,16 @@ enum class ButtonType {
         override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "Button")
     },
     Elevated {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "ElevatedButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "ElevatedButton")
     },
     Outlined {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "OutlinedButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "OutlinedButton")
     },
     FilledTonal {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "FilledTonalButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "FilledTonalButton")
     },
     Text {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "TextButton")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "TextButton")
     },
     ;
 

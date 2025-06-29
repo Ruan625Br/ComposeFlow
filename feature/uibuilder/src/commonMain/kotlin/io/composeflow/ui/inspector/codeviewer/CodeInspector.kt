@@ -23,14 +23,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
+import io.composeflow.Res
+import io.composeflow.copied_code
+import io.composeflow.copy_code
 import io.composeflow.formatter.LocalCodeTheme
 import io.composeflow.model.project.Project
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.modifier.hoverOverlay
-import io.composeflow.Res
-import io.composeflow.copied_code
-import io.composeflow.copy_code
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
@@ -83,10 +83,11 @@ private fun CodeViewer(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboardManager.current
     LazyColumn(
-        modifier = modifier
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(16.dp)
-            .fillMaxSize(),
+        modifier =
+            modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .padding(16.dp)
+                .fillMaxSize(),
     ) {
         item {
             Row(

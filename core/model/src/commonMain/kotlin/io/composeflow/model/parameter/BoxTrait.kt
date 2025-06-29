@@ -35,8 +35,7 @@ data class BoxTrait(
     val contentAlignment: AlignmentWrapper? = null,
     val propagateMinConstraints: Boolean? = null,
 ) : ComposeTrait {
-    override fun areAllParamsEmpty(): Boolean =
-        contentAlignment == null && propagateMinConstraints == null
+    override fun areAllParamsEmpty(): Boolean = contentAlignment == null && propagateMinConstraints == null
 
     private fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -57,12 +56,15 @@ data class BoxTrait(
         )
 
     override fun icon(): ImageVector = Icons.Rounded.BorderOuter
+
     override fun iconText(): String = "Box"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Container,
-        TraitCategory.WrapContainer,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Container,
+            TraitCategory.WrapContainer,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_box_trait
 
@@ -83,16 +85,18 @@ data class BoxTrait(
         modifier: Modifier,
     ) {
         Box(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
             contentAlignment = contentAlignment?.alignment ?: Alignment.TopStart,
             propagateMinConstraints = propagateMinConstraints ?: false,
         ) {
@@ -121,10 +125,10 @@ data class BoxTrait(
         } else {
             codeBlockBuilder.addStatement("%M(", boxMember)
             codeBlockBuilder.add(
-                generateParamsCode()
+                generateParamsCode(),
             )
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
         }
@@ -134,7 +138,7 @@ data class BoxTrait(
                     project = project,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
         }
         codeBlockBuilder.addStatement("}")

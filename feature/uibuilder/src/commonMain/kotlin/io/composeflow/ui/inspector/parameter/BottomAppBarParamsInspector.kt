@@ -43,8 +43,10 @@ fun BottomAppBarParamsInspector(
     Column {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 4.dp)
-                .height(42.dp),
+            modifier =
+                Modifier
+                    .padding(horizontal = 4.dp)
+                    .height(42.dp),
         ) {
             Text(
                 text = "Action Icons",
@@ -57,10 +59,11 @@ fun BottomAppBarParamsInspector(
                     bottomAppBarNode.addBottomAppbarActionIcon()
                     composeNodeCallbacks.onTraitUpdated(node, trait)
                 },
-                modifier = Modifier
-                    .padding(start = 28.dp)
-                    .hoverOverlay()
-                    .hoverIconClickable(),
+                modifier =
+                    Modifier
+                        .padding(start = 28.dp)
+                        .hoverOverlay()
+                        .hoverIconClickable(),
             ) {
                 val contentDesc = stringResource(Res.string.add_action_icon)
                 Tooltip(contentDesc) {
@@ -87,9 +90,10 @@ fun BottomAppBarParamsInspector(
                     composeNodeCallbacks.onTraitUpdated(icon, icon.trait.value)
                 },
                 currentIcon = (icon.trait.value as IconTrait).imageVectorHolder?.imageVector,
-                modifier = Modifier
-                    .hoverOverlay()
-                    .padding(start = 24.dp),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .padding(start = 24.dp),
             )
         }
 

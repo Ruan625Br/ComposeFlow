@@ -10,24 +10,27 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
 object ColorSerializer : KSerializer<Color> {
-
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Color", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: Color) {
+    override fun serialize(
+        encoder: Encoder,
+        value: Color,
+    ) {
         encoder.encodeString(value.asString())
     }
 
     override fun deserialize(decoder: Decoder): Color {
         val colorString = decoder.decodeString().removePrefix("0x").removePrefix("#")
         val colorLong = colorString.toULong(16)
-        val colorInt = if (colorString.length <= 6) {
-            // If the string is 6 characters or fewer, we assume it's RGB and prefix it with FF for the alpha
-            (colorLong or 0xFF000000u).toInt()
-        } else {
-            // If the string is 8 characters, we assume it includes an alpha value
-            colorLong.toInt()
-        }
+        val colorInt =
+            if (colorString.length <= 6) {
+                // If the string is 6 characters or fewer, we assume it's RGB and prefix it with FF for the alpha
+                (colorLong or 0xFF000000u).toInt()
+            } else {
+                // If the string is 8 characters, we assume it includes an alpha value
+                colorLong.toInt()
+            }
         return Color(colorInt)
     }
 }
@@ -43,10 +46,11 @@ object ColorSerializer : KSerializer<Color> {
  */
 fun Color.asString(): String {
     val colorInt = toArgb()
-    val colorString = if (colorInt ushr 24 == 0) {
-        "0xFF${colorInt.toString(16).uppercase().padStart(6, '0')}"
-    } else {
-        "0x${colorInt.toUInt().toString(16).uppercase().padStart(8, '0')}"
-    }
+    val colorString =
+        if (colorInt ushr 24 == 0) {
+            "0xFF${colorInt.toString(16).uppercase().padStart(6, '0')}"
+        } else {
+            "0x${colorInt.toUInt().toString(16).uppercase().padStart(8, '0')}"
+        }
     return colorString
 }

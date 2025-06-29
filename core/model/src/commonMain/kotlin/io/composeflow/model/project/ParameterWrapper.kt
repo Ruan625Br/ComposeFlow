@@ -44,12 +44,14 @@ sealed interface ParameterWrapper<T> {
         override val parameterType: ComposeFlowType = ComposeFlowType.StringType(),
         override val defaultValue: String = "",
         @Transient
-        override val defaultValueAsAssignableProperty: AssignableProperty = StringProperty.StringIntrinsicValue(
-            defaultValue
-        ),
+        override val defaultValueAsAssignableProperty: AssignableProperty =
+            StringProperty.StringIntrinsicValue(
+                defaultValue,
+            ),
     ) : ParameterWrapper<String> {
         @Transient
         override val variableName: String = name.asVariableName()
+
         override fun defaultValueAsCodeBlock(project: Project): CodeBlock =
             if (defaultValue.contains("\n") ||
                 defaultValue.contains("\r") ||
@@ -71,15 +73,16 @@ sealed interface ParameterWrapper<T> {
         private val name: String,
         override val defaultValue: Int = 0,
         @Transient
-        override val defaultValueAsAssignableProperty: AssignableProperty = IntProperty.IntIntrinsicValue(
-            defaultValue
-        ),
+        override val defaultValueAsAssignableProperty: AssignableProperty =
+            IntProperty.IntIntrinsicValue(
+                defaultValue,
+            ),
         override val parameterType: ComposeFlowType = ComposeFlowType.IntType(),
     ) : ParameterWrapper<Int> {
         @Transient
         override val variableName: String = name.asVariableName()
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock =
-            CodeBlock.of("$defaultValue")
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("$defaultValue")
     }
 
     @Serializable
@@ -89,15 +92,16 @@ sealed interface ParameterWrapper<T> {
         private val name: String,
         override val defaultValue: Float = 0f,
         @Transient
-        override val defaultValueAsAssignableProperty: AssignableProperty = FloatProperty.FloatIntrinsicValue(
-            defaultValue
-        ),
+        override val defaultValueAsAssignableProperty: AssignableProperty =
+            FloatProperty.FloatIntrinsicValue(
+                defaultValue,
+            ),
         override val parameterType: ComposeFlowType = ComposeFlowType.FloatType(),
     ) : ParameterWrapper<Float> {
         @Transient
         override val variableName: String = name.asVariableName()
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock =
-            CodeBlock.of("${defaultValue}f")
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("${defaultValue}f")
     }
 
     @Serializable
@@ -107,32 +111,34 @@ sealed interface ParameterWrapper<T> {
         private val name: String,
         override val defaultValue: Boolean = false,
         @Transient
-        override val defaultValueAsAssignableProperty: AssignableProperty = BooleanProperty.BooleanIntrinsicValue(
-            defaultValue
-        ),
+        override val defaultValueAsAssignableProperty: AssignableProperty =
+            BooleanProperty.BooleanIntrinsicValue(
+                defaultValue,
+            ),
         override val parameterType: ComposeFlowType = ComposeFlowType.BooleanType(),
     ) : ParameterWrapper<Boolean> {
         @Transient
         override val variableName: String = name.asVariableName()
-        override fun defaultValueAsCodeBlock(project: Project): CodeBlock =
-            CodeBlock.of("$defaultValue")
+
+        override fun defaultValueAsCodeBlock(project: Project): CodeBlock = CodeBlock.of("$defaultValue")
     }
 
     fun generateArgumentParameterSpec(project: Project): ParameterSpec =
-        ParameterSpec.builder(
-            variableName,
-            parameterType.asKotlinPoetTypeName(project),
-        )
-            .defaultValue(defaultValueAsCodeBlock(project))
+        ParameterSpec
+            .builder(
+                variableName,
+                parameterType.asKotlinPoetTypeName(project),
+            ).defaultValue(defaultValueAsCodeBlock(project))
             .build()
 
     companion object {
-        fun entries(): List<ParameterWrapper<*>> = listOf(
-            StringParameter(name = ""),
-            IntParameter(name = ""),
-            FloatParameter(name = ""),
-            BooleanParameter(name = ""),
-        )
+        fun entries(): List<ParameterWrapper<*>> =
+            listOf(
+                StringParameter(name = ""),
+                IntParameter(name = ""),
+                FloatParameter(name = ""),
+                BooleanParameter(name = ""),
+            )
     }
 }
 
@@ -141,8 +147,8 @@ fun <T> ParameterWrapper<T>.copy(
     newName: String = variableName,
     newType: ComposeFlowType = parameterType,
     newDefaultValue: T = defaultValue,
-): ParameterWrapper<*> {
-    return when (newType) {
+): ParameterWrapper<*> =
+    when (newType) {
         is ComposeFlowType.BooleanType -> {
             ParameterWrapper.BooleanParameter(
                 id = newId,
@@ -188,7 +194,6 @@ fun <T> ParameterWrapper<T>.copy(
         is ComposeFlowType.DocumentIdType -> throw IllegalArgumentException("DocumentId type isn't supported for parameter")
         is ComposeFlowType.UnknownType -> throw IllegalArgumentException("")
     }
-}
 
 @Composable
 fun ParameterEditor(

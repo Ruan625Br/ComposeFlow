@@ -74,11 +74,14 @@ private fun ParseJsonTextField(
     modifier: Modifier = Modifier,
 ) {
     var textFieldValue by remember {
-        mutableStateOf(TextFieldValue(
-            annotatedString = buildAnnotatedString {
-                append("\n".repeat(4))
-            }
-        ))
+        mutableStateOf(
+            TextFieldValue(
+                annotatedString =
+                    buildAnnotatedString {
+                        append("\n".repeat(4))
+                    },
+            ),
+        )
     }
     val lineNumbers = remember { mutableStateListOf<Int>() }
     val coroutineScope = rememberCoroutineScope()
@@ -86,16 +89,17 @@ private fun ParseJsonTextField(
     var hasFocus by remember { mutableStateOf(false) }
     var hasError by remember { mutableStateOf(true) }
     val borderColor by animateColorAsState(
-        targetValue = if (hasError) {
-            MaterialTheme.colorScheme.error
-        } else {
-            if (hasFocus) {
-                MaterialTheme.colorScheme.primary
+        targetValue =
+            if (hasError) {
+                MaterialTheme.colorScheme.error
             } else {
-                Color.Transparent
-            }
-        },
-        animationSpec = tween(durationMillis = 400)
+                if (hasFocus) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    Color.Transparent
+                }
+            },
+        animationSpec = tween(durationMillis = 400),
     )
 
     LaunchedEffect(textFieldValue.text) {
@@ -107,27 +111,29 @@ private fun ParseJsonTextField(
     }
 
     Column(
-        modifier = modifier
-            .fillMaxHeight()
+        modifier =
+            modifier
+                .fillMaxHeight(),
     ) {
         Row(
-            modifier = Modifier
-                .background(
-                    MaterialTheme.colorScheme.surfaceContainerHigh,
-                    shape = MaterialTheme.shapes.small
-                )
-                .border(
-                    width = 1.dp,
-                    color = borderColor,
-                    shape = MaterialTheme.shapes.small
-                )
+            modifier =
+                Modifier
+                    .background(
+                        MaterialTheme.colorScheme.surfaceContainerHigh,
+                        shape = MaterialTheme.shapes.small,
+                    ).border(
+                        width = 1.dp,
+                        color = borderColor,
+                        shape = MaterialTheme.shapes.small,
+                    ),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .background(MaterialTheme.colorScheme.surfaceContainerLow)
-                    .padding(4.dp)
-                    .verticalScroll(verticalScrollState)
+                modifier =
+                    Modifier
+                        .fillMaxHeight()
+                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                        .padding(4.dp)
+                        .verticalScroll(verticalScrollState),
             ) {
                 lineNumbers.forEach { lineNumber ->
                     Text(
@@ -138,20 +144,23 @@ private fun ParseJsonTextField(
                     )
                 }
             }
-            val textStyle = TextStyle(
-                color = MaterialTheme.colorScheme.onSurface,
-                fontSize = 16.sp,
-                lineHeight = 20.sp
-            )
+            val textStyle =
+                TextStyle(
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 16.sp,
+                    lineHeight = 20.sp,
+                )
             Column(
-                modifier = Modifier.padding(8.dp).fillMaxSize().verticalScroll(verticalScrollState)
+                modifier = Modifier.padding(8.dp).fillMaxSize().verticalScroll(verticalScrollState),
             ) {
                 BasicTextField(
                     value = textFieldValue,
                     onValueChange = { newValue ->
                         textFieldValue = newValue
-                        val lineCount = textFieldValue.text.substring(0, newValue.selection.end)
-                            .count { it == '\n' }
+                        val lineCount =
+                            textFieldValue.text
+                                .substring(0, newValue.selection.end)
+                                .count { it == '\n' }
                         coroutineScope.launch {
                             verticalScrollState.scrollTo(lineCount * textStyle.lineHeight.value.toInt())
                         }
@@ -160,12 +169,13 @@ private fun ParseJsonTextField(
                     },
                     textStyle = textStyle,
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .horizontalScroll(rememberScrollState())
-                        .onFocusChanged { focusState ->
-                            hasFocus = focusState.isFocused
-                        },
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .horizontalScroll(rememberScrollState())
+                            .onFocusChanged { focusState ->
+                                hasFocus = focusState.isFocused
+                            },
                 )
             }
         }

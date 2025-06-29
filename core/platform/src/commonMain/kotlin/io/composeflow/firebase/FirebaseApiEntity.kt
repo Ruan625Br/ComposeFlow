@@ -8,7 +8,7 @@ import org.apache.commons.codec.binary.Base64
 @Serializable
 data class AndroidAppRequest(
     val packageName: String,
-    val displayName: String
+    val displayName: String,
 )
 
 @Serializable
@@ -17,16 +17,15 @@ data class AndroidAppMetadata(
     val appId: String,
     val projectId: String,
     val packageName: String,
-    val displayName: String? = null
+    val displayName: String? = null,
 ) {
-    fun buildUrl(): String =
-        "${firebaseConsoleUrl}project/${projectId}/settings/general/android:${packageName}"
+    fun buildUrl(): String = "${firebaseConsoleUrl}project/$projectId/settings/general/android:$packageName"
 }
 
 @Serializable
 data class ListAndroidAppsResponse(
     val apps: List<AndroidAppMetadata>? = null,
-    val nextPageToken: String? = null
+    val nextPageToken: String? = null,
 )
 
 @Serializable
@@ -40,7 +39,7 @@ data class AppConfig(
 @Serializable
 data class IosAppRequest(
     val bundleId: String,
-    val displayName: String
+    val displayName: String,
 )
 
 @Serializable
@@ -49,16 +48,15 @@ data class IosAppMetadata(
     val appId: String,
     val projectId: String,
     val bundleId: String,
-    val displayName: String? = null
+    val displayName: String? = null,
 ) {
-    fun buildUrl(): String =
-        "${firebaseConsoleUrl}project/${projectId}/settings/general/ios:${bundleId}"
+    fun buildUrl(): String = "${firebaseConsoleUrl}project/$projectId/settings/general/ios:$bundleId"
 }
 
 @Serializable
 data class ListIosAppsResponse(
     val apps: List<IosAppMetadata>? = null,
-    val nextPageToken: String? = null
+    val nextPageToken: String? = null,
 )
 
 @Serializable
@@ -89,8 +87,7 @@ data class WebAppMetadata(
     val appUrls: List<String>? = null,
     val apiKeyId: String? = null,
 ) {
-    fun buildUrl(): String =
-        "${firebaseConsoleUrl}project/${projectId}/settings/general/web:${appId}"
+    fun buildUrl(): String = "${firebaseConsoleUrl}project/$projectId/settings/general/web:$appId"
 }
 
 @Serializable
@@ -112,11 +109,11 @@ data class ErrorDetail(
     @SerialName("@type") val type: String,
     val reason: String? = null,
     val domain: String? = null,
-    val metadata: Metadata? = null
+    val metadata: Metadata? = null,
 )
 
 @Serializable
 data class Metadata(
     val service: String? = null,
-    val method: String? = null
+    val method: String? = null,
 )

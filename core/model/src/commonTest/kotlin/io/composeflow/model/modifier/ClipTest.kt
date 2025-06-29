@@ -12,7 +12,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class ClipTest {
-
     @Test
     fun toComposeCode_clip_default() {
         val modifierList = listOf(ModifierWrapper.Clip())

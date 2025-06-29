@@ -110,18 +110,18 @@ fun ColorEditorContent(
             val colorSchemeHolder = project.themeHolder.colorSchemeHolder
             var sourceColor by remember(colorSchemeHolder.sourceColor) {
                 mutableStateOf(
-                    colorSchemeHolder.sourceColor
+                    colorSchemeHolder.sourceColor,
                 )
             }
             var paletteStyle by remember(colorSchemeHolder.paletteStyle) {
                 mutableStateOf(
-                    colorSchemeHolder.paletteStyle
+                    colorSchemeHolder.paletteStyle,
                 )
             }
             val lightScheme by remember(
                 sourceColor,
                 paletteStyle,
-                colorSchemeHolder.lightColorScheme.value
+                colorSchemeHolder.lightColorScheme.value,
             ) {
                 mutableStateOf(
                     sourceColor?.let {
@@ -129,7 +129,7 @@ fun ColorEditorContent(
                             it,
                             isDark = false,
                             isAmoled = false,
-                            style = paletteStyle
+                            style = paletteStyle,
                         )
                     }
                         ?: colorSchemeHolder.lightColorScheme.value.toColorScheme(),
@@ -138,7 +138,7 @@ fun ColorEditorContent(
             val darkScheme by remember(
                 sourceColor,
                 paletteStyle,
-                colorSchemeHolder.darkColorScheme.value
+                colorSchemeHolder.darkColorScheme.value,
             ) {
                 mutableStateOf(
                     sourceColor?.let {
@@ -146,7 +146,7 @@ fun ColorEditorContent(
                             it,
                             isDark = true,
                             isAmoled = false,
-                            style = paletteStyle
+                            style = paletteStyle,
                         )
                     } ?: colorSchemeHolder.darkColorScheme.value.toColorScheme(),
                 )
@@ -200,9 +200,10 @@ private fun ColorSchemeEditor(
     val coroutineScope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier
-            .padding(16.dp)
-            .width(240.dp),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .width(240.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -230,7 +231,7 @@ private fun ColorSchemeEditor(
                         ComposeFlowIcon(
                             imageVector = Icons.Outlined.Info,
                             contentDescription = seedColorDesc,
-                            modifier = Modifier.padding(start = 8.dp)
+                            modifier = Modifier.padding(start = 8.dp),
                         )
                     }
                 }
@@ -343,24 +344,26 @@ private fun ColorPickerProperty(
     var dialogOpen by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .height(38.dp)
-            .clickable {
-                dialogOpen = true
-            }
-            .hoverIconClickable()
-            .focusable(),
+        modifier =
+            modifier
+                .padding(vertical = 4.dp)
+                .clip(RoundedCornerShape(8.dp))
+                .height(38.dp)
+                .clickable {
+                    dialogOpen = true
+                }.hoverIconClickable()
+                .focusable(),
     ) {
         if (label.isNotEmpty()) {
             Text(
                 text = label,
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.wrapContentWidth()
-                    .padding(end = 8.dp)
-                    .align(Alignment.CenterVertically),
+                modifier =
+                    Modifier
+                        .wrapContentWidth()
+                        .padding(end = 8.dp)
+                        .align(Alignment.CenterVertically),
             )
         }
         Row(
@@ -368,17 +371,17 @@ private fun ColorPickerProperty(
             modifier = Modifier.padding(start = 8.dp),
         ) {
             Box(
-                modifier = Modifier
-                    .size(32.dp)
-                    .background(
-                        color = initialColor,
-                        shape = RoundedCornerShape(8.dp),
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
-                        shape = RoundedCornerShape(8.dp),
-                    ),
+                modifier =
+                    Modifier
+                        .size(32.dp)
+                        .background(
+                            color = initialColor,
+                            shape = RoundedCornerShape(8.dp),
+                        ).border(
+                            width = 1.dp,
+                            color = MaterialTheme.colorScheme.surfaceVariant,
+                            shape = RoundedCornerShape(8.dp),
+                        ),
             )
         }
     }
@@ -434,10 +437,11 @@ private fun ColorPickerDialog(
                 Row {
                     ClassicColorPicker(
                         color = currentColor,
-                        modifier = Modifier
-                            .width(860.dp)
-                            .height(300.dp)
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
+                        modifier =
+                            Modifier
+                                .width(860.dp)
+                                .height(300.dp)
+                                .padding(horizontal = 24.dp, vertical = 16.dp),
                         showAlphaBar = false,
                         onColorChanged = { hsvColor: HsvColor ->
                             currentColor = hsvColor
@@ -453,22 +457,21 @@ private fun ColorPickerDialog(
                 Row {
                     sampleColors.forEach { sampleColor ->
                         Box(
-                            modifier = Modifier
-                                .padding(start = 16.dp)
-                                .background(
-                                    sampleColor,
-                                    shape = RoundedCornerShape(8.dp),
-                                )
-                                .size(32.dp)
-                                .border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(8.dp),
-                                )
-                                .hoverIconClickable()
-                                .clickable {
-                                    currentColor = HsvColor.from(sampleColor)
-                                },
+                            modifier =
+                                Modifier
+                                    .padding(start = 16.dp)
+                                    .background(
+                                        sampleColor,
+                                        shape = RoundedCornerShape(8.dp),
+                                    ).size(32.dp)
+                                    .border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(8.dp),
+                                    ).hoverIconClickable()
+                                    .clickable {
+                                        currentColor = HsvColor.from(sampleColor)
+                                    },
                         )
                     }
                 }
@@ -499,28 +502,29 @@ private fun ColorPickerDialog(
     }
 }
 
-val sampleColors = listOf(
-    Color(0xFFD32F2F),
-    Color(0xFFC2185B),
-    Color(0xFF7B1FA2),
-    Color(0xFF512DA8),
-    Color(0xFF303F9F),
-    Color(0xFF1976D2),
-    Color(0xFF0288D1),
-    Color(0xFF0097A7),
-    Color(0xFF00796B),
-    Color(0xFF388E3C),
-    Color(0xFF689F38),
-    Color(0xFFAFB42B),
-    Color(0xFFFBC02D),
-    Color(0xFFFFA000),
-    Color(0xFFF57C00),
-    Color(0xFFE64A19),
-    Color(0xFF5D4037),
-    Color(0xFF616161),
-    Color(0xFF455A64),
-    Color(0xFF263238),
-)
+val sampleColors =
+    listOf(
+        Color(0xFFD32F2F),
+        Color(0xFFC2185B),
+        Color(0xFF7B1FA2),
+        Color(0xFF512DA8),
+        Color(0xFF303F9F),
+        Color(0xFF1976D2),
+        Color(0xFF0288D1),
+        Color(0xFF0097A7),
+        Color(0xFF00796B),
+        Color(0xFF388E3C),
+        Color(0xFF689F38),
+        Color(0xFFAFB42B),
+        Color(0xFFFBC02D),
+        Color(0xFFFFA000),
+        Color(0xFFF57C00),
+        Color(0xFFE64A19),
+        Color(0xFF5D4037),
+        Color(0xFF616161),
+        Color(0xFF455A64),
+        Color(0xFF263238),
+    )
 
 @Composable
 private fun ColorSchemeDetailsContainer(
@@ -549,33 +553,35 @@ private fun ColorSchemePalette(
     isDarkTheme: Boolean = false,
 ) {
     Column(
-        modifier = Modifier.padding(16.dp)
-            .background(
-                colorScheme.surface,
-                shape = RoundedCornerShape(8.dp),
-            )
-            .border(
-                width = 1.dp,
-                color = colorScheme.outline,
-                shape = RoundedCornerShape(8.dp),
-            ),
+        modifier =
+            Modifier
+                .padding(16.dp)
+                .background(
+                    colorScheme.surface,
+                    shape = RoundedCornerShape(8.dp),
+                ).border(
+                    width = 1.dp,
+                    color = colorScheme.outline,
+                    shape = RoundedCornerShape(8.dp),
+                ),
     ) {
         Column(
-            modifier = Modifier
-                .padding(16.dp)
-                .width(820.dp),
+            modifier =
+                Modifier
+                    .padding(16.dp)
+                    .width(820.dp),
         ) {
             Text(
-                text = if (isDarkTheme) {
-                    stringResource(Res.string.dark_scheme)
-                } else {
-                    stringResource(Res.string.light_scheme)
-                },
+                text =
+                    if (isDarkTheme) {
+                        stringResource(Res.string.dark_scheme)
+                    } else {
+                        stringResource(Res.string.light_scheme)
+                    },
                 style = MaterialTheme.typography.titleSmall,
                 color = colorScheme.onSurface,
                 modifier = Modifier.padding(bottom = 16.dp),
             )
-
 
             Row {
                 VerticalColorPalette(
@@ -615,16 +621,20 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.surfaceDim)
-                                .fillMaxWidth()
-                                .height(100.dp),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.surfaceDim)
+                                    .fillMaxWidth()
+                                    .height(100.dp),
                         ) {
                             Text(
                                 text = "Surface Dim",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSurface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -640,16 +650,20 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.surface)
-                                .fillMaxWidth()
-                                .height(100.dp),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.surface)
+                                    .fillMaxWidth()
+                                    .height(100.dp),
                         ) {
                             Text(
                                 text = "Surface",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSurface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -665,16 +679,20 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.surfaceBright)
-                                .fillMaxWidth()
-                                .height(100.dp),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.surfaceBright)
+                                    .fillMaxWidth()
+                                    .height(100.dp),
                         ) {
                             Text(
                                 text = "Surface Bright",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSurface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -690,16 +708,20 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.inverseSurface)
-                                .fillMaxWidth()
-                                .height(100.dp),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.inverseSurface)
+                                    .fillMaxWidth()
+                                    .height(100.dp),
                         ) {
                             Text(
                                 text = "Inverse Surface",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.surface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -719,24 +741,30 @@ private fun ColorSchemePalette(
                         Column(modifier = Modifier.weight(1f)) {
                             SelectionContainer {
                                 Box(
-                                    modifier = Modifier.background(color = colorScheme.surfaceContainerLowest)
-                                        .fillMaxWidth()
-                                        .height(100.dp),
+                                    modifier =
+                                        Modifier
+                                            .background(color = colorScheme.surfaceContainerLowest)
+                                            .fillMaxWidth()
+                                            .height(100.dp),
                                 ) {
                                     Text(
                                         text = "Surf. Container Lowest",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(8.dp),
                                     )
 
                                     Text(
                                         text = colorScheme.surfaceContainerLowest.asString(),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.BottomEnd)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(8.dp),
                                     )
                                 }
                             }
@@ -744,24 +772,30 @@ private fun ColorSchemePalette(
                         Column(modifier = Modifier.weight(1f)) {
                             SelectionContainer {
                                 Box(
-                                    modifier = Modifier.background(color = colorScheme.surfaceContainerLow)
-                                        .fillMaxWidth()
-                                        .height(100.dp),
+                                    modifier =
+                                        Modifier
+                                            .background(color = colorScheme.surfaceContainerLow)
+                                            .fillMaxWidth()
+                                            .height(100.dp),
                                 ) {
                                     Text(
                                         text = "Surf. Container Low",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(8.dp),
                                     )
 
                                     Text(
                                         text = colorScheme.surfaceContainerLow.asString(),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.BottomEnd)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(8.dp),
                                     )
                                 }
                             }
@@ -769,24 +803,30 @@ private fun ColorSchemePalette(
                         Column(modifier = Modifier.weight(1f)) {
                             SelectionContainer {
                                 Box(
-                                    modifier = Modifier.background(color = colorScheme.surfaceContainer)
-                                        .fillMaxWidth()
-                                        .height(100.dp),
+                                    modifier =
+                                        Modifier
+                                            .background(color = colorScheme.surfaceContainer)
+                                            .fillMaxWidth()
+                                            .height(100.dp),
                                 ) {
                                     Text(
                                         text = "Surf. Container",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(8.dp),
                                     )
 
                                     Text(
                                         text = colorScheme.surfaceContainer.asString(),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.BottomEnd)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(8.dp),
                                     )
                                 }
                             }
@@ -794,24 +834,30 @@ private fun ColorSchemePalette(
                         Column(modifier = Modifier.weight(1f)) {
                             SelectionContainer {
                                 Box(
-                                    modifier = Modifier.background(color = colorScheme.surfaceContainerHigh)
-                                        .fillMaxWidth()
-                                        .height(100.dp),
+                                    modifier =
+                                        Modifier
+                                            .background(color = colorScheme.surfaceContainerHigh)
+                                            .fillMaxWidth()
+                                            .height(100.dp),
                                 ) {
                                     Text(
                                         text = "Surf. Container High",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(8.dp),
                                     )
 
                                     Text(
                                         text = colorScheme.surfaceContainerHigh.asString(),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.BottomEnd)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(8.dp),
                                     )
                                 }
                             }
@@ -819,24 +865,30 @@ private fun ColorSchemePalette(
                         Column(modifier = Modifier.weight(1f)) {
                             SelectionContainer {
                                 Box(
-                                    modifier = Modifier.background(color = colorScheme.surfaceContainerHighest)
-                                        .fillMaxWidth()
-                                        .height(100.dp),
+                                    modifier =
+                                        Modifier
+                                            .background(color = colorScheme.surfaceContainerHighest)
+                                            .fillMaxWidth()
+                                            .height(100.dp),
                                 ) {
                                     Text(
                                         text = "Surf. Container Highest",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.TopStart)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(8.dp),
                                     )
 
                                     Text(
                                         text = colorScheme.surfaceContainerHighest.asString(),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = colorScheme.onSurface,
-                                        modifier = Modifier.align(Alignment.BottomEnd)
-                                            .padding(8.dp),
+                                        modifier =
+                                            Modifier
+                                                .align(Alignment.BottomEnd)
+                                                .padding(8.dp),
                                     )
                                 }
                             }
@@ -848,24 +900,30 @@ private fun ColorSchemePalette(
                     Row(modifier = Modifier.weight(1f)) {
                         SelectionContainer {
                             Box(
-                                modifier = Modifier.background(color = colorScheme.inverseOnSurface)
-                                    .fillMaxWidth()
-                                    .height(100.dp),
+                                modifier =
+                                    Modifier
+                                        .background(color = colorScheme.inverseOnSurface)
+                                        .fillMaxWidth()
+                                        .height(100.dp),
                             ) {
                                 Text(
                                     text = "Inverse On Surface",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onSurface,
-                                    modifier = Modifier.align(Alignment.TopStart)
-                                        .padding(8.dp),
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(8.dp),
                                 )
 
                                 Text(
                                     text = colorScheme.inverseOnSurface.asString(),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.onSurface,
-                                    modifier = Modifier.align(Alignment.BottomEnd)
-                                        .padding(8.dp),
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(8.dp),
                                 )
                             }
                         }
@@ -874,24 +932,30 @@ private fun ColorSchemePalette(
                     Row(modifier = Modifier.weight(1f)) {
                         SelectionContainer {
                             Box(
-                                modifier = Modifier.background(color = colorScheme.inversePrimary)
-                                    .fillMaxWidth()
-                                    .height(100.dp),
+                                modifier =
+                                    Modifier
+                                        .background(color = colorScheme.inversePrimary)
+                                        .fillMaxWidth()
+                                        .height(100.dp),
                             ) {
                                 Text(
                                     text = "Inverse Primary",
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.primary,
-                                    modifier = Modifier.align(Alignment.TopStart)
-                                        .padding(8.dp),
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(8.dp),
                                 )
 
                                 Text(
                                     text = colorScheme.inversePrimary.asString(),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = colorScheme.primary,
-                                    modifier = Modifier.align(Alignment.BottomEnd)
-                                        .padding(8.dp),
+                                    modifier =
+                                        Modifier
+                                            .align(Alignment.BottomEnd)
+                                            .padding(8.dp),
                                 )
                             }
                         }
@@ -904,15 +968,19 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.onSurface)
-                                .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.onSurface)
+                                    .fillMaxSize(),
                         ) {
                             Text(
                                 text = "onSurface",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.surface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -927,15 +995,19 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.onSurfaceVariant)
-                                .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.onSurfaceVariant)
+                                    .fillMaxSize(),
                         ) {
                             Text(
                                 text = "On Surface Variant",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.surfaceVariant,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -950,15 +1022,19 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.outline)
-                                .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.outline)
+                                    .fillMaxSize(),
                         ) {
                             Text(
                                 text = "Outline",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.surface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -973,15 +1049,19 @@ private fun ColorSchemePalette(
                 Column(modifier = Modifier.weight(1f)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.outlineVariant)
-                                .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.outlineVariant)
+                                    .fillMaxSize(),
                         ) {
                             Text(
                                 text = "Outline Variant",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = colorScheme.onSurface,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -997,15 +1077,19 @@ private fun ColorSchemePalette(
                 Row(modifier = Modifier.width(199.dp)) {
                     SelectionContainer {
                         Box(
-                            modifier = Modifier.background(color = colorScheme.scrim)
-                                .fillMaxSize(),
+                            modifier =
+                                Modifier
+                                    .background(color = colorScheme.scrim)
+                                    .fillMaxSize(),
                         ) {
                             Text(
                                 text = "Scrim",
                                 style = MaterialTheme.typography.labelSmall,
                                 color = Color.White,
-                                modifier = Modifier.align(Alignment.TopStart)
-                                    .padding(8.dp),
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.TopStart)
+                                        .padding(8.dp),
                             )
 
                             Text(
@@ -1033,16 +1117,20 @@ private fun VerticalColorPalette(
     Column(modifier = modifier) {
         SelectionContainer {
             Box(
-                modifier = Modifier.background(color = colorPair.second)
-                    .fillMaxWidth()
-                    .height(100.dp),
+                modifier =
+                    Modifier
+                        .background(color = colorPair.second)
+                        .fillMaxWidth()
+                        .height(100.dp),
             ) {
                 Text(
                     text = colorPair.first,
                     style = MaterialTheme.typography.labelSmall,
                     color = onColorPair.second,
-                    modifier = Modifier.align(Alignment.TopStart)
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp),
                 )
 
                 Text(
@@ -1055,16 +1143,20 @@ private fun VerticalColorPalette(
         }
         SelectionContainer {
             Box(
-                modifier = Modifier.background(color = onColorPair.second)
-                    .fillMaxWidth()
-                    .height(60.dp),
+                modifier =
+                    Modifier
+                        .background(color = onColorPair.second)
+                        .fillMaxWidth()
+                        .height(60.dp),
             ) {
                 Text(
                     text = onColorPair.first,
                     style = MaterialTheme.typography.labelSmall,
                     color = colorPair.second,
-                    modifier = Modifier.align(Alignment.TopStart)
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp),
                 )
 
                 Text(
@@ -1078,16 +1170,20 @@ private fun VerticalColorPalette(
 
         SelectionContainer {
             Box(
-                modifier = Modifier.background(color = containerColorPair.second)
-                    .fillMaxWidth()
-                    .height(100.dp),
+                modifier =
+                    Modifier
+                        .background(color = containerColorPair.second)
+                        .fillMaxWidth()
+                        .height(100.dp),
             ) {
                 Text(
                     text = containerColorPair.first,
                     style = MaterialTheme.typography.labelSmall,
                     color = onContainerColorPair.second,
-                    modifier = Modifier.align(Alignment.TopStart)
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp),
                 )
 
                 Text(
@@ -1101,16 +1197,20 @@ private fun VerticalColorPalette(
 
         SelectionContainer {
             Box(
-                modifier = Modifier.background(color = onContainerColorPair.second)
-                    .fillMaxWidth()
-                    .height(60.dp),
+                modifier =
+                    Modifier
+                        .background(color = onContainerColorPair.second)
+                        .fillMaxWidth()
+                        .height(60.dp),
             ) {
                 Text(
                     text = onContainerColorPair.first,
                     style = MaterialTheme.typography.labelSmall,
                     color = containerColorPair.second,
-                    modifier = Modifier.align(Alignment.TopStart)
-                        .padding(8.dp),
+                    modifier =
+                        Modifier
+                            .align(Alignment.TopStart)
+                            .padding(8.dp),
                 )
 
                 Text(
@@ -1135,14 +1235,16 @@ private fun CanvasPreview(
     var deviceSizeDp by remember { mutableStateOf(IntSize.Zero) }
     val density = LocalDensity.current
     Column(
-        modifier = Modifier.padding(start = 16.dp)
-            .backgroundContainerNeutral(),
+        modifier =
+            Modifier
+                .padding(start = 16.dp)
+                .backgroundContainerNeutral(),
     ) {
         ProvideAppThemeTokens(
             isDarkTheme = useDarkTheme,
             lightScheme = lightScheme,
             darkScheme = darkScheme,
-            typography = project.themeHolder.fontHolder.generateTypography()
+            typography = project.themeHolder.fontHolder.generateTypography(),
         ) {
             DotPatternBackground(
                 dotRadius = 1.dp,
@@ -1151,34 +1253,40 @@ private fun CanvasPreview(
                 modifier = modifier.fillMaxSize(),
             ) {
                 LazyColumn(
-                    modifier = Modifier.align(Alignment.CenterHorizontally)
-                        .fillMaxWidth(),
+                    modifier =
+                        Modifier
+                            .align(Alignment.CenterHorizontally)
+                            .fillMaxWidth(),
                 ) {
                     items(project.screenHolder.screens) { screen ->
                         Spacer(Modifier.padding(top = 16.dp))
                         Column(
-                            modifier = Modifier.fillMaxWidth()
-                                .background(Color.Transparent),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.Transparent),
                         ) {
                             ProvideDeviceSizeDp(deviceSizeDp) {
                                 AppTheme {
                                     Surface(
-                                        modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .align(Alignment.CenterHorizontally)
-                                            .onGloballyPositioned {
-                                                deviceSizeDp = it.size / density.density.toInt()
-                                            },
+                                        modifier =
+                                            Modifier
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .align(Alignment.CenterHorizontally)
+                                                .onGloballyPositioned {
+                                                    deviceSizeDp = it.size / density.density.toInt()
+                                                },
                                     ) {
                                         screen.contentRootNode().RenderedNodeInCanvas(
                                             project = project,
                                             canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                                             paletteRenderParams = PaletteRenderParams(isThumbnail = true),
                                             zoomableContainerStateHolder = ZoomableContainerStateHolder(),
-                                            modifier = Modifier
-                                                .onClick(enabled = false, onClick = {})
-                                                .align(Alignment.CenterHorizontally)
-                                                .size(width = 416.dp, height = 886.dp),
+                                            modifier =
+                                                Modifier
+                                                    .onClick(enabled = false, onClick = {})
+                                                    .align(Alignment.CenterHorizontally)
+                                                    .size(width = 416.dp, height = 886.dp),
                                         )
                                     }
                                     Spacer(Modifier.padding(bottom = 16.dp))
@@ -1192,33 +1300,36 @@ private fun CanvasPreview(
                 ) {
                     Spacer(Modifier.weight(1f))
                     Card(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .padding(8.dp)
-                            .hoverIconClickable()
-                            .align(Alignment.CenterVertically)
-                            .zIndex(10f),
+                        modifier =
+                            Modifier
+                                .size(48.dp)
+                                .padding(8.dp)
+                                .hoverIconClickable()
+                                .align(Alignment.CenterVertically)
+                                .zIndex(10f),
                         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                         shape = RoundedCornerShape(8.dp),
                     ) {
-                        val contentDesc = if (useDarkTheme) {
-                            stringResource(Res.string.chane_to_day_theme)
-                        } else {
-                            stringResource(Res.string.chane_to_night_theme)
-                        }
+                        val contentDesc =
+                            if (useDarkTheme) {
+                                stringResource(Res.string.chane_to_day_theme)
+                            } else {
+                                stringResource(Res.string.chane_to_night_theme)
+                            }
                         Tooltip(contentDesc) {
                             Icon(
-                                modifier = Modifier
-                                    .clickable {
-                                        useDarkTheme = !useDarkTheme
-                                    }
-                                    .padding(8.dp)
-                                    .size(24.dp),
-                                imageVector = if (useDarkTheme) {
-                                    Icons.Default.ModeNight
-                                } else {
-                                    Icons.Default.WbSunny
-                                },
+                                modifier =
+                                    Modifier
+                                        .clickable {
+                                            useDarkTheme = !useDarkTheme
+                                        }.padding(8.dp)
+                                        .size(24.dp),
+                                imageVector =
+                                    if (useDarkTheme) {
+                                        Icons.Default.ModeNight
+                                    } else {
+                                        Icons.Default.WbSunny
+                                    },
                                 contentDescription = contentDesc,
                             )
                         }

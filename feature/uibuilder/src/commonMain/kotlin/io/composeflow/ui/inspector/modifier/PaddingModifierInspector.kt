@@ -65,19 +65,20 @@ fun PaddingModifierInspector(
                         onCheckedChange = {
                             selectedPaddingSpec = paddingSpec
                         },
-                        modifier = Modifier.then(
-                            if (thisItemSelected) {
-                                Modifier
-                                    .clip(RoundedCornerShape(8.dp))
-                                    .background(
-                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                            alpha = 0.3f,
-                                        ),
-                                    )
-                            } else {
-                                Modifier
-                            },
-                        ),
+                        modifier =
+                            Modifier.then(
+                                if (thisItemSelected) {
+                                    Modifier
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .background(
+                                            MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                                alpha = 0.3f,
+                                            ),
+                                        )
+                                } else {
+                                    Modifier
+                                },
+                            ),
                     ) {
                         imageVector?.let {
                             ComposeFlowIcon(
@@ -146,7 +147,10 @@ fun AllPaddingInspector(
     composeNodeCallbacks: ComposeNodeCallbacks,
 ) {
     BasicEditableTextProperty(
-        initialValue = wrapper.start.value.toInt().toString(),
+        initialValue =
+            wrapper.start.value
+                .toInt()
+                .toString(),
         label = "All",
         validateInput = DpValidator()::validate,
         onValidValueChanged = {
@@ -178,7 +182,10 @@ fun HorizontalAndVerticalPaddingInspector(
         modifier = Modifier.padding(start = 36.dp),
     ) {
         BasicEditableTextProperty(
-            initialValue = wrapper.start.value.toInt().toString(),
+            initialValue =
+                wrapper.start.value
+                    .toInt()
+                    .toString(),
             label = "Horizontal",
             validateInput = DpValidator()::validate,
             onValidValueChanged = {
@@ -197,7 +204,10 @@ fun HorizontalAndVerticalPaddingInspector(
             modifier = Modifier.padding(end = 8.dp),
         )
         BasicEditableTextProperty(
-            initialValue = wrapper.top.value.toInt().toString(),
+            initialValue =
+                wrapper.top.value
+                    .toInt()
+                    .toString(),
             label = "Vertical",
             validateInput = DpValidator()::validate,
             onValidValueChanged = {
@@ -225,13 +235,17 @@ fun IndividualPaddingInspector(
     composeNodeCallbacks: ComposeNodeCallbacks,
 ) {
     Box(
-        modifier = Modifier
-            .padding(start = 36.dp)
-            .fillMaxWidth()
-            .height(156.dp),
+        modifier =
+            Modifier
+                .padding(start = 36.dp)
+                .fillMaxWidth()
+                .height(156.dp),
     ) {
         BasicEditableTextProperty(
-            initialValue = wrapper.start.value.toInt().toString(),
+            initialValue =
+                wrapper.start.value
+                    .toInt()
+                    .toString(),
             label = "Start",
             validateInput = DpValidator()::validate,
             onValidValueChanged = {
@@ -249,7 +263,10 @@ fun IndividualPaddingInspector(
             modifier = Modifier.align(Alignment.CenterStart),
         )
         BasicEditableTextProperty(
-            initialValue = wrapper.top.value.toInt().toString(),
+            initialValue =
+                wrapper.top.value
+                    .toInt()
+                    .toString(),
             label = "Top",
             validateInput = DpValidator()::validate,
             onValidValueChanged = {
@@ -267,7 +284,10 @@ fun IndividualPaddingInspector(
             modifier = Modifier.align(Alignment.TopCenter),
         )
         BasicEditableTextProperty(
-            initialValue = wrapper.end.value.toInt().toString(),
+            initialValue =
+                wrapper.end.value
+                    .toInt()
+                    .toString(),
             label = "End",
             validateInput = DpValidator()::validate,
             onValidValueChanged = {
@@ -285,7 +305,10 @@ fun IndividualPaddingInspector(
             modifier = Modifier.align(Alignment.CenterEnd),
         )
         BasicEditableTextProperty(
-            initialValue = wrapper.bottom.value.toInt().toString(),
+            initialValue =
+                wrapper.bottom.value
+                    .toInt()
+                    .toString(),
             label = "Bottom",
             validateInput = DpValidator()::validate,
             onValidValueChanged = {

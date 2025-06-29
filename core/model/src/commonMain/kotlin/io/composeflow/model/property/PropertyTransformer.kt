@@ -67,17 +67,22 @@ import kotlin.uuid.Uuid
 
 fun List<PropertyTransformer>.areValidRelationships(): Boolean {
     val allPropertiesValid = all { it.isValid() }
-    val validRelationships = zipWithNext { prev, next -> prev.toType() == next.fromType() }
-        .all { it }
+    val validRelationships =
+        zipWithNext { prev, next -> prev.toType() == next.fromType() }
+            .all { it }
     return allPropertiesValid && validRelationships
 }
 
 @Serializable
 sealed interface PropertyTransformer {
     fun fromType(): ComposeFlowType
+
     fun toType(): ComposeFlowType
 
-    fun transformedValueExpression(project: Project, input: String): String
+    fun transformedValueExpression(
+        project: Project,
+        input: String,
+    ): String
 
     fun transformedCodeBlock(
         project: Project,
@@ -87,6 +92,7 @@ sealed interface PropertyTransformer {
     ): CodeBlock
 
     fun isValid(): Boolean = true
+
     fun isDependent(sourceId: String): Boolean
 
     @Composable
@@ -109,7 +115,7 @@ sealed interface PropertyTransformer {
     companion object {
         fun transformers(
             fromType: ComposeFlowType,
-            toType: ComposeFlowType? = null
+            toType: ComposeFlowType? = null,
         ): List<PropertyTransformer> {
             val filterFunc: (PropertyTransformer) -> Boolean = {
                 if (toType != null) {
@@ -172,11 +178,12 @@ sealed interface PropertyTransformer {
 
 @Serializable
 sealed interface FromString : PropertyTransformer {
-
     override fun fromType(): ComposeFlowType = ComposeFlowType.StringType()
 
     @Serializable
-    sealed interface ToString : FromString, PropertyTransformer {
+    sealed interface ToString :
+        FromString,
+        PropertyTransformer {
         @Serializable
         @SerialName("AddBefore")
         data class AddBefore(
@@ -184,15 +191,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "${value.value.transformedValueExpression(project)} + $input"
-            }
+            ): String = "${value.value.transformedValueExpression(project)} + $input"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -245,12 +249,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input + ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input + ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -303,12 +307,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).substringBefore(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).substringBefore(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -362,12 +366,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).substringAfter(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).substringAfter(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -418,7 +422,9 @@ sealed interface FromString : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToBoolean : FromString, PropertyTransformer {
+    sealed interface ToBoolean :
+        FromString,
+        PropertyTransformer {
         @Serializable
         @SerialName("StringContains")
         data class StringContains(
@@ -426,12 +432,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).contains(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).contains(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -457,7 +463,6 @@ sealed interface FromString : PropertyTransformer {
             override fun Editor(
                 project: Project,
                 node: ComposeNode,
-
                 onTransformerEdited: (transformer: PropertyTransformer) -> Unit,
                 modifier: Modifier,
             ) {
@@ -485,12 +490,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).startsWith(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).startsWith(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -543,12 +548,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).endsWith(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).endsWith(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -597,9 +602,10 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("isEmpty")
         data object IsEmpty : ToBoolean {
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).isEmpty()"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).isEmpty()"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -643,17 +649,18 @@ sealed interface FromString : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToInt : FromString, PropertyTransformer {
-
+    sealed interface ToInt :
+        FromString,
+        PropertyTransformer {
         override fun toType(): ComposeFlowType = ComposeFlowType.IntType()
 
         @Serializable
         @SerialName("length")
         data object Length : ToInt {
-
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).length"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).length"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -676,7 +683,6 @@ sealed interface FromString : PropertyTransformer {
             override fun Editor(
                 project: Project,
                 node: ComposeNode,
-
                 onTransformerEdited: (transformer: PropertyTransformer) -> Unit,
                 modifier: Modifier,
             ) {
@@ -685,8 +691,9 @@ sealed interface FromString : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToStringList : FromString, PropertyTransformer {
-
+    sealed interface ToStringList :
+        FromString,
+        PropertyTransformer {
         override fun toType(): ComposeFlowType = ComposeFlowType.StringType(isList = true)
 
         @Serializable
@@ -696,12 +703,12 @@ sealed interface FromString : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue(",")),
         ) : ToStringList {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "($input).split(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "($input).split(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -750,37 +757,37 @@ sealed interface FromString : PropertyTransformer {
     }
 
     companion object {
-        fun transformers(): List<PropertyTransformer> = listOf(
-            ToString.AddBefore(),
-            ToString.AddAfter(),
-            ToString.SubstringBefore(),
-            ToString.SubstringAfter(),
-            ToBoolean.StringContains(),
-            ToBoolean.StartsWith(),
-            ToBoolean.EndsWith(),
-            ToBoolean.IsEmpty,
-            ToInt.Length,
-            ToStringList.Split(),
-        )
+        fun transformers(): List<PropertyTransformer> =
+            listOf(
+                ToString.AddBefore(),
+                ToString.AddAfter(),
+                ToString.SubstringBefore(),
+                ToString.SubstringAfter(),
+                ToBoolean.StringContains(),
+                ToBoolean.StartsWith(),
+                ToBoolean.EndsWith(),
+                ToBoolean.IsEmpty,
+                ToInt.Length,
+                ToStringList.Split(),
+            )
     }
 }
 
 @Serializable
 sealed interface FromBoolean : PropertyTransformer {
-
     override fun fromType(): ComposeFlowType = ComposeFlowType.BooleanType()
 
     @Serializable
-    sealed interface ToStringType : FromBoolean, PropertyTransformer {
+    sealed interface ToStringType :
+        FromBoolean,
+        PropertyTransformer {
         @Serializable
         @SerialName("FromBooleanToString")
         data object ToString : ToStringType {
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input.toString()"
-            }
+            ): String = "$input.toString()"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -804,13 +811,16 @@ sealed interface FromBoolean : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToBoolean : FromBoolean, PropertyTransformer {
+    sealed interface ToBoolean :
+        FromBoolean,
+        PropertyTransformer {
         @Serializable
         @SerialName("ToggleValue")
         data object ToggleValue : ToBoolean {
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "(!$input)"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "(!$input)"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -835,20 +845,22 @@ sealed interface FromBoolean : PropertyTransformer {
     }
 
     companion object {
-        fun transformers(): List<PropertyTransformer> = listOf(
-            ToBoolean.ToggleValue,
-            ToStringType.ToString,
-        )
+        fun transformers(): List<PropertyTransformer> =
+            listOf(
+                ToBoolean.ToggleValue,
+                ToStringType.ToString,
+            )
     }
 }
 
 @Serializable
 sealed interface FromInt : PropertyTransformer {
-
     override fun fromType(): ComposeFlowType = ComposeFlowType.IntType()
 
     @Serializable
-    sealed interface ToInt : FromInt, PropertyTransformer {
+    sealed interface ToInt :
+        FromInt,
+        PropertyTransformer {
         @Serializable
         @SerialName("IntPlus")
         data class IntPlus(
@@ -856,15 +868,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInt {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input + ${value.value.transformedValueExpression(project)}"
-            }
+            ): String = "$input + ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -917,15 +926,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInt {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input * ${value.value.transformedValueExpression(project)}"
-            }
+            ): String = "$input * ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -975,8 +981,9 @@ sealed interface FromInt : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToBoolean : FromInt, PropertyTransformer {
-
+    sealed interface ToBoolean :
+        FromInt,
+        PropertyTransformer {
         @Serializable
         @SerialName("IntLessThan")
         data class IntLessThan(
@@ -984,12 +991,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input < ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input < ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1042,12 +1049,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input <= ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input <= ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1100,12 +1107,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input == ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input == ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1158,12 +1165,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input >= ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input >= ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1216,12 +1223,12 @@ sealed interface FromInt : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input > ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input > ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1277,16 +1284,19 @@ sealed interface FromInt : PropertyTransformer {
             val equalsTo: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(mod.value, equalsTo.value) +
+            override fun getAssignableProperties() =
+                listOf(mod.value, equalsTo.value) +
                     mod.value.getAssignableProperties() + equalsTo.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input mod ${mod.value.transformedValueExpression(project)} == ${
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String =
+                "$input mod ${mod.value.transformedValueExpression(project)} == ${
                     equalsTo.value.transformedValueExpression(
-                        project
+                        project,
                     )
                 }"
-            }
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1306,7 +1316,8 @@ sealed interface FromInt : PropertyTransformer {
                 return builder.build()
             }
 
-            override fun isDependent(sourceId: String): Boolean = mod.value.isDependent(sourceId) ||
+            override fun isDependent(sourceId: String): Boolean =
+                mod.value.isDependent(sourceId) ||
                     equalsTo.value.isDependent(sourceId)
 
             @Composable
@@ -1359,26 +1370,28 @@ sealed interface FromInt : PropertyTransformer {
     }
 
     companion object {
-        fun transformers(): List<PropertyTransformer> = listOf(
-            ToInt.IntPlus(),
-            ToInt.IntMultipliedBy(),
-            ToBoolean.IntLessThan(),
-            ToBoolean.IntLessThanOrEqualTo(),
-            ToBoolean.IntEquals(),
-            ToBoolean.IntGreaterThanOrEqualTo(),
-            ToBoolean.IntGreaterThan(),
-            ToBoolean.IntModEqualsTo(),
-        )
+        fun transformers(): List<PropertyTransformer> =
+            listOf(
+                ToInt.IntPlus(),
+                ToInt.IntMultipliedBy(),
+                ToBoolean.IntLessThan(),
+                ToBoolean.IntLessThanOrEqualTo(),
+                ToBoolean.IntEquals(),
+                ToBoolean.IntGreaterThanOrEqualTo(),
+                ToBoolean.IntGreaterThan(),
+                ToBoolean.IntModEqualsTo(),
+            )
     }
 }
 
 @Serializable
 sealed interface FromFloat : PropertyTransformer {
-
     override fun fromType(): ComposeFlowType = ComposeFlowType.FloatType()
 
     @Serializable
-    sealed interface ToFloat : FromFloat, PropertyTransformer {
+    sealed interface ToFloat :
+        FromFloat,
+        PropertyTransformer {
         @Serializable
         @SerialName("FloatPlus")
         data class FloatPlus(
@@ -1386,15 +1399,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToFloat {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input + ${value.value.transformedValueExpression(project)}"
-            }
+            ): String = "$input + ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1447,15 +1457,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToFloat {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input * ${value.value.transformedValueExpression(project)}"
-            }
+            ): String = "$input * ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1505,8 +1512,9 @@ sealed interface FromFloat : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToBoolean : FromFloat, PropertyTransformer {
-
+    sealed interface ToBoolean :
+        FromFloat,
+        PropertyTransformer {
         @Serializable
         @SerialName("FloatLessThan")
         data class FloatLessThan(
@@ -1514,12 +1522,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input < ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input < ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1572,12 +1580,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input <= ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input <= ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1630,12 +1638,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input == ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input == ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1688,12 +1696,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input >= ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input >= ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1746,12 +1754,12 @@ sealed interface FromFloat : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input > ${value.value.transformedValueExpression(project)}"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input > ${value.value.transformedValueExpression(project)}"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1807,16 +1815,19 @@ sealed interface FromFloat : PropertyTransformer {
             val equalsTo: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
-            override fun getAssignableProperties() = listOf(mod.value, equalsTo.value) +
+            override fun getAssignableProperties() =
+                listOf(mod.value, equalsTo.value) +
                     mod.value.getAssignableProperties() + equalsTo.value.getAssignableProperties()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input mod ${mod.value.transformedValueExpression(project)} == ${
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String =
+                "$input mod ${mod.value.transformedValueExpression(project)} == ${
                     equalsTo.value.transformedValueExpression(
-                        project
+                        project,
                     )
                 }"
-            }
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1836,7 +1847,8 @@ sealed interface FromFloat : PropertyTransformer {
                 return builder.build()
             }
 
-            override fun isDependent(sourceId: String): Boolean = mod.value.isDependent(sourceId) ||
+            override fun isDependent(sourceId: String): Boolean =
+                mod.value.isDependent(sourceId) ||
                     equalsTo.value.isDependent(sourceId)
 
             @Composable
@@ -1889,27 +1901,28 @@ sealed interface FromFloat : PropertyTransformer {
     }
 
     companion object {
-        fun transformers(): List<PropertyTransformer> = listOf(
-            ToFloat.FloatPlus(),
-            ToFloat.FloatMultipliedBy(),
-            ToBoolean.FloatLessThan(),
-            ToBoolean.FloatLessThanOrEqualTo(),
-            ToBoolean.FloatEquals(),
-            ToBoolean.FloatGreaterThanOrEqualTo(),
-            ToBoolean.FloatGreaterThan(),
-            ToBoolean.FloatModEqualsTo(),
-        )
+        fun transformers(): List<PropertyTransformer> =
+            listOf(
+                ToFloat.FloatPlus(),
+                ToFloat.FloatMultipliedBy(),
+                ToBoolean.FloatLessThan(),
+                ToBoolean.FloatLessThanOrEqualTo(),
+                ToBoolean.FloatEquals(),
+                ToBoolean.FloatGreaterThanOrEqualTo(),
+                ToBoolean.FloatGreaterThan(),
+                ToBoolean.FloatModEqualsTo(),
+            )
     }
 }
 
 @Serializable
 sealed interface FromInstant : PropertyTransformer {
-
     override fun fromType(): ComposeFlowType = ComposeFlowType.InstantType()
 
     @Serializable
-    sealed interface ToInstant : FromInstant, PropertyTransformer {
-
+    sealed interface ToInstant :
+        FromInstant,
+        PropertyTransformer {
         @Serializable
         @SerialName("PlusDay")
         data class PlusDay(
@@ -1917,15 +1930,12 @@ sealed interface FromInstant : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input + ${value.value.transformedValueExpression(project)} day(s) "
-            }
+            ): String = "$input + ${value.value.transformedValueExpression(project)} day(s) "
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -1947,7 +1957,7 @@ sealed interface FromInstant : PropertyTransformer {
                         MemberHolder.DateTime.plus,
                         MemberHolder.DateTime.DateTimeUnit,
                         MemberHolder.DateTime.TimeZone,
-                    )
+                    ),
                 )
                 value.value.addReadProperty(project, context, dryRun = dryRun)
                 return builder.build()
@@ -1990,15 +2000,12 @@ sealed interface FromInstant : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input + ${value.value.transformedValueExpression(project)} month(s) "
-            }
+            ): String = "$input + ${value.value.transformedValueExpression(project)} month(s) "
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2020,7 +2027,7 @@ sealed interface FromInstant : PropertyTransformer {
                         MemberHolder.DateTime.plus,
                         MemberHolder.DateTime.DateTimeUnit,
                         MemberHolder.DateTime.TimeZone,
-                    )
+                    ),
                 )
                 value.value.addReadProperty(project, context, dryRun = dryRun)
                 return builder.build()
@@ -2063,15 +2070,12 @@ sealed interface FromInstant : PropertyTransformer {
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
             override fun transformedValueExpression(
                 project: Project,
                 input: String,
-            ): String {
-                return "$input + ${value.value.transformedValueExpression(project)} year(s) "
-            }
+            ): String = "$input + ${value.value.transformedValueExpression(project)} year(s) "
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2093,7 +2097,7 @@ sealed interface FromInstant : PropertyTransformer {
                         MemberHolder.DateTime.plus,
                         MemberHolder.DateTime.DateTimeUnit,
                         MemberHolder.DateTime.TimeZone,
-                    )
+                    ),
                 )
                 value.value.addReadProperty(project, context, dryRun = dryRun)
                 return builder.build()
@@ -2133,8 +2137,9 @@ sealed interface FromInstant : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToString : FromInstant, PropertyTransformer {
-
+    sealed interface ToString :
+        FromInstant,
+        PropertyTransformer {
         @Serializable
         @SerialName("FormatAs")
         data class FormatAs(
@@ -2142,14 +2147,15 @@ sealed interface FromInstant : PropertyTransformer {
             val dateTimeFormatter: MutableState<DateTimeFormatter> =
                 mutableStateOf(
                     DateTimeFormatter.YYYY_MM_DD(),
-                    policy = referentialEqualityPolicy()
+                    policy = referentialEqualityPolicy(),
                 ),
         ) : ToString {
             override fun toType(): ComposeFlowType = ComposeFlowType.StringType()
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "$input.format(${dateTimeFormatter.value.simplifiedFormat()}) "
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.format(${dateTimeFormatter.value.simplifiedFormat()}) "
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2164,7 +2170,7 @@ sealed interface FromInstant : PropertyTransformer {
                         ".%M(%M.currentSystemDefault(",
                         MemberHolder.DateTime.toLocalDateTime,
                         MemberHolder.DateTime.TimeZone,
-                    )
+                    ),
                 )
                 builder.add(CodeBlock.of(")).%M(", MemberHolder.DateTime.format))
                 builder.add(dateTimeFormatter.value.asCodeBlock())
@@ -2236,22 +2242,22 @@ sealed interface FromInstant : PropertyTransformer {
     }
 
     companion object {
-        fun transformers(): List<PropertyTransformer> = listOf(
-            ToString.FormatAs(),
-            ToInstant.PlusDay(),
-            ToInstant.PlusMonth(),
-            ToInstant.PlusYear(),
-        )
+        fun transformers(): List<PropertyTransformer> =
+            listOf(
+                ToString.FormatAs(),
+                ToInstant.PlusDay(),
+                ToInstant.PlusMonth(),
+                ToInstant.PlusYear(),
+            )
     }
 }
 
-
 @Serializable
 sealed interface FromList : PropertyTransformer {
-
     @Serializable
-    sealed interface ToList : FromList, PropertyTransformer {
-
+    sealed interface ToList :
+        FromList,
+        PropertyTransformer {
         @Serializable
         @SerialName("Filter")
         data class Filter(
@@ -2259,28 +2265,31 @@ sealed interface FromList : PropertyTransformer {
             @Serializable(MutableStateSerializer::class)
             val condition: MutableState<AssignableProperty> = mutableStateOf(BooleanProperty.Empty),
         ) : ToList {
-            override fun getAssignableProperties() =
-                listOf(condition.value) + condition.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(condition.value) + condition.value.getAssignableProperties()
 
-            private val functionScopeParameterProperty = FunctionScopeParameterProperty(
-                functionName = "filter",
-                variableType = innerType.copyWith(newIsList = false),
-            )
+            private val functionScopeParameterProperty =
+                FunctionScopeParameterProperty(
+                    functionName = "filter",
+                    variableType = innerType.copyWith(newIsList = false),
+                )
 
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
+
             override fun toType(): ComposeFlowType = innerType.copyWith(newIsList = true)
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return if (condition.value == BooleanProperty.Empty) {
-                    "${input}.filter { }"
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String =
+                if (condition.value == BooleanProperty.Empty) {
+                    "$input.filter { }"
                 } else {
-                    "${input}.filter { ${
+                    "$input.filter { ${
                         condition.value.transformedValueExpression(
                             project,
                         )
                     } }"
                 }
-            }
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2297,7 +2306,7 @@ sealed interface FromList : PropertyTransformer {
                             context,
                             dryRun = dryRun,
                         )
-                    } }"""
+                    } }""",
                 )
                 condition.value.addReadProperty(project, context, dryRun = dryRun)
                 return builder.build()
@@ -2305,12 +2314,10 @@ sealed interface FromList : PropertyTransformer {
 
             override fun isValid(): Boolean = condition.value != BooleanProperty.Empty
 
-            override fun isDependent(sourceId: String): Boolean =
-                condition.value.isDependent(sourceId)
+            override fun isDependent(sourceId: String): Boolean = condition.value.isDependent(sourceId)
 
             @Composable
             override fun displayName(): String = stringResource(Res.string.filter)
-
 
             @Composable
             override fun Editor(
@@ -2333,9 +2340,10 @@ sealed interface FromList : PropertyTransformer {
                         condition.value = BooleanProperty.Empty
                         onTransformerEdited(this)
                     },
-                    functionScopeProperties = listOf(
-                        functionScopeParameterProperty
-                    )
+                    functionScopeProperties =
+                        listOf(
+                            functionScopeParameterProperty,
+                        ),
                 )
             }
         }
@@ -2345,15 +2353,16 @@ sealed interface FromList : PropertyTransformer {
         data class Sorted(
             private val innerType: ComposeFlowType,
         ) : ToList {
-
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
+
             override fun toType(): ComposeFlowType = innerType.copyWith(newIsList = true)
 
             override fun isDependent(sourceId: String): Boolean = false
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "${input}.sorted()"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.sorted()"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2366,8 +2375,8 @@ sealed interface FromList : PropertyTransformer {
                 builder.add(
                     CodeBlock.of(
                         """.%M()""",
-                        MemberHolder.Kotlin.Collection.sorted
-                    )
+                        MemberHolder.Kotlin.Collection.sorted,
+                    ),
                 )
                 return builder.build()
             }
@@ -2381,26 +2390,31 @@ sealed interface FromList : PropertyTransformer {
         data class SortedBy(
             private val innerType: ComposeFlowType,
             @Serializable(MutableStateSerializer::class)
-            private val dataFieldIdToSort: MutableState<DataFieldId> = mutableStateOf(
-                Uuid.random().toString()
-            ),
+            private val dataFieldIdToSort: MutableState<DataFieldId> =
+                mutableStateOf(
+                    Uuid.random().toString(),
+                ),
         ) : ToList {
-
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
+
             override fun toType(): ComposeFlowType = innerType.copyWith(newIsList = true)
 
             override fun isDependent(sourceId: String): Boolean = false
 
-            override fun transformedValueExpression(project: Project, input: String): String {
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String {
                 if (innerType !is ComposeFlowType.CustomDataType) return "Invalid"
                 val dataType = project.findDataTypeOrNull(innerType.dataTypeId) ?: return "Invalid"
 
-                val dataField = dataType.findDataFieldOrNull(dataFieldIdToSort.value)
-                    ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
+                val dataField =
+                    dataType.findDataFieldOrNull(dataFieldIdToSort.value)
+                        ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
                 return if (dataField == null) {
                     "Invalid"
                 } else {
-                    "${input}.sortedBy { it.${dataField.variableName} }"
+                    "$input.sortedBy { it.${dataField.variableName} }"
                 }
             }
 
@@ -2414,8 +2428,9 @@ sealed interface FromList : PropertyTransformer {
                 if (innerType !is ComposeFlowType.CustomDataType) return builder.build()
                 val dataType =
                     project.findDataTypeOrNull(innerType.dataTypeId) ?: return builder.build()
-                val dataField = dataType.findDataFieldOrNull(dataFieldIdToSort.value)
-                    ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
+                val dataField =
+                    dataType.findDataFieldOrNull(dataFieldIdToSort.value)
+                        ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
                 builder.add(input)
                 builder.add(CodeBlock.of(".%M", MemberHolder.Kotlin.Collection.sortedBy))
                 builder.add(" { it.${dataField?.variableName} }")
@@ -2435,9 +2450,10 @@ sealed interface FromList : PropertyTransformer {
                 if (innerType !is ComposeFlowType.CustomDataType) return
                 val dataType = project.findDataTypeOrNull(innerType.dataTypeId) ?: return
 
-                val selectedField = dataType.fields
-                    .firstOrNull { it.id == dataFieldIdToSort.value }
-                    ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
+                val selectedField =
+                    dataType.fields
+                        .firstOrNull { it.id == dataFieldIdToSort.value }
+                        ?: if (dataType.fields.isNotEmpty()) dataType.fields[0] else null
                 BasicDropdownPropertyEditor(
                     project = project,
                     items = dataType.fields,
@@ -2458,28 +2474,33 @@ sealed interface FromList : PropertyTransformer {
             @Serializable(MutableStateSerializer::class)
             private val outputType: MutableState<ComposeFlowType> = mutableStateOf(ComposeFlowType.StringType()),
             @Serializable(MutableStateSerializer::class)
-            val value: MutableState<AssignablePropertyValue> = mutableStateOf(
-                AssignablePropertyValue.ForPrimitive()
-            ),
+            val value: MutableState<AssignablePropertyValue> =
+                mutableStateOf(
+                    AssignablePropertyValue.ForPrimitive(),
+                ),
         ) : ToList {
-
             // Create the FunctionScopeParameterProperty as a property to avoid a new property
             // is created every time recomposition happens
-            private val functionScopeParameterProperty = FunctionScopeParameterProperty(
-                functionName = "map",
-                variableType = innerType.copyWith(newIsList = false),
-            )
+            private val functionScopeParameterProperty =
+                FunctionScopeParameterProperty(
+                    functionName = "map",
+                    variableType = innerType.copyWith(newIsList = false),
+                )
 
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
+
             override fun toType(): ComposeFlowType = outputType.value.copyWith(newIsList = true)
 
-            override fun transformedValueExpression(project: Project, input: String): String {
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String {
                 val context = GenerationContext()
-                return "${input}.map { ${
+                return "$input.map { ${
                     value.value.asSimplifiedText(
                         project,
                         context,
-                        dryRun = false
+                        dryRun = false,
                     )
                 } }"
             }
@@ -2497,9 +2518,9 @@ sealed interface FromList : PropertyTransformer {
                         value.value.asCodeBlock(
                             project,
                             context,
-                            dryRun = dryRun
+                            dryRun = dryRun,
                         )
-                    } }"""
+                    } }""",
                 )
 
                 when (val propertyValues = value.value) {
@@ -2516,8 +2537,7 @@ sealed interface FromList : PropertyTransformer {
                 return builder.build()
             }
 
-            override fun isDependent(sourceId: String): Boolean =
-                value.value.isDependent(sourceId)
+            override fun isDependent(sourceId: String): Boolean = value.value.isDependent(sourceId)
 
             @Composable
             override fun displayName(): String = stringResource(Res.string.map)
@@ -2540,7 +2560,7 @@ sealed interface FromList : PropertyTransformer {
                         onTransformerEdited(this)
                     },
                     label = "Output type",
-                    selectedItem = outputType.value
+                    selectedItem = outputType.value,
                 )
                 if (outputType.value is ComposeFlowType.CustomDataType) {
                     BasicDropdownPropertyEditor(
@@ -2552,13 +2572,14 @@ sealed interface FromList : PropertyTransformer {
                             onTransformerEdited(this)
                         },
                         label = "Data type",
-                        selectedItem = when (val selectedType = outputType.value) {
-                            is ComposeFlowType.CustomDataType -> {
-                                project.findDataTypeOrNull(selectedType.dataTypeId)
-                            }
+                        selectedItem =
+                            when (val selectedType = outputType.value) {
+                                is ComposeFlowType.CustomDataType -> {
+                                    project.findDataTypeOrNull(selectedType.dataTypeId)
+                                }
 
-                            else -> null
-                        }
+                                else -> null
+                            },
                     )
                 }
 
@@ -2567,47 +2588,53 @@ sealed interface FromList : PropertyTransformer {
                         is ComposeFlowType.CustomDataType -> {
                             val dataType = project.findDataTypeOrNull(outputType.dataTypeId)
                             dataType?.let {
-                                val existingProperties = when (val initialProperty = value.value) {
-                                    is AssignablePropertyValue.ForDataType -> {
-                                        initialProperty.properties
-                                    }
+                                val existingProperties =
+                                    when (val initialProperty = value.value) {
+                                        is AssignablePropertyValue.ForDataType -> {
+                                            initialProperty.properties
+                                        }
 
-                                    is AssignablePropertyValue.ForPrimitive -> {
-                                        mutableStateMapOf()
+                                        is AssignablePropertyValue.ForPrimitive -> {
+                                            mutableStateMapOf()
+                                        }
                                     }
-                                }
                                 dataType.fields.forEach { dataField ->
                                     dataField.fieldType.type().defaultValue().Editor(
                                         project = project,
                                         node = node,
-                                        initialProperty = existingProperties.entries.firstOrNull {
-                                            it.key == dataField.id
-                                        }?.value ?: dataField.fieldType.type().defaultValue(),
+                                        initialProperty =
+                                            existingProperties.entries
+                                                .firstOrNull {
+                                                    it.key == dataField.id
+                                                }?.value ?: dataField.fieldType.type().defaultValue(),
                                         label = dataField.variableName,
                                         onValidPropertyChanged = { property, _ ->
                                             existingProperties[dataField.id] = property
-                                            value.value = AssignablePropertyValue.ForDataType(
-                                                dataTypeId = outputType.dataTypeId,
-                                                properties = existingProperties
-                                            )
+                                            value.value =
+                                                AssignablePropertyValue.ForDataType(
+                                                    dataTypeId = outputType.dataTypeId,
+                                                    properties = existingProperties,
+                                                )
                                             onTransformerEdited(this@Map)
                                         },
                                         onInitializeProperty = {
                                             existingProperties[dataField.id] =
                                                 dataField.fieldType.type().defaultValue()
-                                            value.value = AssignablePropertyValue.ForDataType(
-                                                dataTypeId = outputType.dataTypeId,
-                                                properties = existingProperties
-                                            )
+                                            value.value =
+                                                AssignablePropertyValue.ForDataType(
+                                                    dataTypeId = outputType.dataTypeId,
+                                                    properties = existingProperties,
+                                                )
                                             onTransformerEdited(this@Map)
                                         },
                                         editable = true,
                                         destinationStateId = null,
                                         validateInput = null,
                                         modifier = Modifier,
-                                        functionScopeProperties = listOf(
-                                            functionScopeParameterProperty
-                                        )
+                                        functionScopeProperties =
+                                            listOf(
+                                                functionScopeParameterProperty,
+                                            ),
                                     )
                                 }
                             }
@@ -2617,15 +2644,16 @@ sealed interface FromList : PropertyTransformer {
                             outputType.defaultValue().Editor(
                                 project = project,
                                 node = node,
-                                initialProperty = when (val initialProperty = value.value) {
-                                    is AssignablePropertyValue.ForDataType -> {
-                                        outputType.defaultValue()
-                                    }
+                                initialProperty =
+                                    when (val initialProperty = value.value) {
+                                        is AssignablePropertyValue.ForDataType -> {
+                                            outputType.defaultValue()
+                                        }
 
-                                    is AssignablePropertyValue.ForPrimitive -> {
-                                        initialProperty.property
-                                    }
-                                },
+                                        is AssignablePropertyValue.ForPrimitive -> {
+                                            initialProperty.property
+                                        }
+                                    },
                                 label = "value",
                                 onValidPropertyChanged = { property, _ ->
                                     value.value = AssignablePropertyValue.ForPrimitive(property)
@@ -2635,9 +2663,10 @@ sealed interface FromList : PropertyTransformer {
                                 destinationStateId = null,
                                 validateInput = null,
                                 modifier = Modifier,
-                                functionScopeProperties = listOf(
-                                    functionScopeParameterProperty
-                                )
+                                functionScopeProperties =
+                                    listOf(
+                                        functionScopeParameterProperty,
+                                    ),
                             )
                         }
                     }
@@ -2647,8 +2676,9 @@ sealed interface FromList : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToBoolean : FromList, PropertyTransformer {
-
+    sealed interface ToBoolean :
+        FromList,
+        PropertyTransformer {
         override fun toType(): ComposeFlowType = ComposeFlowType.BooleanType()
 
         @Serializable
@@ -2658,19 +2688,20 @@ sealed interface FromList : PropertyTransformer {
             @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> = mutableStateOf(innerType.defaultValue()),
         ) : ToBoolean {
-            override fun getAssignableProperties() =
-                listOf(value.value) + value.value.getAssignableProperties()
+            override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()
 
-            private val functionScopeParameterProperty = FunctionScopeParameterProperty(
-                functionName = "contains",
-                variableType = innerType.copyWith(newIsList = false),
-            )
+            private val functionScopeParameterProperty =
+                FunctionScopeParameterProperty(
+                    functionName = "contains",
+                    variableType = innerType.copyWith(newIsList = false),
+                )
 
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "${input}.contains(${value.value.transformedValueExpression(project)})"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.contains(${value.value.transformedValueExpression(project)})"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2678,10 +2709,11 @@ sealed interface FromList : PropertyTransformer {
                 context: GenerationContext,
                 dryRun: Boolean,
             ): CodeBlock {
-                val block = innerType.copyWith(newIsList = false).convertCodeFromType(
-                    value.value.valueType(project),
-                    value.value.transformedCodeBlock(project, context, dryRun = dryRun)
-                )
+                val block =
+                    innerType.copyWith(newIsList = false).convertCodeFromType(
+                        value.value.valueType(project),
+                        value.value.transformedCodeBlock(project, context, dryRun = dryRun),
+                    )
                 val builder = CodeBlock.builder()
                 builder.add(input)
                 builder.add(".contains($block)")
@@ -2718,9 +2750,10 @@ sealed interface FromList : PropertyTransformer {
                     initialProperty = value.value,
                     editable = true,
                     modifier = Modifier,
-                    functionScopeProperties = listOf(
-                        functionScopeParameterProperty
-                    )
+                    functionScopeProperties =
+                        listOf(
+                            functionScopeParameterProperty,
+                        ),
                 )
             }
         }
@@ -2730,12 +2763,12 @@ sealed interface FromList : PropertyTransformer {
         data class IsEmpty(
             private val innerType: ComposeFlowType,
         ) : ToBoolean {
-
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "${input}.isEmpty()"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.isEmpty()"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2757,8 +2790,9 @@ sealed interface FromList : PropertyTransformer {
     }
 
     @Serializable
-    sealed interface ToInt : FromList, PropertyTransformer {
-
+    sealed interface ToInt :
+        FromList,
+        PropertyTransformer {
         override fun toType(): ComposeFlowType = ComposeFlowType.IntType()
 
         @Serializable
@@ -2766,12 +2800,12 @@ sealed interface FromList : PropertyTransformer {
         data class Size(
             private val innerType: ComposeFlowType,
         ) : ToInt {
-
             override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
 
-            override fun transformedValueExpression(project: Project, input: String): String {
-                return "${input}.size"
-            }
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.size"
 
             override fun transformedCodeBlock(
                 project: Project,
@@ -2794,11 +2828,12 @@ sealed interface FromList : PropertyTransformer {
 
     companion object {
         fun transformers(innerType: ComposeFlowType): List<PropertyTransformer> {
-            val sortTransformer = if (innerType is ComposeFlowType.CustomDataType) {
-                ToList.SortedBy(innerType)
-            } else {
-                ToList.Sorted(innerType)
-            }
+            val sortTransformer =
+                if (innerType is ComposeFlowType.CustomDataType) {
+                    ToList.SortedBy(innerType)
+                } else {
+                    ToList.Sorted(innerType)
+                }
             return listOf(
                 ToList.Filter(innerType.copyWith(newIsList = false)),
                 sortTransformer,

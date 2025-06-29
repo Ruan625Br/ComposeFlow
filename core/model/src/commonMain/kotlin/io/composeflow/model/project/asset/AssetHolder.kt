@@ -16,7 +16,6 @@ data class AssetHolder(
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val icons: MutableList<BlobInfoWrapper> = mutableStateListEqualsOverrideOf(),
 ) {
-
     /**
      * Creates instructions to copy local files to the specified directory for the generated app
      * - First String: The full path of the source file
@@ -25,22 +24,23 @@ data class AssetHolder(
     fun generateCopyLocalFileInstructions(
         userId: String,
         projectId: String,
-    ): Map<String, String> {
-        return images.associate {
-            val cacheFile = getAssetCacheFileFor(
-                userId = userId,
-                projectId = projectId,
-                blobInfoWrapper = it,
-            )
+    ): Map<String, String> =
+        images.associate {
+            val cacheFile =
+                getAssetCacheFileFor(
+                    userId = userId,
+                    projectId = projectId,
+                    blobInfoWrapper = it,
+                )
             cacheFile.path to "composeApp/src/commonMain/composeResources/drawable/${it.fileName.asVariableName()}"
         } +
-                icons.associate {
-                    val cacheFile = getAssetCacheFileFor(
+            icons.associate {
+                val cacheFile =
+                    getAssetCacheFileFor(
                         userId = userId,
                         projectId = projectId,
                         blobInfoWrapper = it,
                     )
-                    cacheFile.path to "composeApp/src/commonMain/composeResources/drawable/${it.fileName.asVariableName()}"
-                }
-    }
+                cacheFile.path to "composeApp/src/commonMain/composeResources/drawable/${it.fileName.asVariableName()}"
+            }
 }

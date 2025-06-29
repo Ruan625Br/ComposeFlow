@@ -9,13 +9,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class RowTraitTest {
-
     @Test
     fun serialize_deserialize() {
-        val rowParams = RowTrait(
-            horizontalArrangement = ArrangementHorizontalWrapper.End,
-            verticalAlignment = AlignmentVerticalWrapper.CenterVertically,
-        )
+        val rowParams =
+            RowTrait(
+                horizontalArrangement = ArrangementHorizontalWrapper.End,
+                verticalAlignment = AlignmentVerticalWrapper.CenterVertically,
+            )
 
         val encoded = yamlSerializer.encodeToString(rowParams)
         val decoded = yamlSerializer.decodeFromString<RowTrait>(encoded)

@@ -23,7 +23,7 @@ fun RouteBuilder.settingsScreen(
         }
         SettingsScreen(
             project = project,
-            initialDestination = initialDestination
+            initialDestination = initialDestination,
         )
     }
 }

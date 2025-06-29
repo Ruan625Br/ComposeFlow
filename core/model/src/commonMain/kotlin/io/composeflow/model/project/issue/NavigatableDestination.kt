@@ -7,7 +7,6 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed interface NavigatableDestination {
-
     @Serializable
     data class UiBuilderScreen(
         val inspectorTabDestination: InspectorTabDestination? = null,
@@ -25,7 +24,6 @@ sealed interface NavigatableDestination {
 
 @Serializable
 sealed interface DestinationContext {
-
     @Serializable
     data class UiBuilderScreen(
         val canvasEditableId: String,
@@ -34,6 +32,6 @@ sealed interface DestinationContext {
 
     @Serializable
     data class ApiEditorScreen(
-        val apiId: ApiId
+        val apiId: ApiId,
     ) : DestinationContext
 }

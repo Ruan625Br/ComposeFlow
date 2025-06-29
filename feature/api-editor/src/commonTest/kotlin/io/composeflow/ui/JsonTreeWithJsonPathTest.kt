@@ -15,7 +15,6 @@ import kotlin.test.Test
 //       kotlin.UninitializedPropertyAccessException: lateinit property scene has not been initialized
 @Ignore
 class JsonTreeWithJsonPathTest {
-
     @get:Rule
     val composeTestRule = createComposeRule()
 

@@ -39,16 +39,14 @@ data class NavigationDrawerItemTrait(
     val imageVectorHolder: ImageVectorHolder? = null,
     val labelProperty: AssignableProperty? = null,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer(
                 "Text",
                 labelProperty,
-                ComposeFlowType.StringType()
+                ComposeFlowType.StringType(),
             ),
         )
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -65,35 +63,37 @@ data class NavigationDrawerItemTrait(
         codeBlockBuilder.addStatement("selected = false,")
         codeBlockBuilder.add("label = {")
         codeBlockBuilder.add(
-            """%M(text =  """, MemberHolder.Material3.Text
+            """%M(text =  """,
+            MemberHolder.Material3.Text,
         )
         codeBlockBuilder.add(
             labelProperty?.transformedCodeBlock(
                 project,
                 context,
                 ComposeFlowType.StringType(),
-                dryRun = dryRun
-            ) ?: CodeBlock.of("")
+                dryRun = dryRun,
+            ) ?: CodeBlock.of(""),
         )
         codeBlockBuilder.addStatement(")")
         codeBlockBuilder.addStatement("},")
 
         imageVectorHolder?.let {
             codeBlockBuilder.addStatement("icon = {")
-            val iconTrait = IconTrait(
-                assetType = IconAssetType.Material,
-                imageVectorHolder = imageVectorHolder,
-            )
+            val iconTrait =
+                IconTrait(
+                    assetType = IconAssetType.Material,
+                    imageVectorHolder = imageVectorHolder,
+                )
             codeBlockBuilder.add(
                 iconTrait.generateCode(
                     project = project,
                     node = node,
                     context = context,
                     dryRun,
-                )
+                ),
             )
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement("},")
         }
@@ -101,26 +101,38 @@ data class NavigationDrawerItemTrait(
     }
 
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnClick)
+
     override fun onClickIncludedInParams(): Boolean = true
+
     override fun icon(): ImageVector = ComposeFlowIcons.DrawerMenu
+
     override fun visibleInPalette(): Boolean = true
+
     override fun isDroppable(): Boolean = false
+
     override fun isResizeable(): Boolean = false
+
     override fun isEditable(): Boolean = true
+
     override fun iconText(): String = "Drawer Item"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.NavigationItem)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_navigation_drawer_item_trait
+
     override fun isVisibilityConditional(): Boolean = true
+
     override fun defaultComposeNode(project: Project): ComposeNode {
-        val navDrawer = ComposeNode(
-            label = mutableStateOf("NavigationDrawerItem"),
-            trait = mutableStateOf(
-                NavigationDrawerItemTrait(
-                    labelProperty = StringProperty.StringIntrinsicValue("Navigation drawer item")
-                ),
-            ),
-        )
+        val navDrawer =
+            ComposeNode(
+                label = mutableStateOf("NavigationDrawerItem"),
+                trait =
+                    mutableStateOf(
+                        NavigationDrawerItemTrait(
+                            labelProperty = StringProperty.StringIntrinsicValue("Navigation drawer item"),
+                        ),
+                    ),
+            )
         return navDrawer
     }
 
@@ -138,7 +150,7 @@ data class NavigationDrawerItemTrait(
                 imageVectorHolder?.let {
                     Icon(
                         imageVector = it.imageVector,
-                        contentDescription = ""
+                        contentDescription = "",
                     )
                 }
             },
@@ -149,15 +161,17 @@ data class NavigationDrawerItemTrait(
                 }
             },
             onClick = {},
-            modifier = node.modifierChainForCanvas()
-                .modifierForCanvas(
-                    project = project,
-                    node = node,
-                    canvasNodeCallbacks = canvasNodeCallbacks,
-                    paletteRenderParams = paletteRenderParams,
-                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    isDraggable = true,
-                ),
+            modifier =
+                node
+                    .modifierChainForCanvas()
+                    .modifierForCanvas(
+                        project = project,
+                        node = node,
+                        canvasNodeCallbacks = canvasNodeCallbacks,
+                        paletteRenderParams = paletteRenderParams,
+                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        isDraggable = true,
+                    ),
         )
     }
 
@@ -170,7 +184,7 @@ data class NavigationDrawerItemTrait(
         val codeBlockBuilder = CodeBlock.builder()
         codeBlockBuilder.addStatement(
             "%M(",
-            MemberName("androidx.compose.material3", "NavigationDrawerItem")
+            MemberName("androidx.compose.material3", "NavigationDrawerItem"),
         )
         codeBlockBuilder.add(generateParamsCode(project, node, context, dryRun))
         codeBlockBuilder.addStatement(")")

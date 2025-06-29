@@ -11,10 +11,12 @@ import kotlinx.serialization.Serializable
 typealias StateResult = Pair<StateHolderType, ReadableState>
 
 interface StateHolder {
-
     fun getStateResults(project: Project): List<StateResult>
+
     fun getStates(project: Project): List<ReadableState>
+
     fun addState(readableState: ReadableState)
+
     fun updateState(readableState: ReadableState)
 
     /**
@@ -24,14 +26,23 @@ interface StateHolder {
      * used, it's better to keep the label names unique within the StateHolder (the value of the
      * label is used for the companion state name)
      */
-    fun createUniqueLabel(project: Project, composeNode: ComposeNode, initial: String): String
-    fun findStateOrNull(project: Project, stateId: StateId): ReadableState?
+    fun createUniqueLabel(
+        project: Project,
+        composeNode: ComposeNode,
+        initial: String,
+    ): String
+
+    fun findStateOrNull(
+        project: Project,
+        stateId: StateId,
+    ): ReadableState?
 
     /**
      * Remove the state from the [StateHolder]  instance.
      * @return true if the state is successfully removed.
      */
     fun removeState(stateId: StateId): Boolean
+
     fun copyContents(other: StateHolder)
 }
 
@@ -41,10 +52,9 @@ data class StateHolderImpl(
     @Serializable(FallbackMutableStateListSerializer::class)
     val states: MutableList<ReadableState> = mutableStateListEqualsOverrideOf(),
 ) : StateHolder {
-
     override fun getStates(project: Project): List<ReadableState> = states
-    override fun getStateResults(project: Project): List<StateResult> =
-        states.map { StateHolderType.Global to it }
+
+    override fun getStateResults(project: Project): List<StateResult> = states.map { StateHolderType.Global to it }
 
     override fun addState(readableState: ReadableState) {
         states.add(readableState)
@@ -53,16 +63,17 @@ data class StateHolderImpl(
     override fun createUniqueLabel(
         project: Project,
         composeNode: ComposeNode,
-        initial: String
-    ): String {
-        return generateUniqueName(
+        initial: String,
+    ): String =
+        generateUniqueName(
             initial = initial,
             existing = getStates(project).map { it.name }.toSet(),
         )
-    }
 
-    override fun findStateOrNull(project: Project, stateId: StateId): ReadableState? =
-        getStates(project).firstOrNull { it.id == stateId }
+    override fun findStateOrNull(
+        project: Project,
+        stateId: StateId,
+    ): ReadableState? = getStates(project).firstOrNull { it.id == stateId }
 
     override fun removeState(stateId: StateId): Boolean =
         states.removeIf {
@@ -81,4 +92,3 @@ data class StateHolderImpl(
         states.addAll((other as? StateHolderImpl)?.states ?: emptyList())
     }
 }
-

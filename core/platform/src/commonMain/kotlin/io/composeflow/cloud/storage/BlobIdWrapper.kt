@@ -10,8 +10,9 @@ data class BlobIdWrapper(
     val generation: Long?,
 )
 
-fun BlobId.toKotlinWrapper(): BlobIdWrapper = BlobIdWrapper(
-    bucket = bucket,
-    name = name,
-    generation = generation,
-)
+fun BlobId.toKotlinWrapper(): BlobIdWrapper =
+    BlobIdWrapper(
+        bucket = bucket,
+        name = name,
+        generation = generation,
+    )

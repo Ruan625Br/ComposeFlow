@@ -24,17 +24,19 @@ fun SemanticsNodeInteraction.dragTo(
     val fromBounds = getBoundsInRoot()
     val toBounds = target.getBoundsInRoot()
     onRoot().performTouchInput {
-        val from = Offset(
-            (fromBounds.left + fromBounds.width / 2).toPx(),
-            (fromBounds.top + fromBounds.height / 2).toPx(),
-        )
+        val from =
+            Offset(
+                (fromBounds.left + fromBounds.width / 2).toPx(),
+                (fromBounds.top + fromBounds.height / 2).toPx(),
+            )
         down(
             from,
         )
-        val destination = Offset(
-            (toBounds.left + toBounds.width * targetPointXRatio).toPx(),
-            (toBounds.top + toBounds.height * targetPointYRatio).toPx(),
-        )
+        val destination =
+            Offset(
+                (toBounds.left + toBounds.width * targetPointXRatio).toPx(),
+                (toBounds.top + toBounds.height * targetPointYRatio).toPx(),
+            )
         moveTo(
             destination,
         )
@@ -49,12 +51,11 @@ fun SemanticsNodeInteraction.dragTo(
     }
 }
 
-fun SemanticsNodeInteraction.exists(): Boolean {
-    return try {
+fun SemanticsNodeInteraction.exists(): Boolean =
+    try {
         fetchSemanticsNode()
         // Found the node
         true
     } catch (e: AssertionError) {
         false
     }
-}

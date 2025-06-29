@@ -53,12 +53,12 @@ class ToolbarViewModel(
     private val firebaseApiCaller: FirebaseApiCaller = FirebaseApiCaller(),
     private val settingsRepository: SettingsRepository = SettingsRepository(),
 ) : ViewModel() {
-
-    val editingProject = projectRepository.editingProject.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = Project(),
-    )
+    val editingProject =
+        projectRepository.editingProject.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = Project(),
+        )
 
     private val _availableDevices: MutableStateFlow<List<Device>> =
         MutableStateFlow(listOf(Device.Web))
@@ -66,37 +66,43 @@ class ToolbarViewModel(
 
     private val selectedDeviceName = MutableStateFlow(availableDevices.value.first().deviceName)
 
-    val selectedDevice = viewModelScope.buildUiState(
-        availableDevices,
-        selectedDeviceName,
-    ) { devices, selected ->
-        devices.firstOrNull { it.deviceName == selected }
-            ?: devices.first()
-    }
+    val selectedDevice =
+        viewModelScope.buildUiState(
+            availableDevices,
+            selectedDeviceName,
+        ) { devices, selected ->
+            devices.firstOrNull { it.deviceName == selected }
+                ?: devices.first()
+        }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    private val firebaseIdToken = authRepository.firebaseIdToken.mapLatest {
-        it
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = firebaseIdTokenArg
-    )
+    private val firebaseIdToken =
+        authRepository.firebaseIdToken
+            .mapLatest {
+                it
+            }.stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = firebaseIdTokenArg,
+            )
 
     private var runPreviewJob: Job? = null
 
-    private val settings = settingsRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ComposeBuilderSettings(),
-    )
-
-    val javaHomePath = settings.map { it.javaHome }
-        .stateIn(
+    private val settings =
+        settingsRepository.settings.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = settings.value.javaHome,
+            initialValue = ComposeBuilderSettings(),
         )
+
+    val javaHomePath =
+        settings
+            .map { it.javaHome }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = settings.value.javaHome,
+            )
 
     private val _pendingPreviewAppParams = MutableStateFlow<PreviewAppParams?>(null)
     val pendingPreviewAppParams = _pendingPreviewAppParams
@@ -114,12 +120,11 @@ class ToolbarViewModel(
         selectedDeviceName.value = deviceName
     }
 
-    fun onCheckPreviewAvailability(
-        previewAppParams: PreviewAppParams,
-    ): PreviewAvailability {
-        val isJavaAvailable = previewAppParams.javaHomePath?.let {
-            JdkChecker.isValidJavaHome(it.path())
-        } == true
+    fun onCheckPreviewAvailability(previewAppParams: PreviewAppParams): PreviewAvailability {
+        val isJavaAvailable =
+            previewAppParams.javaHomePath?.let {
+                JdkChecker.isValidJavaHome(it.path())
+            } == true
 
         return if (isJavaAvailable) {
             PreviewAvailability.Available(previewAppParams)
@@ -128,9 +133,7 @@ class ToolbarViewModel(
         }
     }
 
-    fun onShowDownloadJdkConfirmationDialog(
-        previewAppParams: PreviewAppParams,
-    ) {
+    fun onShowDownloadJdkConfirmationDialog(previewAppParams: PreviewAppParams) {
         _pendingPreviewAppParams.value = previewAppParams
     }
 
@@ -150,31 +153,32 @@ class ToolbarViewModel(
             if (downloadJdk) {
                 try {
                     onStatusBarUiStateChanged(
-                        StatusBarUiState.Loading(getString(Res.string.downloading_jdk))
+                        StatusBarUiState.Loading(getString(Res.string.downloading_jdk)),
                     )
                     val downloadedJavaHome = JdkDownloader.downloadAndExtract()
                     onStatusBarUiStateChanged(
-                        StatusBarUiState.Loading(getString(Res.string.finished_downloading_jdk))
+                        StatusBarUiState.Loading(getString(Res.string.finished_downloading_jdk)),
                     )
                     downloadedJavaHome?.let {
                         settingsRepository.saveJavaHomePath(PathSetting.FromLocal(it))
                         localJavaHomePath = PathSetting.FromLocal(it)
                     } ?: run {
                         onStatusBarUiStateChanged(
-                            StatusBarUiState.Failure(getString(Res.string.failed_to_download_jdk))
+                            StatusBarUiState.Failure(getString(Res.string.failed_to_download_jdk)),
                         )
                         return@launch
                     }
                 } catch (_: Exception) {
                     onStatusBarUiStateChanged(
-                        StatusBarUiState.Failure(getString(Res.string.failed_to_download_jdk))
+                        StatusBarUiState.Failure(getString(Res.string.failed_to_download_jdk)),
                     )
                     return@launch
                 }
             }
 
             val projectUiState =
-                projectRepository.loadProject(previewAppParams.projectFileName)
+                projectRepository
+                    .loadProject(previewAppParams.projectFileName)
                     .asLoadedProjectUiState(previewAppParams.projectFileName)
             when (projectUiState) {
                 is LoadedProjectUiState.Error -> {
@@ -196,8 +200,8 @@ class ToolbarViewModel(
                     } ?: run {
                         onStatusBarUiStateChanged(
                             StatusBarUiState.Failure(
-                                getString(Res.string.download_jdk_needed_message)
-                            )
+                                getString(Res.string.download_jdk_needed_message),
+                            ),
                         )
                     }
                 }
@@ -211,9 +215,11 @@ class ToolbarViewModel(
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
         device: Device = Device.Web,
         availableDevices: List<Device> = emptyList(),
-        localJavaHomePath: PathSetting = PathSetting.FromEnvVar(
-            envVarName = "JAVA_HOME", value = getEnvVar("JAVA_HOME") ?: ""
-        ),
+        localJavaHomePath: PathSetting =
+            PathSetting.FromEnvVar(
+                envVarName = "JAVA_HOME",
+                value = getEnvVar("JAVA_HOME") ?: "",
+            ),
     ) {
         val localFirebaseIdToken = firebaseIdToken.value ?: return
         onStatusBarUiStateChanged(StatusBarUiState.Loading("Generating the code"))
@@ -227,73 +233,79 @@ class ToolbarViewModel(
                 packageName = project.packageName,
                 projectName = project.name,
                 copyInstructions = project.generateCopyInstructions(),
-                copyLocalFileInstructions = project.generateCopyLocalFileInstructions(
-                    userId = localFirebaseIdToken.user_id
-                ),
-                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
+                copyLocalFileInstructions =
+                    project.generateCopyLocalFileInstructions(
+                        userId = localFirebaseIdToken.user_id,
+                    ),
+                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
             )
         } else {
             runPreviewJob?.cancel()
-            runPreviewJob = viewModelScope.launch {
-                project.firebaseAppInfoHolder.firebaseAppInfo =
-                    obtainUpdatedFirebaseAppInfo(project.firebaseAppInfoHolder.firebaseAppInfo)
-                saveProject(project)
-                val fileSpecs = project.generateCode()
+            runPreviewJob =
+                viewModelScope.launch {
+                    project.firebaseAppInfoHolder.firebaseAppInfo =
+                        obtainUpdatedFirebaseAppInfo(project.firebaseAppInfoHolder.firebaseAppInfo)
+                    saveProject(project)
+                    val fileSpecs = project.generateCode()
 
-                when (device) {
-                    is Device.AndroidEmulator -> {
-                        val portNumber = if (device.status == EmulatorStatus.Device) {
-                            device.status.portNumber
-                        } else {
-                            availableDevices.nextPortNumber()
+                    when (device) {
+                        is Device.AndroidEmulator -> {
+                            val portNumber =
+                                if (device.status == EmulatorStatus.Device) {
+                                    device.status.portNumber
+                                } else {
+                                    availableDevices.nextPortNumber()
+                                }
+                            AppRunner.runAndroidApp(
+                                device = device,
+                                fileSpecs = fileSpecs,
+                                onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+                                portNumber = portNumber,
+                                packageName = project.packageName,
+                                projectName = project.name,
+                                copyInstructions = project.generateCopyInstructions(),
+                                copyLocalFileInstructions =
+                                    project.generateCopyLocalFileInstructions(
+                                        userId = localFirebaseIdToken.user_id,
+                                    ),
+                                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
+                                localJavaHomePath = localJavaHomePath,
+                            )
                         }
-                        AppRunner.runAndroidApp(
-                            device = device,
-                            fileSpecs = fileSpecs,
-                            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-                            portNumber = portNumber,
-                            packageName = project.packageName,
-                            projectName = project.name,
-                            copyInstructions = project.generateCopyInstructions(),
-                            copyLocalFileInstructions = project.generateCopyLocalFileInstructions(
-                                userId = localFirebaseIdToken.user_id
-                            ),
-                            firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
-                            localJavaHomePath = localJavaHomePath,
-                        )
-                    }
 
-                    is Device.IosSimulator -> {
-                        AppRunner.runIosApp(
-                            device = device,
-                            fileSpecs = fileSpecs,
-                            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-                            packageName = project.packageName,
-                            projectName = project.name,
-                            copyInstructions = project.generateCopyInstructions(),
-                            copyLocalFileInstructions = project.generateCopyLocalFileInstructions(
-                                userId = localFirebaseIdToken.user_id
-                            ),
-                            firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
-                        )
-                    }
+                        is Device.IosSimulator -> {
+                            AppRunner.runIosApp(
+                                device = device,
+                                fileSpecs = fileSpecs,
+                                onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+                                packageName = project.packageName,
+                                projectName = project.name,
+                                copyInstructions = project.generateCopyInstructions(),
+                                copyLocalFileInstructions =
+                                    project.generateCopyLocalFileInstructions(
+                                        userId = localFirebaseIdToken.user_id,
+                                    ),
+                                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
+                            )
+                        }
 
-                    Device.Web -> {
-                        AppRunner.runJsApp(
-                            fileSpecs = fileSpecs,
-                            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-                            packageName = project.packageName,
-                            projectName = project.name,
-                            copyInstructions = project.generateCopyInstructions(),
-                            copyLocalFileInstructions = project.generateCopyLocalFileInstructions(
-                                userId = localFirebaseIdToken.user_id
-                            ),
-                            firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
-                            localJavaHomePath = localJavaHomePath,
-                        )
+                        Device.Web -> {
+                            AppRunner.runJsApp(
+                                fileSpecs = fileSpecs,
+                                onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+                                packageName = project.packageName,
+                                projectName = project.name,
+                                copyInstructions = project.generateCopyInstructions(),
+                                copyLocalFileInstructions =
+                                    project.generateCopyLocalFileInstructions(
+                                        userId = localFirebaseIdToken.user_id,
+                                    ),
+                                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
+                                localJavaHomePath = localJavaHomePath,
+                            )
+                        }
                     }
                 }
-            }
         }
     }
 
@@ -305,7 +317,8 @@ class ToolbarViewModel(
             // Reset the StatusBar state
             onStatusBarUiStateChanged(StatusBarUiState.Normal)
             val projectUiState =
-                projectRepository.loadProject(projectFileName)
+                projectRepository
+                    .loadProject(projectFileName)
                     .asLoadedProjectUiState(projectFileName)
             when (projectUiState) {
                 is LoadedProjectUiState.Error -> {}
@@ -341,10 +354,11 @@ class ToolbarViewModel(
                 packageName = project.packageName,
                 projectName = project.name,
                 copyInstructions = project.generateCopyInstructions(),
-                copyLocalFileInstructions = project.generateCopyLocalFileInstructions(
-                    userId = localFirebaseIdToken.user_id
-                ),
-                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo
+                copyLocalFileInstructions =
+                    project.generateCopyLocalFileInstructions(
+                        userId = localFirebaseIdToken.user_id,
+                    ),
+                firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
             )
         }
     }
@@ -365,39 +379,42 @@ class ToolbarViewModel(
         firebaseAppInfo.firebaseProjectId?.let { firebaseProjectId ->
             firebaseIdToken.prepareFirebaseApiCall(
                 firebaseProjectId = firebaseProjectId,
-                authRepository = authRepository
+                authRepository = authRepository,
             ) { newIdentifier ->
                 firebaseAppInfo.androidApp?.let { androidApp ->
-                    firebaseApiCaller.getAndroidAppConfig(
-                        identifier = newIdentifier,
-                        appId = androidApp.metadata.appId
-                    ).onSuccess { newConfig ->
-                        newConfig?.let {
-                            result =
-                                result.copy(androidApp = androidApp.copy(config = newConfig.decodeFileContents()))
+                    firebaseApiCaller
+                        .getAndroidAppConfig(
+                            identifier = newIdentifier,
+                            appId = androidApp.metadata.appId,
+                        ).onSuccess { newConfig ->
+                            newConfig?.let {
+                                result =
+                                    result.copy(androidApp = androidApp.copy(config = newConfig.decodeFileContents()))
+                            }
                         }
-                    }
                 }
                 firebaseAppInfo.iOSApp?.let { iOSApp ->
-                    firebaseApiCaller.getIosAppConfig(
-                        identifier = newIdentifier,
-                        appId = iOSApp.metadata.appId
-                    ).onSuccess { newConfig ->
-                        newConfig?.let {
-                            result =
-                                result.copy(iOSApp = iOSApp.copy(config = newConfig.decodeFileContents()))
+                    firebaseApiCaller
+                        .getIosAppConfig(
+                            identifier = newIdentifier,
+                            appId = iOSApp.metadata.appId,
+                        ).onSuccess { newConfig ->
+                            newConfig?.let {
+                                result =
+                                    result.copy(iOSApp = iOSApp.copy(config = newConfig.decodeFileContents()))
+                            }
                         }
-                    }
                 }
                 firebaseAppInfo.webApp?.let { webApp ->
-                    firebaseApiCaller.getWebAppConfig(
-                        identifier = newIdentifier,
-                        appId = webApp.metadata.appId,
-                    ).onSuccess { newConfig ->
-                        newConfig?.let {
-                            result = result.copy(webApp = webApp.copy(config = it))
+                    firebaseApiCaller
+                        .getWebAppConfig(
+                            identifier = newIdentifier,
+                            appId = webApp.metadata.appId,
+                        ).onSuccess { newConfig ->
+                            newConfig?.let {
+                                result = result.copy(webApp = webApp.copy(config = it))
+                            }
                         }
-                    }
                 }
             }
         }
@@ -409,5 +426,4 @@ class ToolbarViewModel(
             projectRepository.updateProject(project)
         }
     }
-
 }

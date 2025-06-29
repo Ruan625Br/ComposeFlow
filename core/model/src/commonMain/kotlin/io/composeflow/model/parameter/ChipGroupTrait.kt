@@ -50,12 +50,14 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("ChipGroupTrait")
 data class ChipGroupTrait(
-    val chipItems: AssignableProperty? = StringProperty.StringIntrinsicValue("Chip1,Chip2,Chip3")
-        .apply {
-            propertyTransformers.add(
-                FromString.ToStringList.Split(mutableStateOf(StringProperty.StringIntrinsicValue(",")))
-            )
-        },
+    val chipItems: AssignableProperty? =
+        StringProperty
+            .StringIntrinsicValue("Chip1,Chip2,Chip3")
+            .apply {
+                propertyTransformers.add(
+                    FromString.ToStringList.Split(mutableStateOf(StringProperty.StringIntrinsicValue(","))),
+                )
+            },
     val selectable: Boolean = true,
     val multiSelect: Boolean = false,
     val elevated: Boolean = false,
@@ -63,39 +65,39 @@ data class ChipGroupTrait(
     // containers issue
     // val wrapContent: Boolean = false,
 ) : ComposeTrait {
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Chip items", chipItems, ComposeFlowType.StringType(isList = true)),
         )
-    }
 
     override fun defaultComposeNode(project: Project): ComposeNode {
-        val chipGroup = ComposeNode(
-            modifierList = defaultModifierList(),
-            trait = mutableStateOf(ChipGroupTrait()),
-        )
+        val chipGroup =
+            ComposeNode(
+                modifierList = defaultModifierList(),
+                trait = mutableStateOf(ChipGroupTrait()),
+            )
         return chipGroup
     }
 
-    override fun companionState(
-        composeNode: ComposeNode,
-    ): ScreenState<*> {
-        return ScreenState.StringListScreenState(
+    override fun companionState(composeNode: ComposeNode): ScreenState<*> =
+        ScreenState.StringListScreenState(
             id = composeNode.companionStateId,
             name = composeNode.label.value,
             companionNodeId = composeNode.id,
         )
-    }
 
     override fun icon(): ImageVector = ComposeFlowIcons.Choice
+
     override fun iconText(): String = "ChipGroup"
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Basic, TraitCategory.Container)
+
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic, TraitCategory.Container)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_chip_group_trait
 
     override fun isDroppable(): Boolean = false
+
     override fun isResizeable(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnChange)
 
     @Composable
@@ -136,17 +138,19 @@ data class ChipGroupTrait(
                     label = {
                         Text(label)
                     },
-                    colors = if (chipGroupTrait.elevated) {
-                        FilterChipDefaults.elevatedFilterChipColors()
-                    } else {
-                        FilterChipDefaults.filterChipColors()
-                    },
-                    elevation = if (chipGroupTrait.elevated) {
-                        FilterChipDefaults.elevatedFilterChipElevation()
-                    } else {
-                        FilterChipDefaults.filterChipElevation()
-                    },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    colors =
+                        if (chipGroupTrait.elevated) {
+                            FilterChipDefaults.elevatedFilterChipColors()
+                        } else {
+                            FilterChipDefaults.filterChipColors()
+                        },
+                    elevation =
+                        if (chipGroupTrait.elevated) {
+                            FilterChipDefaults.elevatedFilterChipElevation()
+                        } else {
+                            FilterChipDefaults.filterChipElevation()
+                        },
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
             } else {
                 AssistChip(
@@ -154,40 +158,45 @@ data class ChipGroupTrait(
                     label = {
                         Text(label)
                     },
-                    colors = if (chipGroupTrait.elevated) {
-                        AssistChipDefaults.elevatedAssistChipColors()
-                    } else {
-                        AssistChipDefaults.assistChipColors()
-                    },
-                    elevation = if (chipGroupTrait.elevated) {
-                        AssistChipDefaults.elevatedAssistChipElevation()
-                    } else {
-                        AssistChipDefaults.elevatedAssistChipElevation()
-                    },
-                    modifier = Modifier.padding(horizontal = 4.dp)
+                    colors =
+                        if (chipGroupTrait.elevated) {
+                            AssistChipDefaults.elevatedAssistChipColors()
+                        } else {
+                            AssistChipDefaults.assistChipColors()
+                        },
+                    elevation =
+                        if (chipGroupTrait.elevated) {
+                            AssistChipDefaults.elevatedAssistChipElevation()
+                        } else {
+                            AssistChipDefaults.elevatedAssistChipElevation()
+                        },
+                    modifier = Modifier.padding(horizontal = 4.dp),
                 )
             }
         }
 
-        val chipItems = when (val chipItems = chipItems) {
-            is CustomEnumValuesProperty -> {
-                chipItems.rawVale(project)
-            }
+        val chipItems =
+            when (val chipItems = chipItems) {
+                is CustomEnumValuesProperty -> {
+                    chipItems.rawVale(project)
+                }
 
-            null -> listOf("[Empty item]")
-            else -> listOf(chipItems.transformedValueExpression(project))
-        }
+                null -> listOf("[Empty item]")
+                else -> listOf(chipItems.transformedValueExpression(project))
+            }
         FlowRow(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         ) {
             chipItems.forEachIndexed { _, item ->
                 LocalChip(
@@ -207,53 +216,57 @@ data class ChipGroupTrait(
         val codeBlockBuilder = CodeBlock.builder()
         val chipGroupTrait = node.trait.value as ChipGroupTrait
 
-        val companionState = node.companionStateId?.let {
-            project.findLocalStateOrNull(it)
-        }
-        val updatedState = if (companionState is ScreenState.StringListScreenState) {
-            companionState.copy(singleValueOnly = !multiSelect)
-        } else {
-            companionState
-        }
+        val companionState =
+            node.companionStateId?.let {
+                project.findLocalStateOrNull(it)
+            }
+        val updatedState =
+            if (companionState is ScreenState.StringListScreenState) {
+                companionState.copy(singleValueOnly = !multiSelect)
+            } else {
+                companionState
+            }
         val canvasEditable = project.findCanvasEditableHavingNodeOrNull(node)!!
         (updatedState as? WriteableState)?.let {
             canvasEditable.updateState(updatedState)
         }
 
-        val itemsCodeBlock = when (val items = chipItems) {
-            null -> {
-                CodeBlock.of("emptyList<String>()")
-            }
+        val itemsCodeBlock =
+            when (val items = chipItems) {
+                null -> {
+                    CodeBlock.of("emptyList<String>()")
+                }
 
-            else -> {
-                items.transformedCodeBlock(
-                    project,
-                    context,
-                    dryRun = dryRun,
-                    writeType = ComposeFlowType.StringType(isList = true)
-                )
+                else -> {
+                    items.transformedCodeBlock(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                        writeType = ComposeFlowType.StringType(isList = true),
+                    )
+                }
             }
-        }
 
         fun generateChipCode(
             groupParams: ChipGroupTrait,
             builder: CodeBlock.Builder,
             dryRun: Boolean,
         ) {
-            val chipMember = if (groupParams.selectable) {
-                MemberName("androidx.compose.material3", "FilterChip")
-            } else {
-                MemberName("androidx.compose.material3", "AssistChip")
-            }
+            val chipMember =
+                if (groupParams.selectable) {
+                    MemberName("androidx.compose.material3", "FilterChip")
+                } else {
+                    MemberName("androidx.compose.material3", "AssistChip")
+                }
             builder.add("%M(", chipMember)
             if (updatedState is WriteableState) {
                 builder.addStatement(
                     "selected = ${
                         updatedState.getReadVariableName(
                             project,
-                            context
+                            context,
                         )
-                    }.contains(it),"
+                    }.contains(it),",
                 )
             } else {
                 builder.addStatement("selected = false,")
@@ -271,8 +284,8 @@ data class ChipGroupTrait(
                         project,
                         canvasEditable,
                         context,
-                        dryRun = dryRun
-                    )
+                        dryRun = dryRun,
+                    ),
                 )
             }
             builder.addStatement("},")
@@ -280,7 +293,7 @@ data class ChipGroupTrait(
                 project,
                 context,
                 builder,
-                dryRun = dryRun
+                dryRun = dryRun,
             )
             builder.add(")")
         }
@@ -290,7 +303,7 @@ data class ChipGroupTrait(
             MemberName("androidx.compose.foundation.layout", "FlowRow"),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(") {")
 

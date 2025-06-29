@@ -22,18 +22,18 @@ fun BooleanPropertyEditor(
     enabled: Boolean = true,
 ) {
     Row(
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .wrapContentHeight()
-            .hoverIconClickable()
-            .clickable {
-                onCheckedChange(!checked)
-            }
-            .padding(vertical = 4.dp),
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .wrapContentHeight()
+                .hoverIconClickable()
+                .clickable {
+                    onCheckedChange(!checked)
+                }.padding(vertical = 4.dp),
     ) {
         LabeledBorderBox(
             label = label,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
         ) {
             ComposeFlowSwitch(
                 checked = checked,

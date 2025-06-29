@@ -29,14 +29,15 @@ actual fun <T> AsyncImage(
     contentScale: ContentScale,
 ) {
     val image: T? by produceState<T?>(null) {
-        value = withContext(Dispatchers.IO) {
-            try {
-                load()
-            } catch (e: IOException) {
-                e.printStackTrace()
-                null
+        value =
+            withContext(Dispatchers.IO) {
+                try {
+                    load()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                    null
+                }
             }
-        }
     }
 
     image?.let {
@@ -50,15 +51,23 @@ actual fun <T> AsyncImage(
     }
 }
 
-/* Loading from file with java.io API */
+// Loading from file with java.io API
 
-fun loadImageBitmap(file: File): ImageBitmap =
-    file.inputStream().buffered().use(::loadImageBitmap)
+fun loadImageBitmap(file: File): ImageBitmap = file.inputStream().buffered().use(::loadImageBitmap)
 
-fun loadSvgPainter(file: File, density: Density): Painter =
-    file.inputStream().buffered().use { androidx.compose.ui.res.loadSvgPainter(it, density) }
+fun loadSvgPainter(
+    file: File,
+    density: Density,
+): Painter =
+    file.inputStream().buffered().use {
+        androidx.compose.ui.res
+            .loadSvgPainter(it, density)
+    }
 
-fun loadXmlImageVector(file: File, density: Density): ImageVector =
+fun loadXmlImageVector(
+    file: File,
+    density: Density,
+): ImageVector =
     file.inputStream().buffered().use {
         androidx.compose.ui.res.loadXmlImageVector(
             InputSource(it),
@@ -66,15 +75,23 @@ fun loadXmlImageVector(file: File, density: Density): ImageVector =
         )
     }
 
-/* Loading from network with java.net API */
+// Loading from network with java.net API
 
-fun loadImageBitmap(url: String): ImageBitmap =
-    URL(url).openStream().buffered().use(::loadImageBitmap)
+fun loadImageBitmap(url: String): ImageBitmap = URL(url).openStream().buffered().use(::loadImageBitmap)
 
-fun loadSvgPainter(url: String, density: Density): Painter =
-    URL(url).openStream().buffered().use { androidx.compose.ui.res.loadSvgPainter(it, density) }
+fun loadSvgPainter(
+    url: String,
+    density: Density,
+): Painter =
+    URL(url).openStream().buffered().use {
+        androidx.compose.ui.res
+            .loadSvgPainter(it, density)
+    }
 
-fun loadXmlImageVector(url: String, density: Density): ImageVector =
+fun loadXmlImageVector(
+    url: String,
+    density: Density,
+): ImageVector =
     URL(url).openStream().buffered().use {
         androidx.compose.ui.res.loadXmlImageVector(
             InputSource(it),

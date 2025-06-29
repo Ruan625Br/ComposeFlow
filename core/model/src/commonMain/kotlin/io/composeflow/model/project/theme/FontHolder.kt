@@ -38,13 +38,12 @@ data class FontHolder(
     var primaryFontFamily: FontFamilyWrapper = defaultFontFamily,
     var secondaryFontFamily: FontFamilyWrapper = defaultFontFamily,
 ) {
-
     @Composable
     fun generateTypography(): Typography =
         Typography().generateWithOverrides(
             primaryFontFamily,
             secondaryFontFamily,
-            textStyleOverrides
+            textStyleOverrides,
         )
 
     fun resetToDefaults() {
@@ -60,9 +59,11 @@ data class FontHolder(
             fileBuilder.addFunction(secondaryFontFamily.generateFontFamilyFunSpec())
         }
 
-        val typographyFunSpecBuilder = FunSpec.builder("AppTypography")
-            .addAnnotation(Composable::class)
-            .returns(Typography::class)
+        val typographyFunSpecBuilder =
+            FunSpec
+                .builder("AppTypography")
+                .addAnnotation(Composable::class)
+                .returns(Typography::class)
 
         val primaryFontFamilyVariable = primaryFontFamily.fontFamilyName().lowercase()
         val secondaryFontFamilyVariable = secondaryFontFamily.fontFamilyName().lowercase()
@@ -75,8 +76,8 @@ data class FontHolder(
         typographyFunSpecBuilder.addCode(
             CodeBlock.of(
                 "return %M().run {",
-                MemberHolder.Material3.Typography
-            )
+                MemberHolder.Material3.Typography,
+            ),
         )
 
         typographyFunSpecBuilder.addCode("copy(")
@@ -84,40 +85,42 @@ data class FontHolder(
             typographyFunSpecBuilder.addCode("${it.styleName} = ${it.styleName}.copy(")
             val textStyleOverride = textStyleOverrides[it]
             if (textStyleOverride == null) {
-                typographyFunSpecBuilder.addCode("fontFamily = ${primaryFontFamilyVariable}),")
+                typographyFunSpecBuilder.addCode("fontFamily = $primaryFontFamilyVariable),")
             } else {
                 textStyleOverride.fontSize?.let { fontSize ->
                     typographyFunSpecBuilder.addCode(
                         CodeBlock.of(
-                            "fontSize = ${fontSize}.%M, ", MemberHolder.AndroidX.Ui.sp
-                        )
+                            "fontSize = $fontSize.%M, ",
+                            MemberHolder.AndroidX.Ui.sp,
+                        ),
                     )
                 }
                 textStyleOverride.fontWeight?.let { fontWeight ->
                     typographyFunSpecBuilder.addCode(
                         CodeBlock.of(
                             "fontWeight = %M.${fontWeight.name}, ",
-                            MemberHolder.AndroidX.Ui.FontWeight
-                        )
+                            MemberHolder.AndroidX.Ui.FontWeight,
+                        ),
                     )
                 }
                 textStyleOverride.letterSpacing?.let { letterSpacing ->
                     typographyFunSpecBuilder.addCode(
                         CodeBlock.of(
-                            "letterSpacing = ${letterSpacing}.%M, ", MemberHolder.AndroidX.Ui.sp
-                        )
+                            "letterSpacing = $letterSpacing.%M, ",
+                            MemberHolder.AndroidX.Ui.sp,
+                        ),
                     )
                 }
                 when (textStyleOverride.fontFamilyCandidate) {
                     FontFamilyCandidate.Primary -> {
                         typographyFunSpecBuilder.addCode(
-                            "fontFamily = $primaryFontFamilyVariable,"
+                            "fontFamily = $primaryFontFamilyVariable,",
                         )
                     }
 
                     FontFamilyCandidate.Secondary -> {
                         typographyFunSpecBuilder.addCode(
-                            "fontFamily = $secondaryFontFamilyVariable,"
+                            "fontFamily = $secondaryFontFamilyVariable,",
                         )
                     }
                 }
@@ -142,22 +145,21 @@ data class FontHolder(
      * The destination path is a relative path from the app's root directory e.g.:
      * `"composeApp/src/commonMain/composeResources/font/Caveat-Bold.ttf"`
      */
-    fun generateCopyFileInstructions(): Map<String, String> {
-        return buildMap {
+    fun generateCopyFileInstructions(): Map<String, String> =
+        buildMap {
             primaryFontFamily.fontFileWrappers.forEach {
                 put(
                     "/composeResources/io.composeflow/font/${it.fontFileName}",
-                    "composeApp/src/commonMain/composeResources/font/${it.fontFileName}"
+                    "composeApp/src/commonMain/composeResources/font/${it.fontFileName}",
                 )
             }
             secondaryFontFamily.fontFileWrappers.forEach {
                 put(
                     "/composeResources/io.composeflow/font/${it.fontFileName}",
-                    "composeApp/src/commonMain/composeResources/font/${it.fontFileName}"
+                    "composeApp/src/commonMain/composeResources/font/${it.fontFileName}",
                 )
             }
         }
-    }
 }
 
 enum class FontFamilyCandidate {
@@ -172,7 +174,6 @@ data class TextStyleOverride(
     val fontWeight: FontWeightWrapper? = null,
     val fontFamilyCandidate: FontFamilyCandidate = FontFamilyCandidate.Primary,
 ) {
-
     @Composable
     fun asTextStyle(
         primaryFontFamily: FontFamilyWrapper,
@@ -189,10 +190,11 @@ data class TextStyleOverride(
         fontWeight?.let {
             result = result.copy(fontWeight = it.asFontWeight())
         }
-        val fontFamily = when (fontFamilyCandidate) {
-            FontFamilyCandidate.Primary -> primaryFontFamily.asFontFamily()
-            FontFamilyCandidate.Secondary -> secondaryFontFamily.asFontFamily()
-        }
+        val fontFamily =
+            when (fontFamilyCandidate) {
+                FontFamilyCandidate.Primary -> primaryFontFamily.asFontFamily()
+                FontFamilyCandidate.Secondary -> secondaryFontFamily.asFontFamily()
+            }
         result = result.copy(fontFamily = fontFamily)
         return result
     }
@@ -203,84 +205,98 @@ fun Typography.generateWithOverrides(
     primaryFontFamily: FontFamilyWrapper,
     secondaryFontFamily: FontFamilyWrapper,
     textStyleOverrides: TextStyleOverrides,
-): Typography {
-    return copy(
-        displayLarge = textStyleOverrides[TextStyleWrapper.DisplayLarge]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            displayLarge
-        ) ?: displayLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        displayMedium = textStyleOverrides[TextStyleWrapper.DisplayMedium]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            displayMedium
-        ) ?: displayMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        displaySmall = textStyleOverrides[TextStyleWrapper.DisplaySmall]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            displaySmall
-        ) ?: displaySmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        headlineLarge = textStyleOverrides[TextStyleWrapper.HeadlineLarge]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            headlineLarge
-        ) ?: headlineLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        headlineMedium = textStyleOverrides[TextStyleWrapper.HeadlineMedium]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            headlineMedium
-        ) ?: headlineMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        headlineSmall = textStyleOverrides[TextStyleWrapper.HeadlineSmall]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            headlineSmall
-        ) ?: headlineSmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        titleLarge = textStyleOverrides[TextStyleWrapper.TitleLarge]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            titleLarge
-        ) ?: titleLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        titleMedium = textStyleOverrides[TextStyleWrapper.TitleMedium]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            titleMedium
-        ) ?: titleMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        titleSmall = textStyleOverrides[TextStyleWrapper.TitleSmall]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            titleSmall
-        ) ?: titleSmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        bodyLarge = textStyleOverrides[TextStyleWrapper.BodyLarge]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            bodyLarge
-        )
-            ?: bodyLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        bodyMedium = textStyleOverrides[TextStyleWrapper.BodyMedium]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            bodyMedium
-        ) ?: bodyMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        bodySmall = textStyleOverrides[TextStyleWrapper.BodySmall]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            bodySmall
-        )
-            ?: bodySmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        labelLarge = textStyleOverrides[TextStyleWrapper.LabelLarge]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            labelLarge
-        ) ?: labelLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        labelMedium = textStyleOverrides[TextStyleWrapper.LabelMedium]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            labelMedium
-        ) ?: labelMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
-        labelSmall = textStyleOverrides[TextStyleWrapper.LabelSmall]?.asTextStyle(
-            primaryFontFamily,
-            secondaryFontFamily,
-            labelSmall
-        ) ?: labelSmall.copy(fontFamily = primaryFontFamily.asFontFamily())
+): Typography =
+    copy(
+        displayLarge =
+            textStyleOverrides[TextStyleWrapper.DisplayLarge]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                displayLarge,
+            ) ?: displayLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        displayMedium =
+            textStyleOverrides[TextStyleWrapper.DisplayMedium]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                displayMedium,
+            ) ?: displayMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        displaySmall =
+            textStyleOverrides[TextStyleWrapper.DisplaySmall]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                displaySmall,
+            ) ?: displaySmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        headlineLarge =
+            textStyleOverrides[TextStyleWrapper.HeadlineLarge]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                headlineLarge,
+            ) ?: headlineLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        headlineMedium =
+            textStyleOverrides[TextStyleWrapper.HeadlineMedium]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                headlineMedium,
+            ) ?: headlineMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        headlineSmall =
+            textStyleOverrides[TextStyleWrapper.HeadlineSmall]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                headlineSmall,
+            ) ?: headlineSmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        titleLarge =
+            textStyleOverrides[TextStyleWrapper.TitleLarge]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                titleLarge,
+            ) ?: titleLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        titleMedium =
+            textStyleOverrides[TextStyleWrapper.TitleMedium]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                titleMedium,
+            ) ?: titleMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        titleSmall =
+            textStyleOverrides[TextStyleWrapper.TitleSmall]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                titleSmall,
+            ) ?: titleSmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        bodyLarge =
+            textStyleOverrides[TextStyleWrapper.BodyLarge]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                bodyLarge,
+            )
+                ?: bodyLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        bodyMedium =
+            textStyleOverrides[TextStyleWrapper.BodyMedium]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                bodyMedium,
+            ) ?: bodyMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        bodySmall =
+            textStyleOverrides[TextStyleWrapper.BodySmall]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                bodySmall,
+            )
+                ?: bodySmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        labelLarge =
+            textStyleOverrides[TextStyleWrapper.LabelLarge]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                labelLarge,
+            ) ?: labelLarge.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        labelMedium =
+            textStyleOverrides[TextStyleWrapper.LabelMedium]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                labelMedium,
+            ) ?: labelMedium.copy(fontFamily = primaryFontFamily.asFontFamily()),
+        labelSmall =
+            textStyleOverrides[TextStyleWrapper.LabelSmall]?.asTextStyle(
+                primaryFontFamily,
+                secondaryFontFamily,
+                labelSmall,
+            ) ?: labelSmall.copy(fontFamily = primaryFontFamily.asFontFamily()),
     )
-}

@@ -7,7 +7,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class AlignHorizontalTest {
-
     @Test
     fun toComposeCode_align_default() {
         val modifierList = listOf(ModifierWrapper.AlignHorizontal())

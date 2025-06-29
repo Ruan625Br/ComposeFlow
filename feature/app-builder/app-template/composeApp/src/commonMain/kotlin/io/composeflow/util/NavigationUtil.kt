@@ -8,13 +8,14 @@ import io.composeflow.platform.computeAdaptiveWindowInfo
 @Composable
 fun calculateCustomNavSuiteType(isTopLevelDestination: Boolean): NavigationSuiteType {
     val adaptiveInfo = computeAdaptiveWindowInfo()
-    val customNavSuiteType = with(adaptiveInfo) {
-        val navSuiteType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
-        if (navSuiteType == NavigationSuiteType.NavigationBar && !isTopLevelDestination) {
-            NavigationSuiteType.None
-        } else {
-            navSuiteType
+    val customNavSuiteType =
+        with(adaptiveInfo) {
+            val navSuiteType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(adaptiveInfo)
+            if (navSuiteType == NavigationSuiteType.NavigationBar && !isTopLevelDestination) {
+                NavigationSuiteType.None
+            } else {
+                navSuiteType
+            }
         }
-    }
     return customNavSuiteType
 }

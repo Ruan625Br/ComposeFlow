@@ -38,7 +38,6 @@ import org.jetbrains.compose.resources.StringResource
 data class CardTrait(
     val cardType: CardType = CardType.Default,
 ) : ComposeTrait {
-
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
             modifierList = defaultModifierList(),
@@ -47,43 +46,51 @@ data class CardTrait(
             addChild(
                 ComposeNode(
                     trait = mutableStateOf(BoxTrait()),
-                    modifierList = mutableStateListEqualsOverrideOf(
-                        ModifierWrapper.FillMaxSize(),
-                        ModifierWrapper.Padding(16.dp)
-                    )
+                    modifierList =
+                        mutableStateListEqualsOverrideOf(
+                            ModifierWrapper.FillMaxSize(),
+                            ModifierWrapper.Padding(16.dp),
+                        ),
                 ).apply {
                     addChild(
                         ComposeNode(
-                            trait = mutableStateOf(
-                                TextTrait(
-                                    text = StringProperty.StringIntrinsicValue("Card content")
-                                )
-                            ),
-                            modifierList = mutableStateListEqualsOverrideOf(
-                                ModifierWrapper.Align(AlignmentWrapper.BottomStart)
-                            )
-                        )
+                            trait =
+                                mutableStateOf(
+                                    TextTrait(
+                                        text = StringProperty.StringIntrinsicValue("Card content"),
+                                    ),
+                                ),
+                            modifierList =
+                                mutableStateListEqualsOverrideOf(
+                                    ModifierWrapper.Align(AlignmentWrapper.BottomStart),
+                                ),
+                        ),
                     )
                     addChild(
                         ComposeNode(
-                            trait = mutableStateOf(
-                                IconTrait(imageVectorHolder = Outlined.MoreVert)
-                            ),
-                            modifierList = mutableStateListEqualsOverrideOf(
-                                ModifierWrapper.Align(AlignmentWrapper.TopEnd)
-                            )
-                        )
+                            trait =
+                                mutableStateOf(
+                                    IconTrait(imageVectorHolder = Outlined.MoreVert),
+                                ),
+                            modifierList =
+                                mutableStateListEqualsOverrideOf(
+                                    ModifierWrapper.Align(AlignmentWrapper.TopEnd),
+                                ),
+                        ),
                     )
-                }
+                },
             )
         }
 
     override fun icon(): ImageVector = Icons.Outlined.Assessment
+
     override fun iconText(): String = "Card"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Basic,
-        TraitCategory.Container,
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Basic,
+            TraitCategory.Container,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_card_trait
 
@@ -106,16 +113,18 @@ data class CardTrait(
         when (cardType) {
             CardType.Default -> {
                 Card(
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     node.children.forEach { child ->
                         child.RenderedNodeInCanvas(
@@ -130,16 +139,18 @@ data class CardTrait(
 
             CardType.Elevated -> {
                 ElevatedCard(
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     node.children.forEach { child ->
                         child.RenderedNodeInCanvas(
@@ -154,16 +165,18 @@ data class CardTrait(
 
             CardType.Outlined -> {
                 OutlinedCard(
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 ) {
                     node.children.forEach { child ->
                         child.RenderedNodeInCanvas(
@@ -176,7 +189,6 @@ data class CardTrait(
                 }
             }
         }
-
     }
 
     override fun generateCode(
@@ -192,7 +204,7 @@ data class CardTrait(
         } else {
             codeBlockBuilder.addStatement("%M(", cardType.toMemberName())
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
         }
@@ -202,7 +214,7 @@ data class CardTrait(
                     project = project,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
         }
         codeBlockBuilder.addStatement("}")
@@ -218,12 +230,10 @@ enum class CardType {
         override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "Card")
     },
     Elevated {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "ElevatedCard")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "ElevatedCard")
     },
     Outlined {
-        override fun toMemberName(): MemberName =
-            MemberName("androidx.compose.material3", "OutlinedCard")
+        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "OutlinedCard")
     },
     ;
 

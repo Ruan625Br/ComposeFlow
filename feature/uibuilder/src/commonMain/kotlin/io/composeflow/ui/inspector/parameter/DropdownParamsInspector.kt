@@ -39,7 +39,7 @@ fun DropdownParamsInspector(
             leadingIcon = {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.FormatListNumbered,
-                    contentDescription = ""
+                    contentDescription = "",
                 )
             },
             variableAssignable = true,
@@ -57,7 +57,7 @@ fun DropdownParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    dropdownTrait.copy(label = StringProperty.StringIntrinsicValue())
+                    dropdownTrait.copy(label = StringProperty.StringIntrinsicValue()),
                 )
             },
             modifier = Modifier.hoverOverlay(),

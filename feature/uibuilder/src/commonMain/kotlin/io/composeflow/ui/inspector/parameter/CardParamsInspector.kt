@@ -32,7 +32,7 @@ fun CardParamsInspector(
                     ),
                 )
             },
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         )
     }
 }

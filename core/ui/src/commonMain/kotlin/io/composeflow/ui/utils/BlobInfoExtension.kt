@@ -24,11 +24,12 @@ fun BlobInfoWrapper.asIconComposable(
     tint: Color = LocalContentColor.current,
     modifier: Modifier = Modifier,
 ) {
-    val localCache = getAssetCacheFileFor(
-        userId = userId,
-        projectId = projectId,
-        this
-    )
+    val localCache =
+        getAssetCacheFileFor(
+            userId = userId,
+            projectId = projectId,
+            this,
+        )
     val density = LocalDensity.current
     Column(modifier = modifier) {
         if (localCache.exists()) {
@@ -46,7 +47,7 @@ fun BlobInfoWrapper.asIconComposable(
                     bitmap = bitmap,
                     contentDescription = "",
                     tint = tint,
-                    modifier = Modifier.heightIn(max = 72.dp)
+                    modifier = Modifier.heightIn(max = 72.dp),
                 )
             }
         }
@@ -62,11 +63,12 @@ fun BlobInfoWrapper.asImageComposable(
     contentScale: ContentScale = ContentScale.None,
     alpha: Float = 1f,
 ) {
-    val localCache = getAssetCacheFileFor(
-        userId = userId,
-        projectId = projectId,
-        this
-    )
+    val localCache =
+        getAssetCacheFileFor(
+            userId = userId,
+            projectId = projectId,
+            this,
+        )
     Column(modifier = modifier) {
         if (localCache.exists()) {
             val bitmap = loadImageBitmap(localCache)

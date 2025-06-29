@@ -18,15 +18,22 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("ScreenTrait")
 data object ScreenTrait : ComposeTrait {
-
     override fun icon(): ImageVector = ComposeFlowIcons.Smartphone
+
     override fun iconText(): String = "Screen"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_screen_trait
+
     override fun visibleInPalette(): Boolean = false
+
     override fun isDroppable(): Boolean = true
+
     override fun isVisibilityConditional(): Boolean = false
+
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnInitialLoad)
+
     override fun generateCode(
         project: Project,
         node: ComposeNode,

@@ -15,7 +15,6 @@ import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.JsonElement
 
-
 fun selectString(
     jsonElement: JsonElement,
     jsonPath: String,
@@ -42,10 +41,14 @@ fun String.toRichHtmlString(): AnnotatedString {
     return state.annotatedString
 }
 
-fun Instant.setHour(newHour: Int, timeZone: TimeZone = TimeZone.currentSystemDefault()): Instant {
+fun Instant.setHour(
+    newHour: Int,
+    timeZone: TimeZone = TimeZone.currentSystemDefault(),
+): Instant {
     val localDateTime = this.toLocalDateTime(timeZone)
-    val updatedDateTime = localDateTime
-        .setHour(newHour)
+    val updatedDateTime =
+        localDateTime
+            .setHour(newHour)
     return updatedDateTime.toInstant(timeZone)
 }
 
@@ -54,13 +57,13 @@ fun Instant.setMinute(
     timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ): Instant {
     val localDateTime = this.toLocalDateTime(timeZone)
-    val updatedDateTime = localDateTime
-        .setMinute(newMinute)
+    val updatedDateTime =
+        localDateTime
+            .setMinute(newMinute)
     return updatedDateTime.toInstant(timeZone)
 }
 
-fun LocalDateTime.setHour(newHour: Int): LocalDateTime =
-    LocalDateTime(year, monthNumber, dayOfMonth, newHour, minute, second, nanosecond)
+fun LocalDateTime.setHour(newHour: Int): LocalDateTime = LocalDateTime(year, monthNumber, dayOfMonth, newHour, minute, second, nanosecond)
 
 fun LocalDateTime.setMinute(newMinute: Int): LocalDateTime =
     LocalDateTime(year, monthNumber, dayOfMonth, hour, newMinute, second, nanosecond)

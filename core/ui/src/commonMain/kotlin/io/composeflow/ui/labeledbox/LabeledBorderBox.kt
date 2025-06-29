@@ -42,75 +42,80 @@ fun LabeledBorderBox(
 
     val textMeasure = rememberTextMeasurer()
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    textLayoutResult = textMeasure.measure(
-        buildAnnotatedString {
-            withStyle(
-                style = SpanStyle(
-                    fontSize = textStyle.fontSize,
-                ),
-            ) {
-                append(label)
-            }
-        },
-    )
-    val drawColor = if (focused) {
-        MaterialTheme.colorScheme.primary
-    } else {
-        MaterialTheme.colorScheme.outline
-    }
+    textLayoutResult =
+        textMeasure.measure(
+            buildAnnotatedString {
+                withStyle(
+                    style =
+                        SpanStyle(
+                            fontSize = textStyle.fontSize,
+                        ),
+                ) {
+                    append(label)
+                }
+            },
+        )
+    val drawColor =
+        if (focused) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.outline
+        }
     val textWidth = textLayoutResult?.size?.width ?: 0
     val density = LocalDensity.current
     Box(
         contentAlignment = Alignment.TopStart,
-        modifier = modifier
-            .padding(4.dp)
-            .padding(horizontal = 4.dp, vertical = 6.dp)
-            .focusable()
-            .onFocusChanged {
-                focused = it.hasFocus
-            }
-            .drawBehind {
-                with(density) {
-                    val labelPadding = if (label.isEmpty()) 0.dp.toPx() else 8.dp.toPx()
-                    val labelStartOffset = 6.dp
-                    val roundedRect = RoundRect(
-                        left = -labelStartOffset.toPx(),
-                        top = -4.dp.toPx(),
-                        right = size.width + labelStartOffset.toPx(),
-                        bottom = size.height + 4.dp.toPx(),
-                        radiusX = cornerRadius.toPx(),
-                        radiusY = cornerRadius.toPx(),
-                    )
+        modifier =
+            modifier
+                .padding(4.dp)
+                .padding(horizontal = 4.dp, vertical = 6.dp)
+                .focusable()
+                .onFocusChanged {
+                    focused = it.hasFocus
+                }.drawBehind {
+                    with(density) {
+                        val labelPadding = if (label.isEmpty()) 0.dp.toPx() else 8.dp.toPx()
+                        val labelStartOffset = 6.dp
+                        val roundedRect =
+                            RoundRect(
+                                left = -labelStartOffset.toPx(),
+                                top = -4.dp.toPx(),
+                                right = size.width + labelStartOffset.toPx(),
+                                bottom = size.height + 4.dp.toPx(),
+                                radiusX = cornerRadius.toPx(),
+                                radiusY = cornerRadius.toPx(),
+                            )
 
-                    val borderPath = Path().apply {
-                        addRoundRect(roundedRect)
-                    }
-                    drawPath(
-                        path = borderPath,
-                        color = drawColor,
-                        style = Stroke(width = borderWidth.toPx()),
-                    )
-                    drawLine(
-                        color = backgroundColor,
-                        start = Offset(-labelStartOffset.toPx() + labelPadding, -4.dp.toPx()),
-                        end = Offset(textWidth + labelPadding, -4.dp.toPx()),
-                        strokeWidth = 2.dp.toPx(),
-                    )
-
-                    textLayoutResult?.let {
-                        drawText(
-                            textLayoutResult = it,
+                        val borderPath =
+                            Path().apply {
+                                addRoundRect(roundedRect)
+                            }
+                        drawPath(
+                            path = borderPath,
                             color = drawColor,
-                            topLeft = Offset(
-                                x = labelStartOffset.toPx(),
-                                y = -10.dp.toPx(),
-                            ),
+                            style = Stroke(width = borderWidth.toPx()),
                         )
+                        drawLine(
+                            color = backgroundColor,
+                            start = Offset(-labelStartOffset.toPx() + labelPadding, -4.dp.toPx()),
+                            end = Offset(textWidth + labelPadding, -4.dp.toPx()),
+                            strokeWidth = 2.dp.toPx(),
+                        )
+
+                        textLayoutResult?.let {
+                            drawText(
+                                textLayoutResult = it,
+                                color = drawColor,
+                                topLeft =
+                                    Offset(
+                                        x = labelStartOffset.toPx(),
+                                        y = -10.dp.toPx(),
+                                    ),
+                            )
+                        }
                     }
-                }
-            }
-            .padding(vertical = 4.dp)
-            .padding(start = 6.dp),
+                }.padding(vertical = 4.dp)
+                .padding(start = 6.dp),
     ) {
         content()
     }

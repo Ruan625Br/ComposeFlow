@@ -18,9 +18,10 @@ object CloudProjectSaverRunner {
             Dispatchers.IO
         }
 
-    private val cloudProjectSaver = createCloudProjectSaver(
-        cloudStorageWrapper = GoogleCloudStorageWrapper()
-    )
+    private val cloudProjectSaver =
+        createCloudProjectSaver(
+            cloudStorageWrapper = GoogleCloudStorageWrapper(),
+        )
     private val localProjectSaver = createLocalProjectSaver()
 
     suspend fun startSavingProjectPeriodically() {

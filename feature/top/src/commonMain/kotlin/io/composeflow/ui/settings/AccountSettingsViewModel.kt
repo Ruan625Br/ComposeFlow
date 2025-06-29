@@ -15,45 +15,51 @@ import moe.tlaster.precompose.viewmodel.viewModelScope
 class AccountSettingsViewModel(
     private val settingsRepository: SettingsRepository = SettingsRepository(),
 ) : ViewModel() {
-
-    val settings = settingsRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ComposeBuilderSettings(),
-    )
-
-    private val composeFlowDarkThemeSetting = settings.map { it.composeBuilderDarkThemeSetting }
-        .stateIn(
+    val settings =
+        settingsRepository.settings.stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = settings.value.composeBuilderDarkThemeSetting,
+            initialValue = ComposeBuilderSettings(),
         )
 
-    private val darkThemeSettingSetterUiState = viewModelScope.buildUiState(
-        composeFlowDarkThemeSetting,
-    ) {
-        DarkThemeSettingSetterUiState(
-            darkThemeSetting = it,
-            onThemeChanged = ::onThemeChanged,
-        )
-    }
+    private val composeFlowDarkThemeSetting =
+        settings
+            .map { it.composeBuilderDarkThemeSetting }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = settings.value.composeBuilderDarkThemeSetting,
+            )
 
-    val darkThemeSettingsUiState = viewModelScope.buildUiState(
-        darkThemeSettingSetterUiState,
-    ) { darkThemeSettingSetterUiState ->
-        SettingsUiState(
-            darkThemeSettingSetterUiState = darkThemeSettingSetterUiState,
-        )
-    }
+    private val darkThemeSettingSetterUiState =
+        viewModelScope.buildUiState(
+            composeFlowDarkThemeSetting,
+        ) {
+            DarkThemeSettingSetterUiState(
+                darkThemeSetting = it,
+                onThemeChanged = ::onThemeChanged,
+            )
+        }
+
+    val darkThemeSettingsUiState =
+        viewModelScope.buildUiState(
+            darkThemeSettingSetterUiState,
+        ) { darkThemeSettingSetterUiState ->
+            SettingsUiState(
+                darkThemeSettingSetterUiState = darkThemeSettingSetterUiState,
+            )
+        }
 
     private fun onThemeChanged(darkThemeSetting: DarkThemeSetting) {
         settingsRepository.saveComposeBuilderDarkTheme(darkThemeSetting)
     }
 
-    val javaHomePath = settings.map { it.javaHome }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = settings.value.javaHome,
-        )
+    val javaHomePath =
+        settings
+            .map { it.javaHome }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = settings.value.javaHome,
+            )
 }

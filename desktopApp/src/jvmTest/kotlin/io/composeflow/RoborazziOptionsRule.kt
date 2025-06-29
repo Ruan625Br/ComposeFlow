@@ -14,10 +14,11 @@ class RoborazziOptionsRule : TestWatcher() {
         provideRoborazziContext().setRuleOverrideRoborazziOptions(
             RoborazziOptions(
                 compareOptions = RoborazziOptions.CompareOptions(changeThreshold = 0F),
-                recordOptions = RoborazziOptions.RecordOptions(
-                    // For saving money
-                    resizeScale = 0.8,
-                ),
+                recordOptions =
+                    RoborazziOptions.RecordOptions(
+                        // For saving money
+                        resizeScale = 0.8,
+                    ),
             ),
         )
     }

@@ -1,16 +1,10 @@
 package io.composeflow.model.project.appscreen.screen
 
-import com.charleskorn.kaml.YamlList
-import com.charleskorn.kaml.YamlMap
 import com.charleskorn.kaml.YamlNode
-import com.charleskorn.kaml.YamlNull
-import com.charleskorn.kaml.YamlScalar
-import com.charleskorn.kaml.YamlTaggedNode
 import io.composeflow.serializer.yamlSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import prefixIdInYamlNode
-import kotlin.uuid.Uuid
 
 fun Screen.postProcessAfterAiGeneration(newId: String): Screen {
     if (label.value.contains("screen", ignoreCase = true)) {
@@ -25,10 +19,11 @@ fun Screen.postProcessAfterAiGeneration(newId: String): Screen {
 
 fun Screen.replaceIdsToIncreaseUniqueness(): Screen {
     val yaml = yamlSerializer.encodeToString(this)
-    val prefixedYaml = prefixYamlIdsWithKaml(
-        yamlString = yaml,
-        screenId = id
-    )
+    val prefixedYaml =
+        prefixYamlIdsWithKaml(
+            yamlString = yaml,
+            screenId = id,
+        )
     return prefixedYaml?.let {
         yamlSerializer.decodeFromString<Screen>(prefixedYaml)
     } ?: yamlSerializer.decodeFromString<Screen>(yaml)
@@ -43,7 +38,10 @@ fun Screen.replaceIdsToIncreaseUniqueness(): Screen {
  * @param screenId The identifier for the screen (e.g., "messagesRoot") used to create the prefix.
  * @return The modified YAML string, or null if an error occurs.
  */
-private fun prefixYamlIdsWithKaml(yamlString: String, screenId: String): String? {
+private fun prefixYamlIdsWithKaml(
+    yamlString: String,
+    screenId: String,
+): String? {
     val idPrefix = "$screenId:" // Define the prefix format
 
     return try {

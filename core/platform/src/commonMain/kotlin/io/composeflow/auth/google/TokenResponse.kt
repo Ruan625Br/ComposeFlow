@@ -13,6 +13,6 @@ data class TokenResponse(
     val error: String? = null,
 ) {
     fun hasSufficientScope(arg: String): Boolean = scope != null && scope.contains(arg)
-    fun hasSufficientScopes(vararg args: String): Boolean =
-        scope != null && args.all { scope.contains(it) }
+
+    fun hasSufficientScopes(vararg args: String): Boolean = scope != null && args.all { scope.contains(it) }
 }

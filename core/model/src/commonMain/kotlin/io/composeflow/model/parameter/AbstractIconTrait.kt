@@ -60,23 +60,21 @@ abstract class AbstractIconTrait(
     @Transient
     open val contentDescription: String = "Icon for ${imageVectorHolder?.name}",
     @Transient
-    open val tint: AssignableProperty? = ColorProperty.ColorIntrinsicValue(
-        value = ColorWrapper(
-            themeColor = Material3ColorWrapper.OnSurface
-        )
-    ),
+    open val tint: AssignableProperty? =
+        ColorProperty.ColorIntrinsicValue(
+            value =
+                ColorWrapper(
+                    themeColor = Material3ColorWrapper.OnSurface,
+                ),
+        ),
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Tint", tint, ComposeFlowType.Color()),
         )
-    }
 
-    override fun generateIssues(
-        project: Project,
-    ): List<Issue> {
-        return buildList {
+    override fun generateIssues(project: Project): List<Issue> =
+        buildList {
             when (assetType) {
                 IconAssetType.CustomAsset -> {
                     if (!project.assetHolder.icons.any { it.blobId.name == blobInfoWrapper?.blobId?.name }) {
@@ -87,7 +85,6 @@ abstract class AbstractIconTrait(
                 else -> {}
             }
         }
-    }
 
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
@@ -96,8 +93,11 @@ abstract class AbstractIconTrait(
         )
 
     override fun icon(): ImageVector = Icons.Outlined.Add
+
     override fun iconText(): String = "Icon"
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_icon_trait
+
     override fun isResizeable(): Boolean = false
 
     @Composable
@@ -120,7 +120,7 @@ abstract class AbstractIconTrait(
                     canvasNodeCallbacks,
                     paletteRenderParams,
                     zoomableContainerStateHolder,
-                    modifier
+                    modifier,
                 )
             }
         } else {
@@ -130,7 +130,7 @@ abstract class AbstractIconTrait(
                 canvasNodeCallbacks,
                 paletteRenderParams,
                 zoomableContainerStateHolder,
-                modifier
+                modifier,
             )
         }
     }
@@ -150,18 +150,21 @@ abstract class AbstractIconTrait(
                     Icon(
                         imageVector = it.imageVector,
                         contentDescription = contentDescription,
-                        tint = (tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                            ?: MaterialTheme.colorScheme.onBackground,
-                        modifier = modifier.then(
-                            node.modifierChainForCanvas()
-                                .modifierForCanvas(
-                                    project = project,
-                                    node = node,
-                                    canvasNodeCallbacks = canvasNodeCallbacks,
-                                    paletteRenderParams = paletteRenderParams,
-                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                ),
-                        ),
+                        tint =
+                            (tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                                ?: MaterialTheme.colorScheme.onBackground,
+                        modifier =
+                            modifier.then(
+                                node
+                                    .modifierChainForCanvas()
+                                    .modifierForCanvas(
+                                        project = project,
+                                        node = node,
+                                        canvasNodeCallbacks = canvasNodeCallbacks,
+                                        paletteRenderParams = paletteRenderParams,
+                                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                    ),
+                            ),
                     )
                 }
             }
@@ -171,18 +174,21 @@ abstract class AbstractIconTrait(
                 blobInfoWrapper?.asIconComposable(
                     userId = userId,
                     projectId = project.id,
-                    tint = (tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                        ?: MaterialTheme.colorScheme.onBackground,
-                    modifier = modifier.then(
-                        node.modifierChainForCanvas()
-                            .modifierForCanvas(
-                                project = project,
-                                node = node,
-                                canvasNodeCallbacks = canvasNodeCallbacks,
-                                paletteRenderParams = paletteRenderParams,
-                                zoomableContainerStateHolder = zoomableContainerStateHolder,
-                            ),
-                    ),
+                    tint =
+                        (tint as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: MaterialTheme.colorScheme.onBackground,
+                    modifier =
+                        modifier.then(
+                            node
+                                .modifierChainForCanvas()
+                                .modifierForCanvas(
+                                    project = project,
+                                    node = node,
+                                    canvasNodeCallbacks = canvasNodeCallbacks,
+                                    paletteRenderParams = paletteRenderParams,
+                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                ),
+                        ),
                 )
             }
         }
@@ -208,8 +214,8 @@ abstract class AbstractIconTrait(
                                 project,
                                 context,
                                 ComposeFlowType.Color(),
-                                dryRun = dryRun
-                            )
+                                dryRun = dryRun,
+                            ),
                         )
                         codeBlockBuilder.addStatement(",")
                     }
@@ -227,9 +233,9 @@ abstract class AbstractIconTrait(
                                 MemberHolder.ComposeFlow.Res,
                                 MemberName(
                                     COMPOSEFLOW_PACKAGE,
-                                    blob.fileName.asVariableName().removeSuffix(".xml")
-                                )
-                            )
+                                    blob.fileName.asVariableName().removeSuffix(".xml"),
+                                ),
+                            ),
                         )
                     } else {
                         codeBlockBuilder.add(
@@ -239,9 +245,9 @@ abstract class AbstractIconTrait(
                                 MemberHolder.ComposeFlow.Res,
                                 MemberName(
                                     COMPOSEFLOW_PACKAGE,
-                                    blob.fileName.asVariableName().substringBeforeLast(".")
-                                )
-                            )
+                                    blob.fileName.asVariableName().substringBeforeLast("."),
+                                ),
+                            ),
                         )
                     }
                     tint?.let {
@@ -251,8 +257,8 @@ abstract class AbstractIconTrait(
                                 project,
                                 context,
                                 ComposeFlowType.Color(),
-                                dryRun
-                            )
+                                dryRun,
+                            ),
                         )
                         codeBlockBuilder.addStatement(",")
                     }
@@ -263,8 +269,7 @@ abstract class AbstractIconTrait(
         return codeBlockBuilder.build()
     }
 
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Common, TraitCategory.Basic)
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Common, TraitCategory.Basic)
 
     companion object {
         fun defaultTrait(): IconTrait = IconTrait(imageVectorHolder = Outlined.Add)
@@ -283,6 +288,5 @@ enum class IconAssetType {
     /**
      * User defined custom icons
      */
-    CustomAsset
-    ;
+    CustomAsset,
 }

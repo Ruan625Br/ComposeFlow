@@ -20,48 +20,118 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.template.ScreenTemplatePair
 
 sealed interface UserOperation {
+    data class ComposableDropped(
+        val node: ComposeNode,
+    ) : UserOperation
 
-    data class ComposableDropped(val node: ComposeNode) : UserOperation
-    data class ComposableMoved(val node: ComposeNode) : UserOperation
-    data class ComposableDeleted(val node: ComposeNode) : UserOperation
-    data class ComposablePasted(val node: ComposeNode) : UserOperation
-    data class ComposableLabelUpdated(val node: ComposeNode, val label: String) : UserOperation
-    data class ParameterUpdated(val node: ComposeNode, val params: ComposeTrait) : UserOperation
-    data class ModifierAdded(val node: ComposeNode, val modifier: ModifierWrapper) : UserOperation
-    data class ModifierUpdated(val node: ComposeNode, val modifier: ModifierWrapper) : UserOperation
-    data class ModifierDeleted(val node: ComposeNode, val modifier: ModifierWrapper) : UserOperation
-    data class ModifierSwapped(val node: ComposeNode, val from: Int, val to: Int) : UserOperation
-    data class PendingModifierCommitted(val node: ComposeNode, val pending: ModifierWrapper?) :
-        UserOperation
+    data class ComposableMoved(
+        val node: ComposeNode,
+    ) : UserOperation
 
-    data class DynamicItemsUpdated(val assignableProperty: AssignableProperty?) : UserOperation
-    data class LazyListChildParamsUpdated(val lazyListChildParams: LazyListChildParams) :
-        UserOperation
+    data class ComposableDeleted(
+        val node: ComposeNode,
+    ) : UserOperation
 
-    data class VisibilityParamsUpdated(val visibilityParams: VisibilityParams) : UserOperation
-    data class WrapComposable(val node: ComposeNode, val wrapContainer: ComposeTrait) :
-        UserOperation
+    data class ComposablePasted(
+        val node: ComposeNode,
+    ) : UserOperation
+
+    data class ComposableLabelUpdated(
+        val node: ComposeNode,
+        val label: String,
+    ) : UserOperation
+
+    data class ParameterUpdated(
+        val node: ComposeNode,
+        val params: ComposeTrait,
+    ) : UserOperation
+
+    data class ModifierAdded(
+        val node: ComposeNode,
+        val modifier: ModifierWrapper,
+    ) : UserOperation
+
+    data class ModifierUpdated(
+        val node: ComposeNode,
+        val modifier: ModifierWrapper,
+    ) : UserOperation
+
+    data class ModifierDeleted(
+        val node: ComposeNode,
+        val modifier: ModifierWrapper,
+    ) : UserOperation
+
+    data class ModifierSwapped(
+        val node: ComposeNode,
+        val from: Int,
+        val to: Int,
+    ) : UserOperation
+
+    data class PendingModifierCommitted(
+        val node: ComposeNode,
+        val pending: ModifierWrapper?,
+    ) : UserOperation
+
+    data class DynamicItemsUpdated(
+        val assignableProperty: AssignableProperty?,
+    ) : UserOperation
+
+    data class LazyListChildParamsUpdated(
+        val lazyListChildParams: LazyListChildParams,
+    ) : UserOperation
+
+    data class VisibilityParamsUpdated(
+        val visibilityParams: VisibilityParams,
+    ) : UserOperation
+
+    data class WrapComposable(
+        val node: ComposeNode,
+        val wrapContainer: ComposeTrait,
+    ) : UserOperation
 
     data class ScreenAddedFromTemplate(
         val name: String,
-        val screenTemplatePair: ScreenTemplatePair
-    ) :
-        UserOperation
+        val screenTemplatePair: ScreenTemplatePair,
+    ) : UserOperation
 
-    data class ScreenAdded(val screen: Screen) : UserOperation
+    data class ScreenAdded(
+        val screen: Screen,
+    ) : UserOperation
 
-    data class ScreenDeleted(val screen: Screen) : UserOperation
-    data class ScreenUpdated(val screen: Screen) : UserOperation
-    data class BringToFront(val node: ComposeNode) : UserOperation
-    data class SendToBack(val node: ComposeNode) : UserOperation
+    data class ScreenDeleted(
+        val screen: Screen,
+    ) : UserOperation
+
+    data class ScreenUpdated(
+        val screen: Screen,
+    ) : UserOperation
+
+    data class BringToFront(
+        val node: ComposeNode,
+    ) : UserOperation
+
+    data class SendToBack(
+        val node: ComposeNode,
+    ) : UserOperation
+
     data class ActionsMapUpdated(
         val node: ComposeNode,
         val actionsMap: Map<ActionType, List<ActionNode>>,
     ) : UserOperation
 
-    data class ConvertToComponent(val componentName: String, val node: ComposeNode) : UserOperation
-    data class CreateComponent(val componentName: String) : UserOperation
-    data class RemoveComponent(val component: Component) : UserOperation
+    data class ConvertToComponent(
+        val componentName: String,
+        val node: ComposeNode,
+    ) : UserOperation
+
+    data class CreateComponent(
+        val componentName: String,
+    ) : UserOperation
+
+    data class RemoveComponent(
+        val component: Component,
+    ) : UserOperation
+
     data class AddParameterToCanvasEditable(
         val canvasEditable: CanvasEditable,
         val parameter: ParameterWrapper<*>,
@@ -84,9 +154,17 @@ sealed interface UserOperation {
         val darkScheme: ColorSchemeWrapper,
     ) : UserOperation
 
-    data class UpdateApi(val updatedApi: ApiDefinition) : UserOperation
-    data class ExecuteAiTool(val toolArgs: ToolArgs) : UserOperation
+    data class UpdateApi(
+        val updatedApi: ApiDefinition,
+    ) : UserOperation
+
+    data class ExecuteAiTool(
+        val toolArgs: ToolArgs,
+    ) : UserOperation
+
     data object ResetColorSchemes : UserOperation
+
     data object Undo : UserOperation
+
     data object Redo : UserOperation
 }

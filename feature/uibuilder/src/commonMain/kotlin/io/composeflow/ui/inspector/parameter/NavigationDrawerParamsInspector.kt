@@ -31,14 +31,14 @@ fun NavigationDrawerParamsInspector(
             onClick = {
                 trait.expandedInCanvas.value = !trait.expandedInCanvas.value
             },
-            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp),
         ) {
             Text(
                 if (trait.expandedInCanvas.value) {
                     "Close drawer"
                 } else {
                     "Open drawer"
-                }
+                },
             )
         }
         BooleanPropertyEditor(
@@ -63,7 +63,7 @@ fun NavigationDrawerParamsInspector(
                     ),
                 )
             },
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         )
     }
 }

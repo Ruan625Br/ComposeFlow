@@ -16,12 +16,12 @@ typealias ActionNodeId = String
 
 sealed interface FocusableActionNode {
     val id: ActionNodeId
+
     fun getFocusedAction(): Action?
 }
 
 @Serializable
 sealed interface ActionNode {
-
     val id: ActionNodeId
 
     /**
@@ -36,7 +36,10 @@ sealed interface ActionNode {
      * @returns the action node itself after the matching node is replaced.
      *
      */
-    fun replaceAction(id: ActionNodeId, action: Action): ActionNode
+    fun replaceAction(
+        id: ActionNodeId,
+        action: Action,
+    ): ActionNode
 
     /**
      * Remove the action with the node that matches the given [id].
@@ -48,6 +51,7 @@ sealed interface ActionNode {
      * found.
      */
     fun findFocusableActionOrNull(id: ActionNodeId): FocusableActionNode?
+
     fun hasActionNode(id: ActionNodeId): Boolean
 
     /**
@@ -74,56 +78,54 @@ sealed interface ActionNode {
     data class Simple(
         override val id: ActionNodeId = Uuid.random().toString(),
         val action: Action? = null,
-    ) : ActionNode, FocusableActionNode {
-
+    ) : ActionNode,
+        FocusableActionNode {
         override fun getFocusedAction(): Action? = action
 
-        override fun replaceAction(id: ActionNodeId, action: Action): ActionNode {
-            return if (this.id == id) {
+        override fun replaceAction(
+            id: ActionNodeId,
+            action: Action,
+        ): ActionNode =
+            if (this.id == id) {
                 action.asActionNode(this.id)
             } else {
                 this
             }
-        }
 
         // Delegates the removal of the Simple action in the parent container
         override fun removeAction(id: ActionNodeId) {}
 
         override fun isValid(): Boolean = action != null
 
-        override fun findFocusableActionOrNull(id: ActionNodeId): FocusableActionNode? =
-            if (this.id == id) this else null
+        override fun findFocusableActionOrNull(id: ActionNodeId): FocusableActionNode? = if (this.id == id) this else null
 
         override fun hasActionNode(id: ActionNodeId): Boolean = this.id == id
 
         override fun allActions(): List<Action> = action?.let { listOf(it) } ?: emptyList()
 
-        override fun isDependent(sourceId: String): Boolean {
-            return action is CallApi && action.apiId == sourceId
-        }
+        override fun isDependent(sourceId: String): Boolean = action is CallApi && action.apiId == sourceId
 
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return action?.let {
+        ): CodeBlock =
+            action?.let {
                 val builder = CodeBlock.builder()
-                it.generateActionTriggerCodeBlock(project, context, dryRun = dryRun)
+                it
+                    .generateActionTriggerCodeBlock(project, context, dryRun = dryRun)
                     ?.let { codeBlock ->
                         builder.add(codeBlock)
                     }
                 builder.addStatement("")
                 builder.build()
             } ?: CodeBlock.of("")
-        }
 
         override fun generateInitializationCodeBlocks(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): List<CodeBlock?> =
-            listOf(action?.generateInitializationCodeBlock(project, context, dryRun = dryRun))
+        ): List<CodeBlock?> = listOf(action?.generateInitializationCodeBlock(project, context, dryRun = dryRun))
     }
 
     @Serializable
@@ -136,30 +138,36 @@ sealed interface ActionNode {
         @Serializable(FallbackMutableStateListSerializer::class)
         val falseNodes: MutableList<ActionNode> = mutableStateListOf(),
     ) : ActionNode {
-
         override fun isValid(): Boolean {
-            val trueNodesResult = trueNodes.all { trueNode ->
-                when (trueNode) {
-                    is Conditional -> trueNode.trueNodes.all { it.isValid() } &&
-                            trueNode.falseNodes.all { it.isValid() }
+            val trueNodesResult =
+                trueNodes.all { trueNode ->
+                    when (trueNode) {
+                        is Conditional ->
+                            trueNode.trueNodes.all { it.isValid() } &&
+                                trueNode.falseNodes.all { it.isValid() }
 
-                    is Simple -> trueNode.isValid()
-                    is Forked -> trueNode.isValid()
+                        is Simple -> trueNode.isValid()
+                        is Forked -> trueNode.isValid()
+                    }
                 }
-            }
-            val falseNodesResult = falseNodes.all { falseNode ->
-                when (falseNode) {
-                    is Conditional -> falseNode.trueNodes.all { it.isValid() } &&
-                            falseNode.falseNodes.all { it.isValid() }
+            val falseNodesResult =
+                falseNodes.all { falseNode ->
+                    when (falseNode) {
+                        is Conditional ->
+                            falseNode.trueNodes.all { it.isValid() } &&
+                                falseNode.falseNodes.all { it.isValid() }
 
-                    is Simple -> falseNode.isValid()
-                    is Forked -> falseNode.isValid()
+                        is Simple -> falseNode.isValid()
+                        is Forked -> falseNode.isValid()
+                    }
                 }
-            }
             return ifCondition != BooleanProperty.Empty && trueNodesResult && falseNodesResult
         }
 
-        override fun replaceAction(id: ActionNodeId, action: Action): ActionNode {
+        override fun replaceAction(
+            id: ActionNodeId,
+            action: Action,
+        ): ActionNode {
             val trueNodeIndex = trueNodes.indexOfFirst { it.id == id && it is FocusableActionNode }
             if (trueNodeIndex != -1) {
                 val newActionNode = action.asActionNode(actionNodeId = id)
@@ -188,8 +196,9 @@ sealed interface ActionNode {
         }
 
         override fun findFocusableActionOrNull(id: ActionNodeId): FocusableActionNode? {
-            val result = trueNodes.firstOrNull { it.id == id && it is FocusableActionNode }
-                ?: falseNodes.firstOrNull { it.id == id && it is FocusableActionNode }
+            val result =
+                trueNodes.firstOrNull { it.id == id && it is FocusableActionNode }
+                    ?: falseNodes.firstOrNull { it.id == id && it is FocusableActionNode }
             return if (result != null) {
                 result as FocusableActionNode
             } else {
@@ -197,22 +206,20 @@ sealed interface ActionNode {
             }
         }
 
-        override fun hasActionNode(id: ActionNodeId): Boolean =
-            trueNodes.any { it.id == id } || falseNodes.any { it.id == id }
+        override fun hasActionNode(id: ActionNodeId): Boolean = trueNodes.any { it.id == id } || falseNodes.any { it.id == id }
 
-        override fun allActions(): List<Action> {
-            return trueNodes.flatMap {
+        override fun allActions(): List<Action> =
+            trueNodes.flatMap {
                 it.allActions()
-            } + falseNodes.flatMap {
-                it.allActions()
-            }
-        }
+            } +
+                falseNodes.flatMap {
+                    it.allActions()
+                }
 
-        override fun isDependent(sourceId: String): Boolean {
-            return ifCondition.isDependent(sourceId) ||
-                    trueNodes.any { it.isDependent(sourceId) } ||
-                    falseNodes.any { it.isDependent(sourceId) }
-        }
+        override fun isDependent(sourceId: String): Boolean =
+            ifCondition.isDependent(sourceId) ||
+                trueNodes.any { it.isDependent(sourceId) } ||
+                falseNodes.any { it.isDependent(sourceId) }
 
         override fun generateCodeBlock(
             project: Project,
@@ -251,22 +258,21 @@ sealed interface ActionNode {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): List<CodeBlock?> {
-            return trueNodes.flatMap {
+        ): List<CodeBlock?> =
+            trueNodes.flatMap {
                 it.generateInitializationCodeBlocks(
                     project,
                     context,
-                    dryRun
+                    dryRun,
                 )
             } +
-                    falseNodes.flatMap {
-                        it.generateInitializationCodeBlocks(
-                            project,
-                            context,
-                            dryRun
-                        )
-                    }
-        }
+                falseNodes.flatMap {
+                    it.generateInitializationCodeBlocks(
+                        project,
+                        context,
+                        dryRun,
+                    )
+                }
     }
 
     /**
@@ -281,33 +287,40 @@ sealed interface ActionNode {
         val trueNodes: MutableList<ActionNode> = mutableStateListOf(),
         @Serializable(FallbackMutableStateListSerializer::class)
         val falseNodes: MutableList<ActionNode> = mutableStateListOf(),
-    ) : ActionNode, FocusableActionNode {
-
+    ) : ActionNode,
+        FocusableActionNode {
         override fun getFocusedAction(): Action = forkedAction
 
         override fun isValid(): Boolean {
-            val trueNodesResult = trueNodes.all { trueNode ->
-                when (trueNode) {
-                    is Conditional -> trueNode.trueNodes.all { it.isValid() } &&
-                            trueNode.falseNodes.all { it.isValid() }
+            val trueNodesResult =
+                trueNodes.all { trueNode ->
+                    when (trueNode) {
+                        is Conditional ->
+                            trueNode.trueNodes.all { it.isValid() } &&
+                                trueNode.falseNodes.all { it.isValid() }
 
-                    is Simple -> trueNode.isValid()
-                    is Forked -> true
+                        is Simple -> trueNode.isValid()
+                        is Forked -> true
+                    }
                 }
-            }
-            val falseNodesResult = falseNodes.all { falseNode ->
-                when (falseNode) {
-                    is Conditional -> falseNode.trueNodes.all { it.isValid() } &&
-                            falseNode.falseNodes.all { it.isValid() }
+            val falseNodesResult =
+                falseNodes.all { falseNode ->
+                    when (falseNode) {
+                        is Conditional ->
+                            falseNode.trueNodes.all { it.isValid() } &&
+                                falseNode.falseNodes.all { it.isValid() }
 
-                    is Simple -> falseNode.isValid()
-                    is Forked -> true
+                        is Simple -> falseNode.isValid()
+                        is Forked -> true
+                    }
                 }
-            }
             return trueNodesResult && falseNodesResult
         }
 
-        override fun replaceAction(id: ActionNodeId, action: Action): ActionNode {
+        override fun replaceAction(
+            id: ActionNodeId,
+            action: Action,
+        ): ActionNode {
             if (this.id == id) {
                 val newActionNode = action.asActionNode(actionNodeId = id)
                 if (newActionNode is Forked) {
@@ -353,22 +366,23 @@ sealed interface ActionNode {
             return result
         }
 
-        override fun hasActionNode(id: ActionNodeId): Boolean = id == this.id ||
-                trueNodes.any { it.id == id } || falseNodes.any { it.id == id }
+        override fun hasActionNode(id: ActionNodeId): Boolean =
+            id == this.id ||
+                trueNodes.any { it.id == id } ||
+                falseNodes.any { it.id == id }
 
-        override fun allActions(): List<Action> {
-            return trueNodes.flatMap {
+        override fun allActions(): List<Action> =
+            trueNodes.flatMap {
                 it.allActions()
-            } + falseNodes.flatMap {
-                it.allActions()
-            } + forkedAction
-        }
+            } +
+                falseNodes.flatMap {
+                    it.allActions()
+                } + forkedAction
 
-        override fun isDependent(sourceId: String): Boolean {
-            return trueNodes.any { it.isDependent(sourceId) } ||
-                    falseNodes.any { it.isDependent(sourceId) } ||
-                    forkedAction.isDependent(sourceId)
-        }
+        override fun isDependent(sourceId: String): Boolean =
+            trueNodes.any { it.isDependent(sourceId) } ||
+                falseNodes.any { it.isDependent(sourceId) } ||
+                forkedAction.isDependent(sourceId)
 
         override fun generateInitializationCodeBlocks(
             project: Project,
@@ -387,36 +401,37 @@ sealed interface ActionNode {
                     falseBlockBuilder.add(actionNode.generateCodeBlock(project, context, dryRun))
                 }
             }
-            val initializationBlock = CodeBlock.of(
-                forkedAction.generateInitializationCodeBlock(project, context, dryRun = dryRun)
-                    .toString()
-                    .replace(TRUE_ACTIONS_PLACEHOLDER, trueBlockBuilder.build().toString())
-                    .replace(FALSE_ACTIONS_PLACEHOLDER, falseBlockBuilder.build().toString())
-            )
+            val initializationBlock =
+                CodeBlock.of(
+                    forkedAction
+                        .generateInitializationCodeBlock(project, context, dryRun = dryRun)
+                        .toString()
+                        .replace(TRUE_ACTIONS_PLACEHOLDER, trueBlockBuilder.build().toString())
+                        .replace(FALSE_ACTIONS_PLACEHOLDER, falseBlockBuilder.build().toString()),
+                )
             return trueNodes.flatMap {
                 it.generateInitializationCodeBlocks(
                     project,
                     context,
-                    dryRun = dryRun
+                    dryRun = dryRun,
                 )
             } +
-                    falseNodes.flatMap {
-                        it.generateInitializationCodeBlocks(
-                            project,
-                            context,
-                            dryRun = dryRun
-                        )
-                    } +
-                    initializationBlock
+                falseNodes.flatMap {
+                    it.generateInitializationCodeBlocks(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                    )
+                } +
+                initializationBlock
         }
 
         override fun generateCodeBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return forkedAction.generateActionTriggerCodeBlock(project, context, dryRun)
+        ): CodeBlock =
+            forkedAction.generateActionTriggerCodeBlock(project, context, dryRun)
                 ?: CodeBlock.of("")
-        }
     }
 }

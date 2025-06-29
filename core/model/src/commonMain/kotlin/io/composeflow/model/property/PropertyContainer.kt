@@ -13,8 +13,10 @@ data class PropertyContainer(
     val assignableProperty: AssignableProperty?,
     val acceptableType: ComposeFlowType,
 ) {
-
-    fun generateTrackableIssues(project: Project, composeNode: ComposeNode): List<TrackableIssue> {
+    fun generateTrackableIssues(
+        project: Project,
+        composeNode: ComposeNode,
+    ): List<TrackableIssue> {
         if (assignableProperty is ValueFromCompanionState) return emptyList()
         val transformedType =
             assignableProperty?.transformedValueType(project) ?: return emptyList()
@@ -23,45 +25,52 @@ data class PropertyContainer(
                 if (transformedType is ComposeFlowType.UnknownType) {
                     add(
                         TrackableIssue(
-                            destinationContext = DestinationContext.UiBuilderScreen(
-                                canvasEditableId = canvasEditable.id,
-                                composeNodeId = composeNode.id,
-                            ),
-                            issue = Issue.ResolvedToUnknownType(
-                                property = assignableProperty,
-                            )
-                        )
+                            destinationContext =
+                                DestinationContext.UiBuilderScreen(
+                                    canvasEditableId = canvasEditable.id,
+                                    composeNodeId = composeNode.id,
+                                ),
+                            issue =
+                                Issue.ResolvedToUnknownType(
+                                    property = assignableProperty,
+                                ),
+                        ),
                     )
                 } else if (!acceptableType.isAbleToAssign(transformedType)) {
                     add(
                         TrackableIssue(
-                            destinationContext = DestinationContext.UiBuilderScreen(
-                                canvasEditableId = canvasEditable.id,
-                                composeNodeId = composeNode.id,
-                            ),
-                            issue = Issue.ResolvedToTypeNotAssignable(
-                                property = assignableProperty,
-                                acceptableType = acceptableType,
-                            )
-                        )
+                            destinationContext =
+                                DestinationContext.UiBuilderScreen(
+                                    canvasEditableId = canvasEditable.id,
+                                    composeNodeId = composeNode.id,
+                                ),
+                            issue =
+                                Issue.ResolvedToTypeNotAssignable(
+                                    property = assignableProperty,
+                                    acceptableType = acceptableType,
+                                ),
+                        ),
                     )
                 }
 
                 // Adds issues generated from the AssignableProperties derived from the property
                 // except for the self  property because self property is considered above block
-                assignableProperty.getAssignableProperties(includeSelf = false)
+                assignableProperty
+                    .getAssignableProperties(includeSelf = false)
                     .forEach { property ->
                         if (property.transformedValueType(project) is ComposeFlowType.UnknownType) {
                             add(
                                 TrackableIssue(
-                                    destinationContext = DestinationContext.UiBuilderScreen(
-                                        canvasEditableId = canvasEditable.id,
-                                        composeNodeId = composeNode.id,
-                                    ),
-                                    issue = Issue.ResolvedToUnknownType(
-                                        property = property,
-                                    )
-                                )
+                                    destinationContext =
+                                        DestinationContext.UiBuilderScreen(
+                                            canvasEditableId = canvasEditable.id,
+                                            composeNodeId = composeNode.id,
+                                        ),
+                                    issue =
+                                        Issue.ResolvedToUnknownType(
+                                            property = property,
+                                        ),
+                                ),
                             )
                         }
                     }

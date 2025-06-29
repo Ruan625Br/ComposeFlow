@@ -29,9 +29,10 @@ actual fun computeAdaptiveWindowInfo(): WindowAdaptiveInfo {
     val localDeviceSize = LocalDeviceSizeDp.current
     val adaptiveInfo = currentWindowAdaptiveInfo()
     // Compute the WindowSizeClass not from the entire window, but from the size of the device area.
-    val computedWindowInfo = WindowSizeClass.compute(
-        dpWidth = localDeviceSize.width.toFloat(),
-        dpHeight = localDeviceSize.height.toFloat()
-    )
+    val computedWindowInfo =
+        WindowSizeClass.compute(
+            dpWidth = localDeviceSize.width.toFloat(),
+            dpHeight = localDeviceSize.height.toFloat(),
+        )
     return WindowAdaptiveInfo(computedWindowInfo, adaptiveInfo.windowPosture)
 }

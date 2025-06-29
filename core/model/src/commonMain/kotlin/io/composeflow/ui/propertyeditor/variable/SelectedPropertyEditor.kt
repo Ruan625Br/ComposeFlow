@@ -60,7 +60,7 @@ fun SelectedPropertyEditor(
 ) {
     val editedProperty by remember(initialProperty) {
         mutableStateOf(
-            initialProperty ?: EmptyProperty
+            initialProperty ?: EmptyProperty,
         )
     }
     val resolvedType by remember(initialProperty) {
@@ -133,14 +133,16 @@ fun SelectedPropertyEditor(
 
         LazyColumn {
             item {
-                val transformersCandidates = PropertyTransformer.transformers(
-                    fromType = editedProperty.valueType(project),
-                    toType = if (editedProperty.propertyTransformers.isNotEmpty()) {
-                        editedProperty.propertyTransformers[0].fromType()
-                    } else {
-                        null
-                    },
-                )
+                val transformersCandidates =
+                    PropertyTransformer.transformers(
+                        fromType = editedProperty.valueType(project),
+                        toType =
+                            if (editedProperty.propertyTransformers.isNotEmpty()) {
+                                editedProperty.propertyTransformers[0].fromType()
+                            } else {
+                                null
+                            },
+                    )
                 AddTransformButton(
                     onAddTransform = {
                         editedProperty.propertyTransformers.add(
@@ -153,11 +155,12 @@ fun SelectedPropertyEditor(
                 )
             }
             itemsIndexed(editedProperty.propertyTransformers) { transformerIndex, transformer ->
-                val hasValidInput = if (transformerIndex == 0) {
-                    true
-                } else {
-                    editedProperty.propertyTransformers[transformerIndex - 1].toType() == transformer.fromType()
-                }
+                val hasValidInput =
+                    if (transformerIndex == 0) {
+                        true
+                    } else {
+                        editedProperty.propertyTransformers[transformerIndex - 1].toType() == transformer.fromType()
+                    }
 
                 val hasValidOutput =
                     if (transformerIndex == editedProperty.propertyTransformers.lastIndex) {
@@ -168,30 +171,33 @@ fun SelectedPropertyEditor(
 
                 Column {
                     Box(
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = if (hasValidInput && hasValidOutput) {
-                                    MaterialTheme.colorScheme.outlineVariant
-                                } else {
-                                    MaterialTheme.colorScheme.error
-                                },
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .wrapContentHeight()
-                            .fillMaxWidth()
-                            .padding(start = 8.dp),
+                        modifier =
+                            Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color =
+                                        if (hasValidInput && hasValidOutput) {
+                                            MaterialTheme.colorScheme.outlineVariant
+                                        } else {
+                                            MaterialTheme.colorScheme.error
+                                        },
+                                    shape = RoundedCornerShape(8.dp),
+                                ).wrapContentHeight()
+                                .fillMaxWidth()
+                                .padding(start = 8.dp),
                     ) {
                         Column {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                val currentCandidates = PropertyTransformer.transformers(
-                                    fromType = transformer.fromType(),
-                                    toType = if (transformerIndex == editedProperty.propertyTransformers.lastIndex) {
-                                        null
-                                    } else {
-                                        transformer.toType()
-                                    },
-                                )
+                                val currentCandidates =
+                                    PropertyTransformer.transformers(
+                                        fromType = transformer.fromType(),
+                                        toType =
+                                            if (transformerIndex == editedProperty.propertyTransformers.lastIndex) {
+                                                null
+                                            } else {
+                                                transformer.toType()
+                                            },
+                                    )
                                 DropdownProperty(
                                     project = project,
                                     items = currentCandidates,
@@ -222,9 +228,10 @@ fun SelectedPropertyEditor(
                                         editedProperty.propertyTransformers[transformerIndex] =
                                             currentCandidates[index]
                                     },
-                                    selectedIndex = currentCandidates.indexOfFirst {
-                                        it::class == transformer::class
-                                    },
+                                    selectedIndex =
+                                        currentCandidates.indexOfFirst {
+                                            it::class == transformer::class
+                                        },
                                 )
                                 Spacer(Modifier.weight(1f))
 
@@ -272,14 +279,16 @@ fun SelectedPropertyEditor(
                         )
                     }
 
-                    val transformersCandidates = PropertyTransformer.transformers(
-                        fromType = editedProperty.propertyTransformers[transformerIndex].toType(),
-                        toType = if (editedProperty.propertyTransformers.size > transformerIndex + 1) {
-                            editedProperty.propertyTransformers[transformerIndex + 1].fromType()
-                        } else {
-                            null
-                        },
-                    )
+                    val transformersCandidates =
+                        PropertyTransformer.transformers(
+                            fromType = editedProperty.propertyTransformers[transformerIndex].toType(),
+                            toType =
+                                if (editedProperty.propertyTransformers.size > transformerIndex + 1) {
+                                    editedProperty.propertyTransformers[transformerIndex + 1].fromType()
+                                } else {
+                                    null
+                                },
+                        )
                     AddTransformButton(
                         onAddTransform = {
                             editedProperty.propertyTransformers.add(
@@ -301,11 +310,12 @@ private fun AddTransformButton(
     enabled: Boolean,
     onAddTransform: () -> Unit,
 ) {
-    val contentsDesc = if (enabled) {
-        stringResource(Res.string.transform_state)
-    } else {
-        stringResource(Res.string.no_valid_transformers)
-    }
+    val contentsDesc =
+        if (enabled) {
+            stringResource(Res.string.transform_state)
+        } else {
+            stringResource(Res.string.no_valid_transformers)
+        }
 
     Tooltip(contentsDesc) {
         ComposeFlowIconButton(
@@ -318,11 +328,12 @@ private fun AddTransformButton(
             ComposeFlowIcon(
                 imageVector = Icons.Outlined.AddCircleOutline,
                 contentDescription = contentsDesc,
-                tint = if (enabled) {
-                    MaterialTheme.colorScheme.secondary
-                } else {
-                    MaterialTheme.colorScheme.error
-                },
+                tint =
+                    if (enabled) {
+                        MaterialTheme.colorScheme.secondary
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
             )
         }
     }

@@ -13,7 +13,7 @@ if (!Files.exists(targetAppTemplateGradleDir)) {
     } catch (e: Exception) {
         throw GradleException(
             "Failed to create directory $targetAppTemplateGradleDir: ${e.message}",
-            e
+            e,
         )
     }
 }
@@ -25,13 +25,13 @@ if (Files.exists(sourceVersionCatalogPath)) {
         Files.copy(
             sourceVersionCatalogPath,
             targetVersionCatalogPath,
-            StandardCopyOption.REPLACE_EXISTING
+            StandardCopyOption.REPLACE_EXISTING,
         )
         println("INFO: Copied $sourceVersionCatalogPath to $targetVersionCatalogPath during initialization.")
     } catch (e: Exception) {
         throw GradleException(
             "Failed to copy $sourceVersionCatalogPath to $targetVersionCatalogPath: ${e.message}",
-            e
+            e,
         )
     }
 } else {
@@ -77,7 +77,6 @@ include(":feature:theme-editor")
 include(":feature:settings")
 include(":feature:top")
 include(":ksp-llm-tools")
-
 
 includeBuild("build-logic")
 includeBuild("feature/app-builder/app-template")

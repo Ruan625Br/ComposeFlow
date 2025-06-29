@@ -15,8 +15,6 @@ import io.composeflow.removeLineBreak
 import io.composeflow.repository.ProjectRepository
 import io.composeflow.serializer.yamlSerializer
 import io.composeflow.ui.EventResult
-import io.composeflow.ui.appstate.AppStateEditorOperator
-import io.composeflow.ui.uibuilder.UiBuilderOperator
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,100 +35,105 @@ class AiChatDialogViewModel(
     private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
     private val onAiAssistantUiStateUpdated: (AiAssistantUiState) -> Unit,
 ) : ViewModel() {
-
     private val _messages = MutableStateFlow<List<MessageModel>>(emptyList())
     val messages = _messages.asStateFlow()
 
     private var generationJob: Job? = null
 
-    fun onSendGeneralRequest(
-        userInput: String,
-    ) {
-        generationJob = viewModelScope.launch {
+    fun onSendGeneralRequest(userInput: String) {
+        generationJob =
+            viewModelScope.launch {
+                aiAssistantUiState.isGenerating.value = true
+                onAiAssistantUiStateUpdated(aiAssistantUiState)
 
-            aiAssistantUiState.isGenerating.value = true
-            onAiAssistantUiStateUpdated(aiAssistantUiState)
-
-            _messages.value += MessageModel(
-                messageOwner = MessageOwner.User,
-                message = userInput,
-                createdAt = Clock.System.now()
-            )
-            try {
-                var result: ToolResponse? = null
-                val prompt = userInput.removeLineBreak()
-                val previousToolArgs = mutableListOf<ToolArgs>()
-                while (isActive && (result as? ToolResponse.Success)?.response?.isConsideredComplete() != true) {
-                    result =
-                        llmRepository.handleToolRequest(
-                            promptString = prompt,
-                            projectContext = yamlSerializer.encodeToString(
-                                Project.serializer(),
-                                project,
-                            ),
-                            previousToolArgs = previousToolArgs,
-                        )
-
-                    when (result) {
-                        is ToolResponse.Error -> {
-                            _messages.value += MessageModel(
-                                messageOwner = MessageOwner.Ai,
-                                message = result.message,
-                                isFailed = true,
-                                createdAt = Clock.System.now()
+                _messages.value +=
+                    MessageModel(
+                        messageOwner = MessageOwner.User,
+                        message = userInput,
+                        createdAt = Clock.System.now(),
+                    )
+                try {
+                    var result: ToolResponse? = null
+                    val prompt = userInput.removeLineBreak()
+                    val previousToolArgs = mutableListOf<ToolArgs>()
+                    while (isActive && (result as? ToolResponse.Success)?.response?.isConsideredComplete() != true) {
+                        result =
+                            llmRepository.handleToolRequest(
+                                promptString = prompt,
+                                projectContext =
+                                    yamlSerializer.encodeToString(
+                                        Project.serializer(),
+                                        project,
+                                    ),
+                                previousToolArgs = previousToolArgs,
                             )
-                            previousToolArgs.add(ToolArgs.FakeArgs().apply {
-                                status = ToolExecutionStatus.Error
-                            })
-                        }
 
-                        is ToolResponse.Success -> {
-                            Logger.i("Success tool result received:")
-                            Logger.i(jsonSerializer.encodeToString(result.response))
+                        when (result) {
+                            is ToolResponse.Error -> {
+                                _messages.value +=
+                                    MessageModel(
+                                        messageOwner = MessageOwner.Ai,
+                                        message = result.message,
+                                        isFailed = true,
+                                        createdAt = Clock.System.now(),
+                                    )
+                                previousToolArgs.add(
+                                    ToolArgs.FakeArgs().apply {
+                                        status = ToolExecutionStatus.Error
+                                    },
+                                )
+                            }
 
-                            _messages.value += MessageModel(
-                                messageOwner = MessageOwner.Ai,
-                                message = result.message,
-                                createdAt = Clock.System.now()
-                            )
-                            result.response.tool_calls?.forEach {
-                                val toolEventResult = dispatchToolResponse(it.tool_args)
-                                it.tool_args.status =
-                                    if (toolEventResult.isSuccessful()) ToolExecutionStatus.Success else ToolExecutionStatus.Error
-                                previousToolArgs.add(it.tool_args)
-                                saveProject(project)
+                            is ToolResponse.Success -> {
+                                Logger.i("Success tool result received:")
+                                Logger.i(jsonSerializer.encodeToString(result.response))
+
+                                _messages.value +=
+                                    MessageModel(
+                                        messageOwner = MessageOwner.Ai,
+                                        message = result.message,
+                                        createdAt = Clock.System.now(),
+                                    )
+                                result.response.tool_calls?.forEach {
+                                    val toolEventResult = dispatchToolResponse(it.tool_args)
+                                    it.tool_args.status =
+                                        if (toolEventResult.isSuccessful()) ToolExecutionStatus.Success else ToolExecutionStatus.Error
+                                    previousToolArgs.add(it.tool_args)
+                                    saveProject(project)
+                                }
                             }
                         }
                     }
+
+                    onAiAssistantUiStateUpdated(aiAssistantUiState)
+                } catch (timeoutException: TimeoutCancellationException) {
+                    val message =
+                        getString(Res.string.ai_failed_to_generate_response_timeout)
+                    onAiAssistantUiStateUpdated(AiAssistantUiState.Error(message = message))
+
+                    _messages.value +=
+                        MessageModel(
+                            messageOwner = MessageOwner.Ai,
+                            message = message,
+                            isFailed = true,
+                            createdAt = Clock.System.now(),
+                        )
+                } catch (e: Exception) {
+                    val message =
+                        getString(Res.string.ai_failed_to_generate_response)
+
+                    onAiAssistantUiStateUpdated(AiAssistantUiState.Error(message = message))
+                    _messages.value +=
+                        MessageModel(
+                            messageOwner = MessageOwner.Ai,
+                            message = message,
+                            isFailed = true,
+                            createdAt = Clock.System.now(),
+                        )
+                } finally {
+                    aiAssistantUiState.isGenerating.value = false
                 }
-
-                onAiAssistantUiStateUpdated(aiAssistantUiState)
-            } catch (timeoutException: TimeoutCancellationException) {
-                val message =
-                    getString(Res.string.ai_failed_to_generate_response_timeout)
-                onAiAssistantUiStateUpdated(AiAssistantUiState.Error(message = message))
-
-                _messages.value += MessageModel(
-                    messageOwner = MessageOwner.Ai,
-                    message = message,
-                    isFailed = true,
-                    createdAt = Clock.System.now()
-                )
-            } catch (e: Exception) {
-                val message =
-                    getString(Res.string.ai_failed_to_generate_response)
-
-                onAiAssistantUiStateUpdated(AiAssistantUiState.Error(message = message))
-                _messages.value += MessageModel(
-                    messageOwner = MessageOwner.Ai,
-                    message = message,
-                    isFailed = true,
-                    createdAt = Clock.System.now()
-                )
-            } finally {
-                aiAssistantUiState.isGenerating.value = false
             }
-        }
     }
 
     private fun dispatchToolResponse(toolArgs: ToolArgs): EventResult {
@@ -138,8 +141,8 @@ class AiChatDialogViewModel(
             recordOperation(
                 project,
                 UserOperation.ExecuteAiTool(
-                    toolArgs = toolArgs
-                )
+                    toolArgs = toolArgs,
+                ),
             )
         }
         return toolDispatcher.dispatchToolResponse(project, toolArgs)
@@ -151,12 +154,13 @@ class AiChatDialogViewModel(
         onAiAssistantUiStateUpdated(aiAssistantUiState)
 
         viewModelScope.launch {
-            _messages.value += MessageModel(
-                messageOwner = MessageOwner.Ai,
-                message = getString(Res.string.ai_response_stopped_by_user),
-                isFailed = true,
-                createdAt = Clock.System.now()
-            )
+            _messages.value +=
+                MessageModel(
+                    messageOwner = MessageOwner.Ai,
+                    message = getString(Res.string.ai_response_stopped_by_user),
+                    isFailed = true,
+                    createdAt = Clock.System.now(),
+                )
         }
     }
 

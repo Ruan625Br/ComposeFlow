@@ -60,7 +60,7 @@ fun ComponentParameterInspector(
         project = project,
         canvasEditable = component,
         composeNodeCallbacks = composeNodeCallbacks,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -92,22 +92,25 @@ fun CanvasEditableParameterInspector(
     var addParameterDialogOpen by remember { mutableStateOf(false) }
     var parameterToBeRemoved by remember { mutableStateOf<ParameterWrapper<*>?>(null) }
     Column(
-        modifier = modifier
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
-        val editableId = when (canvasEditable) {
-            is Screen -> canvasEditable.id
-            is Component -> canvasEditable.id
-            else -> null
-        }
+        val editableId =
+            when (canvasEditable) {
+                is Screen -> canvasEditable.id
+                is Component -> canvasEditable.id
+                else -> null
+            }
         var expanded by remember(editableId) { mutableStateOf(true) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable { expanded = !expanded }
-                .hoverIconClickable(),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { expanded = !expanded }
+                    .hoverIconClickable(),
         ) {
             Text(
                 text = "${canvasEditable.name} ${stringResource(Res.string.parameters).lowercase()}",
@@ -116,11 +119,12 @@ fun CanvasEditableParameterInspector(
                 modifier = Modifier.padding(vertical = 4.dp),
             )
 
-            val parameterDesc = when (canvasEditable) {
-                is Screen -> stringResource(Res.string.parameter_description_screen)
-                is Component -> stringResource(Res.string.parameter_description_component)
-                else -> ""
-            }
+            val parameterDesc =
+                when (canvasEditable) {
+                    is Screen -> stringResource(Res.string.parameter_description_screen)
+                    is Component -> stringResource(Res.string.parameter_description_component)
+                    else -> ""
+                }
             Tooltip(parameterDesc) {
                 ComposeFlowIcon(
                     imageVector = Icons.Outlined.Info,
@@ -154,10 +158,11 @@ fun CanvasEditableParameterInspector(
             canvasEditable.parameters.forEach { parameter ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp),
+                    modifier =
+                        Modifier
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp),
                 ) {
                     FieldRow(
                         project = project,

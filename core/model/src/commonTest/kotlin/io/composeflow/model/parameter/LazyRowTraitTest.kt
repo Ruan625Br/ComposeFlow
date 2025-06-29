@@ -14,7 +14,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class LazyRowTraitTest {
-
     @Test
     fun toComposeCode_emptyParams() {
         val lazyRowParams = LazyRowTrait()
@@ -23,7 +22,8 @@ class LazyRowTraitTest {
             lazyRowParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -35,19 +35,21 @@ class LazyRowTraitTest {
 
     @Test
     fun toComposeCode_nonEmptyParams() {
-        val lazyRowParams = LazyRowTrait(
-            contentPadding = 8.dp,
-            reverseLayout = true,
-            horizontalArrangement = ArrangementHorizontalWrapper.End,
-            verticalAlignment = AlignmentVerticalWrapper.CenterVertically,
-            userScrollEnabled = false,
-        )
+        val lazyRowParams =
+            LazyRowTrait(
+                contentPadding = 8.dp,
+                reverseLayout = true,
+                horizontalArrangement = ArrangementHorizontalWrapper.End,
+                verticalAlignment = AlignmentVerticalWrapper.CenterVertically,
+                userScrollEnabled = false,
+            )
 
         val code =
             lazyRowParams.generateCode(
                 Project(),
                 node = ComposeNode(),
-                context = GenerationContext(), dryRun = false
+                context = GenerationContext(),
+                dryRun = false,
             )
         assertEquals(
             """
@@ -65,11 +67,12 @@ class LazyRowTraitTest {
 
     @Test
     fun serialize_deserialize() {
-        val lazyRowParams = LazyRowTrait(
-            contentPadding = 16.dp,
-            horizontalArrangement = ArrangementHorizontalWrapper.Center,
-            verticalAlignment = AlignmentVerticalWrapper.Bottom,
-        )
+        val lazyRowParams =
+            LazyRowTrait(
+                contentPadding = 16.dp,
+                horizontalArrangement = ArrangementHorizontalWrapper.Center,
+                verticalAlignment = AlignmentVerticalWrapper.Bottom,
+            )
 
         val encoded = yamlSerializer.encodeToString(lazyRowParams)
         val decoded = yamlSerializer.decodeFromString<LazyRowTrait>(encoded)

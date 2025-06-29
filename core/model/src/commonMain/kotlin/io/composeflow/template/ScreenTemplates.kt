@@ -9,7 +9,6 @@ import kotlinx.serialization.decodeFromString
 import org.jetbrains.annotations.VisibleForTesting
 
 object ScreenTemplates {
-
     private val scope = CoroutineScope(Dispatchers.IO)
 
     init {
@@ -25,7 +24,7 @@ object ScreenTemplates {
         val resourcePath = "/blank_screen_template.yaml"
         ScreenTemplatePair(
             resourcePath = resourcePath,
-            screen = loadScreenTemplate(resourcePath)
+            screen = loadScreenTemplate(resourcePath),
         )
     }
 
@@ -34,7 +33,7 @@ object ScreenTemplates {
         val resourcePath = "/messages_screen_template.yaml"
         ScreenTemplatePair(
             resourcePath = resourcePath,
-            screen = loadScreenTemplate(resourcePath)
+            screen = loadScreenTemplate(resourcePath),
         )
     }
 
@@ -43,7 +42,7 @@ object ScreenTemplates {
         val resourcePath = "/login_screen_template.yaml"
         ScreenTemplatePair(
             resourcePath = resourcePath,
-            screen = loadScreenTemplate(resourcePath)
+            screen = loadScreenTemplate(resourcePath),
         )
     }
 
@@ -52,23 +51,24 @@ object ScreenTemplates {
         val resourcePath = "/settings_screen_template.yaml"
         ScreenTemplatePair(
             resourcePath = resourcePath,
-            screen = loadScreenTemplate(resourcePath)
+            screen = loadScreenTemplate(resourcePath),
         )
     }
 
     /**
      * Initial set of templates. Use [createNewScreen] when creating a new screen.
      */
-    fun initialTemplates(): List<ScreenTemplatePair> {
-        return listOf(
-            blankScreen, messagesScreen, loginScreen, settingsScreen
+    fun initialTemplates(): List<ScreenTemplatePair> =
+        listOf(
+            blankScreen,
+            messagesScreen,
+            loginScreen,
+            settingsScreen,
         )
-    }
 
     // When creating new Screen from a template, replace Uuids with random ones while keeping the
     // relationships to keep the referenced statuses.
-    fun createNewScreen(screenTemplatePair: ScreenTemplatePair): Screen =
-        loadScreenTemplate(screenTemplatePair.resourcePath)
+    fun createNewScreen(screenTemplatePair: ScreenTemplatePair): Screen = loadScreenTemplate(screenTemplatePair.resourcePath)
 
     private fun loadScreenTemplate(fileName: String): Screen {
         val yaml = object {}.javaClass.getResourceAsStream(fileName)

@@ -38,13 +38,11 @@ import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun AccountSettingsScreen(
-    modifier: Modifier = Modifier,
-) {
-    val viewModel = viewModel(modelClass = AccountSettingsViewModel::class) {
-        AccountSettingsViewModel(
-        )
-    }
+fun AccountSettingsScreen(modifier: Modifier = Modifier) {
+    val viewModel =
+        viewModel(modelClass = AccountSettingsViewModel::class) {
+            AccountSettingsViewModel()
+        }
     val javaHomePath = viewModel.javaHomePath.collectAsState().value
     val darkThemeSettingsUiState = viewModel.darkThemeSettingsUiState.collectAsState().value
 
@@ -52,7 +50,7 @@ fun AccountSettingsScreen(
         Text(
             text = stringResource(Res.string.settings),
             style = MaterialTheme.typography.displaySmall,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 24.dp),
         )
 
         DarkThemeSettingSetter(
@@ -64,18 +62,19 @@ fun AccountSettingsScreen(
         var advancedSettingsOpen by remember { mutableStateOf(false) }
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .padding(end = 8.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .clickable {
-                    advancedSettingsOpen = !advancedSettingsOpen
-                }
+            modifier =
+                Modifier
+                    .padding(end = 8.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        advancedSettingsOpen = !advancedSettingsOpen
+                    },
         ) {
             TreeExpander(
                 expanded = advancedSettingsOpen,
                 onClick = {
                     advancedSettingsOpen = !advancedSettingsOpen
-                }
+                },
             )
             Text(
                 stringResource(Res.string.advanced_settings),
@@ -103,14 +102,15 @@ private fun AdvancedSettingsContent(
         Spacer(Modifier.size(16.dp))
         Row(
             verticalAlignment = Alignment.Bottom,
-            modifier = Modifier.padding(
-                bottom = 8.dp
-            )
+            modifier =
+                Modifier.padding(
+                    bottom = 8.dp,
+                ),
         ) {
             Text(
                 "Java Home",
                 style = MaterialTheme.typography.titleSmall,
-                modifier = Modifier.padding(end = 8.dp)
+                modifier = Modifier.padding(end = 8.dp),
             )
             val javaHomeDesc = stringResource(Res.string.java_home_description)
             Tooltip(javaHomeDesc) {
@@ -126,7 +126,7 @@ private fun AdvancedSettingsContent(
                         "(Set from Environment Variable)",
                         style = MaterialTheme.typography.titleSmall,
                         color = MaterialTheme.colorScheme.tertiary,
-                        modifier = Modifier.padding(start = 16.dp)
+                        modifier = Modifier.padding(start = 16.dp),
                     )
                 }
 

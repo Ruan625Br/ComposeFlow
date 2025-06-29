@@ -11,7 +11,9 @@ import androidx.compose.runtime.snapshots.StateRecord
  * the equality by using the identify of the instance.
  * (SnapshotStateMap compares the equality by using `instance === other`)
  */
-class SnapshotStateMapEqualsOverride<K, V> : StateObject, MutableMap<K, V> {
+class SnapshotStateMapEqualsOverride<K, V> :
+    StateObject,
+    MutableMap<K, V> {
     private val delegate: SnapshotStateMap<K, V> = SnapshotStateMap()
 
     override val firstStateRecord: StateRecord
@@ -39,7 +41,10 @@ class SnapshotStateMapEqualsOverride<K, V> : StateObject, MutableMap<K, V> {
 
     override fun putAll(from: Map<out K, V>) = delegate.putAll(from)
 
-    override fun put(key: K, value: V): V? = delegate.put(key, value)
+    override fun put(
+        key: K,
+        value: V,
+    ): V? = delegate.put(key, value)
 
     override fun get(key: K): V? = delegate[key]
 
@@ -53,9 +58,7 @@ class SnapshotStateMapEqualsOverride<K, V> : StateObject, MutableMap<K, V> {
         return delegate.toMap() == other.delegate.toMap()
     }
 
-    override fun hashCode(): Int {
-        return delegate.toMap().hashCode()
-    }
+    override fun hashCode(): Int = delegate.toMap().hashCode()
 }
 
 @StateFactoryMarker
@@ -66,5 +69,4 @@ fun <K, V> mutableStateMapEqualsOverrideOf(vararg pairs: Pair<K, V>) =
  * Create an instance of [MutableMap]<K, V> from a map that is observable and can be
  * snapshot.
  */
-fun <K, V> Map<K, V>.toMutableStateMapEqualsOverride() =
-    SnapshotStateMapEqualsOverride<K, V>().also { it.putAll(this) }
+fun <K, V> Map<K, V>.toMutableStateMapEqualsOverride() = SnapshotStateMapEqualsOverride<K, V>().also { it.putAll(this) }

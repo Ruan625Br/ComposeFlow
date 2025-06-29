@@ -9,9 +9,7 @@ data class OpenRouterResponseWrapper(
     val message: String? = null,
     val tool_calls: List<OpenRouterToolResult>? = null,
 ) {
-    fun isConsideredComplete(): Boolean {
-        return tool_calls.isNullOrEmpty()
-    }
+    fun isConsideredComplete(): Boolean = tool_calls.isNullOrEmpty()
 }
 
 @Serializable
@@ -22,7 +20,7 @@ data class OpenRouterResponse(
     val `object`: String,
     val created: Long,
     val choices: List<Choice>,
-    val usage: CompletionUsage
+    val usage: CompletionUsage,
 )
 
 @Serializable
@@ -31,7 +29,7 @@ data class Choice(
     val finish_reason: String,
     val native_finish_reason: String,
     val index: Int,
-    val message: Message
+    val message: Message,
 )
 
 @Serializable
@@ -40,7 +38,7 @@ data class Message(
     val content: String? = null,
     val refusal: String? = null,
     val reasoning: String? = null,
-    val tool_calls: List<ToolCall>? = null
+    val tool_calls: List<ToolCall>? = null,
 )
 
 @Serializable
@@ -48,18 +46,18 @@ data class ToolCall(
     val id: String,
     val index: Int,
     val type: String,
-    val function: FunctionCall
+    val function: FunctionCall,
 )
 
 @Serializable
 data class FunctionCall(
     val name: String,
-    val arguments: String
+    val arguments: String,
 )
 
 @Serializable
 data class CompletionUsage(
     val prompt_tokens: Int,
     val completion_tokens: Int,
-    val total_tokens: Int
+    val total_tokens: Int,
 )

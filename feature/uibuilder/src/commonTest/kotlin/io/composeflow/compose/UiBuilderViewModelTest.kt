@@ -18,18 +18,18 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class UiBuilderViewModelTest {
-
     private lateinit var viewModel: UiBuilderViewModel
     private val project = Project()
 
     @Before
     fun setUp() {
-        viewModel = UiBuilderViewModel(
-            firebaseIdToken = fakeFirebaseIdToken,
-            project = project,
-            projectRepository = fakeProjectRepository,
-            onUpdateProject = {},
-        )
+        viewModel =
+            UiBuilderViewModel(
+                firebaseIdToken = fakeFirebaseIdToken,
+                project = project,
+                projectRepository = fakeProjectRepository,
+                onUpdateProject = {},
+            )
         project.screenHolder.screens.forEach {
             it.rootNode.value.boundsInWindow.value = Rect(0f, 0f, 400f, 400f)
             it.contentRootNode().boundsInWindow.value = Rect(0f, 0f, 400f, 400f)
@@ -78,9 +78,10 @@ class UiBuilderViewModelTest {
 
     @Test
     fun testConvertToComponent() {
-        val row = RowTrait().defaultComposeNode(project).apply {
-            boundsInWindow.value = Rect(0f, 0f, 400f, 400f)
-        }
+        val row =
+            RowTrait().defaultComposeNode(project).apply {
+                boundsInWindow.value = Rect(0f, 0f, 400f, 400f)
+            }
         val textField = TextFieldTrait().defaultComposeNode(project)
         val button = ButtonTrait().defaultComposeNode(project)
         viewModel.onComposableDroppedToTarget(
@@ -120,9 +121,10 @@ class UiBuilderViewModelTest {
 
     @Test
     fun testWrapWithComposable() {
-        val row = RowTrait().defaultComposeNode(project).apply {
-            boundsInWindow.value = Rect(0f, 0f, 400f, 400f)
-        }
+        val row =
+            RowTrait().defaultComposeNode(project).apply {
+                boundsInWindow.value = Rect(0f, 0f, 400f, 400f)
+            }
         val textField = TextFieldTrait().defaultComposeNode(project)
         viewModel.onComposableDroppedToTarget(
             dropPosition = Offset(50f, 50f),

@@ -12,14 +12,19 @@ import kotlin.reflect.KClass
  * Serializer for a Enum class where, it attempts to deserialize from a string value.
  * If a matching entry isn't found, fall back to the first entry.
  */
-open class FallbackEnumSerializer<T : Enum<T>>(enumClass: KClass<T>) : KSerializer<T> {
+open class FallbackEnumSerializer<T : Enum<T>>(
+    enumClass: KClass<T>,
+) : KSerializer<T> {
     private val values = enumClass.java.enumConstants
     private val fallback = values.first() // Default to first entry
 
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor(enumClass.simpleName ?: "Enum", STRING)
 
-    override fun serialize(encoder: Encoder, value: T) {
+    override fun serialize(
+        encoder: Encoder,
+        value: T,
+    ) {
         encoder.encodeString(value.name) // Store as string
     }
 

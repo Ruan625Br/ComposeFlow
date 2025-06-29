@@ -14,18 +14,20 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class TabTraitTest {
-
     @Test
     fun toComposeCode_initialState() {
-        val tabParams = TabTrait(
-            text = StringProperty.StringIntrinsicValue("test"),
-        )
+        val tabParams =
+            TabTrait(
+                text = StringProperty.StringIntrinsicValue("test"),
+            )
 
-        val code = tabParams.generateCode(
-            Project(),
-            node = ComposeNode(),
-            context = GenerationContext(), dryRun = false
-        )
+        val code =
+            tabParams.generateCode(
+                Project(),
+                node = ComposeNode(),
+                context = GenerationContext(),
+                dryRun = false,
+            )
         assertEquals(
             """
             androidx.compose.material3.Tab(
@@ -40,16 +42,19 @@ class TabTraitTest {
 
     @Test
     fun toComposeCode_iconIsSet() {
-        val tabParams = TabTrait(
-            text = StringProperty.StringIntrinsicValue("test"),
-            icon = Outlined.Abc,
-        )
+        val tabParams =
+            TabTrait(
+                text = StringProperty.StringIntrinsicValue("test"),
+                icon = Outlined.Abc,
+            )
 
-        val code = tabParams.generateCode(
-            Project(),
-            node = ComposeNode(),
-            context = GenerationContext(), dryRun = false
-        )
+        val code =
+            tabParams.generateCode(
+                Project(),
+                node = ComposeNode(),
+                context = GenerationContext(),
+                dryRun = false,
+            )
         assertEquals(
             """
             androidx.compose.material3.Tab(
@@ -68,10 +73,11 @@ class TabTraitTest {
 
     @Test
     fun serialize_deserialize() {
-        val tabParams = TabTrait(
-            text = StringProperty.StringIntrinsicValue("tab text"),
-            enabled = false,
-        )
+        val tabParams =
+            TabTrait(
+                text = StringProperty.StringIntrinsicValue("tab text"),
+                enabled = false,
+            )
 
         val encoded = yamlSerializer.encodeToString(tabParams)
         val decoded = yamlSerializer.decodeFromString<TabTrait>(encoded)

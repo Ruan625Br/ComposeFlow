@@ -26,7 +26,6 @@ class AiAssistantViewModel(
     projectCreationQuery: String = "",
     private val repository: LlmRepository = LlmRepository(),
 ) : ViewModel() {
-
     private val _uiState = MutableStateFlow<AiAssistantUiState>(AiAssistantUiState.Idle)
     val uiState: StateFlow<AiAssistantUiState> = _uiState.asStateFlow()
 
@@ -41,36 +40,44 @@ class AiAssistantViewModel(
 
     fun onSendProjectCreationQuery(projectCreationQuery: String) {
         viewModelScope.launch {
-            _messages.value += MessageModel(
-                messageOwner = MessageOwner.User,
-                message = projectCreationQuery,
-                createdAt = Clock.System.now()
-            )
+            _messages.value +=
+                MessageModel(
+                    messageOwner = MessageOwner.User,
+                    message = projectCreationQuery,
+                    createdAt = Clock.System.now(),
+                )
             _uiState.value.isGenerating.value = true
 
             val result = repository.createProject(promptString = projectCreationQuery)
 
-            _messages.value += MessageModel(
-                messageOwner = MessageOwner.Ai,
-                message = result.message,
-                createdAt = Clock.System.now()
-            )
+            _messages.value +=
+                MessageModel(
+                    messageOwner = MessageOwner.Ai,
+                    message = result.message,
+                    createdAt = Clock.System.now(),
+                )
             _uiState.value.isGenerating.value = false
 
-            _uiState.value = AiAssistantUiState.Success.ScreenPromptsCreated(
-                projectName = result.projectName,
-                packageName = result.packageName,
-                screenPrompts = result.prompts.map {
-                    GeneratedScreenPrompt.BeforeGeneration(
-                        id = it.screenName.toKotlinFileName(),
-                        screenName = it.screenName,
-                        prompt = it.prompt,
-                    )
-                })
+            _uiState.value =
+                AiAssistantUiState.Success.ScreenPromptsCreated(
+                    projectName = result.projectName,
+                    packageName = result.packageName,
+                    screenPrompts =
+                        result.prompts.map {
+                            GeneratedScreenPrompt.BeforeGeneration(
+                                id = it.screenName.toKotlinFileName(),
+                                screenName = it.screenName,
+                                prompt = it.prompt,
+                            )
+                        },
+                )
         }
     }
 
-    fun onScreenTitleUpdated(id: String, newTitle: String) {
+    fun onScreenTitleUpdated(
+        id: String,
+        newTitle: String,
+    ) {
         when (val state = _uiState.value) {
             is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                 val updatedPrompts =
@@ -112,7 +119,10 @@ class AiAssistantViewModel(
         }
     }
 
-    fun onScreenPromptUpdated(id: String, newPrompt: String) {
+    fun onScreenPromptUpdated(
+        id: String,
+        newPrompt: String,
+    ) {
         when (val state = _uiState.value) {
             is AiAssistantUiState.Success.ScreenPromptsCreated -> {
                 val updatedPrompts =
@@ -151,41 +161,59 @@ class AiAssistantViewModel(
 
                     val semaphore = Semaphore(permits = maxConcurrentLlmCalls)
 
-                    val jobs = originalPrompts.mapIndexed { index, prompt ->
-                        async {
-                            if (prompt is GeneratedScreenPrompt.BeforeGeneration) {
-                                semaphore.withPermit {
-                                    // Mark as Generating
-                                    updatedPrompts[index] =
-                                        GeneratedScreenPrompt.Generating(
-                                            id = prompt.id,
-                                            screenName = prompt.screenName,
-                                            prompt = prompt.prompt
-                                        )
-                                    _uiState.value =
-                                        state.copy(screenPrompts = updatedPrompts.toList())
-                                    _uiState.value.isGenerating.value = true
-
-                                    var result: CreateScreenResponse =
-                                        CreateScreenResponse.BeforeRequest(prompt.id)
-                                    var promptString = prompt.prompt
-                                    var retryCount = 0
-                                    do {
-                                        try {
-                                            result = repository.createScreen(
-                                                promptString = promptString,
-                                                retryCount = retryCount,
-                                                requestId = prompt.id,
-                                                projectContext = ProjectContext(
-                                                    screenContexts = state.screenPrompts.map {
-                                                        ScreenContext(
-                                                            id = it.id,
-                                                            screenName = it.screenName,
-                                                        )
-                                                    }
-                                                ),
+                    val jobs =
+                        originalPrompts.mapIndexed { index, prompt ->
+                            async {
+                                if (prompt is GeneratedScreenPrompt.BeforeGeneration) {
+                                    semaphore.withPermit {
+                                        // Mark as Generating
+                                        updatedPrompts[index] =
+                                            GeneratedScreenPrompt.Generating(
+                                                id = prompt.id,
+                                                screenName = prompt.screenName,
+                                                prompt = prompt.prompt,
                                             )
-                                            if (result is CreateScreenResponse.Error) {
+                                        _uiState.value =
+                                            state.copy(screenPrompts = updatedPrompts.toList())
+                                        _uiState.value.isGenerating.value = true
+
+                                        var result: CreateScreenResponse =
+                                            CreateScreenResponse.BeforeRequest(prompt.id)
+                                        var promptString = prompt.prompt
+                                        var retryCount = 0
+                                        do {
+                                            try {
+                                                result =
+                                                    repository.createScreen(
+                                                        promptString = promptString,
+                                                        retryCount = retryCount,
+                                                        requestId = prompt.id,
+                                                        projectContext =
+                                                            ProjectContext(
+                                                                screenContexts =
+                                                                    state.screenPrompts.map {
+                                                                        ScreenContext(
+                                                                            id = it.id,
+                                                                            screenName = it.screenName,
+                                                                        )
+                                                                    },
+                                                            ),
+                                                    )
+                                                if (result is CreateScreenResponse.Error) {
+                                                    val indexOfScreen =
+                                                        updatedPrompts.indexOfFirst { it.id == result.requestId }
+                                                    updatedPrompts[indexOfScreen] =
+                                                        GeneratedScreenPrompt.Error(
+                                                            id = prompt.id,
+                                                            screenName = prompt.screenName,
+                                                            prompt = prompt.prompt,
+                                                            errorMessage = result.errorMessage,
+                                                        )
+                                                    retryCount++
+                                                    promptString =
+                                                        "${result.errorMessage}. Fix the yaml parse error. Previously generated Yaml: ${result.errorContent}"
+                                                }
+                                            } catch (e: Exception) {
                                                 val indexOfScreen =
                                                     updatedPrompts.indexOfFirst { it.id == result.requestId }
                                                 updatedPrompts[indexOfScreen] =
@@ -193,51 +221,38 @@ class AiAssistantViewModel(
                                                         id = prompt.id,
                                                         screenName = prompt.screenName,
                                                         prompt = prompt.prompt,
-                                                        errorMessage = result.errorMessage
+                                                        withRetry = false,
+                                                        errorMessage = e.message ?: "Unknown error",
                                                     )
-                                                retryCount++
-                                                promptString =
-                                                    "${result.errorMessage}. Fix the yaml parse error. Previously generated Yaml: ${result.errorContent}"
                                             }
-                                        } catch (e: Exception) {
-                                            val indexOfScreen =
-                                                updatedPrompts.indexOfFirst { it.id == result.requestId }
-                                            updatedPrompts[indexOfScreen] =
-                                                GeneratedScreenPrompt.Error(
-                                                    id = prompt.id,
-                                                    screenName = prompt.screenName,
-                                                    prompt = prompt.prompt,
-                                                    withRetry = false,
-                                                    errorMessage = e.message ?: "Unknown error"
-                                                )
-                                        }
-                                    } while (result is CreateScreenResponse.Error && retryCount < maxRetryCount)
+                                        } while (result is CreateScreenResponse.Error && retryCount < maxRetryCount)
 
-                                    when (result) {
-                                        is CreateScreenResponse.Success -> {
-                                            val indexOfScreen =
-                                                updatedPrompts.indexOfFirst { it.id == result.requestId }
-                                            updatedPrompts[indexOfScreen] =
-                                                GeneratedScreenPrompt.ScreenGenerated(
-                                                    id = prompt.id,
-                                                    screen = result.screen.postProcessAfterAiGeneration(
-                                                        newId = prompt.id
-                                                    ),
-                                                    prompt = prompt.prompt,
-                                                    screenName = prompt.screenName
-                                                )
-                                        }
+                                        when (result) {
+                                            is CreateScreenResponse.Success -> {
+                                                val indexOfScreen =
+                                                    updatedPrompts.indexOfFirst { it.id == result.requestId }
+                                                updatedPrompts[indexOfScreen] =
+                                                    GeneratedScreenPrompt.ScreenGenerated(
+                                                        id = prompt.id,
+                                                        screen =
+                                                            result.screen.postProcessAfterAiGeneration(
+                                                                newId = prompt.id,
+                                                            ),
+                                                        prompt = prompt.prompt,
+                                                        screenName = prompt.screenName,
+                                                    )
+                                            }
 
-                                        else -> {
-                                            // We care only success state here
+                                            else -> {
+                                                // We care only success state here
+                                            }
                                         }
+                                        _uiState.value =
+                                            state.copy(screenPrompts = updatedPrompts.toList())
                                     }
-                                    _uiState.value =
-                                        state.copy(screenPrompts = updatedPrompts.toList())
                                 }
                             }
                         }
-                    }
 
                     jobs.forEach { it.await() }
                     _uiState.value.isGenerating.value = false
@@ -270,37 +285,41 @@ class AiAssistantViewModel(
     fun onSendCreateScreenRequest(userInput: String) {
         viewModelScope.launch {
             // If already generated content exists, include it in the prompt.
-            val existingContext = when (val state = uiState.value) {
-                is AiAssistantUiState.Success.NewScreenCreated -> {
-                    yamlSerializer.encodeToString(Screen.serializer(), state.screen) + " "
-                }
+            val existingContext =
+                when (val state = uiState.value) {
+                    is AiAssistantUiState.Success.NewScreenCreated -> {
+                        yamlSerializer.encodeToString(Screen.serializer(), state.screen) + " "
+                    }
 
-                else -> ""
-            }
+                    else -> ""
+                }
 
             _uiState.value.isGenerating.value = true
 
-            _messages.value += MessageModel(
-                messageOwner = MessageOwner.User,
-                message = userInput,
-                createdAt = Clock.System.now()
-            )
+            _messages.value +=
+                MessageModel(
+                    messageOwner = MessageOwner.User,
+                    message = userInput,
+                    createdAt = Clock.System.now(),
+                )
             try {
                 var result: CreateScreenResponse
                 var prompt = existingContext + userInput.removeLineBreak()
                 var retryCount = 0
                 do {
-                    result = repository.createScreen(
-                        promptString = prompt,
-                        retryCount = retryCount,
-                    )
-                    if (result is CreateScreenResponse.Error) {
-                        _messages.value += MessageModel(
-                            messageOwner = MessageOwner.Ai,
-                            message = result.errorMessage,
-                            isFailed = true,
-                            createdAt = Clock.System.now()
+                    result =
+                        repository.createScreen(
+                            promptString = prompt,
+                            retryCount = retryCount,
                         )
+                    if (result is CreateScreenResponse.Error) {
+                        _messages.value +=
+                            MessageModel(
+                                messageOwner = MessageOwner.Ai,
+                                message = result.errorMessage,
+                                isFailed = true,
+                                createdAt = Clock.System.now(),
+                            )
                         retryCount++
                         prompt =
                             "${result.errorMessage}. Fix the yaml parse error. Previously generated Yaml: ${result.errorContent}"
@@ -309,11 +328,12 @@ class AiAssistantViewModel(
 
                 when (result) {
                     is CreateScreenResponse.Success -> {
-                        _messages.value += MessageModel(
-                            messageOwner = MessageOwner.Ai,
-                            message = result.message,
-                            createdAt = Clock.System.now()
-                        )
+                        _messages.value +=
+                            MessageModel(
+                                messageOwner = MessageOwner.Ai,
+                                message = result.message,
+                                createdAt = Clock.System.now(),
+                            )
                         _uiState.value = AiAssistantUiState.Success.NewScreenCreated(result.screen)
                     }
 
@@ -326,22 +346,24 @@ class AiAssistantViewModel(
                 val message = getString(Res.string.ai_failed_to_generate_response_timeout)
                 _uiState.value =
                     AiAssistantUiState.Error(message = message)
-                _messages.value += MessageModel(
-                    messageOwner = MessageOwner.Ai,
-                    message = message,
-                    isFailed = true,
-                    createdAt = Clock.System.now()
-                )
+                _messages.value +=
+                    MessageModel(
+                        messageOwner = MessageOwner.Ai,
+                        message = message,
+                        isFailed = true,
+                        createdAt = Clock.System.now(),
+                    )
             } catch (e: Exception) {
                 val message = getString(Res.string.ai_failed_to_generate_response)
                 _uiState.value =
                     AiAssistantUiState.Error(message = message)
-                _messages.value += MessageModel(
-                    messageOwner = MessageOwner.Ai,
-                    message = message,
-                    isFailed = true,
-                    createdAt = Clock.System.now()
-                )
+                _messages.value +=
+                    MessageModel(
+                        messageOwner = MessageOwner.Ai,
+                        message = message,
+                        isFailed = true,
+                        createdAt = Clock.System.now(),
+                    )
             }
         }
     }

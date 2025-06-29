@@ -11,7 +11,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class FillMaxHeightTest {
-
     @Test
     fun toComposeCode_fillMaxHeight() {
         val modifierList = listOf(ModifierWrapper.FillMaxHeight())
@@ -37,18 +36,18 @@ class FillMaxHeightTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier.androidx.compose.foundation.layout.fillMaxHeight
-                   (fraction = 0.5f),"""
-                .trimForCompare(),
+                   (fraction = 0.5f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }
 
     @Test
     fun toComposeCode_withOtherModifier() {
-        val modifierList = listOf(
-            ModifierWrapper.Padding(8.dp),
-            ModifierWrapper.FillMaxHeight(),
-        )
+        val modifierList =
+            listOf(
+                ModifierWrapper.Padding(8.dp),
+                ModifierWrapper.FillMaxHeight(),
+            )
 
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
@@ -58,8 +57,7 @@ class FillMaxHeightTest {
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                      all = 8.androidx.compose.ui.unit.dp)
-                 .androidx.compose.foundation.layout.fillMaxHeight(),"""
-                .trimForCompare(),
+                 .androidx.compose.foundation.layout.fillMaxHeight(),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }

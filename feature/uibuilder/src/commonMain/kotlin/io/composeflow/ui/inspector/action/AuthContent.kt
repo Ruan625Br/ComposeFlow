@@ -53,9 +53,10 @@ fun AuthContent(
         if (authEnabled) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.clickable {
-                    authActionsOpened = !authActionsOpened
-                },
+                modifier =
+                    Modifier.clickable {
+                        authActionsOpened = !authActionsOpened
+                    },
             ) {
                 Text(
                     text = "Auth",
@@ -78,8 +79,10 @@ fun AuthContent(
                     Text(
                         text = "Auth",
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 8.dp)
-                            .alpha(0.5f),
+                        modifier =
+                            Modifier
+                                .padding(start = 8.dp)
+                                .alpha(0.5f),
                     )
                     Spacer(Modifier.weight(1f))
                     TreeExpanderInverse(
@@ -87,7 +90,7 @@ fun AuthContent(
                         onClick = {
                             authActionsOpened = !authActionsOpened
                         },
-                        enabled = false
+                        enabled = false,
                     )
                 }
             }
@@ -96,25 +99,25 @@ fun AuthContent(
             Auth.entries().forEach { authAction ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hoverIconClickable()
-                        .hoverOverlay()
-                        .padding(vertical = 4.dp)
-                        .padding(start = 8.dp)
-                        .clickable {
-                            onActionSelected(
-                                authAction
-                            )
-                        }
-                        .selectedActionModifier(
-                            actionInEdit = actionInEdit,
-                            predicate = {
-                                actionInEdit != null &&
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .hoverIconClickable()
+                            .hoverOverlay()
+                            .padding(vertical = 4.dp)
+                            .padding(start = 8.dp)
+                            .clickable {
+                                onActionSelected(
+                                    authAction,
+                                )
+                            }.selectedActionModifier(
+                                actionInEdit = actionInEdit,
+                                predicate = {
+                                    actionInEdit != null &&
                                         actionInEdit is Share &&
                                         actionInEdit.name == authAction.name
-                            },
-                        ),
+                                },
+                            ),
                 ) {
                     Text(
                         text = authAction.name,
@@ -128,7 +131,6 @@ fun AuthContent(
         }
     }
 }
-
 
 @Composable
 fun CreateUserWithEmailAndPasswordContent(

@@ -69,72 +69,79 @@ class ResizeHandlerImpl : ResizeHandler {
         density: Density,
         parentHeight: Float?,
     ) {
-        val heightDeciderModifier = self.modifiersIncludingPending()
-            .filter { it.visible.value }
-            .firstOrNull { it.heightDecider(self.parentNode?.trait?.value) != null }
+        val heightDeciderModifier =
+            self
+                .modifiersIncludingPending()
+                .filter { it.visible.value }
+                .firstOrNull { it.heightDecider(self.parentNode?.trait?.value) != null }
 
         with(density) {
             when (heightDeciderModifier) {
                 is ModifierWrapper.FillMaxHeight -> {
-                    val pendingModifier = if (
-                        parentHeight != null &&
-                        deltaY + currentHeight + paddingHeight >= parentHeight
-                    ) {
-                        ModifierWrapper.FillMaxHeight()
-                    } else {
-                        ModifierWrapper.Height(
-                            height = currentHeight.toDp() + deltaY.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentHeight != null &&
+                            deltaY + currentHeight + paddingHeight >= parentHeight
+                        ) {
+                            ModifierWrapper.FillMaxHeight()
+                        } else {
+                            ModifierWrapper.Height(
+                                height = currentHeight.toDp() + deltaY.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 is ModifierWrapper.FillMaxSize -> {
-                    val pendingModifier = if (
-                        parentHeight != null &&
-                        deltaY + currentHeight + paddingHeight >= parentHeight
-                    ) {
-                        ModifierWrapper.FillMaxHeight()
-                    } else {
-                        ModifierWrapper.Height(
-                            height = currentHeight.toDp() + deltaY.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentHeight != null &&
+                            deltaY + currentHeight + paddingHeight >= parentHeight
+                        ) {
+                            ModifierWrapper.FillMaxHeight()
+                        } else {
+                            ModifierWrapper.Height(
+                                height = currentHeight.toDp() + deltaY.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 is ModifierWrapper.Height -> {
-                    val pendingModifier = if (
-                        parentHeight != null &&
-                        deltaY + currentHeight + paddingHeight >= parentHeight
-                    ) {
-                        ModifierWrapper.FillMaxHeight()
-                    } else {
-                        heightDeciderModifier.copy(
-                            height = heightDeciderModifier.height + deltaY.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentHeight != null &&
+                            deltaY + currentHeight + paddingHeight >= parentHeight
+                        ) {
+                            ModifierWrapper.FillMaxHeight()
+                        } else {
+                            heightDeciderModifier.copy(
+                                height = heightDeciderModifier.height + deltaY.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 is ModifierWrapper.Size -> {
-                    val pendingModifier = if (
-                        parentHeight != null &&
-                        deltaY + currentHeight >= parentHeight
-                    ) {
-                        ModifierWrapper.FillMaxHeight()
-                    } else {
-                        heightDeciderModifier.copy(
-                            height = heightDeciderModifier.height + deltaY.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentHeight != null &&
+                            deltaY + currentHeight >= parentHeight
+                        ) {
+                            ModifierWrapper.FillMaxHeight()
+                        } else {
+                            heightDeciderModifier.copy(
+                                height = heightDeciderModifier.height + deltaY.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 else -> {
-                    self.pendingModifier.value = ModifierWrapper.Height(
-                        currentHeight.toDp(),
-                    )
+                    self.pendingModifier.value =
+                        ModifierWrapper.Height(
+                            currentHeight.toDp(),
+                        )
                 }
             }
         }
@@ -147,75 +154,84 @@ class ResizeHandlerImpl : ResizeHandler {
         density: Density,
         parentWidth: Float?,
     ) {
-        val widthDeciderModifier = self.modifiersIncludingPending()
-            .filter { it.visible.value }
-            .firstOrNull { it.widthDecider(self.parentNode?.trait?.value) != null }
+        val widthDeciderModifier =
+            self
+                .modifiersIncludingPending()
+                .filter { it.visible.value }
+                .firstOrNull { it.widthDecider(self.parentNode?.trait?.value) != null }
         with(density) {
             when (widthDeciderModifier) {
                 is ModifierWrapper.FillMaxWidth -> {
-                    val pendingModifier = if (
-                        parentWidth != null &&
-                        deltaX + currentWidth + paddingWidth >= parentWidth
-                    ) {
-                        ModifierWrapper.FillMaxWidth()
-                    } else {
-                        ModifierWrapper.Width(
-                            width = currentWidth.toDp() + deltaX.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentWidth != null &&
+                            deltaX + currentWidth + paddingWidth >= parentWidth
+                        ) {
+                            ModifierWrapper.FillMaxWidth()
+                        } else {
+                            ModifierWrapper.Width(
+                                width = currentWidth.toDp() + deltaX.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 is ModifierWrapper.FillMaxSize -> {
-                    val pendingModifier = if (
-                        parentWidth != null &&
-                        deltaX + currentWidth + paddingWidth >= parentWidth
-                    ) {
-                        ModifierWrapper.FillMaxWidth()
-                    } else {
-                        ModifierWrapper.Width(
-                            width = currentWidth.toDp() + deltaX.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentWidth != null &&
+                            deltaX + currentWidth + paddingWidth >= parentWidth
+                        ) {
+                            ModifierWrapper.FillMaxWidth()
+                        } else {
+                            ModifierWrapper.Width(
+                                width = currentWidth.toDp() + deltaX.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 is ModifierWrapper.Width -> {
-                    val pendingModifier = if (
-                        parentWidth != null &&
-                        deltaX + currentWidth + paddingWidth >= parentWidth
-                    ) {
-                        ModifierWrapper.FillMaxWidth()
-                    } else {
-                        widthDeciderModifier.copy(
-                            width = widthDeciderModifier.width + deltaX.toDp(),
-                        )
-                    }
+                    val pendingModifier =
+                        if (
+                            parentWidth != null &&
+                            deltaX + currentWidth + paddingWidth >= parentWidth
+                        ) {
+                            ModifierWrapper.FillMaxWidth()
+                        } else {
+                            widthDeciderModifier.copy(
+                                width = widthDeciderModifier.width + deltaX.toDp(),
+                            )
+                        }
                     self.pendingModifier.value = pendingModifier
                 }
 
                 is ModifierWrapper.Size -> {
-                    self.pendingModifier.value = widthDeciderModifier.copy(
-                        width = widthDeciderModifier.width + deltaX.toDp(),
-                    )
+                    self.pendingModifier.value =
+                        widthDeciderModifier.copy(
+                            width = widthDeciderModifier.width + deltaX.toDp(),
+                        )
                 }
 
                 else -> {
-                    self.pendingModifier.value = ModifierWrapper.Width(
-                        currentWidth.toDp(),
-                    )
+                    self.pendingModifier.value =
+                        ModifierWrapper.Width(
+                            currentWidth.toDp(),
+                        )
                 }
             }
         }
     }
 
     override fun commitPendingHeightModifier() {
-        val heightDeciderIndex = self.modifierList
-            .filter { it.visible.value }
-            .indexOfFirst { it.heightDecider(self.parentNode?.trait?.value) != null }
-        val heightDeciderModifier = self.modifierList
-            .filter { it.visible.value }
-            .firstOrNull { it.heightDecider(self.parentNode?.trait?.value) != null }
+        val heightDeciderIndex =
+            self.modifierList
+                .filter { it.visible.value }
+                .indexOfFirst { it.heightDecider(self.parentNode?.trait?.value) != null }
+        val heightDeciderModifier =
+            self.modifierList
+                .filter { it.visible.value }
+                .firstOrNull { it.heightDecider(self.parentNode?.trait?.value) != null }
 
         self.pendingModifier.value?.let { pending ->
             when (heightDeciderIndex) {
@@ -242,12 +258,14 @@ class ResizeHandlerImpl : ResizeHandler {
     }
 
     override fun commitPendingWidthModifier() {
-        val widthDeciderIndex = self.modifierList
-            .filter { it.visible.value }
-            .indexOfFirst { it.widthDecider(self.parentNode?.trait?.value) != null }
-        val widthDeciderModifier = self.modifierList
-            .filter { it.visible.value }
-            .firstOrNull { it.widthDecider(self.parentNode?.trait?.value) != null }
+        val widthDeciderIndex =
+            self.modifierList
+                .filter { it.visible.value }
+                .indexOfFirst { it.widthDecider(self.parentNode?.trait?.value) != null }
+        val widthDeciderModifier =
+            self.modifierList
+                .filter { it.visible.value }
+                .firstOrNull { it.widthDecider(self.parentNode?.trait?.value) != null }
         self.pendingModifier.value?.let { pending ->
             when (widthDeciderIndex) {
                 -1 -> {
@@ -282,22 +300,21 @@ class ResizeHandlerImpl : ResizeHandler {
             .filter { it.visible.value }
             .firstOrNull {
                 it.heightDecider(self.parentNode?.trait?.value) != null
-            }
-            ?.heightDecider(self.parentNode?.trait?.value)
-        ?: "Unspecified"
+            }?.heightDecider(self.parentNode?.trait?.value)
+            ?: "Unspecified"
     }
 
     override fun widthDecider(): String {
         val modifiers = self.modifiersIncludingPending()
-        return modifiers.firstOrNull {
-            // First check the Weight since weights is prioritized regardless of the order of modifiers
-            it is ModifierWrapper.Weight
-        }?.widthDecider(self.parentNode?.trait?.value) ?: modifiers
+        return modifiers
+            .firstOrNull {
+                // First check the Weight since weights is prioritized regardless of the order of modifiers
+                it is ModifierWrapper.Weight
+            }?.widthDecider(self.parentNode?.trait?.value) ?: modifiers
             .filter { it.visible.value }
             .firstOrNull {
                 it.widthDecider(self.parentNode?.trait?.value) != null
-            }
-            ?.widthDecider(self.parentNode?.trait?.value)
-        ?: "Unspecified"
+            }?.widthDecider(self.parentNode?.trait?.value)
+            ?: "Unspecified"
     }
 }

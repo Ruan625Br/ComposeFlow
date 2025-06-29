@@ -8,7 +8,6 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class BoxTraitTest {
-
     @Test
     fun serialize_deserialize() {
         val boxParams = BoxTrait(contentAlignment = AlignmentWrapper.Center)

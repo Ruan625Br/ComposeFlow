@@ -30,7 +30,7 @@ fun CheckboxParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    checkboxTrait.copy(checked = BooleanProperty.BooleanIntrinsicValue())
+                    checkboxTrait.copy(checked = BooleanProperty.BooleanIntrinsicValue()),
                 )
             },
             modifier = Modifier.hoverOverlay(),
@@ -47,7 +47,7 @@ fun CheckboxParamsInspector(
             onInitializeProperty = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    checkboxTrait.copy(enabled = BooleanProperty.BooleanIntrinsicValue(true))
+                    checkboxTrait.copy(enabled = BooleanProperty.BooleanIntrinsicValue(true)),
                 )
             },
             modifier = Modifier.hoverOverlay(),

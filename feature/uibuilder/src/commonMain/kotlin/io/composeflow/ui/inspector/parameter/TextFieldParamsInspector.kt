@@ -53,17 +53,19 @@ fun TextFieldParamsInspector(
                 composeNodeCallbacks.onTraitUpdated(
                     node,
                     textFieldTrait.copy(
-                        value = companionState?.let { ValueFromState(readFromStateId = it.id) }
-                            ?: StringProperty.StringIntrinsicValue("")
+                        value =
+                            companionState?.let { ValueFromState(readFromStateId = it.id) }
+                                ?: StringProperty.StringIntrinsicValue(""),
                     ),
                 )
             },
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    textFieldTrait.copy(value = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        textFieldTrait.copy(value = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -84,7 +86,7 @@ fun TextFieldParamsInspector(
                 onValidPropertyChanged = { property, _ ->
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(enabled = property)
+                        textFieldTrait.copy(enabled = property),
                     )
                 },
                 onInitializeProperty = {
@@ -102,7 +104,7 @@ fun TextFieldParamsInspector(
                 onValidPropertyChanged = { property, _ ->
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(readOnly = property)
+                        textFieldTrait.copy(readOnly = property),
                     )
                 },
                 onInitializeProperty = {
@@ -124,11 +126,12 @@ fun TextFieldParamsInspector(
                 )
             },
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    textFieldTrait.copy(label = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        textFieldTrait.copy(label = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -150,11 +153,12 @@ fun TextFieldParamsInspector(
                 )
             },
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    textFieldTrait.copy(placeholder = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        textFieldTrait.copy(placeholder = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -173,32 +177,34 @@ fun TextFieldParamsInspector(
                 onIconDeleted = {
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(leadingIcon = null)
+                        textFieldTrait.copy(leadingIcon = null),
                     )
                 },
                 currentIcon = textFieldTrait.leadingIcon?.imageVector,
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
             IconPropertyEditor(
                 label = "Trailing icon",
                 onIconSelected = {
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(trailingIcon = it)
+                        textFieldTrait.copy(trailingIcon = it),
                     )
                 },
                 onIconDeleted = {
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(trailingIcon = null)
+                        textFieldTrait.copy(trailingIcon = null),
                     )
                 },
                 currentIcon = textFieldTrait.trailingIcon?.imageVector,
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -208,9 +214,10 @@ fun TextFieldParamsInspector(
                 onCheckedChange = {
                     composeNodeCallbacks.onTraitUpdated(node, textFieldTrait.copy(singleLine = it))
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
             BasicEditableTextProperty(
                 label = "Max lines",
@@ -227,9 +234,10 @@ fun TextFieldParamsInspector(
                     val value = if (it.isEmpty()) null else it.toInt()
                     composeNodeCallbacks.onTraitUpdated(node, textFieldTrait.copy(maxLines = value))
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
                 singleLine = false,
             )
         }
@@ -259,9 +267,10 @@ fun TextFieldParamsInspector(
                         ),
                     )
                 },
-                modifier = Modifier
-                    .weight(1f)
-                    .hoverOverlay()
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .hoverOverlay(),
             )
 
             if (textFieldTrait.textFieldType == TextFieldType.Default) {
@@ -274,9 +283,10 @@ fun TextFieldParamsInspector(
                             textFieldTrait.copy(transparentIndicator = it),
                         )
                     },
-                    modifier = Modifier
-                        .weight(1f)
-                        .hoverOverlay(),
+                    modifier =
+                        Modifier
+                            .weight(1f)
+                            .hoverOverlay(),
                 )
             } else {
                 Spacer(Modifier.weight(1f))
@@ -290,7 +300,7 @@ fun TextFieldParamsInspector(
                 onCheckedChange = {
                     composeNodeCallbacks.onTraitUpdated(
                         node,
-                        textFieldTrait.copy(passwordField = it)
+                        textFieldTrait.copy(passwordField = it),
                     )
                 },
                 modifier = Modifier.hoverOverlay(),

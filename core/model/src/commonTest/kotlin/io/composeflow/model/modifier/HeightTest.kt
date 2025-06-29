@@ -22,8 +22,7 @@ class HeightTest {
             """modifier = 
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.height(
-                   50.androidx.compose.ui.unit.dp),"""
-                .trimForCompare(),
+                   50.androidx.compose.ui.unit.dp),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }

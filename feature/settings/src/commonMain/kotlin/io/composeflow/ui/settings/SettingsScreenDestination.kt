@@ -12,10 +12,10 @@ enum class SettingsScreenDestination(
 ) {
     Preferences(
         icon = Icons.Outlined.Settings,
-        destinationName = "Preferences"
+        destinationName = "Preferences",
     ),
     Firebase(
         icon = ComposeFlowIcons.Firebase,
-        destinationName = "Firebase"
+        destinationName = "Firebase",
     ),
 }

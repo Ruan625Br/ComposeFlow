@@ -11,7 +11,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class WrapContentHeightTest {
-
     @Test
     fun toComposeCode_default() {
         val modifierList = listOf(ModifierWrapper.WrapContentHeight())
@@ -26,12 +25,13 @@ class WrapContentHeightTest {
 
     @Test
     fun toComposeCode_non_default_args() {
-        val modifierList = listOf(
-            ModifierWrapper.WrapContentHeight(
-                align = AlignmentVerticalWrapper.Bottom,
-                unbounded = true,
-            ),
-        )
+        val modifierList =
+            listOf(
+                ModifierWrapper.WrapContentHeight(
+                    align = AlignmentVerticalWrapper.Bottom,
+                    unbounded = true,
+                ),
+            )
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 

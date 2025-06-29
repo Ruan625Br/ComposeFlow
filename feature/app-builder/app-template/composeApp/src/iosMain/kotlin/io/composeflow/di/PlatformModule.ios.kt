@@ -6,6 +6,7 @@ import com.russhwolf.settings.coroutines.toFlowSettings
 import org.koin.dsl.module
 import platform.Foundation.NSUserDefaults
 
-actual fun platformModule() = module {
-    single<FlowSettings> { NSUserDefaultsSettings(NSUserDefaults()).toFlowSettings() }
-}
+actual fun platformModule() =
+    module {
+        single<FlowSettings> { NSUserDefaultsSettings(NSUserDefaults()).toFlowSettings() }
+    }

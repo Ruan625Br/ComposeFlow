@@ -42,10 +42,11 @@ fun InspectorTab(
     }
 
     Column(
-        modifier = modifier
-            .width(420.dp)
-            .background(MaterialTheme.colorScheme.surface)
-            .fillMaxHeight(),
+        modifier =
+            modifier
+                .width(420.dp)
+                .background(MaterialTheme.colorScheme.surface)
+                .fillMaxHeight(),
     ) {
         TabRow(
             selectedTabIndex = selectedTabIndex,

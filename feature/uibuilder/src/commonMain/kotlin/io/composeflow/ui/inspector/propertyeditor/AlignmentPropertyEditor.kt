@@ -26,13 +26,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadSvgPainter
 import androidx.compose.ui.res.useResource
 import androidx.compose.ui.unit.dp
-import io.composeflow.model.parameter.wrapper.AlignmentWrapper
-import io.composeflow.platform.AsyncImage
-import io.composeflow.ui.Tooltip
-import io.composeflow.ui.icon.ComposeFlowIcon
-import io.composeflow.ui.icon.ComposeFlowIconToggleButton
-import io.composeflow.ui.inspector.ParamInspectorHeaderRow
-import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.Res
 import io.composeflow.alignment_bottom_center
 import io.composeflow.alignment_bottom_end
@@ -43,6 +36,13 @@ import io.composeflow.alignment_center_start
 import io.composeflow.alignment_top_center
 import io.composeflow.alignment_top_end
 import io.composeflow.alignment_top_start
+import io.composeflow.model.parameter.wrapper.AlignmentWrapper
+import io.composeflow.platform.AsyncImage
+import io.composeflow.ui.Tooltip
+import io.composeflow.ui.icon.ComposeFlowIcon
+import io.composeflow.ui.icon.ComposeFlowIconToggleButton
+import io.composeflow.ui.inspector.ParamInspectorHeaderRow
+import io.composeflow.ui.modifier.hoverOverlay
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -73,19 +73,20 @@ fun AlignmentPropertyEditor(
                     onCheckedChange = {
                         onAlignmentSelected(boxAlignment)
                     },
-                    modifier = Modifier.then(
-                        if (thisItemSelected) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                        alpha = 0.3f,
-                                    ),
-                                )
-                        } else {
-                            Modifier
-                        },
-                    ),
+                    modifier =
+                        Modifier.then(
+                            if (thisItemSelected) {
+                                Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                            alpha = 0.3f,
+                                        ),
+                                    )
+                            } else {
+                                Modifier
+                            },
+                        ),
                 ) {
                     imageVector?.let {
                         ComposeFlowIcon(

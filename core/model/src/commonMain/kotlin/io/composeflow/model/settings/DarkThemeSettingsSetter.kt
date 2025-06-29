@@ -21,12 +21,11 @@ data class DarkThemeSettingSetterUiState(
 )
 
 @Composable
-fun DarkThemeSettingSetter(
-    darkThemeSettingSetterUiState: DarkThemeSettingSetterUiState,
-) {
+fun DarkThemeSettingSetter(darkThemeSettingSetterUiState: DarkThemeSettingSetterUiState) {
     Column(
-        modifier = Modifier
-            .padding(top = 16.dp)
+        modifier =
+            Modifier
+                .padding(top = 16.dp),
     ) {
         Text(
             text = "Dark Theme",
@@ -36,23 +35,23 @@ fun DarkThemeSettingSetter(
         DarkThemeSetting.entries.forEachIndexed { index, element ->
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .clickable {
-                        darkThemeSettingSetterUiState.onThemeChanged(
-                            DarkThemeSetting.fromOrdinal(
-                                index
+                modifier =
+                    Modifier
+                        .clickable {
+                            darkThemeSettingSetterUiState.onThemeChanged(
+                                DarkThemeSetting.fromOrdinal(
+                                    index,
+                                ),
                             )
-                        )
-                    }
-                    .padding(horizontal = 8.dp),
+                        }.padding(horizontal = 8.dp),
             ) {
                 ComposeFlowRadioButton(
                     selected = darkThemeSettingSetterUiState.darkThemeSetting.ordinal == index,
                     onClick = {
                         darkThemeSettingSetterUiState.onThemeChanged(
                             DarkThemeSetting.fromOrdinal(
-                                index
-                            )
+                                index,
+                            ),
                         )
                     },
                     modifier = Modifier.height(32.dp),

@@ -36,7 +36,6 @@ import java.util.concurrent.CancellationException
 import kotlin.io.path.createTempDirectory
 
 object AppRunner {
-
     // TODO: Replace this with DI
     var buildLogger = Logger(loggerConfigInit(SystemWriter()))
     private val androidEmulatorWrapper = AndroidEmulatorWrapper()
@@ -61,13 +60,14 @@ object AppRunner {
     ) {
         buildLogger.i("runAndroidApp. $device, portNumber: $portNumber")
         withContext(ioDispatcher) {
-            val appDir = prepareAppDir(
-                packageName = packageName,
-                projectName = projectName,
-                copyInstructions = copyInstructions,
-                copyLocalFileInstructions = copyLocalFileInstructions,
-                firebaseAppInfo = firebaseAppInfo,
-            )
+            val appDir =
+                prepareAppDir(
+                    packageName = packageName,
+                    projectName = projectName,
+                    copyInstructions = copyInstructions,
+                    copyLocalFileInstructions = copyLocalFileInstructions,
+                    firebaseAppInfo = firebaseAppInfo,
+                )
             // For isolating problem when build error happens, not formatting the code
             // when building the app
             addComposeBuilderImplementation(appDir, fileSpecs, formatCode = false)
@@ -99,13 +99,14 @@ object AppRunner {
     ) {
         buildLogger.i("runIosApp. $device")
         withContext(ioDispatcher) {
-            val appDir = prepareAppDir(
-                packageName = packageName,
-                projectName = projectName,
-                copyInstructions = copyInstructions,
-                copyLocalFileInstructions = copyLocalFileInstructions,
-                firebaseAppInfo = firebaseAppInfo,
-            )
+            val appDir =
+                prepareAppDir(
+                    packageName = packageName,
+                    projectName = projectName,
+                    copyInstructions = copyInstructions,
+                    copyLocalFileInstructions = copyLocalFileInstructions,
+                    firebaseAppInfo = firebaseAppInfo,
+                )
             // For isolating problem when build error happens, not formatting the code
             // when building the app
             addComposeBuilderImplementation(appDir, fileSpecs, formatCode = false)
@@ -134,13 +135,14 @@ object AppRunner {
         localJavaHomePath: PathSetting,
     ) {
         withContext(ioDispatcher) {
-            val appDir = prepareAppDir(
-                packageName = packageName,
-                projectName = projectName,
-                copyInstructions = copyInstructions,
-                copyLocalFileInstructions = copyLocalFileInstructions,
-                firebaseAppInfo = firebaseAppInfo,
-            )
+            val appDir =
+                prepareAppDir(
+                    packageName = packageName,
+                    projectName = projectName,
+                    copyInstructions = copyInstructions,
+                    copyLocalFileInstructions = copyLocalFileInstructions,
+                    firebaseAppInfo = firebaseAppInfo,
+                )
             // For isolating problem when build error happens, not formatting the code
             // when building the app
             addComposeBuilderImplementation(appDir, fileSpecs, formatCode = false)
@@ -151,7 +153,7 @@ object AppRunner {
             runJsAppOnBrowser(
                 appDir = appDir,
                 onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-                localJavaHomePath = localJavaHomePath
+                localJavaHomePath = localJavaHomePath,
             )
         }
     }
@@ -164,20 +166,22 @@ object AppRunner {
         copyLocalFileInstructions: Map<String, String>,
         firebaseAppInfo: FirebaseAppInfo,
     ) {
-        val appDir = prepareAppDir(
-            packageName = packageName,
-            projectName = projectName,
-            copyInstructions = copyInstructions,
-            copyLocalFileInstructions = copyLocalFileInstructions,
-            firebaseAppInfo = firebaseAppInfo,
-        )
+        val appDir =
+            prepareAppDir(
+                packageName = packageName,
+                projectName = projectName,
+                copyInstructions = copyInstructions,
+                copyLocalFileInstructions = copyLocalFileInstructions,
+                firebaseAppInfo = firebaseAppInfo,
+            )
 
         addComposeBuilderImplementation(appDir, fileSpecs)
 
-        val gradleWrapper = GradleWrapper(
-            projectRoot = appDir,
-            buildLogger = buildLogger,
-        )
+        val gradleWrapper =
+            GradleWrapper(
+                projectRoot = appDir,
+                buildLogger = buildLogger,
+            )
         buildLogger.i("Building the app at directory: $appDir")
         gradleWrapper.assembleDebug()
     }
@@ -193,18 +197,23 @@ object AppRunner {
         firebaseAppInfo: FirebaseAppInfo,
     ) {
         withContext(ioDispatcher) {
-            val appDir = prepareAppDir(
-                packageName = packageName,
-                projectName = projectName,
-                copyInstructions = copyInstructions,
-                copyLocalFileInstructions = copyLocalFileInstructions,
-                firebaseAppInfo = firebaseAppInfo,
-            )
+            val appDir =
+                prepareAppDir(
+                    packageName = packageName,
+                    projectName = projectName,
+                    copyInstructions = copyInstructions,
+                    copyLocalFileInstructions = copyLocalFileInstructions,
+                    firebaseAppInfo = firebaseAppInfo,
+                )
             addComposeBuilderImplementation(appDir, fileSpecs)
             val downloadDir = prepareDownloadDir()
 
             onStatusBarUiStateChanged(StatusBarUiState.Loading("Zipping the contents"))
-            fun generateZipFile(projectName: String, downloadDirectory: File): File {
+
+            fun generateZipFile(
+                projectName: String,
+                downloadDirectory: File,
+            ): File {
                 val file = downloadDirectory.resolve("$projectName.zip")
                 if (!file.exists()) {
                     return file
@@ -226,27 +235,31 @@ object AppRunner {
 
     suspend fun getAvailableDevices(): List<Device> {
         val toolsResult = xcodeToolsWrapper.isToolAvailable()
-        val iosSimulators = if (toolsResult) {
-            xcodeToolsWrapper.listSimulators()
-        } else {
-            emptyList()
-        }
+        val iosSimulators =
+            if (toolsResult) {
+                xcodeToolsWrapper.listSimulators()
+            } else {
+                emptyList()
+            }
         val onlineSimulators = iosSimulators.filter { it.status == SimulatorStatus.Booted }
         val offlineSimulators = iosSimulators.filter { it.status != SimulatorStatus.Booted }
         val onlineEmulators = adbWrapper.listDevices()
-        val offlineEmulators = androidEmulatorWrapper.listAvdsAndWait().filter { avdName ->
-            !onlineEmulators.any { it.name == avdName }
-        }.map {
-            Device.AndroidEmulator(
-                name = it,
-                status = EmulatorStatus.Offline,
-            )
-        }
+        val offlineEmulators =
+            androidEmulatorWrapper
+                .listAvdsAndWait()
+                .filter { avdName ->
+                    !onlineEmulators.any { it.name == avdName }
+                }.map {
+                    Device.AndroidEmulator(
+                        name = it,
+                        status = EmulatorStatus.Offline,
+                    )
+                }
         return listOf(Device.Web) +
-                onlineEmulators +
-                onlineSimulators +
-                offlineEmulators +
-                offlineSimulators
+            onlineEmulators +
+            onlineSimulators +
+            offlineEmulators +
+            offlineSimulators
     }
 
     private suspend fun runAppOnAndroidDevice(
@@ -260,7 +273,9 @@ object AppRunner {
     ) = withContext(ioDispatcher) {
         val avds = androidEmulatorWrapper.listAvdsAndWait()
         if (avds.isEmpty()) {
-            onStatusBarUiStateChanged(StatusBarUiState.Failure("No available emulators. Set up an emulator in Android Studio or from command line"))
+            onStatusBarUiStateChanged(
+                StatusBarUiState.Failure("No available emulators. Set up an emulator in Android Studio or from command line"),
+            )
             throw CancellationException("No available emulators")
         }
         // When launching an emulator, emulator command tends to run indefinitely as it keeps the
@@ -274,7 +289,8 @@ object AppRunner {
 
         var devices: List<Device.AndroidEmulator>?
         try {
-            withTimeoutOrNull(30_000L) { // timeout after 30 seconds
+            withTimeoutOrNull(30_000L) {
+                // timeout after 30 seconds
                 while (isActive) { // continue looping as long as the coroutine is active
                     devices = adbWrapper.listDevices()
                     if (devices?.isNotEmpty() == true &&
@@ -293,11 +309,12 @@ object AppRunner {
             throw e
         }
 
-        val gradleWrapper = GradleCommandLineRunner(
-            projectRoot = appDir,
-            buildLogger = buildLogger,
-            localJavaHomePath = localJavaHomePath.path()
-        )
+        val gradleWrapper =
+            GradleCommandLineRunner(
+                projectRoot = appDir,
+                buildLogger = buildLogger,
+                localJavaHomePath = localJavaHomePath.path(),
+            )
 
         gradleWrapper.assembleDebug(
             onStatusBarUiStateChanged,
@@ -318,11 +335,12 @@ object AppRunner {
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
         localJavaHomePath: PathSetting,
     ) = withContext(ioDispatcher) {
-        val gradleWrapper = GradleCommandLineRunner(
-            projectRoot = appDir,
-            buildLogger = buildLogger,
-            localJavaHomePath = localJavaHomePath.path()
-        )
+        val gradleWrapper =
+            GradleCommandLineRunner(
+                projectRoot = appDir,
+                buildLogger = buildLogger,
+                localJavaHomePath = localJavaHomePath.path(),
+            )
         gradleWrapper.jsBrowserDevelopmentRun(
             onStatusBarUiStateChanged,
         )
@@ -338,9 +356,10 @@ object AppRunner {
             try {
                 it?.let {
                     if (formatCode) {
-                        val ktFile = sharedKotlinDir
-                            .resolve(it.packageName.replace(".", File.separator))
-                            .resolve("${it.name}.kt")
+                        val ktFile =
+                            sharedKotlinDir
+                                .resolve(it.packageName.replace(".", File.separator))
+                                .resolve("${it.name}.kt")
                         ktFile.parentFile?.mkdirs()
                         ktFile.writeText(Formatter.format(it))
                     } else {
@@ -360,8 +379,9 @@ object AppRunner {
         copyLocalFileInstructions: Map<String, String>,
         firebaseAppInfo: FirebaseAppInfo,
     ): File {
-        val zipStream = object {}.javaClass.getResourceAsStream("/app-template.zip")
-            ?: throw IllegalStateException("Couldn't find a zip file at. /app-template.zip")
+        val zipStream =
+            object {}.javaClass.getResourceAsStream("/app-template.zip")
+                ?: throw IllegalStateException("Couldn't find a zip file at. /app-template.zip")
         val tempDir = createTempDirectory().toFile()
         zipStream.unzip(tempDir.toPath())
 
@@ -380,37 +400,37 @@ object AppRunner {
         replacePackageAndProject(
             file = buildGradleKts,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
         replacePackageAndProject(
             file = settingsGradleKts,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
         replacePackageAndProject(
             file = mainActivity,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
         replacePackageAndProject(
             file = mainApplication,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
         replacePackageAndProject(
             file = stringsXml,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
         replacePackageAndProject(
             file = googleServicesJson,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
         replacePackageAndProject(
             file = googleServiceInfoPlist,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
 
         copyFiles(appTemplateDir, copyInstructions)
@@ -420,18 +440,24 @@ object AppRunner {
         replacePackageAndProject(
             file = iosXCConfig,
             packageName = packageName,
-            projectName = projectName
+            projectName = projectName,
         )
 
         moveFile(
             sourceFile = mainActivity,
-            targetFile = appTemplateDir.resolve("composeApp/src/androidMain/kotlin")
-                .resolve(packageName.replace(".", "/")).resolve("MainActivity.kt")
+            targetFile =
+                appTemplateDir
+                    .resolve("composeApp/src/androidMain/kotlin")
+                    .resolve(packageName.replace(".", "/"))
+                    .resolve("MainActivity.kt"),
         )
         moveFile(
             sourceFile = mainApplication,
-            targetFile = appTemplateDir.resolve("composeApp/src/androidMain/kotlin")
-                .resolve(packageName.replace(".", "/")).resolve("MainApplication.kt")
+            targetFile =
+                appTemplateDir
+                    .resolve("composeApp/src/androidMain/kotlin")
+                    .resolve(packageName.replace(".", "/"))
+                    .resolve("MainApplication.kt"),
         )
         handleFirebaseConfig(
             packageName = packageName,
@@ -439,7 +465,7 @@ object AppRunner {
             firebaseAppInfo,
             googleServicesJson,
             googleServiceInfoPlist,
-            appTemplateDir
+            appTemplateDir,
         )
 
         val gradlew = appTemplateDir.resolve("gradlew")
@@ -460,14 +486,17 @@ object AppRunner {
     ) {
         firebaseAppInfo.androidApp?.let { firebaseAndroidApp ->
             googleServicesJson.writeText(firebaseAndroidApp.config)
-            val clientId = extractClientIdFromGoogleServicesJson(
-                firebaseAndroidApp.config,
-                packageName = "$packageName.$projectName"
-            )
-            val appInitializer = appTemplateDir.resolve("composeApp")
-                .resolve("src/commonMain/kotlin/io/composeflow/AppInitializer.kt")
+            val clientId =
+                extractClientIdFromGoogleServicesJson(
+                    firebaseAndroidApp.config,
+                    packageName = "$packageName.$projectName",
+                )
+            val appInitializer =
+                appTemplateDir
+                    .resolve("composeApp")
+                    .resolve("src/commonMain/kotlin/io/composeflow/AppInitializer.kt")
             appInitializer.writeText(
-                appInitializer.readText().replace("\"OAUTH_CLIENT_ID\"", clientId ?: "\"\"")
+                appInitializer.readText().replace("\"OAUTH_CLIENT_ID\"", clientId ?: "\"\""),
             )
         }
         val infoPlist = appTemplateDir.resolve("iosApp").resolve("iosApp").resolve("Info.plist")
@@ -489,7 +518,7 @@ object AppRunner {
       </dict>
     </array>"""
             infoPlist.writeText(
-                infoPlist.readText().replace(placeHolderString, firebaseConfigInPlist)
+                infoPlist.readText().replace(placeHolderString, firebaseConfigInPlist),
             )
         } ?: run {
             infoPlist.writeText(infoPlist.readText().replace(placeHolderString, ""))
@@ -498,15 +527,18 @@ object AppRunner {
         firebaseAppInfo.webApp?.let {
             val webAppConfig = jsonSerializer.parseToJsonElement(it.config)
             val map = (webAppConfig as JsonObject).toMap()
-            val jsAuthInitializer = appTemplateDir.resolve("composeApp")
-                .resolve("src/jsMain/kotlin/io/composeflow/platform/AuthInitializer.js.kt")
+            val jsAuthInitializer =
+                appTemplateDir
+                    .resolve("composeApp")
+                    .resolve("src/jsMain/kotlin/io/composeflow/platform/AuthInitializer.js.kt")
             jsAuthInitializer.writeText(
-                jsAuthInitializer.readText()
+                jsAuthInitializer
+                    .readText()
                     .replace("\"WEB_APPLICATION_ID\"", map["appId"].toString())
                     .replace("\"API_KEY\"", map["apiKey"].toString())
                     .replace("\"AUTH_DOMAIN\"", map["authDomain"].toString())
                     .replace("\"PROJECT_ID\"", map["projectId"].toString())
-                    .replace("\"STORAGE_BUCKET\"", map["storageBucket"].toString())
+                    .replace("\"STORAGE_BUCKET\"", map["storageBucket"].toString()),
             )
         }
     }
@@ -559,7 +591,11 @@ object AppRunner {
         }
     }
 
-    private fun replaceTextInFile(file: File, oldText: String, newText: String) {
+    private fun replaceTextInFile(
+        file: File,
+        oldText: String,
+        newText: String,
+    ) {
         if (file.exists()) {
             val fileContent = file.readText()
             val newContent = fileContent.replace(oldText, newText)
@@ -569,13 +605,20 @@ object AppRunner {
         }
     }
 
-    private fun replacePackageAndProject(file: File, packageName: String, projectName: String) {
+    private fun replacePackageAndProject(
+        file: File,
+        packageName: String,
+        projectName: String,
+    ) {
         replaceTextInFile(file, "packageName", packageName)
         replaceTextInFile(file, "projectName", projectName)
     }
 
     @Suppress("unused")
-    private fun moveFile(sourceFile: File, targetFile: File) {
+    private fun moveFile(
+        sourceFile: File,
+        targetFile: File,
+    ) {
         // Ensure the parent directory of the target file exists
         val targetDir = targetFile.parentFile
         if (targetDir != null && !targetDir.exists()) {

@@ -31,14 +31,15 @@ data class IconTrait(
     override val imageVectorHolder: ImageVectorHolder? = Outlined.Add,
     override val blobInfoWrapper: BlobInfoWrapper? = null,
     override val contentDescription: String = "Icon for ${imageVectorHolder?.name}",
-    override val tint: AssignableProperty? = ColorProperty.ColorIntrinsicValue(
-        value = ColorWrapper(
-            themeColor = Material3ColorWrapper.OnSurface
-        )
-    ),
+    override val tint: AssignableProperty? =
+        ColorProperty.ColorIntrinsicValue(
+            value =
+                ColorWrapper(
+                    themeColor = Material3ColorWrapper.OnSurface,
+                ),
+        ),
 ) : AbstractIconTrait(assetType, imageVectorHolder, blobInfoWrapper, contentDescription, tint),
     ComposeTrait {
-
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
             trait = mutableStateOf(defaultTrait()),
@@ -46,12 +47,14 @@ data class IconTrait(
         )
 
     override fun icon(): ImageVector = Icons.Outlined.Add
+
     override fun iconText(): String = "Icon"
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_icon_trait
+
     override fun isResizeable(): Boolean = false
 
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Common, TraitCategory.Basic)
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Common, TraitCategory.Basic)
 
     override fun generateCode(
         project: Project,
@@ -73,10 +76,10 @@ data class IconTrait(
                 project = project,
                 context = context,
                 dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
 

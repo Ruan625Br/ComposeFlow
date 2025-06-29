@@ -42,7 +42,10 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
      * Boolean implicitly, but with this flag being false, it's considered as String isn't assignable
      * to Boolean
      */
-    fun isAbleToAssign(type: ComposeFlowType, exactMatch: Boolean = false): Boolean
+    fun isAbleToAssign(
+        type: ComposeFlowType,
+        exactMatch: Boolean = false,
+    ): Boolean
 
     /**
      * Returns true if this type has any matching type within containing fields for the given
@@ -55,16 +58,22 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         project: Project,
         type: ComposeFlowType,
         exactMatch: Boolean = false,
-    ): Boolean =
-        isAbleToAssign(type, exactMatch)
+    ): Boolean = isAbleToAssign(type, exactMatch)
 
     fun isPrimitive(): Boolean
-    fun displayName(project: Project, listAware: Boolean = true): String
+
+    fun displayName(
+        project: Project,
+        listAware: Boolean = true,
+    ): String
+
     fun defaultValue(): AssignableProperty
+
     fun asKotlinPoetTypeName(project: Project): TypeName
+
     fun ComposeFlowType.convertCodeFromType(
         inputType: ComposeFlowType,
-        codeBlock: CodeBlock
+        codeBlock: CodeBlock,
     ): CodeBlock {
         if (!isAbleToAssign(inputType)) {
             return codeBlock
@@ -74,7 +83,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     fun ComposeFlowType.convertExpressionFromType(
         inputType: ComposeFlowType,
-        expression: String
+        expression: String,
     ): String {
         if (!isAbleToAssign(inputType)) {
             return expression
@@ -82,9 +91,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         return expression
     }
 
-    fun copyWith(
-        newIsList: Boolean = isList,
-    ): ComposeFlowType
+    fun copyWith(newIsList: Boolean = isList): ComposeFlowType
 
     fun copyWith(
         newIsList: Boolean = isList,
@@ -93,14 +100,15 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("StringType")
-    data class StringType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class StringType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         // Always returns true except for Unknown since every Kotlin type has the toString() method
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
-        ): Boolean {
-            return if (isList) {
+            exactMatch: Boolean,
+        ): Boolean =
+            if (isList) {
                 // StringType(isList = false) converts the element as listOf("...")
                 type == StringType(isList = true) || type == StringType(isList = false)
             } else {
@@ -110,29 +118,27 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
                     type != UnknownType() && type !is DocumentIdType
                 }
             }
-        }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<String>" else "String"
             } else {
                 "String"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = StringProperty.StringIntrinsicValue()
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
                 List::class.asTypeName().parameterizedBy(String::class.asTypeName())
             } else {
                 String::class.asTypeName()
             }
-        }
 
         override fun ComposeFlowType.convertCodeFromType(
             inputType: ComposeFlowType,
@@ -181,11 +187,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("BooleanType")
-    data class BooleanType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class BooleanType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -194,28 +201,28 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<Boolean>" else "Boolean"
             } else {
                 "Boolean"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun isPrimitive() = true
+
         override fun defaultValue(): AssignableProperty = BooleanProperty.BooleanIntrinsicValue()
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
                 List::class.asTypeName().parameterizedBy(Boolean::class.asTypeName())
             } else {
                 Boolean::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Boolean")
@@ -223,11 +230,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("IntType")
-    data class IntType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class IntType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -245,33 +253,34 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
                 return codeBlock
             }
             return if (inputType == FloatType(isList = false)) {
-                CodeBlock.of("${codeBlock}.toFloat()")
+                CodeBlock.of("$codeBlock.toFloat()")
             } else {
                 codeBlock
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<Int>" else "Int"
             } else {
                 "Int"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = IntProperty.IntIntrinsicValue()
+
         override fun isPrimitive() = true
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
                 List::class.asTypeName().parameterizedBy(Int::class.asTypeName())
             } else {
                 Int::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
@@ -279,11 +288,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("FloatType")
-    data class FloatType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class FloatType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -301,33 +311,34 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
                 return codeBlock
             }
             return if (inputType == IntType(isList = false)) {
-                CodeBlock.of("${codeBlock}.toInt()")
+                CodeBlock.of("$codeBlock.toInt()")
             } else {
                 codeBlock
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<Float>" else "Float"
             } else {
                 "Float"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = FloatProperty.FloatIntrinsicValue()
+
         override fun isPrimitive() = true
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
                 List::class.asTypeName().parameterizedBy(Float::class.asTypeName())
             } else {
                 Float::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
@@ -335,11 +346,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("ColorType")
-    data class Color(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class Color(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -348,28 +360,30 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<Color>" else "Color"
             } else {
                 "Color"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = ColorProperty.ColorIntrinsicValue()
+
         override fun isPrimitive() = true
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
-                List::class.asTypeName()
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
+                List::class
+                    .asTypeName()
                     .parameterizedBy(androidx.compose.ui.graphics.Color::class.asTypeName())
             } else {
                 androidx.compose.ui.graphics.Color::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Color")
@@ -377,11 +391,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("InstantType")
-    data class InstantType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class InstantType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -390,28 +405,30 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<Instant>" else "Instant"
             } else {
                 "Instant (Date)"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = InstantProperty.InstantIntrinsicValue()
+
         override fun isPrimitive() = true
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
-                List::class.asTypeName()
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
+                List::class
+                    .asTypeName()
                     .parameterizedBy(kotlinx.datetime.Instant::class.asTypeName())
             } else {
                 kotlinx.datetime.Instant::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Instant")
@@ -423,10 +440,9 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         override val isList: Boolean = false,
         val dataTypeId: DataTypeId,
     ) : ComposeFlowType {
-
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -450,7 +466,10 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String {
             val className =
                 dataTypeId.let { project.findDataTypeOrNull(it)?.className } ?: "DataType"
             return if (listAware) {
@@ -460,19 +479,17 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun copyWith(
             newIsList: Boolean,
             newDataTypeId: DataTypeId,
         ): ComposeFlowType = this.copy(isList = newIsList, dataTypeId = newDataTypeId)
 
-        override fun defaultValue(): AssignableProperty =
-            CustomDataTypeProperty.ValueFromFields(dataTypeId = dataTypeId)
+        override fun defaultValue(): AssignableProperty = CustomDataTypeProperty.ValueFromFields(dataTypeId = dataTypeId)
 
         override fun isPrimitive() = false
+
         override fun asKotlinPoetTypeName(project: Project): TypeName {
             val className =
                 dataTypeId.let { project.findDataTypeOrThrow(it).asKotlinPoetClassName(project) }
@@ -492,10 +509,9 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         @Serializable(ClassSerializer::class)
         val enumClass: Class<E>,
     ) : ComposeFlowType {
-
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -507,8 +523,15 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            val typeName = enumClass.name.split(".").last().replace("Wrapper", "")
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String {
+            val typeName =
+                enumClass.name
+                    .split(".")
+                    .last()
+                    .replace("Wrapper", "")
             return if (listAware) {
                 if (isList) "List<$typeName>" else typeName
             } else {
@@ -516,21 +539,18 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
-        override fun defaultValue(): AssignableProperty =
-            EnumProperty(enumClass.getFirstEnumValue()!! as EnumWrapper)
+        override fun defaultValue(): AssignableProperty = EnumProperty(enumClass.getFirstEnumValue()!! as EnumWrapper)
 
         override fun isPrimitive() = false
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
                 List::class.asTypeName().parameterizedBy(Int::class.asTypeName())
             } else {
                 Int::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Enum")
@@ -541,10 +561,9 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
     data class JsonElementType(
         override val isList: Boolean = false,
     ) : ComposeFlowType {
-
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -553,22 +572,22 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<JsonElement>" else "JsonElement"
             } else {
                 "JsonElement"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
-        override fun defaultValue(): AssignableProperty =
-            ApiResultProperty(apiId = null)
+        override fun defaultValue(): AssignableProperty = ApiResultProperty(apiId = null)
 
         override fun isPrimitive() = false
+
         override fun asKotlinPoetTypeName(project: Project): TypeName {
             val className = JsonElementType::class.asTypeName()
             return if (isList) {
@@ -584,11 +603,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("AnyType")
-    data class AnyType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class AnyType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -597,28 +617,30 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return if (listAware) {
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
                 if (isList) "List<Any>" else "Any"
             } else {
                 "Any"
             }
-        }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = StringProperty.StringIntrinsicValue()
+
         override fun isPrimitive() = true
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
-                List::class.asTypeName()
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
+                List::class
+                    .asTypeName()
                     .parameterizedBy(AnyType::class.asTypeName())
             } else {
                 AnyType::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Any")
@@ -636,10 +658,9 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
         val firestoreCollectionId: CollectionId,
         override val isList: Boolean = false,
     ) : ComposeFlowType {
-
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean {
             if (isList != type.isList) return false
             return when (type) {
@@ -651,9 +672,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            val firestoreCollection = project.findFirestoreCollectionOrNull(firestoreCollectionId)
-                ?: return "DocumentId<Unknown>"
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String {
+            val firestoreCollection =
+                project.findFirestoreCollectionOrNull(firestoreCollectionId)
+                    ?: return "DocumentId<Unknown>"
             val documentIdTypeName = "DocumentId<${firestoreCollection.name}>"
             return if (listAware) {
                 if (isList) "List<$documentIdTypeName>" else documentIdTypeName
@@ -662,20 +687,20 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             }
         }
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = DocumentIdProperty.EmptyDocumentId
+
         override fun isPrimitive() = true
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return if (isList) {
-                List::class.asTypeName()
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
+                List::class
+                    .asTypeName()
                     .parameterizedBy(String::class.asTypeName())
             } else {
                 String::class.asTypeName()
             }
-        }
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("DocumentId")
@@ -683,26 +708,26 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     @Serializable
     @SerialName("UnknownType")
-    data class UnknownType(override val isList: Boolean = false) : ComposeFlowType {
-
+    data class UnknownType(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
-            exactMatch: Boolean
+            exactMatch: Boolean,
         ): Boolean = false
 
-        override fun displayName(project: Project, listAware: Boolean): String {
-            return "Unknown"
-        }
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String = "Unknown"
 
-        override fun copyWith(
-            newIsList: Boolean,
-        ): ComposeFlowType = this.copy(isList = newIsList)
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
 
         override fun defaultValue(): AssignableProperty = BooleanProperty.Empty
+
         override fun isPrimitive() = false
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            return Nothing::class.asTypeName()
-        }
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName = Nothing::class.asTypeName()
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Unknown")
@@ -710,11 +735,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     companion object {
         fun validSingleEntries(project: Project): List<ComposeFlowType> {
-            val firstDataType = if (project.dataTypeHolder.dataTypes.isNotEmpty()) {
-                project.dataTypeHolder.dataTypes.first()
-            } else {
-                EmptyDataType
-            }
+            val firstDataType =
+                if (project.dataTypeHolder.dataTypes.isNotEmpty()) {
+                    project.dataTypeHolder.dataTypes.first()
+                } else {
+                    EmptyDataType
+                }
             return listOf(
                 StringType(),
                 BooleanType(),
@@ -726,15 +752,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
     }
 }
 
-private fun <E : Enum<E>> Class<E>.getFirstEnumValue(): E? {
-    return enumConstants?.firstOrNull()
-}
+private fun <E : Enum<E>> Class<E>.getFirstEnumValue(): E? = enumConstants?.firstOrNull()
 
 fun ComposeFlowType.convertCodeFromType(
     inputType: ComposeFlowType,
-    codeBlock: CodeBlock
-): CodeBlock {
-    return this.convertCodeFromType(inputType, codeBlock)
-}
+    codeBlock: CodeBlock,
+): CodeBlock = this.convertCodeFromType(inputType, codeBlock)
 
 val emptyDocumentIdType = ComposeFlowType.DocumentIdType(Uuid.random().toString())

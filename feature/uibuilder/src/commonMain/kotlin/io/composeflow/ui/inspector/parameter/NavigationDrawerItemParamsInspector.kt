@@ -34,18 +34,20 @@ fun NavigationDrawerItemParamsInspector(
                 composeNodeCallbacks.onTraitUpdated(
                     node,
                     trait.copy(
-                        labelProperty = StringProperty.StringIntrinsicValue(
-                            ""
-                        )
+                        labelProperty =
+                            StringProperty.StringIntrinsicValue(
+                                "",
+                            ),
                     ),
                 )
             },
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    trait.copy(labelProperty = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        trait.copy(labelProperty = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -60,12 +62,13 @@ fun NavigationDrawerItemParamsInspector(
             onIconSelected = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    trait.copy(imageVectorHolder = it)
+                    trait.copy(imageVectorHolder = it),
                 )
             },
             currentIcon = trait.imageVectorHolder?.imageVector,
-            modifier = Modifier
-                .hoverOverlay(),
+            modifier =
+                Modifier
+                    .hoverOverlay(),
         )
     }
 }

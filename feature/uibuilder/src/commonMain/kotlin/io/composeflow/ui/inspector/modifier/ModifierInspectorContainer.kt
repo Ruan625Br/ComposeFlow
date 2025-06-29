@@ -67,10 +67,11 @@ fun ModifierInspectorContainer(
 ) {
     var expanded by remember { mutableStateOf(false) }
     Column(
-        modifier = modifier
-            .hoverOverlay()
-            .padding(end = 8.dp)
-            .animateContentSize(keyframes { durationMillis = 100 }),
+        modifier =
+            modifier
+                .hoverOverlay()
+                .padding(end = 8.dp)
+                .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
         ModifierInspectorHeaderRow(
             expanded = expanded,
@@ -98,11 +99,13 @@ fun ModifierInspectorHeaderRow(
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .clickable {
-                onExpandButtonClicked()
-            },
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .clickable {
+                    onExpandButtonClicked()
+                },
     ) {
         TreeExpander(
             expanded = expanded,
@@ -121,11 +124,12 @@ fun ModifierInspectorHeaderRow(
                 onClick = onVisibilityToggleClicked,
                 modifier = Modifier.hoverIconClickable(),
             ) {
-                val icon = if (wrapper.visible.value) {
-                    Icons.Outlined.Visibility
-                } else {
-                    Icons.Outlined.VisibilityOff
-                }
+                val icon =
+                    if (wrapper.visible.value) {
+                        Icons.Outlined.Visibility
+                    } else {
+                        Icons.Outlined.VisibilityOff
+                    }
                 val contentDesc =
                     if (wrapper.visible.value) {
                         stringResource(Res.string.tap_to_hide)

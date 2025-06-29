@@ -20,11 +20,8 @@ data class ColorWrapper(
     @Serializable(with = ColorSerializer::class)
     val color: Color? = null,
 ) {
-
     @Composable
-    fun getColor(): Color {
-        return themeColor?.getAppColor() ?: color!!
-    }
+    fun getColor(): Color = themeColor?.getAppColor() ?: color!!
 
     fun generateCode(): CodeBlock {
         val builder = CodeBlock.builder()
@@ -60,7 +57,9 @@ object Material3ColorWrapperSerializer :
  * Also this class has a benefit of constructing the color from non Composable function context.
  */
 @Serializable(Material3ColorWrapperSerializer::class)
-enum class Material3ColorWrapper(val colorName: String) {
+enum class Material3ColorWrapper(
+    val colorName: String,
+) {
     Primary("primary"),
     OnPrimary("onPrimary"),
     PrimaryContainer("primaryContainer"),
@@ -103,51 +102,52 @@ enum class Material3ColorWrapper(val colorName: String) {
     fun getAppColor(): Color {
         var color: Color = Color.Unspecified
         AppTheme {
-            color = when (this) {
-                Primary -> MaterialTheme.colorScheme.primary
-                OnPrimary -> MaterialTheme.colorScheme.onPrimary
-                PrimaryContainer -> MaterialTheme.colorScheme.primaryContainer
-                OnPrimaryContainer -> MaterialTheme.colorScheme.onPrimaryContainer
-                InversePrimary -> MaterialTheme.colorScheme.inversePrimary
-                Secondary -> MaterialTheme.colorScheme.secondary
-                OnSecondary -> MaterialTheme.colorScheme.onSecondary
-                SecondaryContainer -> MaterialTheme.colorScheme.secondaryContainer
-                OnSecondaryContainer -> MaterialTheme.colorScheme.onSecondaryContainer
-                Tertiary -> MaterialTheme.colorScheme.tertiary
-                OnTertiary -> MaterialTheme.colorScheme.onTertiary
-                TertiaryContainer -> MaterialTheme.colorScheme.tertiaryContainer
-                OnTertiaryContainer -> MaterialTheme.colorScheme.onTertiaryContainer
-                Background -> MaterialTheme.colorScheme.background
-                OnBackground -> MaterialTheme.colorScheme.onBackground
-                Surface -> MaterialTheme.colorScheme.surface
-                OnSurface -> MaterialTheme.colorScheme.onSurface
-                SurfaceVariant -> MaterialTheme.colorScheme.surfaceVariant
-                OnSurfaceVariant -> MaterialTheme.colorScheme.onSurfaceVariant
-                SurfaceTint -> MaterialTheme.colorScheme.surfaceTint
-                InverseSurface -> MaterialTheme.colorScheme.inverseSurface
-                InverseOnSurface -> MaterialTheme.colorScheme.inverseOnSurface
-                Error -> MaterialTheme.colorScheme.error
-                OnError -> MaterialTheme.colorScheme.onError
-                ErrorContainer -> MaterialTheme.colorScheme.errorContainer
-                OnErrorContainer -> MaterialTheme.colorScheme.onErrorContainer
-                Outline -> MaterialTheme.colorScheme.outline
-                OutlineVariant -> MaterialTheme.colorScheme.outlineVariant
-                Scrim -> MaterialTheme.colorScheme.scrim
-                SurfaceDim -> MaterialTheme.colorScheme.surfaceDim
-                SurfaceBright -> MaterialTheme.colorScheme.surfaceBright
-                SurfaceContainerLowest -> MaterialTheme.colorScheme.surfaceContainerLowest
-                SurfaceContainerLow -> MaterialTheme.colorScheme.surfaceContainerLow
-                SurfaceContainer -> MaterialTheme.colorScheme.surfaceContainer
-                SurfaceContainerHigh -> MaterialTheme.colorScheme.surfaceContainerHigh
-                SurfaceContainerHighest -> MaterialTheme.colorScheme.surfaceContainerHighest
-            }
+            color =
+                when (this) {
+                    Primary -> MaterialTheme.colorScheme.primary
+                    OnPrimary -> MaterialTheme.colorScheme.onPrimary
+                    PrimaryContainer -> MaterialTheme.colorScheme.primaryContainer
+                    OnPrimaryContainer -> MaterialTheme.colorScheme.onPrimaryContainer
+                    InversePrimary -> MaterialTheme.colorScheme.inversePrimary
+                    Secondary -> MaterialTheme.colorScheme.secondary
+                    OnSecondary -> MaterialTheme.colorScheme.onSecondary
+                    SecondaryContainer -> MaterialTheme.colorScheme.secondaryContainer
+                    OnSecondaryContainer -> MaterialTheme.colorScheme.onSecondaryContainer
+                    Tertiary -> MaterialTheme.colorScheme.tertiary
+                    OnTertiary -> MaterialTheme.colorScheme.onTertiary
+                    TertiaryContainer -> MaterialTheme.colorScheme.tertiaryContainer
+                    OnTertiaryContainer -> MaterialTheme.colorScheme.onTertiaryContainer
+                    Background -> MaterialTheme.colorScheme.background
+                    OnBackground -> MaterialTheme.colorScheme.onBackground
+                    Surface -> MaterialTheme.colorScheme.surface
+                    OnSurface -> MaterialTheme.colorScheme.onSurface
+                    SurfaceVariant -> MaterialTheme.colorScheme.surfaceVariant
+                    OnSurfaceVariant -> MaterialTheme.colorScheme.onSurfaceVariant
+                    SurfaceTint -> MaterialTheme.colorScheme.surfaceTint
+                    InverseSurface -> MaterialTheme.colorScheme.inverseSurface
+                    InverseOnSurface -> MaterialTheme.colorScheme.inverseOnSurface
+                    Error -> MaterialTheme.colorScheme.error
+                    OnError -> MaterialTheme.colorScheme.onError
+                    ErrorContainer -> MaterialTheme.colorScheme.errorContainer
+                    OnErrorContainer -> MaterialTheme.colorScheme.onErrorContainer
+                    Outline -> MaterialTheme.colorScheme.outline
+                    OutlineVariant -> MaterialTheme.colorScheme.outlineVariant
+                    Scrim -> MaterialTheme.colorScheme.scrim
+                    SurfaceDim -> MaterialTheme.colorScheme.surfaceDim
+                    SurfaceBright -> MaterialTheme.colorScheme.surfaceBright
+                    SurfaceContainerLowest -> MaterialTheme.colorScheme.surfaceContainerLowest
+                    SurfaceContainerLow -> MaterialTheme.colorScheme.surfaceContainerLow
+                    SurfaceContainer -> MaterialTheme.colorScheme.surfaceContainer
+                    SurfaceContainerHigh -> MaterialTheme.colorScheme.surfaceContainerHigh
+                    SurfaceContainerHighest -> MaterialTheme.colorScheme.surfaceContainerHighest
+                }
         }
         return color
     }
 
     @Composable
-    fun getTextColor(): Color {
-        return when (this) {
+    fun getTextColor(): Color =
+        when (this) {
             Primary -> OnPrimary.getAppColor()
             OnPrimary -> Primary.getAppColor()
             PrimaryContainer -> OnPrimaryContainer.getAppColor()
@@ -185,5 +185,4 @@ enum class Material3ColorWrapper(val colorName: String) {
             SurfaceContainerHighest -> OnSurface.getAppColor()
             Scrim -> Color.White
         }
-    }
 }

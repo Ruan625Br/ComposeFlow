@@ -28,20 +28,25 @@ class ProjectRepository(
 ) {
     private val editingProjectKey = stringPreferencesKey("editing_project")
 
-    val editingProject: Flow<Project> = dataStore.data.map { preference ->
-        preference[editingProjectKey]?.let { yamlSerializer.decodeFromString<Project>(it) }
-            ?: Project()
-    }
+    val editingProject: Flow<Project> =
+        dataStore.data.map { preference ->
+            preference[editingProjectKey]?.let { yamlSerializer.decodeFromString<Project>(it) }
+                ?: Project()
+        }
 
-    suspend fun createProject(projectName: String, packageName: String): Project {
-        val project = Project(
-            name = projectName.toKotlinFileName(),
-            packageName = packageName.toPackageName()
-        )
+    suspend fun createProject(
+        projectName: String,
+        packageName: String,
+    ): Project {
+        val project =
+            Project(
+                name = projectName.toKotlinFileName(),
+                packageName = packageName.toPackageName(),
+            )
         projectSaver.saveProjectYaml(
             userId = firebaseIdToken.user_id,
             projectId = project.id,
-            yamlContent = project.serialize()
+            yamlContent = project.serialize(),
         )
         return project
     }
@@ -49,27 +54,29 @@ class ProjectRepository(
     suspend fun deleteProject(projectId: String) {
         projectSaver.deleteProject(
             userId = firebaseIdToken.user_id,
-            projectId = projectId
+            projectId = projectId,
         )
     }
 
-    suspend fun loadProject(projectId: String): Result<Project?, Throwable> = runCatching {
-        val loaded = projectSaver.loadProject(
-            userId = firebaseIdToken.user_id,
-            projectId = projectId.removeSuffix(".yaml")
-        )
-        loaded?.let {
-            val project = Project.deserializeFromString(it.yaml)
-            project.lastModified = it.lastModified
-            project
+    suspend fun loadProject(projectId: String): Result<Project?, Throwable> =
+        runCatching {
+            val loaded =
+                projectSaver.loadProject(
+                    userId = firebaseIdToken.user_id,
+                    projectId = projectId.removeSuffix(".yaml"),
+                )
+            loaded?.let {
+                val project = Project.deserializeFromString(it.yaml)
+                project.lastModified = it.lastModified
+                project
+            }
         }
-    }
 
     suspend fun updateProject(project: Project) {
         projectSaver.saveProjectYaml(
             userId = firebaseIdToken.user_id,
             projectId = project.id,
-            yamlContent = project.serialize()
+            yamlContent = project.serialize(),
         )
 
         // Save the project to DataStore, too so that Flow
@@ -78,6 +85,5 @@ class ProjectRepository(
         }
     }
 
-    suspend fun loadProjectIdList(): List<String> =
-        projectSaver.loadProjectIdList(userId = firebaseIdToken.user_id)
+    suspend fun loadProjectIdList(): List<String> = projectSaver.loadProjectIdList(userId = firebaseIdToken.user_id)
 }

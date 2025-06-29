@@ -62,19 +62,20 @@ fun ShapePropertyEditor(
                     onCheckedChange = {
                         onShapeUpdated(shape)
                     },
-                    modifier = Modifier.then(
-                        if (selected) {
-                            Modifier
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(
-                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                        alpha = 0.3f,
-                                    ),
-                                )
-                        } else {
-                            Modifier
-                        },
-                    ),
+                    modifier =
+                        Modifier.then(
+                            if (selected) {
+                                Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                            alpha = 0.3f,
+                                        ),
+                                    )
+                            } else {
+                                Modifier
+                            },
+                        ),
                 ) {
                     ComposeFlowIcon(
                         imageVector = imageVector,
@@ -98,7 +99,7 @@ fun ShapePropertyEditor(
                                 initialShape.topStart,
                                 initialShape.topEnd,
                                 initialShape.bottomEnd,
-                                initialShape.bottomStart
+                                initialShape.bottomStart,
                             )
                         }
 
@@ -107,14 +108,14 @@ fun ShapePropertyEditor(
                                 initialShape.topStart,
                                 initialShape.topEnd,
                                 initialShape.bottomEnd,
-                                initialShape.bottomStart
+                                initialShape.bottomStart,
                             )
                         }
 
                         else -> {
                             null
                         }
-                    }
+                    },
                 )
             }
             var cornerValues by remember {
@@ -123,8 +124,8 @@ fun ShapePropertyEditor(
                         0.dp,
                         0.dp,
                         0.dp,
-                        0.dp
-                    )
+                        0.dp,
+                    ),
                 )
             }
             runIconToggleButton(
@@ -140,23 +141,25 @@ fun ShapePropertyEditor(
                 contentDesc = "Circle",
             )
             runIconToggleButton(
-                shape = ShapeWrapper.RoundedCorner(
-                    cornerValues.topStart,
-                    cornerValues.topEnd,
-                    cornerValues.bottomEnd,
-                    cornerValues.bottomStart
-                ),
+                shape =
+                    ShapeWrapper.RoundedCorner(
+                        cornerValues.topStart,
+                        cornerValues.topEnd,
+                        cornerValues.bottomEnd,
+                        cornerValues.bottomStart,
+                    ),
                 selected = initialShape is ShapeWrapper.RoundedCorner,
                 imageVector = Icons.Outlined.RoundedCorner,
                 contentDesc = "Rounded corner",
             )
             runIconToggleButton(
-                shape = ShapeWrapper.CutCorner(
-                    cornerValues.topStart,
-                    cornerValues.topEnd,
-                    cornerValues.bottomEnd,
-                    cornerValues.bottomStart
-                ),
+                shape =
+                    ShapeWrapper.CutCorner(
+                        cornerValues.topStart,
+                        cornerValues.topEnd,
+                        cornerValues.bottomEnd,
+                        cornerValues.bottomStart,
+                    ),
                 selected = initialShape is ShapeWrapper.CutCorner,
                 imageVector = Icons.Outlined.CropDin,
                 contentDesc = "Cut corner",
@@ -212,7 +215,6 @@ fun CornerSizeInspector(
         bottomStart: Dp,
     ) -> Unit,
 ) {
-
     var selectedPaddingSpec by remember {
         mutableStateOf(
             initialShape?.let {
@@ -221,7 +223,7 @@ fun CornerSizeInspector(
                 } else {
                     ShapeCornerSpec.All
                 }
-            } ?: ShapeCornerSpec.All
+            } ?: ShapeCornerSpec.All,
         )
     }
 
@@ -238,19 +240,20 @@ fun CornerSizeInspector(
                 onCheckedChange = {
                     selectedPaddingSpec = shapeSpec
                 },
-                modifier = Modifier.then(
-                    if (thisItemSelected) {
-                        Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                                    alpha = 0.3f,
-                                ),
-                            )
-                    } else {
-                        Modifier
-                    },
-                ),
+                modifier =
+                    Modifier.then(
+                        if (thisItemSelected) {
+                            Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(
+                                    MaterialTheme.colorScheme.onPrimaryContainer.copy(
+                                        alpha = 0.3f,
+                                    ),
+                                )
+                        } else {
+                            Modifier
+                        },
+                    ),
             ) {
                 imageVector?.let {
                     ComposeFlowIcon(
@@ -279,7 +282,10 @@ fun CornerSizeInspector(
         when (selectedPaddingSpec) {
             ShapeCornerSpec.All -> {
                 BasicEditableTextProperty(
-                    initialValue = cornerValues.topStart.value.toInt().toString(),
+                    initialValue =
+                        cornerValues.topStart.value
+                            .toInt()
+                            .toString(),
                     placeholder = "Corner size",
                     label = "All",
                     validateInput = CornerValidator()::validate,
@@ -295,7 +301,10 @@ fun CornerSizeInspector(
                 Column {
                     Row {
                         BasicEditableTextProperty(
-                            initialValue = cornerValues.topStart.value.toInt().toString(),
+                            initialValue =
+                                cornerValues.topStart.value
+                                    .toInt()
+                                    .toString(),
                             label = "Top start",
                             validateInput = CornerValidator()::validate,
                             onValidValueChanged = {
@@ -303,15 +312,19 @@ fun CornerSizeInspector(
                                     Dp(it.toFloat()),
                                     cornerValues.topEnd,
                                     cornerValues.bottomEnd,
-                                    cornerValues.bottomStart
+                                    cornerValues.bottomStart,
                                 )
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 4.dp),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 4.dp),
                         )
                         BasicEditableTextProperty(
-                            initialValue = cornerValues.topEnd.value.toInt().toString(),
+                            initialValue =
+                                cornerValues.topEnd.value
+                                    .toInt()
+                                    .toString(),
                             label = "Top end",
                             validateInput = CornerValidator()::validate,
                             onValidValueChanged = {
@@ -319,17 +332,21 @@ fun CornerSizeInspector(
                                     cornerValues.topStart,
                                     Dp(it.toFloat()),
                                     cornerValues.bottomEnd,
-                                    cornerValues.bottomStart
+                                    cornerValues.bottomStart,
                                 )
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 4.dp),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 4.dp),
                         )
                     }
                     Row {
                         BasicEditableTextProperty(
-                            initialValue = cornerValues.bottomStart.value.toInt().toString(),
+                            initialValue =
+                                cornerValues.bottomStart.value
+                                    .toInt()
+                                    .toString(),
                             label = "Bottom start",
                             validateInput = CornerValidator()::validate,
                             onValidValueChanged = {
@@ -337,15 +354,19 @@ fun CornerSizeInspector(
                                     cornerValues.topStart,
                                     cornerValues.topEnd,
                                     cornerValues.bottomEnd,
-                                    Dp(it.toFloat())
+                                    Dp(it.toFloat()),
                                 )
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 4.dp),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 4.dp),
                         )
                         BasicEditableTextProperty(
-                            initialValue = cornerValues.bottomEnd.value.toInt().toString(),
+                            initialValue =
+                                cornerValues.bottomEnd.value
+                                    .toInt()
+                                    .toString(),
                             label = "Bottom end",
                             validateInput = CornerValidator()::validate,
                             onValidValueChanged = {
@@ -353,12 +374,13 @@ fun CornerSizeInspector(
                                     cornerValues.topStart,
                                     cornerValues.topEnd,
                                     Dp(it.toFloat()),
-                                    cornerValues.bottomStart
+                                    cornerValues.bottomStart,
                                 )
                             },
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 4.dp),
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 4.dp),
                         )
                     }
                 }

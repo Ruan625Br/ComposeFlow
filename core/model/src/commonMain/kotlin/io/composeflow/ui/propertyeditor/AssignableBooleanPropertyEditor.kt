@@ -69,17 +69,18 @@ fun AssignableBooleanPropertyEditor(
                     val newProperty = BooleanProperty.BooleanIntrinsicValue(it)
                     onValidPropertyChanged(
                         initialProperty.mergeProperty(project, newProperty),
-                        null
+                        null,
                     )
                 },
                 modifier = Modifier.padding(bottom = 12.dp).weight(1f),
             )
         } else {
-            val supportingText = if (initialProperty == BooleanProperty.Empty) {
-                stringResource(Res.string.condition_must_not_be_empty)
-            } else {
-                null
-            }
+            val supportingText =
+                if (initialProperty == BooleanProperty.Empty) {
+                    stringResource(Res.string.condition_must_not_be_empty)
+                } else {
+                    null
+                }
             EditableTextProperty(
                 initialValue = initialProperty?.transformedValueExpression(project) ?: "",
                 onValidValueChanged = {},

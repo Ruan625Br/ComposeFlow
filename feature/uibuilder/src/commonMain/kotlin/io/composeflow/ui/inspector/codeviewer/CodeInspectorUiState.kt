@@ -4,5 +4,8 @@ import androidx.compose.ui.text.AnnotatedString
 
 sealed interface CodeInspectorUiState {
     data object Loading : CodeInspectorUiState
-    data class Success(val parsedCode: AnnotatedString) : CodeInspectorUiState
+
+    data class Success(
+        val parsedCode: AnnotatedString,
+    ) : CodeInspectorUiState
 }

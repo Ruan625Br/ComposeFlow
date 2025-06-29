@@ -12,7 +12,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +23,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.IntSize
@@ -105,49 +105,45 @@ data class Screen(
     override val id: String = Uuid.random().toString(),
     override val name: String,
     @Serializable(with = MutableStateSerializer::class)
-    val rootNode: MutableState<ComposeNode> = mutableStateOf(
-        ComposeNode(
-            label = mutableStateOf(name),
-            trait = mutableStateOf(ScreenTrait)
-        ).apply {
-            addChild(ComposeNode.createRootNode())
-        }),
-
+    val rootNode: MutableState<ComposeNode> =
+        mutableStateOf(
+            ComposeNode(
+                label = mutableStateOf(name),
+                trait = mutableStateOf(ScreenTrait),
+            ).apply {
+                addChild(ComposeNode.createRootNode())
+            },
+        ),
     /**
      * If set to true, this Screen is visible in the Navigation.
      */
     @Serializable(with = MutableStateSerializer::class)
     val showOnNavigation: MutableState<Boolean> = mutableStateOf(true),
-
     /**
      * Title in the TopAppBar
      */
     @Serializable(with = MutableStateSerializer::class)
     val title: MutableState<String> = mutableStateOf(name),
-
     /**
      * Displayed label in the Navigation
      */
     @Serializable(with = MutableStateSerializer::class)
     val label: MutableState<String> = mutableStateOf(name),
-
     @Serializable(with = MutableStateSerializer::class)
-    val icon: MutableState<ImageVectorHolder> = mutableStateOf(
-        Filled.entries.toTypedArray().random(),
-    ),
-
+    val icon: MutableState<ImageVectorHolder> =
+        mutableStateOf(
+            Filled.entries.toTypedArray().random(),
+        ),
     /**
      * The default destination when the app is launched
      */
     @Serializable(with = MutableStateSerializer::class)
     val isDefault: MutableState<Boolean> = mutableStateOf(false),
-
     /**
      * Set to true when this screen is active in the UI Builder
      */
     @Serializable(with = MutableStateSerializer::class)
     val isSelected: MutableState<Boolean> = mutableStateOf(false),
-
     /**
      * ComposeNode that represents the TopAppBar specific to this Screen.
      */
@@ -156,44 +152,42 @@ data class Screen(
         mutableStateOf(
             ComposeNode(
                 label = mutableStateOf("TopAppBar"),
-                trait = mutableStateOf(
-                    TopAppBarTrait(
-                        title = StringProperty.StringIntrinsicValue(title.value),
-                        topAppBarType = TopAppBarTypeWrapper.CenterAligned,
+                trait =
+                    mutableStateOf(
+                        TopAppBarTrait(
+                            title = StringProperty.StringIntrinsicValue(title.value),
+                            topAppBarType = TopAppBarTypeWrapper.CenterAligned,
+                        ),
                     ),
-                ),
             ).apply {
                 addChild(
                     ComposeNode(
                         label = mutableStateOf("Nav Icon"),
-                        trait = mutableStateOf(
-                            IconTrait(imageVectorHolder = null),
-                        ),
+                        trait =
+                            mutableStateOf(
+                                IconTrait(imageVectorHolder = null),
+                            ),
                     ),
                 )
             },
         ),
-
     /**
      * ComposeNode that represents the TopAppBar specific to this Screen.
      */
     @Serializable(with = MutableStateSerializer::class)
     val bottomAppBarNode: MutableState<ComposeNode?> = mutableStateOf(null),
-
     /**
      * ComposeNode that represents the NavigationDrawer
      */
     @Serializable(with = MutableStateSerializer::class)
     val navigationDrawerNode: MutableState<ComposeNode?> =
         mutableStateOf(null),
-
     /**
      * ComposeNode that represents the FAB
      */
     @Serializable(with = MutableStateSerializer::class)
     val fabNode: MutableState<ComposeNode?> =
         mutableStateOf(null),
-
     @Serializable(FallbackMutableStateListSerializer::class)
     override val parameters: MutableList<ParameterWrapper<*>> = mutableStateListEqualsOverrideOf(),
     private val stateHolderImpl: StateHolderImpl = StateHolderImpl(),
@@ -206,10 +200,11 @@ data class Screen(
         navigationDrawerNode.value?.updateChildParentRelationships()
 
         if (rootNode.value.trait.value !is ScreenTrait) {
-            val newRoot = ComposeNode(
-                label = mutableStateOf(label.value),
-                trait = mutableStateOf(ScreenTrait)
-            )
+            val newRoot =
+                ComposeNode(
+                    label = mutableStateOf(label.value),
+                    trait = mutableStateOf(ScreenTrait),
+                )
             newRoot.addChild(rootNode.value)
             rootNode.value = newRoot
         }
@@ -222,20 +217,19 @@ data class Screen(
      * Returns the content root node which is the root node of the actual content (instead of
      * a ComposeNode where paletteNode == PaletteNode.Screen)
      */
-    fun contentRootNode(): ComposeNode = if (rootNode.value.trait.value is ScreenTrait) {
-        rootNode.value.children[0]
-    } else {
-        rootNode.value
-    }
+    fun contentRootNode(): ComposeNode =
+        if (rootNode.value.trait.value is ScreenTrait) {
+            rootNode.value.children[0]
+        } else {
+            rootNode.value
+        }
 
-    fun defaultRouteCodeBlock(): CodeBlock {
-        return if (parameters.isEmpty()) {
+    fun defaultRouteCodeBlock(): CodeBlock =
+        if (parameters.isEmpty()) {
             CodeBlock.of("%T.$routeName", screenRouteClass)
         } else {
-            CodeBlock.of("%T.${routeName}()", screenRouteClass)
+            CodeBlock.of("%T.$routeName()", screenRouteClass)
         }
-    }
-
 
     private fun asRouteClassName(): ClassName = screenRouteClass.nestedClass(routeName)
 
@@ -259,16 +253,17 @@ data class Screen(
     @Transient
     val sceneName: String = name.asClassName().lowercase().toKotlinFileName()
 
-    override fun getPackageName(project: Project): String =
-        "${project.packageName}.screens.$name".toPackageName()
+    override fun getPackageName(project: Project): String = "${project.packageName}.screens.$name".toPackageName()
 
     override fun getStates(project: Project): List<ReadableState> {
         val projectStates = project.getStates(project)
         val screenSpecificStates = stateHolderImpl.getStates(project)
-        val companionStates = getRootNode().allChildren()
-            .flatMap {
-                it.getCompanionStates(project)
-            }
+        val companionStates =
+            getRootNode()
+                .allChildren()
+                .flatMap {
+                    it.getCompanionStates(project)
+                }
         return projectStates + screenSpecificStates + companionStates
     }
 
@@ -279,10 +274,13 @@ data class Screen(
     override fun createUniqueLabel(
         project: Project,
         composeNode: ComposeNode,
-        initial: String
+        initial: String,
     ): String {
         val existingLabels =
-            getRootNode().allChildren().filter { it.id != composeNode.id }.map { it.label.value }
+            getRootNode()
+                .allChildren()
+                .filter { it.id != composeNode.id }
+                .map { it.label.value }
                 .toSet()
         return generateUniqueName(
             initial = initial,
@@ -290,8 +288,10 @@ data class Screen(
         )
     }
 
-    override fun findStateOrNull(project: Project, stateId: StateId): ReadableState? =
-        getStates(project).firstOrNull { it.id == stateId }
+    override fun findStateOrNull(
+        project: Project,
+        stateId: StateId,
+    ): ReadableState? = getStates(project).firstOrNull { it.id == stateId }
 
     override fun removeState(stateId: StateId): Boolean =
         stateHolderImpl.states.removeIf {
@@ -310,18 +310,21 @@ data class Screen(
         stateHolderImpl.states.addAll((other as? StateHolderImpl)?.states ?: emptyList())
     }
 
-    override fun getStateResults(project: Project): List<StateResult> {
-        return project.getStates(project).map { StateHolderType.Global to it } +
-                stateHolderImpl.getStates(project)
-                    .map { StateHolderType.Screen(screenId = id) to it } +
-                getRootNode().allChildren().flatMap { node ->
-                    node.getCompanionStates(project).map { state ->
-                        StateHolderType.Screen(screenId = id) to state
-                    }
+    override fun getStateResults(project: Project): List<StateResult> =
+        project.getStates(project).map { StateHolderType.Global to it } +
+            stateHolderImpl
+                .getStates(project)
+                .map { StateHolderType.Screen(screenId = id) to it } +
+            getRootNode().allChildren().flatMap { node ->
+                node.getCompanionStates(project).map { state ->
+                    StateHolderType.Screen(screenId = id) to state
                 }
-    }
+            }
 
-    fun generateCode(project: Project, context: GenerationContext): List<FileSpec?> {
+    fun generateCode(
+        project: Project,
+        context: GenerationContext,
+    ): List<FileSpec?> {
         val localContext = context.copy(currentEditable = this)
 
         // Execute generation first to construct the related dependencies in the GenerationContext
@@ -351,25 +354,26 @@ data class Screen(
         )
     }
 
-    fun getBottomAppBar(): ComposeNode? {
-        return bottomAppBarNode.value
-    }
+    fun getBottomAppBar(): ComposeNode? = bottomAppBarNode.value
 
     override fun generateComposeScreenFileSpec(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
     ): FileSpec {
-        val fileBuilder = FileSpec.builder(getPackageName(project), composableName)
-            .addImport("androidx.compose.runtime", "getValue")
-            .addImport("androidx.compose.runtime", "setValue")
+        val fileBuilder =
+            FileSpec
+                .builder(getPackageName(project), composableName)
+                .addImport("androidx.compose.runtime", "getValue")
+                .addImport("androidx.compose.runtime", "setValue")
 
         val funSpecBuilder = FunSpec.builder(composableName).addAnnotation(Composable::class)
         if (parameters.isNotEmpty()) {
             funSpecBuilder.addParameter(
-                ParameterSpec.builder(ComposeScreenConstant.arguments.name, asRouteClassName())
+                ParameterSpec
+                    .builder(ComposeScreenConstant.arguments.name, asRouteClassName())
                     .defaultValue(defaultRouteCodeBlock())
-                    .build()
+                    .build(),
             )
         }
 
@@ -392,7 +396,7 @@ data class Screen(
         if (context.getCurrentComposableContext().isCoroutineScopeUsed) {
             funSpecBuilder.addStatement(
                 "val ${ComposeScreenConstant.coroutineScope.name} = %M()",
-                MemberHolder.AndroidX.Runtime.rememberCoroutineScope
+                MemberHolder.AndroidX.Runtime.rememberCoroutineScope,
             )
         }
 
@@ -412,10 +416,11 @@ data class Screen(
                         state.generateVariableInitializationBlock(
                             project,
                             context,
-                            dryRun
-                        )
+                            dryRun,
+                        ),
                     )
-                    state.generateValidatorInitializationBlock(project, context, dryRun = dryRun)
+                    state
+                        .generateValidatorInitializationBlock(project, context, dryRun = dryRun)
                         ?.let {
                             funSpecBuilder.addCode(it)
                         }
@@ -428,8 +433,8 @@ data class Screen(
                             state.generateVariableInitializationBlock(
                                 project,
                                 context,
-                                dryRun = dryRun
-                            )
+                                dryRun = dryRun,
+                            ),
                         )
                         funSpecBuilder.addStatement("") // Enforce a new line
                     }
@@ -441,8 +446,8 @@ data class Screen(
                             state.generateVariableInitializationBlock(
                                 project,
                                 context,
-                                dryRun = dryRun
-                            )
+                                dryRun = dryRun,
+                            ),
                         )
                         funSpecBuilder.addStatement("") // Enforce a new line
                     }
@@ -455,8 +460,8 @@ data class Screen(
                     state.generateVariableInitializationBlock(
                         project,
                         context,
-                        dryRun = dryRun
-                    )
+                        dryRun = dryRun,
+                    ),
                 )
                 funSpecBuilder.addStatement("") // Enforce a new line
             }
@@ -473,12 +478,12 @@ data class Screen(
             }
             funSpecBuilder.addCode(
                 """
-                val screenLoaded by $viewModelName.${screenInitiallyLoadedFlag}.%M()
+                val screenLoaded by $viewModelName.$screenInitiallyLoadedFlag.%M()
                 %M(screenLoaded) {
                     if (screenLoaded) {
                         ${onInitialLoadCodeBlock.build()}
                     } else {
-                        ${viewModelName}.${onScreenInitiallyLoaded}()
+                        $viewModelName.$onScreenInitiallyLoaded()
                     }
                 }
             """,
@@ -500,22 +505,22 @@ data class Screen(
         }
         project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.forEach { firestoreCollection ->
             if (contentRootNode().isDependent(firestoreCollection.id)) {
-                context.getCurrentComposableContext()
+                context
+                    .getCurrentComposableContext()
                     .addDependency(viewModelConstant = ViewModelConstant.firestore)
                 funSpecBuilder.addCode(
                     firestoreCollection.generateVariableInitializationBlock(
                         project,
                         context,
-                        dryRun
-                    )
+                        dryRun,
+                    ),
                 )
             }
         }
         getAllActionNodes()
             .flatMap {
                 it.generateInitializationCodeBlocks(project, context, dryRun = dryRun)
-            }
-            .distinctBy { it }
+            }.distinctBy { it }
             .forEach { initializationCode ->
                 initializationCode?.let {
                     funSpecBuilder.addCode(it)
@@ -597,16 +602,17 @@ data class Screen(
                     "%M(modifier = %M.%M(top = it.calculateTopPadding())) {",
                     MemberHolder.AndroidX.Layout.Column,
                     MemberHolder.AndroidX.Ui.Modifier,
-                    MemberHolder.AndroidX.Layout.padding
-                )
+                    MemberHolder.AndroidX.Layout.padding,
+                ),
             )
         }
 
-        val generatedCode = contentRootNode().generateCode(
-            project = project,
-            context = context,
-            dryRun = dryRun,
-        )
+        val generatedCode =
+            contentRootNode().generateCode(
+                project = project,
+                context = context,
+                dryRun = dryRun,
+            )
         funSpecBuilder.addCode("%M {", MemberHolder.AndroidX.Layout.Column)
         funSpecBuilder.addCode(generatedCode)
 
@@ -645,7 +651,8 @@ data class Screen(
             it.generateNavigationInitializationBlock()?.let { codeBlock ->
                 builder
                     .addStatement("${it.argumentName(project)} = ")
-                    .add(codeBlock).addStatement(",")
+                    .add(codeBlock)
+                    .addStatement(",")
             }
         }
         return builder.build()
@@ -657,44 +664,48 @@ data class Screen(
             getAllActions(project).distinctBy { it.generateArgumentParameterSpec(project) }
         val funSpecBuilder = FunSpec.builder(sceneName).receiver(NavGraphBuilder::class)
 
-        val argumentPassersString = buildString {
-            actionsDistinctByArgSpec.forEach {
-                it.argumentName(project)?.let { argumentName ->
-                    append("$argumentName = $argumentName,\n")
+        val argumentPassersString =
+            buildString {
+                actionsDistinctByArgSpec.forEach {
+                    it.argumentName(project)?.let { argumentName ->
+                        append("$argumentName = $argumentName,\n")
+                    }
                 }
             }
-        }
         actionsDistinctByArgSpec.forEach {
             it.generateArgumentParameterSpec(project)?.let { parameterSpec ->
                 funSpecBuilder.addParameter(parameterSpec)
             }
         }
 
-        val paramsBlock = if (parameters.isNotEmpty()) {
-            CodeBlock.builder().add(
-                "val arguments: ${screenRoute}.${routeName} = %M(backstackEntry)",
-                MemberName("${COMPOSEFLOW_PACKAGE}.util", "toRoute")
-            )
-        } else {
-            CodeBlock.builder()
-        }
-
-        val paramsPassersString = buildString {
+        val paramsBlock =
             if (parameters.isNotEmpty()) {
-                append("arguments = arguments,\n")
+                CodeBlock.builder().add(
+                    "val arguments: $screenRoute.$routeName = %M(backstackEntry)",
+                    MemberName("${COMPOSEFLOW_PACKAGE}.util", "toRoute"),
+                )
+            } else {
+                CodeBlock.builder()
             }
-        }
 
-        val funSpec = funSpecBuilder
-            .addCode(
-                """
-    %M<${screenRoute}.$routeName> { backstackEntry ->
+        val paramsPassersString =
+            buildString {
+                if (parameters.isNotEmpty()) {
+                    append("arguments = arguments,\n")
+                }
+            }
+
+        val funSpec =
+            funSpecBuilder
+                .addCode(
+                    """
+    %M<$screenRoute.$routeName> { backstackEntry ->
         ${paramsBlock.build()}
         $composableName($paramsPassersString$argumentPassersString)
     } 
             """,
-                MemberName("androidx.navigation.compose", "composable"),
-            ).build()
+                    MemberName("androidx.navigation.compose", "composable"),
+                ).build()
         fileBuilder.addFunction(funSpec).build()
         fileBuilder.suppressRedundantVisibilityModifier()
         return fileBuilder.build()
@@ -776,20 +787,20 @@ data class Screen(
         }
     }
 
-    private fun getAllRootNodes(): List<ComposeNode?> = listOf(
-        navigationDrawerNode.value,
-        topAppBarNode.value,
-        bottomAppBarNode.value,
-        rootNode.value,
-        fabNode.value,
-    )
+    private fun getAllRootNodes(): List<ComposeNode?> =
+        listOf(
+            navigationDrawerNode.value,
+            topAppBarNode.value,
+            bottomAppBarNode.value,
+            rootNode.value,
+            fabNode.value,
+        )
 
     override fun getRootNode(): ComposeNode = rootNode.value
+
     override fun getContentRootNode(): ComposeNode = contentRootNode()
 
-    override fun findFocusedNodeOrNull(): ComposeNode? {
-        return getAllComposeNodes().firstOrNull { it.isFocused.value }
-    }
+    override fun findFocusedNodeOrNull(): ComposeNode? = getAllComposeNodes().firstOrNull { it.isFocused.value }
 
     override fun clearIsHoveredRecursively() {
         getAllRootNodes().forEach { it?.clearIsHoveredRecursively() }
@@ -809,10 +820,10 @@ data class Screen(
 
     override fun getAllComposeNodes(): List<ComposeNode> =
         rootNode.value.allChildren() +
-                (topAppBarNode.value?.allChildren() ?: emptyList()) +
-                (bottomAppBarNode.value?.allChildren() ?: emptyList()) +
-                (navigationDrawerNode.value?.allChildren() ?: emptyList()) +
-                (fabNode.value?.allChildren() ?: emptyList())
+            (topAppBarNode.value?.allChildren() ?: emptyList()) +
+            (bottomAppBarNode.value?.allChildren() ?: emptyList()) +
+            (navigationDrawerNode.value?.allChildren() ?: emptyList()) +
+            (fabNode.value?.allChildren() ?: emptyList())
 
     @Composable
     fun thumbnail(
@@ -824,23 +835,26 @@ data class Screen(
         var deviceSizeDp by remember { mutableStateOf(IntSize.Zero) }
         val density = LocalDensity.current
         Column(
-            modifier = modifier
-                .clip(RoundedCornerShape(16.dp))
-                .background(
-                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
-                )
-                .switchByHovered(
-                    hovered = Modifier.border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(16.dp),
-                    ).hoverIconClickable(),
-                    notHovered = Modifier.alpha(0.5f).border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.secondary,
-                        shape = RoundedCornerShape(16.dp),
+            modifier =
+                modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f),
+                    ).switchByHovered(
+                        hovered =
+                            Modifier
+                                .border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    shape = RoundedCornerShape(16.dp),
+                                ).hoverIconClickable(),
+                        notHovered =
+                            Modifier.alpha(0.5f).border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.secondary,
+                                shape = RoundedCornerShape(16.dp),
+                            ),
                     ),
-                ),
         ) {
             Text(
                 text = thumbnailName,
@@ -854,7 +868,7 @@ data class Screen(
                         "Updated: ${lastModified.asDateString()}",
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f),
-                        modifier = Modifier.padding(top = 8.dp, start = 24.dp)
+                        modifier = Modifier.padding(top = 8.dp, start = 24.dp),
                     )
                 }
             }
@@ -862,26 +876,32 @@ data class Screen(
             ProvideDeviceSizeDp(deviceSizeDp) {
                 ProvideAppThemeTokens(
                     isDarkTheme = LocalUseDarkTheme.current,
-                    lightScheme = project.themeHolder.colorSchemeHolder.lightColorScheme.value.toColorScheme(),
-                    darkScheme = project.themeHolder.colorSchemeHolder.darkColorScheme.value.toColorScheme(),
-                    typography = project.themeHolder.fontHolder.generateTypography()
+                    lightScheme =
+                        project.themeHolder.colorSchemeHolder.lightColorScheme.value
+                            .toColorScheme(),
+                    darkScheme =
+                        project.themeHolder.colorSchemeHolder.darkColorScheme.value
+                            .toColorScheme(),
+                    typography = project.themeHolder.fontHolder.generateTypography(),
                 ) {
                     Surface(
-                        modifier = Modifier
-                            .scale(0.85f)
-                            .clip(RoundedCornerShape(8.dp))
-                            .onGloballyPositioned {
-                                deviceSizeDp = it.size / density.density.toInt()
-                            },
+                        modifier =
+                            Modifier
+                                .scale(0.85f)
+                                .clip(RoundedCornerShape(8.dp))
+                                .onGloballyPositioned {
+                                    deviceSizeDp = it.size / density.density.toInt()
+                                },
                     ) {
                         contentRootNode().RenderedNodeInCanvas(
                             project = project,
                             canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                             paletteRenderParams = PaletteRenderParams(isThumbnail = true),
                             zoomableContainerStateHolder = ZoomableContainerStateHolder(),
-                            modifier = Modifier
-                                .onClick(enabled = true, onClick = {})
-                                .size(width = 330.dp, height = 460.dp),
+                            modifier =
+                                Modifier
+                                    .onClick(enabled = true, onClick = {})
+                                    .size(width = 330.dp, height = 460.dp),
                         )
                     }
                 }
@@ -911,10 +931,9 @@ fun Screen.restoreInstance(): Screen {
     return decoded
 }
 
-fun Screen.createCopyOfNewName(newName: String): Screen {
-    return copy(
+fun Screen.createCopyOfNewName(newName: String): Screen =
+    copy(
         name = newName,
         title = mutableStateOf(newName),
-        label = mutableStateOf(newName)
+        label = mutableStateOf(newName),
     )
-}

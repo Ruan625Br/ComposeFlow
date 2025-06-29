@@ -37,7 +37,11 @@ fun HorizontalPagerParamsInspector(
     Column {
         Row {
             BasicEditableTextProperty(
-                initialValue = trait.contentPadding?.value?.toInt()?.toString() ?: "",
+                initialValue =
+                    trait.contentPadding
+                        ?.value
+                        ?.toInt()
+                        ?.toString() ?: "",
                 label = "Content padding",
                 validateInput = DpValidator()::validate,
                 onValidValueChanged = {
@@ -51,7 +55,11 @@ fun HorizontalPagerParamsInspector(
             )
 
             BasicEditableTextProperty(
-                initialValue = trait.pageSpacing?.value?.toInt()?.toString() ?: "",
+                initialValue =
+                    trait.pageSpacing
+                        ?.value
+                        ?.toInt()
+                        ?.toString() ?: "",
                 label = "Page spacing",
                 validateInput = DpValidator()::validate,
                 onValidValueChanged = {
@@ -90,7 +98,7 @@ fun HorizontalPagerParamsInspector(
             },
             label = "Snap position",
             selectedItem = trait.snapPositionWrapper,
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         )
         Row {
             BooleanPropertyEditor(
@@ -128,11 +136,12 @@ fun HorizontalPagerParamsInspector(
                 acceptableType = ComposeFlowType.Color(),
                 initialProperty = trait.indicatorSelectedColor,
                 onValidPropertyChanged = { property, lazyListSource ->
-                    val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                        node,
-                        trait.copy(indicatorSelectedColor = property),
-                        lazyListSource,
-                    )
+                    val result =
+                        composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                            node,
+                            trait.copy(indicatorSelectedColor = property),
+                            lazyListSource,
+                        )
                     result.errorMessages.forEach {
                         coroutineScope.launch {
                             onShowSnackbar(it, null)
@@ -143,15 +152,17 @@ fun HorizontalPagerParamsInspector(
                     composeNodeCallbacks.onTraitUpdated(
                         node,
                         trait.copy(
-                            indicatorSelectedColor = ColorProperty.ColorIntrinsicValue(
-                                value = ColorWrapper(themeColor = Material3ColorWrapper.OnSurface)
-                            )
-                        )
+                            indicatorSelectedColor =
+                                ColorProperty.ColorIntrinsicValue(
+                                    value = ColorWrapper(themeColor = Material3ColorWrapper.OnSurface),
+                                ),
+                        ),
                     )
                 },
-                modifier = Modifier
-                    .hoverOverlay()
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .fillMaxWidth(),
             )
             AssignableColorPropertyEditor(
                 project = project,
@@ -160,11 +171,12 @@ fun HorizontalPagerParamsInspector(
                 acceptableType = ComposeFlowType.Color(),
                 initialProperty = trait.indicatorUnselectedColor,
                 onValidPropertyChanged = { property, lazyListSource ->
-                    val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                        node,
-                        trait.copy(indicatorUnselectedColor = property),
-                        lazyListSource,
-                    )
+                    val result =
+                        composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                            node,
+                            trait.copy(indicatorUnselectedColor = property),
+                            lazyListSource,
+                        )
                     result.errorMessages.forEach {
                         coroutineScope.launch {
                             onShowSnackbar(it, null)
@@ -175,15 +187,17 @@ fun HorizontalPagerParamsInspector(
                     composeNodeCallbacks.onTraitUpdated(
                         node,
                         trait.copy(
-                            indicatorSelectedColor = ColorProperty.ColorIntrinsicValue(
-                                value = ColorWrapper(themeColor = Material3ColorWrapper.SurfaceVariant)
-                            )
-                        )
+                            indicatorSelectedColor =
+                                ColorProperty.ColorIntrinsicValue(
+                                    value = ColorWrapper(themeColor = Material3ColorWrapper.SurfaceVariant),
+                                ),
+                        ),
                     )
                 },
-                modifier = Modifier
-                    .hoverOverlay()
-                    .fillMaxWidth(),
+                modifier =
+                    Modifier
+                        .hoverOverlay()
+                        .fillMaxWidth(),
             )
         }
     }

@@ -16,7 +16,6 @@ data class GenerationContext(
      * function
      */
     val componentCountMap: MutableMap<String, Int> = mutableMapOf(),
-
     val generatedPlace: GeneratedPlace = GeneratedPlace.Unspecified,
     val viewModelMap: MutableMap<String, ComposeEditableContext> = mutableMapOf(),
     val currentEditable: CanvasEditable = Screen(name = ""),

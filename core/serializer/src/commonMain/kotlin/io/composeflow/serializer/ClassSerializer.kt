@@ -12,7 +12,10 @@ object ClassSerializer : KSerializer<Class<*>> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("WithClassSerializer", PrimitiveKind.STRING)
 
-    override fun serialize(encoder: Encoder, value: Class<*>) {
+    override fun serialize(
+        encoder: Encoder,
+        value: Class<*>,
+    ) {
         encoder.encodeString(value.name)
     }
 

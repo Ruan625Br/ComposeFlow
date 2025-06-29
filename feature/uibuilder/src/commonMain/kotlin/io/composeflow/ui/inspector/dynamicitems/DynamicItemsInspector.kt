@@ -19,6 +19,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.composeflow.Res
+import io.composeflow.bind_dynamic_items
+import io.composeflow.dynamic_items
+import io.composeflow.dynamic_items_description
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNodeCallbacks
@@ -32,10 +36,6 @@ import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.propertyeditor.variable.SetFromStateDialog
-import io.composeflow.Res
-import io.composeflow.bind_dynamic_items
-import io.composeflow.dynamic_items
-import io.composeflow.dynamic_items_description
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -60,9 +60,10 @@ fun DynamicItemsInspector(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = dynamicItemDescription,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(18.dp),
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(18.dp),
                 )
             }
 
@@ -87,7 +88,7 @@ fun DynamicItemsInspector(
             node.dynamicItems.value?.let { dynamicItems ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 4.dp)
+                    modifier = Modifier.padding(vertical = 4.dp),
                 ) {
                     Icon(
                         imageVector = dynamicItems.transformedValueType(project).leadingIcon(),

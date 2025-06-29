@@ -25,8 +25,9 @@ import kotlinx.serialization.Serializable
 import org.jetbrains.compose.resources.stringResource
 
 @Serializable
-sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
-
+sealed interface TextFieldValidator :
+    ComposeStateValidator,
+    DropdownItem {
     @Composable
     fun Editor(
         project: Project,
@@ -45,6 +46,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
     ) : TextFieldValidator {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("String")
+
         override fun isSameItem(item: Any): Boolean = item is StringValidator
 
         @Composable
@@ -62,7 +64,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@StringValidator.copy(allowBlank = it))
                         },
                         label = "Allow blank",
-                        modifier = Modifier.hoverOverlay()
+                        modifier = Modifier.hoverOverlay(),
                     )
                 }
 
@@ -73,10 +75,13 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@StringValidator.copy(maxLength = it.toInt()))
                         },
                         label = "Max length",
-                        validateInput = io.composeflow.editor.validator.IntValidator()::validate,
-                        modifier = Modifier.padding(end = 8.dp)
-                            .weight(1f)
-                            .hoverOverlay()
+                        validateInput = io.composeflow.editor.validator
+                            .IntValidator()::validate,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f)
+                                .hoverOverlay(),
                     )
                     EditableTextProperty(
                         initialValue = minLength?.toString() ?: "",
@@ -84,30 +89,37 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@StringValidator.copy(minLength = it.toInt()))
                         },
                         label = "Min length",
-                        validateInput = io.composeflow.editor.validator.IntValidator()::validate,
-                        modifier = Modifier.padding(end = 8.dp)
-                            .weight(1f)
-                            .hoverOverlay()
+                        validateInput = io.composeflow.editor.validator
+                            .IntValidator()::validate,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f)
+                                .hoverOverlay(),
                     )
                 }
             }
         }
 
-        override fun asCodeBlock(project: Project, context: GenerationContext): CodeBlock {
-            val argString = buildString {
-                if (!allowBlank) {
-                    append("allowBlank = ${allowBlank},\n")
+        override fun asCodeBlock(
+            project: Project,
+            context: GenerationContext,
+        ): CodeBlock {
+            val argString =
+                buildString {
+                    if (!allowBlank) {
+                        append("allowBlank = $allowBlank,\n")
+                    }
+                    maxLength?.let {
+                        append("maxLength = $maxLength,\n")
+                    }
+                    minLength?.let {
+                        append("minLength = $minLength,\n")
+                    }
                 }
-                maxLength?.let {
-                    append("maxLength = ${maxLength},\n")
-                }
-                minLength?.let {
-                    append("minLength = ${minLength},\n")
-                }
-            }
             return CodeBlock.of(
                 "%T($argString)",
-                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "StringValidator")
+                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "StringValidator"),
             )
         }
     }
@@ -121,6 +133,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
     ) : TextFieldValidator {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
+
         override fun isSameItem(item: Any): Boolean = item is IntValidator
 
         @Composable
@@ -137,7 +150,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                         onValidatorEdited(this@IntValidator.copy(allowLessThanZero = it))
                     },
                     label = "Allow less than zero",
-                    modifier = Modifier.hoverOverlay()
+                    modifier = Modifier.hoverOverlay(),
                 )
 
                 Row {
@@ -147,10 +160,13 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@IntValidator.copy(maxValue = it.toInt()))
                         },
                         label = "Max value",
-                        validateInput = io.composeflow.editor.validator.IntValidator()::validate,
-                        modifier = Modifier.padding(end = 8.dp)
-                            .weight(1f)
-                            .hoverOverlay()
+                        validateInput = io.composeflow.editor.validator
+                            .IntValidator()::validate,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f)
+                                .hoverOverlay(),
                     )
                     EditableTextProperty(
                         initialValue = minValue?.toString() ?: "",
@@ -158,30 +174,37 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@IntValidator.copy(minValue = it.toInt()))
                         },
                         label = "Min value",
-                        validateInput = io.composeflow.editor.validator.IntValidator()::validate,
-                        modifier = Modifier.padding(end = 8.dp)
-                            .weight(1f)
-                            .hoverOverlay()
+                        validateInput = io.composeflow.editor.validator
+                            .IntValidator()::validate,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f)
+                                .hoverOverlay(),
                     )
                 }
             }
         }
 
-        override fun asCodeBlock(project: Project, context: GenerationContext): CodeBlock {
-            val argString = buildString {
-                if (!allowLessThanZero) {
-                    append("allowLessThanZero = ${allowLessThanZero},\n")
+        override fun asCodeBlock(
+            project: Project,
+            context: GenerationContext,
+        ): CodeBlock {
+            val argString =
+                buildString {
+                    if (!allowLessThanZero) {
+                        append("allowLessThanZero = $allowLessThanZero,\n")
+                    }
+                    maxValue?.let {
+                        append("maxValue = $maxValue,\n")
+                    }
+                    minValue?.let {
+                        append("minValue = $minValue,\n")
+                    }
                 }
-                maxValue?.let {
-                    append("maxValue = ${maxValue},\n")
-                }
-                minValue?.let {
-                    append("minValue = ${minValue},\n")
-                }
-            }
             return CodeBlock.of(
                 "%T($argString)",
-                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "IntValidator")
+                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "IntValidator"),
             )
         }
     }
@@ -195,6 +218,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
     ) : TextFieldValidator {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
+
         override fun isSameItem(item: Any): Boolean = item is FloatValidator
 
         @Composable
@@ -211,7 +235,7 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                         onValidatorEdited(this@FloatValidator.copy(allowLessThanZero = it))
                     },
                     label = "Allow less than zero",
-                    modifier = Modifier.hoverOverlay()
+                    modifier = Modifier.hoverOverlay(),
                 )
 
                 Row {
@@ -221,10 +245,13 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@FloatValidator.copy(maxValue = it.toFloat()))
                         },
                         label = "Max value",
-                        validateInput = io.composeflow.editor.validator.FloatValidator()::validate,
-                        modifier = Modifier.padding(end = 8.dp)
-                            .weight(1f)
-                            .hoverOverlay()
+                        validateInput = io.composeflow.editor.validator
+                            .FloatValidator()::validate,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f)
+                                .hoverOverlay(),
                     )
                     EditableTextProperty(
                         initialValue = minValue?.toString() ?: "",
@@ -232,30 +259,37 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
                             onValidatorEdited(this@FloatValidator.copy(minValue = it.toFloat()))
                         },
                         label = "Min value",
-                        validateInput = io.composeflow.editor.validator.FloatValidator()::validate,
-                        modifier = Modifier.padding(end = 8.dp)
-                            .weight(1f)
-                            .hoverOverlay()
+                        validateInput = io.composeflow.editor.validator
+                            .FloatValidator()::validate,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp)
+                                .weight(1f)
+                                .hoverOverlay(),
                     )
                 }
             }
         }
 
-        override fun asCodeBlock(project: Project, context: GenerationContext): CodeBlock {
-            val argString = buildString {
-                if (!allowLessThanZero) {
-                    append("allowLessThanZero = ${allowLessThanZero},\n")
+        override fun asCodeBlock(
+            project: Project,
+            context: GenerationContext,
+        ): CodeBlock {
+            val argString =
+                buildString {
+                    if (!allowLessThanZero) {
+                        append("allowLessThanZero = $allowLessThanZero,\n")
+                    }
+                    maxValue?.let {
+                        append("maxValue = ${maxValue}f,\n")
+                    }
+                    minValue?.let {
+                        append("minValue = ${minValue}f,\n")
+                    }
                 }
-                maxValue?.let {
-                    append("maxValue = ${maxValue}f,\n")
-                }
-                minValue?.let {
-                    append("minValue = ${minValue}f,\n")
-                }
-            }
             return CodeBlock.of(
                 "%T($argString)",
-                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "FloatValidator")
+                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "FloatValidator"),
             )
         }
     }
@@ -265,22 +299,26 @@ sealed interface TextFieldValidator : ComposeStateValidator, DropdownItem {
     data object EmailValidator : TextFieldValidator {
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Email address")
+
         override fun isSameItem(item: Any): Boolean = item is EmailValidator
 
-        override fun asCodeBlock(project: Project, context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(
+            project: Project,
+            context: GenerationContext,
+        ): CodeBlock =
+            CodeBlock.of(
                 "%T()",
-                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "EmailValidator")
+                ClassName("${COMPOSEFLOW_PACKAGE}.validator", "EmailValidator"),
             )
-        }
     }
 
     companion object {
-        fun entries(): List<TextFieldValidator> = listOf(
-            StringValidator(),
-            IntValidator(),
-            FloatValidator(),
-            EmailValidator
-        )
+        fun entries(): List<TextFieldValidator> =
+            listOf(
+                StringValidator(),
+                IntValidator(),
+                FloatValidator(),
+                EmailValidator,
+            )
     }
 }

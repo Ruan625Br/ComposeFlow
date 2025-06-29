@@ -9,7 +9,6 @@ import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 
 class ColorWrapperTest {
-
     @Test
     fun withThemeColor_verify_restoredAsSame() {
         val colorWrapper = ColorWrapper(themeColor = Material3ColorWrapper.Surface)
@@ -51,7 +50,8 @@ class ColorWrapperTest {
 
     @Test
     fun deserialize_hexColorString_withoutAlpha() {
-        val yaml = "themeColor: null\n" +
+        val yaml =
+            "themeColor: null\n" +
                 "color: \"#23AB01\""
         val decoded = yamlSerializer.decodeFromString<ColorWrapper>(yaml)
         assertEquals(Color(0xFF23AB01.toInt()), decoded.color)
@@ -64,10 +64,10 @@ class ColorWrapperTest {
         assertEquals(Color(0xFF23AB01.toInt()), decoded.color)
     }
 
-
     @Test
     fun deserialize_hexColorString_withAlpha() {
-        val yaml = "themeColor: null\n" +
+        val yaml =
+            "themeColor: null\n" +
                 "color: \"#8023AB01\""
         val decoded = yamlSerializer.decodeFromString<ColorWrapper>(yaml)
         assertEquals(Color(0x8023AB01.toInt()), decoded.color)

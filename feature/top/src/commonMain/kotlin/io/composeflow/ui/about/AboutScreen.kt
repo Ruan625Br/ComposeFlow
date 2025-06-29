@@ -47,48 +47,46 @@ val canDoOnlineUpdates get() = updateController?.canTriggerUpdateCheckUI() == So
 val billingClient = BillingClient()
 
 @Composable
-fun AboutScreen(
-    modifier: Modifier = Modifier,
-) {
+fun AboutScreen(modifier: Modifier = Modifier) {
     val density = LocalDensity.current
     val scale = density.density / 2
     var showLicenseDialog by remember { mutableStateOf(false) }
-    
+
     Column(modifier = modifier) {
         Image(
             painterResource(Res.drawable.ComposeFlow_Logo_Symbol),
             contentDescription = "ComposeFlow logo",
-            modifier = Modifier.scale(scale)
+            modifier = Modifier.scale(scale),
         )
         Text(
             text = "ComposeFlow",
             style = MaterialTheme.typography.displaySmall,
-            modifier = Modifier.padding(bottom = 24.dp)
+            modifier = Modifier.padding(bottom = 24.dp),
         )
 
         VersionCell()
-        
+
         // License button
         TextButton(
             onClick = { showLicenseDialog = true },
-            modifier = Modifier.padding(top = 8.dp)
+            modifier = Modifier.padding(top = 8.dp),
         ) {
             Text(stringResource(Res.string.open_source_licenses))
         }
     }
-    
+
     // License dialog
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
     if (showLicenseDialog) {
         onAnyDialogIsShown()
-        
+
         LicenseDialog(
             libraries = LibraryData.libraries,
             onCloseClick = {
                 showLicenseDialog = false
                 onAllDialogsClosed()
-            }
+            },
         )
     }
 }
@@ -147,7 +145,7 @@ private fun VersionCell() {
                             },
                             failure = {
                                 Logger.e("Failed to create pricing table link", it)
-                            }
+                            },
                         )
                     }
                 },
@@ -171,7 +169,7 @@ private fun VersionCell() {
                     onAllDialogsClosed()
                 },
                 positiveText = "Ok",
-                positiveButtonColor = MaterialTheme.colorScheme.primary
+                positiveButtonColor = MaterialTheme.colorScheme.primary,
             )
         }
     }

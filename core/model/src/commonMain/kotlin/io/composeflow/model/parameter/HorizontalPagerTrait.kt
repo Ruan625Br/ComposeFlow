@@ -63,13 +63,16 @@ data class HorizontalPagerTrait(
     val verticalAlignment: AlignmentVerticalWrapper? = null,
     val userScrollEnabled: Boolean? = null,
     val showIndicator: Boolean = true,
-    val indicatorSelectedColor: AssignableProperty = ColorProperty.ColorIntrinsicValue(
-        value = ColorWrapper(themeColor = Material3ColorWrapper.OnSurface)
-    ),
-    val indicatorUnselectedColor: AssignableProperty = ColorProperty.ColorIntrinsicValue(
-        value = ColorWrapper(themeColor = Material3ColorWrapper.SurfaceVariant)
-    ),
-) : PagerTrait, ComposeTrait {
+    val indicatorSelectedColor: AssignableProperty =
+        ColorProperty.ColorIntrinsicValue(
+            value = ColorWrapper(themeColor = Material3ColorWrapper.OnSurface),
+        ),
+    val indicatorUnselectedColor: AssignableProperty =
+        ColorProperty.ColorIntrinsicValue(
+            value = ColorWrapper(themeColor = Material3ColorWrapper.SurfaceVariant),
+        ),
+) : PagerTrait,
+    ComposeTrait {
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
@@ -85,19 +88,19 @@ data class HorizontalPagerTrait(
                 .addStatement(
                     "contentPadding = %M(${it.value.toInt()}.%M),",
                     paddingValuesMember,
-                    dpMember
+                    dpMember,
                 )
         }
         pageSpacing?.let {
             codeBlockBuilder
                 .addStatement(
                     "pageSpacing = ${it.value.toInt()}.%M,",
-                    dpMember
+                    dpMember,
                 )
         }
         codeBlockBuilder.addStatement(
             "snapPosition = %M,",
-            snapPositionWrapper.toMemberName()
+            snapPositionWrapper.toMemberName(),
         )
         reverseLayout?.let {
             codeBlockBuilder.addStatement("reverseLayout = $it,")
@@ -121,11 +124,14 @@ data class HorizontalPagerTrait(
     override fun hasDynamicItems(): Boolean = true
 
     override fun icon(): ImageVector = ComposeFlowIcons.HorizontalPager
+
     override fun iconText(): String = "H Pager"
-    override fun paletteCategories(): List<TraitCategory> = listOf(
-        TraitCategory.Container,
-        TraitCategory.Layout
-    )
+
+    override fun paletteCategories(): List<TraitCategory> =
+        listOf(
+            TraitCategory.Container,
+            TraitCategory.Layout,
+        )
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_horizontal_pager_trait
 
@@ -150,26 +156,30 @@ data class HorizontalPagerTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        val childrenDependOnDynamicItems = node.children.any {
-            it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
-        }
+        val childrenDependOnDynamicItems =
+            node.children.any {
+                it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
+            }
         if (childrenDependOnDynamicItems) {
-            val pagerState = rememberPagerState(
-                pageCount = {
-                    DefaultNumOfItems
-                }
-            )
+            val pagerState =
+                rememberPagerState(
+                    pageCount = {
+                        DefaultNumOfItems
+                    },
+                )
             Box(
-                modifier = modifier.then(
-                    node.modifierChainForCanvas()
-                        .modifierForCanvas(
-                            project = project,
-                            node = node,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
-                ),
+                modifier =
+                    modifier.then(
+                        node
+                            .modifierChainForCanvas()
+                            .modifierForCanvas(
+                                project = project,
+                                node = node,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            ),
+                    ),
             ) {
                 HorizontalPager(
                     state = pagerState,
@@ -177,17 +187,19 @@ data class HorizontalPagerTrait(
                     pageSpacing = pageSpacing?.value?.dp ?: 0.dp,
                     reverseLayout = reverseLayout ?: false,
                     verticalAlignment = verticalAlignment?.alignment ?: Alignment.Top,
-                    userScrollEnabled = if (paletteRenderParams.isThumbnail) {
-                        false
-                    } else {
-                        userScrollEnabled ?: true
-                    },
+                    userScrollEnabled =
+                        if (paletteRenderParams.isThumbnail) {
+                            false
+                        } else {
+                            userScrollEnabled ?: true
+                        },
                     snapPosition = snapPositionWrapper.toSnapPosition(),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) { page ->
-                    val child = node.children.first {
-                        it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
-                    }
+                    val child =
+                        node.children.first {
+                            it.lazyListChildParams.value is LazyListChildParams.DynamicItemsSource
+                        }
                     if (page == 0) {
                         child.RenderedNodeInCanvas(
                             project = project,
@@ -207,47 +219,54 @@ data class HorizontalPagerTrait(
                 if (showIndicator) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                            .align(Alignment.BottomCenter)
+                        modifier =
+                            Modifier
+                                .padding(bottom = 8.dp)
+                                .align(Alignment.BottomCenter),
                     ) {
                         repeat(DefaultNumOfItems) { index ->
                             val isSelected = pagerState.currentPage == index
                             Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .size(if (isSelected) 10.dp else 8.dp)
-                                    .background(
-                                        color = if (isSelected) {
-                                            (indicatorSelectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                                                ?: Color.Unspecified
-                                        } else {
-                                            (indicatorUnselectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                                                ?: Color.Unspecified
-                                        },
-                                        shape = CircleShape
-                                    )
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = 4.dp)
+                                        .size(if (isSelected) 10.dp else 8.dp)
+                                        .background(
+                                            color =
+                                                if (isSelected) {
+                                                    (indicatorSelectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                                                        ?: Color.Unspecified
+                                                } else {
+                                                    (indicatorUnselectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                                                        ?: Color.Unspecified
+                                                },
+                                            shape = CircleShape,
+                                        ),
                             )
                         }
                     }
                 }
             }
         } else {
-            val pagerState = rememberPagerState(
-                pageCount = {
-                    node.children.size
-                }
-            )
-            Box(
-                modifier = modifier.then(
-                    node.modifierChainForCanvas()
-                        .modifierForCanvas(
-                            project = project,
-                            node = node,
-                            canvasNodeCallbacks = canvasNodeCallbacks,
-                            paletteRenderParams = paletteRenderParams,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
+            val pagerState =
+                rememberPagerState(
+                    pageCount = {
+                        node.children.size
+                    },
                 )
+            Box(
+                modifier =
+                    modifier.then(
+                        node
+                            .modifierChainForCanvas()
+                            .modifierForCanvas(
+                                project = project,
+                                node = node,
+                                canvasNodeCallbacks = canvasNodeCallbacks,
+                                paletteRenderParams = paletteRenderParams,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            ),
+                    ),
             ) {
                 HorizontalPager(
                     state = pagerState,
@@ -255,19 +274,21 @@ data class HorizontalPagerTrait(
                     pageSpacing = pageSpacing?.value?.dp ?: 0.dp,
                     reverseLayout = reverseLayout ?: false,
                     verticalAlignment = verticalAlignment?.alignment ?: Alignment.Top,
-                    userScrollEnabled = if (paletteRenderParams.isThumbnail) {
-                        false
-                    } else {
-                        userScrollEnabled ?: true
-                    },
+                    userScrollEnabled =
+                        if (paletteRenderParams.isThumbnail) {
+                            false
+                        } else {
+                            userScrollEnabled ?: true
+                        },
                     snapPosition = snapPositionWrapper.toSnapPosition(),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.fillMaxSize(),
                 ) { page ->
-                    val child = if (node.children.size > page) {
-                        node.children[page]
-                    } else {
-                        node.children.last()
-                    }
+                    val child =
+                        if (node.children.size > page) {
+                            node.children[page]
+                        } else {
+                            node.children.last()
+                        }
                     child.RenderedNodeInCanvas(
                         project = project,
                         canvasNodeCallbacks = canvasNodeCallbacks,
@@ -279,25 +300,29 @@ data class HorizontalPagerTrait(
                 if (showIndicator) {
                     Row(
                         horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                            .align(Alignment.BottomCenter)
+                        modifier =
+                            Modifier
+                                .padding(bottom = 8.dp)
+                                .align(Alignment.BottomCenter),
                     ) {
                         repeat(node.children.size) { index ->
                             val isSelected = pagerState.currentPage == index
                             Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .size(if (isSelected) 10.dp else 8.dp)
-                                    .background(
-                                        color = if (isSelected) {
-                                            (indicatorSelectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                                                ?: Color.Unspecified
-                                        } else {
-                                            (indicatorUnselectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                                                ?: Color.Unspecified
-                                        },
-                                        shape = CircleShape
-                                    )
+                                modifier =
+                                    Modifier
+                                        .padding(horizontal = 4.dp)
+                                        .size(if (isSelected) 10.dp else 8.dp)
+                                        .background(
+                                            color =
+                                                if (isSelected) {
+                                                    (indicatorSelectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                                                        ?: Color.Unspecified
+                                                } else {
+                                                    (indicatorUnselectedColor as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                                                        ?: Color.Unspecified
+                                                },
+                                            shape = CircleShape,
+                                        ),
                             )
                         }
                     }

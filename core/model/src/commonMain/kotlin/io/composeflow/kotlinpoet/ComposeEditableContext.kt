@@ -25,8 +25,7 @@ class ComposeEditableContext(
     var isCoroutineScopeUsed: Boolean = false
     val dependencies: Set<ViewModelConstant> = _dependencies
 
-    fun allProperties(): List<PropertySpec> =
-        prioritizedPropertySpecs.toList() + propertySpecs.toList()
+    fun allProperties(): List<PropertySpec> = prioritizedPropertySpecs.toList() + propertySpecs.toList()
 
     /**
      * LaunchedEffect block for Composable screen.
@@ -50,22 +49,32 @@ class ComposeEditableContext(
     private val _compositionLocalVariables: MutableMap<String, MemberName> = mutableMapOf()
     val compositionLocalVariables: Map<String, MemberName> = _compositionLocalVariables
 
-    fun addFunction(funSpec: FunSpec, dryRun: Boolean) {
+    fun addFunction(
+        funSpec: FunSpec,
+        dryRun: Boolean,
+    ) {
         if (dryRun) return
         if (funSpecs.any { it.name == funSpec.name }) return
-        val newName = generateUniqueName(
-            funSpec.name,
-            funSpecs.map { it.name }.toSet(),
-        )
+        val newName =
+            generateUniqueName(
+                funSpec.name,
+                funSpecs.map { it.name }.toSet(),
+            )
         funSpecs.add(funSpec.toBuilder(newName).build())
     }
 
-    fun addFunctionInConstructor(funSpec: FunSpec, dryRun: Boolean) {
+    fun addFunctionInConstructor(
+        funSpec: FunSpec,
+        dryRun: Boolean,
+    ) {
         if (dryRun) return
         constructorFunSpecBuilder.addCode(funSpec.body)
     }
 
-    fun addProperty(propertySpec: PropertySpec, dryRun: Boolean) {
+    fun addProperty(
+        propertySpec: PropertySpec,
+        dryRun: Boolean,
+    ) {
         if (dryRun) return
         if (propertySpecs.any { it.name == propertySpec.name }) return
         val newName = generateUniquePropertyName(initial = propertySpec.name)
@@ -81,7 +90,10 @@ class ComposeEditableContext(
      * to be defined before other properties.
      * (e.g. FlowSettings property needs to be defined before each property that depends on FlowSettings)
      */
-    fun addPrioritizedProperty(propertySpec: PropertySpec, dryRun: Boolean) {
+    fun addPrioritizedProperty(
+        propertySpec: PropertySpec,
+        dryRun: Boolean,
+    ) {
         if (dryRun) return
         if (prioritizedPropertySpecs.any { it.name == propertySpec.name }) return
         val newName = generateUniquePropertyName(initial = propertySpec.name)
@@ -95,25 +107,32 @@ class ComposeEditableContext(
      * @param id the ID of the identifier. For example id of [State] or [ComposeNode], [Action]
      * @param initialIdentifier initial identifier for the identifier
      */
-    fun getOrAddIdentifier(id: String, initialIdentifier: String): String {
-        return identifierMap.getOrPut(id) {
+    fun getOrAddIdentifier(
+        id: String,
+        initialIdentifier: String,
+    ): String =
+        identifierMap.getOrPut(id) {
             generateUniqueName(
                 initialIdentifier,
                 identifierMap.values.toSet(),
             )
         }
-    }
 
     /**
      * LaunchedEffect code block in the Compose code.
      */
-    fun addLaunchedEffectBlock(codeBlock: CodeBlock, dryRun: Boolean) {
+    fun addLaunchedEffectBlock(
+        codeBlock: CodeBlock,
+        dryRun: Boolean,
+    ) {
         if (dryRun) return
         _launchedEffectBlock.add(codeBlock)
     }
 
     fun addCompositionLocalVariableEntryIfNotPresent(
-        id: String, initialIdentifier: String, compositionLocalMember: MemberName,
+        id: String,
+        initialIdentifier: String,
+        compositionLocalMember: MemberName,
     ): String {
         val newName = getOrAddIdentifier(id, initialIdentifier)
         if (!_compositionLocalVariables.contains(newName)) {
@@ -125,7 +144,11 @@ class ComposeEditableContext(
     /**
      * Add the variable name to the Compose file. Returns the generated unique name
      */
-    fun addComposeFileVariable(id: String, initialIdentifier: String, dryRun: Boolean): String {
+    fun addComposeFileVariable(
+        id: String,
+        initialIdentifier: String,
+        dryRun: Boolean,
+    ): String {
         if (dryRun) return initialIdentifier
         val newName = getOrAddIdentifier(id, initialIdentifier)
         return newName
@@ -145,14 +168,14 @@ class ComposeEditableContext(
         return typeSpecBuilder.build()
     }
 
-    private fun generateUniquePropertyName(initial: String): String {
-        return generateUniqueName(
+    private fun generateUniquePropertyName(initial: String): String =
+        generateUniqueName(
             initial,
             propertySpecs.plus(prioritizedPropertySpecs).map { it.name }.toSet(),
         )
-    }
 
-    fun generateUniqueFunName(id: String, initial: String): String {
-        return getOrAddIdentifier(id = id, initialIdentifier = initial)
-    }
+    fun generateUniqueFunName(
+        id: String,
+        initial: String,
+    ): String = getOrAddIdentifier(id = id, initialIdentifier = initial)
 }

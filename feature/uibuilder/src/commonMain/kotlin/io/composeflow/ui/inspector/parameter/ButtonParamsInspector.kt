@@ -42,11 +42,12 @@ fun ButtonParamsInspector(
                 )
             },
             onValidPropertyChanged = { property, lazyListSource ->
-                val result = composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
-                    node,
-                    buttonTrait.copy(textProperty = property),
-                    lazyListSource,
-                )
+                val result =
+                    composeNodeCallbacks.onParamsUpdatedWithLazyListSource(
+                        node,
+                        buttonTrait.copy(textProperty = property),
+                        lazyListSource,
+                    )
                 result.errorMessages.forEach {
                     coroutineScope.launch {
                         onShowSnackbar(it, null)
@@ -64,12 +65,13 @@ fun ButtonParamsInspector(
             onIconDeleted = {
                 composeNodeCallbacks.onTraitUpdated(
                     node,
-                    buttonTrait.copy(imageVectorHolder = null)
+                    buttonTrait.copy(imageVectorHolder = null),
                 )
             },
             currentIcon = buttonTrait.imageVectorHolder?.imageVector,
-            modifier = Modifier
-                .hoverOverlay(),
+            modifier =
+                Modifier
+                    .hoverOverlay(),
         )
 
         AssignableBooleanPropertyEditor(
@@ -106,7 +108,7 @@ fun ButtonParamsInspector(
                     ),
                 )
             },
-            modifier = Modifier.hoverOverlay()
+            modifier = Modifier.hoverOverlay(),
         )
     }
 }

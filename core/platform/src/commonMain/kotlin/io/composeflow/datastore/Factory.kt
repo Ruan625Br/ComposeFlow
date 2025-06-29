@@ -12,7 +12,6 @@ import kotlinx.coroutines.SupervisorJob
 import okio.Path.Companion.toPath
 
 object Factory {
-
     private lateinit var dataStore: DataStore<Preferences>
 
     private val lock = SynchronizedObject()
@@ -25,13 +24,14 @@ object Factory {
             if (Factory::dataStore.isInitialized) {
                 dataStore
             } else {
-                PreferenceDataStoreFactory.createWithPath(
-                    produceFile = { producePath().toPath() },
-                    scope = ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcherCoroutineScope) {
-                        CoroutineScope(Dispatchers.IO + SupervisorJob())
-                    },
-                )
-                    .also { dataStore = it }
+                PreferenceDataStoreFactory
+                    .createWithPath(
+                        produceFile = { producePath().toPath() },
+                        scope =
+                            ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcherCoroutineScope) {
+                                CoroutineScope(Dispatchers.IO + SupervisorJob())
+                            },
+                    ).also { dataStore = it }
             }
         }
 

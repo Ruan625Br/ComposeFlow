@@ -10,7 +10,6 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 class RotateTest {
-
     @Test
     fun toComposeCode_default_args() {
         val modifierList = listOf(ModifierWrapper.Rotate())
@@ -21,8 +20,7 @@ class RotateTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier
-                 .androidx.compose.ui.draw.rotate(0.0f),"""
-                .trimForCompare(),
+                 .androidx.compose.ui.draw.rotate(0.0f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }
@@ -37,8 +35,7 @@ class RotateTest {
         assertEquals(
             """modifier = 
                  androidx.compose.ui.Modifier
-                 .androidx.compose.ui.draw.rotate(30.0f),"""
-                .trimForCompare(),
+                 .androidx.compose.ui.draw.rotate(30.0f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
     }

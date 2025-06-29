@@ -16,17 +16,23 @@ import kotlinx.serialization.json.jsonPrimitive
 private const val UNSPECIFIED_KEYWORD = "unspecified"
 
 object DpNonNegativeSerializer : KSerializer<Dp> by InternalDpSerializer(allowNegative = false)
+
 object DpSerializer : KSerializer<Dp> by InternalDpSerializer(allowNegative = true)
 
-data class InternalDpSerializer(val allowNegative: Boolean = true) : KSerializer<Dp> {
+data class InternalDpSerializer(
+    val allowNegative: Boolean = true,
+) : KSerializer<Dp> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Dp", PrimitiveKind.FLOAT)
 
-    override fun serialize(encoder: Encoder, value: Dp) {
+    override fun serialize(
+        encoder: Encoder,
+        value: Dp,
+    ) {
         encoder.encodeFloat(value.value)
     }
 
-    override fun deserialize(decoder: Decoder): Dp {
-        return when (decoder) {
+    override fun deserialize(decoder: Decoder): Dp =
+        when (decoder) {
             is JsonDecoder -> {
                 val element = decoder.decodeJsonElement()
                 when {
@@ -61,5 +67,4 @@ data class InternalDpSerializer(val allowNegative: Boolean = true) : KSerializer
                 }
             }
         }
-    }
 }

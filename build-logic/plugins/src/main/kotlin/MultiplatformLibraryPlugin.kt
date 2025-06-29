@@ -33,15 +33,11 @@ class MultiplatformLibraryPlugin : Plugin<Project> {
     }
 }
 
-fun DependencyHandlerScope.implementation(
-    artifact: Dependency,
-) {
+fun DependencyHandlerScope.implementation(artifact: Dependency) {
     add("implementation", artifact)
 }
 
-fun DependencyHandlerScope.implementation(
-    artifact: MinimalExternalModuleDependency,
-) {
+fun DependencyHandlerScope.implementation(artifact: MinimalExternalModuleDependency) {
     add("implementation", artifact)
 }
 

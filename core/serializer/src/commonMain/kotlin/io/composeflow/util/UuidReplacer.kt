@@ -5,9 +5,10 @@ import kotlin.uuid.Uuid
 
 fun replaceInvalidUuid(yamlContent: String): String {
     val ids = extractIds(yamlContent)
-    val formattedIds = ids.associateWith {
-        formatToUuid(it)
-    }
+    val formattedIds =
+        ids.associateWith {
+            formatToUuid(it)
+        }
     var result = yamlContent
     formattedIds.forEach { (oldId, newId) ->
         result = result.replace("\"$oldId\"", "\"$newId\"")
@@ -34,27 +35,29 @@ internal fun formatToUuid(inputString: String): String {
             return Uuid.random().toString()
         }
 
-        val formattedParts = parts.mapIndexed { index, part ->
-            val expectedLength = when (index) {
-                0 -> 8
-                1, 2, 3 -> 4
-                4 -> 12
-                else -> 0 // Should not happen
-            }
+        val formattedParts =
+            parts.mapIndexed { index, part ->
+                val expectedLength =
+                    when (index) {
+                        0 -> 8
+                        1, 2, 3 -> 4
+                        4 -> 12
+                        else -> 0 // Should not happen
+                    }
 
-            val cleanedPart = part.filter { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }
+                val cleanedPart = part.filter { it in '0'..'9' || it in 'a'..'f' || it in 'A'..'F' }
 
-            if (cleanedPart.isEmpty()) {
-                // If the part is empty after cleaning, generate a random segment
-                generateRandomUuidSegment(expectedLength)
-            } else if (cleanedPart.length < expectedLength) {
-                cleanedPart.padEnd(expectedLength, '0')
-            } else if (cleanedPart.length > expectedLength) {
-                cleanedPart.substring(0, expectedLength)
-            } else {
-                cleanedPart
+                if (cleanedPart.isEmpty()) {
+                    // If the part is empty after cleaning, generate a random segment
+                    generateRandomUuidSegment(expectedLength)
+                } else if (cleanedPart.length < expectedLength) {
+                    cleanedPart.padEnd(expectedLength, '0')
+                } else if (cleanedPart.length > expectedLength) {
+                    cleanedPart.substring(0, expectedLength)
+                } else {
+                    cleanedPart
+                }
             }
-        }
         return formattedParts.joinToString("-")
     }
 }

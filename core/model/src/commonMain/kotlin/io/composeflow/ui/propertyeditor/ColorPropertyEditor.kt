@@ -81,34 +81,36 @@ fun ColorPropertyEditor(
     @Composable
     fun ColorBox(color: Color) {
         Box(
-            modifier = Modifier
-                .size(24.dp)
-                .background(
-                    color = color,
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(8.dp),
-                ),
+            modifier =
+                Modifier
+                    .size(24.dp)
+                    .background(
+                        color = color,
+                        shape = RoundedCornerShape(8.dp),
+                    ).border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
+                    ),
         )
     }
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
-            .wrapContentHeight()
-            .hoverIconClickable()
-            .clickable {
-                dialogOpen = true
-            },
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(8.dp))
+                .wrapContentHeight()
+                .hoverIconClickable()
+                .clickable {
+                    dialogOpen = true
+                },
     ) {
-        val colorExpression = if (initialColor?.themeColor != null) {
-            initialColor.themeColor.colorName
-        } else {
-            initialColor?.getColor()?.asString() ?: "Unspecified"
-        }
+        val colorExpression =
+            if (initialColor?.themeColor != null) {
+                initialColor.themeColor.colorName
+            } else {
+                initialColor?.getColor()?.asString() ?: "Unspecified"
+            }
 
         LabeledBorderBox(
             label = label.ifEmpty { "Color" },
@@ -168,10 +170,11 @@ private fun ColorPropertyDialog(
         onCloseRequest = {
             onCloseClick()
         },
-        state = rememberDialogState(
-            position = WindowPosition(Alignment.TopCenter),
-            size = DpSize(800.dp, 1060.dp),
-        ),
+        state =
+            rememberDialogState(
+                position = WindowPosition(Alignment.TopCenter),
+                size = DpSize(800.dp, 1060.dp),
+            ),
         title = "Select color",
         undecorated = true,
         onKeyEvent = {
@@ -203,13 +206,15 @@ fun ColorPropertyDialogContent(
     onColorUpdated: (Color) -> Unit,
 ) {
     Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .size(width = 760.dp, height = 680.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .size(width = 760.dp, height = 680.dp),
     ) {
         Column(
-            modifier = Modifier
-                .padding(all = 16.dp),
+            modifier =
+                Modifier
+                    .padding(all = 16.dp),
         ) {
             Text(
                 text = stringResource(Res.string.select_color),
@@ -224,10 +229,11 @@ fun ColorPropertyDialogContent(
             Row {
                 ClassicColorPicker(
                     color = currentColor,
-                    modifier = Modifier
-                        .width(540.dp)
-                        .height(300.dp)
-                        .padding(horizontal = 24.dp, vertical = 16.dp),
+                    modifier =
+                        Modifier
+                            .width(540.dp)
+                            .height(300.dp)
+                            .padding(horizontal = 24.dp, vertical = 16.dp),
                     onColorChanged = { hsvColor: HsvColor ->
                         // Triggered when the color changes, do something with the newly picked color here!
                         currentColor = hsvColor
@@ -257,45 +263,44 @@ fun ColorPropertyDialogContent(
                     Material3ColorWrapper.entries.toTypedArray(),
                 ) { themeColor ->
 
-                    val borderModifier = if (initialColor?.themeColor == themeColor) {
-                        Modifier.border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.tertiary,
-                            shape = RoundedCornerShape(8.dp),
-                        )
-                    } else {
-                        Modifier
-                    }
+                    val borderModifier =
+                        if (initialColor?.themeColor == themeColor) {
+                            Modifier.border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.tertiary,
+                                shape = RoundedCornerShape(8.dp),
+                            )
+                        } else {
+                            Modifier
+                        }
                     Row(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = borderModifier
-                            .size(
-                                width = 164.dp,
-                                height = 64.dp,
-                            )
-                            .padding(8.dp)
-                            .background(
-                                color = themeColor.getAppColor(),
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.surfaceVariant,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                            .clickable {
-                                onThemeColorSelected(themeColor)
-                                onCloseClick()
-                            }
-                            .hoverIconClickable(),
+                        modifier =
+                            borderModifier
+                                .size(
+                                    width = 164.dp,
+                                    height = 64.dp,
+                                ).padding(8.dp)
+                                .background(
+                                    color = themeColor.getAppColor(),
+                                    shape = RoundedCornerShape(8.dp),
+                                ).border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = RoundedCornerShape(8.dp),
+                                ).clickable {
+                                    onThemeColorSelected(themeColor)
+                                    onCloseClick()
+                                }.hoverIconClickable(),
                     ) {
                         Text(
                             text = themeColor.colorName,
                             color = themeColor.getTextColor(),
                             style = MaterialTheme.typography.labelSmall,
-                            modifier = Modifier
-                                .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+                            modifier =
+                                Modifier
+                                    .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
                         )
                     }
                 }
@@ -340,28 +345,29 @@ fun ColorPreviewInfo(
         Text(
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.secondary,
-            text = if (showAlpha) {
-                "A: ${color.alpha} \n"
-            } else {
-                ""
-            } +
+            text =
+                if (showAlpha) {
+                    "A: ${color.alpha} \n"
+                } else {
+                    ""
+                } +
                     "R: $red \n" +
                     "G: $green \n" +
                     "B: $blue",
         )
         Box(
-            modifier = Modifier
-                .padding(start = 16.dp)
-                .background(
-                    color,
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .size(72.dp)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant,
-                    shape = RoundedCornerShape(8.dp),
-                ),
+            modifier =
+                Modifier
+                    .padding(start = 16.dp)
+                    .background(
+                        color,
+                        shape = RoundedCornerShape(8.dp),
+                    ).size(72.dp)
+                    .border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        shape = RoundedCornerShape(8.dp),
+                    ),
         )
         Spacer(Modifier.height(16.dp))
     }
@@ -375,7 +381,7 @@ private fun ThemedColorPropertyEditorPreview(useDarkTheme: Boolean) {
             initialColor = ColorWrapper(Material3ColorWrapper.Primary),
             onColorUpdated = {},
             onThemeColorSelected = {},
-            onColorDeleted = {}
+            onColorDeleted = {},
         )
     }
 }
@@ -400,7 +406,7 @@ private fun ThemedColorPropertyDialogContentPreview(useDarkTheme: Boolean) {
             fallbackColor = Color.Gray,
             onThemeColorSelected = {},
             onCloseClick = {},
-            onColorUpdated = {}
+            onColorUpdated = {},
         )
     }
 }
@@ -421,7 +427,7 @@ fun ColorPropertyDialogContentPreview_Dark() {
 private fun ThemedColorPreviewInfoPreview(useDarkTheme: Boolean) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
         ColorPreviewInfo(
-            color = Color(0xFF1976D2)
+            color = Color(0xFF1976D2),
         )
     }
 }

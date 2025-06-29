@@ -54,7 +54,6 @@ data class Project(
     val firebaseAppInfoHolder: FirebaseAppInfoHolder = FirebaseAppInfoHolder(),
     val globalStateHolder: StateHolderImpl = StateHolderImpl(),
 ) : StateHolder by globalStateHolder {
-
     @Transient
     var lastModified: Instant? = Clock.System.now()
 
@@ -66,18 +65,18 @@ data class Project(
         val context = GenerationContext()
         screenHolder.generateComposeLauncherFile()
         return screenHolder.screens.flatMap { it.generateCode(this, context = context) } +
-                screenHolder.generateComposeLauncherFile() +
-                screenHolder.generateAppNavHostFile(this, context = context) +
-                screenHolder.generateKoinViewModelModule(this) +
-                screenHolder.generateAppViewModel(this) +
-                screenHolder.generateScreenRouteFileSpec(this) +
-                dataTypeHolder.generateDataTypeFiles(this) +
-                customEnumHolder.generateEnumFiles(this) +
-                themeHolder.generateThemeFiles() +
-                componentHolder.generateKoinViewModelModule(this) +
-                componentHolder.components.flatMap {
-                    it.generateCode(this, context = context)
-                }
+            screenHolder.generateComposeLauncherFile() +
+            screenHolder.generateAppNavHostFile(this, context = context) +
+            screenHolder.generateKoinViewModelModule(this) +
+            screenHolder.generateAppViewModel(this) +
+            screenHolder.generateScreenRouteFileSpec(this) +
+            dataTypeHolder.generateDataTypeFiles(this) +
+            customEnumHolder.generateEnumFiles(this) +
+            themeHolder.generateThemeFiles() +
+            componentHolder.generateKoinViewModelModule(this) +
+            componentHolder.components.flatMap {
+                it.generateCode(this, context = context)
+            }
     }
 
     /**
@@ -90,36 +89,29 @@ data class Project(
      * The destination path is a relative path from the app's root directory e.g.:
      * `"composeApp/src/commonMain/composeResources/font/Caveat-Bold.ttf"`
      */
-    fun generateCopyInstructions(): Map<String, String> {
-        return themeHolder.fontHolder.generateCopyFileInstructions()
-    }
+    fun generateCopyInstructions(): Map<String, String> = themeHolder.fontHolder.generateCopyFileInstructions()
 
-    fun generateCopyLocalFileInstructions(userId: String): Map<String, String> {
-        return assetHolder.generateCopyLocalFileInstructions(
+    fun generateCopyLocalFileInstructions(userId: String): Map<String, String> =
+        assetHolder.generateCopyLocalFileInstructions(
             userId = userId,
             projectId = id,
         )
-    }
 
-    fun getAllCanvasEditable(): List<CanvasEditable> {
-        return componentHolder.components + screenHolder.screens
-    }
+    fun getAllCanvasEditable(): List<CanvasEditable> = componentHolder.components + screenHolder.screens
 
-    fun getAllComposeNodes(): List<ComposeNode> {
-        return (screenHolder.screens + componentHolder.components).flatMap {
+    fun getAllComposeNodes(): List<ComposeNode> =
+        (screenHolder.screens + componentHolder.components).flatMap {
             it.getAllComposeNodes()
         }
-    }
 
-    fun generateTrackableIssues(): List<TrackableIssue> {
-        return (screenHolder.screens + componentHolder.components).flatMap { it.getAllComposeNodes() }
+    fun generateTrackableIssues(): List<TrackableIssue> =
+        (screenHolder.screens + componentHolder.components)
+            .flatMap { it.getAllComposeNodes() }
             .flatMap { node ->
                 node.generateTrackableIssues(this)
             } + apiHolder.generateTrackableIssues()
-    }
 
     companion object {
-
         fun deserializeFromString(yaml: String): Project {
             val project = yamlSerializer.decodeFromString<Project>(yaml)
             project.screenHolder.updateChildParentRelationships()
@@ -133,21 +125,24 @@ fun Project.serialize(): String = yamlSerializer.encodeToString(this)
 /**
  * Find matching State from the all states including all Screens within the project
  */
-fun Project.findLocalStateOrNull(stateId: StateId): ReadableState? {
-    return globalStateHolder.findStateOrNull(this, stateId)
-        ?: screenHolder.screens.firstOrNull { it.findStateOrNull(this, stateId) != null }
+fun Project.findLocalStateOrNull(stateId: StateId): ReadableState? =
+    globalStateHolder.findStateOrNull(this, stateId)
+        ?: screenHolder.screens
+            .firstOrNull { it.findStateOrNull(this, stateId) != null }
             ?.findStateOrNull(this, stateId)
-        ?: componentHolder.components.firstOrNull { it.findStateOrNull(this, stateId) != null }
+        ?: componentHolder.components
+            .firstOrNull { it.findStateOrNull(this, stateId) != null }
             ?.findStateOrNull(this, stateId)
-}
 
 fun Project.removeLocalState(stateId: StateId) {
-    screenHolder.screens.firstOrNull {
-        it.findStateOrNull(this, stateId) != null
-    }?.removeState(stateId)
-    componentHolder.components.firstOrNull {
-        it.findStateOrNull(this, stateId) != null
-    }?.removeState(stateId)
+    screenHolder.screens
+        .firstOrNull {
+            it.findStateOrNull(this, stateId) != null
+        }?.removeState(stateId)
+    componentHolder.components
+        .firstOrNull {
+            it.findStateOrNull(this, stateId) != null
+        }?.removeState(stateId)
 }
 
 fun Project.findComposeNodeOrNull(nodeId: String): ComposeNode? {
@@ -172,7 +167,10 @@ fun Project.findComposeNodeOrThrow(nodeId: String): ComposeNode {
     throw IllegalStateException("No node is found : $nodeId")
 }
 
-fun Project.replaceNode(nodeId: String, newNode: ComposeNode) {
+fun Project.replaceNode(
+    nodeId: String,
+    newNode: ComposeNode,
+) {
     var node: ComposeNode?
     getAllCanvasEditable().forEach { editable ->
         node = editable.getAllComposeNodes().firstOrNull { it.id == nodeId }
@@ -185,18 +183,16 @@ fun Project.replaceNode(nodeId: String, newNode: ComposeNode) {
     }
 }
 
-fun Project.findDataTypeOrNull(dataTypeId: String): DataType? {
-    return dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId }
-}
+fun Project.findDataTypeOrNull(dataTypeId: String): DataType? = dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId }
 
-fun Project.findCustomEnumOrNull(customEnumId: String): CustomEnum? {
-    return customEnumHolder.enumList.firstOrNull { it.customEnumId == customEnumId }
-}
+fun Project.findCustomEnumOrNull(customEnumId: String): CustomEnum? =
+    customEnumHolder.enumList.firstOrNull {
+        it.customEnumId == customEnumId
+    }
 
-fun Project.findDataTypeOrThrow(dataTypeId: String): DataType {
-    return findDataTypeOrNull(dataTypeId)
+fun Project.findDataTypeOrThrow(dataTypeId: String): DataType =
+    findDataTypeOrNull(dataTypeId)
         ?: throw IllegalStateException("No Data Type is found : $dataTypeId")
-}
 
 fun Project.findCanvasEditableHavingNodeOrNull(node: ComposeNode): CanvasEditable? {
     val screen = screenHolder.screens.firstOrNull { it.hasComposeNode(node) }
@@ -212,22 +208,22 @@ fun Project.findCanvasEditableOrNull(id: String): CanvasEditable? {
     return component
 }
 
-
 fun Project.findScreenOrNull(screenId: String): Screen? = screenHolder.findScreen(screenId)
 
-fun Project.findComponentOrNull(componentId: ComponentId): Component? =
-    componentHolder.components.firstOrNull { it.id == componentId }
+fun Project.findComponentOrNull(componentId: ComponentId): Component? = componentHolder.components.firstOrNull { it.id == componentId }
 
 fun Project.findComponentOrThrow(componentId: ComponentId): Component =
     findComponentOrNull(componentId)
         ?: throw IllegalStateException("No component is found : $componentId")
 
 fun Project.findParameterOrNull(parameterId: ParameterId): ParameterWrapper<*>? {
-    val allParameters = componentHolder.components.flatMap {
-        it.parameters
-    } + screenHolder.screens.flatMap {
-        it.parameters
-    }
+    val allParameters =
+        componentHolder.components.flatMap {
+            it.parameters
+        } +
+            screenHolder.screens.flatMap {
+                it.parameters
+            }
 
     return allParameters.firstOrNull {
         it.id == parameterId
@@ -238,12 +234,12 @@ fun Project.findParameterOrThrow(parameterId: ParameterId): ParameterWrapper<*> 
     findParameterOrNull(parameterId)
         ?: throw IllegalStateException("No parameter is found : $parameterId")
 
-fun Project.findApiDefinitionOrNull(apiId: ApiId): ApiDefinition? =
-    apiHolder.findApiDefinitionOrNull(apiId)
+fun Project.findApiDefinitionOrNull(apiId: ApiId): ApiDefinition? = apiHolder.findApiDefinitionOrNull(apiId)
 
-fun Project.findFirestoreCollectionOrNull(collectionId: CollectionId): FirestoreCollection? {
-    return firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.firstOrNull { it.id == collectionId }
-}
+fun Project.findFirestoreCollectionOrNull(collectionId: CollectionId): FirestoreCollection? =
+    firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.firstOrNull {
+        it.id == collectionId
+    }
 
 /**
  * Utility function to copy contents from another project.

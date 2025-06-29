@@ -53,7 +53,7 @@ class XcodeCommandLineToolsWrapper(
                     Device.IosSimulator(
                         name = name,
                         deviceId = deviceId,
-                        status = SimulatorStatus.fromString(status)
+                        status = SimulatorStatus.fromString(status),
                     )
                 } else {
                     null
@@ -71,17 +71,18 @@ class XcodeCommandLineToolsWrapper(
         launchSimulator(
             appDir = appDir,
             simulator = simulator,
-            onStatusBarUiStateChanged = onStatusBarUiStateChanged
+            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
         )
         resolvePackageDependencies(
             appDir = appDir,
             onStatusBarUiStateChanged = onStatusBarUiStateChanged,
         )
-        val buildResult = buildApp(
-            appDir = appDir,
-            simulator = simulator,
-            onStatusBarUiStateChanged = onStatusBarUiStateChanged
-        )
+        val buildResult =
+            buildApp(
+                appDir = appDir,
+                simulator = simulator,
+                onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+            )
         when (buildResult) {
             is BuildResult.Success -> {
                 onStatusBarUiStateChanged(StatusBarUiState.Loading("Installing the app"))
@@ -95,7 +96,7 @@ class XcodeCommandLineToolsWrapper(
                     appDir = appDir,
                     simulator = simulator,
                     packageName = packageName,
-                    projectName = projectName
+                    projectName = projectName,
                 )
                 onStatusBarUiStateChanged(StatusBarUiState.Success("BUILD SUCCESS"))
             }
@@ -111,18 +112,21 @@ class XcodeCommandLineToolsWrapper(
         simulator: Device.IosSimulator,
         artifactPath: String,
     ) {
-        withTimeoutOrNull(90_000L) { // timeout after 90 seconds
+        withTimeoutOrNull(90_000L) {
+            // timeout after 90 seconds
             withContext(Dispatchers.IO) {
-                val command = arrayOf(
-                    XCRUN,
-                    "simctl",
-                    "install",
-                    simulator.deviceId,
-                    artifactPath,
-                )
-                val processBuilder = ProcessBuilder(*command).apply {
-                    directory(appDir.resolve("iosApp"))
-                }
+                val command =
+                    arrayOf(
+                        XCRUN,
+                        "simctl",
+                        "install",
+                        simulator.deviceId,
+                        artifactPath,
+                    )
+                val processBuilder =
+                    ProcessBuilder(*command).apply {
+                        directory(appDir.resolve("iosApp"))
+                    }
                 Logger.d("Installing the app: ${processBuilder.command()}")
                 logger.debug("Installing the app: {}", processBuilder.command())
 
@@ -140,16 +144,18 @@ class XcodeCommandLineToolsWrapper(
         projectName: String,
     ) {
         withContext(Dispatchers.IO) {
-            val command = arrayOf(
-                XCRUN,
-                "simctl",
-                "launch",
-                simulator.deviceId,
-                "$packageName.$projectName",
-            )
-            val processBuilder = ProcessBuilder(*command).apply {
-                directory(appDir.resolve("iosApp"))
-            }
+            val command =
+                arrayOf(
+                    XCRUN,
+                    "simctl",
+                    "launch",
+                    simulator.deviceId,
+                    "$packageName.$projectName",
+                )
+            val processBuilder =
+                ProcessBuilder(*command).apply {
+                    directory(appDir.resolve("iosApp"))
+                }
             Logger.d("Launching the app: ${processBuilder.command()}")
             logger.debug("Launching the app: {}", processBuilder.command())
 
@@ -163,40 +169,44 @@ class XcodeCommandLineToolsWrapper(
     ) {
         try {
             withContext(Dispatchers.IO) {
-                val command = arrayOf(
-                    XCODEBUILD,
-                    "-resolvePackageDependencies",
-                )
-                val processBuilder = ProcessBuilder(*command).apply {
-                    directory(appDir.resolve("iosApp"))
-                }
+                val command =
+                    arrayOf(
+                        XCODEBUILD,
+                        "-resolvePackageDependencies",
+                    )
+                val processBuilder =
+                    ProcessBuilder(*command).apply {
+                        directory(appDir.resolve("iosApp"))
+                    }
                 Logger.d("Executing command: ${processBuilder.command()}")
 
                 val process = processBuilder.start()
 
                 readStdOutJob?.cancel()
-                readStdOutJob = launch {
-                    process.inputStream.bufferedReader().use { reader ->
-                        reader.forEachLine { line ->
-                            onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
-                            buildLogger.d(line)
-                            logger.debug(line)
+                readStdOutJob =
+                    launch {
+                        process.inputStream.bufferedReader().use { reader ->
+                            reader.forEachLine { line ->
+                                onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
+                                buildLogger.d(line)
+                                logger.debug(line)
+                            }
                         }
                     }
-                }
 
                 readStdErrJob?.cancel()
-                readStdErrJob = launch {
-                    process.errorStream.bufferedReader().use { reader ->
-                        reader.forEachLine { line ->
-                            if (line.isEmpty()) {
-                                return@forEachLine
+                readStdErrJob =
+                    launch {
+                        process.errorStream.bufferedReader().use { reader ->
+                            reader.forEachLine { line ->
+                                if (line.isEmpty()) {
+                                    return@forEachLine
+                                }
+                                buildLogger.e(line)
+                                logger.error(line)
                             }
-                            buildLogger.e(line)
-                            logger.error(line)
                         }
                     }
-                }
                 process.waitFor()
             }
         } catch (e: Exception) {
@@ -212,57 +222,62 @@ class XcodeCommandLineToolsWrapper(
     ): BuildResult? {
         return try {
             var appPath: String? = null
-            withTimeoutOrNull(90_000L) { // timeout after 90 seconds
+            withTimeoutOrNull(90_000L) {
+                // timeout after 90 seconds
                 withContext(Dispatchers.IO) {
                     appDir.resolve("gradlew").setExecutable(true)
-                    val command = arrayOf(
-                        XCODEBUILD,
-                        "-scheme",
-                        "iosApp",
-                        "-sdk",
-                        "iphonesimulator",
-                        "-destination",
-                        "id=${simulator.deviceId}",
-                        "clean",
-                        "build"
-                    )
-                    val processBuilder = ProcessBuilder(*command).apply {
-                        directory(appDir.resolve("iosApp"))
-                    }
+                    val command =
+                        arrayOf(
+                            XCODEBUILD,
+                            "-scheme",
+                            "iosApp",
+                            "-sdk",
+                            "iphonesimulator",
+                            "-destination",
+                            "id=${simulator.deviceId}",
+                            "clean",
+                            "build",
+                        )
+                    val processBuilder =
+                        ProcessBuilder(*command).apply {
+                            directory(appDir.resolve("iosApp"))
+                        }
                     Logger.d("Executing command: ${processBuilder.command()}")
                     logger.debug("Executing command: {}", processBuilder.command())
 
                     val process = processBuilder.start()
 
                     readStdOutJob?.cancel()
-                    readStdOutJob = launch {
-                        process.inputStream.bufferedReader().use { reader ->
-                            reader.forEachLine { line ->
-                                buildLogger.d(line)
-                                logger.debug(line)
+                    readStdOutJob =
+                        launch {
+                            process.inputStream.bufferedReader().use { reader ->
+                                reader.forEachLine { line ->
+                                    buildLogger.d(line)
+                                    logger.debug(line)
 
-                                if (line.contains("/usr/bin/touch")) {
-                                    val split = line.split("\\s+".toRegex())
-                                    appPath = split[3]
-                                } else {
-                                    onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
+                                    if (line.contains("/usr/bin/touch")) {
+                                        val split = line.split("\\s+".toRegex())
+                                        appPath = split[3]
+                                    } else {
+                                        onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
+                                    }
                                 }
                             }
                         }
-                    }
 
                     readStdErrJob?.cancel()
-                    readStdErrJob = launch {
-                        process.errorStream.bufferedReader().use { reader ->
-                            reader.forEachLine { line ->
-                                if (line.isEmpty()) {
-                                    return@forEachLine
+                    readStdErrJob =
+                        launch {
+                            process.errorStream.bufferedReader().use { reader ->
+                                reader.forEachLine { line ->
+                                    if (line.isEmpty()) {
+                                        return@forEachLine
+                                    }
+                                    buildLogger.e(line)
+                                    logger.error(line)
                                 }
-                                buildLogger.e(line)
-                                logger.error(line)
                             }
                         }
-                    }
                     process.waitFor()
                     appPath?.let {
                         BuildResult.Success(it)
@@ -283,17 +298,20 @@ class XcodeCommandLineToolsWrapper(
         if (simulator.status == SimulatorStatus.Booted) return
         try {
             var simulators: List<Device.IosSimulator>?
-            withTimeoutOrNull(60_000L) { // timeout after 90 seconds
+            withTimeoutOrNull(60_000L) {
+                // timeout after 90 seconds
                 withContext(Dispatchers.IO) {
-                    val command = arrayOf(
-                        XCRUN,
-                        "simctl",
-                        "boot",
-                        simulator.deviceId,
-                    )
-                    val processBuilder = ProcessBuilder(*command).apply {
-                        directory(appDir.resolve("iosApp"))
-                    }
+                    val command =
+                        arrayOf(
+                            XCRUN,
+                            "simctl",
+                            "boot",
+                            simulator.deviceId,
+                        )
+                    val processBuilder =
+                        ProcessBuilder(*command).apply {
+                            directory(appDir.resolve("iosApp"))
+                        }
                     processBuilder.start()
                     while (isActive) { // continue looping as long as the coroutine is active
                         simulators = listSimulators()
@@ -316,6 +334,9 @@ class XcodeCommandLineToolsWrapper(
 }
 
 sealed interface BuildResult {
-    data class Success(val artifactPath: String) : BuildResult
+    data class Success(
+        val artifactPath: String,
+    ) : BuildResult
+
     data object Failure : BuildResult
 }

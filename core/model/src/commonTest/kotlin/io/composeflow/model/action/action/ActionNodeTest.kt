@@ -11,7 +11,6 @@ import kotlin.test.assertTrue
 import kotlin.uuid.Uuid
 
 class ActionNodeTest {
-
     @Test
     fun testAllActions_simpleNode() {
         val emptyAction = ActionNode.Simple()
@@ -28,42 +27,53 @@ class ActionNodeTest {
         val navigateTo1 =
             ActionNode.Simple(action = Navigation.NavigateTo(screenId = Uuid.random().toString()))
         val navigateBack2 = ActionNode.Simple(action = Navigation.NavigateBack)
-        val navigateTo2 = ActionNode.Simple(
-            action = Navigation.NavigateTo(
-                screenId = Uuid.random().toString(),
-            ),
-        )
-        val setAppStateValue = ActionNode.Simple(
-            action = StateAction.SetAppStateValue(
-                setValueToStates = mutableListOf(
-                    SetValueToState(
-                        writeToStateId = Uuid.random().toString(),
-                        operation = StateOperation.ClearValue,
+        val navigateTo2 =
+            ActionNode.Simple(
+                action =
+                    Navigation.NavigateTo(
+                        screenId = Uuid.random().toString(),
                     ),
-                ),
-            ),
-        )
-        val navigateTo3 = ActionNode.Simple(
-            action = Navigation.NavigateTo(screenId = Uuid.random().toString()),
-        )
-        val conditionalNode = ActionNode.Conditional(
-            trueNodes = mutableListOf(
-                navigateBack1,
-                navigateTo1,
-            ),
-            falseNodes = mutableListOf(
-                navigateBack2,
-                navigateTo2,
-                ActionNode.Conditional(
-                    trueNodes = mutableListOf(
-                        setAppStateValue,
+            )
+        val setAppStateValue =
+            ActionNode.Simple(
+                action =
+                    StateAction.SetAppStateValue(
+                        setValueToStates =
+                            mutableListOf(
+                                SetValueToState(
+                                    writeToStateId = Uuid.random().toString(),
+                                    operation = StateOperation.ClearValue,
+                                ),
+                            ),
                     ),
-                    falseNodes = mutableListOf(
-                        navigateTo3,
+            )
+        val navigateTo3 =
+            ActionNode.Simple(
+                action = Navigation.NavigateTo(screenId = Uuid.random().toString()),
+            )
+        val conditionalNode =
+            ActionNode.Conditional(
+                trueNodes =
+                    mutableListOf(
+                        navigateBack1,
+                        navigateTo1,
                     ),
-                ),
-            ),
-        )
+                falseNodes =
+                    mutableListOf(
+                        navigateBack2,
+                        navigateTo2,
+                        ActionNode.Conditional(
+                            trueNodes =
+                                mutableListOf(
+                                    setAppStateValue,
+                                ),
+                            falseNodes =
+                                mutableListOf(
+                                    navigateTo3,
+                                ),
+                        ),
+                    ),
+            )
         assertEquals(6, conditionalNode.allActions().size)
         assertTrue(
             conditionalNode.allActions().containsAll(
@@ -82,11 +92,12 @@ class ActionNodeTest {
     @Test
     fun testGenerateCodeBlockWithSimpleNode() {
         val navigateBack1 = ActionNode.Simple(action = Navigation.NavigateBack)
-        val codeBlock = navigateBack1.generateCodeBlock(
-            project = Project(),
-            GenerationContext(),
-            dryRun = false
-        )
+        val codeBlock =
+            navigateBack1.generateCodeBlock(
+                project = Project(),
+                GenerationContext(),
+                dryRun = false,
+            )
 
         assertEquals("onNavigateBack()".trimForCompare(), codeBlock.toString().trimForCompare())
     }
@@ -101,26 +112,31 @@ class ActionNodeTest {
 
         val navigateBack1 = ActionNode.Simple(action = Navigation.NavigateBack)
         val navigateBack2 = ActionNode.Simple(action = Navigation.NavigateBack)
-        val conditionalNode = ActionNode.Conditional(
-            ifCondition = BooleanProperty.BooleanIntrinsicValue(true),
-            trueNodes = mutableListOf(
-                navigateBack1,
-            ),
-            falseNodes = mutableListOf(
-                navigateBack2,
-                ActionNode.Conditional(
-                    ifCondition = BooleanProperty.BooleanIntrinsicValue(false),
-                    trueNodes = mutableListOf(
-                        navigateBack2,
+        val conditionalNode =
+            ActionNode.Conditional(
+                ifCondition = BooleanProperty.BooleanIntrinsicValue(true),
+                trueNodes =
+                    mutableListOf(
+                        navigateBack1,
                     ),
-                ),
-            ),
-        )
-        val codeBlock = conditionalNode.generateCodeBlock(
-            project = Project(),
-            GenerationContext(),
-            dryRun = false
-        )
+                falseNodes =
+                    mutableListOf(
+                        navigateBack2,
+                        ActionNode.Conditional(
+                            ifCondition = BooleanProperty.BooleanIntrinsicValue(false),
+                            trueNodes =
+                                mutableListOf(
+                                    navigateBack2,
+                                ),
+                        ),
+                    ),
+            )
+        val codeBlock =
+            conditionalNode.generateCodeBlock(
+                project = Project(),
+                GenerationContext(),
+                dryRun = false,
+            )
         assertEquals(
             """
             if (true) {

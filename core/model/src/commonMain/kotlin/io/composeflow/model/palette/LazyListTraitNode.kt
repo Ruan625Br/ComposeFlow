@@ -14,7 +14,6 @@ import io.composeflow.model.property.ApiResultProperty
 import io.composeflow.replaceSpaces
 
 object LazyListTraitNode {
-
     fun generateCode(
         project: Project,
         node: ComposeNode,
@@ -32,17 +31,20 @@ object LazyListTraitNode {
         } else {
             codeBlockBuilder.addStatement("%M(", lazyListMember)
             codeBlockBuilder.add(
-                lazyListParams.generateParamsCode()
+                lazyListParams.generateParamsCode(),
             )
             codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun)
+                node.generateModifierCode(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
         }
 
         node.children.forEach { child ->
             val itemName =
-                node.trait.value.iconText().replaceSpaces().replaceFirstChar { it.lowercase() }
+                node.trait.value
+                    .iconText()
+                    .replaceSpaces()
+                    .replaceFirstChar { it.lowercase() }
             when (val childParams = child.lazyListChildParams.value) {
                 is LazyListChildParams.FixedNumber -> {
                     codeBlockBuilder.addStatement("items(count = ${childParams.numOfItems}) { ${itemName}Index -> ")
@@ -51,7 +53,7 @@ object LazyListTraitNode {
                             project = project,
                             context = context,
                             dryRun = dryRun,
-                        )
+                        ),
                     )
                     codeBlockBuilder.addStatement("}")
                 }
@@ -69,7 +71,7 @@ object LazyListTraitNode {
                                     CodeBlock.of(
                                         "%M(",
                                         MemberHolder.AndroidX.Lazy.itemsIndexed,
-                                    )
+                                    ),
                                 )
                                 codeBlockBuilder.add(transformedItemCodeBlock)
                                 codeBlockBuilder.add(") { ${itemName}Index, ${itemName}Item -> ")
@@ -88,7 +90,7 @@ object LazyListTraitNode {
                                 project = project,
                                 context = context,
                                 dryRun = dryRun,
-                            )
+                            ),
                         )
                         codeBlockBuilder.addStatement("}")
                         when (dynamicItem) {

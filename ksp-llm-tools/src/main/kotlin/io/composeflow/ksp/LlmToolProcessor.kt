@@ -17,13 +17,13 @@ import java.io.File
 class LlmToolProcessor(
     private val codeGenerator: CodeGenerator,
     private val logger: KSPLogger,
-    private val options: Map<String, String>
+    private val options: Map<String, String>,
 ) : SymbolProcessor {
-
-    private val json = Json {
-        prettyPrint = true
-        encodeDefaults = true
-    }
+    private val json =
+        Json {
+            prettyPrint = true
+            encodeDefaults = true
+        }
 
     override fun process(resolver: Resolver): List<KSAnnotated> {
         logger.info("LlmToolProcessor is processing...")
@@ -42,17 +42,19 @@ class LlmToolProcessor(
     }
 
     private fun processFunction(function: KSFunctionDeclaration) {
-        val annotation = function.annotations.find {
-            it.shortName.asString() == "LlmTool"
-        } ?: return
+        val annotation =
+            function.annotations.find {
+                it.shortName.asString() == "LlmTool"
+            } ?: return
 
         val packageName = function.containingFile?.packageName?.asString() ?: ""
         val className = function.parentDeclaration?.simpleName?.asString() ?: ""
         val functionName = function.simpleName.asString()
 
         // Extract annotation values
-        val name = annotation.arguments.find { it.name?.asString() == "name" }?.value as? String
-            ?: functionName
+        val name =
+            annotation.arguments.find { it.name?.asString() == "name" }?.value as? String
+                ?: functionName
         val description =
             annotation.arguments.find { it.name?.asString() == "description" }?.value as? String
                 ?: ""
@@ -61,67 +63,81 @@ class LlmToolProcessor(
                 ?: ""
 
         // Process parameters
-        val parameters = function.parameters.map { param ->
-            val paramAnnotation = param.annotations.find {
-                it.shortName.asString() == "LlmParam"
+        val parameters =
+            function.parameters.map { param ->
+                val paramAnnotation =
+                    param.annotations.find {
+                        it.shortName.asString() == "LlmParam"
+                    }
+
+                val paramDescription =
+                    paramAnnotation
+                        ?.arguments
+                        ?.find {
+                            it.name?.asString() == "description"
+                        }?.value as? String ?: ""
+
+                val required =
+                    paramAnnotation
+                        ?.arguments
+                        ?.find {
+                            it.name?.asString() == "required"
+                        }?.value as? Boolean ?: true
+
+                val defaultValue =
+                    paramAnnotation
+                        ?.arguments
+                        ?.find {
+                            it.name?.asString() == "defaultValue"
+                        }?.value as? String ?: ""
+
+                val paramType = param.type.resolve()
+                val typeDeclaration = paramType.declaration
+
+                // Check if the type has a @SerialName annotation
+                val serialNameAnnotation =
+                    typeDeclaration.annotations.find {
+                        it.shortName.asString() == "SerialName" ||
+                            it.shortName.asString() == "kotlinx.serialization.SerialName"
+                    }
+
+                // Get the serial name value if available, otherwise use the qualified name
+                val typeName =
+                    if (serialNameAnnotation != null) {
+                        // Extract the value from the annotation
+                        serialNameAnnotation.arguments.firstOrNull()?.value as? String
+                            ?: typeDeclaration.simpleName.asString()
+                    } else {
+                        // Fall back to the qualified name or simple name
+                        typeDeclaration.qualifiedName?.asString()
+                            ?: typeDeclaration.simpleName.asString()
+                    }
+
+                ParameterInfo(
+                    name = param.name?.asString() ?: "",
+                    type = typeName,
+                    description = paramDescription,
+                    required = required,
+                    defaultValue = defaultValue,
+                )
             }
-
-            val paramDescription = paramAnnotation?.arguments?.find {
-                it.name?.asString() == "description"
-            }?.value as? String ?: ""
-
-            val required = paramAnnotation?.arguments?.find {
-                it.name?.asString() == "required"
-            }?.value as? Boolean ?: true
-
-            val defaultValue = paramAnnotation?.arguments?.find {
-                it.name?.asString() == "defaultValue"
-            }?.value as? String ?: ""
-
-            val paramType = param.type.resolve()
-            val typeDeclaration = paramType.declaration
-
-            // Check if the type has a @SerialName annotation
-            val serialNameAnnotation = typeDeclaration.annotations.find {
-                it.shortName.asString() == "SerialName" ||
-                        it.shortName.asString() == "kotlinx.serialization.SerialName"
-            }
-
-            // Get the serial name value if available, otherwise use the qualified name
-            val typeName = if (serialNameAnnotation != null) {
-                // Extract the value from the annotation
-                serialNameAnnotation.arguments.firstOrNull()?.value as? String
-                    ?: typeDeclaration.simpleName.asString()
-            } else {
-                // Fall back to the qualified name or simple name
-                typeDeclaration.qualifiedName?.asString()
-                    ?: typeDeclaration.simpleName.asString()
-            }
-
-            ParameterInfo(
-                name = param.name?.asString() ?: "",
-                type = typeName,
-                description = paramDescription,
-                required = required,
-                defaultValue = defaultValue
-            )
-        }
 
         // Get return type
         val returnType = function.returnType?.resolve()
         val returnTypeName = returnType?.declaration?.qualifiedName?.asString() ?: "void"
 
         // Create tool info
-        val toolInfo = LlmToolInfo(
-            name = name,
-            description = description,
-            category = category,
-            className = className,
-            functionName = functionName,
-            packageName = packageName,
-            parameters = parameters,
-            returnType = returnTypeName
-        )
+        val toolInfo =
+            LlmToolInfo(
+                name = name,
+                description = description,
+                category = category,
+                className = className,
+                functionName = functionName,
+                packageName = packageName,
+                parameters = parameters,
+                returnType = returnTypeName,
+            )
 
         // Generate JSON file
         generateJsonFile(toolInfo)
@@ -133,7 +149,7 @@ class LlmToolProcessor(
         val outputDirFile = File(outputDir)
         outputDirFile.mkdirs()
         logger.info("Output directory exists: ${outputDirFile.exists()}, isDirectory: ${outputDirFile.isDirectory}")
-        
+
         // Generate the original format JSON
         val fileName = "${toolInfo.name.replace(" ", "_")}_tool"
         val fileContent = json.encodeToString(toolInfo)
@@ -143,13 +159,13 @@ class LlmToolProcessor(
         try {
             file.writeText(fileContent)
             logger.info("Successfully generated LLM tool JSON for ${toolInfo.name} at ${file.absolutePath}")
-            
+
             // Generate the MCP tool format JSON
             val mcpFileName = "${toolInfo.name.replace(" ", "_")}_mcp_tool"
             val mcpFileContent = LlmToolJsonTransformer.transform(toolInfo)
             val mcpFile = outputDirFile.resolve("$mcpFileName.json")
             logger.info("Writing MCP tool JSON to file: ${mcpFile.absolutePath}")
-            
+
             mcpFile.writeText(mcpFileContent)
             logger.info("Successfully generated MCP tool JSON for ${toolInfo.name} at ${mcpFile.absolutePath}")
         } catch (e: Exception) {
@@ -160,15 +176,12 @@ class LlmToolProcessor(
 }
 
 class LlmToolProcessorProvider : SymbolProcessorProvider {
-    override fun create(
-        environment: SymbolProcessorEnvironment
-    ): SymbolProcessor {
-        return LlmToolProcessor(
+    override fun create(environment: SymbolProcessorEnvironment): SymbolProcessor =
+        LlmToolProcessor(
             environment.codeGenerator,
             environment.logger,
-            environment.options
+            environment.options,
         )
-    }
 }
 
 @Serializable
@@ -180,7 +193,7 @@ data class LlmToolInfo(
     val functionName: String,
     val packageName: String,
     val parameters: List<ParameterInfo>,
-    val returnType: String
+    val returnType: String,
 )
 
 @Serializable
@@ -189,5 +202,5 @@ data class ParameterInfo(
     val type: String,
     val description: String,
     val required: Boolean,
-    val defaultValue: String
+    val defaultValue: String,
 )

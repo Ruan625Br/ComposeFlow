@@ -18,7 +18,11 @@ class LocalProjectSaverImpl(
             Dispatchers.IO
         },
 ) : ProjectSaver {
-    override suspend fun saveProjectYaml(userId: String, projectId: String, yamlContent: String) {
+    override suspend fun saveProjectYaml(
+        userId: String,
+        projectId: String,
+        yamlContent: String,
+    ) {
         withContext(ioDispatcher) {
             val projectsDir = prepareProjectDir(userId = userId, projectId = projectId)
             val file = projectsDir.resolve(projectYamlFileName)
@@ -26,7 +30,10 @@ class LocalProjectSaverImpl(
         }
     }
 
-    override suspend fun deleteProject(userId: String, projectId: String) {
+    override suspend fun deleteProject(
+        userId: String,
+        projectId: String,
+    ) {
         withContext(ioDispatcher) {
             val projectDir = getCacheDir().resolve("projects").resolve(userId).resolve(projectId)
             if (projectDir.exists()) {
@@ -46,7 +53,7 @@ class LocalProjectSaverImpl(
         }
         return ProjectYamlNameWithLastModified(
             file.readText(),
-            Instant.fromEpochMilliseconds(file.lastModified())
+            Instant.fromEpochMilliseconds(file.lastModified()),
         )
     }
 
@@ -67,10 +74,12 @@ class LocalProjectSaverImpl(
             projectDir.deleteRecursively()
         }
     }
-
 }
 
-private fun prepareProjectDir(userId: String, projectId: String): File {
+private fun prepareProjectDir(
+    userId: String,
+    projectId: String,
+): File {
     val projectsDir = getCacheDir().resolve("projects").resolve(userId).resolve(projectId)
     projectsDir.mkdirs()
     return projectsDir

@@ -14,14 +14,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 sealed interface ActionHandler {
     var actionsMap: MutableMap<ActionType, MutableList<ActionNode>>
+
     fun allActions(): List<Action>
+
     fun allActionNodes(): List<ActionNode>
 
     /**
      * Get the list of ComposeNode for [actionType] that enables [ComposeStateValidator]
      */
     fun getDependentValidatorNodesForActionType(
-        project: Project, actionType: ActionType,
+        project: Project,
+        actionType: ActionType,
     ): List<ComposeNode>
 }
 
@@ -30,29 +33,31 @@ sealed interface ActionHandler {
 class ActionHandlerImpl : ActionHandler {
     @Serializable(with = FallbackMutableStateMapSerializer::class)
     override var actionsMap: MutableMap<
-            ActionType,
-            @Serializable(with = FallbackMutableStateListSerializer::class) MutableList<ActionNode>,
-            > = mutableStateMapOf()
+        ActionType,
+        @Serializable(with = FallbackMutableStateListSerializer::class)
+        MutableList<ActionNode>,
+    > = mutableStateMapOf()
 
     override fun getDependentValidatorNodesForActionType(
         project: Project,
         actionType: ActionType,
     ): List<ComposeNode> {
         val actionNodes = actionsMap[actionType]
-        val dependentComposeNodes = actionNodes?.flatMap { it.allActions() }
-            ?.flatMap { it.getDependentComposeNodes(project) }
+        val dependentComposeNodes =
+            actionNodes
+                ?.flatMap { it.allActions() }
+                ?.flatMap { it.getDependentComposeNodes(project) }
         return dependentComposeNodes?.filter {
             // At the moment, only TextField is able to have a validator
             it.trait.value is TextFieldTrait &&
-                    (it.trait.value as TextFieldTrait).enableValidator == true
+                (it.trait.value as TextFieldTrait).enableValidator == true
         } ?: emptyList()
     }
 
-    override fun allActions(): List<Action> {
-        return actionsMap.entries.flatMap { entry ->
+    override fun allActions(): List<Action> =
+        actionsMap.entries.flatMap { entry ->
             entry.value.flatMap { it.allActions() }
         }
-    }
 
     override fun allActionNodes(): List<ActionNode> = actionsMap.entries.flatMap { it.value }
 }

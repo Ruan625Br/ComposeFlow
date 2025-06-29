@@ -10,10 +10,12 @@ fun getAssetCacheFileFor(
     projectId: String,
     blobInfoWrapper: BlobInfoWrapper,
 ): File {
-    val asset = getCacheDir().resolve("projects")
-        .resolve(userId)
-        .resolve(projectId)
-        .resolve("assets")
-        .resolve(blobInfoWrapper.fileName)
+    val asset =
+        getCacheDir()
+            .resolve("projects")
+            .resolve(userId)
+            .resolve(projectId)
+            .resolve("assets")
+            .resolve(blobInfoWrapper.fileName)
     return asset
 }

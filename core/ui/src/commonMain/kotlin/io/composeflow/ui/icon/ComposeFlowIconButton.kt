@@ -22,9 +22,10 @@ fun ComposeFlowIconButton(
 ) {
     IconButton(
         onClick = onClick,
-        modifier = modifier
-            .size(minimumInteractiveComponentSize)
-            .hoverIconClickable(),
+        modifier =
+            modifier
+                .size(minimumInteractiveComponentSize)
+                .hoverIconClickable(),
         enabled = enabled,
         colors = colors,
         interactionSource = interactionSource,

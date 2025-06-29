@@ -23,9 +23,8 @@ data class FirebaseAppInfo(
     @Serializable(MutableStateSerializer::class)
     val authenticationEnabled: MutableState<Boolean> = mutableStateOf(false),
 ) {
-
-    fun getConnectedStatus(): FirebaseConnectedStatus {
-        return if (androidApp != null && iOSApp != null && webApp != null) {
+    fun getConnectedStatus(): FirebaseConnectedStatus =
+        if (androidApp != null && iOSApp != null && webApp != null) {
             FirebaseConnectedStatus.Connected
         } else if (
             androidApp != null ||
@@ -36,10 +35,10 @@ data class FirebaseAppInfo(
         } else {
             FirebaseConnectedStatus.NotConnected
         }
-    }
 
     companion object {
         fun defaultAppDisplayName(projectName: String) = "ComposeFlow: $projectName"
+
         fun defaultWebAppDisplayName(projectName: String) = "ComposeFlow preview: $projectName"
     }
 }
@@ -47,5 +46,5 @@ data class FirebaseAppInfo(
 enum class FirebaseConnectedStatus {
     Connected,
     PartiallyConnected,
-    NotConnected
+    NotConnected,
 }

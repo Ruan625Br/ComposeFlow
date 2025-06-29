@@ -13,7 +13,6 @@ import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 
 object UiBuilderHelper {
-
     fun checkIfNodeCanBeAddedDueToScreenOnlyNode(
         currentEditable: CanvasEditable,
         composeNode: ComposeNode,
@@ -30,7 +29,7 @@ object UiBuilderHelper {
             ) {
                 return String.format(
                     SAME_NODE_EXISTS_IN_SCREEN,
-                    composeNode.trait.value.iconText()
+                    composeNode.trait.value.iconText(),
                 )
             }
         }

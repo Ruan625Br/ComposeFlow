@@ -13,8 +13,9 @@ import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import kotlin.random.Random
 
-class DependencyInjectionRule(private val coroutinesDispatcherRule: CoroutinesDispatcherRule) :
-    TestWatcher() {
+class DependencyInjectionRule(
+    private val coroutinesDispatcherRule: CoroutinesDispatcherRule,
+) : TestWatcher() {
     override fun starting(description: Description) {
         ServiceLocator.putWithKey(
             key = ServiceLocator.KeyIoDispatcherCoroutineScope,

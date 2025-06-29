@@ -11,7 +11,6 @@ data class PreviewAppParams(
 )
 
 sealed interface PreviewAvailability {
-
     val previewAppParams: PreviewAppParams
 
     data class Available(

@@ -25,14 +25,17 @@ import org.jetbrains.compose.resources.StringResource
 @SerialName("TabContentTrait")
 data object TabContentTrait : ComposeTrait {
     override fun icon(): ImageVector = Icons.Outlined.Description
+
     override fun iconText(): String = "TabContent"
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Container, TraitCategory.TabContent)
+
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container, TraitCategory.TabContent)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_tab_content_trait
 
     override fun visibleInPalette(): Boolean = false
+
     override fun isResizeable(): Boolean = false
+
     override fun isEditable(): Boolean = false
 
     @Composable
@@ -45,17 +48,19 @@ data object TabContentTrait : ComposeTrait {
         modifier: Modifier,
     ) {
         Column(
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        isDraggable = false,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            isDraggable = false,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         ) {
             node.children.forEach {
                 it.RenderedNodeInCanvas(
@@ -73,13 +78,11 @@ data object TabContentTrait : ComposeTrait {
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        return ColumnTrait().generateCode(
+    ): CodeBlock =
+        ColumnTrait().generateCode(
             project = project,
             node,
             context = context,
             dryRun = dryRun,
         )
-    }
 }
-

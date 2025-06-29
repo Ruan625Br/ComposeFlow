@@ -19,7 +19,7 @@ fun TabRowParamsInspector(
             onCheckedChange = {
                 composeNodeCallbacks.onTraitUpdated(node, params.copy(scrollable = it))
             },
-            label = "Scrollable"
+            label = "Scrollable",
         )
     }
 }

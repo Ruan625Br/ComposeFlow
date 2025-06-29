@@ -3,17 +3,19 @@ package io.composeflow.wrapper
 import java.io.File
 
 object JdkChecker {
-
     fun isValidJavaHome(javaHome: String): Boolean {
         val javaHomeDir = File(javaHome)
         if (!javaHomeDir.exists() || !javaHomeDir.isDirectory) return false
 
         val javaBinDir = javaHomeDir.resolve("bin")
         if (!javaBinDir.exists()) return false
-        if (!javaBinDir.resolve("java").exists() && !javaBinDir.resolve("java.exe")
+        if (!javaBinDir.resolve("java").exists() &&
+            !javaBinDir
+                .resolve("java.exe")
                 .exists()
-        ) return false
+        ) {
+            return false
+        }
         return true
     }
-
 }
