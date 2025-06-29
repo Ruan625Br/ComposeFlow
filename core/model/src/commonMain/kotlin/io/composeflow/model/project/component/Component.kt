@@ -106,21 +106,22 @@ data class Component(
     override val id: ComponentId = Uuid.random().toString(),
     override val name: String,
     @Serializable(MutableStateSerializer::class)
-    val componentRoot: MutableState<ComposeNode> = mutableStateOf(
-        ComposeNode(),
-    ),
+    val componentRoot: MutableState<ComposeNode> =
+        mutableStateOf(
+            ComposeNode(),
+        ),
     @Serializable(FallbackMutableStateListSerializer::class)
     override val parameters: MutableList<ParameterWrapper<*>> = mutableStateListEqualsOverrideOf(),
     private val stateHolderImpl: StateHolderImpl = StateHolderImpl(),
-) : PaletteDraggable, CanvasEditable, StateHolder {
-
+) : PaletteDraggable,
+    CanvasEditable,
+    StateHolder {
     init {
         componentRoot.value.updateChildParentRelationships()
         getAllComposeNodes().forEach { it.updateComposeNodeReferencesForTrait() }
     }
 
-    override fun getPackageName(project: Project): String =
-        "${project.packageName}.components.$name".toPackageName()
+    override fun getPackageName(project: Project): String = "${project.packageName}.components.$name".toPackageName()
 
     @Transient
     override val composableName: String = name.toKotlinFileName()
@@ -131,8 +132,7 @@ data class Component(
     @Transient
     override val viewModelName: String = name.replaceFirstChar { it.lowercase() } + "ViewModel"
 
-    fun asMemberName(project: Project): MemberName =
-        MemberName(getPackageName(project), composableName)
+    fun asMemberName(project: Project): MemberName = MemberName(getPackageName(project), composableName)
 
     @Composable
     fun Thumbnail(
@@ -143,41 +143,40 @@ data class Component(
     ) {
         var removeComponentDialogOpen by remember { mutableStateOf(false) }
         Column(
-            modifier = modifier
-                .clip(RoundedCornerShape(8.dp))
-                .background(
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                )
-                .aspectRatio(2.2f)
-                .border(
-                    width = 1.dp,
-                    color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(8.dp),
-                )
-                .switchByHovered(
-                    hovered = Modifier.border(
+            modifier =
+                modifier
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                    ).aspectRatio(2.2f)
+                    .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.primary,
+                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                         shape = RoundedCornerShape(8.dp),
-                    ),
-                    notHovered = Modifier.alpha(0.5f),
-                ).draggableFromPalette(
-                    project = project,
-                    paletteNodeCallbacks = paletteNodeCallbacks,
-                    paletteDraggable = this,
-                    zoomableContainerStateHolder = ZoomableContainerStateHolder(),
-                )
-                .combinedClickable(
-                    enabled = true,
-                    onClick = {},
-                    onDoubleClick = {
-                        composeNodeCallbacks.onEditComponent(
-                            project.findComponentOrThrow(
-                                id
+                    ).switchByHovered(
+                        hovered =
+                            Modifier.border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.primary,
+                                shape = RoundedCornerShape(8.dp),
+                            ),
+                        notHovered = Modifier.alpha(0.5f),
+                    ).draggableFromPalette(
+                        project = project,
+                        paletteNodeCallbacks = paletteNodeCallbacks,
+                        paletteDraggable = this,
+                        zoomableContainerStateHolder = ZoomableContainerStateHolder(),
+                    ).combinedClickable(
+                        enabled = true,
+                        onClick = {},
+                        onDoubleClick = {
+                            composeNodeCallbacks.onEditComponent(
+                                project.findComponentOrThrow(
+                                    id,
+                                ),
                             )
-                        )
-                    },
-                ),
+                        },
+                    ),
         ) {
             Row {
                 Text(
@@ -214,9 +213,10 @@ data class Component(
             }
             ProvideAppThemeTokens(isDarkTheme = LocalUseDarkTheme.current) {
                 Surface(
-                    modifier = Modifier
-                        .scale(0.65f)
-                        .clip(RoundedCornerShape(8.dp))
+                    modifier =
+                        Modifier
+                            .scale(0.65f)
+                            .clip(RoundedCornerShape(8.dp)),
                 ) {
                     // Calling restoreInstance so that same mutableStates such as Hovered or focused
                     // statuses are not used with the original ComposeNode tree
@@ -225,8 +225,9 @@ data class Component(
                         canvasNodeCallbacks = emptyCanvasNodeCallbacks,
                         paletteRenderParams = PaletteRenderParams(isThumbnail = true),
                         zoomableContainerStateHolder = ZoomableContainerStateHolder(),
-                        modifier = Modifier
-                            .size(width = 330.dp, height = 460.dp),
+                        modifier =
+                            Modifier
+                                .size(width = 330.dp, height = 460.dp),
                     )
                 }
             }
@@ -253,11 +254,15 @@ data class Component(
         }
     }
 
-    override fun defaultComposeNode(project: Project): ComposeNode? {
-        return project.findComponentOrNull(id)?.componentRoot?.value?.createComponentWrapperNode(id)
-    }
+    override fun defaultComposeNode(project: Project): ComposeNode? =
+        project
+            .findComponentOrNull(id)
+            ?.componentRoot
+            ?.value
+            ?.createComponentWrapperNode(id)
 
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Container)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_component_trait
 
     override fun icon(): ImageVector = ComposeFlowIcons.ComposeLogo
@@ -265,11 +270,10 @@ data class Component(
     override fun iconText(): String = name
 
     override fun getRootNode(): ComposeNode = componentRoot.value
+
     override fun getContentRootNode(): ComposeNode = componentRoot.value
 
-    override fun findFocusedNodeOrNull(): ComposeNode? {
-        return componentRoot.value.findFirstFocusedNodeOrNull()
-    }
+    override fun findFocusedNodeOrNull(): ComposeNode? = componentRoot.value.findFirstFocusedNodeOrNull()
 
     override fun findNodeById(id: String): ComposeNode? {
         if (id == this.id) {
@@ -310,18 +314,17 @@ data class Component(
         }
     }
 
-    override fun findDeepestChildAtOrNull(position: Offset): ComposeNode? {
-        return componentRoot.value.findDeepestChildAtOrNull(position)
-    }
+    override fun findDeepestChildAtOrNull(position: Offset): ComposeNode? = componentRoot.value.findDeepestChildAtOrNull(position)
 
     override fun getAllComposeNodes(): List<ComposeNode> = componentRoot.value.allChildren()
 
-    override fun getStates(project: Project): List<ReadableState> {
-        return project.getStates(project) + stateHolderImpl.getStates(project) + getRootNode().allChildren()
-            .flatMap {
-                it.getCompanionStates(project)
-            }
-    }
+    override fun getStates(project: Project): List<ReadableState> =
+        project.getStates(project) + stateHolderImpl.getStates(project) +
+            getRootNode()
+                .allChildren()
+                .flatMap {
+                    it.getCompanionStates(project)
+                }
 
     override fun addState(readableState: ReadableState) {
         stateHolderImpl.states.add(readableState)
@@ -330,10 +333,13 @@ data class Component(
     override fun createUniqueLabel(
         project: Project,
         composeNode: ComposeNode,
-        initial: String
+        initial: String,
     ): String {
         val existingLabels =
-            getRootNode().allChildren().filter { it.id != composeNode.id }.map { it.label.value }
+            getRootNode()
+                .allChildren()
+                .filter { it.id != composeNode.id }
+                .map { it.label.value }
                 .toSet()
         return generateUniqueName(
             initial = initial,
@@ -341,8 +347,10 @@ data class Component(
         )
     }
 
-    override fun findStateOrNull(project: Project, stateId: StateId): ReadableState? =
-        getStates(project).firstOrNull { it.id == stateId }
+    override fun findStateOrNull(
+        project: Project,
+        stateId: StateId,
+    ): ReadableState? = getStates(project).firstOrNull { it.id == stateId }
 
     override fun removeState(stateId: StateId): Boolean =
         stateHolderImpl.states.removeIf {
@@ -361,42 +369,45 @@ data class Component(
         stateHolderImpl.states.addAll((other as? StateHolderImpl)?.states ?: emptyList())
     }
 
-    override fun getStateResults(project: Project): List<StateResult> {
-        return project.getStates(project).map { StateHolderType.Global to it } +
-                stateHolderImpl.getStates(project)
-                    .map { StateHolderType.Screen(screenId = id) to it } +
-                getRootNode().allChildren().flatMap { node ->
-                    node.getCompanionStates(project).map { state ->
-                        StateHolderType.Screen(screenId = id) to state
-                    }
+    override fun getStateResults(project: Project): List<StateResult> =
+        project.getStates(project).map { StateHolderType.Global to it } +
+            stateHolderImpl
+                .getStates(project)
+                .map { StateHolderType.Screen(screenId = id) to it } +
+            getRootNode().allChildren().flatMap { node ->
+                node.getCompanionStates(project).map { state ->
+                    StateHolderType.Screen(screenId = id) to state
                 }
-    }
+            }
 
     override fun generateComposeScreenFileSpec(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
     ): FileSpec {
-        val fileBuilder = FileSpec.builder(getPackageName(project), composableName)
-            .addImport("androidx.compose.runtime", "getValue")
-            .addImport("androidx.compose.runtime", "setValue")
+        val fileBuilder =
+            FileSpec
+                .builder(getPackageName(project), composableName)
+                .addImport("androidx.compose.runtime", "getValue")
+                .addImport("androidx.compose.runtime", "setValue")
         val funSpecBuilder = FunSpec.builder(composableName).addAnnotation(Composable::class)
         parameters.forEach {
             funSpecBuilder.addParameter(it.generateArgumentParameterSpec(project))
         }
         funSpecBuilder.addParameter(
-            ParameterSpec.builder("modifier", Modifier::class)
+            ParameterSpec
+                .builder("modifier", Modifier::class)
                 .defaultValue("%T", Modifier::class)
                 .build(),
         )
         // Key to distinguish the ViewModel to avoid the same ViewModel is reused across
         // multiple component invocations.
         funSpecBuilder.addParameter(
-            ParameterSpec.builder(
-                componentKeyName,
-                String::class.asTypeName().copy(nullable = true)
-            )
-                .defaultValue("null")
+            ParameterSpec
+                .builder(
+                    componentKeyName,
+                    String::class.asTypeName().copy(nullable = true),
+                ).defaultValue("null")
                 .build(),
         )
 
@@ -409,7 +420,7 @@ data class Component(
         if (getAllActions(project).any { it.hasSuspendFunction() }) {
             funSpecBuilder.addStatement(
                 "val ${ComposeScreenConstant.coroutineScope.name} = %M()",
-                MemberHolder.AndroidX.Runtime.rememberCoroutineScope
+                MemberHolder.AndroidX.Runtime.rememberCoroutineScope,
             )
         }
         context.getCurrentComposableContext().compositionLocalVariables.forEach { (variableName, memberName) ->
@@ -428,10 +439,11 @@ data class Component(
                         state.generateVariableInitializationBlock(
                             project,
                             context,
-                            dryRun = dryRun
-                        )
+                            dryRun = dryRun,
+                        ),
                     )
-                    state.generateValidatorInitializationBlock(project, context, dryRun = dryRun)
+                    state
+                        .generateValidatorInitializationBlock(project, context, dryRun = dryRun)
                         ?.let {
                             funSpecBuilder.addCode(it)
                         }
@@ -444,8 +456,8 @@ data class Component(
                             state.generateVariableInitializationBlock(
                                 project,
                                 context,
-                                dryRun = dryRun
-                            )
+                                dryRun = dryRun,
+                            ),
                         )
                         funSpecBuilder.addStatement("") // Enforce a new line
                     }
@@ -457,8 +469,8 @@ data class Component(
                             state.generateVariableInitializationBlock(
                                 project,
                                 context,
-                                dryRun = dryRun
-                            )
+                                dryRun = dryRun,
+                            ),
                         )
                         funSpecBuilder.addStatement("") // Enforce a new line
                     }
@@ -471,8 +483,8 @@ data class Component(
                     state.generateVariableInitializationBlock(
                         project,
                         context,
-                        dryRun = dryRun
-                    )
+                        dryRun = dryRun,
+                    ),
                 )
                 funSpecBuilder.addStatement("") // Enforce a new line
             }
@@ -497,14 +509,15 @@ data class Component(
         }
         project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.forEach { firestoreCollection ->
             if (getRootNode().isDependent(firestoreCollection.id)) {
-                context.getCurrentComposableContext()
+                context
+                    .getCurrentComposableContext()
                     .addDependency(viewModelConstant = ViewModelConstant.firestore)
                 funSpecBuilder.addCode(
                     firestoreCollection.generateVariableInitializationBlock(
                         project,
                         context,
-                        dryRun
-                    )
+                        dryRun,
+                    ),
                 )
             }
         }
@@ -522,14 +535,14 @@ data class Component(
         // Wrap by Column to apply the modifier from the argument
         codeBlockBuilder.addStatement(
             "%M(modifier = modifier) {",
-            MemberHolder.AndroidX.Layout.Column
+            MemberHolder.AndroidX.Layout.Column,
         )
         codeBlockBuilder.add(
             getRootNode().generateCode(
                 project = project,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.addStatement("}")
 
@@ -539,7 +552,10 @@ data class Component(
         return fileBuilder.build()
     }
 
-    fun generateCode(project: Project, context: GenerationContext): List<FileSpec?> {
+    fun generateCode(
+        project: Project,
+        context: GenerationContext,
+    ): List<FileSpec?> {
         val localContext = context.copy(currentEditable = this)
         // Execute generation first to construct the related dependencies in the GenerationContext
         // by passing dryRun as true
@@ -556,11 +572,11 @@ data class Component(
         return listOf(
             generateViewModelFileSpec(
                 project,
-                context = localContext.copy(generatedPlace = GeneratedPlace.ViewModel)
+                context = localContext.copy(generatedPlace = GeneratedPlace.ViewModel),
             ),
             generateComposeScreenFileSpec(
                 project,
-                context = localContext.copy(generatedPlace = GeneratedPlace.ComposeScreen)
+                context = localContext.copy(generatedPlace = GeneratedPlace.ComposeScreen),
             ),
         )
     }

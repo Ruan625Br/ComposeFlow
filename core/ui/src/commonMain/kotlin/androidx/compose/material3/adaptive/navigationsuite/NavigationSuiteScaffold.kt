@@ -1,4 +1,5 @@
 @file:Suppress("DEPRECATION") // Suppress for imports of WindowWidthSizeClass
+
 package androidx.compose.material3.adaptive.navigationsuite
 
 /*
@@ -50,6 +51,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType.Companion.NavigationBar
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType.Companion.NavigationRail
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
@@ -106,7 +109,7 @@ fun NavigationSuiteScaffold(
                 NavigationSuite(
                     layoutType = layoutType,
                     colors = navigationSuiteColors,
-                    content = navigationSuiteItems
+                    content = navigationSuiteItems,
                 )
             },
             layoutType = layoutType,
@@ -124,12 +127,12 @@ fun NavigationSuiteScaffold(
                                 DrawerDefaults.windowInsets.only(WindowInsetsSides.Start)
 
                             else -> NoWindowInsets
-                        }
-                    )
+                        },
+                    ),
                 ) {
                     content()
                 }
-            }
+            },
         )
     }
 }
@@ -177,14 +180,14 @@ fun NavigationSuiteScaffoldLayout(
                     if (isNavigationBar) {
                         constraints.copy(
                             minHeight = layoutHeight - navigationPlaceable.height,
-                            maxHeight = layoutHeight - navigationPlaceable.height
+                            maxHeight = layoutHeight - navigationPlaceable.height,
                         )
                     } else {
                         constraints.copy(
                             minWidth = layoutWidth - navigationPlaceable.width,
-                            maxWidth = layoutWidth - navigationPlaceable.width
+                            maxWidth = layoutWidth - navigationPlaceable.width,
                         )
-                    }
+                    },
                 )
 
         layout(layoutWidth, layoutHeight) {
@@ -237,7 +240,7 @@ fun NavigationSuite(
             NavigationBar(
                 modifier = modifier,
                 containerColor = colors.navigationBarContainerColor,
-                contentColor = colors.navigationBarContentColor
+                contentColor = colors.navigationBarContentColor,
             ) {
                 scope.itemList.forEach {
                     NavigationBarItem(
@@ -249,9 +252,9 @@ fun NavigationSuite(
                         label = it.label,
                         alwaysShowLabel = it.alwaysShowLabel,
                         colors =
-                        it.colors?.navigationBarItemColors
-                            ?: defaultItemColors.navigationBarItemColors,
-                        interactionSource = it.interactionSource
+                            it.colors?.navigationBarItemColors
+                                ?: defaultItemColors.navigationBarItemColors,
+                        interactionSource = it.interactionSource,
                     )
                 }
             }
@@ -261,7 +264,7 @@ fun NavigationSuite(
             NavigationRail(
                 modifier = modifier,
                 containerColor = colors.navigationRailContainerColor,
-                contentColor = colors.navigationRailContentColor
+                contentColor = colors.navigationRailContentColor,
             ) {
                 scope.itemList.forEach {
                     NavigationRailItem(
@@ -273,9 +276,9 @@ fun NavigationSuite(
                         label = it.label,
                         alwaysShowLabel = it.alwaysShowLabel,
                         colors =
-                        it.colors?.navigationRailItemColors
-                            ?: defaultItemColors.navigationRailItemColors,
-                        interactionSource = it.interactionSource
+                            it.colors?.navigationRailItemColors
+                                ?: defaultItemColors.navigationRailItemColors,
+                        interactionSource = it.interactionSource,
                     )
                 }
             }
@@ -285,7 +288,7 @@ fun NavigationSuite(
             PermanentDrawerSheet(
                 modifier = modifier,
                 drawerContainerColor = colors.navigationDrawerContainerColor,
-                drawerContentColor = colors.navigationDrawerContentColor
+                drawerContentColor = colors.navigationDrawerContentColor,
             ) {
                 scope.itemList.forEach {
                     NavigationDrawerItem(
@@ -296,23 +299,22 @@ fun NavigationSuite(
                         badge = it.badge,
                         label = { it.label?.invoke() ?: Text("") },
                         colors =
-                        it.colors?.navigationDrawerItemColors
-                            ?: defaultItemColors.navigationDrawerItemColors,
-                        interactionSource = it.interactionSource
+                            it.colors?.navigationDrawerItemColors
+                                ?: defaultItemColors.navigationDrawerItemColors,
+                        interactionSource = it.interactionSource,
                     )
                 }
             }
         }
 
         NavigationSuiteType.None -> {
-            /* Do nothing. */
+            // Do nothing.
         }
     }
 }
 
 /** The scope associated with the [NavigationSuiteScope]. */
 sealed interface NavigationSuiteScope {
-
     /**
      * This function sets the parameters of the default Material navigation item to be used with the
      * Navigation Suite Scaffold. The item is called in [NavigationSuite], according to the current
@@ -360,10 +362,10 @@ sealed interface NavigationSuiteScope {
  * The [NavigationSuiteType] informs the [NavigationSuite] of what navigation component to expect.
  */
 @JvmInline
-value class NavigationSuiteType private constructor(private val description: String) {
-    override fun toString(): String {
-        return description
-    }
+value class NavigationSuiteType private constructor(
+    private val description: String,
+) {
+    override fun toString(): String = description
 
     companion object {
         /**
@@ -395,9 +397,9 @@ value class NavigationSuiteType private constructor(private val description: Str
          * custom behavior. Different `NavigationSuite` implementations will exhibit different
          * behaviors when using this type.
          */
-        @Suppress("OPT_IN_MARKER_ON_WRONG_TARGET")
-//        @get:ExperimentalMaterial3AdaptiveNavigationSuiteApi
+        //        @get:ExperimentalMaterial3AdaptiveNavigationSuiteApi
 //        @ExperimentalMaterial3AdaptiveNavigationSuiteApi
+        @Suppress("OPT_IN_MARKER_ON_WRONG_TARGET")
         val Custom = NavigationSuiteType(description = "Custom")
 
         /**
@@ -418,8 +420,8 @@ object NavigationSuiteScaffoldDefaults {
      * @see NavigationSuiteScaffold
      */
     @Suppress("DEPRECATION") // WindowWidthSizeClass deprecated
-    fun calculateFromAdaptiveInfo(adaptiveInfo: WindowAdaptiveInfo): NavigationSuiteType {
-        return with(adaptiveInfo) {
+    fun calculateFromAdaptiveInfo(adaptiveInfo: WindowAdaptiveInfo): NavigationSuiteType =
+        with(adaptiveInfo) {
             if (
                 windowPosture.isTabletop ||
                 windowSizeClass.windowHeightSizeClass == WindowHeightSizeClass.COMPACT
@@ -434,7 +436,6 @@ object NavigationSuiteScaffoldDefaults {
                 NavigationSuiteType.NavigationBar
             }
         }
-    }
 
     /** Default container color for a navigation suite scaffold. */
     val containerColor: Color
@@ -480,7 +481,7 @@ object NavigationSuiteDefaults {
             navigationRailContainerColor = navigationRailContainerColor,
             navigationRailContentColor = navigationRailContentColor,
             navigationDrawerContainerColor = navigationDrawerContainerColor,
-            navigationDrawerContentColor = navigationDrawerContentColor
+            navigationDrawerContentColor = navigationDrawerContentColor,
         )
 
     /**
@@ -507,7 +508,7 @@ object NavigationSuiteDefaults {
         NavigationSuiteItemColors(
             navigationBarItemColors = navigationBarItemColors,
             navigationRailItemColors = navigationRailItemColors,
-            navigationDrawerItemColors = navigationDrawerItemColors
+            navigationDrawerItemColors = navigationDrawerItemColors,
         )
 }
 
@@ -531,14 +532,14 @@ object NavigationSuiteDefaults {
  *   [NavigationSuite]
  */
 class NavigationSuiteColors
-internal constructor(
-    val navigationBarContainerColor: Color,
-    val navigationBarContentColor: Color,
-    val navigationRailContainerColor: Color,
-    val navigationRailContentColor: Color,
-    val navigationDrawerContainerColor: Color,
-    val navigationDrawerContentColor: Color,
-)
+    internal constructor(
+        val navigationBarContainerColor: Color,
+        val navigationBarContentColor: Color,
+        val navigationRailContainerColor: Color,
+        val navigationRailContentColor: Color,
+        val navigationDrawerContainerColor: Color,
+        val navigationDrawerContentColor: Color,
+    )
 
 /**
  * Represents the colors of a [NavigationSuiteScope.item].
@@ -580,8 +581,9 @@ private class NavigationSuiteItem(
     val interactionSource: MutableInteractionSource?,
 )
 
-private class NavigationSuiteScopeImpl : NavigationSuiteScope, NavigationSuiteItemProvider {
-
+private class NavigationSuiteScopeImpl :
+    NavigationSuiteScope,
+    NavigationSuiteItemProvider {
     override fun item(
         selected: Boolean,
         onClick: () -> Unit,
@@ -605,8 +607,8 @@ private class NavigationSuiteScopeImpl : NavigationSuiteScope, NavigationSuiteIt
                 alwaysShowLabel = alwaysShowLabel,
                 badge = badge,
                 colors = colors,
-                interactionSource = interactionSource
-            )
+                interactionSource = interactionSource,
+            ),
         )
     }
 
@@ -617,9 +619,7 @@ private class NavigationSuiteScopeImpl : NavigationSuiteScope, NavigationSuiteIt
 }
 
 @Composable
-private fun rememberStateOfItems(
-    content: NavigationSuiteScope.() -> Unit,
-): State<NavigationSuiteItemProvider> {
+private fun rememberStateOfItems(content: NavigationSuiteScope.() -> Unit): State<NavigationSuiteItemProvider> {
     val latestContent = rememberUpdatedState(content)
     return remember { derivedStateOf { NavigationSuiteScopeImpl().apply(latestContent.value) } }
 }

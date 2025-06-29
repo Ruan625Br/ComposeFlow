@@ -66,23 +66,24 @@ fun SmallOutlinedTextField(
     contentPadding: PaddingValues = PaddingValues(vertical = 6.dp, horizontal = 12.dp),
 ) {
     // If color is not provided via the text style, use content color as a default
-    val textColor = textStyle.color.takeOrElse {
-        textColor(enabled, isError, interactionSource).value
-    }
+    val textColor =
+        textStyle.color.takeOrElse {
+            textColor(enabled, isError, interactionSource).value
+        }
     val mergedTextStyle = textStyle.merge(TextStyle(color = textColor))
 
     BasicTextField(
         value = value,
-        modifier = if (label != null) {
-            modifier
-                // Merge semantics at the beginning of the modifier chain to ensure padding is
-                // considered part of the text field.
-                .semantics(mergeDescendants = true) {}
-                .padding(top = 8.dp)
-        } else {
-            modifier
-        }
-            .defaultMinSize(
+        modifier =
+            if (label != null) {
+                modifier
+                    // Merge semantics at the beginning of the modifier chain to ensure padding is
+                    // considered part of the text field.
+                    .semantics(mergeDescendants = true) {}
+                    .padding(top = 8.dp)
+            } else {
+                modifier
+            }.defaultMinSize(
                 minWidth = minWidth,
                 minHeight = minHeight,
             ),
@@ -140,22 +141,22 @@ fun textColor(
 ): State<Color> {
     val focused by interactionSource.collectIsFocusedAsState()
 
-    val targetValue = when {
-        !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledInputOpacity)
-        isError -> MaterialTheme.colorScheme.onSurface
-        focused -> MaterialTheme.colorScheme.onSurface
-        else -> MaterialTheme.colorScheme.onSurface
-    }
+    val targetValue =
+        when {
+            !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledInputOpacity)
+            isError -> MaterialTheme.colorScheme.onSurface
+            focused -> MaterialTheme.colorScheme.onSurface
+            else -> MaterialTheme.colorScheme.onSurface
+        }
     return rememberUpdatedState(targetValue)
 }
 
 @Composable
-fun cursorColor(isError: Boolean): State<Color> {
-    return rememberUpdatedState(
+fun cursorColor(isError: Boolean): State<Color> =
+    rememberUpdatedState(
         if (isError) {
             MaterialTheme.colorScheme.error
         } else {
             MaterialTheme.colorScheme.primary
         },
     )
-}

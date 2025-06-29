@@ -1,6 +1,5 @@
 package io.composeflow.ksp
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import java.io.File
 
@@ -112,10 +111,12 @@ class LlmToolsLoader {
                 simpleName == "Int" ||
                 kotlinType.contains("Long") ||
                 simpleName == "Long" -> "integer"
+
             kotlinType.contains("Float") ||
                 simpleName == "Float" ||
                 kotlinType.contains("Double") ||
                 simpleName == "Double" -> "number"
+
             kotlinType.contains("Boolean") || simpleName == "Boolean" -> "boolean"
             kotlinType.contains("List") ||
                 simpleName == "List" ||

@@ -229,7 +229,8 @@ sealed interface AssignableProperty {
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ) {}
+    ) {
+    }
 
     fun getDependentComposeNodes(project: Project): List<ComposeNode> = emptyList()
 
@@ -1521,7 +1522,7 @@ data class FirestoreCollectionProperty(
     }
     is %T.Error -> {
         %M(text = "Error: ${'$'}{$readVariableName.message}")
-    } 
+    }
     is %T.Success -> {
             """,
             ClassHolder.ComposeFlow.DataResult,
@@ -1535,7 +1536,7 @@ data class FirestoreCollectionProperty(
         builder.add(
             """
     }
-}                
+}
 """,
         )
         return builder.build()
@@ -1561,7 +1562,7 @@ when ($readVariableName) {
             """
     }
     else -> {}
-}                
+}
 """,
         )
         return builder.build()

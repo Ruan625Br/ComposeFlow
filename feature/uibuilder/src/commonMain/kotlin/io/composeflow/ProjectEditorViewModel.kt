@@ -19,7 +19,6 @@ class ProjectEditorViewModel(
     projectId: String,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
-
     private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
         MutableStateFlow(LoadedProjectUiState.Loading)
 
@@ -35,8 +34,10 @@ class ProjectEditorViewModel(
     init {
         viewModelScope.launch {
             _projectUiState.value = LoadedProjectUiState.Loading
-            _projectUiState.value = projectRepository.loadProject(projectId)
-                .asLoadedProjectUiState(projectId)
+            _projectUiState.value =
+                projectRepository
+                    .loadProject(projectId)
+                    .asLoadedProjectUiState(projectId)
             when (val state = _projectUiState.value) {
                 is LoadedProjectUiState.Success -> {
                     _project.value = state.project

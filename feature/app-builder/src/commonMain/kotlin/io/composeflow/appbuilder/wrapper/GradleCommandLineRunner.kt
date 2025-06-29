@@ -26,26 +26,23 @@ class GradleCommandLineRunner(
     private var readStdOutJob: Job? = null
     private var readStdErrJob: Job? = null
 
-    suspend fun installDebug(
-        onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
-    ) = runTask(
-        task = "installDebug",
-        onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-    )
+    suspend fun installDebug(onStatusBarUiStateChanged: (StatusBarUiState) -> Unit) =
+        runTask(
+            task = "installDebug",
+            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+        )
 
-    suspend fun assembleDebug(
-        onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
-    ) = runTask(
-        task = "assembleDebug",
-        onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-    )
+    suspend fun assembleDebug(onStatusBarUiStateChanged: (StatusBarUiState) -> Unit) =
+        runTask(
+            task = "assembleDebug",
+            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+        )
 
-    suspend fun jsBrowserDevelopmentRun(
-        onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
-    ) = runTask(
-        task = "jsBrowserDevelopmentRun",
-        onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-    )
+    suspend fun jsBrowserDevelopmentRun(onStatusBarUiStateChanged: (StatusBarUiState) -> Unit) =
+        runTask(
+            task = "jsBrowserDevelopmentRun",
+            onStatusBarUiStateChanged = onStatusBarUiStateChanged,
+        )
 
     private suspend fun runTask(
         task: String,
@@ -60,18 +57,20 @@ class GradleCommandLineRunner(
 
         withContext(Dispatchers.IO) {
             projectRoot.resolve("gradlew").setExecutable(true)
-            val commands = when (currentOs) {
-                CurrentOs.Windows -> {
-                    arrayOf("cmd.exe", "/c", "gradlew.bat", task)
-                }
+            val commands =
+                when (currentOs) {
+                    CurrentOs.Windows -> {
+                        arrayOf("cmd.exe", "/c", "gradlew.bat", task)
+                    }
 
-                else -> {
-                    arrayOf("./gradlew", task)
+                    else -> {
+                        arrayOf("./gradlew", task)
+                    }
                 }
-            }
-            val processBuilder = ProcessBuilder(*commands).apply {
-                directory(projectRoot)
-            }
+            val processBuilder =
+                ProcessBuilder(*commands).apply {
+                    directory(projectRoot)
+                }
 
             localJavaHomePath?.let {
                 val environment = processBuilder.environment()
@@ -84,52 +83,20 @@ class GradleCommandLineRunner(
             val process = processBuilder.start()
 
             try {
-
                 readStdOutJob?.cancel()
-                readStdOutJob = launch {
-                    process.inputStream.bufferedReader().use { reader ->
-                        reader.forEachLine { line ->
-                            buildLogger.d(line)
-                            logger.debug(line)
-                            if (line.isBuildSuccessful()) {
-                                onStatusBarUiStateChanged(StatusBarUiState.Success(line))
-                            } else if (line.isJsBrowserRunSuccessful()) {
-                                val message = "Running at: ${
-                                    line.replace(
-                                        "<i> [webpack-dev-server] Loopback: ",
-                                        "",
-                                    )
-                                }"
-                                onStatusBarUiStateChanged(
-                                    StatusBarUiState.JsBrowserRunSuccess(
-                                        message,
-                                    ),
-                                )
-                            } else {
-                                onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
-                            }
-                        }
-                    }
-                }
-
-                readStdErrJob?.cancel()
-                readStdErrJob = launch {
-                    process.errorStream.bufferedReader().use { reader ->
-                        reader.forEachLine { line ->
-                            if (line.isEmpty()) {
-                                return@forEachLine
-                            }
-                            if (line.hasWebPackMessage() || line.contains(ignoreWarning) || line.startsWith(
-                                    "warning"
-                                )
-                            ) {
-                                // For some reason, the line from webpack for the jsBrowserRun task is
-                                // emitted to the standard error.
-                                if (line.isJsBrowserRunSuccessful()) {
+                readStdOutJob =
+                    launch {
+                        process.inputStream.bufferedReader().use { reader ->
+                            reader.forEachLine { line ->
+                                buildLogger.d(line)
+                                logger.debug(line)
+                                if (line.isBuildSuccessful()) {
+                                    onStatusBarUiStateChanged(StatusBarUiState.Success(line))
+                                } else if (line.isJsBrowserRunSuccessful()) {
                                     val message = "Running at: ${
                                         line.replace(
                                             "<i> [webpack-dev-server] Loopback: ",
-                                            ""
+                                            "",
                                         )
                                     }"
                                     onStatusBarUiStateChanged(
@@ -138,19 +105,54 @@ class GradleCommandLineRunner(
                                         ),
                                     )
                                 } else {
-                                    buildLogger.i(line)
                                     onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
                                 }
-                            } else {
-                                if (line.isBuildFailure()) {
-                                    onStatusBarUiStateChanged(StatusBarUiState.Failure(line))
-                                }
-                                buildLogger.e(line)
-                                logger.error(line)
                             }
                         }
                     }
-                }
+
+                readStdErrJob?.cancel()
+                readStdErrJob =
+                    launch {
+                        process.errorStream.bufferedReader().use { reader ->
+                            reader.forEachLine { line ->
+                                if (line.isEmpty()) {
+                                    return@forEachLine
+                                }
+                                if (line.hasWebPackMessage() ||
+                                    line.contains(ignoreWarning) ||
+                                    line.startsWith(
+                                        "warning",
+                                    )
+                                ) {
+                                    // For some reason, the line from webpack for the jsBrowserRun task is
+                                    // emitted to the standard error.
+                                    if (line.isJsBrowserRunSuccessful()) {
+                                        val message = "Running at: ${
+                                            line.replace(
+                                                "<i> [webpack-dev-server] Loopback: ",
+                                                "",
+                                            )
+                                        }"
+                                        onStatusBarUiStateChanged(
+                                            StatusBarUiState.JsBrowserRunSuccess(
+                                                message,
+                                            ),
+                                        )
+                                    } else {
+                                        buildLogger.i(line)
+                                        onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
+                                    }
+                                } else {
+                                    if (line.isBuildFailure()) {
+                                        onStatusBarUiStateChanged(StatusBarUiState.Failure(line))
+                                    }
+                                    buildLogger.e(line)
+                                    logger.error(line)
+                                }
+                            }
+                        }
+                    }
 
                 // Create a suspension point so that this task is also canceled when
                 // canceling the parent coroutine
@@ -173,12 +175,11 @@ class GradleCommandLineRunner(
 }
 
 private fun String.isBuildSuccessful() = contains("BUILD SUCCESSFUL")
-private fun String.isBuildFailure() =
-    contains("error", ignoreCase = true) || contains("build failed", ignoreCase = true)
+
+private fun String.isBuildFailure() = contains("error", ignoreCase = true) || contains("build failed", ignoreCase = true)
 
 private fun String.isJsBrowserRunSuccessful() = hasWebPackMessage() && contains("Loopback: ")
 
-private fun String.hasWebPackMessage() =
-    contains("[webpack-dev-server]") || contains("[webpack-dev-middleware]")
+private fun String.hasWebPackMessage() = contains("[webpack-dev-server]") || contains("[webpack-dev-middleware]")
 
 private const val ignoreWarning = "warning Ignored scripts due to flag."

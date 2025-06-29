@@ -30,7 +30,6 @@ import kotlin.enums.EnumEntries
  */
 @Serializable
 sealed interface EnumWrapper : CodeConvertible {
-
     fun enumValue(): Enum<*>
 
     fun <E : Enum<E>> entries(): EnumEntries<E>
@@ -38,7 +37,9 @@ sealed interface EnumWrapper : CodeConvertible {
 
 @SerialName("TextDecorationWrapper")
 @Serializable(TextDecorationWrapper.TextDecorationWrapperSerializer::class)
-enum class TextDecorationWrapper(val textDecoration: TextDecoration) : EnumWrapper {
+enum class TextDecorationWrapper(
+    val textDecoration: TextDecoration,
+) : EnumWrapper {
     None(TextDecoration.None),
     Underline(TextDecoration.Underline),
     LineThrough(TextDecoration.LineThrough),
@@ -51,8 +52,7 @@ enum class TextDecorationWrapper(val textDecoration: TextDecoration) : EnumWrapp
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextDecoration"))
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextDecoration"))
 
     object TextDecorationWrapperSerializer :
         FallbackEnumSerializer<TextDecorationWrapper>(TextDecorationWrapper::class)
@@ -60,7 +60,10 @@ enum class TextDecorationWrapper(val textDecoration: TextDecoration) : EnumWrapp
 
 @SerialName("TextStyleWrapper")
 @Serializable(TextStyleWrapper.TextStyleWrapperSerializer::class)
-enum class TextStyleWrapper(val styleName: String, val displayName: String) : EnumWrapper,
+enum class TextStyleWrapper(
+    val styleName: String,
+    val displayName: String,
+) : EnumWrapper,
     CustomizedDropdownTextDisplayable {
     DisplayLarge("displayLarge", "Display Large"),
     DisplayMedium("displayMedium", "Display Medium"),
@@ -84,110 +87,141 @@ enum class TextStyleWrapper(val styleName: String, val displayName: String) : En
         val secondaryColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.7f)
         val overriddenTypography = project.themeHolder.fontHolder.generateTypography()
         return when (this) {
-            DisplayLarge -> buildAnnotatedString {
-                append("Display Large ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.displayLarge.fontSize}, weight:${overriddenTypography.displayLarge.fontWeight?.weight}")
+            DisplayLarge ->
+                buildAnnotatedString {
+                    append("Display Large ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.displayLarge.fontSize}, weight:${overriddenTypography.displayLarge.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            DisplayMedium -> buildAnnotatedString {
-                append("Display Medium ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.displayMedium.fontSize}, weight:${overriddenTypography.displayMedium.fontWeight?.weight}")
+            DisplayMedium ->
+                buildAnnotatedString {
+                    append("Display Medium ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.displayMedium.fontSize}, weight:${overriddenTypography.displayMedium.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            DisplaySmall -> buildAnnotatedString {
-                append("Display Small ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.displaySmall.fontSize}, weight:${overriddenTypography.displaySmall.fontWeight?.weight}")
+            DisplaySmall ->
+                buildAnnotatedString {
+                    append("Display Small ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.displaySmall.fontSize}, weight:${overriddenTypography.displaySmall.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            HeadlineLarge -> buildAnnotatedString {
-                append("Headline Large ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.headlineLarge.fontSize}, weight:${overriddenTypography.headlineLarge.fontWeight?.weight}")
+            HeadlineLarge ->
+                buildAnnotatedString {
+                    append("Headline Large ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.headlineLarge.fontSize}, weight:${overriddenTypography.headlineLarge.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            HeadlineMedium -> buildAnnotatedString {
-                append("Headline Medium ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.headlineMedium.fontSize}, weight:${overriddenTypography.headlineMedium.fontWeight?.weight}")
+            HeadlineMedium ->
+                buildAnnotatedString {
+                    append("Headline Medium ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.headlineMedium.fontSize}, weight:${overriddenTypography.headlineMedium.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            HeadlineSmall -> buildAnnotatedString {
-                append("Headline Small ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.headlineSmall.fontSize}, weight:${overriddenTypography.headlineSmall.fontWeight?.weight}")
+            HeadlineSmall ->
+                buildAnnotatedString {
+                    append("Headline Small ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.headlineSmall.fontSize}, weight:${overriddenTypography.headlineSmall.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            TitleLarge -> buildAnnotatedString {
-                append("Title Large ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.titleLarge.fontSize}, weight:${overriddenTypography.titleLarge.fontWeight?.weight}")
+            TitleLarge ->
+                buildAnnotatedString {
+                    append("Title Large ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.titleLarge.fontSize}, weight:${overriddenTypography.titleLarge.fontWeight?.weight}")
+                    }
                 }
-            }
 
-            TitleMedium -> buildAnnotatedString {
-                append("Title Medium ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.titleMedium.fontSize}, weight:${overriddenTypography.titleMedium.fontWeight?.weight}")
+            TitleMedium ->
+                buildAnnotatedString {
+                    append("Title Medium ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.titleMedium.fontSize}, weight:${overriddenTypography.titleMedium.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            TitleSmall -> buildAnnotatedString {
-                append("Title Small ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.titleSmall.fontSize}, weight:${overriddenTypography.titleSmall.fontWeight?.weight}")
+            TitleSmall ->
+                buildAnnotatedString {
+                    append("Title Small ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.titleSmall.fontSize}, weight:${overriddenTypography.titleSmall.fontWeight?.weight}")
+                    }
                 }
-            }
 
-            BodyLarge -> buildAnnotatedString {
-                append("Body Large ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.bodyLarge.fontSize}, weight:${overriddenTypography.bodyLarge.fontWeight?.weight}")
+            BodyLarge ->
+                buildAnnotatedString {
+                    append("Body Large ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.bodyLarge.fontSize}, weight:${overriddenTypography.bodyLarge.fontWeight?.weight}")
+                    }
                 }
-            }
 
-            BodyMedium -> buildAnnotatedString {
-                append("Body Medium ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.bodyMedium.fontSize}, weight:${overriddenTypography.bodyMedium.fontWeight?.weight}")
+            BodyMedium ->
+                buildAnnotatedString {
+                    append("Body Medium ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.bodyMedium.fontSize}, weight:${overriddenTypography.bodyMedium.fontWeight?.weight}")
+                    }
                 }
-            }
 
-            BodySmall -> buildAnnotatedString {
-                append("Body Small ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.bodySmall.fontSize}, weight:${overriddenTypography.bodySmall.fontWeight?.weight}")
+            BodySmall ->
+                buildAnnotatedString {
+                    append("Body Small ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.bodySmall.fontSize}, weight:${overriddenTypography.bodySmall.fontWeight?.weight}")
+                    }
                 }
-            }
 
-            LabelLarge -> buildAnnotatedString {
-                append("Label Large ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.labelLarge.fontSize}, weight:${overriddenTypography.labelLarge.fontWeight?.weight}")
+            LabelLarge ->
+                buildAnnotatedString {
+                    append("Label Large ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.labelLarge.fontSize}, weight:${overriddenTypography.labelLarge.fontWeight?.weight}")
+                    }
                 }
-            }
 
-            LabelMedium -> buildAnnotatedString {
-                append("Label Medium ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.labelMedium.fontSize}, weight:${overriddenTypography.labelMedium.fontWeight?.weight}")
+            LabelMedium ->
+                buildAnnotatedString {
+                    append("Label Medium ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append(
+                            "${overriddenTypography.labelMedium.fontSize}, weight:${overriddenTypography.labelMedium.fontWeight?.weight}",
+                        )
+                    }
                 }
-            }
 
-            LabelSmall -> buildAnnotatedString {
-                append("Label Small ")
-                withStyle(SpanStyle(color = secondaryColor)) {
-                    append("${overriddenTypography.labelSmall.fontSize}, weight:${overriddenTypography.labelSmall.fontWeight?.weight}")
+            LabelSmall ->
+                buildAnnotatedString {
+                    append("Label Small ")
+                    withStyle(SpanStyle(color = secondaryColor)) {
+                        append("${overriddenTypography.labelSmall.fontSize}, weight:${overriddenTypography.labelSmall.fontWeight?.weight}")
+                    }
                 }
-            }
         }
     }
 
@@ -218,8 +252,7 @@ enum class TextStyleWrapper(val styleName: String, val displayName: String) : En
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.typography.$styleName", MemberHolder.Material3.MaterialTheme)
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.typography.$styleName", MemberHolder.Material3.MaterialTheme)
 
     object TextStyleWrapperSerializer :
         FallbackEnumSerializer<TextStyleWrapper>(TextStyleWrapper::class)
@@ -227,7 +260,9 @@ enum class TextStyleWrapper(val styleName: String, val displayName: String) : En
 
 @SerialName("FontStyleWrapper")
 @Serializable(FontStyleWrapper.FontStyleWrapperSerializer::class)
-enum class FontStyleWrapper(val fontStyle: FontStyle) : EnumWrapper {
+enum class FontStyleWrapper(
+    val fontStyle: FontStyle,
+) : EnumWrapper {
     Normal(FontStyle.Normal),
     Italic(FontStyle.Italic),
     ;
@@ -239,8 +274,7 @@ enum class FontStyleWrapper(val fontStyle: FontStyle) : EnumWrapper {
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.font", "FontStyle"))
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.font", "FontStyle"))
 
     object FontStyleWrapperSerializer :
         FallbackEnumSerializer<FontStyleWrapper>(FontStyleWrapper::class)
@@ -248,7 +282,9 @@ enum class FontStyleWrapper(val fontStyle: FontStyle) : EnumWrapper {
 
 @SerialName("TextAlignWrapper")
 @Serializable(TextAlignWrapper.TextAlignWrapperSerializer::class)
-enum class TextAlignWrapper(val textAlign: TextAlign) : EnumWrapper {
+enum class TextAlignWrapper(
+    val textAlign: TextAlign,
+) : EnumWrapper {
     Left(TextAlign.Left),
     Right(TextAlign.Right),
     Center(TextAlign.Center),
@@ -264,8 +300,7 @@ enum class TextAlignWrapper(val textAlign: TextAlign) : EnumWrapper {
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextAlign"))
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextAlign"))
 
     object TextAlignWrapperSerializer :
         FallbackEnumSerializer<TextAlignWrapper>(TextAlignWrapper::class)
@@ -273,7 +308,9 @@ enum class TextAlignWrapper(val textAlign: TextAlign) : EnumWrapper {
 
 @SerialName("TextOverflowWrapper")
 @Serializable(TextOverflowWrapper.TextOverflowWrapperSerializer::class)
-enum class TextOverflowWrapper(val textOverflow: TextOverflow) : EnumWrapper {
+enum class TextOverflowWrapper(
+    val textOverflow: TextOverflow,
+) : EnumWrapper {
     Clip(TextOverflow.Clip),
     Ellipsis(TextOverflow.Ellipsis),
     Visible(TextOverflow.Visible),
@@ -286,8 +323,7 @@ enum class TextOverflowWrapper(val textOverflow: TextOverflow) : EnumWrapper {
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextOverflow"))
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextOverflow"))
 
     object TextOverflowWrapperSerializer :
         FallbackEnumSerializer<TextOverflowWrapper>(TextOverflowWrapper::class)
@@ -295,7 +331,9 @@ enum class TextOverflowWrapper(val textOverflow: TextOverflow) : EnumWrapper {
 
 @SerialName("ContentScaleWrapper")
 @Serializable(ContentScaleWrapper.ContentScaleWrapperSerializer::class)
-enum class ContentScaleWrapper(val contentScale: ContentScale) : EnumWrapper {
+enum class ContentScaleWrapper(
+    val contentScale: ContentScale,
+) : EnumWrapper {
     Crop(ContentScale.Crop),
     Fit(ContentScale.Fit),
     FillHeight(ContentScale.FillHeight),
@@ -312,8 +350,7 @@ enum class ContentScaleWrapper(val contentScale: ContentScale) : EnumWrapper {
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.layout", "ContentScale"))
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.layout", "ContentScale"))
 
     object ContentScaleWrapperSerializer :
         FallbackEnumSerializer<ContentScaleWrapper>(ContentScaleWrapper::class)
@@ -333,15 +370,13 @@ enum class TextFieldColorsWrapper : EnumWrapper {
         return entries as EnumEntries<E>
     }
 
-    override fun asCodeBlock(): CodeBlock =
-        CodeBlock.of("%M.colors()", toMemberName())
+    override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.colors()", toMemberName())
 
-    fun toMemberName(): MemberName {
-        return when (this) {
+    fun toMemberName(): MemberName =
+        when (this) {
             Default -> MemberName("androidx.compose.material3", "TextFieldDefaults")
             Outlined -> MemberName("androidx.compose.material3", "OutlinedTextFieldDefaults")
         }
-    }
 
     object TextFieldColorsWrapperSerializer :
         FallbackEnumSerializer<TextFieldColorsWrapper>(TextFieldColorsWrapper::class)
@@ -360,6 +395,7 @@ enum class NodeVisibility : EnumWrapper {
     }
 
     override fun enumValue(): Enum<*> = this
+
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("")
 
     object NodeVisibilitySerializer : FallbackEnumSerializer<NodeVisibility>(NodeVisibility::class)

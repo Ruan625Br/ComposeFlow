@@ -78,7 +78,6 @@ data class ComposeNode(
     val trait: MutableState<ComposeTrait> = mutableStateOf(EmptyTrait),
     @Serializable(MutableStateSerializer::class)
     val label: MutableState<String> = mutableStateOf(trait.value.iconText()),
-
     /**
      * The level of this node in the tree. The root node's level is 0.
      * This is var intentionally because when the default ComposeNode has a child initially,
@@ -86,7 +85,6 @@ data class ComposeNode(
      * the parentNode is dragged onto the canvas.
      */
     var level: Int = 0,
-
     /**
      * The list of modifier wrappers attached to the content when this node is rendered.
      * Explicitly store the list of modifier so that it can be accessible in a later phase
@@ -95,48 +93,38 @@ data class ComposeNode(
      */
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val modifierList: MutableList<ModifierWrapper> = mutableStateListEqualsOverrideOf(),
-
     /**
      * The direct children that belong to this node.
      */
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val children: MutableList<ComposeNode> = mutableStateListEqualsOverrideOf(),
-
     /**
      * Parameters only used if when this node is a child of any LazyList (such as LazyColumn, LazyRow)
      */
     @Serializable(with = MutableStateSerializer::class)
     val lazyListChildParams: MutableState<LazyListChildParams> = mutableStateOf(LazyListChildParams.FixedNumber()),
-
     @Serializable(with = MutableStateSerializer::class)
     val dynamicItems: MutableState<AssignableProperty?> = mutableStateOf(null),
-
     @Serializable(with = FallbackActionHandlerSerializer::class)
     val actionHandler: ActionHandler = ActionHandlerImpl(),
-
     val inspectable: Boolean = true,
-
     @Serializable(with = MutableStateSerializer::class)
     val visibilityParams: MutableState<VisibilityParams> = mutableStateOf(VisibilityParams()),
-
     /**
      * Updated to true when this node is focused. For example when it's clicked.
      */
     @Transient
     val isFocused: MutableState<Boolean> = mutableStateOf(false),
-
     /**
      * Updated to true when the mouse cursor is hovered on this node.
      */
     @Transient
     val isHovered: MutableState<Boolean> = mutableStateOf(false),
-
     /**
      * Updated to true when another ComposeNode is being dragged within the bounds of this node.
      */
     @Transient
     val isDraggedOnBounds: MutableState<Boolean> = mutableStateOf(false),
-
     /**
      * The index to which index the new node is dropped. Which is used  when a composable is being
      * dragged and indicates the position within a container.
@@ -144,13 +132,11 @@ data class ComposeNode(
      */
     @Transient
     val indexToBeDropped: MutableState<Int> = mutableStateOf(0),
-
     /**
      * Bounds relative to window when placed inside the editor canvas.
      */
     @Transient
     val boundsInWindow: MutableState<Rect> = mutableStateOf(Rect(0f, 0f, 0f, 0f)),
-
     /**
      * Reference to the componentId if this node is part of a component.
      * When this has a non-null value, this and children of this node can't be edited and
@@ -158,7 +144,6 @@ data class ComposeNode(
      * Null if the ComposeNode isn't part of a component.
      */
     val componentId: ComponentId? = null,
-
     /**
      * Set to true if node is drawn as part of a component
      */
@@ -173,7 +158,6 @@ data class ComposeNode(
      */
     @Transient
     var originalNodeId: String? = null,
-
     @Transient
     private val tabsNode: TabsNode = TabsNodeImpl(),
     @Transient
@@ -197,17 +181,18 @@ data class ComposeNode(
     TopAppBarNode by topAppBarNode,
     BottomAppBarNode by bottomAppBarNode,
     ComponentHandler by componentHandler {
-
     companion object {
-        fun createRootNode() = ComposeNode(
-            modifierList = mutableStateListEqualsOverrideOf(
-                ModifierWrapper.FillMaxWidth(),
-                ModifierWrapper.Weight(1f)
-            ),
-            trait = mutableStateOf(ColumnTrait()),
-            label = mutableStateOf("Root"),
-            inspectable = false,
-        )
+        fun createRootNode() =
+            ComposeNode(
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.FillMaxWidth(),
+                        ModifierWrapper.Weight(1f),
+                    ),
+                trait = mutableStateOf(ColumnTrait()),
+                label = mutableStateOf("Root"),
+                inspectable = false,
+            )
     }
 
     init {
@@ -233,16 +218,16 @@ data class ComposeNode(
      * in ComposeFlow. This is to mitigate potential crashes by providing a unique identifier.
      */
     @Transient
-    val fallbackId = "${label.value}-${id}"
+    val fallbackId = "${label.value}-$id"
 
     /**
      * StateId that coexists with this node.
      */
     @Transient
-    val companionStateId: StateId = "${id}-companionState"
+    val companionStateId: StateId = "$id-companionState"
 
-    fun displayName(project: Project): String {
-        return if (trait.value is ComponentTrait) {
+    fun displayName(project: Project): String =
+        if (trait.value is ComponentTrait) {
             componentId?.let {
                 project.findComponentOrNull(it)?.name
             } ?: label.value
@@ -253,23 +238,19 @@ data class ComposeNode(
                 label.value
             }
         }
-    }
 
-    internal fun modifiersIncludingPending(): MutableList<ModifierWrapper> {
-        return pendingModifier.value?.let {
+    internal fun modifiersIncludingPending(): MutableList<ModifierWrapper> =
+        pendingModifier.value?.let {
             mutableListOf(it).apply {
                 addAll(modifierList)
             }
         } ?: modifierList
-    }
 
     /**
      * Returns the chain of Modifier including the [pendingModifier] so that uncommitted Modifier
      * is visible in the canvas, such as Height modifier while the ComposeNode is being resized.
      */
-    fun modifierChainForCanvas(): Modifier {
-        return modifiersIncludingPending().toModifierChain()
-    }
+    fun modifierChainForCanvas(): Modifier = modifiersIncludingPending().toModifierChain()
 
     /**
      * Copy the instance with the same values except for the [id]. [id]s are replaced while keeping
@@ -279,23 +260,23 @@ data class ComposeNode(
      *
      * @param idMap Map that holds the mapping information between the existing IDs and new IDs.
      */
-    fun copyExceptId(
-        idMap: IdMap = mutableMapOf(),
-    ): ComposeNode {
+    fun copyExceptId(idMap: IdMap = mutableMapOf()): ComposeNode {
         val newId = idMap.createNewIdIfNotPresent(id)
-        val restored = this.copy(
-            id = newId,
-            children = mutableStateListEqualsOverrideOf<ComposeNode>().apply {
-                addAll(
-                    children.map {
-                        it.copyExceptId(
-                            idMap,
+        val restored =
+            this.copy(
+                id = newId,
+                children =
+                    mutableStateListEqualsOverrideOf<ComposeNode>().apply {
+                        addAll(
+                            children.map {
+                                it.copyExceptId(
+                                    idMap,
+                                )
+                            },
                         )
                     },
-                )
-            },
-            componentId = componentId,
-        )
+                componentId = componentId,
+            )
         restored.parentNode = parentNode
         return restored
     }
@@ -313,27 +294,24 @@ data class ComposeNode(
     private val _allChildren: List<ComposeNode>
         get() = children + children.flatMap { it._allChildren }
 
-    fun allChildren(includeSelf: Boolean = true): List<ComposeNode> {
-        return if (includeSelf) {
+    fun allChildren(includeSelf: Boolean = true): List<ComposeNode> =
+        if (includeSelf) {
             _allChildren + this
         } else {
             _allChildren
         }
-    }
 
-    fun findDeepestContainerAtOrNull(
-        position: Offset,
-    ): ComposeNode? = findDeepestChildAt(position) {
-        it.isPositionWithinBounds(position) &&
+    fun findDeepestContainerAtOrNull(position: Offset): ComposeNode? =
+        findDeepestChildAt(position) {
+            it.isPositionWithinBounds(position) &&
                 it.isContainer() &&
                 it.isVisibleInCanvas()
-    }
+        }
 
-    fun findDeepestChildAtOrNull(
-        position: Offset,
-    ): ComposeNode? = findDeepestChildAt(position) {
-        it.isPositionWithinBounds(position) && it.isVisibleInCanvas()
-    }
+    fun findDeepestChildAtOrNull(position: Offset): ComposeNode? =
+        findDeepestChildAt(position) {
+            it.isPositionWithinBounds(position) && it.isVisibleInCanvas()
+        }
 
     /**
      * Check if this node can be deletable from the parent.
@@ -366,13 +344,14 @@ data class ComposeNode(
      */
     fun removeFromParent(excludeIndex: Int? = null) {
         if (excludeIndex != null) {
-            val indexes = parentNode?.children?.mapIndexed { index, node ->
-                if (index != excludeIndex && node == this) {
-                    index to node
-                } else {
-                    null
+            val indexes =
+                parentNode?.children?.mapIndexed { index, node ->
+                    if (index != excludeIndex && node == this) {
+                        index to node
+                    } else {
+                        null
+                    }
                 }
-            }
             indexes?.forEach { pair ->
                 pair?.let {
                     parentNode?.children?.removeAt(it.first)
@@ -392,22 +371,23 @@ data class ComposeNode(
         updateChildParentRelationships()
     }
 
-    fun findFirstFocusedNodeOrNull(): ComposeNode? =
-        allChildren().firstOrNull { it.isFocused.value }
+    fun findFirstFocusedNodeOrNull(): ComposeNode? = allChildren().firstOrNull { it.isFocused.value }
 
-    fun clearIsDraggedOnBoundsRecursively() = doRecursively { node, _, _ ->
-        node.isDraggedOnBounds.value = false
-    }
+    fun clearIsDraggedOnBoundsRecursively() =
+        doRecursively { node, _, _ ->
+            node.isDraggedOnBounds.value = false
+        }
 
-    fun clearIndexToBeDroppedRecursively() = doRecursively { node, _, _ ->
-        node.indexToBeDropped.value = 0
-    }
+    fun clearIndexToBeDroppedRecursively() =
+        doRecursively { node, _, _ ->
+            node.indexToBeDropped.value = 0
+        }
 
     fun clearIsFocusedRecursively() = doRecursively { node, _, _ -> node.isFocused.value = false }
 
     fun clearIsHoveredRecursively() = doRecursively { node, _, _ -> node.isHovered.value = false }
-    fun setIsPartOfComponentRecursively(value: Boolean) =
-        doRecursively { node, _, _ -> node.isPartOfComponent = value }
+
+    fun setIsPartOfComponentRecursively(value: Boolean) = doRecursively { node, _, _ -> node.isPartOfComponent = value }
 
     /**
      * Check if any constraints are not violated against the parent [ComposeNode].
@@ -419,19 +399,23 @@ data class ComposeNode(
             it.getErrorIfInvalid(parent)
         }
 
-    fun insertChildAt(index: Int = children.size, child: ComposeNode) {
+    fun insertChildAt(
+        index: Int = children.size,
+        child: ComposeNode,
+    ) {
         val parent = this
         check(parent.isContainer())
 
         // Fallback to the index that doesn't throw exception to mitigate the chance of ignoring the
         // AI generated content with the index
-        val fallbackIndex = if (index < 0) {
-            0
-        } else if (index >= parent.children.size) {
-            parent.children.size
-        } else {
-            index
-        }
+        val fallbackIndex =
+            if (index < 0) {
+                0
+            } else if (index >= parent.children.size) {
+                parent.children.size
+            } else {
+                index
+            }
         children.add(
             fallbackIndex,
             child.copy().apply {
@@ -510,13 +494,13 @@ data class ComposeNode(
 
     fun isContainer(): Boolean =
         TraitCategory.Container in trait.value.paletteCategories() ||
-                TraitCategory.TabContent in trait.value.paletteCategories()
+            TraitCategory.TabContent in trait.value.paletteCategories()
 
-    fun isRoot(): Boolean = parentNode == null &&
+    fun isRoot(): Boolean =
+        parentNode == null &&
             trait.value !is FabTrait
 
-    fun isContentRoot(): Boolean =
-        parentNode?.trait?.value is ScreenTrait
+    fun isContentRoot(): Boolean = parentNode?.trait?.value is ScreenTrait
 
     fun bringToFront() {
         val selfLevel = level
@@ -552,7 +536,10 @@ data class ComposeNode(
         modifierList.add(ModifierWrapper.ZIndex(minZIndex - 1))
     }
 
-    fun updateDropIndex(project: Project, draggedPosition: Offset) {
+    fun updateDropIndex(
+        project: Project,
+        draggedPosition: Offset,
+    ) {
         if (!isContainer() || !isPositionWithinBounds(draggedPosition)) {
             return
         }
@@ -610,7 +597,7 @@ data class ComposeNode(
                 }
 
                 else -> {
-                    /* no-op */
+                    // no-op
                 }
             }
         }
@@ -639,18 +626,20 @@ data class ComposeNode(
     fun isDependent(sourceId: String): Boolean {
         val dynamicItemsDependency =
             allChildren().any { it.dynamicItems.value?.isDependent(sourceId) == true }
-        val actionDependency = allChildren().any { child ->
-            child.actionsMap.any {
-                it.value.any { actionNode ->
-                    actionNode.isDependent(sourceId)
+        val actionDependency =
+            allChildren().any { child ->
+                child.actionsMap.any {
+                    it.value.any { actionNode ->
+                        actionNode.isDependent(sourceId)
+                    }
                 }
             }
-        }
-        val paramsDependency = allChildren().any {
-            it.trait.value.getPropertyContainers().any { propertyContainer ->
-                propertyContainer.assignableProperty?.isDependent(sourceId) == true
+        val paramsDependency =
+            allChildren().any {
+                it.trait.value.getPropertyContainers().any { propertyContainer ->
+                    propertyContainer.assignableProperty?.isDependent(sourceId) == true
+                }
             }
-        }
         val visibilityDependency = visibilityParams.value.isDependent(sourceId)
         return dynamicItemsDependency || actionDependency || paramsDependency || visibilityDependency
     }
@@ -669,12 +658,12 @@ data class ComposeNode(
                     node = this,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
         } else {
             codeBlockBuilder.add("if (")
             codeBlockBuilder.add(
-                visibilityParams.generateVisibilityCondition(project, context, dryRun = dryRun)
+                visibilityParams.generateVisibilityCondition(project, context, dryRun = dryRun),
             )
             codeBlockBuilder.addStatement(") {")
             codeBlockBuilder.add(
@@ -683,24 +672,28 @@ data class ComposeNode(
                     node = this,
                     context = context,
                     dryRun = dryRun,
-                )
+                ),
             )
             codeBlockBuilder.addStatement("}")
         }
         // Wrap with specific code if any actions inside the Composable have a non-null CodeBlock by
         // generateWrapWithComposableBlock
-        val wrappedCode = allActions()
-            .filter { it.generateWrapWithComposableBlock(codeBlockBuilder.build()) != null }
-            .fold(initial = codeBlockBuilder.build()) { acc, element ->
-                element.generateWrapWithComposableBlock(acc) ?: acc
-            }
+        val wrappedCode =
+            allActions()
+                .filter { it.generateWrapWithComposableBlock(codeBlockBuilder.build()) != null }
+                .fold(initial = codeBlockBuilder.build()) { acc, element ->
+                    element.generateWrapWithComposableBlock(acc) ?: acc
+                }
 
-        val wrappedCodeByProperties = (trait.value.getPropertyContainers()
-            .map { it.assignableProperty } + dynamicItems.value)
-            .filter { it?.generateWrapWithComposableBlock(project, wrappedCode) != null }
-            .fold(initial = wrappedCode) { acc, element ->
-                element?.generateWrapWithComposableBlock(project, acc) ?: acc
-            }
+        val wrappedCodeByProperties =
+            (
+                trait.value
+                    .getPropertyContainers()
+                    .map { it.assignableProperty } + dynamicItems.value
+            ).filter { it?.generateWrapWithComposableBlock(project, wrappedCode) != null }
+                .fold(initial = wrappedCode) { acc, element ->
+                    element?.generateWrapWithComposableBlock(project, acc) ?: acc
+                }
         return wrappedCodeByProperties
     }
 
@@ -761,7 +754,7 @@ data class ComposeNode(
                 Row {
                     Icon(
                         imageVector = Icons.Outlined.Warning,
-                        contentDescription = null
+                        contentDescription = null,
                     )
                     Text(
                         text = "No component found for $componentId",
@@ -819,11 +812,13 @@ data class ComposeNode(
             true
         } else {
             val nodesUntilRootReversed = findNodesUntilContentRoot()
-            val nearestCutBounds = nodesUntilRootReversed.firstOrNull {
-                it.trait.value.isLazyList() ||
-                        it.trait.value is CardTrait ||
-                        it.isContentRoot()
-            }?.boundsInWindow
+            val nearestCutBounds =
+                nodesUntilRootReversed
+                    .firstOrNull {
+                        it.trait.value.isLazyList() ||
+                            it.trait.value is CardTrait ||
+                            it.isContentRoot()
+                    }?.boundsInWindow
             nearestCutBounds?.value?.let {
                 if (boundsInWindow.value.top - it.top < labelHeight) {
                     true
@@ -834,24 +829,24 @@ data class ComposeNode(
         }
     }
 
-    fun getCompanionStateOrNull(project: Project): ScreenState<*>? {
-        return trait.value.companionState(this)
-    }
+    fun getCompanionStateOrNull(project: Project): ScreenState<*>? = trait.value.companionState(this)
 
     fun getCompanionStates(project: Project): List<ScreenState<*>> {
-        val statesFromTrait = trait.value.companionState(this)?.let {
-            listOf(it)
-        } ?: emptyList()
-        val statesFromActions = allActions().mapNotNull {
-            it.companionState(project)
-        }
+        val statesFromTrait =
+            trait.value.companionState(this)?.let {
+                listOf(it)
+            } ?: emptyList()
+        val statesFromActions =
+            allActions().mapNotNull {
+                it.companionState(project)
+            }
 
         return statesFromTrait + statesFromActions
     }
 
     fun isPositionWithinBounds(position: Offset) =
         position.x in boundsInWindow.value.left..boundsInWindow.value.right &&
-                position.y in boundsInWindow.value.top..boundsInWindow.value.bottom
+            position.y in boundsInWindow.value.top..boundsInWindow.value.bottom
 
     private fun findDeepestChildAt(
         position: Offset = Offset.Zero,
@@ -887,7 +882,14 @@ data class ComposeNode(
     @Suppress("unused")
     fun printRecursively(project: Project? = null) {
         doRecursively { self, _, level ->
-            println("  ".repeat(level) + "name: ${project?.let { self.displayName(it) } ?: self.label.value}, id: ${self.id}, isFocused: ${self.isFocused.value}, isHovered: ${self.isHovered.value}")
+            println(
+                "  ".repeat(level) +
+                    "name: ${project?.let {
+                        self.displayName(
+                            it,
+                        )
+                    } ?: self.label.value}, id: ${self.id}, isFocused: ${self.isFocused.value}, isHovered: ${self.isHovered.value}",
+            )
         }
     }
 
@@ -896,46 +898,53 @@ data class ComposeNode(
      * should navigate to the screen and focus on the node.
      */
     fun generateTrackableIssues(project: Project): List<TrackableIssue> {
-        val paramIssues = trait.value.getPropertyContainers().flatMap {
-            it.generateTrackableIssues(project = project, composeNode = this)
-        }
-        val canvasEditable = project.findCanvasEditableHavingNodeOrNull(this) ?: return emptyList()
-        val issuesFromParams = canvasEditable.let {
-            trait.value.generateIssues(project).map {
-                TrackableIssue(
-                    destinationContext = DestinationContext.UiBuilderScreen(
-                        canvasEditableId = canvasEditable.id,
-                        composeNodeId = this.id,
-                    ),
-                    issue = it,
-                )
+        val paramIssues =
+            trait.value.getPropertyContainers().flatMap {
+                it.generateTrackableIssues(project = project, composeNode = this)
             }
-        }
-
-        val actionIssues = allActions().flatMap { it.generateIssues(project) }.map { issue ->
-            TrackableIssue(
-                destinationContext = DestinationContext.UiBuilderScreen(
-                    canvasEditableId = canvasEditable.id,
-                    composeNodeId = this.id,
-                ),
-                issue = issue,
-            )
-        }
-        val modifierIssues = if (isContentRoot()) {
-            emptyList()
-        } else {
-            modifierList
-                .flatMap { it.generateIssues(this.parentNode?.trait?.value) }
-                .map { issue ->
+        val canvasEditable = project.findCanvasEditableHavingNodeOrNull(this) ?: return emptyList()
+        val issuesFromParams =
+            canvasEditable.let {
+                trait.value.generateIssues(project).map {
                     TrackableIssue(
-                        destinationContext = DestinationContext.UiBuilderScreen(
+                        destinationContext =
+                            DestinationContext.UiBuilderScreen(
+                                canvasEditableId = canvasEditable.id,
+                                composeNodeId = this.id,
+                            ),
+                        issue = it,
+                    )
+                }
+            }
+
+        val actionIssues =
+            allActions().flatMap { it.generateIssues(project) }.map { issue ->
+                TrackableIssue(
+                    destinationContext =
+                        DestinationContext.UiBuilderScreen(
                             canvasEditableId = canvasEditable.id,
                             composeNodeId = this.id,
                         ),
-                        issue = issue,
-                    )
-                }
-        }
+                    issue = issue,
+                )
+            }
+        val modifierIssues =
+            if (isContentRoot()) {
+                emptyList()
+            } else {
+                modifierList
+                    .flatMap { it.generateIssues(this.parentNode?.trait?.value) }
+                    .map { issue ->
+                        TrackableIssue(
+                            destinationContext =
+                                DestinationContext.UiBuilderScreen(
+                                    canvasEditableId = canvasEditable.id,
+                                    composeNodeId = this.id,
+                                ),
+                            issue = issue,
+                        )
+                    }
+            }
         val visibilityParamsIssues =
             visibilityParams.value.generateTrackableIssues(project, canvasEditable, this)
         return paramIssues + issuesFromParams + actionIssues + modifierIssues + visibilityParamsIssues
@@ -947,18 +956,24 @@ data class ComposeNode(
      *
      * This is to check the equality of the instance restored by deserializing the encoded instance.
      */
-    fun contentEquals(other: ComposeNode, excludeId: Boolean = true): Boolean {
-        val idEquality = if (excludeId) {
-            true
-        } else {
-            id == other.id
-        }
-        val companionStateIdEquality = if (excludeId) {
-            true
-        } else {
-            companionStateId == other.companionStateId
-        }
-        val otherEquality = trait.value == other.trait.value &&
+    fun contentEquals(
+        other: ComposeNode,
+        excludeId: Boolean = true,
+    ): Boolean {
+        val idEquality =
+            if (excludeId) {
+                true
+            } else {
+                id == other.id
+            }
+        val companionStateIdEquality =
+            if (excludeId) {
+                true
+            } else {
+                companionStateId == other.companionStateId
+            }
+        val otherEquality =
+            trait.value == other.trait.value &&
                 label.value == other.label.value &&
                 modifierList.eachEquals(
                     other = other.modifierList,
@@ -974,8 +989,8 @@ data class ComposeNode(
                     },
                 )
         return idEquality &&
-                companionStateIdEquality &&
-                otherEquality
+            companionStateIdEquality &&
+            otherEquality
     }
 }
 
@@ -1004,8 +1019,7 @@ fun ComposeNode.restoreInstance(sameId: Boolean = false): ComposeNode {
  * only created when the node tree is rendered instead of being merged with the actual ComposeNode
  * tree.
  */
-fun ComposeNode.getOperationTargetNode(project: Project): ComposeNode {
-    return originalNodeId?.let {
+fun ComposeNode.getOperationTargetNode(project: Project): ComposeNode =
+    originalNodeId?.let {
         project.findComposeNodeOrThrow(it)
     } ?: this
-}

@@ -62,7 +62,6 @@ data class TextTrait(
     val textStyleWrapper: AssignableProperty? = null,
     val parseHtml: Boolean? = null,
 ) : ComposeTrait {
-
     override fun getPropertyContainers(): List<PropertyContainer> =
         listOf(
             PropertyContainer("Text", text, ComposeFlowType.StringType()),
@@ -70,80 +69,75 @@ data class TextTrait(
             PropertyContainer(
                 "FontStyle",
                 fontStyle,
-                ComposeFlowType.Enum(enumClass = FontStyleWrapper::class.java)
+                ComposeFlowType.Enum(enumClass = FontStyleWrapper::class.java),
             ),
             PropertyContainer(
                 "Text decoration",
                 textDecoration,
-                ComposeFlowType.Enum(enumClass = TextDecorationWrapper::class.java)
+                ComposeFlowType.Enum(enumClass = TextDecorationWrapper::class.java),
             ),
             PropertyContainer(
                 "Text align",
                 textAlign,
-                ComposeFlowType.Enum(enumClass = TextAlignWrapper::class.java)
+                ComposeFlowType.Enum(enumClass = TextAlignWrapper::class.java),
             ),
             PropertyContainer(
                 "Overflow",
                 overflow,
-                ComposeFlowType.Enum(enumClass = TextOverflowWrapper::class.java)
+                ComposeFlowType.Enum(enumClass = TextOverflowWrapper::class.java),
             ),
             PropertyContainer(
                 "TextStyle",
                 textStyleWrapper,
-                ComposeFlowType.Enum(enumClass = TextStyleWrapper::class.java)
-            )
+                ComposeFlowType.Enum(enumClass = TextStyleWrapper::class.java),
+            ),
         )
 
-    private fun fontStyleValue(): FontStyle? {
-        return when (fontStyle) {
+    private fun fontStyleValue(): FontStyle? =
+        when (fontStyle) {
             is EnumProperty -> {
                 FontStyleWrapper.entries[fontStyle.value.enumValue().ordinal].fontStyle
             }
 
             else -> null
         }
-    }
 
-    private fun textDecorationValue(): TextDecoration? {
-        return when (textDecoration) {
+    private fun textDecorationValue(): TextDecoration? =
+        when (textDecoration) {
             is EnumProperty -> {
                 TextDecorationWrapper.entries[textDecoration.value.enumValue().ordinal].textDecoration
             }
 
             else -> null
         }
-    }
 
-    private fun textAlignValue(): TextAlign? {
-        return when (textAlign) {
+    private fun textAlignValue(): TextAlign? =
+        when (textAlign) {
             is EnumProperty -> {
                 TextAlignWrapper.entries[textAlign.value.enumValue().ordinal].textAlign
             }
 
             else -> null
         }
-    }
 
-    private fun overflowValue(): TextOverflow? {
-        return when (overflow) {
+    private fun overflowValue(): TextOverflow? =
+        when (overflow) {
             is EnumProperty -> {
                 TextOverflowWrapper.entries[overflow.value.enumValue().ordinal].textOverflow
             }
 
             else -> null
         }
-    }
 
     @Composable
-    fun textStyleValue(): TextStyle? {
-        return when (textStyleWrapper) {
+    fun textStyleValue(): TextStyle? =
+        when (textStyleWrapper) {
             is EnumProperty -> {
                 TextStyleWrapper.entries[textStyleWrapper.value.enumValue().ordinal].getStyle()
             }
 
             else -> null
         }
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -159,9 +153,9 @@ data class TextTrait(
                     project,
                     context,
                     ComposeFlowType.StringType(),
-                    dryRun = dryRun
+                    dryRun = dryRun,
                 ),
-                MemberName("${COMPOSEFLOW_PACKAGE}.util", "toRichHtmlString", isExtension = true)
+                MemberName("${COMPOSEFLOW_PACKAGE}.util", "toRichHtmlString", isExtension = true),
             )
         } else {
             codeBlockBuilder.add(
@@ -169,8 +163,8 @@ data class TextTrait(
                     project,
                     context,
                     ComposeFlowType.StringType(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
         }
         codeBlockBuilder.addStatement(",")
@@ -182,8 +176,8 @@ data class TextTrait(
                     project,
                     context,
                     ComposeFlowType.Color(),
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
         }
@@ -224,21 +218,25 @@ data class TextTrait(
 
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
-            trait = mutableStateOf(
-                TextTrait(
-                    text = StringProperty.StringIntrinsicValue("Example text"),
-                    colorWrapper = ColorProperty.ColorIntrinsicValue(
-                        ColorWrapper(
-                            Material3ColorWrapper.OnSurface,
-                        ),
+            trait =
+                mutableStateOf(
+                    TextTrait(
+                        text = StringProperty.StringIntrinsicValue("Example text"),
+                        colorWrapper =
+                            ColorProperty.ColorIntrinsicValue(
+                                ColorWrapper(
+                                    Material3ColorWrapper.OnSurface,
+                                ),
+                            ),
                     ),
                 ),
-            ),
             modifierList = defaultModifierList(),
         )
 
     override fun icon(): ImageVector = Icons.Outlined.TextFields
+
     override fun isResizeable(): Boolean = false
+
     override fun iconText(): String = "Text"
 
     @Composable
@@ -250,41 +248,46 @@ data class TextTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        val textWithPlaceholder = when (val usage = placeholderText) {
-            PlaceholderText.NoUsage -> text.transformedValueExpression(project)
-            is PlaceholderText.Used -> usage.value.transformedValueExpression(project)
-        }
+        val textWithPlaceholder =
+            when (val usage = placeholderText) {
+                PlaceholderText.NoUsage -> text.transformedValueExpression(project)
+                is PlaceholderText.Used -> usage.value.transformedValueExpression(project)
+            }
         Text(
-            text = if (parseHtml == true) {
-                textWithPlaceholder.toRichHtmlString()
-            } else {
-                AnnotatedString(textWithPlaceholder)
-            },
-            color = (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                ?: Color.Unspecified,
+            text =
+                if (parseHtml == true) {
+                    textWithPlaceholder.toRichHtmlString()
+                } else {
+                    AnnotatedString(textWithPlaceholder)
+                },
+            color =
+                (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                    ?: Color.Unspecified,
             fontStyle = fontStyleValue(),
             textDecoration = textDecorationValue(),
             textAlign = textAlignValue(),
             overflow = overflowValue() ?: TextOverflow.Clip,
             softWrap = softWrap ?: true,
             maxLines = maxLines ?: Int.MAX_VALUE,
-            style = textStyleValue()
-                ?: LocalTextStyle.current,
-            modifier = modifier.then(
-                node.modifierChainForCanvas()
-                    .modifierForCanvas(
-                        project = project,
-                        node = node,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        paletteRenderParams = paletteRenderParams,
-                        zoomableContainerStateHolder = zoomableContainerStateHolder,
-                    ),
-            ),
+            style =
+                textStyleValue()
+                    ?: LocalTextStyle.current,
+            modifier =
+                modifier.then(
+                    node
+                        .modifierChainForCanvas()
+                        .modifierForCanvas(
+                            project = project,
+                            node = node,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            paletteRenderParams = paletteRenderParams,
+                            zoomableContainerStateHolder = zoomableContainerStateHolder,
+                        ),
+                ),
         )
     }
 
-    override fun paletteCategories(): List<TraitCategory> =
-        listOf(TraitCategory.Common, TraitCategory.Basic)
+    override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Common, TraitCategory.Basic)
 
     override fun tooltipResource(): StringResource = Res.string.tooltip_text_trait
 
@@ -302,10 +305,10 @@ data class TextTrait(
                 project = project,
                 context = context,
                 dryRun = dryRun,
-            )
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()
@@ -319,7 +322,6 @@ private const val defaultPlaceholderText = "This is a placeholder only visible i
  */
 @Serializable
 sealed interface PlaceholderText {
-
     @Serializable
     @SerialName("NoUsage")
     data object NoUsage : PlaceholderText

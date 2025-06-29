@@ -73,29 +73,27 @@ data class ImageTrait(
     val contentScaleWrapper: AssignableProperty? = null,
     val alpha: Float? = null,
 ) : ComposeTrait {
-
-    override fun getPropertyContainers(): List<PropertyContainer> {
-        return listOf(
+    override fun getPropertyContainers(): List<PropertyContainer> =
+        listOf(
             PropertyContainer("Url", url, ComposeFlowType.StringType()),
             PropertyContainer(
                 "Content scale",
-                contentScaleWrapper, ComposeFlowType.Enum(
+                contentScaleWrapper,
+                ComposeFlowType.Enum(
                     isList = false,
                     enumClass = ContentScaleWrapper::class.java,
-                )
+                ),
             ),
         )
-    }
 
-    fun contentScaleValue(): ContentScale? {
-        return when (contentScaleWrapper) {
+    fun contentScaleValue(): ContentScale? =
+        when (contentScaleWrapper) {
             is EnumProperty -> {
                 ContentScaleWrapper.entries[contentScaleWrapper.value.enumValue().ordinal].contentScale
             }
 
             else -> null
         }
-    }
 
     private fun generateParamsCode(
         project: Project,
@@ -111,8 +109,8 @@ data class ImageTrait(
                         project,
                         context,
                         ComposeFlowType.StringType(),
-                        dryRun = dryRun
-                    )
+                        dryRun = dryRun,
+                    ),
                 )
                 codeBlockBuilder.addStatement(",")
             }
@@ -126,9 +124,9 @@ data class ImageTrait(
                             MemberHolder.ComposeFlow.Res,
                             MemberName(
                                 COMPOSEFLOW_PACKAGE,
-                                blob.fileName.asVariableName().substringBeforeLast(".")
-                            )
-                        )
+                                blob.fileName.asVariableName().substringBeforeLast("."),
+                            ),
+                        ),
                     )
                 }
             }
@@ -164,8 +162,11 @@ data class ImageTrait(
         )
 
     override fun icon(): ImageVector = Icons.Outlined.Image
+
     override fun iconText(): String = "Image"
+
     override fun paletteCategories(): List<TraitCategory> = listOf(TraitCategory.Basic)
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_image_trait
 
     @Composable
@@ -177,17 +178,18 @@ data class ImageTrait(
         zoomableContainerStateHolder: ZoomableContainerStateHolder,
         modifier: Modifier,
     ) {
-        val modifierForCanvas = if (paletteRenderParams.isShadowNode) {
-            Modifier
-        } else {
-            Modifier.modifierForCanvas(
-                project = project,
-                node = node,
-                canvasNodeCallbacks = canvasNodeCallbacks,
-                paletteRenderParams = paletteRenderParams,
-                zoomableContainerStateHolder = zoomableContainerStateHolder,
-            )
-        }
+        val modifierForCanvas =
+            if (paletteRenderParams.isShadowNode) {
+                Modifier
+            } else {
+                Modifier.modifierForCanvas(
+                    project = project,
+                    node = node,
+                    canvasNodeCallbacks = canvasNodeCallbacks,
+                    paletteRenderParams = paletteRenderParams,
+                    zoomableContainerStateHolder = zoomableContainerStateHolder,
+                )
+            }
         if (isTest()) {
             LoadedImage(
                 painter = rememberVectorPainter(Icons.Outlined.Image),
@@ -198,20 +200,24 @@ data class ImageTrait(
         } else {
             when (assetType) {
                 ImageAssetType.Network -> {
-                    val imageUrl = when (val usage = placeholderUrl) {
-                        PlaceholderUrl.NoUsage -> url.transformedValueExpression(
-                            project
-                        )
+                    val imageUrl =
+                        when (val usage = placeholderUrl) {
+                            PlaceholderUrl.NoUsage ->
+                                url.transformedValueExpression(
+                                    project,
+                                )
 
-                        is PlaceholderUrl.Used -> usage.url.transformedValueExpression(project)
-                    }
+                            is PlaceholderUrl.Used -> usage.url.transformedValueExpression(project)
+                        }
                     AsyncImage(
                         url = imageUrl,
                         contentDescription = stringResource(Res.string.image_from_network),
-                        alignment = alignmentWrapper?.alignment
-                            ?: Alignment.Center,
-                        contentScale = contentScaleValue()
-                            ?: ContentScale.Fit,
+                        alignment =
+                            alignmentWrapper?.alignment
+                                ?: Alignment.Center,
+                        contentScale =
+                            contentScaleValue()
+                                ?: ContentScale.Fit,
                         alpha = alpha ?: DefaultAlpha,
                         modifier = node.modifierChainForCanvas().then(modifierForCanvas),
                     )
@@ -223,19 +229,23 @@ data class ImageTrait(
                         blob.asImageComposable(
                             userId = userId,
                             projectId = project.id.toString(),
-                            alignment = alignmentWrapper?.alignment
-                                ?: Alignment.Center,
-                            contentScale = contentScaleValue()
-                                ?: ContentScale.Fit,
+                            alignment =
+                                alignmentWrapper?.alignment
+                                    ?: Alignment.Center,
+                            contentScale =
+                                contentScaleValue()
+                                    ?: ContentScale.Fit,
                             alpha = alpha ?: DefaultAlpha,
-                            modifier = node.modifierChainForCanvas().then(modifierForCanvas)
+                            modifier = node.modifierChainForCanvas().then(modifierForCanvas),
                         )
                     } ?: Box(
-                        modifier = Modifier.shimmer()
-                            .background(
-                                color = MaterialTheme.colorScheme.outlineVariant,
-                                shape = RoundedCornerShape(8.dp)
-                            )
+                        modifier =
+                            Modifier
+                                .shimmer()
+                                .background(
+                                    color = MaterialTheme.colorScheme.outlineVariant,
+                                    shape = RoundedCornerShape(8.dp),
+                                ),
                     )
                 }
             }
@@ -253,8 +263,9 @@ data class ImageTrait(
             painter = painter,
             contentDescription = stringResource(Res.string.image_from_network),
             alignment = imageTrait.alignmentWrapper?.alignment ?: Alignment.Center,
-            contentScale = imageTrait.contentScaleValue()
-                ?: ContentScale.Fit,
+            contentScale =
+                imageTrait.contentScaleValue()
+                    ?: ContentScale.Fit,
             alpha = imageTrait.alpha ?: DefaultAlpha,
             modifier = modifierList.toModifierChain().then(modifierForCanvas),
         )
@@ -271,10 +282,11 @@ data class ImageTrait(
             return codeBlockBuilder.build()
         }
 
-        val imageMember = when (assetType) {
-            ImageAssetType.Network -> MemberName("${COMPOSEFLOW_PACKAGE}.ui", "AsyncImage")
-            ImageAssetType.Asset -> MemberHolder.AndroidX.Foundation.Image
-        }
+        val imageMember =
+            when (assetType) {
+                ImageAssetType.Network -> MemberName("${COMPOSEFLOW_PACKAGE}.ui", "AsyncImage")
+                ImageAssetType.Asset -> MemberHolder.AndroidX.Foundation.Image
+            }
         codeBlockBuilder.addStatement(
             "%M(",
             imageMember,
@@ -283,11 +295,11 @@ data class ImageTrait(
             generateParamsCode(
                 project = project,
                 context = context,
-                dryRun = dryRun
-            )
+                dryRun = dryRun,
+            ),
         )
         codeBlockBuilder.add(
-            node.generateModifierCode(project, context, dryRun = dryRun)
+            node.generateModifierCode(project, context, dryRun = dryRun),
         )
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()
@@ -301,8 +313,7 @@ object ImageAssetTypeSerializer : FallbackEnumSerializer<ImageAssetType>(ImageAs
 @Serializable(ImageAssetTypeSerializer::class)
 enum class ImageAssetType {
     Network,
-    Asset
-    ;
+    Asset,
 }
 
 /**
@@ -310,7 +321,6 @@ enum class ImageAssetType {
  */
 @Serializable
 sealed interface PlaceholderUrl {
-
     @Serializable
     @SerialName("NoUsage")
     data object NoUsage : PlaceholderUrl

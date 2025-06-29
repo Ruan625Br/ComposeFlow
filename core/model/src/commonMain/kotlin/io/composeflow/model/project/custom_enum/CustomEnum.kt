@@ -26,8 +26,7 @@ data class CustomEnum(
     @Transient
     val enumName = name.asClassName()
 
-    fun asKotlinPoetClassName(project: Project): ClassName =
-        ClassName("${project.packageName}.${EnumPackage}", enumName)
+    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$EnumPackage", enumName)
 
     fun generateCustomEnumSpec(): TypeSpec? {
         if (values.isEmpty()) return null

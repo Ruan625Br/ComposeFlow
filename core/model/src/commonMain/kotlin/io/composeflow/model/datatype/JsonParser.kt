@@ -20,16 +20,22 @@ sealed interface JsonParseResult {
 }
 
 sealed interface DataTypeParseResult : JsonParseResult {
-    data class Success(val dataType: DataType) : DataTypeParseResult {
+    data class Success(
+        val dataType: DataType,
+    ) : DataTypeParseResult {
         override fun isSuccess(): Boolean = true
     }
 
-    data class SuccessWithWarning(val warningMessage: String, val dataType: DataType) :
-        DataTypeParseResult {
+    data class SuccessWithWarning(
+        val warningMessage: String,
+        val dataType: DataType,
+    ) : DataTypeParseResult {
         override fun isSuccess(): Boolean = true
     }
 
-    data class Failure(val message: String) : DataTypeParseResult {
+    data class Failure(
+        val message: String,
+    ) : DataTypeParseResult {
         override fun isSuccess(): Boolean = false
     }
 
@@ -39,7 +45,9 @@ sealed interface DataTypeParseResult : JsonParseResult {
 }
 
 sealed interface DefaultValuesParseResult : JsonParseResult {
-    data class Success(val defaultValues: List<DataTypeDefaultValue>) : DefaultValuesParseResult {
+    data class Success(
+        val defaultValues: List<DataTypeDefaultValue>,
+    ) : DefaultValuesParseResult {
         override fun isSuccess(): Boolean = true
     }
 
@@ -50,7 +58,9 @@ sealed interface DefaultValuesParseResult : JsonParseResult {
         override fun isSuccess(): Boolean = true
     }
 
-    data class Failure(val message: String) : DefaultValuesParseResult {
+    data class Failure(
+        val message: String,
+    ) : DefaultValuesParseResult {
         override fun isSuccess(): Boolean = false
     }
 
@@ -61,13 +71,13 @@ sealed interface DefaultValuesParseResult : JsonParseResult {
 
 @OptIn(ExperimentalSerializationApi::class)
 class JsonParser(
-    private val json: Json = Json {
-        isLenient = true
-        ignoreUnknownKeys = true
-        allowTrailingComma = true
-    },
+    private val json: Json =
+        Json {
+            isLenient = true
+            ignoreUnknownKeys = true
+            allowTrailingComma = true
+        },
 ) {
-
     fun parseJsonToDataType(
         jsonText: String,
         includeDefaultValue: Boolean = false,
@@ -121,47 +131,52 @@ class JsonParser(
                         dataFields.add(
                             DataField(
                                 name = key ?: "",
-                                fieldType = FieldType.Int(
-                                    defaultValue = if (includeDefaultValue) element.content.toInt() else 0
-                                )
-                            )
+                                fieldType =
+                                    FieldType.Int(
+                                        defaultValue = if (includeDefaultValue) element.content.toInt() else 0,
+                                    ),
+                            ),
                         )
                     } else if (element.content.toFloatOrNull() != null) {
                         dataFields.add(
                             DataField(
                                 name = key ?: "",
-                                fieldType = FieldType.Float(
-                                    defaultValue = if (includeDefaultValue) element.content.toFloat() else 0f
-                                )
-                            )
+                                fieldType =
+                                    FieldType.Float(
+                                        defaultValue = if (includeDefaultValue) element.content.toFloat() else 0f,
+                                    ),
+                            ),
                         )
                     } else if (element.content.toBooleanStrictOrNull() != null) {
                         dataFields.add(
                             DataField(
                                 name = key ?: "",
-                                fieldType = FieldType.Boolean(
-                                    defaultValue = if (includeDefaultValue) element.content.toBooleanStrict() else false
-                                )
-                            )
+                                fieldType =
+                                    FieldType.Boolean(
+                                        defaultValue = if (includeDefaultValue) element.content.toBooleanStrict() else false,
+                                    ),
+                            ),
                         )
                     } else if (element.content.tryToParseToInstant() != null) {
                         dataFields.add(
                             DataField(
                                 name = key ?: "",
-                                fieldType = FieldType.Instant(
-                                    defaultValue = if (includeDefaultValue) element.content.tryToParseToInstant()!! else InstantWrapper()
-                                )
-                            )
+                                fieldType =
+                                    FieldType.Instant(
+                                        defaultValue = if (includeDefaultValue) element.content.tryToParseToInstant()!! else InstantWrapper(),
+                                    ),
+                            ),
                         )
                     } else {
                         if (element.isString) {
                             dataFields.add(
                                 DataField(
                                     name = key ?: "",
-                                    fieldType = FieldType.String(
-                                        defaultValue = if (includeDefaultValue) element.content else ""
-                                    )
-                                )
+                                    fieldType =
+                                        FieldType.String(
+                                            defaultValue = if (includeDefaultValue) element.content else "",
+                                        ),
+                                ),
                             )
                         }
                     }
@@ -181,7 +196,7 @@ class JsonParser(
             warning?.let {
                 DataTypeParseResult.SuccessWithWarning(
                     warningMessage = it,
-                    DataType(name = "", fields = fields)
+                    DataType(name = "", fields = fields),
                 )
             } ?: DataTypeParseResult.Success(DataType(name = "", fields = fields))
         } catch (e: Exception) {
@@ -189,7 +204,10 @@ class JsonParser(
         }
     }
 
-    fun parseJsonToDefaultValues(dataType: DataType, jsonText: String): DefaultValuesParseResult {
+    fun parseJsonToDefaultValues(
+        dataType: DataType,
+        jsonText: String,
+    ): DefaultValuesParseResult {
         if (jsonText.trim().isEmpty()) return DefaultValuesParseResult.EmptyInput
 
         var warning: String? = null
@@ -207,13 +225,14 @@ class JsonParser(
                     // Adding the array as String since nested array isn't allowed at the moment.
                     // TODO: Allow parsing json once nested arrays are allowed
                     warning = "Nested array(s) are translated as String"
-                    dataType.findDataFieldOrNullByVariableName(fieldName = key ?: "")
+                    dataType
+                        .findDataFieldOrNullByVariableName(fieldName = key ?: "")
                         ?.let { dataField ->
                             dataTypeDefaultValue.defaultFields.add(
                                 FieldDefaultValue(
                                     fieldId = dataField.id,
-                                    defaultValue = StringProperty.StringIntrinsicValue(element.toString())
-                                )
+                                    defaultValue = StringProperty.StringIntrinsicValue(element.toString()),
+                                ),
                             )
                         }
                 }
@@ -232,67 +251,74 @@ class JsonParser(
                         // Adding the object as String since nested DataType isn't allowed at the moment.
                         // TODO: Allow parsing json once nested DataType is allowed
                         warning = "Nested object(s) are translated as String"
-                        dataType.findDataFieldOrNullByVariableName(fieldName = key ?: "")
+                        dataType
+                            .findDataFieldOrNullByVariableName(fieldName = key ?: "")
                             ?.let { dataField ->
                                 dataTypeDefaultValue.defaultFields.add(
                                     FieldDefaultValue(
                                         fieldId = dataField.id,
-                                        defaultValue = StringProperty.StringIntrinsicValue(element.toString())
-                                    )
+                                        defaultValue = StringProperty.StringIntrinsicValue(element.toString()),
+                                    ),
                                 )
                             }
                     }
                 }
 
                 is JsonPrimitive -> {
-                    dataType.findDataFieldOrNullByVariableName(fieldName = key ?: "")
+                    dataType
+                        .findDataFieldOrNullByVariableName(fieldName = key ?: "")
                         ?.let { dataField ->
                             if (element.content.toIntOrNull() != null) {
                                 dataTypeDefaultValue.defaultFields.add(
                                     FieldDefaultValue(
                                         fieldId = dataField.id,
-                                        defaultValue = IntProperty.IntIntrinsicValue(
-                                            element.content.toIntOrNull() ?: 0
-                                        )
-                                    )
+                                        defaultValue =
+                                            IntProperty.IntIntrinsicValue(
+                                                element.content.toIntOrNull() ?: 0,
+                                            ),
+                                    ),
                                 )
                             } else if (element.content.toFloatOrNull() != null) {
                                 dataTypeDefaultValue.defaultFields.add(
                                     FieldDefaultValue(
                                         fieldId = dataField.id,
-                                        defaultValue = FloatProperty.FloatIntrinsicValue(
-                                            element.content.toFloatOrNull() ?: 0f
-                                        )
-                                    )
+                                        defaultValue =
+                                            FloatProperty.FloatIntrinsicValue(
+                                                element.content.toFloatOrNull() ?: 0f,
+                                            ),
+                                    ),
                                 )
                             } else if (element.content.toBooleanStrictOrNull() != null) {
                                 dataTypeDefaultValue.defaultFields.add(
                                     FieldDefaultValue(
                                         fieldId = dataField.id,
-                                        defaultValue = BooleanProperty.BooleanIntrinsicValue(
-                                            element.content.toBooleanStrictOrNull() ?: false
-                                        )
-                                    )
+                                        defaultValue =
+                                            BooleanProperty.BooleanIntrinsicValue(
+                                                element.content.toBooleanStrictOrNull() ?: false,
+                                            ),
+                                    ),
                                 )
                             } else if (element.content.tryToParseToInstant() != null) {
                                 dataTypeDefaultValue.defaultFields.add(
                                     FieldDefaultValue(
                                         fieldId = dataField.id,
-                                        defaultValue = InstantProperty.InstantIntrinsicValue(
-                                            element.content.tryToParseToInstant()
-                                                ?: InstantWrapper()
-                                        )
-                                    )
+                                        defaultValue =
+                                            InstantProperty.InstantIntrinsicValue(
+                                                element.content.tryToParseToInstant()
+                                                    ?: InstantWrapper(),
+                                            ),
+                                    ),
                                 )
                             } else {
                                 if (element.isString) {
                                     dataTypeDefaultValue.defaultFields.add(
                                         FieldDefaultValue(
                                             fieldId = dataField.id,
-                                            defaultValue = StringProperty.StringIntrinsicValue(
-                                                element.content
-                                            )
-                                        )
+                                            defaultValue =
+                                                StringProperty.StringIntrinsicValue(
+                                                    element.content,
+                                                ),
+                                        ),
                                     )
                                 } else {
                                 }
@@ -312,7 +338,7 @@ class JsonParser(
                         val dataTypeDefaultValue = DataTypeDefaultValue(dataTypeId = dataType.id)
                         processEachJsonElement(
                             element = child,
-                            dataTypeDefaultValue
+                            dataTypeDefaultValue,
                         )
                         defaultValues.add(dataTypeDefaultValue)
                     }
@@ -334,11 +360,10 @@ class JsonParser(
     }
 }
 
-private fun String.tryToParseToInstant(): InstantWrapper? {
-    return try {
+private fun String.tryToParseToInstant(): InstantWrapper? =
+    try {
         val instant = Instant.parse(this)
         InstantWrapper(instant)
     } catch (e: Exception) {
         null
     }
-}

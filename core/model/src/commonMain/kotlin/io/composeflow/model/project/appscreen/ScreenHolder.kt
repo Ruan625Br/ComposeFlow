@@ -55,47 +55,43 @@ val screenRouteClass = ClassName(packageName = "", screenRoute)
 @Serializable
 @SerialName("ScreenHolder")
 data class ScreenHolder(
-
     @Serializable(with = FallbackMutableStateListSerializer::class)
-    val screens: MutableList<Screen> = mutableStateListEqualsOverrideOf(
-        Screen(
-            name = "Home",
-            rootNode = mutableStateOf(ComposeNode.createRootNode()),
-            icon = mutableStateOf(Filled.Home),
-            isDefault = mutableStateOf(true),
+    val screens: MutableList<Screen> =
+        mutableStateListEqualsOverrideOf(
+            Screen(
+                name = "Home",
+                rootNode = mutableStateOf(ComposeNode.createRootNode()),
+                icon = mutableStateOf(Filled.Home),
+                isDefault = mutableStateOf(true),
+            ),
         ),
-    ),
-
     /**
      * Set to true if the Navigation should be visible
      */
     @Serializable(with = MutableStateSerializer::class)
     val showNavigation: MutableState<Boolean> = mutableStateOf(true),
-
     @Serializable(MutableStateSerializer::class)
-    val loginScreenId: MutableState<ScreenId?> = mutableStateOf(
-        null
-    ),
-
+    val loginScreenId: MutableState<ScreenId?> =
+        mutableStateOf(
+            null,
+        ),
     var pendingDestination: NavigatableDestination? = null,
-
     var pendingDestinationContext: DestinationContext? = null,
 ) {
     @Serializable(MutableStateSerializer::class)
     val editedComponent = mutableStateOf<Component?>(null)
 
-    fun currentEditable(): CanvasEditable {
-        return editedComponent.value ?: currentScreen()
-    }
+    fun currentEditable(): CanvasEditable = editedComponent.value ?: currentScreen()
 
-    fun currentScreen(): Screen {
-        return screens.firstOrNull { it.isSelected.value }
+    fun currentScreen(): Screen =
+        screens.firstOrNull { it.isSelected.value }
             ?: screens.firstOrNull { it.isDefault.value }
             ?: screens.first()
-    }
 
     fun currentRootNode(): ComposeNode = currentEditable().getRootNode()
+
     fun currentContentRootNode(): ComposeNode = currentEditable().getContentRootNode()
+
     fun findScreen(id: String) = screens.firstOrNull { it.id == id }
 
     fun selectScreen(screen: Screen) {
@@ -111,13 +107,17 @@ data class ScreenHolder(
         screens.firstOrNull { it.id == screen.id }?.isDefault?.value = true
     }
 
-    fun addScreen(name: String, newScreen: Screen): Screen {
+    fun addScreen(
+        name: String,
+        newScreen: Screen,
+    ): Screen {
         val newName = generateUniqueName(initial = name, existing = screens.map { it.name }.toSet())
-        val screenToAdd = newScreen.restoreInstance().copy(
-            name = newName,
-            title = mutableStateOf(newName),
-            label = mutableStateOf(newName)
-        )
+        val screenToAdd =
+            newScreen.restoreInstance().copy(
+                name = newName,
+                title = mutableStateOf(newName),
+                label = mutableStateOf(newName),
+            )
 
         screenToAdd.rootNode.value.updateChildParentRelationships()
         screens.add(screenToAdd)
@@ -128,13 +128,12 @@ data class ScreenHolder(
         screens.remove(screen)
     }
 
-    fun findFocusedNodeOrNull(): ComposeNode? {
-        return if (editedComponent.value != null) {
+    fun findFocusedNodeOrNull(): ComposeNode? =
+        if (editedComponent.value != null) {
             editedComponent.value?.findFocusedNodeOrNull()
         } else {
             currentScreen().findFocusedNodeOrNull()
         }
-    }
 
     fun findDeepestChildAtOrNull(position: Offset): ComposeNode? {
         val currentEditable = currentEditable()
@@ -176,9 +175,7 @@ data class ScreenHolder(
         currentEditable().updateHoveredNode(eventPosition)
     }
 
-    fun getAllComposeNodes(): List<ComposeNode> {
-        return screens.flatMap { it.getAllComposeNodes() } + currentEditable().getAllComposeNodes()
-    }
+    fun getAllComposeNodes(): List<ComposeNode> = screens.flatMap { it.getAllComposeNodes() } + currentEditable().getAllComposeNodes()
 
     fun clearIsHovered() {
         screens.forEach {
@@ -226,34 +223,37 @@ data class ScreenHolder(
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                 id = "appNavHost",
                 initialIdentifier = authenticatedUserName,
-                MemberHolder.ComposeFlow.LocalAuthenticatedUser
+                MemberHolder.ComposeFlow.LocalAuthenticatedUser,
             )
             funSpecBuilder.addCode(
                 """
                 val $authenticatedUserName = %M.current
-                val startDestination = if (${authenticatedUserName} == null) { ScreenRoute.${loginScreen.routeName} } else { initialRoute } 
+                val startDestination = if ($authenticatedUserName == null) { ScreenRoute.${loginScreen.routeName} } else { initialRoute }
             """,
                 MemberHolder.ComposeFlow.LocalAuthenticatedUser,
             )
         }
         val initialRouteName = if (loginScreen != null) "startDestination" else "initialRoute"
-        funSpecBuilder.addParameters(
-            listOf(
-                ParameterSpec.builder("navController", NavHostController::class)
-                    .build(),
-                ParameterSpec.builder("initialRoute", screenRouteClass)
-                    .defaultValue(defaultScreen.defaultRouteCodeBlock())
-                    .build(),
-            ),
-        ).addCode(
-            """
+        funSpecBuilder
+            .addParameters(
+                listOf(
+                    ParameterSpec
+                        .builder("navController", NavHostController::class)
+                        .build(),
+                    ParameterSpec
+                        .builder("initialRoute", screenRouteClass)
+                        .defaultValue(defaultScreen.defaultRouteCodeBlock())
+                        .build(),
+                ),
+            ).addCode(
+                """
     %M(
         navController = navController,
-        startDestination = ${initialRouteName},
+        startDestination = $initialRouteName,
     ) {
         """,
-            MemberName("androidx.navigation.compose", "NavHost"),
-        )
+                MemberName("androidx.navigation.compose", "NavHost"),
+            )
 
         val codeBuilder = CodeBlock.builder()
         screens.forEach {
@@ -270,14 +270,16 @@ data class ScreenHolder(
     }
 
     fun generateComposeLauncherFile(): FileSpec {
-        val fileBuilder = FileSpec.builder("", "App")
-            .addImport("androidx.compose.runtime", "getValue")
-            .addImport("androidx.compose.runtime", "mutableStateOf")
-            .addImport("androidx.compose.runtime", "setValue")
+        val fileBuilder =
+            FileSpec
+                .builder("", "App")
+                .addImport("androidx.compose.runtime", "getValue")
+                .addImport("androidx.compose.runtime", "mutableStateOf")
+                .addImport("androidx.compose.runtime", "setValue")
         val appFunSpecBuilder = FunSpec.builder("App").addAnnotation(Composable::class)
         appFunSpecBuilder.addStatement(
             """
-    val appViewModel = %M(${appViewModel}::class)
+    val appViewModel = %M($appViewModel::class)
     val navController = %M()
     val snackbarHostState = %M { %M() }
     """,
@@ -311,13 +313,13 @@ data class ScreenHolder(
 
         appFunSpecBuilder.addStatement(
             """
-%M {                
+%M {
     %M(snackbarHostState) {
         %M {
     """,
             MemberName("${COMPOSEFLOW_PACKAGE}.auth", "ProvideAuthenticatedUser"),
             MemberName("${COMPOSEFLOW_PACKAGE}.ui", "ProvideOnShowSnackbar"),
-            MemberName("${COMPOSEFLOW_PACKAGE}.common", "AppTheme")
+            MemberName("${COMPOSEFLOW_PACKAGE}.common", "AppTheme"),
         )
 
         if (showNavigation.value) {
@@ -349,7 +351,7 @@ data class ScreenHolder(
                 ) {""",
                 MemberName(
                     "androidx.compose.material3.adaptive.navigationsuite",
-                    "NavigationSuiteScaffold"
+                    "NavigationSuiteScaffold",
                 ),
                 MemberName("androidx.navigation", "NavOptions"),
                 MemberName("androidx.compose.material3", "Icon"),
@@ -366,18 +368,18 @@ data class ScreenHolder(
 
         appFunSpecBuilder.addStatement(
             "snackbarHost = { %M(snackbarHostState) }",
-            MemberName("androidx.compose.material3", "SnackbarHost")
+            MemberName("androidx.compose.material3", "SnackbarHost"),
         )
 
         appFunSpecBuilder.addStatement(
             """
-            ) { 
+            ) {
                 AppNavHost(
                     navController = navController,
                 )
             }
         }
-    } 
+    }
 }
     """,
             MemberHolder.AndroidX.Ui.Modifier,
@@ -397,40 +399,45 @@ data class ScreenHolder(
     @OptIn(ExperimentalSettingsApi::class)
     fun generateAppViewModel(project: Project): FileSpec {
         val fileBuilder = FileSpec.builder("", appViewModel)
-        val typeBuilder = TypeSpec.classBuilder(appViewModel)
-            .superclass(ViewModel::class)
-            .addSuperinterface(KoinComponent::class)
-        if (project.globalStateHolder.getStates(project)
+        val typeBuilder =
+            TypeSpec
+                .classBuilder(appViewModel)
+                .superclass(ViewModel::class)
+                .addSuperinterface(KoinComponent::class)
+        if (project.globalStateHolder
+                .getStates(project)
                 .any { it is AppState.CustomDataTypeListAppState }
         ) {
             typeBuilder.addProperty(
-                PropertySpec.builder(ViewModelConstant.jsonSerializer.name, Json::class)
+                PropertySpec
+                    .builder(ViewModelConstant.jsonSerializer.name, Json::class)
                     .addModifiers(KModifier.PRIVATE)
                     .delegate(
-                        CodeBlock.builder()
+                        CodeBlock
+                            .builder()
                             .add("%M()", MemberHolder.Koin.inject)
                             .build(),
-                    )
-                    .build(),
+                    ).build(),
             )
             typeBuilder.addProperty(
-                PropertySpec.builder(ViewModelConstant.flowSettings.name, FlowSettings::class)
+                PropertySpec
+                    .builder(ViewModelConstant.flowSettings.name, FlowSettings::class)
                     .addModifiers(KModifier.PRIVATE)
                     .delegate(
-                        CodeBlock.builder()
+                        CodeBlock
+                            .builder()
                             .beginControlFlow("lazy")
                             .add("%M()", MemberHolder.Koin.get)
                             .endControlFlow()
                             .build(),
-                    )
-                    .build(),
+                    ).build(),
             )
 
             val codeBlockBuilder = CodeBlock.builder()
             codeBlockBuilder.beginControlFlow(
                 "%M.%M",
                 MemberHolder.PreCompose.viewModelScope,
-                MemberHolder.Coroutines.launch
+                MemberHolder.Coroutines.launch,
             )
             project.globalStateHolder.getStates(project).forEach { state ->
                 if (state is AppState.CustomDataTypeListAppState && state.defaultValue.isNotEmpty()) {
@@ -442,7 +449,7 @@ data class ScreenHolder(
                             )
                         """,
                             MemberHolder.Serialization.encodeToString,
-                            state.defaultValue.generateCodeBlock(project).toString()
+                            state.defaultValue.generateCodeBlock(project).toString(),
                         ),
                     )
                 }
@@ -450,7 +457,7 @@ data class ScreenHolder(
             codeBlockBuilder.endControlFlow()
 
             typeBuilder.addInitializerBlock(
-                codeBlockBuilder.build()
+                codeBlockBuilder.build(),
             )
         }
 
@@ -461,20 +468,23 @@ data class ScreenHolder(
     }
 
     fun generateKoinViewModelModule(project: Project): FileSpec {
-        val fileBuilder = FileSpec.builder(
-            fileName = "ViewModelModule",
-            packageName = "${COMPOSEFLOW_PACKAGE}.screens"
-        )
-        val funSpecBuilder = FunSpec.builder("screenViewModelModule")
-            .returns(org.koin.core.module.Module::class)
-            .addCode("return %M {", MemberName("org.koin.dsl", "module"))
+        val fileBuilder =
+            FileSpec.builder(
+                fileName = "ViewModelModule",
+                packageName = "${COMPOSEFLOW_PACKAGE}.screens",
+            )
+        val funSpecBuilder =
+            FunSpec
+                .builder("screenViewModelModule")
+                .returns(org.koin.core.module.Module::class)
+                .addCode("return %M {", MemberName("org.koin.dsl", "module"))
 
         funSpecBuilder.addStatement("factory { %T() } ", ClassName("", appViewModel))
 
         screens.forEach {
             funSpecBuilder.addStatement(
                 "factory { %T() } ",
-                ClassName(it.getPackageName(project), it.viewModelFileName)
+                ClassName(it.getPackageName(project), it.viewModelFileName),
             )
         }
         funSpecBuilder.addCode("}")
@@ -484,59 +494,64 @@ data class ScreenHolder(
     }
 
     fun generateScreenRouteFileSpec(project: Project): FileSpec {
-        val fileBuilder = FileSpec.builder(
-            fileName = screenRoute,
-            packageName = ""
-        )
-
-        val routeName = "routeName"
-        val screenRouteBuilder = TypeSpec.interfaceBuilder(screenRoute)
-            .addAnnotation(ClassHolder.Kotlinx.Serialization.Serializable)
-            .addModifiers(KModifier.SEALED)
-            .addProperty(PropertySpec.builder(routeName, String::class).build())
-            .addFunction(
-                FunSpec.builder("isCurrentDestination")
-                    .addParameter(
-                        "backStackEntry",
-                        ClassName("androidx.navigation", "NavBackStackEntry").copy(nullable = true)
-                    )
-                    .returns(Boolean::class)
-                    .addCode("""return backStackEntry?.destination?.route == $routeName""")
-                    .build()
+        val fileBuilder =
+            FileSpec.builder(
+                fileName = screenRoute,
+                packageName = "",
             )
 
+        val routeName = "routeName"
+        val screenRouteBuilder =
+            TypeSpec
+                .interfaceBuilder(screenRoute)
+                .addAnnotation(ClassHolder.Kotlinx.Serialization.Serializable)
+                .addModifiers(KModifier.SEALED)
+                .addProperty(PropertySpec.builder(routeName, String::class).build())
+                .addFunction(
+                    FunSpec
+                        .builder("isCurrentDestination")
+                        .addParameter(
+                            "backStackEntry",
+                            ClassName("androidx.navigation", "NavBackStackEntry").copy(nullable = true),
+                        ).returns(Boolean::class)
+                        .addCode("""return backStackEntry?.destination?.route == $routeName""")
+                        .build(),
+                )
+
         project.screenHolder.screens.forEach { screen ->
-            val typeSpecBuilder = if (screen.parameters.isEmpty()) {
-                TypeSpec.objectBuilder(screen.routeName)
-            } else {
-                val classBuilder = TypeSpec.classBuilder(screen.routeName)
-                val primaryConstructorBuilder = FunSpec.constructorBuilder()
-                screen.parameters.forEach { parameter ->
-                    primaryConstructorBuilder.addParameter(
-                        parameter.generateArgumentParameterSpec(project)
-                    )
-                    classBuilder.addProperty(
-                        PropertySpec.builder(
-                            parameter.variableName,
-                            parameter.parameterType.asKotlinPoetTypeName(project)
+            val typeSpecBuilder =
+                if (screen.parameters.isEmpty()) {
+                    TypeSpec.objectBuilder(screen.routeName)
+                } else {
+                    val classBuilder = TypeSpec.classBuilder(screen.routeName)
+                    val primaryConstructorBuilder = FunSpec.constructorBuilder()
+                    screen.parameters.forEach { parameter ->
+                        primaryConstructorBuilder.addParameter(
+                            parameter.generateArgumentParameterSpec(project),
                         )
-                            .initializer(parameter.variableName)
-                            .build()
+                        classBuilder.addProperty(
+                            PropertySpec
+                                .builder(
+                                    parameter.variableName,
+                                    parameter.parameterType.asKotlinPoetTypeName(project),
+                                ).initializer(parameter.variableName)
+                                .build(),
+                        )
+                    }
+                    classBuilder.primaryConstructor(primaryConstructorBuilder.build())
+                    classBuilder
+                }.apply {
+                    addModifiers(KModifier.DATA)
+                    addSuperinterface(screenRouteClass)
+                    addAnnotation(ClassHolder.Kotlinx.Serialization.Serializable)
+                    addProperty(
+                        PropertySpec
+                            .builder(routeName, String::class)
+                            .addModifiers(KModifier.OVERRIDE)
+                            .initializer("%S", "$screenRoute.${screen.routeName}")
+                            .build(),
                     )
                 }
-                classBuilder.primaryConstructor(primaryConstructorBuilder.build())
-                classBuilder
-            }.apply {
-                addModifiers(KModifier.DATA)
-                addSuperinterface(screenRouteClass)
-                addAnnotation(ClassHolder.Kotlinx.Serialization.Serializable)
-                addProperty(
-                    PropertySpec.builder(routeName, String::class)
-                        .addModifiers(KModifier.OVERRIDE)
-                        .initializer("%S", "${screenRoute}.${screen.routeName}")
-                        .build()
-                )
-            }
             screenRouteBuilder.addType(typeSpecBuilder.build())
         }
 
@@ -546,67 +561,71 @@ data class ScreenHolder(
     }
 
     private fun generateScreenDestinationEnum(): TypeSpec {
-        val enumBuilder = TypeSpec.enumBuilder("ScreenDestination")
-            .primaryConstructor(
-                FunSpec.constructorBuilder()
-                    .addParameter("icon", ImageVector::class)
-                    .addParameter("isTopLevel", Boolean::class)
-                    .addParameter("label", String::class)
-                    .addParameter("title", String::class)
-                    .addParameter("route", screenRouteClass)
-                    .build(),
-            )
-            .addProperty(
-                PropertySpec.builder("icon", ImageVector::class)
-                    .initializer("icon")
-                    .build(),
-            )
-            .addProperty(
-                PropertySpec.builder("isTopLevel", Boolean::class)
-                    .initializer("isTopLevel")
-                    .build(),
-            )
-            .addProperty(
-                PropertySpec.builder("label", String::class)
-                    .initializer("label")
-                    .build(),
-            )
-            .addProperty(
-                PropertySpec.builder("title", String::class)
-                    .initializer("title")
-                    .build(),
-            )
-            .addProperty(
-                PropertySpec.builder("route", screenRouteClass)
-                    .initializer("route")
-                    .build(),
-            )
+        val enumBuilder =
+            TypeSpec
+                .enumBuilder("ScreenDestination")
+                .primaryConstructor(
+                    FunSpec
+                        .constructorBuilder()
+                        .addParameter("icon", ImageVector::class)
+                        .addParameter("isTopLevel", Boolean::class)
+                        .addParameter("label", String::class)
+                        .addParameter("title", String::class)
+                        .addParameter("route", screenRouteClass)
+                        .build(),
+                ).addProperty(
+                    PropertySpec
+                        .builder("icon", ImageVector::class)
+                        .initializer("icon")
+                        .build(),
+                ).addProperty(
+                    PropertySpec
+                        .builder("isTopLevel", Boolean::class)
+                        .initializer("isTopLevel")
+                        .build(),
+                ).addProperty(
+                    PropertySpec
+                        .builder("label", String::class)
+                        .initializer("label")
+                        .build(),
+                ).addProperty(
+                    PropertySpec
+                        .builder("title", String::class)
+                        .initializer("title")
+                        .build(),
+                ).addProperty(
+                    PropertySpec
+                        .builder("route", screenRouteClass)
+                        .initializer("route")
+                        .build(),
+                )
 
-        screens.filter {
-            it.showOnNavigation.value &&
+        screens
+            .filter {
+                it.showOnNavigation.value &&
                     // The screen specified as login screen can't be the top level destination
                     loginScreenId.value != it.id
-        }.forEach {
-            enumBuilder.addEnumConstant(
-                it.name.toKotlinFileName(),
-                TypeSpec.anonymousClassBuilder()
-                    .addSuperclassConstructorParameter(it.icon.value.asCodeBlock())
-                    .addSuperclassConstructorParameter("%L", it.showOnNavigation.value)
-                    .addSuperclassConstructorParameter("%S", it.label.value)
-                    .addSuperclassConstructorParameter("%S", it.title.value)
-                    .addSuperclassConstructorParameter(it.defaultRouteCodeBlock())
-                    .build(),
-            )
-        }
+            }.forEach {
+                enumBuilder.addEnumConstant(
+                    it.name.toKotlinFileName(),
+                    TypeSpec
+                        .anonymousClassBuilder()
+                        .addSuperclassConstructorParameter(it.icon.value.asCodeBlock())
+                        .addSuperclassConstructorParameter("%L", it.showOnNavigation.value)
+                        .addSuperclassConstructorParameter("%S", it.label.value)
+                        .addSuperclassConstructorParameter("%S", it.title.value)
+                        .addSuperclassConstructorParameter(it.defaultRouteCodeBlock())
+                        .build(),
+                )
+            }
         return enumBuilder.build()
     }
 
     companion object {
-
         fun generateCodeBlockFromScrollBehavior(scrollBehaviorWrapper: ScrollBehaviorWrapper): CodeBlock {
             val builder = CodeBlock.builder()
             when (scrollBehaviorWrapper) {
-                ScrollBehaviorWrapper.None -> { /* no-op */
+                ScrollBehaviorWrapper.None -> { // no-op
                 }
 
                 ScrollBehaviorWrapper.EnterAlways -> {

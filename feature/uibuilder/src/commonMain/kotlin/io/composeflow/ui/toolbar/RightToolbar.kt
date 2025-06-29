@@ -21,15 +21,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.auth.FirebaseIdToken
-import io.composeflow.custom.ComposeFlowIcons
-import io.composeflow.custom.composeflowicons.NounAi
 import io.composeflow.download_jdk_confirmation
 import io.composeflow.model.device.Device
 import io.composeflow.model.device.EmulatorStatus
 import io.composeflow.model.device.SimulatorStatus
 import io.composeflow.preview_app_disabled_due_to_issues
 import io.composeflow.ui.Tooltip
-import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.modifier.hoverOverlay
@@ -61,19 +58,20 @@ fun RightToolbar(
     val viewModel =
         viewModel(modelClass = ToolbarViewModel::class, keys = listOf(firebaseIdToken)) {
             ToolbarViewModel(
-                firebaseIdTokenArg = firebaseIdToken
+                firebaseIdTokenArg = firebaseIdToken,
             )
         }
     val availableDevices by viewModel.availableDevices.collectAsState()
     val project by viewModel.editingProject.collectAsState()
     val buttonEnabled = statusBarUiState !is StatusBarUiState.Loading
-    val buttonModifier = if (buttonEnabled) {
-        Modifier
-            .hoverIconClickable()
-            .hoverOverlay()
-    } else {
-        Modifier.alpha(0.5f)
-    }
+    val buttonModifier =
+        if (buttonEnabled) {
+            Modifier
+                .hoverIconClickable()
+                .hoverOverlay()
+        } else {
+            Modifier.alpha(0.5f)
+        }
     val javaHomePath = viewModel.javaHomePath.collectAsState().value
     val pendingPreviewAppParams = viewModel.pendingPreviewAppParams.collectAsState().value
 
@@ -98,59 +96,63 @@ fun RightToolbar(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-            .testTag(ToolbarTestTag),
+        modifier =
+            modifier
+                .testTag(ToolbarTestTag),
     ) {
         val selectedDevice by viewModel.selectedDevice.collectAsState()
 
         @Composable
         fun DeviceIcon(device: Device) {
-            val icon = when (device) {
-                is Device.AndroidEmulator -> {
-                    val iconProvider = rememberResourcePainterProvider(
-                        "icons/androidDevice.svg",
-                        Icons::class.java,
-                    )
-                    if (device.status == EmulatorStatus.Device) {
-                        val badged by iconProvider.getPainter(
-                            Badge(
-                                Color.Green,
-                                DotBadgeShape.Default,
-                            ),
-                        )
-                        badged
-                    } else {
+            val icon =
+                when (device) {
+                    is Device.AndroidEmulator -> {
+                        val iconProvider =
+                            rememberResourcePainterProvider(
+                                "icons/androidDevice.svg",
+                                Icons::class.java,
+                            )
+                        if (device.status == EmulatorStatus.Device) {
+                            val badged by iconProvider.getPainter(
+                                Badge(
+                                    Color.Green,
+                                    DotBadgeShape.Default,
+                                ),
+                            )
+                            badged
+                        } else {
+                            val icon by iconProvider.getPainter()
+                            icon
+                        }
+                    }
+
+                    is Device.IosSimulator -> {
+                        val iconProvider =
+                            rememberResourcePainterProvider(
+                                "icons/iPhoneDevice.svg",
+                                Icons::class.java,
+                            )
+                        if (device.status == SimulatorStatus.Booted) {
+                            val badged by iconProvider.getPainter(
+                                Badge(
+                                    Color.Green,
+                                    DotBadgeShape.Default,
+                                ),
+                            )
+                            badged
+                        } else {
+                            val icon by iconProvider.getPainter()
+                            icon
+                        }
+                    }
+
+                    Device.Web -> {
+                        val iconProvider =
+                            rememberResourcePainterProvider("icons/web.svg", Icons::class.java)
                         val icon by iconProvider.getPainter()
                         icon
                     }
                 }
-
-                is Device.IosSimulator -> {
-                    val iconProvider = rememberResourcePainterProvider(
-                        "icons/iPhoneDevice.svg",
-                        Icons::class.java,
-                    )
-                    if (device.status == SimulatorStatus.Booted) {
-                        val badged by iconProvider.getPainter(
-                            Badge(
-                                Color.Green,
-                                DotBadgeShape.Default,
-                            ),
-                        )
-                        badged
-                    } else {
-                        val icon by iconProvider.getPainter()
-                        icon
-                    }
-                }
-
-                Device.Web -> {
-                    val iconProvider =
-                        rememberResourcePainterProvider("icons/web.svg", Icons::class.java)
-                    val icon by iconProvider.getPainter()
-                    icon
-                }
-            }
             org.jetbrains.jewel.ui.component.Icon(
                 painter = icon,
                 "device icon",
@@ -162,8 +164,10 @@ fun RightToolbar(
 
         val issues = project.generateTrackableIssues()
         IssuesBadge(
-            project = project, issues = issues, navigator = navigator,
-            onSetPendingFocus = viewModel::onSetPendingFocuses
+            project = project,
+            issues = issues,
+            navigator = navigator,
+            onSetPendingFocus = viewModel::onSetPendingFocuses,
         )
         Spacer(Modifier.width(16.dp))
 
@@ -193,55 +197,62 @@ fun RightToolbar(
             }
         }
 
-        val runAppContentDesc = if (issues.isEmpty()) {
-            "Preview app"
-        } else {
-            stringResource(Res.string.preview_app_disabled_due_to_issues)
-        }
+        val runAppContentDesc =
+            if (issues.isEmpty()) {
+                "Preview app"
+            } else {
+                stringResource(Res.string.preview_app_disabled_due_to_issues)
+            }
         Tooltip(runAppContentDesc) {
             ComposeFlowIconButton(
                 onClick = {
-                    val availability = viewModel.onCheckPreviewAvailability(
-                        previewAppParams = PreviewAppParams(
-                            projectFileName = projectFileName,
-                            targetDevice = selectedDevice,
-                            availableDevices = availableDevices,
-                            javaHomePath = javaHomePath,
-                        ),
-                    )
+                    val availability =
+                        viewModel.onCheckPreviewAvailability(
+                            previewAppParams =
+                                PreviewAppParams(
+                                    projectFileName = projectFileName,
+                                    targetDevice = selectedDevice,
+                                    availableDevices = availableDevices,
+                                    javaHomePath = javaHomePath,
+                                ),
+                        )
 
                     when (availability) {
                         is PreviewAvailability.Available -> {
                             viewModel.onRunPreviewApp(
                                 onStatusBarUiStateChanged = onStatusBarUiStateChanged,
-                                previewAppParams = availability.previewAppParams
+                                previewAppParams = availability.previewAppParams,
                             )
                         }
 
                         is PreviewAvailability.JdkNotInstalled -> {
                             viewModel.onShowDownloadJdkConfirmationDialog(
-                                previewAppParams = availability.previewAppParams
+                                previewAppParams = availability.previewAppParams,
                             )
                         }
                     }
                 },
                 enabled = statusBarUiState !is StatusBarUiState.Loading && issues.isEmpty(),
-                modifier = Modifier
-                    .testTag(ToolbarRunButtonTestTag)
-                    .then(
-                        if (issues.isEmpty()) {
-                            buttonModifier
-                        } else Modifier
-                    ),
+                modifier =
+                    Modifier
+                        .testTag(ToolbarRunButtonTestTag)
+                        .then(
+                            if (issues.isEmpty()) {
+                                buttonModifier
+                            } else {
+                                Modifier
+                            },
+                        ),
             ) {
                 Icon(
                     imageVector = Icons.Outlined.PlayArrow,
                     contentDescription = runAppContentDesc,
-                    tint = if (issues.isEmpty()) {
-                        JewelTheme.colorPalette.green(5)
-                    } else {
-                        JewelTheme.colorPalette.grey(7)
-                    },
+                    tint =
+                        if (issues.isEmpty()) {
+                            JewelTheme.colorPalette.green(5)
+                        } else {
+                            JewelTheme.colorPalette.grey(7)
+                        },
                 )
             }
         }

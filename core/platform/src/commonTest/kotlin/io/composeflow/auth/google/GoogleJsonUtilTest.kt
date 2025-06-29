@@ -4,16 +4,16 @@ import org.junit.Assert.assertEquals
 import kotlin.test.Test
 
 class GoogleJsonUtilTest {
-
     @Test
     fun testExtractClientIdFromGoogleServicesJson() {
-        val clientId = extractClientIdFromGoogleServicesJson(
-            exampleGoogleJson,
-            packageName = "com.example.test3"
-        )
+        val clientId =
+            extractClientIdFromGoogleServicesJson(
+                exampleGoogleJson,
+                packageName = "com.example.test3",
+            )
         assertEquals(
             "\"571511600000-kno1uo3d7hr5351fbeud4pq6fur_test3_redacted.apps.googleusercontent.com\"",
-            clientId
+            clientId,
         )
     }
 }

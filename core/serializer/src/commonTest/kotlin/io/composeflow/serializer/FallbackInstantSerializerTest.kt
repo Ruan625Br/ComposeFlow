@@ -10,11 +10,10 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class InstantWithFallbackSerializerTest {
-
     @Serializable
     data class TestData(
         @Serializable(with = FallbackInstantSerializer::class)
-        val timestamp: Instant
+        val timestamp: Instant,
     )
 
     private val json = Json { encodeDefaults = true }

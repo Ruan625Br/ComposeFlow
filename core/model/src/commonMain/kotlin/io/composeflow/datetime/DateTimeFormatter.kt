@@ -22,10 +22,12 @@ interface PaddingHolder {
 
 @Serializable
 sealed interface DateTimeFormatter : DropdownItem {
-
     fun asFormatter(): DateTimeFormat<LocalDateTime>
+
     fun simplifiedFormat(): String
+
     fun asCodeBlock(): CodeBlock
+
     fun newInstance(): DateTimeFormatter
 
     @Serializable
@@ -33,7 +35,9 @@ sealed interface DateTimeFormatter : DropdownItem {
     data class YYYY_MM_DD(
         override var separator: Separator = Separator.Slash,
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder, SeparatorHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder,
+        SeparatorHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 year(padding.padding)
@@ -43,8 +47,8 @@ sealed interface DateTimeFormatter : DropdownItem {
                 dayOfMonth(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 year(${padding.asCodeBlock()})
@@ -52,11 +56,10 @@ sealed interface DateTimeFormatter : DropdownItem {
                 monthNumber(${padding.asCodeBlock()})
                 chars("${separator.char}")
                 dayOfMonth(${padding.asCodeBlock()})
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "YYYY${separator}MM${separator}DD"
 
@@ -65,6 +68,7 @@ sealed interface DateTimeFormatter : DropdownItem {
             AnnotatedString("YYYY${separator}MM${separator}DD (2024${separator}${padding.asString()}8${separator}${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY_MM_DD
+
         override fun newInstance(): DateTimeFormatter = YYYY_MM_DD()
     }
 
@@ -73,7 +77,9 @@ sealed interface DateTimeFormatter : DropdownItem {
     data class YYYY_MM_DD_HH_MM(
         override var separator: Separator = Separator.Slash,
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder, SeparatorHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder,
+        SeparatorHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 year(padding.padding)
@@ -87,8 +93,8 @@ sealed interface DateTimeFormatter : DropdownItem {
                 minute()
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 year(${padding.asCodeBlock()})
@@ -100,19 +106,21 @@ sealed interface DateTimeFormatter : DropdownItem {
                 hour()
                 chars(":")
                 minute()
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "YYYY${separator}MM${separator}DD HH:MM"
 
         @Composable
         override fun asDropdownText(): AnnotatedString =
-            AnnotatedString("YYYY${separator}MM${separator}DD HH:MM (2024${separator}${padding.asString()}8${separator}${padding.asString()}9 10:05)")
+            AnnotatedString(
+                "YYYY${separator}MM${separator}DD HH:MM (2024${separator}${padding.asString()}8${separator}${padding.asString()}9 10:05)",
+            )
 
         override fun isSameItem(item: Any): Boolean = item is YYYY_MM_DD_HH_MM
+
         override fun newInstance(): DateTimeFormatter = YYYY_MM_DD_HH_MM()
     }
 
@@ -121,7 +129,9 @@ sealed interface DateTimeFormatter : DropdownItem {
     data class YYYY_MM(
         override var separator: Separator = Separator.Slash,
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder, SeparatorHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder,
+        SeparatorHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 year(padding.padding)
@@ -129,26 +139,25 @@ sealed interface DateTimeFormatter : DropdownItem {
                 monthNumber(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 year(${padding.asCodeBlock()})
                 chars("${separator.char}")
                 monthNumber(${padding.asCodeBlock()})
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "YYYY${separator}MM$"
 
         @Composable
-        override fun asDropdownText(): AnnotatedString =
-            AnnotatedString("YYYY${separator}MM (2024${separator}${padding.asString()}8)")
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("YYYY${separator}MM (2024${separator}${padding.asString()}8)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY_MM
+
         override fun newInstance(): DateTimeFormatter = YYYY_MM()
     }
 
@@ -157,7 +166,9 @@ sealed interface DateTimeFormatter : DropdownItem {
     data class MM_DD(
         override var separator: Separator = Separator.Slash,
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder, SeparatorHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder,
+        SeparatorHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 monthNumber(padding.padding)
@@ -165,18 +176,17 @@ sealed interface DateTimeFormatter : DropdownItem {
                 dayOfMonth(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 monthNumber(${padding.asCodeBlock()})
                 chars("${separator.char}")
                 dayOfMonth(${padding.asCodeBlock()})
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "MM${separator}DD"
 
@@ -185,6 +195,7 @@ sealed interface DateTimeFormatter : DropdownItem {
             AnnotatedString("MM${separator}DD (${padding.asString()}8${separator}${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is MM_DD
+
         override fun newInstance(): DateTimeFormatter = MM_DD()
     }
 
@@ -193,7 +204,9 @@ sealed interface DateTimeFormatter : DropdownItem {
     data class DD_MM_YYYY(
         override var separator: Separator = Separator.Slash,
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, SeparatorHolder, PaddingHolder {
+    ) : DateTimeFormatter,
+        SeparatorHolder,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 dayOfMonth(padding.padding)
@@ -203,8 +216,8 @@ sealed interface DateTimeFormatter : DropdownItem {
                 year(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 dayOfMonth(${padding.asCodeBlock()})
@@ -212,11 +225,10 @@ sealed interface DateTimeFormatter : DropdownItem {
                 monthNumber(${padding.asCodeBlock()})
                 chars("${separator.char}")
                 year(${padding.asCodeBlock()})
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "DD${separator}MM${separator}YYYY"
 
@@ -225,6 +237,7 @@ sealed interface DateTimeFormatter : DropdownItem {
             AnnotatedString("DD${separator}MM${separator}YYYY (${padding.asString()}9${separator}${padding.asString()}8${separator}2024)")
 
         override fun isSameItem(item: Any): Boolean = item is DD_MM_YYYY
+
         override fun newInstance(): DateTimeFormatter = DD_MM_YYYY()
     }
 
@@ -232,7 +245,8 @@ sealed interface DateTimeFormatter : DropdownItem {
     @SerialName("MMM_DD_YYYY")
     data class MMM_DD_YYYY(
         override var padding: PaddingWrapper = PaddingWrapper.None,
-    ) : DateTimeFormatter, PaddingHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 monthName(MonthNames.ENGLISH_ABBREVIATED)
@@ -242,8 +256,8 @@ sealed interface DateTimeFormatter : DropdownItem {
                 year(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 monthName(%M.ENGLISH_ABBREVIATED)
@@ -251,12 +265,11 @@ sealed interface DateTimeFormatter : DropdownItem {
                 dayOfMonth(${padding.asCodeBlock()})
                 chars(", ")
                 year(${padding.asCodeBlock()})
-            }    
+            }
             """,
                 MemberHolder.DateTime.LocalDateTime,
-                MemberHolder.DateTime.MonthNames
+                MemberHolder.DateTime.MonthNames,
             )
-        }
 
         override fun simplifiedFormat(): String = "MMM DD, YYYY"
 
@@ -264,6 +277,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("MMM DD, YYYY (Aug ${padding.asString()}9, 2024)")
 
         override fun isSameItem(item: Any): Boolean = item is MMM_DD_YYYY
+
         override fun newInstance(): DateTimeFormatter = MMM_DD_YYYY()
     }
 
@@ -271,7 +285,8 @@ sealed interface DateTimeFormatter : DropdownItem {
     @SerialName("MMM_DD")
     data class MMM_DD(
         override var padding: PaddingWrapper = PaddingWrapper.None,
-    ) : DateTimeFormatter, PaddingHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 monthName(MonthNames.ENGLISH_ABBREVIATED)
@@ -279,19 +294,18 @@ sealed interface DateTimeFormatter : DropdownItem {
                 dayOfMonth(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 monthName(%M.ENGLISH_ABBREVIATED)
                 chars(" ")
                 dayOfMonth(${padding.asCodeBlock()})
-            }    
+            }
             """,
                 MemberHolder.DateTime.LocalDateTime,
                 MemberHolder.DateTime.MonthNames,
             )
-        }
 
         override fun simplifiedFormat(): String = "MMM DD"
 
@@ -299,6 +313,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("MMM DD (Aug ${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is MMM_DD
+
         override fun newInstance(): DateTimeFormatter = MMM_DD()
     }
 
@@ -306,22 +321,22 @@ sealed interface DateTimeFormatter : DropdownItem {
     @SerialName("YYYY")
     data class YYYY(
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 year(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 year(${padding.asCodeBlock()})
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "YYYY"
 
@@ -329,6 +344,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("YYYY (2024)")
 
         override fun isSameItem(item: Any): Boolean = item is YYYY
+
         override fun newInstance(): DateTimeFormatter = YYYY()
     }
 
@@ -336,22 +352,22 @@ sealed interface DateTimeFormatter : DropdownItem {
     @SerialName("MM")
     data class MM(
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 monthNumber(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 dayOfMonth(${padding.asCodeBlock()})
-            }    
+            }
             """,
-                MemberHolder.DateTime.LocalDateTime
+                MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "MM"
 
@@ -359,6 +375,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("MM (${padding.asString()}8)")
 
         override fun isSameItem(item: Any): Boolean = item is MM
+
         override fun newInstance(): DateTimeFormatter = MM()
     }
 
@@ -370,17 +387,16 @@ sealed interface DateTimeFormatter : DropdownItem {
                 monthName(MonthNames.ENGLISH_ABBREVIATED)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 monthName(%M.ENGLISH_ABBREVIATED)
-            }    
+            }
             """,
                 MemberHolder.DateTime.LocalDateTime,
                 MemberHolder.DateTime.MonthNames,
             )
-        }
 
         override fun simplifiedFormat(): String = "MMM"
 
@@ -388,6 +404,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("MMM (Aug)")
 
         override fun isSameItem(item: Any): Boolean = item is MMM
+
         override fun newInstance(): DateTimeFormatter = MMM
     }
 
@@ -395,22 +412,22 @@ sealed interface DateTimeFormatter : DropdownItem {
     @SerialName("DD")
     data class DD(
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 dayOfMonth(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 dayOfMonth(${padding.asCodeBlock()})
-            }    
+            }
             """,
                 MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "DD"
 
@@ -418,6 +435,7 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("DD (${padding.asString()}9)")
 
         override fun isSameItem(item: Any): Boolean = item is DD
+
         override fun newInstance(): DateTimeFormatter = DD()
     }
 
@@ -425,7 +443,8 @@ sealed interface DateTimeFormatter : DropdownItem {
     @SerialName("HH_MM")
     data class HH_MM(
         override var padding: PaddingWrapper = PaddingWrapper.Zero,
-    ) : DateTimeFormatter, PaddingHolder {
+    ) : DateTimeFormatter,
+        PaddingHolder {
         override fun asFormatter(): DateTimeFormat<LocalDateTime> =
             LocalDateTime.Format {
                 hour(padding.padding)
@@ -433,18 +452,17 @@ sealed interface DateTimeFormatter : DropdownItem {
                 minute(padding.padding)
             }
 
-        override fun asCodeBlock(): CodeBlock {
-            return CodeBlock.of(
+        override fun asCodeBlock(): CodeBlock =
+            CodeBlock.of(
                 """
             %M.Format {
                 hour(${padding.asCodeBlock()})
                 chars(":")
                 minute(${padding.asCodeBlock()})
-            }    
+            }
             """,
                 MemberHolder.DateTime.LocalDateTime,
             )
-        }
 
         override fun simplifiedFormat(): String = "HH:MM"
 
@@ -452,53 +470,63 @@ sealed interface DateTimeFormatter : DropdownItem {
         override fun asDropdownText(): AnnotatedString = AnnotatedString("HH:MM")
 
         override fun isSameItem(item: Any): Boolean = item is HH_MM
+
         override fun newInstance(): DateTimeFormatter = HH_MM()
     }
 
     companion object {
-        fun entries(): List<DateTimeFormatter> = listOf(
-            YYYY_MM_DD(),
-            YYYY_MM_DD_HH_MM(),
-            YYYY_MM(),
-            MM_DD(),
-            DD_MM_YYYY(),
-            MMM_DD_YYYY(),
-            MMM_DD(),
-            YYYY(),
-            MM(),
-            MMM,
-            DD(),
-            HH_MM(),
-        )
+        fun entries(): List<DateTimeFormatter> =
+            listOf(
+                YYYY_MM_DD(),
+                YYYY_MM_DD_HH_MM(),
+                YYYY_MM(),
+                MM_DD(),
+                DD_MM_YYYY(),
+                MMM_DD_YYYY(),
+                MMM_DD(),
+                YYYY(),
+                MM(),
+                MMM,
+                DD(),
+                HH_MM(),
+            )
     }
 }
 
-enum class Separator(val char: String) {
+enum class Separator(
+    val char: String,
+) {
     Slash("/"),
     Dash("-"),
-    Space(" ");
+    Space(" "),
+    ;
 
     override fun toString(): String = char
 }
 
-enum class PaddingWrapper(val padding: Padding) {
+enum class PaddingWrapper(
+    val padding: Padding,
+) {
     Zero(Padding.ZERO),
     None(Padding.NONE),
     Space(Padding.SPACE),
     ;
 
     fun asString(): String = padding.asString()
+
     fun asCodeBlock(): CodeBlock = padding.asCodeBlock()
 }
 
-fun Padding.asString(): String = when (this) {
-    Padding.ZERO -> "0"
-    Padding.NONE -> ""
-    Padding.SPACE -> " "
-}
+fun Padding.asString(): String =
+    when (this) {
+        Padding.ZERO -> "0"
+        Padding.NONE -> ""
+        Padding.SPACE -> " "
+    }
 
-fun Padding.asCodeBlock(): CodeBlock = when (this) {
-    Padding.ZERO -> CodeBlock.of("%M.ZERO", MemberHolder.DateTime.Padding)
-    Padding.NONE -> CodeBlock.of("%M.NONE", MemberHolder.DateTime.Padding)
-    Padding.SPACE -> CodeBlock.of("%M.SPACE", MemberHolder.DateTime.Padding)
-}
+fun Padding.asCodeBlock(): CodeBlock =
+    when (this) {
+        Padding.ZERO -> CodeBlock.of("%M.ZERO", MemberHolder.DateTime.Padding)
+        Padding.NONE -> CodeBlock.of("%M.NONE", MemberHolder.DateTime.Padding)
+        Padding.SPACE -> CodeBlock.of("%M.SPACE", MemberHolder.DateTime.Padding)
+    }

@@ -1,6 +1,5 @@
 package io.composeflow.ksp
 
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonObject
@@ -69,10 +68,12 @@ object LlmToolJsonTransformer {
                 kotlinType.contains("Long") ||
                 kotlinType.contains("Float") ||
                 kotlinType.contains("Double") -> "number"
+
             kotlinType.contains("Boolean") -> "boolean"
             kotlinType.contains("List") ||
                 kotlinType.contains("Array") ||
                 kotlinType.contains("Set") -> "array"
+
             else -> "object"
         }
 }

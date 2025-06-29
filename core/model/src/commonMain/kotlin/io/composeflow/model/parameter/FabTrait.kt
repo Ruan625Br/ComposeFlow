@@ -361,7 +361,8 @@ enum class FabType {
     },
     Extended {
         override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "ExtendedFloatingActionButton")
-    }, ;
+    },
+    ;
 
     abstract fun toMemberName(): MemberName
 }

@@ -9,9 +9,8 @@ import kotlinx.serialization.json.jsonPrimitive
 
 object ContentItemSerializer :
     JsonContentPolymorphicSerializer<ToolContentItem>(ToolContentItem::class) {
-
-    override fun selectDeserializer(element: JsonElement): DeserializationStrategy<ToolContentItem> {
-        return when (val name = element.jsonObject["name"]?.jsonPrimitive?.content) {
+    override fun selectDeserializer(element: JsonElement): DeserializationStrategy<ToolContentItem> =
+        when (val name = element.jsonObject["name"]?.jsonPrimitive?.content) {
             "add_compose_node_to_container" -> AddComposeNodeContentItem.serializer()
             "remove_compose_node" -> RemoveComposeNode.serializer()
             "add_modifier" -> AddModifier.serializer()
@@ -21,5 +20,4 @@ object ContentItemSerializer :
             "move_compose_node_to_container" -> MoveComposeNodeToContainer.serializer()
             else -> throw SerializationException("Unknown content item: $name")
         }
-    }
 }

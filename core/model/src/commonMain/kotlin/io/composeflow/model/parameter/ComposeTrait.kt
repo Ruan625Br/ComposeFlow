@@ -38,7 +38,6 @@ import org.jetbrains.compose.resources.StringResource
 
 @Serializable
 sealed interface ComposeTrait : PaletteDraggable {
-
     /**
      * True if all parameters are empty. Used for determining if the parentheses are omitted when
      * invoking [generateCode].
@@ -68,8 +67,7 @@ sealed interface ComposeTrait : PaletteDraggable {
     ) {
     }
 
-    fun defaultModifierList(): MutableList<ModifierWrapper> =
-        mutableStateListEqualsOverrideOf(ModifierWrapper.Padding(all = 8.dp))
+    fun defaultModifierList(): MutableList<ModifierWrapper> = mutableStateListEqualsOverrideOf(ModifierWrapper.Padding(all = 8.dp))
 
     fun defaultConstraints(): Set<Constraint> = emptySet()
 
@@ -137,11 +135,12 @@ sealed interface ComposeTrait : PaletteDraggable {
      */
     fun onClickIncludedInParams(): Boolean = false
 
-    fun actionTypes(): List<ActionType> = listOf(
-        ActionType.OnClick,
-        ActionType.OnDoubleClick,
-        ActionType.OnLongClick,
-    )
+    fun actionTypes(): List<ActionType> =
+        listOf(
+            ActionType.OnClick,
+            ActionType.OnDoubleClick,
+            ActionType.OnLongClick,
+        )
 
     fun generateCode(
         project: Project,
@@ -169,8 +168,8 @@ sealed interface ComposeTrait : PaletteDraggable {
         project: Project,
         canvasEditable: CanvasEditable?,
         node: ComposeNode,
-    ): ReadableState? {
-        return when (this) {
+    ): ReadableState? =
+        when (this) {
             is ValueFromState -> {
                 canvasEditable?.findStateOrNull(project, readFromStateId)
             }
@@ -181,7 +180,6 @@ sealed interface ComposeTrait : PaletteDraggable {
 
             else -> null
         }
-    }
 
     companion object {
         const val NumOfItemsInLazyList = 1
@@ -191,14 +189,12 @@ sealed interface ComposeTrait : PaletteDraggable {
 }
 
 interface LazyListTrait : ComposeTrait {
-
     var defaultChildNumOfItems: Int
 
     fun generateParamsCode(): CodeBlock
 }
 
 interface PagerTrait : ComposeTrait {
-
     var defaultChildNumOfItems: Int
 
     fun generateParamsCode(): CodeBlock
@@ -209,42 +205,43 @@ interface LazyGridTrait : LazyListTrait {
 }
 
 val ComposeTrait.Companion.entries: List<ComposeTrait>
-    get() = listOf(
-        TextTrait(),
-        IconTrait(),
-        ImageTrait(),
-        ButtonTrait(),
-        TextFieldTrait(),
-        RowTrait(),
-        ColumnTrait(),
-        BoxTrait(),
-        LazyColumnTrait(),
-        LazyRowTrait(),
-        LazyVerticalGridTrait(),
-        LazyHorizontalGridTrait(),
-        HorizontalPagerTrait(),
-        CardTrait(),
-        TabsTrait,
-        TabRowTrait(),
-        TabTrait(),
-        TabContentTrait,
-        ChipGroupTrait(),
-        TopAppBarTrait(),
-        BottomAppBarTrait(),
-        NavigationDrawerTrait(),
-        NavigationDrawerItemTrait(),
-        FabTrait(),
-        HorizontalDividerTrait(),
-        VerticalDividerTrait(),
-        SpacerTrait,
-        SwitchTrait(),
-        CheckboxTrait(),
-        SliderTrait(),
-        DropdownTrait(),
-        ComponentTrait(),
-        ScreenTrait,
-        GoogleSignInButtonTrait(),
-    )
+    get() =
+        listOf(
+            TextTrait(),
+            IconTrait(),
+            ImageTrait(),
+            ButtonTrait(),
+            TextFieldTrait(),
+            RowTrait(),
+            ColumnTrait(),
+            BoxTrait(),
+            LazyColumnTrait(),
+            LazyRowTrait(),
+            LazyVerticalGridTrait(),
+            LazyHorizontalGridTrait(),
+            HorizontalPagerTrait(),
+            CardTrait(),
+            TabsTrait,
+            TabRowTrait(),
+            TabTrait(),
+            TabContentTrait,
+            ChipGroupTrait(),
+            TopAppBarTrait(),
+            BottomAppBarTrait(),
+            NavigationDrawerTrait(),
+            NavigationDrawerItemTrait(),
+            FabTrait(),
+            HorizontalDividerTrait(),
+            VerticalDividerTrait(),
+            SpacerTrait,
+            SwitchTrait(),
+            CheckboxTrait(),
+            SliderTrait(),
+            DropdownTrait(),
+            ComponentTrait(),
+            ScreenTrait,
+            GoogleSignInButtonTrait(),
+        )
 
 @Serializable
 @SerialName("EmptyTrait")
@@ -254,13 +251,14 @@ data object EmptyTrait : ComposeTrait {
     override fun iconText(): String = "Empty"
 
     override fun paletteCategories(): List<TraitCategory> = emptyList()
+
     override fun tooltipResource(): StringResource = Res.string.tooltip_column_trait
 
     override fun generateCode(
         project: Project,
         node: ComposeNode,
         context: GenerationContext,
-        dryRun: Boolean
+        dryRun: Boolean,
     ): CodeBlock = CodeBlock.of("")
 
     override fun defaultComposeNode(project: Project): ComposeNode? = null

@@ -6,6 +6,7 @@ import org.jetbrains.compose.resources.stringResource
 
 sealed interface ValidateResult {
     data object Success : ValidateResult
+
     data class Failure(
         val messageResource: StringResource,
         val formatArgs: List<Any> = emptyList(),

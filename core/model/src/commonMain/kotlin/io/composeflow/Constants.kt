@@ -25,44 +25,43 @@ enum class ComposeScreenConstant {
 enum class ViewModelConstant {
     flowSettings {
         @OptIn(ExperimentalSettingsApi::class)
-        override fun generateProperty(): PropertySpec {
-            return PropertySpec.builder(flowSettings.name, FlowSettings::class)
+        override fun generateProperty(): PropertySpec =
+            PropertySpec
+                .builder(flowSettings.name, FlowSettings::class)
                 .addModifiers(KModifier.PRIVATE)
                 .delegate(
-                    CodeBlock.builder()
+                    CodeBlock
+                        .builder()
                         .beginControlFlow("lazy")
                         .add("%M()", MemberHolder.Koin.get)
                         .endControlFlow()
                         .build(),
-                )
-                .build()
-        }
+                ).build()
     },
     jsonSerializer {
-        override fun generateProperty(): PropertySpec {
-            return PropertySpec.builder(jsonSerializer.name, Json::class)
+        override fun generateProperty(): PropertySpec =
+            PropertySpec
+                .builder(jsonSerializer.name, Json::class)
                 .addModifiers(KModifier.PRIVATE)
                 .delegate(
-                    CodeBlock.builder()
+                    CodeBlock
+                        .builder()
                         .add("%M()", MemberHolder.Koin.inject)
                         .build(),
-                )
-                .build()
-        }
+                ).build()
     },
     firestore {
-        override fun generateProperty(): PropertySpec {
-            return PropertySpec.builder(firestore.name, FirebaseFirestore::class)
+        override fun generateProperty(): PropertySpec =
+            PropertySpec
+                .builder(firestore.name, FirebaseFirestore::class)
                 .addModifiers(KModifier.PRIVATE)
                 .delegate(
-                    CodeBlock.builder()
+                    CodeBlock
+                        .builder()
                         .add("%M()", MemberHolder.Koin.inject)
                         .build(),
-                )
-                .build()
-        }
-    }
-    ;
+                ).build()
+    }, ;
 
     abstract fun generateProperty(): PropertySpec
 }

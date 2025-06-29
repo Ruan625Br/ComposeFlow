@@ -22,16 +22,16 @@ class TopScreenViewModel(
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
     settingsRepository: SettingsRepository = SettingsRepository(),
 ) : ViewModel() {
-
     private val _projectUiState: MutableStateFlow<ProjectUiState> =
         MutableStateFlow(ProjectUiState.HasNotSelected.ProjectListLoading)
     val projectListUiState: StateFlow<ProjectUiState> = _projectUiState
 
-    val settings = settingsRepository.settings.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = ComposeBuilderSettings(),
-    )
+    val settings =
+        settingsRepository.settings.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = ComposeBuilderSettings(),
+        )
 
     init {
         loadProjectList()
@@ -63,12 +63,16 @@ class TopScreenViewModel(
         }
     }
 
-    fun onCreateProject(projectName: String, packageName: String) {
+    fun onCreateProject(
+        projectName: String,
+        packageName: String,
+    ) {
         viewModelScope.launch {
-            val project = projectRepository.createProject(
-                projectName = projectName,
-                packageName = packageName
-            )
+            val project =
+                projectRepository.createProject(
+                    projectName = projectName,
+                    packageName = packageName,
+                )
             _projectUiState.value = ProjectUiState.Selected(project)
         }
     }
@@ -76,13 +80,14 @@ class TopScreenViewModel(
     fun onCreateProjectWithScreens(
         projectName: String,
         packageName: String,
-        screens: List<Screen>
+        screens: List<Screen>,
     ) {
         viewModelScope.launch {
-            val project = projectRepository.createProject(
-                projectName = projectName,
-                packageName = packageName
-            )
+            val project =
+                projectRepository.createProject(
+                    projectName = projectName,
+                    packageName = packageName,
+                )
             if (screens.isNotEmpty()) {
                 project.screenHolder.screens.forEach {
                     project.screenHolder.deleteScreen(it)
@@ -112,16 +117,18 @@ class TopScreenViewModel(
 }
 
 sealed interface ProjectUiState {
-
     sealed interface HasNotSelected : ProjectUiState {
-
         data object ProjectListLoading : HasNotSelected
 
-        data class ProjectListLoaded(val projectList: List<LoadedProjectUiState>) : HasNotSelected
+        data class ProjectListLoaded(
+            val projectList: List<LoadedProjectUiState>,
+        ) : HasNotSelected
     }
 
     /**
      * The state where the project is created or the user selected the one project to edit
      */
-    data class Selected(val project: Project) : ProjectUiState
+    data class Selected(
+        val project: Project,
+    ) : ProjectUiState
 }

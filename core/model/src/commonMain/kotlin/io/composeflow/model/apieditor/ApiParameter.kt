@@ -11,8 +11,8 @@ import kotlin.uuid.Uuid
 
 @Serializable
 sealed interface ApiProperty {
-
     fun asCodeBlock(): CodeBlock
+
     fun asStringValue(): String
 
     @Serializable
@@ -21,6 +21,7 @@ sealed interface ApiProperty {
         val value: String = "",
     ) : ApiProperty {
         override fun asCodeBlock(): CodeBlock = CodeBlock.of("\"\"\"$value\"\"\"")
+
         override fun asStringValue(): String = value
     }
 
@@ -31,17 +32,19 @@ sealed interface ApiProperty {
         val name: String,
         val defaultValue: String = "",
     ) : ApiProperty {
-
         @Transient
         val variableName = name.asVariableName()
+
         override fun asCodeBlock(): CodeBlock = CodeBlock.of(name)
+
         override fun asStringValue(): String = defaultValue
 
-        fun generateArgumentParameterSpec(): ParameterSpec = ParameterSpec.builder(
-            name = name,
-            String::class
-        )
-            .defaultValue("\"$defaultValue\"")
-            .build()
+        fun generateArgumentParameterSpec(): ParameterSpec =
+            ParameterSpec
+                .builder(
+                    name = name,
+                    String::class,
+                ).defaultValue("\"$defaultValue\"")
+                .build()
     }
 }

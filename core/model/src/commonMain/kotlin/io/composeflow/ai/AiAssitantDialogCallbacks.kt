@@ -2,7 +2,6 @@ package io.composeflow.ai
 
 import io.composeflow.ai.subaction.GeneratedScreenPrompt
 import io.composeflow.model.project.appscreen.screen.Screen
-import kotlin.uuid.Uuid
 
 data class AiAssistantDialogCallbacks(
     val onAddNewScreen: (Screen) -> Unit = {},
@@ -11,5 +10,5 @@ data class AiAssistantDialogCallbacks(
     val onScreenPromptDeleted: (id: String) -> Unit = {},
     val onProceedToGenerateScreens: () -> Unit = {},
     val onRenderedErrorDetected: (GeneratedScreenPrompt.Error) -> Unit = { _ -> },
-    val onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit = { _, _, _ -> }
+    val onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit = { _, _, _ -> },
 )

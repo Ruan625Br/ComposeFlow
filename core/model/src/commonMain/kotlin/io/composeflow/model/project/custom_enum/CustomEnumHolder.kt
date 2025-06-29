@@ -15,17 +15,17 @@ data class CustomEnumHolder(
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val enumList: MutableList<CustomEnum> = mutableStateListEqualsOverrideOf(),
 ) {
-    fun generateEnumFiles(project: Project): List<FileSpec?> {
-        return enumList.map { enum ->
+    fun generateEnumFiles(project: Project): List<FileSpec?> =
+        enumList.map { enum ->
             enum.generateCustomEnumSpec()?.let {
                 val fileBuilder =
-                    FileSpec.builder("${project.packageName}.$EnumPackage", enum.enumName)
+                    FileSpec
+                        .builder("${project.packageName}.$EnumPackage", enum.enumName)
                         .addType(it)
                 fileBuilder.suppressRedundantVisibilityModifier()
                 fileBuilder.build()
             }
         }
-    }
 
     fun newCustomEnum(name: String): CustomEnum {
         val newName =

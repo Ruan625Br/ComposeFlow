@@ -1,13 +1,12 @@
 package io.composeflow.appbuilder
 
+import io.composeflow.BuildConfig
 import io.composeflow.CurrentOs
 import io.composeflow.currentOs
 import io.composeflow.logger.logger
-import io.composeflow.BuildConfig
 import java.io.File
 
 object JavaHomeHolder {
-
     private const val LinuxDefaultJavaHome = "/opt/composeflow/lib/runtime"
 
     val javaHome: String? =

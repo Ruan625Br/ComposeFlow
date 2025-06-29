@@ -15,7 +15,11 @@ const val themeEditorRoute = "theme_editor_route"
 const val assetEditorRoute = "asset_editor_route"
 const val settingsRoute = "settings_route"
 
-enum class TopLevelDestination(val iconPath: String, val label: String, val route: String) {
+enum class TopLevelDestination(
+    val iconPath: String,
+    val label: String,
+    val route: String,
+) {
     UiBuilder(
         "icons/editFolder.svg",
         "UI Builder",

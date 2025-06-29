@@ -18,11 +18,11 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 
 class FilterExpressionTests {
-
     private val project = Project()
-    private val dataType = DataType(
-        name = "testType"
-    )
+    private val dataType =
+        DataType(
+            name = "testType",
+        )
     private val stringField = DataField(name = "stringField", fieldType = FieldType.String())
     private val booleanField = DataField(name = "booleanField", fieldType = FieldType.Boolean())
     private val intField = DataField(name = "intField", fieldType = FieldType.Int())
@@ -43,11 +43,12 @@ class FilterExpressionTests {
 
     @Test
     fun testPrimitiveFields_string() {
-        val singleFilter = SingleFilter(
-            filterFieldType = FilterFieldType.DataField(dataType.id, stringField.id),
-            operator = FilterOperator.EqualTo,
-            property = StringProperty.StringIntrinsicValue("123")
-        )
+        val singleFilter =
+            SingleFilter(
+                filterFieldType = FilterFieldType.DataField(dataType.id, stringField.id),
+                operator = FilterOperator.EqualTo,
+                property = StringProperty.StringIntrinsicValue("123"),
+            )
 
         val context = GenerationContext()
 
@@ -59,11 +60,12 @@ class FilterExpressionTests {
 
     @Test
     fun testPrimitiveFields_int() {
-        val singleFilter = SingleFilter(
-            filterFieldType = FilterFieldType.DataField(dataType.id, intField.id),
-            operator = FilterOperator.EqualTo,
-            property = IntProperty.IntIntrinsicValue(123)
-        )
+        val singleFilter =
+            SingleFilter(
+                filterFieldType = FilterFieldType.DataField(dataType.id, intField.id),
+                operator = FilterOperator.EqualTo,
+                property = IntProperty.IntIntrinsicValue(123),
+            )
 
         val context = GenerationContext()
 
@@ -75,18 +77,19 @@ class FilterExpressionTests {
 
     @Test
     fun testAndFilterGenerateCodeBlock() {
-        val filters = listOf(
-            SingleFilter(
-                filterFieldType = FilterFieldType.DataField(dataType.id, stringField.id),
-                operator = FilterOperator.EqualTo,
-                property = StringProperty.StringIntrinsicValue("123")
-            ),
-            SingleFilter(
-                filterFieldType = FilterFieldType.DataField(dataType.id, booleanField.id),
-                operator = FilterOperator.NotEqualTo,
-                property = BooleanProperty.BooleanIntrinsicValue(true)
+        val filters =
+            listOf(
+                SingleFilter(
+                    filterFieldType = FilterFieldType.DataField(dataType.id, stringField.id),
+                    operator = FilterOperator.EqualTo,
+                    property = StringProperty.StringIntrinsicValue("123"),
+                ),
+                SingleFilter(
+                    filterFieldType = FilterFieldType.DataField(dataType.id, booleanField.id),
+                    operator = FilterOperator.NotEqualTo,
+                    property = BooleanProperty.BooleanIntrinsicValue(true),
+                ),
             )
-        )
 
         val andFilter = AndFilter(filters)
         val context = GenerationContext()
@@ -100,18 +103,19 @@ class FilterExpressionTests {
 
     @Test
     fun testOrFilterGenerateCodeBlock() {
-        val filters = listOf(
-            SingleFilter(
-                filterFieldType = FilterFieldType.DataField(dataType.id, stringField.id),
-                operator = FilterOperator.EqualTo,
-                property = StringProperty.StringIntrinsicValue("123")
-            ),
-            SingleFilter(
-                filterFieldType = FilterFieldType.DataField(dataType.id, booleanField.id),
-                operator = FilterOperator.NotEqualTo,
-                property = BooleanProperty.BooleanIntrinsicValue(true)
+        val filters =
+            listOf(
+                SingleFilter(
+                    filterFieldType = FilterFieldType.DataField(dataType.id, stringField.id),
+                    operator = FilterOperator.EqualTo,
+                    property = StringProperty.StringIntrinsicValue("123"),
+                ),
+                SingleFilter(
+                    filterFieldType = FilterFieldType.DataField(dataType.id, booleanField.id),
+                    operator = FilterOperator.NotEqualTo,
+                    property = BooleanProperty.BooleanIntrinsicValue(true),
+                ),
             )
-        )
 
         val orFilter = OrFilter(filters)
         val context = GenerationContext()

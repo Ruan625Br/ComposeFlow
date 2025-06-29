@@ -71,10 +71,10 @@ sealed class ModifierWrapper(
         @FloatRange(from = 0.0, to = 1.0)
         val alpha: Float = 1f,
     ) : ModifierWrapper() {
-
         override fun toModifier(): Modifier = Modifier.alpha(alpha)
 
         override fun displayName(): String = "Alpha"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -88,8 +88,8 @@ sealed class ModifierWrapper(
         }
 
         override fun category() = ModifierCategory.Drawing
-        override fun tooltipText(): String =
-            "Draw content with modified alpha that may be less than 1."
+
+        override fun tooltipText(): String = "Draw content with modified alpha that may be less than 1."
     }
 
     @Serializable
@@ -98,13 +98,14 @@ sealed class ModifierWrapper(
         val ratio: Float,
         val matchHeightConstraintsFirst: Boolean? = null,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier = Modifier.aspectRatio(
-            ratio,
-            matchHeightConstraintsFirst ?: false,
-        )
+        override fun toModifier(): Modifier =
+            Modifier.aspectRatio(
+                ratio,
+                matchHeightConstraintsFirst ?: false,
+            )
 
         override fun displayName(): String = "Aspect ratio"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -113,11 +114,12 @@ sealed class ModifierWrapper(
         ): CodeBlock.Builder {
             val aspectRatioMember = MemberName("androidx.compose.foundation.layout", "aspectRatio")
             val ratioParam = "ratio = ${ratio}f,"
-            val matchHeightConstraintsFirstParam = if (matchHeightConstraintsFirst != null) {
-                "matchHeightConstraintsFirst = $matchHeightConstraintsFirst,"
-            } else {
-                ""
-            }
+            val matchHeightConstraintsFirstParam =
+                if (matchHeightConstraintsFirst != null) {
+                    "matchHeightConstraintsFirst = $matchHeightConstraintsFirst,"
+                } else {
+                    ""
+                }
             codeBlockBuilder
                 .addStatement(
                     ".%M($ratioParam $matchHeightConstraintsFirstParam)",
@@ -127,8 +129,8 @@ sealed class ModifierWrapper(
         }
 
         override fun category() = ModifierCategory.Size
-        override fun tooltipText(): String =
-            "Attempts to size the content to match a specified aspect ratio"
+
+        override fun tooltipText(): String = "Attempts to size the content to match a specified aspect ratio"
     }
 
     @Serializable
@@ -140,20 +142,23 @@ sealed class ModifierWrapper(
             ),
         val shapeWrapper: ShapeWrapper = ShapeWrapper.Rectangle,
     ) : ModifierWrapper() {
-
-        fun defaultColorProperty() = ColorProperty.ColorIntrinsicValue(
-            ColorWrapper(Material3ColorWrapper.SecondaryContainer),
-        )
-
-        override fun toModifier(): Modifier = Modifier.composed {
-            Modifier.background(
-                color = (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                    ?: defaultColorProperty().value.getColor(),
-                shape = shapeWrapper.toShape(),
+        fun defaultColorProperty() =
+            ColorProperty.ColorIntrinsicValue(
+                ColorWrapper(Material3ColorWrapper.SecondaryContainer),
             )
-        }
+
+        override fun toModifier(): Modifier =
+            Modifier.composed {
+                Modifier.background(
+                    color =
+                        (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: defaultColorProperty().value.getColor(),
+                    shape = shapeWrapper.toShape(),
+                )
+            }
 
         override fun displayName(): String = "Background"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -170,8 +175,8 @@ sealed class ModifierWrapper(
                 colorWrapper.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
 
@@ -181,6 +186,7 @@ sealed class ModifierWrapper(
         }
 
         override fun category() = ModifierCategory.Drawing
+
         override fun tooltipText(): String = "Draws shape with a solid color behind the content."
     }
 
@@ -195,21 +201,24 @@ sealed class ModifierWrapper(
             ),
         val shapeWrapper: ShapeWrapper = ShapeWrapper.Rectangle,
     ) : ModifierWrapper() {
-
-        fun defaultColorProperty() = ColorProperty.ColorIntrinsicValue(
-            ColorWrapper(Material3ColorWrapper.Outline),
-        )
-
-        override fun toModifier(): Modifier = Modifier.composed {
-            Modifier.border(
-                width = width,
-                color = (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                    ?: defaultColorProperty().value.getColor(),
-                shape = shapeWrapper.toShape(),
+        fun defaultColorProperty() =
+            ColorProperty.ColorIntrinsicValue(
+                ColorWrapper(Material3ColorWrapper.Outline),
             )
-        }
+
+        override fun toModifier(): Modifier =
+            Modifier.composed {
+                Modifier.border(
+                    width = width,
+                    color =
+                        (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                            ?: defaultColorProperty().value.getColor(),
+                    shape = shapeWrapper.toShape(),
+                )
+            }
 
         override fun displayName(): String = "Border"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -228,8 +237,8 @@ sealed class ModifierWrapper(
                 colorWrapper.transformedCodeBlock(
                     project,
                     context,
-                    dryRun = dryRun
-                )
+                    dryRun = dryRun,
+                ),
             )
             codeBlockBuilder.addStatement(",")
             shapeWrapper.generateCode(codeBlockBuilder)
@@ -238,8 +247,9 @@ sealed class ModifierWrapper(
         }
 
         override fun category() = ModifierCategory.Border
+
         override fun tooltipText(): String =
-            """Modify element to add border with appearance specified with a width, 
+            """Modify element to add border with appearance specified with a width,
 a color and a shape and clip it"""
     }
 
@@ -248,11 +258,11 @@ a color and a shape and clip it"""
     data class Clip(
         val shapeWrapper: ShapeWrapper = ShapeWrapper.Rectangle,
     ) : ModifierWrapper() {
-
         // TODO: When rendered in canvas, this also clips the border and Composable label. Is it possible to avoid it?
         override fun toModifier(): Modifier = Modifier.clip(shape = shapeWrapper.toShape())
 
         override fun displayName(): String = "Clip"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -268,6 +278,7 @@ a color and a shape and clip it"""
         }
 
         override fun category() = ModifierCategory.Drawing
+
         override fun tooltipText(): String = "Clip the content to shape"
     }
 
@@ -277,11 +288,10 @@ a color and a shape and clip it"""
         @Serializable(with = DpSerializer::class)
         val height: Dp,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier =
-            Modifier.height(height = height)
+        override fun toModifier(): Modifier = Modifier.height(height = height)
 
         override fun displayName(): String = "Height"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -295,11 +305,11 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-
         override fun heightDecider(parent: ComposeTrait?) = "${height.value.toInt()}dp"
+
         override fun category() = ModifierCategory.Size
-        override fun tooltipText(): String =
-            "Declare the preferred height of the content to be exactly height dp"
+
+        override fun tooltipText(): String = "Declare the preferred height of the content to be exactly height dp"
     }
 
     @Serializable
@@ -308,10 +318,10 @@ a color and a shape and clip it"""
         @FloatRange(from = 0.0, to = 1.0)
         val fraction: Float = 1f,
     ) : ModifierWrapper() {
-
         override fun toModifier(): Modifier = Modifier.fillMaxHeight(fraction)
 
         override fun displayName(): String = "Fill max height"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -324,9 +334,10 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-
         override fun heightDecider(parent: ComposeTrait?) = fraction.fillAsString()
+
         override fun category() = ModifierCategory.Size
+
         override fun tooltipText(): String = "Have the content fill (possibly only partially)"
     }
 
@@ -336,10 +347,10 @@ a color and a shape and clip it"""
         @FloatRange(from = 0.0, to = 1.0)
         val fraction: Float = 1f,
     ) : ModifierWrapper() {
-
         override fun toModifier(): Modifier = Modifier.fillMaxWidth(fraction)
 
         override fun displayName(): String = "Fill max width"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -353,7 +364,9 @@ a color and a shape and clip it"""
         }
 
         override fun widthDecider(parent: ComposeTrait?) = fraction.fillAsString()
+
         override fun category() = ModifierCategory.Size
+
         override fun tooltipText(): String = "Have the content fill (possibly only partially)"
     }
 
@@ -363,10 +376,10 @@ a color and a shape and clip it"""
         @FloatRange(from = 0.0, to = 1.0)
         val fraction: Float = 1f,
     ) : ModifierWrapper() {
-
         override fun toModifier(): Modifier = Modifier.fillMaxSize(fraction)
 
         override fun displayName(): String = "Fill max size"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -379,10 +392,12 @@ a color and a shape and clip it"""
             return codeBlockBuilder
         }
 
-
         override fun heightDecider(parent: ComposeTrait?) = fraction.fillAsString()
+
         override fun widthDecider(parent: ComposeTrait?) = fraction.fillAsString()
+
         override fun category() = ModifierCategory.Size
+
         override fun tooltipText(): String = "Have the content fill (possibly only partially)"
     }
 
@@ -394,11 +409,10 @@ a color and a shape and clip it"""
         @Serializable(with = DpSerializer::class)
         val y: Dp = 0.dp,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier =
-            Modifier.offset(x = x, y = y)
+        override fun toModifier(): Modifier = Modifier.offset(x = x, y = y)
 
         override fun displayName(): String = "Offset"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -418,6 +432,7 @@ a color and a shape and clip it"""
         }
 
         override fun category() = ModifierCategory.Position
+
         override fun tooltipText(): String = "Offset the content by (x dp, y dp)"
     }
 
@@ -433,16 +448,15 @@ a color and a shape and clip it"""
         @Serializable(with = DpNonNegativeSerializer::class)
         val bottom: Dp = 0.dp,
     ) : ModifierWrapper() {
-
         constructor(all: Dp) : this(start = all, top = all, end = all, bottom = all)
 
         constructor(horizontal: Dp, vertical: Dp) :
-                this(start = horizontal, end = horizontal, top = vertical, bottom = vertical)
+            this(start = horizontal, end = horizontal, top = vertical, bottom = vertical)
 
-        override fun toModifier(): Modifier =
-            Modifier.padding(start = start, top = top, end = end, bottom = bottom)
+        override fun toModifier(): Modifier = Modifier.padding(start = start, top = top, end = end, bottom = bottom)
 
         override fun displayName(): String = "Padding"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -502,6 +516,7 @@ a color and a shape and clip it"""
         }
 
         override fun category() = ModifierCategory.Padding
+
         override fun tooltipText(): String = "Apply additional space along each edge of the content"
 
         fun spec(): PaddingSpec =
@@ -535,10 +550,10 @@ a color and a shape and clip it"""
     data class Rotate(
         val degrees: Float = 0f,
     ) : ModifierWrapper() {
-
         override fun toModifier(): Modifier = Modifier.rotate(degrees)
 
         override fun displayName(): String = "Rotate"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -552,8 +567,8 @@ a color and a shape and clip it"""
         }
 
         override fun category() = ModifierCategory.Transformations
-        override fun tooltipText(): String =
-            "Sets the degrees the view is rotated around the center of the composable"
+
+        override fun tooltipText(): String = "Sets the degrees the view is rotated around the center of the composable"
     }
 
     @Serializable
@@ -562,15 +577,16 @@ a color and a shape and clip it"""
         val scaleX: Float? = null,
         val scaleY: Float? = null,
     ) : ModifierWrapper() {
-
         constructor(scale: Float) : this(scale, scale)
 
-        override fun toModifier(): Modifier = Modifier.scale(
-            scaleX = scaleX ?: 1f,
-            scaleY = scaleY ?: 1f,
-        )
+        override fun toModifier(): Modifier =
+            Modifier.scale(
+                scaleX = scaleX ?: 1f,
+                scaleY = scaleY ?: 1f,
+            )
 
         override fun displayName(): String = "Scale"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -595,8 +611,9 @@ a color and a shape and clip it"""
         }
 
         override fun category() = ModifierCategory.Transformations
+
         override fun tooltipText(): String =
-            """Scale the contents of the composable by the following 
+            """Scale the contents of the composable by the following
 scale factors along the horizontal and vertical axis respectively"""
 
         fun spec(): ScaleSpec =
@@ -619,11 +636,10 @@ scale factors along the horizontal and vertical axis respectively"""
         val elevation: Dp = 0.dp,
         val shapeWrapper: ShapeWrapper = ShapeWrapper.Rectangle,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier =
-            Modifier.shadow(elevation = elevation, shape = shapeWrapper.toShape())
+        override fun toModifier(): Modifier = Modifier.shadow(elevation = elevation, shape = shapeWrapper.toShape())
 
         override fun displayName(): String = "Shadow"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -634,7 +650,7 @@ scale factors along the horizontal and vertical axis respectively"""
             codeBlockBuilder.addStatement(
                 ".%M(elevation = ${elevation.value.toInt()}.%M,",
                 shadowMember,
-                MemberHolder.AndroidX.Ui.dp
+                MemberHolder.AndroidX.Ui.dp,
             )
             shapeWrapper.generateCode(codeBlockBuilder)
             codeBlockBuilder.addStatement(")")
@@ -642,6 +658,7 @@ scale factors along the horizontal and vertical axis respectively"""
         }
 
         override fun category() = ModifierCategory.Drawing
+
         override fun tooltipText(): String = """Creates a graphicsLayer that draws a shadow"""
     }
 
@@ -653,13 +670,12 @@ scale factors along the horizontal and vertical axis respectively"""
         @Serializable(with = DpSerializer::class)
         val height: Dp = Dp.Unspecified,
     ) : ModifierWrapper() {
-
         constructor(size: Dp) : this(width = size, height = size)
 
-        override fun toModifier(): Modifier =
-            Modifier.size(width = width, height = height)
+        override fun toModifier(): Modifier = Modifier.size(width = width, height = height)
 
         override fun displayName(): String = "Size"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -685,25 +701,24 @@ scale factors along the horizontal and vertical axis respectively"""
         }
 
         override fun category() = ModifierCategory.Size
-        override fun tooltipText(): String =
-            """Declare the preferred size of the content to be exactly width dp by height dp"""
 
-        override fun heightDecider(parent: ComposeTrait?) =
-            if (height != Dp.Unspecified) "${height.value.toInt()}dp" else null
+        override fun tooltipText(): String = """Declare the preferred size of the content to be exactly width dp by height dp"""
 
-        override fun widthDecider(parent: ComposeTrait?) =
-            if (width != Dp.Unspecified) "${width.value.toInt()}dp" else null
+        override fun heightDecider(parent: ComposeTrait?) = if (height != Dp.Unspecified) "${height.value.toInt()}dp" else null
+
+        override fun widthDecider(parent: ComposeTrait?) = if (width != Dp.Unspecified) "${width.value.toInt()}dp" else null
     }
 
     @Serializable
     @SerialName("HorizontalScroll")
     data object HorizontalScroll : ModifierWrapper() {
-
-        override fun toModifier(): Modifier = Modifier.composed {
-            Modifier.horizontalScroll(rememberScrollState())
-        }
+        override fun toModifier(): Modifier =
+            Modifier.composed {
+                Modifier.horizontalScroll(rememberScrollState())
+            }
 
         override fun displayName(): String = "HorizontalScroll"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -717,8 +732,8 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-
         override fun category() = ModifierCategory.Scroll
+
         override fun tooltipText(): String =
             """Modify element to allow to scroll horizontally when width of the content is bigger than max constraints allow"""
     }
@@ -726,12 +741,13 @@ scale factors along the horizontal and vertical axis respectively"""
     @Serializable
     @SerialName("VerticalScroll")
     data object VerticalScroll : ModifierWrapper() {
-
-        override fun toModifier(): Modifier = Modifier.composed {
-            Modifier.verticalScroll(rememberScrollState())
-        }
+        override fun toModifier(): Modifier =
+            Modifier.composed {
+                Modifier.verticalScroll(rememberScrollState())
+            }
 
         override fun displayName(): String = "VerticalScroll"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -745,8 +761,8 @@ scale factors along the horizontal and vertical axis respectively"""
             return codeBlockBuilder
         }
 
-
         override fun category() = ModifierCategory.Scroll
+
         override fun tooltipText(): String =
             """Modify element to allow to scroll vertically when height of the content is bigger than max constraints allow"""
     }
@@ -757,11 +773,10 @@ scale factors along the horizontal and vertical axis respectively"""
         @Serializable(with = DpSerializer::class)
         val width: Dp,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier =
-            Modifier.width(width = width)
+        override fun toModifier(): Modifier = Modifier.width(width = width)
 
         override fun displayName(): String = "Width"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -779,11 +794,10 @@ scale factors along the horizontal and vertical axis respectively"""
         }
 
         override fun category() = ModifierCategory.Size
-        override fun tooltipText(): String =
-            "Declare the preferred width of the content to be exactly width dp"
 
-        override fun widthDecider(parent: ComposeTrait?) =
-            if (width != Dp.Unspecified) "${width.value.toInt()}dp" else null
+        override fun tooltipText(): String = "Declare the preferred width of the content to be exactly width dp"
+
+        override fun widthDecider(parent: ComposeTrait?) = if (width != Dp.Unspecified) "${width.value.toInt()}dp" else null
     }
 
     @Serializable
@@ -792,11 +806,11 @@ scale factors along the horizontal and vertical axis respectively"""
         val align: AlignmentVerticalWrapper? = null,
         val unbounded: Boolean? = null,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier = Modifier.wrapContentHeight(
-            align?.alignment ?: Alignment.CenterVertically,
-            unbounded ?: false,
-        )
+        override fun toModifier(): Modifier =
+            Modifier.wrapContentHeight(
+                align?.alignment ?: Alignment.CenterVertically,
+                unbounded ?: false,
+            )
 
         override fun displayName(): String = "Wrap content height"
 
@@ -824,7 +838,9 @@ scale factors along the horizontal and vertical axis respectively"""
         }
 
         override fun category() = ModifierCategory.Size
-        override fun tooltipText(): String = """Allow the content to measure at its desired height 
+
+        override fun tooltipText(): String =
+            """Allow the content to measure at its desired height
 without regard for the incoming measurement"""
     }
 
@@ -834,11 +850,11 @@ without regard for the incoming measurement"""
         val align: AlignmentWrapper? = null,
         val unbounded: Boolean? = null,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier = Modifier.wrapContentSize(
-            align?.alignment ?: Alignment.Center,
-            unbounded ?: false,
-        )
+        override fun toModifier(): Modifier =
+            Modifier.wrapContentSize(
+                align?.alignment ?: Alignment.Center,
+                unbounded ?: false,
+            )
 
         override fun displayName(): String = "Wrap content size"
 
@@ -866,8 +882,9 @@ without regard for the incoming measurement"""
         }
 
         override fun category() = ModifierCategory.Size
+
         override fun tooltipText(): String =
-            """Allow the content to measure at its desired size without 
+            """Allow the content to measure at its desired size without
 regard for the incoming measurement"""
     }
 
@@ -877,11 +894,11 @@ regard for the incoming measurement"""
         val align: AlignmentHorizontalWrapper? = null,
         val unbounded: Boolean? = null,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier = Modifier.wrapContentWidth(
-            align?.alignment ?: Alignment.CenterHorizontally,
-            unbounded ?: false,
-        )
+        override fun toModifier(): Modifier =
+            Modifier.wrapContentWidth(
+                align?.alignment ?: Alignment.CenterHorizontally,
+                unbounded ?: false,
+            )
 
         override fun displayName(): String = "Wrap content width"
 
@@ -909,8 +926,9 @@ regard for the incoming measurement"""
         }
 
         override fun category() = ModifierCategory.Size
+
         override fun tooltipText(): String =
-            """Allow the content to measure at its desired size without 
+            """Allow the content to measure at its desired size without
 regard for the incoming measurement"""
     }
 
@@ -919,11 +937,10 @@ regard for the incoming measurement"""
     data class ZIndex(
         val zIndex: Float? = null,
     ) : ModifierWrapper() {
-
-        override fun toModifier(): Modifier =
-            Modifier.zIndex(zIndex = zIndex ?: 0f)
+        override fun toModifier(): Modifier = Modifier.zIndex(zIndex = zIndex ?: 0f)
 
         override fun displayName(): String = "zIndex"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -936,7 +953,9 @@ regard for the incoming measurement"""
         }
 
         override fun category() = ModifierCategory.Drawing
-        override fun tooltipText(): String = """Creates a modifier that controls the drawing order 
+
+        override fun tooltipText(): String =
+            """Creates a modifier that controls the drawing order
 for the children of the same layout parent"""
     }
 
@@ -946,7 +965,6 @@ for the children of the same layout parent"""
     data class Align(
         val align: AlignmentWrapper = AlignmentWrapper.TopStart,
     ) : ModifierWrapper() {
-
         @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
         override fun toModifier(): Modifier {
             // Creating instance using reflection because modifiers that require LayoutScopeMarker
@@ -965,6 +983,7 @@ for the children of the same layout parent"""
         }
 
         override fun displayName(): String = "Align"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -978,9 +997,10 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-
         override fun hasValidParent(parent: ComposeTrait): Boolean = parent is BoxTrait
+
         override fun category() = ModifierCategory.Alignment
+
         override fun tooltipText(): String =
             """Creates a modifier that controls the drawing order for the children of the same layout parent"""
     }
@@ -990,7 +1010,6 @@ for the children of the same layout parent"""
     data class AlignHorizontal(
         val align: AlignmentHorizontalWrapper = AlignmentHorizontalWrapper.Start,
     ) : ModifierWrapper() {
-
         @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
         override fun toModifier(): Modifier {
             // Creating instance using reflection because modifiers that require LayoutScopeMarker
@@ -1003,6 +1022,7 @@ for the children of the same layout parent"""
         }
 
         override fun displayName(): String = "Align horizontal"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -1016,9 +1036,10 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-
         override fun hasValidParent(parent: ComposeTrait): Boolean = parent is ColumnTrait
+
         override fun category() = ModifierCategory.Alignment
+
         override fun tooltipText(): String = "Align the element horizontally within the Column"
     }
 
@@ -1027,7 +1048,6 @@ for the children of the same layout parent"""
     data class AlignVertical(
         val align: AlignmentVerticalWrapper = AlignmentVerticalWrapper.Top,
     ) : ModifierWrapper() {
-
         @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
         override fun toModifier(): Modifier {
             // Creating instance using reflection because modifiers that require LayoutScopeMarker
@@ -1040,6 +1060,7 @@ for the children of the same layout parent"""
         }
 
         override fun displayName(): String = "Align vertical"
+
         override fun generateCode(
             project: Project,
             context: GenerationContext,
@@ -1053,9 +1074,10 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
-
         override fun hasValidParent(parent: ComposeTrait): Boolean = parent is RowTrait
+
         override fun category() = ModifierCategory.Alignment
+
         override fun tooltipText(): String = "Align the element vertically within the Row"
     }
 
@@ -1065,7 +1087,6 @@ for the children of the same layout parent"""
         val weight: Float = 1f,
         val fill: Boolean = true,
     ) : ModifierWrapper() {
-
         @Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
         override fun toModifier(): Modifier {
             // Creating instance using reflection because modifiers that require LayoutScopeMarker
@@ -1092,36 +1113,41 @@ for the children of the same layout parent"""
             return codeBlockBuilder
         }
 
+        override fun heightDecider(parent: ComposeTrait?) =
+            if (parent is ColumnTrait) {
+                "weight $weight"
+            } else {
+                null
+            }
 
-        override fun heightDecider(parent: ComposeTrait?) = if (parent is ColumnTrait) {
-            "weight $weight"
-        } else {
-            null
-        }
-
-        override fun widthDecider(parent: ComposeTrait?) = if (parent is RowTrait) {
-            "weight $weight"
-        } else {
-            null
-        }
+        override fun widthDecider(parent: ComposeTrait?) =
+            if (parent is RowTrait) {
+                "weight $weight"
+            } else {
+                null
+            }
 
         override fun category() = ModifierCategory.Size
-        override fun hasValidParent(parent: ComposeTrait): Boolean =
-            parent is RowTrait || parent is ColumnTrait
 
-        override fun tooltipText(): String = """Size the element's width proportional to its weight 
+        override fun hasValidParent(parent: ComposeTrait): Boolean = parent is RowTrait || parent is ColumnTrait
+
+        override fun tooltipText(): String =
+            """Size the element's width proportional to its weight
 relative to other weighted sibling elements in the Row"""
     }
 
-    fun generateIssues(parent: ComposeTrait?): List<Issue> {
-        return if (parent == null) {
+    fun generateIssues(parent: ComposeTrait?): List<Issue> =
+        if (parent == null) {
             emptyList()
         } else {
-            if (!hasValidParent(parent)) listOf(
-                Issue.InvalidModifierRelation()
-            ) else emptyList()
+            if (!hasValidParent(parent)) {
+                listOf(
+                    Issue.InvalidModifierRelation(),
+                )
+            } else {
+                emptyList()
+            }
         }
-    }
 
     abstract fun toModifier(): Modifier
 
@@ -1160,35 +1186,35 @@ relative to other weighted sibling elements in the Row"""
     open fun widthDecider(parent: ComposeTrait?): String? = null
 
     companion object {
-
-        fun values(): List<ModifierWrapper> = listOf(
-            Align(),
-            AlignHorizontal(),
-            AlignVertical(),
-            Alpha(),
-            AspectRatio(ratio = 1f),
-            Background(),
-            Border(width = 1.dp),
-            Clip(),
-            Height(80.dp),
-            FillMaxHeight(),
-            FillMaxWidth(),
-            FillMaxSize(),
-            HorizontalScroll,
-            VerticalScroll,
-            Offset(),
-            Rotate(),
-            Padding(all = 8.dp),
-            Scale(),
-            Shadow(),
-            Size(),
-            Weight(),
-            Width(80.dp),
-            WrapContentHeight(),
-            WrapContentWidth(),
-            WrapContentSize(),
-            ZIndex(),
-        )
+        fun values(): List<ModifierWrapper> =
+            listOf(
+                Align(),
+                AlignHorizontal(),
+                AlignVertical(),
+                Alpha(),
+                AspectRatio(ratio = 1f),
+                Background(),
+                Border(width = 1.dp),
+                Clip(),
+                Height(80.dp),
+                FillMaxHeight(),
+                FillMaxWidth(),
+                FillMaxSize(),
+                HorizontalScroll,
+                VerticalScroll,
+                Offset(),
+                Rotate(),
+                Padding(all = 8.dp),
+                Scale(),
+                Shadow(),
+                Size(),
+                Weight(),
+                Width(80.dp),
+                WrapContentHeight(),
+                WrapContentWidth(),
+                WrapContentSize(),
+                ZIndex(),
+            )
     }
 }
 
@@ -1228,8 +1254,8 @@ fun List<ModifierWrapper>.generateCode(
     context: GenerationContext,
     codeBlockBuilder: CodeBlock.Builder = CodeBlock.builder(),
     dryRun: Boolean,
-): CodeBlock.Builder {
-    return if (isEmpty()) {
+): CodeBlock.Builder =
+    if (isEmpty()) {
         codeBlockBuilder
     } else {
         val modifier = MemberName("androidx.compose.ui", "Modifier")
@@ -1240,7 +1266,6 @@ fun List<ModifierWrapper>.generateCode(
         codeBlockBuilder.addStatement(",")
         codeBlockBuilder
     }
-}
 
 fun ComposeNode.generateModifierCode(
     project: Project,

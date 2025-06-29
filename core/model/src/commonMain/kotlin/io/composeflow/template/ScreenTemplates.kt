@@ -2,6 +2,7 @@ package io.composeflow.template
 
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.serializer.yamlSerializer
+import io.composeflow.template.ScreenTemplates.createNewScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

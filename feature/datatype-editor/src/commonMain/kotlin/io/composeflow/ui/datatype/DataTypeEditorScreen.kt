@@ -43,6 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component4
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component5
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -108,9 +113,10 @@ fun DataTypeEditor(
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = DataTypeEditorViewModel::class) {
-        DataTypeEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
-    }
+    val viewModel =
+        viewModel(modelClass = DataTypeEditorViewModel::class) {
+            DataTypeEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
+        }
 //    val projectUiState by viewModel.projectUiState.collectAsState()
 
     var deleteDataTypeDialogOpen by remember { mutableStateOf(false) }
@@ -196,7 +202,7 @@ fun DataTypeEditor(
             onConfirmClick = {
                 viewModel.onEnumDeleted()
                 closeDeleteEnumDialog()
-            }
+            },
         )
     }
 }
@@ -215,7 +221,7 @@ private fun LeftPane(
     selectedTab: DataTypeTab,
 ) {
     Column(
-        modifier = Modifier.width(320.dp)
+        modifier = Modifier.width(320.dp),
     ) {
         val dataType = stringResource(Res.string.data_type)
         val enum = stringResource(Res.string.enum)
@@ -225,16 +231,20 @@ private fun LeftPane(
                 DataTypeListHeader(
                     onDataTypeAdded = onDataTypeAdded,
                     onDataTypeWithFieldsAdded = onDataTypeWithFieldsAdded,
-                    modifier = Modifier.padding(16.dp)
-                        .padding(bottom = 16.dp)
+                    modifier =
+                        Modifier
+                            .padding(16.dp)
+                            .padding(bottom = 16.dp),
                 )
             }
 
             DataTypeTab.Enum -> {
                 EnumListHeader(
                     onEnumAdded = onEnumAdded,
-                    modifier = Modifier.padding(16.dp)
-                        .padding(bottom = 16.dp)
+                    modifier =
+                        Modifier
+                            .padding(16.dp)
+                            .padding(bottom = 16.dp),
                 )
             }
         }
@@ -251,7 +261,7 @@ private fun LeftPane(
                     },
                     text = {
                         Text(dataType)
-                    }
+                    },
                 )
             }
 
@@ -264,7 +274,7 @@ private fun LeftPane(
                     },
                     text = {
                         Text(enum)
-                    }
+                    },
                 )
             }
         }
@@ -297,32 +307,34 @@ private fun DataTypeList(
 ) {
     Column(
         Modifier
-            .padding(16.dp)
+            .padding(16.dp),
     ) {
         val dataTypes = project.dataTypeHolder.dataTypes
         LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
             itemsIndexed(dataTypes) { i, dataType ->
-                val focusedModifier = if (i == dataTypeFocusedIndex) {
-                    Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(
-                            MaterialTheme.colorScheme.tertiaryContainer.copy(
-                                alpha = 0.8f,
-                            ),
-                        )
-                } else {
-                    Modifier.alpha(0.4f)
-                }
+                val focusedModifier =
+                    if (i == dataTypeFocusedIndex) {
+                        Modifier
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(
+                                MaterialTheme.colorScheme.tertiaryContainer.copy(
+                                    alpha = 0.8f,
+                                ),
+                            )
+                    } else {
+                        Modifier.alpha(0.4f)
+                    }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(42.dp)
-                        .hoverIconClickable()
-                        .then(focusedModifier)
-                        .clickable {
-                            onFocusedIndexUpdated(i)
-                        },
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(42.dp)
+                            .hoverIconClickable()
+                            .then(focusedModifier)
+                            .clickable {
+                                onFocusedIndexUpdated(i)
+                            },
                 ) {
                     Text(
                         dataType.className,
@@ -359,9 +371,10 @@ private fun DataTypeListHeader(
                     imageVector = Icons.Outlined.Info,
                     contentDescription = contentDesc,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(18.dp),
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(18.dp),
                 )
             }
         }
@@ -373,9 +386,10 @@ private fun DataTypeListHeader(
                 onClick = {
                     nameDialogOpen = true
                 },
-                modifier = Modifier
-                    .hoverIconClickable()
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .hoverIconClickable()
+                        .hoverOverlay(),
             ) {
                 Icon(
                     Icons.Outlined.Add,
@@ -390,9 +404,10 @@ private fun DataTypeListHeader(
                 onClick = {
                     nameDialogFromJsonOpen = true
                 },
-                modifier = Modifier
-                    .hoverIconClickable()
-                    .hoverOverlay(),
+                modifier =
+                    Modifier
+                        .hoverIconClickable()
+                        .hoverOverlay(),
             ) {
                 Icon(
                     Icons.Outlined.DataObject,
@@ -400,7 +415,6 @@ private fun DataTypeListHeader(
                 )
             }
         }
-
     }
 
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
@@ -464,15 +478,16 @@ fun NewNameDialog(
         }
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 280.dp, height = 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 280.dp, height = 160.dp)
+                        .padding(16.dp),
             ) {
                 var validateResult by remember {
                     mutableStateOf<ValidateResult>(
                         ValidateResult.Failure(
-                            MUST_NOT_BE_EMPTY
-                        )
+                            MUST_NOT_BE_EMPTY,
+                        ),
                     )
                 }
                 SmallOutlinedTextField(
@@ -491,23 +506,25 @@ fun NewNameDialog(
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     isError = validateResult is ValidateResult.Failure,
-                    supportingText = (validateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .fillMaxWidth()
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && projectName.isNotEmpty()) {
-                                onNameConfirmed(projectName)
-                                true
-                            } else {
-                                false
+                    supportingText =
+                        (validateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
                             }
                         },
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .fillMaxWidth()
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && projectName.isNotEmpty()) {
+                                    onNameConfirmed(projectName)
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
 
                 Row(
@@ -518,9 +535,10 @@ fun NewNameDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(second),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(second),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -529,8 +547,9 @@ fun NewNameDialog(
                             onNameConfirmed(projectName)
                         },
                         enabled = validateResult is ValidateResult.Success,
-                        modifier = Modifier
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }
@@ -551,8 +570,8 @@ private fun DataTypeFromJsonDialog(
     var validateResult by remember {
         mutableStateOf<ValidateResult>(
             ValidateResult.Failure(
-                MUST_NOT_BE_EMPTY
-            )
+                MUST_NOT_BE_EMPTY,
+            ),
         )
     }
 
@@ -565,7 +584,7 @@ private fun DataTypeFromJsonDialog(
                 is DataTypeParseResult.SuccessWithWarning -> result.dataType.fields
                 DataTypeParseResult.EmptyInput -> null
                 null -> null
-            }
+            },
         )
     }
     val errorMessage: String? by remember(parseResult) {
@@ -576,14 +595,14 @@ private fun DataTypeFromJsonDialog(
                 is DataTypeParseResult.Success -> null
                 is DataTypeParseResult.SuccessWithWarning -> result.warningMessage
                 null -> emptyJSON
-            }
+            },
         )
     }
 
     val isFormValid by remember {
         derivedStateOf {
             parseResult?.isSuccess() == true &&
-                    validateResult is ValidateResult.Success
+                validateResult is ValidateResult.Success
         }
     }
 
@@ -606,9 +625,10 @@ private fun DataTypeFromJsonDialog(
         }
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 680.dp, height = 620.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 680.dp, height = 620.dp)
+                        .padding(16.dp),
             ) {
                 SmallOutlinedTextField(
                     value = projectName,
@@ -626,23 +646,27 @@ private fun DataTypeFromJsonDialog(
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
                     isError = validateResult is ValidateResult.Failure,
-                    supportingText = (validateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .fillMaxWidth()
+                    supportingText =
+                        (validateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
+                            }
+                        },
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .fillMaxWidth(),
                 )
 
                 ParseDataTypeJsonTextField(
                     onJsonParsed = {
                         parseResult = it
                     },
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .weight(1f)
+                    modifier =
+                        Modifier
+                            .padding(top = 16.dp)
+                            .weight(1f),
                 )
                 if (errorMessage != null) {
                     Column(modifier = Modifier.fillMaxWidth().height(24.dp)) {
@@ -650,7 +674,7 @@ private fun DataTypeFromJsonDialog(
                             text = errorMessage!!,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                 } else {
@@ -665,9 +689,10 @@ private fun DataTypeFromJsonDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(second),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(second),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -679,8 +704,9 @@ private fun DataTypeFromJsonDialog(
                             onCloseClick()
                         },
                         enabled = isFormValid,
-                        modifier = Modifier
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }
@@ -700,10 +726,11 @@ private fun DataTypeDetail(
     onDeleteDataFieldOfIndex: (Int) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundContainerNeutral()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .backgroundContainerNeutral()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.weight(1f))
         DataTypeDetailContent(
@@ -732,14 +759,14 @@ private fun DataTypeDetailContent(
     var indexOfDataFieldToBeDeleted by remember { mutableStateOf<Int?>(null) }
 
     Column(
-        modifier = Modifier
-            .width(960.dp)
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier =
+            Modifier
+                .width(960.dp)
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surface),
     ) {
-
         val dataType =
             focusedDataTypeIndex?.let { project.dataTypeHolder.dataTypes[it] }
         Column(
@@ -800,9 +827,10 @@ private fun DataTypeDetailContent(
                 addDataFieldDialogOpen = false
                 onAllDialogsClosed()
             }
-            val initialValue = indexOfDataFieldToBeEdited?.let {
-                dataType?.fields?.get(it)
-            }
+            val initialValue =
+                indexOfDataFieldToBeEdited?.let {
+                    dataType?.fields?.get(it)
+                }
             AddDataFieldDialog(
                 project = project,
                 initialValue = initialValue,
@@ -861,7 +889,7 @@ fun AddDataFieldDialog(
         } else {
             onDataFieldNameUpdated(
                 updateIndex,
-                fieldName
+                fieldName,
             )
         }
     }
@@ -885,9 +913,10 @@ fun AddDataFieldDialog(
         }
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 320.dp, height = 320.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 320.dp, height = 320.dp)
+                        .padding(16.dp),
             ) {
                 val fieldWidth = 300.dp
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -918,23 +947,26 @@ fun AddDataFieldDialog(
                     },
                     singleLine = true,
                     shape = RoundedCornerShape(8.dp),
-                    supportingText = (fieldNameValidateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-                    isError = fieldNameValidateResult is ValidateResult.Failure,
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .width(width = fieldWidth)
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && fieldName.isNotEmpty()) {
-                                onDataFieldConfirmed()
-                                true
-                            } else {
-                                false
+                    supportingText =
+                        (fieldNameValidateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
                             }
                         },
+                    isError = fieldNameValidateResult is ValidateResult.Failure,
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .width(width = fieldWidth)
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && fieldName.isNotEmpty()) {
+                                    onDataFieldConfirmed()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
                 var dropDownSelectedIndex by remember { mutableStateOf(0) }
 
@@ -947,9 +979,11 @@ fun AddDataFieldDialog(
                     },
                     selectedItem = fieldType,
                     label = stringResource(Res.string.field_type),
-                    modifier = Modifier.padding(top = 8.dp)
-                        .focusRequester(second)
-                        .moveFocusOnTab(),
+                    modifier =
+                        Modifier
+                            .padding(top = 8.dp)
+                            .focusRequester(second)
+                            .moveFocusOnTab(),
                 )
 
                 var defaultValueValidateResult by remember {
@@ -960,7 +994,7 @@ fun AddDataFieldDialog(
                 val isFormValid by remember {
                     derivedStateOf {
                         defaultValueValidateResult is ValidateResult.Success &&
-                                fieldNameValidateResult is ValidateResult.Success
+                            fieldNameValidateResult is ValidateResult.Success
                     }
                 }
                 Column(
@@ -974,8 +1008,10 @@ fun AddDataFieldDialog(
                                     fieldType = fieldType.copyWithDefaultValue(it)
                                 },
                                 label = stringResource(Res.string.default_value),
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab(),
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab(),
                             )
                         }
 
@@ -983,7 +1019,8 @@ fun AddDataFieldDialog(
                             var value by remember {
                                 mutableStateOf(
                                     if (fieldType.defaultValue() is Int) {
-                                        fieldType.defaultValue()
+                                        fieldType
+                                            .defaultValue()
                                             .toString()
                                     } else {
                                         ""
@@ -1012,25 +1049,28 @@ fun AddDataFieldDialog(
                                         modifier = Modifier.alpha(0.6f),
                                     )
                                 },
-                                supportingText = (defaultValueValidateResult as? ValidateResult.Failure)?.let {
-                                    {
-                                        Text(it.message)
-                                    }
-                                },
+                                supportingText =
+                                    (defaultValueValidateResult as? ValidateResult.Failure)?.let {
+                                        {
+                                            Text(it.message)
+                                        }
+                                    },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 isError = defaultValueValidateResult is ValidateResult.Failure,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onDataFieldConfirmed()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onDataFieldConfirmed()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -1038,7 +1078,8 @@ fun AddDataFieldDialog(
                             var value by remember {
                                 mutableStateOf(
                                     if (fieldType.defaultValue() is Float) {
-                                        fieldType.defaultValue()
+                                        fieldType
+                                            .defaultValue()
                                             .toString()
                                     } else {
                                         ""
@@ -1067,36 +1108,41 @@ fun AddDataFieldDialog(
                                         modifier = Modifier.alpha(0.6f),
                                     )
                                 },
-                                supportingText = (defaultValueValidateResult as? ValidateResult.Failure)?.let {
-                                    {
-                                        Text(it.message)
-                                    }
-                                },
+                                supportingText =
+                                    (defaultValueValidateResult as? ValidateResult.Failure)?.let {
+                                        {
+                                            Text(it.message)
+                                        }
+                                    },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 isError = defaultValueValidateResult is ValidateResult.Failure,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onDataFieldConfirmed()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onDataFieldConfirmed()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
                         is FieldType.String -> {
                             SmallOutlinedTextField(
-                                value = if (fieldType.defaultValue() is String) {
-                                    fieldType.defaultValue()
-                                        .toString()
-                                } else {
-                                    ""
-                                },
+                                value =
+                                    if (fieldType.defaultValue() is String) {
+                                        fieldType
+                                            .defaultValue()
+                                            .toString()
+                                    } else {
+                                        ""
+                                    },
                                 onValueChange = {
                                     fieldType = fieldType.copyWithDefaultValue(it)
                                 },
@@ -1108,17 +1154,19 @@ fun AddDataFieldDialog(
                                     )
                                 },
                                 singleLine = true,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onDataFieldConfirmed()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onDataFieldConfirmed()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -1137,9 +1185,10 @@ fun AddDataFieldDialog(
                         onClick = {
                             onDialogClosed()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(fourth),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(fourth),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -1148,8 +1197,9 @@ fun AddDataFieldDialog(
                             onDataFieldConfirmed()
                         },
                         enabled = isFormValid,
-                        modifier = Modifier
-                            .focusRequester(fifth),
+                        modifier =
+                            Modifier
+                                .focusRequester(fifth),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }
@@ -1204,9 +1254,10 @@ fun DataTypeDetailFieldRow(
                 onValueChange = {
                     onDataFieldNameUpdated(index, it)
                 },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface
-                ),
+                textStyle =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
                 modifier = Modifier.width(240.dp),
             )
 
@@ -1240,8 +1291,9 @@ fun DataTypeDetailFieldRow(
             }
         }
         HorizontalDivider(
-            modifier = Modifier
-                .padding(vertical = 8.dp),
+            modifier =
+                Modifier
+                    .padding(vertical = 8.dp),
         )
     }
 }
@@ -1267,9 +1319,10 @@ fun DeleteDataFieldDialog(
     ) {
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 300.dp, height = 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 300.dp, height = 160.dp)
+                        .padding(16.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.delete_data_field) + "?",
@@ -1283,8 +1336,9 @@ fun DeleteDataFieldDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -1325,9 +1379,10 @@ private fun DeleteDataTypeDialog(
     ) {
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 300.dp, height = 160.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 300.dp, height = 160.dp)
+                        .padding(16.dp),
             ) {
                 Text(
                     text = "Delete data type?",
@@ -1341,8 +1396,9 @@ private fun DeleteDataTypeDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp),
                     ) {
                         Text("Cancel")
                     }

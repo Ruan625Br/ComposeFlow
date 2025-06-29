@@ -69,39 +69,43 @@ fun PaletteTab(
     @Composable
     fun PaletteItem(paletteDraggable: PaletteDraggable) {
         @Composable
-        fun Icon(modifier: Modifier = Modifier) = run {
-            PaletteIcon(
-                modifier = modifier.fillMaxSize(),
-                imageVector = paletteDraggable.icon(),
-                iconText = paletteDraggable.iconText(),
-                contentDescription =
-                    stringResource(Res.string.palette_icon_for, paletteDraggable.iconText()),
-            )
-        }
+        fun Icon(modifier: Modifier = Modifier) =
+            run {
+                PaletteIcon(
+                    modifier = modifier.fillMaxSize(),
+                    imageVector = paletteDraggable.icon(),
+                    iconText = paletteDraggable.iconText(),
+                    contentDescription =
+                        stringResource(Res.string.palette_icon_for, paletteDraggable.iconText()),
+                )
+            }
 
         val tooltipText = stringResource(paletteDraggable.tooltipResource())
 
         Box(
-            modifier = Modifier
-                .width(68.dp)
-                .height(58.dp)
-                .switchByHovered(
-                    hovered = Modifier
-                        .clip(shape = RoundedCornerShape(16.dp))
-                        .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f)),
-                    notHovered = Modifier.alpha(0.7f),
-                ),
+            modifier =
+                Modifier
+                    .width(68.dp)
+                    .height(58.dp)
+                    .switchByHovered(
+                        hovered =
+                            Modifier
+                                .clip(shape = RoundedCornerShape(16.dp))
+                                .background(MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.7f)),
+                        notHovered = Modifier.alpha(0.7f),
+                    ),
         ) {
             Tooltip(tooltipText) {
                 Icon(
-                    modifier = Modifier
-                        .testTag("$PaletteTestTag/${paletteDraggable.iconText()}")
-                        .draggableFromPalette(
-                            project = project,
-                            paletteNodeCallbacks = paletteNodeCallbacks,
-                            paletteDraggable = paletteDraggable,
-                            zoomableContainerStateHolder = zoomableContainerStateHolder,
-                        ),
+                    modifier =
+                        Modifier
+                            .testTag("$PaletteTestTag/${paletteDraggable.iconText()}")
+                            .draggableFromPalette(
+                                project = project,
+                                paletteNodeCallbacks = paletteNodeCallbacks,
+                                paletteDraggable = paletteDraggable,
+                                zoomableContainerStateHolder = zoomableContainerStateHolder,
+                            ),
                 )
             }
         }
@@ -117,12 +121,14 @@ fun PaletteTab(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = modifier.padding(bottom = 4.dp)
-                .wrapContentSize()
-                .clip(RoundedCornerShape(8.dp))
-                .clickable {
-                    onExpandClick()
-                },
+            modifier =
+                modifier
+                    .padding(bottom = 4.dp)
+                    .wrapContentSize()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable {
+                        onExpandClick()
+                    },
         ) {
             Text(
                 text = categoryName,
@@ -136,7 +142,7 @@ fun PaletteTab(
                 Tooltip(text) {
                     ComposeFlowIcon(
                         imageVector = Icons.Outlined.Info,
-                        contentDescription = text
+                        contentDescription = text,
                     )
                 }
             }
@@ -149,9 +155,10 @@ fun PaletteTab(
     }
 
     Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface),
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.surface),
     ) {
         var commonExpanded by remember { mutableStateOf(true) }
         var layoutExpanded by remember { mutableStateOf(true) }
@@ -173,7 +180,8 @@ fun PaletteTab(
                 )
             }
             if (commonExpanded) {
-                ComposeTrait.entries.filter { TraitCategory.Common in it.paletteCategories() }
+                ComposeTrait.entries
+                    .filter { TraitCategory.Common in it.paletteCategories() }
                     .forEach {
                         item {
                             PaletteItem(
@@ -190,7 +198,8 @@ fun PaletteTab(
                 )
             }
             if (layoutExpanded) {
-                ComposeTrait.entries.filter { TraitCategory.Layout in it.paletteCategories() }
+                ComposeTrait.entries
+                    .filter { TraitCategory.Layout in it.paletteCategories() }
                     .forEach {
                         item {
                             PaletteItem(
@@ -207,7 +216,8 @@ fun PaletteTab(
                 )
             }
             if (basicExpanded) {
-                ComposeTrait.entries.filter { TraitCategory.Basic in it.paletteCategories() }
+                ComposeTrait.entries
+                    .filter { TraitCategory.Basic in it.paletteCategories() }
                     .forEach {
                         item {
                             PaletteItem(
@@ -221,11 +231,12 @@ fun PaletteTab(
                     categoryName = "Screen elements",
                     expanded = screenOnlyExpanded,
                     onExpandClick = { screenOnlyExpanded = !screenOnlyExpanded },
-                    tooltipTextResource = TraitCategory.ScreenOnly.tooltipResource
+                    tooltipTextResource = TraitCategory.ScreenOnly.tooltipResource,
                 )
             }
             if (screenOnlyExpanded) {
-                ComposeTrait.entries.filter { TraitCategory.ScreenOnly in it.paletteCategories() }
+                ComposeTrait.entries
+                    .filter { TraitCategory.ScreenOnly in it.paletteCategories() }
                     .forEach {
                         item {
                             PaletteItem(
@@ -242,7 +253,8 @@ fun PaletteTab(
                 )
             }
             if (navigationItemExpanded) {
-                ComposeTrait.entries.filter { TraitCategory.NavigationItem in it.paletteCategories() }
+                ComposeTrait.entries
+                    .filter { TraitCategory.NavigationItem in it.paletteCategories() }
                     .forEach {
                         item {
                             PaletteItem(
@@ -259,7 +271,8 @@ fun PaletteTab(
                 )
             }
             if (authExpanded) {
-                ComposeTrait.entries.filter { TraitCategory.Auth in it.paletteCategories() }
+                ComposeTrait.entries
+                    .filter { TraitCategory.Auth in it.paletteCategories() }
                     .forEach {
                         item {
                             PaletteItem(
@@ -280,28 +293,31 @@ fun PaletteIcon(
     contentDescription: String,
 ) {
     Box(
-        modifier = modifier
-            .width(80.dp)
-            .height(64.dp),
+        modifier =
+            modifier
+                .width(80.dp)
+                .height(64.dp),
     ) {
         Image(
             imageVector = imageVector,
             contentDescription = contentDescription,
             contentScale = ContentScale.FillWidth,
             colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            modifier = Modifier
-                .width(42.dp)
-                .align(Alignment.TopCenter)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .width(42.dp)
+                    .align(Alignment.TopCenter)
+                    .padding(4.dp),
         )
 
         Text(
             text = iconText,
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.labelSmall,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(4.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(4.dp),
         )
     }
 }
@@ -314,7 +330,7 @@ private fun ThemedPaletteTabPreview(useDarkTheme: Boolean) {
         PaletteTab(
             project = mockProject,
             paletteNodeCallbacks = emptyPaletteNodeCallbacks,
-            zoomableContainerStateHolder = mockZoomableContainerStateHolder
+            zoomableContainerStateHolder = mockZoomableContainerStateHolder,
         )
     }
 }
@@ -338,7 +354,7 @@ private fun ThemedPaletteIconPreview(useDarkTheme: Boolean) {
         PaletteIcon(
             imageVector = columnTrait.icon(),
             iconText = columnTrait.iconText(),
-            contentDescription = "Preview icon"
+            contentDescription = "Preview icon",
         )
     }
 }

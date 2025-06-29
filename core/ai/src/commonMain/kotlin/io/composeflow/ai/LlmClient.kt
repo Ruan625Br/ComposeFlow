@@ -18,144 +18,157 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import java.time.Duration
 
-val jsonSerializer = Json {
-    ignoreUnknownKeys = true
-}
+val jsonSerializer =
+    Json {
+        ignoreUnknownKeys = true
+    }
 
 class LlmClient(
-    private val client: OkHttpClient = OkHttpClient.Builder()
-        .callTimeout(Duration.ofMinutes(5))
-        .readTimeout(Duration.ofMinutes(5))
-        .build(),
+    private val client: OkHttpClient =
+        OkHttpClient
+            .Builder()
+            .callTimeout(Duration.ofMinutes(5))
+            .readTimeout(Duration.ofMinutes(5))
+            .build(),
 ) {
-
     suspend fun invokeCreateProject(
         promptString: String,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
-        retryCount: Int = 0
-    ): Result<CreateProjectAiResponse, Throwable> = runCatching {
-        if (retryCount >= 3) {
-            Logger.e("Failed to generate response. Tried maximum number of attempts.")
-            throw IllegalStateException("Failed to generate response. Tried maximum number of attempts.")
-        }
-        val url =
-            "${BuildConfig.LLM_ENDPOINT}/create_project"
-        val mediaType = "application/json".toMediaType()
-        val escapedPromptString = Json.encodeToString(promptString)
-        val jsonBody = """{
+        retryCount: Int = 0,
+    ): Result<CreateProjectAiResponse, Throwable> =
+        runCatching {
+            if (retryCount >= 3) {
+                Logger.e("Failed to generate response. Tried maximum number of attempts.")
+                throw IllegalStateException("Failed to generate response. Tried maximum number of attempts.")
+            }
+            val url =
+                "${BuildConfig.LLM_ENDPOINT}/create_project"
+            val mediaType = "application/json".toMediaType()
+            val escapedPromptString = Json.encodeToString(promptString)
+            val jsonBody = """{
             "userRequest": $escapedPromptString
         }"""
-        Logger.i("Json body: $jsonBody")
-        val requestBody = jsonBody.toRequestBody(mediaType)
+            Logger.i("Json body: $jsonBody")
+            val requestBody = jsonBody.toRequestBody(mediaType)
 
-        val request = Request.Builder()
-            .url(url)
-            .post(requestBody)
-            .addHeader("Content-Type", "application/json")
-            .build()
+            val request =
+                Request
+                    .Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
 
-        withContext(dispatcher) {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    val errorBody = response.body?.string()
-                    Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
-                    throw Exception("Unexpected code ${response.code}, $errorBody")
-                } else {
-                    val responseBodyString =
-                        response.body?.string() ?: throw Exception("Response body is null")
-                    try {
-                        val aiResponseRawResponse =
-                            jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
-                                responseBodyString
-                            )
-                        val aiResponse = jsonSerializer.decodeFromString(
-                            CreateProjectAiResponse.serializer(),
-                            extractContent(
-                                aiResponseRawResponse.response.choices[0].message.content ?: ""
-                            )
-                        )
-                        aiResponse
-                    } catch (e: SerializationException) {
-                        Logger.e("Error during JSON deserialization: ${e.message}")
-                        return@withContext invokeCreateProject(
-                            promptString = "${e}. Fix the json parse error. Previously generated Json: $responseBodyString",
-                            dispatcher = dispatcher,
-                            retryCount = retryCount + 1
-                        ).getOrThrow() // Rethrow any exception from the recursive call
+            withContext(dispatcher) {
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        val errorBody = response.body?.string()
+                        Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
+                        throw Exception("Unexpected code ${response.code}, $errorBody")
+                    } else {
+                        val responseBodyString =
+                            response.body?.string() ?: throw Exception("Response body is null")
+                        try {
+                            val aiResponseRawResponse =
+                                jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
+                                    responseBodyString,
+                                )
+                            val aiResponse =
+                                jsonSerializer.decodeFromString(
+                                    CreateProjectAiResponse.serializer(),
+                                    extractContent(
+                                        aiResponseRawResponse.response.choices[0]
+                                            .message.content ?: "",
+                                    ),
+                                )
+                            aiResponse
+                        } catch (e: SerializationException) {
+                            Logger.e("Error during JSON deserialization: ${e.message}")
+                            return@withContext invokeCreateProject(
+                                promptString = "$e. Fix the json parse error. Previously generated Json: $responseBodyString",
+                                dispatcher = dispatcher,
+                                retryCount = retryCount + 1,
+                            ).getOrThrow() // Rethrow any exception from the recursive call
+                        }
                     }
                 }
             }
         }
-    }
 
     suspend fun invokeGenerateScreen(
         promptString: String,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         retryCount: Int = 0,
         projectContextString: String? = null,
-    ): Result<AiResponse, Throwable> = runCatching {
-        if (retryCount >= 3) {
-            Logger.e("Failed to generate response. Tried maximum number of attempts.")
-            throw IllegalStateException("Failed to generate response. Tried maximum number of attempts.")
-        }
-        val url = "${BuildConfig.LLM_ENDPOINT}/generate_ui"
-        val mediaType = "application/json".toMediaType()
-        val escapedPromptString = Json.encodeToString(promptString)
-        val jsonBody = projectContextString?.let {
-            """{
+    ): Result<AiResponse, Throwable> =
+        runCatching {
+            if (retryCount >= 3) {
+                Logger.e("Failed to generate response. Tried maximum number of attempts.")
+                throw IllegalStateException("Failed to generate response. Tried maximum number of attempts.")
+            }
+            val url = "${BuildConfig.LLM_ENDPOINT}/generate_ui"
+            val mediaType = "application/json".toMediaType()
+            val escapedPromptString = Json.encodeToString(promptString)
+            val jsonBody =
+                projectContextString?.let {
+                    """{
             "userRequest": $escapedPromptString,
             "projectContext": ${Json.encodeToString(projectContextString)}
         }"""
-        } ?: """{
+                } ?: """{
             "userRequest": $escapedPromptString
         }"""
 
-        Logger.i("Json body: $jsonBody")
-        val requestBody = jsonBody.toRequestBody(mediaType)
+            Logger.i("Json body: $jsonBody")
+            val requestBody = jsonBody.toRequestBody(mediaType)
 
-        val request = Request.Builder()
-            .url(url)
-            .post(requestBody)
-            .addHeader("Content-Type", "application/json")
-            .build()
+            val request =
+                Request
+                    .Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
 
-        withContext(dispatcher) {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    val errorBody = response.body?.string()
-                    Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
-                    throw Exception("Unexpected code ${response.code}, $errorBody")
-                } else {
-                    val responseBodyString =
-                        response.body?.string() ?: throw Exception("Response body is null")
+            withContext(dispatcher) {
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        val errorBody = response.body?.string()
+                        Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
+                        throw Exception("Unexpected code ${response.code}, $errorBody")
+                    } else {
+                        val responseBodyString =
+                            response.body?.string() ?: throw Exception("Response body is null")
 
-                    // Log the raw response for debugging
-                    Logger.i("Raw response body: $responseBodyString")
+                        // Log the raw response for debugging
+                        Logger.i("Raw response body: $responseBodyString")
 
-                    try {
-                        val aiResponseRawResponse =
-                            jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
-                                responseBodyString
-                            )
-                        val aiResponse = jsonSerializer.decodeFromString(
-                            AiResponse.serializer(),
-                            extractContent(
-                                aiResponseRawResponse.response.choices[0].message.content ?: ""
-                            )
-                        )
-                        aiResponse
-                    } catch (e: SerializationException) {
-                        Logger.e("Error during JSON deserialization: ${e.message}")
-                        return@withContext invokeGenerateScreen(
-                            promptString = "${e}. Fix the json parse error. Previously generated Json: $responseBodyString",
-                            dispatcher = dispatcher,
-                            retryCount = retryCount + 1
-                        ).getOrThrow() // Rethrow any exception from the recursive call
+                        try {
+                            val aiResponseRawResponse =
+                                jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
+                                    responseBodyString,
+                                )
+                            val aiResponse =
+                                jsonSerializer.decodeFromString(
+                                    AiResponse.serializer(),
+                                    extractContent(
+                                        aiResponseRawResponse.response.choices[0]
+                                            .message.content ?: "",
+                                    ),
+                                )
+                            aiResponse
+                        } catch (e: SerializationException) {
+                            Logger.e("Error during JSON deserialization: ${e.message}")
+                            return@withContext invokeGenerateScreen(
+                                promptString = "$e. Fix the json parse error. Previously generated Json: $responseBodyString",
+                                dispatcher = dispatcher,
+                                retryCount = retryCount + 1,
+                            ).getOrThrow() // Rethrow any exception from the recursive call
+                        }
                     }
                 }
             }
         }
-    }
 
     suspend fun invokeHandleGeneralRequest(
         promptString: String,
@@ -163,60 +176,63 @@ class LlmClient(
         previousToolArgs: List<ToolArgs> = emptyList(),
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         retryCount: Int = 0,
-    ): Result<OpenRouterResponseWrapper, Throwable> = runCatching {
-        if (retryCount >= 3) {
-            Logger.e("Failed to generate response. Tried maximum number of attempts.")
-            throw IllegalStateException("Failed to generate response. Tried maximum number of attempts.")
-        }
-        val url = "${BuildConfig.LLM_ENDPOINT}/handle_request"
-        val mediaType = "application/json".toMediaType()
-        val jsonBody = """{
+    ): Result<OpenRouterResponseWrapper, Throwable> =
+        runCatching {
+            if (retryCount >= 3) {
+                Logger.e("Failed to generate response. Tried maximum number of attempts.")
+                throw IllegalStateException("Failed to generate response. Tried maximum number of attempts.")
+            }
+            val url = "${BuildConfig.LLM_ENDPOINT}/handle_request"
+            val mediaType = "application/json".toMediaType()
+            val jsonBody = """{
             "userRequest": ${Json.encodeToString(promptString)},
             "projectContext": ${Json.encodeToString(projectContextString)},
             "toolCallResults": ${Json.encodeToString(previousToolArgs)}
         }"""
 
-        Logger.i("invokeHandleGeneralRequest Json body: $jsonBody")
-        val requestBody = jsonBody.toRequestBody(mediaType)
+            Logger.i("invokeHandleGeneralRequest Json body: $jsonBody")
+            val requestBody = jsonBody.toRequestBody(mediaType)
 
-        val request = Request.Builder()
-            .url(url)
-            .post(requestBody)
-            .addHeader("Content-Type", "application/json")
-            .build()
+            val request =
+                Request
+                    .Builder()
+                    .url(url)
+                    .post(requestBody)
+                    .addHeader("Content-Type", "application/json")
+                    .build()
 
-        withContext(dispatcher) {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    val errorBody = response.body?.string()
-                    Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
-                    throw Exception("Unexpected code ${response.code}, $errorBody")
-                } else {
-                    val responseBodyString =
-                        response.body?.string() ?: throw Exception("Response body is null")
+            withContext(dispatcher) {
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        val errorBody = response.body?.string()
+                        Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
+                        throw Exception("Unexpected code ${response.code}, $errorBody")
+                    } else {
+                        val responseBodyString =
+                            response.body?.string() ?: throw Exception("Response body is null")
 
-                    // Log the raw response for debugging
-                    Logger.i("Raw response body: $responseBodyString")
+                        // Log the raw response for debugging
+                        Logger.i("Raw response body: $responseBodyString")
 
-                    try {
-                        val toolResponse =
-                            jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
-                                responseBodyString
-                            )
-                        toolResponse
-                    } catch (e: SerializationException) {
-                        Logger.e("Error during JSON deserialization: ${e.message}")
-                        return@withContext invokeHandleGeneralRequest(
-                            promptString = "Original prompt: $promptString. Error: ${e}. Fix the json parse error. Previously generated Json: $responseBodyString",
-                            projectContextString = projectContextString,
-                            dispatcher = dispatcher,
-                            retryCount = retryCount + 1
-                        ).getOrThrow() // Rethrow any exception from the recursive call
+                        try {
+                            val toolResponse =
+                                jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
+                                    responseBodyString,
+                                )
+                            toolResponse
+                        } catch (e: SerializationException) {
+                            Logger.e("Error during JSON deserialization: ${e.message}")
+                            return@withContext invokeHandleGeneralRequest(
+                                promptString = "Original prompt: $promptString. Error: $e. Fix the json parse error. Previously generated Json: $responseBodyString",
+                                projectContextString = projectContextString,
+                                dispatcher = dispatcher,
+                                retryCount = retryCount + 1,
+                            ).getOrThrow() // Rethrow any exception from the recursive call
+                        }
                     }
                 }
             }
         }
-    }
 
     /**
      * Extract the content wrapped with

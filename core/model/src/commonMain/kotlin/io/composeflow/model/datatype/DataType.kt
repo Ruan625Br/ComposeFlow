@@ -41,6 +41,7 @@ data class DataType(
 ) : DropdownTextDisplayable {
     @Transient
     val className = name.asClassName()
+
     private fun isValid(): Boolean = fields.isNotEmpty()
 
     @Composable
@@ -52,28 +53,23 @@ data class DataType(
             listOf(
                 DataField(
                     name = firestoreDocumentId,
-                    fieldType = FieldType.DocumentId(firestoreCollectionId = matchingFirestoreCollection.id)
-                )
+                    fieldType = FieldType.DocumentId(firestoreCollectionId = matchingFirestoreCollection.id),
+                ),
             ) + fields
         } else {
             fields
         }
     }
 
-    fun asKotlinPoetClassName(project: Project): ClassName =
-        ClassName("${project.packageName}.${DataTypePackage}", name.asClassName())
+    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$DataTypePackage", name.asClassName())
 
 //    fun findDataFieldOrNull(fieldName: String): DataField? {
 //        return fields.firstOrNull { it.variableName == fieldName }
 //    }
 
-    fun findDataFieldOrNullByVariableName(fieldName: String): DataField? {
-        return fields.find { it.variableName == fieldName }
-    }
+    fun findDataFieldOrNullByVariableName(fieldName: String): DataField? = fields.find { it.variableName == fieldName }
 
-    fun findDataFieldOrNull(dataFieldId: String): DataField? {
-        return fields.find { it.id == dataFieldId }
-    }
+    fun findDataFieldOrNull(dataFieldId: String): DataField? = fields.find { it.id == dataFieldId }
 
     /**
      * Generates a TypeSpec for the data class that represents this data type.
@@ -82,30 +78,34 @@ data class DataType(
         if (!isValid()) return null
 
         val constructorSpecBuilder = FunSpec.constructorBuilder()
-        val typeSpecBuilder = TypeSpec.classBuilder(name.asClassName())
-            .addModifiers(KModifier.DATA)
-            .addAnnotation(Serializable::class)
+        val typeSpecBuilder =
+            TypeSpec
+                .classBuilder(name.asClassName())
+                .addModifiers(KModifier.DATA)
+                .addAnnotation(Serializable::class)
 
         if (this.findMatchingFirestoreCollection(project) != null) {
             constructorSpecBuilder.addParameter(
-                ParameterSpec.builder(firestoreDocumentId, String::class.asTypeName())
+                ParameterSpec
+                    .builder(firestoreDocumentId, String::class.asTypeName())
                     .defaultValue("\"\"")
-                    .build()
+                    .build(),
             )
             typeSpecBuilder.addProperty(
-                PropertySpec.builder(
-                    name = firestoreDocumentId,
-                    type = String::class.asTypeName()
-                )
-                    .initializer(firestoreDocumentId)
-                    .build()
+                PropertySpec
+                    .builder(
+                        name = firestoreDocumentId,
+                        type = String::class.asTypeName(),
+                    ).initializer(firestoreDocumentId)
+                    .build(),
             )
         }
         fields.forEach {
-            val constructorParameterBuilder = ParameterSpec.builder(
-                name = it.variableName,
-                type = it.fieldType.type().asKotlinPoetTypeName(project),
-            )
+            val constructorParameterBuilder =
+                ParameterSpec.builder(
+                    name = it.variableName,
+                    type = it.fieldType.type().asKotlinPoetTypeName(project),
+                )
             it.fieldType.defaultValueAsCodeBlock(project).let { defaultCodeBlock ->
                 constructorParameterBuilder.defaultValue(defaultCodeBlock)
             }
@@ -113,11 +113,11 @@ data class DataType(
                 constructorParameterBuilder.build(),
             )
             typeSpecBuilder.addProperty(
-                PropertySpec.builder(
-                    name = it.variableName,
-                    type = it.fieldType.type().asKotlinPoetTypeName(project),
-                )
-                    .initializer(it.variableName)
+                PropertySpec
+                    .builder(
+                        name = it.variableName,
+                        type = it.fieldType.type().asKotlinPoetTypeName(project),
+                    ).initializer(it.variableName)
                     .build(),
             )
         }
@@ -140,11 +140,10 @@ data class DataType(
         }
     }
 
-    private fun findMatchingFirestoreCollection(project: Project): FirestoreCollection? {
-        return project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.firstOrNull {
+    private fun findMatchingFirestoreCollection(project: Project): FirestoreCollection? =
+        project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections.firstOrNull {
             it.dataTypeId == id
         }
-    }
 }
 
 @Serializable
@@ -153,9 +152,7 @@ data class DataTypeDefaultValue(
     val defaultFields: MutableList<FieldDefaultValue> = mutableListOf(),
 )
 
-fun List<DataTypeDefaultValue>.generateCodeBlock(
-    project: Project,
-): CodeBlock {
+fun List<DataTypeDefaultValue>.generateCodeBlock(project: Project): CodeBlock {
     val builder = CodeBlock.builder()
     if (isEmpty()) {
         builder.add("\"[]\"")

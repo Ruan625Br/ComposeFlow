@@ -13,7 +13,6 @@ const val DefaultNumOfItems = 8
 @Serializable
 @SerialName("LazyListChildParams")
 sealed interface LazyListChildParams {
-
     fun getSourceId(): String?
 
     @Serializable
@@ -21,8 +20,11 @@ sealed interface LazyListChildParams {
     data class FixedNumber(
         val numOfItems: Int = ComposeTrait.NumOfItemsInLazyList,
     ) : LazyListChildParams {
+        override fun getNumOfItems(
+            project: Project,
+            lazyList: ComposeNode,
+        ): Int = numOfItems
 
-        override fun getNumOfItems(project: Project, lazyList: ComposeNode): Int = numOfItems
         override fun getSourceId(): String? = null
     }
 
@@ -36,9 +38,7 @@ sealed interface LazyListChildParams {
         override fun getNumOfItems(
             project: Project,
             lazyList: ComposeNode,
-        ): Int {
-            return DefaultNumOfItems
-        }
+        ): Int = DefaultNumOfItems
     }
 
     fun boundsIncludingChildren(
@@ -49,13 +49,17 @@ sealed interface LazyListChildParams {
         val childBottomRight = self.boundsInWindow.value.bottomRight
         return Rect(
             topLeft = self.boundsInWindow.value.topLeft,
-            bottomRight = childBottomRight +
+            bottomRight =
+                childBottomRight +
                     Offset(
                         x = 0f,
-                        y = (getNumOfItems(
-                            project,
-                            lazyList
-                        ) - 1) * self.boundsInWindow.value.height,
+                        y =
+                            (
+                                getNumOfItems(
+                                    project,
+                                    lazyList,
+                                ) - 1
+                            ) * self.boundsInWindow.value.height,
                     ),
         )
     }

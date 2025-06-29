@@ -19,14 +19,17 @@ object LibraryParser {
                     inVersionsSection = true
                     inLibrariesSection = false
                 }
+
                 trimmedLine == "[libraries]" -> {
                     inVersionsSection = false
                     inLibrariesSection = true
                 }
+
                 trimmedLine.startsWith("[") -> {
                     inVersionsSection = false
                     inLibrariesSection = false
                 }
+
                 inVersionsSection && trimmedLine.contains("=") -> {
                     val parts = trimmedLine.split("=").map { it.trim() }
                     if (parts.size == 2) {
@@ -35,6 +38,7 @@ object LibraryParser {
                         versionMap[key] = value
                     }
                 }
+
                 inLibrariesSection && trimmedLine.contains("=") && !trimmedLine.startsWith("#") -> {
                     val libraryName = trimmedLine.substringBefore("=").trim()
                     val libraryDef = trimmedLine.substringAfter("=").trim()
@@ -57,15 +61,19 @@ object LibraryParser {
                                     part.startsWith("group") -> {
                                         group = part.substringAfter("=").trim().trim('"')
                                     }
+
                                     part.startsWith("module") -> {
                                         module = part.substringAfter("=").trim().trim('"')
                                     }
+
                                     part.startsWith("name") -> {
                                         name = part.substringAfter("=").trim().trim('"')
                                     }
+
                                     part.startsWith("version.ref") -> {
                                         versionRef = part.substringAfter("=").trim().trim('"')
                                     }
+
                                     part.startsWith("version") && !part.startsWith("version.ref") -> {
                                         version = part.substringAfter("=").trim().trim('"')
                                     }
@@ -106,6 +114,7 @@ object LibraryParser {
                                 )
                             }
                         }
+
                         libraryDef.contains(":") -> {
                             // String notation like "com.example:library:1.0.0"
                             val cleanDef = libraryDef.trim('"')

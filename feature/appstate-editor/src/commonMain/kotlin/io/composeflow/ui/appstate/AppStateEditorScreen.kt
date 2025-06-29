@@ -38,6 +38,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
+import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component4
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -94,9 +98,10 @@ fun AppStateEditor(
     modifier: Modifier = Modifier,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = AppStateEditorViewModel::class) {
-        AppStateEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
-    }
+    val viewModel =
+        viewModel(modelClass = AppStateEditorViewModel::class) {
+            AppStateEditorViewModel(firebaseIdToken = firebaseIdToken, project = project)
+        }
     Surface(modifier = modifier.fillMaxSize()) {
         Row {
             AppStateHeaderContainer()
@@ -137,9 +142,10 @@ private fun AppStateHeader() {
                     imageVector = Icons.Outlined.Info,
                     contentDescription = contentDesc,
                     tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .size(18.dp),
+                    modifier =
+                        Modifier
+                            .padding(start = 8.dp)
+                            .size(18.dp),
                 )
             }
         }
@@ -155,10 +161,11 @@ private fun AppStateDetail(
     onDataTypeListDefaultValueUpdated: (AppState<*>, List<DataTypeDefaultValue>) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxSize()
-            .backgroundContainerNeutral()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .backgroundContainerNeutral()
+                .padding(16.dp),
     ) {
         Spacer(Modifier.weight(1f))
         AppStateDetailContent(
@@ -185,12 +192,13 @@ private fun AppStateDetailContent(
     var appStateToBeUpdated by remember { mutableStateOf<AppState<*>?>(null) }
 
     Column(
-        modifier = Modifier
-            .width(960.dp)
-            .fillMaxHeight()
-            .padding(vertical = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(color = MaterialTheme.colorScheme.surface),
+        modifier =
+            Modifier
+                .width(960.dp)
+                .fillMaxHeight()
+                .padding(vertical = 16.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(color = MaterialTheme.colorScheme.surface),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -217,7 +225,7 @@ private fun AppStateDetailContent(
                         onDeleteAppStateDialogOpen = {
                             appStateToBeDeleted = it
                         },
-                        onDataTypeListDefaultValueUpdated = onDataTypeListDefaultValueUpdated
+                        onDataTypeListDefaultValueUpdated = onDataTypeListDefaultValueUpdated,
                     )
                 }
             }
@@ -348,7 +356,6 @@ private fun AppStateDetailRow(
                 modifier = Modifier.width(120.dp),
             )
 
-
             Column(modifier = Modifier.width(280.dp)) {
                 Text(
                     appState.defaultValue?.toString() ?: "",
@@ -389,8 +396,9 @@ private fun AppStateDetailRow(
             }
         }
         HorizontalDivider(
-            modifier = Modifier
-                .padding(vertical = 8.dp),
+            modifier =
+                Modifier
+                    .padding(vertical = 8.dp),
         )
     }
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
@@ -406,7 +414,7 @@ private fun AppStateDetailRow(
             onCloseClick = dialogClosed,
             onDataTypeDefaultValueAdded = {
                 onDataTypeListDefaultValueUpdated(appState, it)
-            }
+            },
         )
     }
 }
@@ -428,7 +436,7 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
                 is DefaultValuesParseResult.SuccessWithWarning -> result.defaultValues
                 DefaultValuesParseResult.EmptyInput -> null
                 null -> null
-            }
+            },
         )
     }
 
@@ -440,7 +448,7 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
                 is DefaultValuesParseResult.Success -> null
                 is DefaultValuesParseResult.SuccessWithWarning -> result.warningMessage
                 null -> emptyJSON
-            }
+            },
         )
     }
 
@@ -466,15 +474,16 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
         val (first, second, third) = remember { FocusRequester.createRefs() }
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 680.dp, height = 620.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 680.dp, height = 620.dp)
+                        .padding(16.dp),
             ) {
                 Text(
                     text = stringResource(Res.string.set_default_values_from_json),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    modifier = Modifier.padding(bottom = 8.dp),
                 )
 
                 ParseDefaultValuesJsonTextField(
@@ -482,10 +491,11 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
                     onJsonParsed = {
                         parseResult = it
                     },
-                    modifier = Modifier
-                        .padding(top = 16.dp)
-                        .focusRequester(first)
-                        .weight(1f)
+                    modifier =
+                        Modifier
+                            .padding(top = 16.dp)
+                            .focusRequester(first)
+                            .weight(1f),
                 )
                 if (errorMessage != null) {
                     Column(modifier = Modifier.fillMaxWidth().height(24.dp)) {
@@ -493,7 +503,7 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
                             text = errorMessage!!,
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                 } else {
@@ -508,9 +518,10 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
                         onClick = {
                             onCloseClick()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(second),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(second),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -522,8 +533,9 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
                             onCloseClick()
                         },
                         enabled = isFormValid,
-                        modifier = Modifier
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }
@@ -547,17 +559,18 @@ private fun AddAppStateDialog(
         )
     }
 
-    val initialDataTypeSelected = when (initialValue) {
-        is AppState.CustomDataTypeAppState -> {
-            if (project.dataTypeHolder.dataTypes.any { it.id == initialValue.dataTypeId }) {
-                project.dataTypeHolder.dataTypes.indexOfFirst { it.id == initialValue.dataTypeId }
-            } else {
-                0
+    val initialDataTypeSelected =
+        when (initialValue) {
+            is AppState.CustomDataTypeAppState -> {
+                if (project.dataTypeHolder.dataTypes.any { it.id == initialValue.dataTypeId }) {
+                    project.dataTypeHolder.dataTypes.indexOfFirst { it.id == initialValue.dataTypeId }
+                } else {
+                    0
+                }
             }
-        }
 
-        else -> 0
-    }
+            else -> 0
+        }
     var dataTypeSelectedIndex by remember { mutableStateOf(initialDataTypeSelected) }
 
     val onAppStateConfirmed = {
@@ -588,9 +601,10 @@ private fun AddAppStateDialog(
         }
         Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
             Column(
-                modifier = Modifier
-                    .size(width = 320.dp, height = 380.dp)
-                    .padding(16.dp),
+                modifier =
+                    Modifier
+                        .size(width = 320.dp, height = 380.dp)
+                        .padding(16.dp),
             ) {
                 val fieldWidth = 300.dp
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -620,22 +634,25 @@ private fun AddAppStateDialog(
                     singleLine = true,
                     isError = appStateNameValidateResult is ValidateResult.Failure,
                     shape = RoundedCornerShape(8.dp),
-                    supportingText = (appStateNameValidateResult as? ValidateResult.Failure)?.let {
-                        {
-                            Text(it.message)
-                        }
-                    },
-                    modifier = Modifier.focusRequester(first)
-                        .moveFocusOnTab()
-                        .width(width = fieldWidth)
-                        .onKeyEvent {
-                            if (it.key == Key.Enter && editedAppState.name.isNotEmpty()) {
-                                onAppStateConfirmed()
-                                true
-                            } else {
-                                false
+                    supportingText =
+                        (appStateNameValidateResult as? ValidateResult.Failure)?.let {
+                            {
+                                Text(it.message)
                             }
                         },
+                    modifier =
+                        Modifier
+                            .focusRequester(first)
+                            .moveFocusOnTab()
+                            .width(width = fieldWidth)
+                            .onKeyEvent {
+                                if (it.key == Key.Enter && editedAppState.name.isNotEmpty()) {
+                                    onAppStateConfirmed()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
                 )
                 var dropDownSelectedIndex by remember {
                     mutableStateOf(
@@ -645,34 +662,40 @@ private fun AddAppStateDialog(
 
                 BasicDropdownPropertyEditor(
                     project = project,
-                    items = AppState.entries()
-                        .map {
-                            it.valueType(project).displayName(
-                                project = project,
-                                listAware = false,
-                            )
-                        },
+                    items =
+                        AppState
+                            .entries()
+                            .map {
+                                it.valueType(project).displayName(
+                                    project = project,
+                                    listAware = false,
+                                )
+                            },
                     onValueChanged = { index, _ ->
                         val appState = AppState.fromOrdinal(index)
                         val dataTypes = project.dataTypeHolder.dataTypes
-                        val selectedDataTypeId = if (dataTypes.isNotEmpty()) {
-                            dataTypes[dataTypeSelectedIndex].id
-                        } else {
-                            null
-                        }
-                        editedAppState = appState.copy(
-                            id = editedAppState.id,
-                            name = editedAppState.name,
-                            isList = editedAppState.isList,
-                            argDataTypeId = selectedDataTypeId,
-                        )
+                        val selectedDataTypeId =
+                            if (dataTypes.isNotEmpty()) {
+                                dataTypes[dataTypeSelectedIndex].id
+                            } else {
+                                null
+                            }
+                        editedAppState =
+                            appState.copy(
+                                id = editedAppState.id,
+                                name = editedAppState.name,
+                                isList = editedAppState.isList,
+                                argDataTypeId = selectedDataTypeId,
+                            )
                         dropDownSelectedIndex = index
                     },
                     selectedIndex = dropDownSelectedIndex,
                     label = stringResource(Res.string.data_type),
-                    modifier = Modifier.padding(top = 8.dp)
-                        .focusRequester(second)
-                        .moveFocusOnTab(),
+                    modifier =
+                        Modifier
+                            .padding(top = 8.dp)
+                            .focusRequester(second)
+                            .moveFocusOnTab(),
                 )
 
                 if (editedAppState is AppStateWithDataTypeId) {
@@ -695,9 +718,10 @@ private fun AddAppStateDialog(
                             onValueChanged = { index, _ ->
                                 when (val appState = editedAppState) {
                                     is AppState.CustomDataTypeAppState -> {
-                                        editedAppState = appState.copy(
-                                            dataTypeId = dataTypes[index].id,
-                                        )
+                                        editedAppState =
+                                            appState.copy(
+                                                dataTypeId = dataTypes[index].id,
+                                            )
                                     }
 
                                     else -> {}
@@ -713,11 +737,12 @@ private fun AddAppStateDialog(
                 BooleanPropertyEditor(
                     checked = editedAppState.isList,
                     onCheckedChange = {
-                        editedAppState = editedAppState.copy(
-                            id = editedAppState.id,
-                            name = editedAppState.name,
-                            isList = it,
-                        )
+                        editedAppState =
+                            editedAppState.copy(
+                                id = editedAppState.id,
+                                name = editedAppState.name,
+                                isList = it,
+                            )
                     },
                     label = stringResource(Res.string.is_list),
                 )
@@ -726,12 +751,12 @@ private fun AddAppStateDialog(
                 val isFormValid by remember {
                     derivedStateOf {
                         defaultValueError == null &&
-                                appStateNameValidateResult is ValidateResult.Success &&
-                                if (editedAppState is AppStateWithDataTypeId) {
-                                    project.dataTypeHolder.dataTypes.isNotEmpty()
-                                } else {
-                                    true
-                                }
+                            appStateNameValidateResult is ValidateResult.Success &&
+                            if (editedAppState is AppStateWithDataTypeId) {
+                                project.dataTypeHolder.dataTypes.isNotEmpty()
+                            } else {
+                                true
+                            }
                     }
                 }
                 Column(
@@ -750,8 +775,10 @@ private fun AddAppStateDialog(
                                         )
                                 },
                                 label = stringResource(Res.string.default_value),
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab(),
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab(),
                             )
                         }
 
@@ -789,25 +816,28 @@ private fun AddAppStateDialog(
                                         color = MaterialTheme.colorScheme.onSurface,
                                     )
                                 },
-                                supportingText = defaultValueError?.let {
-                                    {
-                                        Text(it)
-                                    }
-                                },
+                                supportingText =
+                                    defaultValueError?.let {
+                                        {
+                                            Text(it)
+                                        }
+                                    },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 isError = defaultValueError != null,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onAppStateConfirmed()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onAppStateConfirmed()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -845,25 +875,28 @@ private fun AddAppStateDialog(
                                         color = MaterialTheme.colorScheme.onSurface,
                                     )
                                 },
-                                supportingText = defaultValueError?.let {
-                                    {
-                                        Text(it)
-                                    }
-                                },
+                                supportingText =
+                                    defaultValueError?.let {
+                                        {
+                                            Text(it)
+                                        }
+                                    },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
                                 isError = defaultValueError != null,
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onAppStateConfirmed()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onAppStateConfirmed()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -889,17 +922,19 @@ private fun AddAppStateDialog(
                                 },
                                 singleLine = true,
                                 shape = RoundedCornerShape(8.dp),
-                                modifier = Modifier.focusRequester(third)
-                                    .moveFocusOnTab()
-                                    .width(width = fieldWidth)
-                                    .onKeyEvent {
-                                        if (it.key == Key.Enter && isFormValid) {
-                                            onAppStateConfirmed()
-                                            true
-                                        } else {
-                                            false
-                                        }
-                                    },
+                                modifier =
+                                    Modifier
+                                        .focusRequester(third)
+                                        .moveFocusOnTab()
+                                        .width(width = fieldWidth)
+                                        .onKeyEvent {
+                                            if (it.key == Key.Enter && isFormValid) {
+                                                onAppStateConfirmed()
+                                                true
+                                            } else {
+                                                false
+                                            }
+                                        },
                             )
                         }
 
@@ -921,9 +956,10 @@ private fun AddAppStateDialog(
                         onClick = {
                             onDialogClosed()
                         },
-                        modifier = Modifier
-                            .padding(end = 16.dp)
-                            .focusRequester(third),
+                        modifier =
+                            Modifier
+                                .padding(end = 16.dp)
+                                .focusRequester(third),
                     ) {
                         Text(stringResource(Res.string.cancel))
                     }
@@ -932,8 +968,9 @@ private fun AddAppStateDialog(
                             onAppStateConfirmed()
                         },
                         enabled = isFormValid,
-                        modifier = Modifier
-                            .focusRequester(fourth),
+                        modifier =
+                            Modifier
+                                .focusRequester(fourth),
                     ) {
                         Text(stringResource(Res.string.confirm))
                     }

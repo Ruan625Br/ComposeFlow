@@ -44,35 +44,45 @@ sealed interface ReadableState {
     val id: StateId
     var name: String
     val isList: Boolean
+
     fun generateVariableInitializationBlock(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
     ): CodeBlock
 
-    fun generateReadBlock(project: Project, context: GenerationContext, dryRun: Boolean): CodeBlock
-    fun getReadVariableName(project: Project, context: GenerationContext): String =
-        getUniqueIdentifier(context).asVariableName()
+    fun generateReadBlock(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+    ): CodeBlock
 
-    fun getFlowName(context: GenerationContext): String =
-        getUniqueIdentifier(context).asVariableName() + "Flow"
+    fun getReadVariableName(
+        project: Project,
+        context: GenerationContext,
+    ): String = getUniqueIdentifier(context).asVariableName()
+
+    fun getFlowName(context: GenerationContext): String = getUniqueIdentifier(context).asVariableName() + "Flow"
 
     /**
      * [asNonList] If set to true, returns the result type with [ComposeFlowType.isList] = false regardless of the
      * actual [ComposeFlowType.isList] property
      */
-    fun valueType(project: Project, asNonList: Boolean = false): ComposeFlowType
+    fun valueType(
+        project: Project,
+        asNonList: Boolean = false,
+    ): ComposeFlowType
+
     fun generateStatePropertiesToViewModel(
         project: Project,
-        context: GenerationContext
+        context: GenerationContext,
     ): List<PropertySpec> = emptyList()
 
-    fun getUniqueIdentifier(context: GenerationContext): String {
-        return context.getCurrentComposableContext().getOrAddIdentifier(
+    fun getUniqueIdentifier(context: GenerationContext): String =
+        context.getCurrentComposableContext().getOrAddIdentifier(
             id = id,
             initialIdentifier = name,
         )
-    }
 }
 
 @Serializable
@@ -83,6 +93,7 @@ sealed interface WriteableState : ReadableState {
      * instead, it should be changed through a specific action such as "Open date picker" action.
      */
     val userWritable: Boolean
+
     fun generateWriteBlock(
         project: Project,
         canvasEditable: CanvasEditable,
@@ -91,9 +102,8 @@ sealed interface WriteableState : ReadableState {
     ): CodeBlock
 
     fun getUpdateMethodName(context: GenerationContext): String
-    fun generateUpdateStateMethodToViewModel(
-        context: GenerationContext
-    ): FunSpec
+
+    fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec
 
     fun generateUpdateStateCodeToViewModel(
         project: Project,
@@ -103,22 +113,27 @@ sealed interface WriteableState : ReadableState {
     ): CodeBlock
 
     fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock
+
     override fun generateStatePropertiesToViewModel(
         project: Project,
-        context: GenerationContext
+        context: GenerationContext,
     ): List<PropertySpec>
 
-    fun getValidateResultName(context: GenerationContext): String =
-        getUniqueIdentifier(context).asVariableName() + "ValidateResult"
+    fun getValidateResultName(context: GenerationContext): String = getUniqueIdentifier(context).asVariableName() + "ValidateResult"
 }
 
 @Serializable
-sealed interface State<T> : ReadableState, WriteableState {
+sealed interface State<T> :
+    ReadableState,
+    WriteableState {
     override val id: StateId
     override var name: String
     override val isList: Boolean
+
     override fun generateVariableInitializationBlock(
-        project: Project, context: GenerationContext, dryRun: Boolean,
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
     ): CodeBlock
 
     override fun generateReadBlock(
@@ -128,7 +143,11 @@ sealed interface State<T> : ReadableState, WriteableState {
     ): CodeBlock
 
     override val userWritable: Boolean
-    override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType
+
+    override fun valueType(
+        project: Project,
+        asNonList: Boolean,
+    ): ComposeFlowType
 
     override fun generateWriteBlock(
         project: Project,
@@ -142,9 +161,7 @@ sealed interface State<T> : ReadableState, WriteableState {
         return "on${uniqueIdentifier.asVariableName().capitalize(Locale.current)}Updated"
     }
 
-    override fun generateUpdateStateMethodToViewModel(
-        context: GenerationContext
-    ): FunSpec
+    override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec
 
     override fun generateUpdateStateCodeToViewModel(
         project: Project,
@@ -154,9 +171,10 @@ sealed interface State<T> : ReadableState, WriteableState {
     ): CodeBlock
 
     override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock
+
     override fun generateStatePropertiesToViewModel(
         project: Project,
-        context: GenerationContext
+        context: GenerationContext,
     ): List<PropertySpec>
 
     val defaultValue: T?
@@ -167,22 +185,21 @@ sealed interface BooleanState : State<Boolean> {
 }
 
 sealed interface ListAppState {
-
     fun generateStateProperty(
         propertyName: String,
         stateName: String,
         typeClassName: ClassName,
-    ): PropertySpec {
-        return PropertySpec.builder(
-            propertyName,
-            ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
-                ClassHolder.Collections.List.parameterizedBy(typeClassName),
-            ),
-        )
-            .initializer(
+    ): PropertySpec =
+        PropertySpec
+            .builder(
+                propertyName,
+                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                    ClassHolder.Collections.List.parameterizedBy(typeClassName),
+                ),
+            ).initializer(
                 """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$stateName", 
+                         "$stateName",
                          defaultValue = "[]",
                        ).%M {
                             ${ViewModelConstant.jsonSerializer.name}.decodeFromString<%T<%T>>(it)
@@ -190,7 +207,7 @@ sealed interface ListAppState {
                        .%M(
                          scope = %M,
                          started = %M.WhileSubscribed(5_000),
-                         initialValue = emptyList(), 
+                         initialValue = emptyList(),
                        )
                     """,
                 MemberHolder.Settings.getStringFlow,
@@ -200,19 +217,16 @@ sealed interface ListAppState {
                 MemberHolder.Coroutines.Flow.stateIn,
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.Flow.SharingStarted,
-            )
-            .build()
-    }
+            ).build()
 
-    fun generateClearStateCode(stateName: String): CodeBlock {
-        return CodeBlock.of(
+    fun generateClearStateCode(stateName: String): CodeBlock =
+        CodeBlock.of(
             """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putString("$stateName", "[]")
                 }""",
             MemberHolder.PreCompose.viewModelScope,
             MemberHolder.Coroutines.launch,
         )
-    }
 
     fun generateAddValueToStateCode(
         project: Project,
@@ -225,8 +239,8 @@ sealed interface ListAppState {
         project: Project,
         context: GenerationContext,
         writeState: WriteableState,
-    ): CodeBlock {
-        return CodeBlock.of(
+    ): CodeBlock =
+        CodeBlock.of(
             """%M.%M {
                 val list = ${writeState.getFlowName(context)}.value.toMutableList()
                 if (list.isNotEmpty()) {
@@ -238,14 +252,13 @@ sealed interface ListAppState {
             MemberHolder.Coroutines.launch,
             MemberHolder.Serialization.encodeToString,
         )
-    }
 
     fun generateRemoveLastValueCode(
         project: Project,
         context: GenerationContext,
         writeState: WriteableState,
-    ): CodeBlock {
-        return CodeBlock.of(
+    ): CodeBlock =
+        CodeBlock.of(
             """%M.%M {
                 val list = ${writeState.getFlowName(context)}.value.toMutableList()
                 if (list.isNotEmpty()) {
@@ -257,7 +270,6 @@ sealed interface ListAppState {
             MemberHolder.Coroutines.launch,
             MemberHolder.Serialization.encodeToString,
         )
-    }
 
     fun generateRemoveValueAtIndexFun(
         project: Project,
@@ -266,14 +278,14 @@ sealed interface ListAppState {
         writeState: WriteableState,
     ): FunSpec {
         val indexToRemove = "indexToRemove"
-        return FunSpec.builder(functionName)
+        return FunSpec
+            .builder(functionName)
             .addParameter(
                 ParameterSpec.builder(name = indexToRemove, Int::class).build(),
-            )
-            .addCode(
+            ).addCode(
                 """
                 val list = ${writeState.getFlowName(context)}.value.toMutableList()
-                if ($indexToRemove < 0 || $indexToRemove >= list.size) return     
+                if ($indexToRemove < 0 || $indexToRemove >= list.size) return
                 %M.%M {
                     if (list.isNotEmpty()) {
                         list.removeAt($indexToRemove)
@@ -283,8 +295,7 @@ sealed interface ListAppState {
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
                 MemberHolder.Serialization.encodeToString,
-            )
-            .build()
+            ).build()
     }
 
     fun generateUpdateValueAtIndexFunBuilder(
@@ -295,14 +306,14 @@ sealed interface ListAppState {
         writeState: WriteableState,
     ): FunSpec.Builder {
         val indexToUpdate = "indexToUpdate"
-        return FunSpec.builder(functionName)
+        return FunSpec
+            .builder(functionName)
             .addParameter(
                 ParameterSpec.builder(name = indexToUpdate, Int::class).build(),
-            )
-            .addCode(
+            ).addCode(
                 """
                 val list = ${writeState.getFlowName(context)}.value.toMutableList()
-                if ($indexToUpdate < 0 || $indexToUpdate >= list.size) return     
+                if ($indexToUpdate < 0 || $indexToUpdate >= list.size) return
                 %M.%M {
                     list.set($indexToUpdate, $readCodeBlock)
                     ${ViewModelConstant.flowSettings.name}.putString("${writeState.name}", ${ViewModelConstant.jsonSerializer.name}.%M(list))
@@ -316,20 +327,20 @@ sealed interface ListAppState {
 
 @Serializable
 sealed interface AppStateWithDataTypeId {
-
     val dataTypeId: DataTypeId
 }
 
 @Serializable
 sealed interface ScreenState<T> : State<T> {
-
     /**
      * Get the Id of the companion node where the states
      */
     val companionNodeId: String?
 
     override fun generateVariableInitializationBlock(
-        project: Project, context: GenerationContext, dryRun: Boolean,
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val variableName = getReadVariableName(project, context)
@@ -345,29 +356,31 @@ sealed interface ScreenState<T> : State<T> {
         context: GenerationContext,
         dryRun: Boolean,
     ): CodeBlock? {
-        val companionNode = companionNodeId?.let {
-            project.findComposeNodeOrNull(it)
-        } ?: return null
+        val companionNode =
+            companionNodeId?.let {
+                project.findComposeNodeOrNull(it)
+            } ?: return null
 
-        val result = companionNode.trait.value.getStateValidator()?.let { stateValidator ->
-            CodeBlock.of(
-                """val ${getValidateResultName(context)} by %M(${
-                    getReadVariableName(
-                        project,
-                        context
-                    )
-                }) { %M(
+        val result =
+            companionNode.trait.value.getStateValidator()?.let { stateValidator ->
+                CodeBlock.of(
+                    """val ${getValidateResultName(context)} by %M(${
+                        getReadVariableName(
+                            project,
+                            context,
+                        )
+                    }) { %M(
                     ${stateValidator.asCodeBlock(project, context)}.validate(${
-                    getReadVariableName(
-                        project,
-                        context
-                    )
-                })
+                        getReadVariableName(
+                            project,
+                            context,
+                        )
+                    })
                 ) }""",
-                MemberHolder.AndroidX.Runtime.remember,
-                MemberHolder.AndroidX.Runtime.mutableStateOf,
-            )
-        }
+                    MemberHolder.AndroidX.Runtime.remember,
+                    MemberHolder.AndroidX.Runtime.mutableStateOf,
+                )
+            }
         return result
     }
 
@@ -380,12 +393,10 @@ sealed interface ScreenState<T> : State<T> {
         override val userWritable: Boolean = true,
         override val companionNodeId: String? = null,
     ) : ScreenState<String> {
-
-        override fun generateUpdateStateMethodToViewModel(
-            context: GenerationContext,
-        ): FunSpec {
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
             val flowName = getFlowName(context)
-            return FunSpec.builder(getUpdateMethodName(context))
+            return FunSpec
+                .builder(getUpdateMethodName(context))
                 .addParameter("newValue", String::class)
                 .addStatement("_$flowName.value = newValue")
                 .build()
@@ -398,51 +409,52 @@ sealed interface ScreenState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.StringType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.StringType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """
-                    _${getFlowName(context)}.value = $expression 
+                    _${getFlowName(context)}.value = $expression
                 """,
                     )
                 }
             return builder.build()
         }
 
-        override fun generateClearStateCodeToViewModel(
-            context: GenerationContext
-        ): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """
                     _${getFlowName(context)}.value = "$defaultValue"
                 """,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${getFlowName(context)}",
-                MutableStateFlow::class.parameterizedBy(String::class),
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer("""MutableStateFlow("$defaultValue")""")
-                .build()
-            val property = PropertySpec.builder(
-                getFlowName(context),
-                StateFlow::class.parameterizedBy(String::class),
-            )
-                .initializer("""_${getFlowName(context)}""")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_${getFlowName(context)}",
+                        MutableStateFlow::class.parameterizedBy(String::class),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer("""MutableStateFlow("$defaultValue")""")
+                    .build()
+            val property =
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(String::class),
+                    ).initializer("""_${getFlowName(context)}""")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
@@ -469,8 +481,10 @@ sealed interface ScreenState<T> : State<T> {
             return builder.build()
         }
 
-        override fun valueType(project: Project, asNonList: Boolean) =
-            ComposeFlowType.StringType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ) = ComposeFlowType.StringType(isList = false)
 
         override val isList: Boolean = false
     }
@@ -484,10 +498,10 @@ sealed interface ScreenState<T> : State<T> {
         override val userWritable: Boolean = true,
         override val companionNodeId: String? = null,
     ) : ScreenState<Float> {
-
         override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
             val flowName = getFlowName(context)
-            return FunSpec.builder(getUpdateMethodName(context))
+            return FunSpec
+                .builder(getUpdateMethodName(context))
                 .addParameter("newValue", Float::class)
                 .addStatement("_$flowName.value = newValue")
                 .build()
@@ -500,49 +514,52 @@ sealed interface ScreenState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.FloatType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.FloatType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """
-                    _${getFlowName(context)}.value = $expression 
+                    _${getFlowName(context)}.value = $expression
                 """,
                     )
                 }
             return builder.build()
         }
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """
                     _${getFlowName(context)}.value = "${defaultValue}f"
                 """,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${getFlowName(context)}",
-                MutableStateFlow::class.parameterizedBy(Float::class),
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer("""MutableStateFlow(${defaultValue}f)""")
-                .build()
-            val property = PropertySpec.builder(
-                getFlowName(context),
-                StateFlow::class.parameterizedBy(Float::class),
-            )
-                .initializer("""_${getFlowName(context)}""")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_${getFlowName(context)}",
+                        MutableStateFlow::class.parameterizedBy(Float::class),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer("""MutableStateFlow(${defaultValue}f)""")
+                    .build()
+            val property =
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Float::class),
+                    ).initializer("""_${getFlowName(context)}""")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
@@ -569,8 +586,10 @@ sealed interface ScreenState<T> : State<T> {
             return builder.build()
         }
 
-        override fun valueType(project: Project, asNonList: Boolean) =
-            ComposeFlowType.FloatType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ) = ComposeFlowType.FloatType(isList = false)
 
         override val isList: Boolean = false
     }
@@ -583,11 +602,12 @@ sealed interface ScreenState<T> : State<T> {
         override val defaultValue: Boolean = false,
         override val userWritable: Boolean = true,
         override val companionNodeId: String? = null,
-    ) : ScreenState<Boolean>, BooleanState {
-
+    ) : ScreenState<Boolean>,
+        BooleanState {
         override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
             val flowName = getFlowName(context)
-            return FunSpec.builder(getUpdateMethodName(context))
+            return FunSpec
+                .builder(getUpdateMethodName(context))
                 .addParameter("newValue", Boolean::class)
                 .addStatement("_$flowName.value = newValue")
                 .build()
@@ -600,59 +620,61 @@ sealed interface ScreenState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.BooleanType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.BooleanType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """
-                    _${getFlowName(context)}.value = $expression 
+                    _${getFlowName(context)}.value = $expression
                 """,
                     )
                 }
             return builder.build()
         }
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """
                     _${getFlowName(context)}.value = $defaultValue
                 """,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${getFlowName(context)}",
-                MutableStateFlow::class.parameterizedBy(Boolean::class),
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer("""MutableStateFlow($defaultValue)""")
-                .build()
-            val property = PropertySpec.builder(
-                getFlowName(context),
-                StateFlow::class.parameterizedBy(Boolean::class),
-            )
-                .initializer("""_${getFlowName(context)}""")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_${getFlowName(context)}",
+                        MutableStateFlow::class.parameterizedBy(Boolean::class),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer("""MutableStateFlow($defaultValue)""")
+                    .build()
+            val property =
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Boolean::class),
+                    ).initializer("""_${getFlowName(context)}""")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
-        override fun generateToggleStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateToggleStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """
                     _${getFlowName(context)}.value = !${getFlowName(context)}.value
                 """,
             )
-        }
 
         override fun generateReadBlock(
             project: Project,
@@ -677,8 +699,10 @@ sealed interface ScreenState<T> : State<T> {
             return builder.build()
         }
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.BooleanType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.BooleanType(isList = false)
 
         override val isList: Boolean = false
     }
@@ -693,7 +717,6 @@ sealed interface ScreenState<T> : State<T> {
         override val userWritable: Boolean = true,
         override val companionNodeId: String? = null,
     ) : ScreenState<Instant> {
-
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
             context: GenerationContext,
@@ -701,53 +724,57 @@ sealed interface ScreenState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.InstantType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.InstantType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """
-                    _${getFlowName(context)}.value = $expression 
+                    _${getFlowName(context)}.value = $expression
                 """,
                     )
                 }
             return builder.build()
         }
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """
                     _${getFlowName(context)}.value = $defaultValue
                 """,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${getFlowName(context)}",
-                ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(Instant::class.asTypeName()),
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer(
-                    "%T(%T.System.now())",
-                    ClassHolder.Coroutines.Flow.MutableStateFlow,
-                    Clock::class.asTypeName()
-                )
-                .build()
-            val property = PropertySpec.builder(
-                getFlowName(context),
-                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(Instant::class.asTypeName()),
-            )
-                .initializer("""_${getFlowName(context)}""")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_${getFlowName(context)}",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow
+                            .parameterizedBy(Instant::class.asTypeName()),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer(
+                        "%T(%T.System.now())",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow,
+                        Clock::class.asTypeName(),
+                    ).build()
+            val property =
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        ClassHolder.Coroutines.Flow.StateFlow
+                            .parameterizedBy(Instant::class.asTypeName()),
+                    ).initializer("""_${getFlowName(context)}""")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
@@ -766,20 +793,21 @@ sealed interface ScreenState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
         override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
             val flowName = getFlowName(context)
-            return FunSpec.builder(getUpdateMethodName(context))
+            return FunSpec
+                .builder(getUpdateMethodName(context))
                 .addParameter("newValue", Instant::class)
                 .addStatement("_$flowName.value = newValue")
                 .build()
         }
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.InstantType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.InstantType(isList = false)
 
         override val isList: Boolean = false
     }
@@ -798,7 +826,6 @@ sealed interface ScreenState<T> : State<T> {
         override val userWritable: Boolean = true,
         override val companionNodeId: String? = null,
     ) : ScreenState<List<String>> {
-
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
             context: GenerationContext,
@@ -806,32 +833,34 @@ sealed interface ScreenState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.StringType(isList = true).convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.StringType(isList = true).convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """
-                    _${getFlowName(context)}.value = $expression 
+                    _${getFlowName(context)}.value = $expression
                 """,
                     )
                 }
             return builder.build()
         }
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """
                     _${getFlowName(context)}.value = emptyList()
                 """,
             )
-        }
 
         override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
             val flowName = getFlowName(context)
-            return FunSpec.builder(getUpdateMethodName(context))
+            return FunSpec
+                .builder(getUpdateMethodName(context))
                 .addParameter("newValue", List::class.parameterizedBy(String::class))
                 .addStatement("_$flowName.value = newValue")
                 .build()
@@ -839,32 +868,34 @@ sealed interface ScreenState<T> : State<T> {
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
-            val backingProperty = PropertySpec.builder(
-                "_${getFlowName(context)}",
-                ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
-                    List::class.parameterizedBy(
-                        String::class
-                    )
-                ),
-            )
-                .addModifiers(KModifier.PRIVATE)
-                .initializer("""MutableStateFlow(List(0) { "" })""")
-                .build()
-            val property = PropertySpec.builder(
-                getFlowName(context),
-                ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
-                    List::class.parameterizedBy(
-                        String::class
-                    )
-                ),
-            )
-                .initializer("""_${getFlowName(context)}""")
-                .build()
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_${getFlowName(context)}",
+                        ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
+                            List::class.parameterizedBy(
+                                String::class,
+                            ),
+                        ),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer("""MutableStateFlow(List(0) { "" })""")
+                    .build()
+            val property =
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                            List::class.parameterizedBy(
+                                String::class,
+                            ),
+                        ),
+                    ).initializer("""_${getFlowName(context)}""")
+                    .build()
             return listOf(
                 backingProperty,
-                property
+                property,
             )
         }
 
@@ -886,46 +917,52 @@ sealed interface ScreenState<T> : State<T> {
         ): CodeBlock {
             val builder = CodeBlock.builder()
             val composeContext = context.getCurrentComposableContext()
-            val newItems = composeContext.addComposeFileVariable(
-                id = id, "newItems", dryRun = dryRun
-            )
+            val newItems =
+                composeContext.addComposeFileVariable(
+                    id = id,
+                    "newItems",
+                    dryRun = dryRun,
+                )
             if (singleValueOnly) {
                 builder.add(
                     CodeBlock.of(
                         """
-                    val $newItems = ${getReadVariableName(project, context)}.%M() 
-                    if (${newItems}.%M()) {
-                        ${newItems}.clear()
-                        ${newItems}.add(it)
+                    val $newItems = ${getReadVariableName(project, context)}.%M()
+                    if ($newItems.%M()) {
+                        $newItems.clear()
+                        $newItems.add(it)
                     } else {
-                        ${newItems}.add(it)
+                        $newItems.add(it)
                     }
                     ${canvasEditable.viewModelName}.${getUpdateMethodName(context)}($newItems)
                 """,
                         MemberHolder.Kotlin.Collection.toMutableList,
-                        MemberHolder.Kotlin.Collection.isNotEmpty
+                        MemberHolder.Kotlin.Collection.isNotEmpty,
                     ),
                 )
             } else {
                 builder.add(
                     CodeBlock.of(
                         """
-                    val $newItems = ${getReadVariableName(project, context)}.%M() 
+                    val $newItems = ${getReadVariableName(project, context)}.%M()
                     if ($newItems.contains(it)) {
-                        ${newItems}.remove(it)
+                        $newItems.remove(it)
                     } else {
-                        ${newItems}.add(it)
+                        $newItems.add(it)
                     }
                     ${canvasEditable.viewModelName}.${getUpdateMethodName(context)}($newItems)
-                """, MemberHolder.Kotlin.Collection.toMutableList
+                """,
+                        MemberHolder.Kotlin.Collection.toMutableList,
                     ),
                 )
             }
             return builder.build()
         }
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.StringType(isList = true)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.StringType(isList = true)
     }
 
     /**
@@ -940,23 +977,24 @@ sealed interface ScreenState<T> : State<T> {
         excludeId: Boolean = true,
         excludeName: Boolean = true,
     ): Boolean {
-        val idEquality = if (excludeId) {
-            true
-        } else {
-            id == other.id
-        }
-        val nameEquality = if (excludeName) {
-            true
-        } else {
-            name == other.name
-        }
+        val idEquality =
+            if (excludeId) {
+                true
+            } else {
+                id == other.id
+            }
+        val nameEquality =
+            if (excludeName) {
+                true
+            } else {
+                name == other.name
+            }
         return idEquality && nameEquality
     }
 }
 
 @Serializable
 sealed interface AppState<T> : State<T> {
-
     @Serializable
     data class StringAppState(
         override val id: StateId = Uuid.random().toString(),
@@ -965,7 +1003,6 @@ sealed interface AppState<T> : State<T> {
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
     ) : AppState<String> {
-
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -989,13 +1026,15 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context))
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec
+                .builder(getUpdateMethodName(context))
                 .build()
-        }
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.StringType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.StringType(isList = false)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
@@ -1004,12 +1043,14 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.StringType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.StringType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
                         ${ViewModelConstant.flowSettings.name}.putString("$name", $expression)
@@ -1021,29 +1062,28 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putString("$name", "$defaultValue")
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
-                PropertySpec.builder(
-                    getFlowName(context),
-                    StateFlow::class.parameterizedBy(String::class),
-                )
-                    .initializer(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(String::class),
+                    ).initializer(
                         """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$name", 
+                         "$name",
                          defaultValue = "$defaultValue"
                        )
                        .%M(
@@ -1056,10 +1096,8 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.stateIn,
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.Flow.SharingStarted,
-                    )
-                    .build()
+                    ).build(),
             )
-        }
     }
 
     @Serializable
@@ -1071,26 +1109,23 @@ sealed interface AppState<T> : State<T> {
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
     ) : AppState<Int> {
-
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
         override fun generateWriteBlock(
             project: Project,
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.IntType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.IntType(isList = false)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
@@ -1099,12 +1134,14 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.IntType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.IntType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
                         ${ViewModelConstant.flowSettings.name}.putInt("$name", $expression)
@@ -1116,33 +1153,31 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putInt("$name", $defaultValue)
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
-                PropertySpec.builder(
-                    getFlowName(context),
-                    StateFlow::class.parameterizedBy(Int::class)
-                )
-                    .initializer(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Int::class),
+                    ).initializer(
                         """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$name", 
+                         "$name",
                          defaultValue = $defaultValue,
                        )
                        .%M(
@@ -1155,10 +1190,8 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.stateIn,
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.Flow.SharingStarted,
-                    )
-                    .build()
+                    ).build(),
             )
-        }
     }
 
     @Serializable
@@ -1170,26 +1203,23 @@ sealed interface AppState<T> : State<T> {
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
     ) : AppState<Float> {
-
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
         override fun generateWriteBlock(
             project: Project,
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.FloatType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.FloatType(isList = false)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
@@ -1198,12 +1228,14 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.FloatType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.FloatType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
                         ${ViewModelConstant.flowSettings.name}.putFloat("$name", $expression)
@@ -1215,33 +1247,31 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putFloat("$name", ${defaultValue}f)
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
-                PropertySpec.builder(
-                    getFlowName(context),
-                    StateFlow::class.parameterizedBy(Float::class)
-                )
-                    .initializer(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Float::class),
+                    ).initializer(
                         """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$name", 
+                         "$name",
                          defaultValue = ${defaultValue}f,
                        )
                        .%M(
@@ -1254,10 +1284,8 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.stateIn,
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.Flow.SharingStarted,
-                    )
-                    .build()
+                    ).build(),
             )
-        }
     }
 
     @Serializable
@@ -1268,26 +1296,25 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: Boolean = false,
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
-    ) : AppState<Boolean>, BooleanState {
+    ) : AppState<Boolean>,
+        BooleanState {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
         override fun generateWriteBlock(
             project: Project,
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.BooleanType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.BooleanType(isList = false)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
@@ -1296,12 +1323,14 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.BooleanType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.BooleanType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
                         ${ViewModelConstant.flowSettings.name}.putBoolean("$name", $expression)
@@ -1313,47 +1342,44 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putBoolean("$name", $defaultValue)
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
-        override fun generateToggleStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateToggleStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putBoolean("$name", !${
                     getFlowName(
-                        context
+                        context,
                     )
                 }.value)
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
-                PropertySpec.builder(
-                    getFlowName(context),
-                    StateFlow::class.parameterizedBy(Boolean::class),
-                )
-                    .initializer(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Boolean::class),
+                    ).initializer(
                         """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$name", 
+                         "$name",
                          defaultValue = $defaultValue,
                        )
                        .%M(
@@ -1366,10 +1392,8 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.stateIn,
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.Flow.SharingStarted,
-                    )
-                    .build()
+                    ).build(),
             )
-        }
     }
 
     @Serializable
@@ -1385,21 +1409,19 @@ sealed interface AppState<T> : State<T> {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
         override fun generateWriteBlock(
             project: Project,
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.InstantType(isList = false)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.InstantType(isList = false)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
@@ -1408,15 +1430,17 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
-                    val expression = ComposeFlowType.InstantType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.InstantType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
-                        ${ViewModelConstant.flowSettings.name}.putLong("$name", ${expression}.toEpochMilliseconds())
+                        ${ViewModelConstant.flowSettings.name}.putLong("$name", $expression.toEpochMilliseconds())
                     }""",
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.launch,
@@ -1425,34 +1449,32 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putLong("$name", ${defaultValue.generateCode()}.toEpochMilliseconds())
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
-                PropertySpec.builder(
-                    getFlowName(context),
-                    StateFlow::class.parameterizedBy(Instant::class),
-                )
-                    .initializer(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Instant::class),
+                    ).initializer(
                         CodeBlock.of(
                             """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$name", 
+                         "$name",
                          defaultValue = ${defaultValue.generateCode()}.toEpochMilliseconds(),
                        )
                        .%M { %M.fromEpochMilliseconds(it) }
@@ -1468,11 +1490,9 @@ sealed interface AppState<T> : State<T> {
                             MemberHolder.Coroutines.Flow.stateIn,
                             MemberHolder.PreCompose.viewModelScope,
                             MemberHolder.Coroutines.Flow.SharingStarted,
-                        )
-                    )
-                    .build()
+                        ),
+                    ).build(),
             )
-        }
     }
 
     @Serializable
@@ -1483,8 +1503,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: List<String> = listOf(""),
         override val isList: Boolean = true,
         override val userWritable: Boolean = true,
-    ) : AppState<List<String>>, ListAppState {
-
+    ) : AppState<List<String>>,
+        ListAppState {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1500,11 +1520,12 @@ sealed interface AppState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType =
             ComposeFlowType.StringType(
                 isList = !asNonList,
             )
@@ -1514,30 +1535,25 @@ sealed interface AppState<T> : State<T> {
             context: GenerationContext,
             readProperty: AssignableProperty,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return super.generateClearStateCode(stateName = name)
-        }
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            super.generateClearStateCode(stateName = name)
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
                 super.generateStateProperty(
                     propertyName = getFlowName(context),
                     stateName = name,
                     typeClassName = ClassHolder.Kotlin.String,
-                )
+                ),
             )
-        }
 
         override fun generateAddValueToStateCode(
             project: Project,
@@ -1546,14 +1562,16 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
                     val state = project.findLocalStateOrNull(id) ?: return builder.build()
                     val writeState = state as? WriteableState ?: return builder.build()
-                    val expression = ComposeFlowType.StringType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.StringType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
                         val list = ${writeState.getFlowName(context)}.value.toMutableList().apply {
@@ -1578,8 +1596,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: List<Int> = listOf(0),
         override val isList: Boolean = true,
         override val userWritable: Boolean = true,
-    ) : AppState<List<Int>>, ListAppState {
-
+    ) : AppState<List<Int>>,
+        ListAppState {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1595,42 +1613,37 @@ sealed interface AppState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.IntType(isList = !asNonList)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.IntType(isList = !asNonList)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
             context: GenerationContext,
             readProperty: AssignableProperty,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return super.generateClearStateCode(stateName = name)
-        }
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            super.generateClearStateCode(stateName = name)
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
                 super.generateStateProperty(
                     propertyName = getFlowName(context),
                     stateName = name,
                     typeClassName = ClassHolder.Kotlin.Int,
-                )
+                ),
             )
-        }
 
         override fun generateAddValueToStateCode(
             project: Project,
@@ -1639,14 +1652,16 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
                     val writeState = project.findLocalStateOrNull(id)
                     if (writeState != null && writeState is WriteableState) {
-                        val expression = ComposeFlowType.IntType().convertCodeFromType(
-                            inputType = readProperty.valueType(project),
-                            codeBlock = readExpression,
-                        )
+                        val expression =
+                            ComposeFlowType.IntType().convertCodeFromType(
+                                inputType = readProperty.valueType(project),
+                                codeBlock = readExpression,
+                            )
                         builder.addStatement(
                             """%M.%M {
                         val list = ${writeState.getFlowName(context)}.value.toMutableList().apply {
@@ -1672,8 +1687,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: List<Float> = listOf(0f),
         override val isList: Boolean = true,
         override val userWritable: Boolean = true,
-    ) : AppState<List<Float>>, ListAppState {
-
+    ) : AppState<List<Float>>,
+        ListAppState {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1689,42 +1704,37 @@ sealed interface AppState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.FloatType(isList = !asNonList)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.FloatType(isList = !asNonList)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
             context: GenerationContext,
             readProperty: AssignableProperty,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return super.generateClearStateCode(stateName = name)
-        }
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            super.generateClearStateCode(stateName = name)
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
                 super.generateStateProperty(
                     propertyName = getFlowName(context),
                     stateName = name,
                     typeClassName = ClassHolder.Kotlin.Float,
-                )
+                ),
             )
-        }
 
         override fun generateAddValueToStateCode(
             project: Project,
@@ -1733,14 +1743,16 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
                     val writeState = project.findLocalStateOrNull(id)
                     if (writeState != null && writeState is WriteableState) {
-                        val expression = ComposeFlowType.FloatType().convertCodeFromType(
-                            inputType = readProperty.valueType(project),
-                            codeBlock = readExpression,
-                        )
+                        val expression =
+                            ComposeFlowType.FloatType().convertCodeFromType(
+                                inputType = readProperty.valueType(project),
+                                codeBlock = readExpression,
+                            )
                         builder.addStatement(
                             """%M.%M {
                         val list = ${writeState.getFlowName(context)}.value.toMutableList().apply {
@@ -1766,8 +1778,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: List<Boolean> = listOf(false),
         override val isList: Boolean = true,
         override val userWritable: Boolean = true,
-    ) : AppState<List<Boolean>>, ListAppState {
-
+    ) : AppState<List<Boolean>>,
+        ListAppState {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1783,42 +1795,37 @@ sealed interface AppState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.BooleanType(isList = !asNonList)
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.BooleanType(isList = !asNonList)
 
         override fun generateUpdateStateCodeToViewModel(
             project: Project,
             context: GenerationContext,
             readProperty: AssignableProperty,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return super.generateClearStateCode(stateName = name)
-        }
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            super.generateClearStateCode(stateName = name)
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
                 super.generateStateProperty(
                     propertyName = getFlowName(context),
                     stateName = name,
                     typeClassName = ClassHolder.Kotlin.Boolean,
-                )
+                ),
             )
-        }
 
         override fun generateAddValueToStateCode(
             project: Project,
@@ -1827,14 +1834,16 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
                     val writeState = project.findLocalStateOrNull(id)
                     if (writeState != null && writeState is WriteableState) {
-                        val expression = ComposeFlowType.BooleanType().convertCodeFromType(
-                            inputType = readProperty.valueType(project),
-                            codeBlock = readExpression,
-                        )
+                        val expression =
+                            ComposeFlowType.BooleanType().convertCodeFromType(
+                                inputType = readProperty.valueType(project),
+                                codeBlock = readExpression,
+                            )
                         builder.addStatement(
                             """%M.%M {
                         val list = ${writeState.getFlowName(context)}.value.toMutableList().apply {
@@ -1860,8 +1869,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: List<InstantWrapper> = listOf(InstantWrapper(null)),
         override val isList: Boolean = true,
         override val userWritable: Boolean = true,
-    ) : AppState<List<InstantWrapper>>, ListAppState {
-
+    ) : AppState<List<InstantWrapper>>,
+        ListAppState {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1877,11 +1886,12 @@ sealed interface AppState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType =
             ComposeFlowType.StringType(
                 isList = !asNonList,
             )
@@ -1891,30 +1901,25 @@ sealed interface AppState<T> : State<T> {
             context: GenerationContext,
             readProperty: AssignableProperty,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return super.generateClearStateCode(stateName = name)
-        }
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            super.generateClearStateCode(stateName = name)
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
-        ): List<PropertySpec> {
-            return listOf(
+            context: GenerationContext,
+        ): List<PropertySpec> =
+            listOf(
                 super.generateStateProperty(
                     propertyName = getFlowName(context),
                     stateName = name,
                     typeClassName = ClassHolder.Kotlin.Long,
-                )
+                ),
             )
-        }
 
         override fun generateAddValueToStateCode(
             project: Project,
@@ -1923,14 +1928,16 @@ sealed interface AppState<T> : State<T> {
             dryRun: Boolean,
         ): CodeBlock {
             val builder = CodeBlock.builder()
-            readProperty.transformedCodeBlock(project, context, dryRun = dryRun)
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
                 .let { readExpression ->
                     val state = project.findLocalStateOrNull(id) ?: return builder.build()
                     val writeState = state as? WriteableState ?: return builder.build()
-                    val expression = ComposeFlowType.StringType().convertCodeFromType(
-                        inputType = readProperty.valueType(project),
-                        codeBlock = readExpression,
-                    )
+                    val expression =
+                        ComposeFlowType.StringType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
                     builder.addStatement(
                         """%M.%M {
                         val list = ${writeState.getFlowName(context)}.value.toMutableList().apply {
@@ -1956,8 +1963,9 @@ sealed interface AppState<T> : State<T> {
         override val isList: Boolean = true,
         override val dataTypeId: DataTypeId,
         override val userWritable: Boolean = true,
-    ) : AppState<List<DataTypeDefaultValue>>, ListAppState, AppStateWithDataTypeId {
-
+    ) : AppState<List<DataTypeDefaultValue>>,
+        ListAppState,
+        AppStateWithDataTypeId {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1973,11 +1981,12 @@ sealed interface AppState<T> : State<T> {
             canvasEditable: CanvasEditable,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType =
             ComposeFlowType.CustomDataType(
                 isList = !asNonList,
                 dataTypeId = dataTypeId,
@@ -1988,21 +1997,17 @@ sealed interface AppState<T> : State<T> {
             context: GenerationContext,
             readProperty: AssignableProperty,
             dryRun: Boolean,
-        ): CodeBlock {
-            return CodeBlock.of("")
-        }
+        ): CodeBlock = CodeBlock.of("")
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return super.generateClearStateCode(stateName = name)
-        }
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            super.generateClearStateCode(stateName = name)
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
             return listOf(
@@ -2010,7 +2015,7 @@ sealed interface AppState<T> : State<T> {
                     propertyName = getFlowName(context),
                     stateName = name,
                     typeClassName = dataType.asKotlinPoetClassName(project),
-                )
+                ),
             )
         }
 
@@ -2034,8 +2039,8 @@ sealed interface AppState<T> : State<T> {
         override val isList: Boolean = false,
         override val dataTypeId: DataTypeId = defaultValue?.id ?: EmptyDataType.id,
         override val userWritable: Boolean = true,
-    ) : AppState<DataType>, AppStateWithDataTypeId {
-
+    ) : AppState<DataType>,
+        AppStateWithDataTypeId {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -2059,7 +2064,10 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType =
             ComposeFlowType.CustomDataType(
                 isList = false,
                 dataTypeId = dataTypeId,
@@ -2075,38 +2083,36 @@ sealed interface AppState<T> : State<T> {
             return builder.build()
         }
 
-        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
-            return FunSpec.builder(getUpdateMethodName(context)).build()
-        }
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec =
+            FunSpec.builder(getUpdateMethodName(context)).build()
 
-        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock {
-            return CodeBlock.of(
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
                 """%M.%M {
                     ${ViewModelConstant.flowSettings.name}.putString("$name", "{}")
                 }""",
                 MemberHolder.PreCompose.viewModelScope,
                 MemberHolder.Coroutines.launch,
             )
-        }
 
         override fun generateStatePropertiesToViewModel(
             project: Project,
-            context: GenerationContext
+            context: GenerationContext,
         ): List<PropertySpec> {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
             return listOf(
-                PropertySpec.builder(
-                    getFlowName(context),
-                    ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
-                        dataType.asKotlinPoetClassName(
-                            project
-                        )
-                    ),
-                )
-                    .initializer(
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
+                            dataType.asKotlinPoetClassName(
+                                project,
+                            ),
+                        ),
+                    ).initializer(
                         """
                        ${ViewModelConstant.flowSettings.name}.%M(
-                         "$name", 
+                         "$name",
                          defaultValue = "{}"
                        ).%M {
                             ${ViewModelConstant.jsonSerializer.name}.decodeFromString<%T>(it)
@@ -2114,7 +2120,7 @@ sealed interface AppState<T> : State<T> {
                        .%M(
                          scope = %M,
                          started = %M.WhileSubscribed(5_000),
-                         initialValue = %T(), 
+                         initialValue = %T(),
                        )
                     """,
                         MemberHolder.Settings.getStringFlow,
@@ -2124,8 +2130,7 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.PreCompose.viewModelScope,
                         MemberHolder.Coroutines.Flow.SharingStarted,
                         dataType.asKotlinPoetClassName(project),
-                    )
-                    .build()
+                    ).build(),
             )
         }
     }
@@ -2143,17 +2148,18 @@ sealed interface AppState<T> : State<T> {
     }
 
     companion object {
-        fun entries(): List<AppState<*>> = listOf(
-            StringAppState(name = ""),
-            IntAppState(name = ""),
-            FloatAppState(name = ""),
-            BooleanAppState(name = ""),
-            InstantAppState(name = ""),
-            CustomDataTypeAppState(name = ""),
-        )
+        fun entries(): List<AppState<*>> =
+            listOf(
+                StringAppState(name = ""),
+                IntAppState(name = ""),
+                FloatAppState(name = ""),
+                BooleanAppState(name = ""),
+                InstantAppState(name = ""),
+                CustomDataTypeAppState(name = ""),
+            )
 
-        fun indexOf(appState: AppState<*>): Int {
-            return when (appState) {
+        fun indexOf(appState: AppState<*>): Int =
+            when (appState) {
                 is StringAppState -> 0
                 is IntAppState -> 1
                 is FloatAppState -> 2
@@ -2162,10 +2168,9 @@ sealed interface AppState<T> : State<T> {
                 is CustomDataTypeAppState -> 5
                 else -> throw IllegalArgumentException("Invalid appState $appState")
             }
-        }
 
-        fun fromOrdinal(ordinal: Int): AppState<*> {
-            return when (ordinal) {
+        fun fromOrdinal(ordinal: Int): AppState<*> =
+            when (ordinal) {
                 0 -> StringAppState(name = "")
                 1 -> IntAppState(name = "")
                 2 -> FloatAppState(name = "")
@@ -2174,7 +2179,6 @@ sealed interface AppState<T> : State<T> {
                 5 -> CustomDataTypeAppState(name = "")
                 else -> throw IllegalArgumentException("Invalid ordinal : $ordinal")
             }
-        }
     }
 }
 
@@ -2191,8 +2195,8 @@ fun <T> AppState<T>.copy(
         name: String,
         defaultValue: String,
         isList: Boolean,
-    ): AppState<*> {
-        return if (isList) {
+    ): AppState<*> =
+        if (isList) {
             AppState.StringListAppState(
                 id = newId,
                 name = name,
@@ -2205,15 +2209,14 @@ fun <T> AppState<T>.copy(
                 defaultValue = defaultValue,
             )
         }
-    }
 
     fun copyIntState(
         newId: StateId,
         name: String,
         defaultValue: Int,
         isList: Boolean,
-    ): AppState<*> {
-        return if (isList) {
+    ): AppState<*> =
+        if (isList) {
             AppState.IntListAppState(
                 id = newId,
                 name = name,
@@ -2226,15 +2229,14 @@ fun <T> AppState<T>.copy(
                 defaultValue = defaultValue,
             )
         }
-    }
 
     fun copyFloatState(
         newId: StateId,
         name: String,
         defaultValue: Float,
         isList: Boolean,
-    ): AppState<*> {
-        return if (isList) {
+    ): AppState<*> =
+        if (isList) {
             AppState.FloatListAppState(
                 id = newId,
                 name = name,
@@ -2247,15 +2249,14 @@ fun <T> AppState<T>.copy(
                 defaultValue = defaultValue,
             )
         }
-    }
 
     fun copyBooleanState(
         newId: StateId,
         name: String,
         defaultValue: Boolean,
         isList: Boolean,
-    ): AppState<*> {
-        return if (isList) {
+    ): AppState<*> =
+        if (isList) {
             AppState.BooleanListAppState(
                 id = newId,
                 name = name,
@@ -2268,15 +2269,14 @@ fun <T> AppState<T>.copy(
                 defaultValue = defaultValue,
             )
         }
-    }
 
     fun copyInstantState(
         newId: StateId,
         name: String,
         defaultValue: InstantWrapper,
         isList: Boolean,
-    ): AppState<*> {
-        return if (isList) {
+    ): AppState<*> =
+        if (isList) {
             AppState.InstantListAppState(
                 id = newId,
                 name = name,
@@ -2289,15 +2289,14 @@ fun <T> AppState<T>.copy(
                 defaultValue = defaultValue,
             )
         }
-    }
 
     fun copyCustomDataTypeState(
         newId: StateId,
         name: String,
         isList: Boolean,
         dataTypeId: DataTypeId,
-    ): AppState<*> {
-        return if (isList) {
+    ): AppState<*> =
+        if (isList) {
             AppState.CustomDataTypeListAppState(
                 id = newId,
                 name = name,
@@ -2310,7 +2309,6 @@ fun <T> AppState<T>.copy(
                 dataTypeId = dataTypeId,
             )
         }
-    }
 
     return when (this) {
         is AppState.BooleanAppState -> {
@@ -2427,7 +2425,6 @@ private const val authenticatedUser = "authenticatedUser"
 
 @Serializable
 sealed interface AuthenticatedUserState : ReadableState {
-
     override fun generateVariableInitializationBlock(
         project: Project,
         context: GenerationContext,
@@ -2436,7 +2433,8 @@ sealed interface AuthenticatedUserState : ReadableState {
         val authenticatedUser = "authenticatedUser"
         context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
             id = authenticatedUser,
-            authenticatedUser, MemberHolder.ComposeFlow.LocalAuthenticatedUser
+            authenticatedUser,
+            MemberHolder.ComposeFlow.LocalAuthenticatedUser,
         )
         // Initialize the authenticatedUser once in the compose file instead of initializing it in
         // every state that has a reference
@@ -2454,11 +2452,12 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of("""$authenticatedUser != null""")
+        ): CodeBlock = CodeBlock.of("""$authenticatedUser != null""")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.BooleanType()
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.BooleanType()
     }
 
     @Serializable
@@ -2472,11 +2471,12 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of("""(${authenticatedUser}?.displayName ?: "Invalid display name")""")
+        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.displayName ?: "Invalid display name")""")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.StringType()
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.StringType()
     }
 
     @Serializable
@@ -2490,11 +2490,12 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of("""(${authenticatedUser}?.email ?: "Invalid email")""")
+        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.email ?: "Invalid email")""")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.StringType()
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.StringType()
     }
 
     @Serializable
@@ -2508,11 +2509,12 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of("""(${authenticatedUser}?.phoneNumber ?: "Invalid phone number")""")
+        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.phoneNumber ?: "Invalid phone number")""")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.StringType()
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.StringType()
     }
 
     @Serializable
@@ -2526,11 +2528,12 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of("""(${authenticatedUser}?.photoURL ?: "Invalid photo url")""")
+        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.photoURL ?: "Invalid photo url")""")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.StringType()
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.StringType()
     }
 
     @Serializable
@@ -2544,21 +2547,23 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of("""(${authenticatedUser}?.isAnonymous ?: false)""")
+        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.isAnonymous ?: false)""")
 
-        override fun valueType(project: Project, asNonList: Boolean): ComposeFlowType =
-            ComposeFlowType.BooleanType()
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ): ComposeFlowType = ComposeFlowType.BooleanType()
     }
 
     companion object {
-        fun entries(): List<AuthenticatedUserState> = listOf(
-            IsSignedIn,
-            DisplayName,
-            Email,
-            PhoneNumber,
-            PhotoUrl,
-            IsAnonymous,
-        )
+        fun entries(): List<AuthenticatedUserState> =
+            listOf(
+                IsSignedIn,
+                DisplayName,
+                Email,
+                PhoneNumber,
+                PhotoUrl,
+                IsAnonymous,
+            )
     }
 }

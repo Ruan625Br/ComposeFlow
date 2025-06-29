@@ -81,30 +81,38 @@ fun ProjectEditorContent(
     onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
-    val viewModel = viewModel(modelClass = ProjectEditorViewModel::class) {
-        ProjectEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
-    }
+    val viewModel =
+        viewModel(modelClass = ProjectEditorViewModel::class) {
+            ProjectEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
+        }
     val project = viewModel.project.collectAsState().value
     val aiAssistantUiState by viewModel.aiAssistantUiState.collectAsState()
 
     val projectEditorNavigator = rememberNavigator()
-    val currentDestination = TopLevelDestination.entries.firstOrNull {
-        it.route == projectEditorNavigator.currentEntry.collectAsState(null).value?.route?.route
-    }
-    val showAiChatDialog = viewModel.showAiChatDialog.collectAsState().value
-    val aiChatToggleVisibilityModifier = Modifier.onPreviewKeyEvent { event ->
-        if (event.type == KeyEventType.KeyDown &&
-            event.key == Key.K &&
-            (event.isMetaPressed || event.isCtrlPressed)
-        ) {
-            viewModel.onToggleShowAiChatDialog()
-            true
-        } else {
-            false
+    val currentDestination =
+        TopLevelDestination.entries.firstOrNull {
+            it.route ==
+                projectEditorNavigator.currentEntry
+                    .collectAsState(null)
+                    .value
+                    ?.route
+                    ?.route
         }
-    }
+    val showAiChatDialog = viewModel.showAiChatDialog.collectAsState().value
+    val aiChatToggleVisibilityModifier =
+        Modifier.onPreviewKeyEvent { event ->
+            if (event.type == KeyEventType.KeyDown &&
+                event.key == Key.K &&
+                (event.isMetaPressed || event.isCtrlPressed)
+            ) {
+                viewModel.onToggleShowAiChatDialog()
+                true
+            } else {
+                false
+            }
+        }
     Surface(
-        modifier = aiChatToggleVisibilityModifier
+        modifier = aiChatToggleVisibilityModifier,
     ) {
         val statusBarViewModel =
             viewModel(modelClass = StatusBarViewModel::class) {
@@ -135,13 +143,15 @@ fun ProjectEditorContent(
                     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
                         var selectedItem by remember(currentDestination) {
                             mutableStateOf(
-                                currentDestination?.ordinal ?: 0
+                                currentDestination?.ordinal ?: 0,
                             )
                         }
                         Column(
-                            modifier = Modifier.width(40.dp)
-                                .fillMaxHeight()
-                                .background(color = MaterialTheme.colorScheme.surface),
+                            modifier =
+                                Modifier
+                                    .width(40.dp)
+                                    .fillMaxHeight()
+                                    .background(color = MaterialTheme.colorScheme.surface),
                         ) {
                             TopLevelDestination.entries.forEachIndexed { index, item ->
                                 Tooltip(item.label) {
@@ -149,28 +159,34 @@ fun ProjectEditorContent(
                                         selected = selectedItem == item.ordinal,
                                         onClick = {
                                             projectEditorNavigator.navigate(
-                                                item.route, options = NavOptions(
-                                                    popUpTo = PopUpTo(
-                                                        route = item.route
-                                                    )
-                                                )
+                                                item.route,
+                                                options =
+                                                    NavOptions(
+                                                        popUpTo =
+                                                            PopUpTo(
+                                                                route = item.route,
+                                                            ),
+                                                    ),
                                             )
                                             selectedItem = index
                                         },
-                                        modifier = Modifier
-                                            .size(40.dp)
-                                            .padding(5.dp)
-                                            .testTag("$NavigationRailTestTag/${item.name}"),
+                                        modifier =
+                                            Modifier
+                                                .size(40.dp)
+                                                .padding(5.dp)
+                                                .testTag("$NavigationRailTestTag/${item.name}"),
                                     ) { state ->
                                         val tint by LocalIconButtonStyle.current.colors.foregroundFor(
                                             state,
                                         )
-                                        val painterProvider = rememberResourcePainterProvider(
-                                            item.iconPath,
-                                            Icons::class.java,
-                                        )
+                                        val painterProvider =
+                                            rememberResourcePainterProvider(
+                                                item.iconPath,
+                                                Icons::class.java,
+                                            )
                                         val painter by painterProvider.getPainter(
-                                            org.jetbrains.jewel.ui.painter.hints.Size(20),
+                                            org.jetbrains.jewel.ui.painter.hints
+                                                .Size(20),
                                             Stroke(tint),
                                         )
                                         Icon(painter = painter, "icon")
@@ -180,9 +196,10 @@ fun ProjectEditorContent(
                         }
                         VerticalDivider(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            modifier = Modifier
-                                .fillMaxHeight()
-                                .width(1.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxHeight()
+                                    .width(1.dp),
                         )
 
                         ProjectEditorNavHost(
@@ -190,7 +207,7 @@ fun ProjectEditorContent(
                             project = project,
                             aiAssistantUiState = aiAssistantUiState,
                             onUpdateProject = viewModel::onUpdateProject,
-                            screenMaxSize = screenMaxSize
+                            screenMaxSize = screenMaxSize,
                         )
                     }
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
