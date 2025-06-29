@@ -14,7 +14,13 @@ sealed class ToolArgs {
      * Indicates the execution status of the tool in ComposeFlow app.
      */
     var status: ToolExecutionStatus = ToolExecutionStatus.NotExecuted
-    val result: String = "Successfully executed."
+    
+    /**
+     * The result of the tool execution. For tools that return data (like list_app_states),
+     * this will contain the returned data. For tools that perform actions, this contains
+     * a success/error message.
+     */
+    var result: String = "Successfully executed."
 
     @Serializable
     @SerialName("add_compose_node_to_container")

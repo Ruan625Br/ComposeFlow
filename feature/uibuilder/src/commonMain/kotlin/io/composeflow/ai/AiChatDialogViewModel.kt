@@ -34,8 +34,7 @@ class AiChatDialogViewModel(
     private val aiAssistantUiState: AiAssistantUiState,
     private val llmRepository: LlmRepository = LlmRepository(),
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdTokenArg),
-    private val uiBuilderOperator: UiBuilderOperator = UiBuilderOperator(),
-    private val appStateEditorOperator: AppStateEditorOperator = AppStateEditorOperator(),
+    private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
     private val onAiAssistantUiStateUpdated: (AiAssistantUiState) -> Unit,
 ) : ViewModel() {
 
@@ -135,7 +134,6 @@ class AiChatDialogViewModel(
     }
 
     private fun dispatchToolResponse(toolArgs: ToolArgs): EventResult {
-        Logger.i("dispatchToolResponse: $toolArgs")
         if (toolArgs !is ToolArgs.FakeArgs) {
             recordOperation(
                 project,
@@ -144,111 +142,7 @@ class AiChatDialogViewModel(
                 )
             )
         }
-        return when (toolArgs) {
-            is ToolArgs.AddComposeNodeArgs -> {
-                uiBuilderOperator.onAddComposeNodeToContainerNode(
-                    project,
-                    toolArgs.containerNodeId,
-                    toolArgs.composeNodeYaml,
-                    toolArgs.indexToDrop
-                )
-            }
-
-            is ToolArgs.AddModifierArgs -> {
-                uiBuilderOperator.onAddModifier(
-                    project,
-                    toolArgs.composeNodeId,
-                    toolArgs.modifierYaml
-                )
-            }
-
-            is ToolArgs.MoveComposeNodeToContainerArgs -> {
-                uiBuilderOperator.onMoveComposeNodeToContainer(
-                    project,
-                    toolArgs.composeNodeId,
-                    toolArgs.containerNodeId,
-                    toolArgs.index
-                )
-            }
-
-            is ToolArgs.RemoveComposeNodeArgs -> {
-                uiBuilderOperator.onRemoveComposeNode(
-                    project,
-                    toolArgs.composeNodeId
-                )
-            }
-
-            is ToolArgs.RemoveModifierArgs -> {
-                uiBuilderOperator.onRemoveModifier(
-                    project,
-                    toolArgs.composeNodeId,
-                    toolArgs.index
-                )
-            }
-
-            is ToolArgs.SwapModifiersArgs -> {
-                uiBuilderOperator.onSwapModifiers(
-                    project,
-                    toolArgs.composeNodeId,
-                    toolArgs.fromIndex,
-                    toolArgs.toIndex
-                )
-            }
-
-            is ToolArgs.UpdateModifierArgs -> {
-                uiBuilderOperator.onUpdateModifier(
-                    project,
-                    toolArgs.composeNodeId,
-                    toolArgs.index,
-                    toolArgs.modifierYaml
-                )
-            }
-
-            is ToolArgs.AddAppStateArgs -> {
-                appStateEditorOperator.onAddAppState(
-                    project,
-                    toolArgs.appStateYaml
-                )
-            }
-
-            is ToolArgs.DeleteAppStateArgs -> {
-                appStateEditorOperator.onDeleteAppState(
-                    project,
-                    toolArgs.appStateId
-                )
-            }
-
-            is ToolArgs.UpdateAppStateArgs -> {
-                appStateEditorOperator.onUpdateAppState(
-                    project,
-                    toolArgs.appStateYaml
-                )
-            }
-
-            is ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs -> {
-                appStateEditorOperator.onUpdateCustomDataTypeListDefaultValues(
-                    project,
-                    toolArgs.appStateId,
-                    toolArgs.defaultValuesYaml
-                )
-            }
-
-            is ToolArgs.ListAppStatesArgs -> {
-                // TODO: List app states doesn't return EventResult, it returns a string
-                // We need to handle this differently or modify the method
-                EventResult()
-            }
-
-            is ToolArgs.GetAppStateArgs -> {
-                // TODO: Get app state doesn't return EventResult, it returns a string
-                // We need to handle this differently or modify the method
-                EventResult()
-            }
-
-            is ToolArgs.FakeArgs -> {
-                EventResult()
-            }
-        }
+        return toolDispatcher.dispatchToolResponse(project, toolArgs)
     }
 
     fun onStopGeneration() {
