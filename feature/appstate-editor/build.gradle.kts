@@ -28,6 +28,17 @@ kotlin {
             implementation(libs.precompose.viewmodel)
         }
 
+        // Configure KSP for LLM tools
+        dependencies {
+            add("kspDesktop", project(":ksp-llm-tools"))
+        }
+
+        // Configure KSP options
+        ksp {
+            // Set output directory for LLM tool JSON files
+            arg("llmToolsOutputDir", "${project.buildDir}/generated/llm-tools")
+        }
+
         commonTest.dependencies {
             implementation(project(":core:model"))
             implementation(kotlin("test-junit"))
@@ -43,14 +54,25 @@ kotlin {
     }
 }
 
-// Configure KSP for LLM tools
-dependencies {
-    add("kspDesktop", project(":ksp-llm-tools"))
+// Add a specific task to run KSP
+tasks.register("runKsp") {
+    group = "ksp"
+    description = "Run KSP to generate LLM tool JSON files"
+
+    // Create the output directory
+    doFirst {
+        mkdir("${project.buildDir}/generated/llm-tools")
+    }
+
+    // Depend on the KSP task for the desktop target
+    dependsOn("kspKotlinDesktop")
 }
 
-// Configure KSP options
-ksp {
-    // Set output directory for LLM tool JSON files
-    arg("llmToolsOutputDir", "${project.layout.buildDirectory.get()}/generated/llm-tools")
+// Make sure the KSP tasks run
+afterEvaluate {
+    tasks.withType<com.google.devtools.ksp.gradle.KspTask>().configureEach {
+        // Ensure the KSP task runs
+        outputs.upToDateWhen { false }
+    }
 }
 
