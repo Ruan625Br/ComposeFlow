@@ -5,8 +5,12 @@ import kotlinx.serialization.Serializable
 /**
  * Interface for all tool result types.
  * Each implementation should have a unique SerialName annotation matching the tool_name in API responses.
+ *
+ * Suppress the naming lint warning for naming because the name needs to match with the result
+ * with OpenRouter.
  */
 @Serializable(with = OpenRouterToolResultSerializer::class)
+@Suppress("ktlint:standard:property-naming")
 sealed interface OpenRouterToolResult {
     val tool_name: String
     val tool_call_id: String
