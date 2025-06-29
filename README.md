@@ -77,15 +77,3 @@ conveyor make copied-site
 
 `bash generate_system_prompts.sh`
 
-## API secrets for ID providers
-
-Secrets for ID providers are retrieved from `local.properties` file.
-Ask for the secrets or register a OAuth2 by
-following https://support.google.com/cloud/answer/6158849?hl=en
-
-```
-
-google.client.id=<OAuth2 client id for Google>
-google.client.secret=<OAuth2 client secret for Google>
-
-```
