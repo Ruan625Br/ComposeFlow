@@ -179,7 +179,8 @@ private fun FontDetailContentHeader(
                         LaunchedEffect(interactionSource) {
                             interactionSource.interactions.collect {
                                 if (it is PressInteraction.Release) {
-                                    changeFontFamilyCallback = callbacks.onSecondaryFontFamilyChanged
+                                    changeFontFamilyCallback =
+                                        callbacks.onSecondaryFontFamilyChanged
                                 }
                             }
                         }
@@ -193,10 +194,21 @@ private fun FontDetailContentHeader(
             project.themeHolder.fontHolder.textStyleOverrides.entries
                 .map { it.toPair() }
                 .toSet()
-        val editedTextOverriddes =
+        val editedTextOverrides =
             fontEditableParams.textStyleOverrides.entries
                 .map { it.toPair() }
                 .toSet()
+        TextButton(
+            onClick = {
+                openResetConfirmation = true
+            },
+        ) {
+            Text(
+                stringResource(Res.string.reset_fonts),
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        Spacer(Modifier.size(16.dp))
         TextButton(
             onClick = {
                 callbacks.onApplyFontEditableParams()
@@ -207,21 +219,9 @@ private fun FontDetailContentHeader(
             enabled =
                 project.themeHolder.fontHolder.primaryFontFamily != fontEditableParams.primaryFontFamily ||
                     project.themeHolder.fontHolder.secondaryFontFamily != fontEditableParams.secondaryFontFamily ||
-                    existingTextOverrides != editedTextOverriddes,
+                    existingTextOverrides != editedTextOverrides,
         ) {
             Text(stringResource(Res.string.apply_change))
-        }
-        Spacer(Modifier.size(16.dp))
-
-        TextButton(
-            onClick = {
-                openResetConfirmation = true
-            },
-        ) {
-            Text(
-                stringResource(Res.string.reset_fonts),
-                color = MaterialTheme.colorScheme.error,
-            )
         }
         Spacer(Modifier.size(32.dp))
     }
@@ -375,7 +375,7 @@ private fun FontTable(
     project: Project,
     callbacks: ThemeEditorCallbacks,
     fontEditableParams: FontEditableParams,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     val typography =
         MaterialTheme.typography.generateWithOverrides(
