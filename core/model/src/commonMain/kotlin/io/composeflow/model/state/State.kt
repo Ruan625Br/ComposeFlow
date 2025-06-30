@@ -1,5 +1,7 @@
 package io.composeflow.model.state
 
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import com.squareup.kotlinpoet.ClassName
@@ -29,6 +31,7 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.model.type.convertCodeFromType
 import io.composeflow.serializer.FallbackInstantSerializer
+import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Clock
@@ -996,13 +999,15 @@ sealed interface ScreenState<T> : State<T> {
 @Serializable
 sealed interface AppState<T> : State<T> {
     @Serializable
+    @SerialName("StringAppState")
     data class StringAppState(
         override val id: StateId = Uuid.random().toString(),
         override var name: String,
         override val defaultValue: String = "",
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
-    ) : AppState<String> {
+    ) : AppState<String>,
+        DropdownItem {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1098,6 +1103,11 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.SharingStarted,
                     ).build(),
             )
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("String")
+
+        override fun isSameItem(item: Any): Boolean = item is StringAppState
     }
 
     @Serializable
@@ -1108,7 +1118,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: Int = 0,
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
-    ) : AppState<Int> {
+    ) : AppState<Int>,
+        DropdownItem {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1192,6 +1203,11 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.SharingStarted,
                     ).build(),
             )
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Int")
+
+        override fun isSameItem(item: Any): Boolean = item is IntAppState
     }
 
     @Serializable
@@ -1202,7 +1218,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: Float = 0f,
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
-    ) : AppState<Float> {
+    ) : AppState<Float>,
+        DropdownItem {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1286,6 +1303,11 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.SharingStarted,
                     ).build(),
             )
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Float")
+
+        override fun isSameItem(item: Any): Boolean = item is FloatAppState
     }
 
     @Serializable
@@ -1297,7 +1319,8 @@ sealed interface AppState<T> : State<T> {
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
     ) : AppState<Boolean>,
-        BooleanState {
+        BooleanState,
+        DropdownItem {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1394,6 +1417,11 @@ sealed interface AppState<T> : State<T> {
                         MemberHolder.Coroutines.Flow.SharingStarted,
                     ).build(),
             )
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Boolean")
+
+        override fun isSameItem(item: Any): Boolean = item is BooleanAppState
     }
 
     @Serializable
@@ -1404,7 +1432,8 @@ sealed interface AppState<T> : State<T> {
         override val defaultValue: InstantWrapper = InstantWrapper(null),
         override val isList: Boolean = false,
         override val userWritable: Boolean = true,
-    ) : AppState<InstantWrapper> {
+    ) : AppState<InstantWrapper>,
+        DropdownItem {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -1493,6 +1522,11 @@ sealed interface AppState<T> : State<T> {
                         ),
                     ).build(),
             )
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Instant")
+
+        override fun isSameItem(item: Any): Boolean = item is InstantAppState
     }
 
     @Serializable
@@ -2040,7 +2074,8 @@ sealed interface AppState<T> : State<T> {
         override val dataTypeId: DataTypeId = defaultValue?.id ?: EmptyDataType.id,
         override val userWritable: Boolean = true,
     ) : AppState<DataType>,
-        AppStateWithDataTypeId {
+        AppStateWithDataTypeId,
+        DropdownItem {
         override fun generateReadBlock(
             project: Project,
             context: GenerationContext,
@@ -2133,6 +2168,11 @@ sealed interface AppState<T> : State<T> {
                     ).build(),
             )
         }
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("DataType")
+
+        override fun isSameItem(item: Any): Boolean = item is CustomDataTypeAppState
     }
 
     override fun generateVariableInitializationBlock(
@@ -2157,28 +2197,6 @@ sealed interface AppState<T> : State<T> {
                 InstantAppState(name = ""),
                 CustomDataTypeAppState(name = ""),
             )
-
-        fun indexOf(appState: AppState<*>): Int =
-            when (appState) {
-                is StringAppState -> 0
-                is IntAppState -> 1
-                is FloatAppState -> 2
-                is BooleanAppState -> 3
-                is InstantAppState -> 4
-                is CustomDataTypeAppState -> 5
-                else -> throw IllegalArgumentException("Invalid appState $appState")
-            }
-
-        fun fromOrdinal(ordinal: Int): AppState<*> =
-            when (ordinal) {
-                0 -> StringAppState(name = "")
-                1 -> IntAppState(name = "")
-                2 -> FloatAppState(name = "")
-                3 -> BooleanAppState(name = "")
-                4 -> InstantAppState(name = "")
-                5 -> CustomDataTypeAppState(name = "")
-                else -> throw IllegalArgumentException("Invalid ordinal : $ordinal")
-            }
     }
 }
 

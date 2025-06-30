@@ -44,7 +44,7 @@ class AppStateEditorOperator {
 
     @LlmTool(
         name = "add_app_state",
-        description = "Adds a new app state to the project. App states are used to store and manage application-wide data that persists across screens.",
+        "Adds a new app state to the project. App states are used to store and manage application-wide data that persists across screens.",
     )
     fun onAddAppState(
         project: Project,
@@ -96,7 +96,8 @@ class AppStateEditorOperator {
     ): EventResult {
         val result = EventResult()
         try {
-            val existingState = project.globalStateHolder.getStates(project).find { it.id == appState.id }
+            val existingState =
+                project.globalStateHolder.getStates(project).find { it.id == appState.id }
             if (existingState == null) {
                 result.errorMessages.add("App state with ID ${appState.id} not found.")
                 return result
@@ -178,7 +179,8 @@ class AppStateEditorOperator {
         defaultValuesYaml: String,
     ): EventResult =
         try {
-            val defaultValues = yamlSerializer.decodeFromString<List<DataTypeDefaultValue>>(defaultValuesYaml)
+            val defaultValues =
+                yamlSerializer.decodeFromString<List<DataTypeDefaultValue>>(defaultValuesYaml)
             updateCustomDataTypeListDefaultValues(project, appStateId, defaultValues)
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing default values YAML" }

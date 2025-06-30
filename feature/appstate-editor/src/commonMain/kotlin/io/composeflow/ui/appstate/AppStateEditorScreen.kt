@@ -38,10 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component4
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -419,7 +415,7 @@ private fun AppStateDetailRow(
     }
 }
 
-private const val emptyJSON = "Empty JSON"
+private const val emptyJson = "Empty JSON"
 
 @Composable
 private fun DataTypeListDefaultValuesFromJsonDialog(
@@ -443,11 +439,11 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
     val errorMessage: String? by remember(parseResult) {
         mutableStateOf(
             when (val result = parseResult) {
-                DefaultValuesParseResult.EmptyInput -> emptyJSON
+                DefaultValuesParseResult.EmptyInput -> emptyJson
                 is DefaultValuesParseResult.Failure -> result.message
                 is DefaultValuesParseResult.Success -> null
                 is DefaultValuesParseResult.SuccessWithWarning -> result.warningMessage
-                null -> emptyJSON
+                null -> emptyJson
             },
         )
     }
@@ -654,25 +650,14 @@ private fun AddAppStateDialog(
                                 }
                             },
                 )
-                var dropDownSelectedIndex by remember {
-                    mutableStateOf(
-                        initialValue?.let { AppState.indexOf(it) } ?: 0,
-                    )
+                var dropDownSelectedItem by remember {
+                    mutableStateOf(initialValue)
                 }
 
                 BasicDropdownPropertyEditor(
                     project = project,
-                    items =
-                        AppState
-                            .entries()
-                            .map {
-                                it.valueType(project).displayName(
-                                    project = project,
-                                    listAware = false,
-                                )
-                            },
-                    onValueChanged = { index, _ ->
-                        val appState = AppState.fromOrdinal(index)
+                    items = AppState.entries(),
+                    onValueChanged = { index, item ->
                         val dataTypes = project.dataTypeHolder.dataTypes
                         val selectedDataTypeId =
                             if (dataTypes.isNotEmpty()) {
@@ -681,15 +666,15 @@ private fun AddAppStateDialog(
                                 null
                             }
                         editedAppState =
-                            appState.copy(
+                            item.copy(
                                 id = editedAppState.id,
                                 name = editedAppState.name,
                                 isList = editedAppState.isList,
                                 argDataTypeId = selectedDataTypeId,
                             )
-                        dropDownSelectedIndex = index
+                        dropDownSelectedItem = item
                     },
-                    selectedIndex = dropDownSelectedIndex,
+                    selectedItem = dropDownSelectedItem,
                     label = stringResource(Res.string.data_type),
                     modifier =
                         Modifier
