@@ -11,6 +11,7 @@ import io.composeflow.model.project.CanvasEditable
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
+import io.composeflow.util.generateUniqueName
 
 object UiBuilderHelper {
     fun checkIfNodeCanBeAddedDueToScreenOnlyNode(
@@ -66,9 +67,23 @@ object UiBuilderHelper {
                     stateHolder = project.screenHolder.currentEditable(),
                     node = composeNode,
                 )
+                val uniqueId =
+                    generateUniqueName(
+                        initial = composeNode.id,
+                        canvasEditable
+                            .getRootNode()
+                            .allChildren()
+                            .map { it.id }
+                            .toSet(),
+                    )
+                // Ensure the uniqueness of the ID within the same canvasEditable
+                val uniqueIdComposeNode = composeNode.copy(id = uniqueId)
                 indexToDrop?.let {
-                    containerNode.insertChildAt(index = indexToDrop, composeNode)
-                } ?: containerNode.addChild(composeNode)
+                    containerNode.insertChildAt(
+                        index = indexToDrop,
+                        uniqueIdComposeNode,
+                    )
+                } ?: containerNode.addChild(uniqueIdComposeNode)
             }
         }
     }
