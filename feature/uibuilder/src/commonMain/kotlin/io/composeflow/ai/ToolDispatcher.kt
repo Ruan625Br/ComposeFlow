@@ -88,32 +88,48 @@ class ToolDispatcher(
             }
 
             is ToolArgs.AddAppStateArgs -> {
-                appStateEditorOperator.onAddAppState(
+                val result = appStateEditorOperator.onAddAppState(
                     project,
                     toolArgs.appStateYaml,
                 )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
             }
 
             is ToolArgs.DeleteAppStateArgs -> {
-                appStateEditorOperator.onDeleteAppState(
+                val result = appStateEditorOperator.onDeleteAppState(
                     project,
                     toolArgs.appStateId,
                 )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
             }
 
             is ToolArgs.UpdateAppStateArgs -> {
-                appStateEditorOperator.onUpdateAppState(
+                val result = appStateEditorOperator.onUpdateAppState(
                     project,
                     toolArgs.appStateYaml,
                 )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
             }
 
             is ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs -> {
-                appStateEditorOperator.onUpdateCustomDataTypeListDefaultValues(
+                val result = appStateEditorOperator.onUpdateCustomDataTypeListDefaultValues(
                     project,
                     toolArgs.appStateId,
                     toolArgs.defaultValuesYaml,
                 )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
             }
 
             is ToolArgs.ListAppStatesArgs -> {

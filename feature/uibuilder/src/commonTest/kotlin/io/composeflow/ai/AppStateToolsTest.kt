@@ -7,6 +7,7 @@ import io.composeflow.model.state.AppState
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 /**
@@ -140,5 +141,172 @@ class AppStateToolsTest {
         assertTrue(getResult.contains("Anonymous") || getResult.contains("\"Anonymous\""))
         // Should not contain the other state
         assertTrue(!getResult.contains("theme") || !getResult.contains("\"theme\"") || getResult.contains("not found"))
+    }
+
+    @Test
+    fun testAddAppStateArgs_ValidStringStateYaml() {
+        // Test adding a StringAppState via YAML
+        val appStateYaml = """
+!<StringAppState>
+id: "test-id-123"
+name: "testStringState"
+defaultValue: "Hello World"
+userWritable: true
+        """.trimIndent()
+
+        val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
+        
+        executeToolAndSetStatus(toolArgs)
+
+        assertEquals(ToolExecutionStatus.Success, toolArgs.status)
+        assertEquals("Successfully executed.", toolArgs.result)
+        
+        // Verify state was added to project
+        val states = project.globalStateHolder.getStates(project)
+        assertEquals(1, states.size)
+        val addedState = states.first()
+        assertTrue(addedState is AppState.StringAppState)
+        assertEquals("testStringState", addedState.name)
+        assertEquals("Hello World", (addedState as AppState.StringAppState).defaultValue)
+    }
+
+    @Test
+    fun testAddAppStateArgs_ValidBooleanStateYaml() {
+        // Test adding a BooleanAppState via YAML
+        val appStateYaml = """
+!<BooleanAppState>
+id: "bool-id-456"
+name: "isDarkMode"
+defaultValue: false
+userWritable: true
+        """.trimIndent()
+
+        val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
+        
+        executeToolAndSetStatus(toolArgs)
+
+        assertEquals(ToolExecutionStatus.Success, toolArgs.status)
+        assertEquals("Successfully executed.", toolArgs.result)
+        
+        // Verify state was added to project
+        val states = project.globalStateHolder.getStates(project)
+        assertEquals(1, states.size)
+        val addedState = states.first()
+        assertTrue(addedState is AppState.BooleanAppState)
+        assertEquals("isDarkMode", addedState.name)
+        assertEquals(false, (addedState as AppState.BooleanAppState).defaultValue)
+    }
+
+    @Test
+    fun testAddAppStateArgs_InvalidYaml() {
+        // Test handling of malformed YAML
+        val invalidYaml = """
+!<StringAppState>
+invalid: yaml: structure
+name missing quotes
+        """.trimIndent()
+
+        val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = invalidYaml)
+        
+        executeToolAndSetStatus(toolArgs)
+
+        assertEquals(ToolExecutionStatus.Error, toolArgs.status)
+        assertTrue(toolArgs.result.contains("Failed to parse app state YAML"))
+        
+        // Verify no state was added to project
+        val states = project.globalStateHolder.getStates(project)
+        assertEquals(0, states.size)
+    }
+
+    @Test
+    fun testAddAppStateArgs_DuplicateName() {
+        // Add a state first
+        val existingState = AppState.StringAppState(name = "duplicateName", defaultValue = "existing")
+        project.globalStateHolder.addState(existingState)
+
+        // Try to add another state with the same name
+        val appStateYaml = """
+!<StringAppState>
+id: "new-id-789"
+name: "duplicateName"
+defaultValue: "new value"
+userWritable: true
+        """.trimIndent()
+
+        val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
+        
+        executeToolAndSetStatus(toolArgs)
+
+        assertEquals(ToolExecutionStatus.Success, toolArgs.status)
+        assertEquals("Successfully executed.", toolArgs.result)
+        
+        // Verify both states exist with unique names
+        val states = project.globalStateHolder.getStates(project)
+        assertEquals(2, states.size)
+        val stateNames = states.map { it.name }.toSet()
+        assertTrue(stateNames.contains("duplicateName"))
+        // The new state should have a unique name generated
+        assertTrue(stateNames.size == 2) // Both names should be unique
+    }
+
+    @Test
+    fun testAddAppStateArgs_EmptyProject() {
+        // Test adding state to completely empty project
+        assertTrue(project.globalStateHolder.getStates(project).isEmpty())
+
+        val appStateYaml = """
+!<StringAppState>
+id: "first-state-id"
+name: "firstState" 
+defaultValue: "initial"
+userWritable: true
+        """.trimIndent()
+
+        val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
+        
+        executeToolAndSetStatus(toolArgs)
+
+        assertEquals(ToolExecutionStatus.Success, toolArgs.status)
+        assertEquals("Successfully executed.", toolArgs.result)
+        
+        // Verify state was added
+        val states = project.globalStateHolder.getStates(project)
+        assertEquals(1, states.size)
+        assertEquals("firstState", states.first().name)
+    }
+
+    @Test
+    fun testAddAppStateArgs_IntegrationWithListAndGet() {
+        // Test full workflow: add state via YAML, then list and get it
+
+        // Add state via YAML
+        val appStateYaml = """
+!<StringAppState>
+id: "integration-test-id"
+name: "integrationState"
+defaultValue: "integration test value"
+userWritable: true
+        """.trimIndent()
+
+        val addArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
+        executeToolAndSetStatus(addArgs)
+        assertEquals(ToolExecutionStatus.Success, addArgs.status)
+
+        // List states to verify it's there
+        val listArgs = ToolArgs.ListAppStatesArgs()
+        executeToolAndSetStatus(listArgs)
+        assertEquals(ToolExecutionStatus.Success, listArgs.status)
+        assertTrue(listArgs.result.contains("integrationState"))
+
+        // Get the specific state
+        val states = project.globalStateHolder.getStates(project)
+        val addedState = states.find { it.name == "integrationState" }
+        assertNotNull(addedState)
+        
+        val getArgs = ToolArgs.GetAppStateArgs(appStateId = addedState!!.id)
+        executeToolAndSetStatus(getArgs)
+        assertEquals(ToolExecutionStatus.Success, getArgs.status)
+        assertTrue(getArgs.result.contains("integrationState"))
+        assertTrue(getArgs.result.contains("integration test value"))
     }
 }

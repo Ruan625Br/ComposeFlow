@@ -6,6 +6,7 @@ import io.composeflow.ksp.LlmTool
 import io.composeflow.model.datatype.DataTypeDefaultValue
 import io.composeflow.model.project.Project
 import io.composeflow.model.state.AppState
+import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.copy
 import io.composeflow.serializer.yamlSerializer
 import io.composeflow.ui.EventResult
@@ -52,8 +53,14 @@ class AppStateEditorOperator {
         appStateYaml: String,
     ): EventResult =
         try {
-            val appState = yamlSerializer.decodeFromString<AppState<*>>(appStateYaml)
-            addAppState(project, appState)
+            val appState = yamlSerializer.decodeFromString<ReadableState>(appStateYaml)
+            if (appState is AppState<*>) {
+                addAppState(project, appState)
+            } else {
+                EventResult().apply {
+                    errorMessages.add("Parsed state is not an AppState: ${appState::class.simpleName}")
+                }
+            }
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing app state YAML" }
             EventResult().apply {
@@ -131,8 +138,14 @@ class AppStateEditorOperator {
         appStateYaml: String,
     ): EventResult =
         try {
-            val appState = yamlSerializer.decodeFromString<AppState<*>>(appStateYaml)
-            updateAppState(project, appState)
+            val appState = yamlSerializer.decodeFromString<ReadableState>(appStateYaml)
+            if (appState is AppState<*>) {
+                updateAppState(project, appState)
+            } else {
+                EventResult().apply {
+                    errorMessages.add("Parsed state is not an AppState: ${appState::class.simpleName}")
+                }
+            }
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing app state YAML" }
             EventResult().apply {
