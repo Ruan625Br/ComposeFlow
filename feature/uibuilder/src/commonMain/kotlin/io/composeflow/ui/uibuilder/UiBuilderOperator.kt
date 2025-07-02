@@ -26,6 +26,7 @@ import kotlinx.serialization.decodeFromString
  * Operations in this class are exposed to the LLM to allow them call it as tools as well as used
  * from the GUI in ComposeFlow.
  */
+@Suppress("ktlint:standard:max-line-length")
 class UiBuilderOperator {
     /**
      * Pre operations before adding a node to a container node to validate if the node can be added.
@@ -136,6 +137,7 @@ class UiBuilderOperator {
             }
         } catch (e: Exception) {
             Logger.e(e) { "Error adding compose node to container" }
+            result.errorMessages.add("Error adding compose node to container: ${e.message}")
         }
         return result
     }
@@ -228,6 +230,7 @@ class UiBuilderOperator {
             )
         } catch (e: Exception) {
             Logger.e(e) { "Error adding modifier to node" }
+            result.errorMessages.add("Error adding modifier to node: ${e.message}")
         }
         return result
     }
@@ -273,6 +276,7 @@ class UiBuilderOperator {
             onUpdateModifier(project, composeNodeId, index, modifier)
         } catch (e: Exception) {
             Logger.e(e) { "Error updating modifier at index $index" }
+            result.errorMessages.add("Error updating modifier at index $index: ${e.message}")
         }
         return result
     }
@@ -316,6 +320,7 @@ class UiBuilderOperator {
             node.modifierList.removeAt(index)
         } catch (e: Exception) {
             Logger.e(e) { "Error removing modifier at index $index" }
+            result.errorMessages.add("Error removing modifier at index $index: ${e.message}")
         }
         return result
     }
@@ -357,6 +362,7 @@ class UiBuilderOperator {
             node.modifierList.swap(fromIndex, toIndex)
         } catch (e: Exception) {
             Logger.e(e) { "Error swapping modifiers at indices $fromIndex and $toIndex" }
+            result.errorMessages.add("Error swappigng modifiers at indices $fromIndex and $toIndex: ${e.message}")
         }
         return result
     }
@@ -399,6 +405,7 @@ class UiBuilderOperator {
             }
         } catch (e: Exception) {
             Logger.e(e) { "Error moving component to position" }
+            eventResult.errorMessages.add("Error moving component to position: ${e.message}")
         }
         return eventResult
     }

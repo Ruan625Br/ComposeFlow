@@ -96,10 +96,27 @@ class AiChatDialogViewModel(
                                     )
                                 result.response.tool_calls?.forEach {
                                     val toolEventResult = dispatchToolResponse(it.tool_args)
-                                    it.tool_args.status =
-                                        if (toolEventResult.isSuccessful()) ToolExecutionStatus.Success else ToolExecutionStatus.Error
-                                    previousToolArgs.add(it.tool_args)
-                                    saveProject(project)
+                                    if (toolEventResult.isSuccessful()) {
+                                        it.tool_args.status = ToolExecutionStatus.Success
+                                        previousToolArgs.add(it.tool_args)
+                                        saveProject(project)
+                                    } else {
+                                        it.tool_args.status = ToolExecutionStatus.Error
+                                        it.tool_args.result =
+                                            toolEventResult.errorMessages.joinToString("\n")
+                                        previousToolArgs.add(it.tool_args)
+
+                                        _messages.value +=
+                                            MessageModel(
+                                                messageOwner = MessageOwner.Ai,
+                                                message =
+                                                    toolEventResult.errorMessages.joinToString(
+                                                        "\n",
+                                                    ),
+                                                isFailed = true,
+                                                createdAt = Clock.System.now(),
+                                            )
+                                    }
                                 }
                             }
                         }
