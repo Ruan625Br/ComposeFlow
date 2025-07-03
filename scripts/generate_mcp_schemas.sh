@@ -25,6 +25,7 @@ echo "Target directory: ${TARGET_DIR}"
 echo "Running KSP to generate JSON schema files..."
 ./gradlew :feature:uibuilder:runKsp
 ./gradlew :feature:appstate-editor:runKsp
+./gradlew :feature:datatype-editor:runKsp
 
 # Check if KSP ran successfully
 if [ $? -ne 0 ]; then
@@ -46,6 +47,7 @@ fi
 echo "Copying MCP tool schema files to ${TARGET_DIR}..."
 find feature/uibuilder/build/generated/llm-tools -name "*_mcp_tool.json" -exec cp {} "${TARGET_DIR}" \;
 find feature/appstate-editor/build/generated/llm-tools -name "*_mcp_tool.json" -exec cp {} "${TARGET_DIR}" \;
+find feature/datatype-editor/build/generated/llm-tools -name "*_mcp_tool.json" -exec cp {} "${TARGET_DIR}" \;
 
 # Count the number of files copied
 NUM_FILES=$(find "${TARGET_DIR}" -name "*_mcp_tool.json" | wc -l)

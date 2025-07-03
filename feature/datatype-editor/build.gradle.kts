@@ -1,6 +1,7 @@
 plugins {
     id("io.compose.flow.kmp.library")
     id("io.compose.flow.compose.multiplatform")
+    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
 }
 
 version = "1.0-SNAPSHOT"
@@ -10,6 +11,8 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
+            implementation(project(":ksp-llm-tools"))
+            implementation(project(":core:ai"))
             implementation(project(":core:di"))
             implementation(project(":core:model"))
             implementation(project(":core:platform"))
@@ -27,6 +30,17 @@ kotlin {
             implementation(libs.reorderable)
         }
 
+        // Configure KSP for LLM tools
+        dependencies {
+            add("kspDesktop", project(":ksp-llm-tools"))
+        }
+
+        // Configure KSP options
+        ksp {
+            // Set output directory for LLM tool JSON files
+            arg("llmToolsOutputDir", "${project.buildDir}/generated/llm-tools")
+        }
+
         commonTest.dependencies {
             implementation(project(":core:model"))
             implementation(kotlin("test-junit"))
@@ -39,5 +53,27 @@ kotlin {
             optInComposeExperimentalApis()
             optInKotlinExperimentalApis()
         }
+    }
+}
+
+// Add a specific task to run KSP
+tasks.register("runKsp") {
+    group = "ksp"
+    description = "Run KSP to generate LLM tool JSON files"
+
+    // Create the output directory
+    doFirst {
+        mkdir("${project.buildDir}/generated/llm-tools")
+    }
+
+    // Depend on the KSP task for the desktop target
+    dependsOn("kspKotlinDesktop")
+}
+
+// Make sure the KSP tasks run
+afterEvaluate {
+    tasks.withType<com.google.devtools.ksp.gradle.KspTask>().configureEach {
+        // Ensure the KSP task runs
+        outputs.upToDateWhen { false }
     }
 }

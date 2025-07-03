@@ -7,15 +7,11 @@ import io.composeflow.asClassName
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.datatype.DataField
 import io.composeflow.model.datatype.DataType
-import io.composeflow.model.datatype.firestoreDocumentId
-import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.custom_enum.CustomEnum
 import io.composeflow.repository.ProjectRepository
 import io.composeflow.swap
 import io.composeflow.util.generateUniqueName
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
@@ -25,9 +21,7 @@ class DataTypeEditorViewModel(
     private val project: Project,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
 ) : ViewModel() {
-    private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
-        MutableStateFlow(LoadedProjectUiState.Success(Project()))
-    val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState
+    private val dataTypeEditorOperator = DataTypeEditorOperator()
 
     var focusedDataTypeIndex by mutableStateOf<Int?>(null)
         private set
@@ -35,13 +29,10 @@ class DataTypeEditorViewModel(
         private set
 
     fun onDataTypeAdded(dataTypeName: String) {
-        val newName =
-            generateUniqueName(
-                dataTypeName,
-                (project.dataTypeHolder.dataTypes.map { it.className } + firestoreDocumentId).toSet(),
-            )
-        project.dataTypeHolder.dataTypes.add(DataType(name = newName))
-        focusedDataTypeIndex = project.dataTypeHolder.dataTypes.size - 1
+        val result = dataTypeEditorOperator.addDataType(project, DataType(name = dataTypeName))
+        if (result.isSuccessful()) {
+            focusedDataTypeIndex = project.dataTypeHolder.dataTypes.size - 1
+        }
         saveProject()
     }
 
@@ -49,26 +40,21 @@ class DataTypeEditorViewModel(
         dataTypeName: String,
         fields: List<DataField> = emptyList(),
     ) {
-        val newName =
-            generateUniqueName(
-                dataTypeName,
-                project.dataTypeHolder.dataTypes
-                    .map { it.className }
-                    .toSet(),
+        val result =
+            dataTypeEditorOperator.addDataType(
+                project,
+                DataType(name = dataTypeName, fields = fields.toMutableList()),
             )
-        project.dataTypeHolder.dataTypes.add(
-            DataType(
-                name = newName,
-                fields = fields.toMutableList(),
-            ),
-        )
-        focusedDataTypeIndex = project.dataTypeHolder.dataTypes.size - 1
+        if (result.isSuccessful()) {
+            focusedDataTypeIndex = project.dataTypeHolder.dataTypes.size - 1
+        }
         saveProject()
     }
 
     fun onDataTypeDeleted() {
-        focusedDataTypeIndex?.let {
-            project.dataTypeHolder.dataTypes.removeAt(it)
+        focusedDataTypeIndex?.let { index ->
+            val dataType = project.dataTypeHolder.dataTypes[index]
+            dataTypeEditorOperator.deleteDataType(project, dataType.id)
             saveProject()
         }
         focusedDataTypeIndex = if (project.dataTypeHolder.dataTypes.isNotEmpty()) 0 else null
@@ -76,16 +62,8 @@ class DataTypeEditorViewModel(
 
     fun onDataFieldAdded(dataField: DataField) {
         focusedDataTypeIndex?.let { focusedIndex ->
-            val newName =
-                generateUniqueName(
-                    dataField.variableName,
-                    project.dataTypeHolder.dataTypes[focusedIndex]
-                        .fields
-                        .map { it.variableName }
-                        .toSet(),
-                )
-            val editedDataType = project.dataTypeHolder.dataTypes[focusedIndex]
-            editedDataType.fields.add(dataField.copy(name = newName))
+            val dataType = project.dataTypeHolder.dataTypes[focusedIndex]
+            dataTypeEditorOperator.addDataField(project, dataType.id, dataField)
             saveProject()
         }
     }
@@ -124,9 +102,10 @@ class DataTypeEditorViewModel(
     }
 
     fun onDeleteDataField(dataFieldIndex: Int) {
-        focusedDataTypeIndex?.let {
-            val editedDataType = project.dataTypeHolder.dataTypes[it]
-            editedDataType.fields.removeAt(dataFieldIndex)
+        focusedDataTypeIndex?.let { dataTypeIndex ->
+            val dataType = project.dataTypeHolder.dataTypes[dataTypeIndex]
+            val dataField = dataType.fields[dataFieldIndex]
+            dataTypeEditorOperator.deleteDataField(project, dataType.id, dataField.id)
             saveProject()
         }
     }
@@ -136,15 +115,10 @@ class DataTypeEditorViewModel(
     }
 
     fun onEnumAdded(enumName: String) {
-        val newName =
-            generateUniqueName(
-                enumName,
-                project.customEnumHolder.enumList
-                    .map { it.enumName }
-                    .toSet(),
-            )
-        project.customEnumHolder.enumList.add(CustomEnum(name = newName))
-        focusedEnumIndex = project.customEnumHolder.enumList.size - 1
+        val result = dataTypeEditorOperator.addCustomEnum(project, CustomEnum(name = enumName))
+        if (result.isSuccessful()) {
+            focusedEnumIndex = project.customEnumHolder.enumList.size - 1
+        }
         saveProject()
     }
 
@@ -185,8 +159,9 @@ class DataTypeEditorViewModel(
     }
 
     fun onEnumDeleted() {
-        focusedEnumIndex?.let {
-            project.customEnumHolder.enumList.removeAt(it)
+        focusedEnumIndex?.let { index ->
+            val customEnum = project.customEnumHolder.enumList[index]
+            dataTypeEditorOperator.deleteCustomEnum(project, customEnum.customEnumId)
             saveProject()
         }
         focusedEnumIndex = if (project.customEnumHolder.enumList.size > 0) 0 else null

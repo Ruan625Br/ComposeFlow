@@ -5,6 +5,7 @@ import io.composeflow.ai.openrouter.tools.ToolArgs
 import io.composeflow.model.project.Project
 import io.composeflow.ui.EventResult
 import io.composeflow.ui.appstate.AppStateEditorOperator
+import io.composeflow.ui.datatype.DataTypeEditorOperator
 import io.composeflow.ui.uibuilder.UiBuilderOperator
 
 /**
@@ -13,6 +14,7 @@ import io.composeflow.ui.uibuilder.UiBuilderOperator
 class ToolDispatcher(
     private val uiBuilderOperator: UiBuilderOperator = UiBuilderOperator(),
     private val appStateEditorOperator: AppStateEditorOperator = AppStateEditorOperator(),
+    private val dataTypeEditorOperator: DataTypeEditorOperator = DataTypeEditorOperator(),
 ) {
     /**
      * Dispatches a tool execution request to the appropriate operator.
@@ -153,6 +155,144 @@ class ToolDispatcher(
                     Logger.e(e) { "Error getting app state" }
                     toolArgs.result = "Error getting app state: ${e.message}"
                     EventResult().apply { errorMessages.add("Failed to get app state: ${e.message}") }
+                }
+            }
+
+            is ToolArgs.AddDataTypeArgs -> {
+                val result = dataTypeEditorOperator.onAddDataType(
+                    project,
+                    toolArgs.dataTypeYaml,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.DeleteDataTypeArgs -> {
+                val result = dataTypeEditorOperator.onDeleteDataType(
+                    project,
+                    toolArgs.dataTypeId,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.UpdateDataTypeArgs -> {
+                val result = dataTypeEditorOperator.onUpdateDataType(
+                    project,
+                    toolArgs.dataTypeYaml,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.AddDataFieldArgs -> {
+                val result = dataTypeEditorOperator.onAddDataField(
+                    project,
+                    toolArgs.dataTypeId,
+                    toolArgs.dataFieldYaml,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.DeleteDataFieldArgs -> {
+                val result = dataTypeEditorOperator.onDeleteDataField(
+                    project,
+                    toolArgs.dataTypeId,
+                    toolArgs.dataFieldId,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.AddCustomEnumArgs -> {
+                val result = dataTypeEditorOperator.onAddCustomEnum(
+                    project,
+                    toolArgs.customEnumYaml,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.DeleteCustomEnumArgs -> {
+                val result = dataTypeEditorOperator.onDeleteCustomEnum(
+                    project,
+                    toolArgs.customEnumId,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.UpdateCustomEnumArgs -> {
+                val result = dataTypeEditorOperator.onUpdateCustomEnum(
+                    project,
+                    toolArgs.customEnumYaml,
+                )
+                if (result.errorMessages.isNotEmpty()) {
+                    toolArgs.result = result.errorMessages.joinToString("; ")
+                }
+                result
+            }
+
+            is ToolArgs.ListDataTypesArgs -> {
+                try {
+                    val dataTypesResult = dataTypeEditorOperator.onListDataTypes(project)
+                    toolArgs.result = dataTypesResult
+                    EventResult() // Success
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error listing data types" }
+                    toolArgs.result = "Error listing data types: ${e.message}"
+                    EventResult().apply { errorMessages.add("Failed to list data types: ${e.message}") }
+                }
+            }
+
+            is ToolArgs.GetDataTypeArgs -> {
+                try {
+                    val dataTypeResult = dataTypeEditorOperator.onGetDataType(project, toolArgs.dataTypeId)
+                    toolArgs.result = dataTypeResult
+                    EventResult() // Success
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error getting data type" }
+                    toolArgs.result = "Error getting data type: ${e.message}"
+                    EventResult().apply { errorMessages.add("Failed to get data type: ${e.message}") }
+                }
+            }
+
+            is ToolArgs.ListCustomEnumsArgs -> {
+                try {
+                    val customEnumsResult = dataTypeEditorOperator.onListCustomEnums(project)
+                    toolArgs.result = customEnumsResult
+                    EventResult() // Success
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error listing custom enums" }
+                    toolArgs.result = "Error listing custom enums: ${e.message}"
+                    EventResult().apply { errorMessages.add("Failed to list custom enums: ${e.message}") }
+                }
+            }
+
+            is ToolArgs.GetCustomEnumArgs -> {
+                try {
+                    val customEnumResult = dataTypeEditorOperator.onGetCustomEnum(project, toolArgs.customEnumId)
+                    toolArgs.result = customEnumResult
+                    EventResult() // Success
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error getting custom enum" }
+                    toolArgs.result = "Error getting custom enum: ${e.message}"
+                    EventResult().apply { errorMessages.add("Failed to get custom enum: ${e.message}") }
                 }
             }
 

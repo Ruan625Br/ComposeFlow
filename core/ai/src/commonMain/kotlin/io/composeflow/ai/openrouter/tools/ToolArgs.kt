@@ -112,6 +112,80 @@ sealed class ToolArgs {
     ) : ToolArgs()
 
     @Serializable
+    @SerialName("add_data_type")
+    data class AddDataTypeArgs(
+        val dataTypeYaml: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("delete_data_type")
+    data class DeleteDataTypeArgs(
+        val dataTypeId: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("update_data_type")
+    data class UpdateDataTypeArgs(
+        val dataTypeYaml: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("add_data_field")
+    data class AddDataFieldArgs(
+        val dataTypeId: String,
+        val dataFieldYaml: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("delete_data_field")
+    data class DeleteDataFieldArgs(
+        val dataTypeId: String,
+        val dataFieldId: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("add_custom_enum")
+    data class AddCustomEnumArgs(
+        val customEnumYaml: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("delete_custom_enum")
+    data class DeleteCustomEnumArgs(
+        val customEnumId: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("update_custom_enum")
+    data class UpdateCustomEnumArgs(
+        val customEnumYaml: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("list_data_types")
+    data class ListDataTypesArgs(
+        val dummy: String = "",
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("get_data_type")
+    data class GetDataTypeArgs(
+        val dataTypeId: String,
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("list_custom_enums")
+    data class ListCustomEnumsArgs(
+        val dummy: String = "",
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("get_custom_enum")
+    data class GetCustomEnumArgs(
+        val customEnumId: String,
+    ) : ToolArgs()
+
+    @Serializable
     data class FakeArgs(
         val fakeString: String = "fakeString",
     ) : ToolArgs()

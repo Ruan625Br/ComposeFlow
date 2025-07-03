@@ -106,4 +106,88 @@ sealed interface OpenRouterToolResult {
         override val tool_call_id: String,
         override val tool_args: ToolArgs.GetAppStateArgs,
     ) : OpenRouterToolResult
+
+    @Serializable
+    data class AddDataTypeArgs(
+        override val tool_name: String = "add_data_type",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.AddDataTypeArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class DeleteDataTypeArgs(
+        override val tool_name: String = "delete_data_type",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.DeleteDataTypeArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class UpdateDataTypeArgs(
+        override val tool_name: String = "update_data_type",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.UpdateDataTypeArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class AddDataFieldArgs(
+        override val tool_name: String = "add_data_field",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.AddDataFieldArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class DeleteDataFieldArgs(
+        override val tool_name: String = "delete_data_field",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.DeleteDataFieldArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class AddCustomEnumArgs(
+        override val tool_name: String = "add_custom_enum",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.AddCustomEnumArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class DeleteCustomEnumArgs(
+        override val tool_name: String = "delete_custom_enum",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.DeleteCustomEnumArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class UpdateCustomEnumArgs(
+        override val tool_name: String = "update_custom_enum",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.UpdateCustomEnumArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class ListDataTypesArgs(
+        override val tool_name: String = "list_data_types",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.ListDataTypesArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class GetDataTypeArgs(
+        override val tool_name: String = "get_data_type",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.GetDataTypeArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class ListCustomEnumsArgs(
+        override val tool_name: String = "list_custom_enums",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.ListCustomEnumsArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class GetCustomEnumArgs(
+        override val tool_name: String = "get_custom_enum",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.GetCustomEnumArgs,
+    ) : OpenRouterToolResult
 }

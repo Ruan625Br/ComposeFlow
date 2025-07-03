@@ -161,6 +161,114 @@ object OpenRouterToolResultSerializer : KSerializer<OpenRouterToolResult> {
                                 value.tool_args,
                             ),
                         )
+
+                    is OpenRouterToolResult.AddDataTypeArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.AddDataTypeArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.DeleteDataTypeArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.DeleteDataTypeArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.UpdateDataTypeArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.UpdateDataTypeArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.AddDataFieldArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.AddDataFieldArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.DeleteDataFieldArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.DeleteDataFieldArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.AddCustomEnumArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.AddCustomEnumArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.DeleteCustomEnumArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.DeleteCustomEnumArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.UpdateCustomEnumArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.UpdateCustomEnumArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.ListDataTypesArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.ListDataTypesArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.GetDataTypeArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.GetDataTypeArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.ListCustomEnumsArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.ListCustomEnumsArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.GetCustomEnumArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.GetCustomEnumArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
                 }
             }
 
@@ -364,6 +472,162 @@ object OpenRouterToolResultSerializer : KSerializer<OpenRouterToolResult> {
                         processedToolArgsElement,
                     )
                 OpenRouterToolResult.GetAppStateArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "add_data_type" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.AddDataTypeArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.AddDataTypeArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "delete_data_type" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.DeleteDataTypeArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.DeleteDataTypeArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "update_data_type" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.UpdateDataTypeArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.UpdateDataTypeArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "add_data_field" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.AddDataFieldArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.AddDataFieldArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "delete_data_field" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.DeleteDataFieldArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.DeleteDataFieldArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "add_custom_enum" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.AddCustomEnumArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.AddCustomEnumArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "delete_custom_enum" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.DeleteCustomEnumArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.DeleteCustomEnumArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "update_custom_enum" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.UpdateCustomEnumArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.UpdateCustomEnumArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "list_data_types" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.ListDataTypesArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.ListDataTypesArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "get_data_type" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.GetDataTypeArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.GetDataTypeArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "list_custom_enums" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.ListCustomEnumsArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.ListCustomEnumsArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "get_custom_enum" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.GetCustomEnumArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.GetCustomEnumArgs(
                     tool_name = toolName,
                     tool_call_id = toolCallId,
                     tool_args = toolArgs,
