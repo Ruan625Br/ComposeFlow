@@ -34,7 +34,7 @@ import io.composeflow.Res
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.editor.validator.AlphaValidator
 import io.composeflow.model.enumwrapper.ContentScaleWrapper
-import io.composeflow.model.parameter.DefaultUrl
+import io.composeflow.model.parameter.DEFAULT_URL
 import io.composeflow.model.parameter.ImageAssetType
 import io.composeflow.model.parameter.ImageTrait
 import io.composeflow.model.parameter.PlaceholderUrl
@@ -99,7 +99,7 @@ fun ImageParamsInspector(
                     onInitializeProperty = {
                         composeNodeCallbacks.onTraitUpdated(
                             node,
-                            imageTrait.copy(url = StringProperty.StringIntrinsicValue(DefaultUrl)),
+                            imageTrait.copy(url = StringProperty.StringIntrinsicValue(DEFAULT_URL)),
                         )
                     },
                     onValidPropertyChanged = { property, lazyListSource ->
@@ -128,7 +128,7 @@ fun ImageParamsInspector(
                                     if (placeHolderUsed) {
                                         PlaceholderUrl.Used(
                                             StringProperty.StringIntrinsicValue(
-                                                DefaultUrl,
+                                                DEFAULT_URL,
                                             ),
                                         )
                                     } else {

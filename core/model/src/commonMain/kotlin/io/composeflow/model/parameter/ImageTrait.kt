@@ -51,10 +51,45 @@ import io.composeflow.ui.image.AsyncImage
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.utils.asImageComposable
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.nullable
+import kotlinx.serialization.descriptors.SerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
+
+/**
+ * Custom serializer for contentScaleWrapper that falls back to EnumProperty(ContentScaleWrapper.Crop)
+ * when serialization/deserialization fails for any reason.
+ */
+object ContentScaleWrapperFallbackSerializer : KSerializer<AssignableProperty?> {
+    private val delegateSerializer = AssignableProperty.serializer().nullable
+
+    override val descriptor: SerialDescriptor = delegateSerializer.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: AssignableProperty?,
+    ) {
+        try {
+            delegateSerializer.serialize(encoder, value)
+        } catch (e: Exception) {
+            // If serialization fails, serialize the fallback value
+            delegateSerializer.serialize(encoder, EnumProperty(ContentScaleWrapper.Crop))
+        }
+    }
+
+    override fun deserialize(decoder: Decoder): AssignableProperty? =
+        try {
+            delegateSerializer.deserialize(decoder)
+        } catch (e: Exception) {
+            // If deserialization fails, return the fallback value
+            EnumProperty(ContentScaleWrapper.Crop)
+        }
+}
 
 @Serializable
 @SerialName("ImageTrait")
@@ -63,13 +98,14 @@ data class ImageTrait(
     /**
      * The url of the image effective only when [assetType] is [ImageAssetType.Network]
      */
-    val url: AssignableProperty = StringProperty.StringIntrinsicValue(DefaultUrl),
+    val url: AssignableProperty = StringProperty.StringIntrinsicValue(DEFAULT_URL),
     /**
      * The asset information of the image effective only when [assetType] is [ImageAssetType.Asset]
      */
     val blobInfoWrapper: BlobInfoWrapper? = null,
     val placeholderUrl: PlaceholderUrl = PlaceholderUrl.NoUsage,
     val alignmentWrapper: AlignmentWrapper? = null,
+    @Serializable(with = ContentScaleWrapperFallbackSerializer::class)
     val contentScaleWrapper: AssignableProperty? = null,
     val alpha: Float? = null,
 ) : ComposeTrait {
@@ -151,7 +187,7 @@ data class ImageTrait(
     override fun defaultComposeNode(project: Project): ComposeNode =
         ComposeNode(
             modifierList = defaultModifierList(),
-            trait = mutableStateOf(ImageTrait(url = StringProperty.StringIntrinsicValue(DefaultUrl))),
+            trait = mutableStateOf(ImageTrait(url = StringProperty.StringIntrinsicValue(DEFAULT_URL))),
         )
 
     override fun defaultModifierList(): MutableList<ModifierWrapper> =
@@ -306,7 +342,7 @@ data class ImageTrait(
     }
 }
 
-const val DefaultUrl = "https://picsum.photos/480"
+const val DEFAULT_URL = "https://picsum.photos/480"
 
 object ImageAssetTypeSerializer : FallbackEnumSerializer<ImageAssetType>(ImageAssetType::class)
 
@@ -328,6 +364,6 @@ sealed interface PlaceholderUrl {
     @Serializable
     @SerialName("Used")
     data class Used(
-        val url: StringProperty = StringProperty.StringIntrinsicValue(DefaultUrl),
+        val url: StringProperty = StringProperty.StringIntrinsicValue(DEFAULT_URL),
     ) : PlaceholderUrl
 }
