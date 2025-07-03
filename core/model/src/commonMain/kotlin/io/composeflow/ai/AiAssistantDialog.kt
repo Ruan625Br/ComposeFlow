@@ -242,23 +242,11 @@ private fun ChatMessage(
 
     var isExpanded by remember { mutableStateOf(false) }
 
-    // Determine the main message content
-    val messageContent = messageModel.message
-    val toolCallPrefix = if (messageModel.messageType == MessageType.ToolCall && !messageModel.toolCallSummary.isNullOrEmpty()) {
-        "${messageModel.toolCallSummary}\n\n"
-    } else {
-        ""
-    }
-
     // Check if message is long enough to need expansion
-    val isLongMessage = messageContent.length > 300
+    val isLongMessage = messageModel.message.length > 300
     
-    // Determine display text based on expansion state
-    val displayText = if (isLongMessage && !isExpanded) {
-        toolCallPrefix + messageContent.take(300) + "..."
-    } else {
-        toolCallPrefix + messageContent
-    }
+    // Get styled text for display
+    val styledText = messageModel.getStyledText(isLongMessage = isLongMessage, isExpanded = isExpanded)
     
     // Determine icon color based on message type
     val iconColor = when (messageModel.messageType) {
@@ -314,8 +302,8 @@ private fun ChatMessage(
                     ) {
                         SelectionContainer {
                             Text(
-                                text = displayText,
-                                color = MaterialTheme.colorScheme.onSurface,
+                                text = styledText,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(16.dp),
                             )
@@ -375,12 +363,12 @@ private fun ChatMessage(
                     ) {
                         SelectionContainer {
                             Text(
-                                text = displayText,
+                                text = styledText,
                                 color =
                                     if (messageModel.isFailed) {
                                         MaterialTheme.colorScheme.error
                                     } else {
-                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
                                     },
                                 style = MaterialTheme.typography.bodyMedium,
                                 modifier = Modifier.padding(16.dp),
