@@ -15,13 +15,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.onClick
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -234,6 +239,34 @@ private fun ChatMessage(
             chars(":")
             minute(Padding.ZERO)
         }
+
+    var isExpanded by remember { mutableStateOf(false) }
+
+    // Determine the main message content
+    val messageContent = messageModel.message
+    val toolCallPrefix = if (messageModel.messageType == MessageType.ToolCall && !messageModel.toolCallSummary.isNullOrEmpty()) {
+        "${messageModel.toolCallSummary}\n\n"
+    } else {
+        ""
+    }
+
+    // Check if message is long enough to need expansion
+    val isLongMessage = messageContent.length > 300
+    
+    // Determine display text based on expansion state
+    val displayText = if (isLongMessage && !isExpanded) {
+        toolCallPrefix + messageContent.take(300) + "..."
+    } else {
+        toolCallPrefix + messageContent
+    }
+    
+    // Determine icon color based on message type
+    val iconColor = when (messageModel.messageType) {
+        MessageType.ToolCall -> MaterialTheme.colorScheme.tertiary
+        MessageType.ToolCallError -> MaterialTheme.colorScheme.error
+        MessageType.Regular -> MaterialTheme.colorScheme.onPrimary
+    }
+    
     if (messageModel.messageOwner == MessageOwner.User) {
         Column(modifier = modifier) {
             Row(
@@ -253,27 +286,51 @@ private fun ChatMessage(
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(8.dp),
                 )
-                Column(
-                    modifier =
-                        Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                                shape =
-                                    RoundedCornerShape(
-                                        topStart = 16.dp,
-                                        topEnd = 0.dp,
-                                        bottomEnd = 16.dp,
-                                        bottomStart = 16.dp,
-                                    ),
-                            ).weight(1f),
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.weight(1f),
                 ) {
-                    SelectionContainer {
-                        Text(
-                            text = messageModel.message,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp),
-                        )
+                    Icon(
+                        imageVector = Icons.Filled.Circle,
+                        contentDescription = "User message",
+                        tint = MaterialTheme.colorScheme.onPrimary,
+                        modifier = Modifier
+                            .size(12.dp)
+                            .padding(top = 4.dp, end = 8.dp),
+                    )
+                    Column(
+                        modifier =
+                            Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                    shape =
+                                        RoundedCornerShape(
+                                            topStart = 16.dp,
+                                            topEnd = 0.dp,
+                                            bottomEnd = 16.dp,
+                                            bottomStart = 16.dp,
+                                        ),
+                                ),
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                text = displayText,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        if (isLongMessage) {
+                            TextButton(
+                                onClick = { isExpanded = !isExpanded },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = if (isExpanded) "Show less" else "Show more",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -286,32 +343,60 @@ private fun ChatMessage(
                 horizontalArrangement = Arrangement.Start,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape =
-                                    RoundedCornerShape(
-                                        topStart = 0.dp,
-                                        topEnd = 16.dp,
-                                        bottomEnd = 16.dp,
-                                        bottomStart = 16.dp,
-                                    ),
-                            ).weight(1f),
+                Row(
+                    verticalAlignment = Alignment.Top,
+                    modifier = Modifier.weight(1f),
                 ) {
-                    SelectionContainer {
-                        Text(
-                            text = messageModel.message,
-                            color =
-                                if (messageModel.isFailed) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.onPrimaryContainer
-                                },
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp),
-                        )
+                    Icon(
+                        imageVector = Icons.Filled.Circle,
+                        contentDescription = when (messageModel.messageType) {
+                            MessageType.ToolCall -> "Tool call message"
+                            MessageType.ToolCallError -> "Tool call error message"
+                            MessageType.Regular -> "AI message"
+                        },
+                        tint = iconColor,
+                        modifier = Modifier
+                            .size(12.dp)
+                            .padding(top = 4.dp, end = 8.dp),
+                    )
+                    Column(
+                        modifier =
+                            Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape =
+                                        RoundedCornerShape(
+                                            topStart = 0.dp,
+                                            topEnd = 16.dp,
+                                            bottomEnd = 16.dp,
+                                            bottomStart = 16.dp,
+                                        ),
+                                ),
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                text = displayText,
+                                color =
+                                    if (messageModel.isFailed) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    },
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        if (isLongMessage) {
+                            TextButton(
+                                onClick = { isExpanded = !isExpanded },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                            ) {
+                                Text(
+                                    text = if (isExpanded) "Show less" else "Show more",
+                                    style = MaterialTheme.typography.bodySmall
+                                )
+                            }
+                        }
                     }
                 }
                 Text(

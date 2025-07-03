@@ -8,6 +8,7 @@ import io.composeflow.ai_failed_to_generate_response
 import io.composeflow.ai_failed_to_generate_response_timeout
 import io.composeflow.ai_response_stopped_by_user
 import io.composeflow.auth.FirebaseIdToken
+import io.composeflow.json.jsonSerializer
 import io.composeflow.model.project.Project
 import io.composeflow.model.useroperation.OperationHistory
 import io.composeflow.model.useroperation.UserOperation
@@ -76,6 +77,7 @@ class AiChatDialogViewModel(
                                         message = result.message,
                                         isFailed = true,
                                         createdAt = Clock.System.now(),
+                                        messageType = MessageType.ToolCallError,
                                     )
                                 previousToolArgs.add(
                                     ToolArgs.FakeArgs().apply {
@@ -88,11 +90,35 @@ class AiChatDialogViewModel(
                                 Logger.i("Success tool result received:")
                                 Logger.i(jsonSerializer.encodeToString(result.response))
 
+                                val toolCallSummary =
+                                    result.response.tool_calls?.let { toolCalls ->
+                                        if (toolCalls.isNotEmpty()) {
+                                            "Tool calls: ${
+                                                toolCalls.joinToString(", ") {
+                                                    it.tool_args.javaClass.simpleName.removeSuffix(
+                                                        "Args",
+                                                    )
+                                                }
+                                            }"
+                                        } else {
+                                            null
+                                        }
+                                    }
+
                                 _messages.value +=
                                     MessageModel(
                                         messageOwner = MessageOwner.Ai,
                                         message = result.message,
                                         createdAt = Clock.System.now(),
+                                        messageType =
+                                            if (result.response.tool_calls?.isNotEmpty() ==
+                                                true
+                                            ) {
+                                                MessageType.ToolCall
+                                            } else {
+                                                MessageType.Regular
+                                            },
+                                        toolCallSummary = toolCallSummary,
                                     )
                                 result.response.tool_calls?.forEach {
                                     val toolEventResult = dispatchToolResponse(it.tool_args)
@@ -115,6 +141,7 @@ class AiChatDialogViewModel(
                                                     ),
                                                 isFailed = true,
                                                 createdAt = Clock.System.now(),
+                                                messageType = MessageType.ToolCallError,
                                             )
                                     }
                                 }

@@ -1,5 +1,6 @@
 package io.composeflow.ai
 
+import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,12 +20,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Circle
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -50,12 +53,14 @@ import androidx.compose.ui.window.Popup
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.project.Project
 import io.composeflow.ui.modifier.hoverIconClickable
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.offsetAt
 import moe.tlaster.precompose.viewmodel.viewModel
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun AiChatDialog(
@@ -151,6 +156,7 @@ fun AiChatDialog(
                                         onSendInput()
                                     }
                                 },
+                                enabled = textFieldValue.isNotEmpty() && !aiAssistantUiState.isGenerating.value,
                             ) {
                                 if (aiAssistantUiState.isGenerating.value) {
                                     CircularProgressIndicator(
@@ -209,6 +215,8 @@ fun AiChatDialog(
     }
 }
 
+private const val TEXT_LENGTH_THRESHOLD = 300
+
 @Composable
 private fun ChatMessage(
     messageModel: MessageModel,
@@ -220,6 +228,37 @@ private fun ChatMessage(
             chars(":")
             minute(Padding.ZERO)
         }
+
+    var isExpanded by remember { mutableStateOf(false) }
+
+    // Determine the main message content
+    val messageContent = messageModel.message
+    val toolCallPrefix =
+        if (messageModel.messageType == MessageType.ToolCall && !messageModel.toolCallSummary.isNullOrEmpty()) {
+            "${messageModel.toolCallSummary}\n\n"
+        } else {
+            ""
+        }
+
+    // Check if message is long enough to need expansion
+    val isLongMessage = messageContent.length > TEXT_LENGTH_THRESHOLD
+
+    // Determine display text based on expansion state
+    val displayText =
+        if (isLongMessage && !isExpanded) {
+            toolCallPrefix + messageContent.take(TEXT_LENGTH_THRESHOLD) + "..."
+        } else {
+            toolCallPrefix + messageContent
+        }
+
+    // Determine icon color based on message type
+    val iconColor =
+        when (messageModel.messageType) {
+            MessageType.ToolCall -> MaterialTheme.colorScheme.tertiary
+            MessageType.ToolCallError -> MaterialTheme.colorScheme.error
+            MessageType.Regular -> MaterialTheme.colorScheme.onSurface
+        }
+
     if (messageModel.messageOwner == MessageOwner.User) {
         Column(modifier = modifier) {
             Row(
@@ -251,15 +290,27 @@ private fun ChatMessage(
                                         bottomEnd = 16.dp,
                                         bottomStart = 16.dp,
                                     ),
-                            ).weight(1f),
+                            ).weight(1f)
+                            .animateContentSize(),
                 ) {
                     SelectionContainer {
                         Text(
-                            text = messageModel.message,
+                            text = displayText,
                             color = MaterialTheme.colorScheme.onSurface,
                             style = MaterialTheme.typography.bodyMedium,
                             modifier = Modifier.padding(16.dp),
                         )
+                    }
+                    if (isLongMessage) {
+                        TextButton(
+                            onClick = { isExpanded = !isExpanded },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                        ) {
+                            Text(
+                                text = if (isExpanded) "Show less" else "Show more",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
                     }
                 }
             }
@@ -272,32 +323,62 @@ private fun ChatMessage(
                 horizontalArrangement = Arrangement.Start,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .background(
-                                color = MaterialTheme.colorScheme.primaryContainer,
-                                shape =
-                                    RoundedCornerShape(
-                                        topStart = 0.dp,
-                                        topEnd = 16.dp,
-                                        bottomEnd = 16.dp,
-                                        bottomStart = 16.dp,
-                                    ),
-                            ).weight(1f),
+                Row(
+                    verticalAlignment = Alignment.Top,
                 ) {
-                    SelectionContainer {
-                        Text(
-                            text = messageModel.message,
-                            color =
-                                if (messageModel.isFailed) {
-                                    MaterialTheme.colorScheme.error
-                                } else {
-                                    MaterialTheme.colorScheme.onPrimaryContainer
-                                },
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp),
-                        )
+                    Icon(
+                        imageVector = Icons.Filled.Circle,
+                        contentDescription =
+                            when (messageModel.messageType) {
+                                MessageType.ToolCall -> "Tool call message"
+                                MessageType.ToolCallError -> "Tool call error message"
+                                MessageType.Regular -> "AI message"
+                            },
+                        tint = iconColor,
+                        modifier =
+                            Modifier
+                                .size(8.dp),
+                    )
+                    Spacer(Modifier.width(4.dp))
+                    Column(
+                        modifier =
+                            Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape =
+                                        RoundedCornerShape(
+                                            topStart = 0.dp,
+                                            topEnd = 16.dp,
+                                            bottomEnd = 16.dp,
+                                            bottomStart = 16.dp,
+                                        ),
+                                ).weight(1f)
+                                .animateContentSize(),
+                    ) {
+                        SelectionContainer {
+                            Text(
+                                text = displayText,
+                                color =
+                                    if (messageModel.isFailed) {
+                                        MaterialTheme.colorScheme.error
+                                    } else {
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    },
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(16.dp),
+                            )
+                        }
+                        if (isLongMessage) {
+                            TextButton(
+                                onClick = { isExpanded = !isExpanded },
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                            ) {
+                                Text(
+                                    text = if (isExpanded) "Show less" else "Show more",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                        }
                     }
                 }
                 Text(
@@ -314,6 +395,114 @@ private fun ChatMessage(
                 )
             }
             Spacer(modifier = Modifier.height(16.dp))
+        }
+    }
+}
+
+@Preview
+@Composable
+fun ChatMessageShortPreview() {
+    ChatMessage(
+        messageModel =
+            MessageModel(
+                messageOwner = MessageOwner.Ai,
+                message = "This is a short AI message.",
+                isFailed = false,
+                createdAt = Clock.System.now(),
+                messageType = MessageType.Regular,
+            ),
+    )
+}
+
+@Preview
+@Composable
+fun ChatMessageLongPreview() {
+    ChatMessage(
+        messageModel =
+            MessageModel(
+                messageOwner = MessageOwner.Ai,
+                message =
+                    "This is a very long AI message that exceeds 300 characters. ".repeat(10) +
+                        "This should trigger the expand/collapse functionality with a 'Show more' button.",
+                isFailed = false,
+                createdAt = Clock.System.now(),
+                messageType = MessageType.Regular,
+            ),
+    )
+}
+
+@Preview
+@Composable
+fun ChatMessageToolCallPreview() {
+    ChatMessage(
+        messageModel =
+            MessageModel(
+                messageOwner = MessageOwner.Ai,
+                message = "Successfully added a new button component to the screen.",
+                isFailed = false,
+                createdAt = Clock.System.now(),
+                messageType = MessageType.ToolCall,
+                toolCallSummary = "Tool calls: AddComposeNode, UpdateModifier",
+            ),
+    )
+}
+
+@Preview
+@Composable
+fun ChatMessageErrorPreview() {
+    ChatMessage(
+        messageModel =
+            MessageModel(
+                messageOwner = MessageOwner.Ai,
+                message = "Failed to execute the requested operation.",
+                isFailed = true,
+                createdAt = Clock.System.now(),
+                messageType = MessageType.ToolCallError,
+            ),
+    )
+}
+
+@Preview
+@Composable
+fun ChatMessageUserPreview() {
+    ChatMessage(
+        messageModel =
+            MessageModel(
+                messageOwner = MessageOwner.User,
+                message = "Can you add a button to the top of the screen?",
+                isFailed = false,
+                createdAt = Clock.System.now(),
+                messageType = MessageType.Regular,
+            ),
+    )
+}
+
+@Preview
+@Composable
+fun AiChatDialogPreview() {
+    // Note: This is a simplified preview as the full dialog requires complex state
+    val sampleMessages =
+        listOf(
+            MessageModel(
+                messageOwner = MessageOwner.User,
+                message = "Add a button component",
+                isFailed = false,
+                createdAt = Clock.System.now(),
+            ),
+            MessageModel(
+                messageOwner = MessageOwner.Ai,
+                message = "I'll add a button component to your screen.",
+                isFailed = false,
+                createdAt = Clock.System.now(),
+                messageType = MessageType.ToolCall,
+                toolCallSummary = "Tool calls: AddComposeNode",
+            ),
+        )
+
+    // Simplified preview showing just the message layout
+    Column {
+        sampleMessages.forEach { message ->
+            ChatMessage(messageModel = message)
         }
     }
 }
