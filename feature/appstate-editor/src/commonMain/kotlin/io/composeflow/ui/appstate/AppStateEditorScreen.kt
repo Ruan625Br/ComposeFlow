@@ -1,6 +1,7 @@
 package io.composeflow.ui.appstate
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,6 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.HorizontalDivider
@@ -26,7 +29,24 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.Checkbox
 import androidx.compose.runtime.Composable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
+import io.composeflow.ui.icon.ComposeFlowIcon
+import io.composeflow.ui.icon.ComposeFlowIconButton
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -38,10 +58,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
@@ -55,6 +76,7 @@ import io.composeflow.data_type
 import io.composeflow.default_value
 import io.composeflow.delete_app_state
 import io.composeflow.editor.validator.FloatValidator
+import io.composeflow.editor.validator.InputValidator
 import io.composeflow.editor.validator.IntValidator
 import io.composeflow.editor.validator.KotlinVariableNameValidator
 import io.composeflow.editor.validator.ValidateResult
@@ -353,27 +375,14 @@ private fun AppStateDetailRow(
             )
 
             Column(modifier = Modifier.width(280.dp)) {
-                Text(
-                    appState.defaultValue?.toString() ?: "",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-
-                if (appState is AppState.CustomDataTypeListAppState) {
-                    Text(
-                        text = "${appState.defaultValue.size} items",
-                        color = MaterialTheme.colorScheme.tertiary,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-
-                    TextButton(onClick = {
-                        dataTypeForDefaultValues = project.findDataTypeOrNull(appState.dataTypeId)
-                    }) {
-                        Text(text = "+ " + stringResource(Res.string.set_from_json))
+                EditableDefaultValue(
+                    appState = appState,
+                    project = project,
+                    onAppStateUpdated = onAppStateUpdated,
+                    onDataTypeForDefaultValuesUpdated = { dataType ->
+                        dataTypeForDefaultValues = dataType
                     }
-                }
+                )
             }
             Spacer(Modifier.weight(1f))
             IconButton(
@@ -964,3 +973,357 @@ private fun AddAppStateDialog(
         }
     }
 }
+
+@Composable
+private fun EditableDefaultValue(
+    appState: AppState<*>,
+    project: Project,
+    onAppStateUpdated: (AppState<*>) -> Unit,
+    onDataTypeForDefaultValuesUpdated: (DataType?) -> Unit,
+) {
+    when (appState) {
+        is AppState.StringAppState -> {
+            EditableText(
+                initialText = appState.defaultValue,
+                onValueChange = { newValue ->
+                    onAppStateUpdated(appState.copy(defaultValue = newValue))
+                },
+                allowEmptyText = true,
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+            )
+        }
+        
+        is AppState.IntAppState -> {
+            ValidatedEditableText(
+                initialText = appState.defaultValue.toString(),
+                onValueChange = { newValue ->
+                    onAppStateUpdated(appState.copy(defaultValue = newValue.toInt()))
+                },
+                validator = IntValidator(),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+            )
+        }
+        
+        is AppState.FloatAppState -> {
+            ValidatedEditableText(
+                initialText = appState.defaultValue.toString(),
+                onValueChange = { newValue ->
+                    onAppStateUpdated(appState.copy(defaultValue = newValue.toFloat()))
+                },
+                validator = FloatValidator(),
+                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                    color = MaterialTheme.colorScheme.onSurface
+                ),
+            )
+        }
+        
+        is AppState.BooleanAppState -> {
+            Row(
+                verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+            ) {
+                Checkbox(
+                    checked = appState.defaultValue,
+                    onCheckedChange = { newValue ->
+                        onAppStateUpdated(appState.copy(defaultValue = newValue))
+                    }
+                )
+                Text(
+                    text = appState.defaultValue.toString(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+        }
+        
+        is AppState.InstantAppState -> {
+            // For Instant types, show as read-only for now since date/time editing is complex
+            Text(
+                text = appState.defaultValue?.toString() ?: "null",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.tertiary,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+        }
+        
+        is AppState.CustomDataTypeAppState -> {
+            Text(
+                text = appState.defaultValue?.toString() ?: "null",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.tertiary,
+                maxLines = 1,
+                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+            )
+        }
+        
+        is AppState.StringListAppState -> {
+            Column {
+                Text(
+                    text = "${appState.defaultValue.size} items: [${appState.defaultValue.joinToString(", ")}]",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "List editing not yet supported",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+        }
+        
+        is AppState.IntListAppState -> {
+            Column {
+                Text(
+                    text = "${appState.defaultValue.size} items: [${appState.defaultValue.joinToString(", ")}]",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "List editing not yet supported",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+        }
+        
+        is AppState.FloatListAppState -> {
+            Column {
+                Text(
+                    text = "${appState.defaultValue.size} items: [${appState.defaultValue.joinToString(", ")}]",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "List editing not yet supported",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+        }
+        
+        is AppState.BooleanListAppState -> {
+            Column {
+                Text(
+                    text = "${appState.defaultValue.size} items: [${appState.defaultValue.joinToString(", ")}]",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+                Text(
+                    text = "List editing not yet supported",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+        }
+        
+        is AppState.InstantListAppState -> {
+            Column {
+                Text(
+                    text = "${appState.defaultValue.size} items",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Text(
+                    text = "List editing not yet supported",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.tertiary,
+                )
+            }
+        }
+        
+        is AppState.CustomDataTypeListAppState -> {
+            Column {
+                Text(
+                    text = "${appState.defaultValue.size} items",
+                    color = MaterialTheme.colorScheme.tertiary,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+
+                TextButton(onClick = {
+                    onDataTypeForDefaultValuesUpdated(project.findDataTypeOrNull(appState.dataTypeId))
+                }) {
+                    Text(text = "+ " + stringResource(Res.string.set_from_json))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ValidatedEditableText(
+    initialText: String,
+    onValueChange: (String) -> Unit,
+    validator: InputValidator,
+    textStyle: androidx.compose.ui.text.TextStyle,
+    modifier: Modifier = Modifier,
+    allowEmptyText: Boolean = false,
+) {
+    var currentText by remember(initialText) { mutableStateOf(initialText) }
+    var tempText by remember(initialText) { mutableStateOf(initialText) }
+    var isEditable by remember { mutableStateOf(false) }
+    var validationResult by remember(initialText) { 
+        mutableStateOf(validator.validate(initialText)) 
+    }
+    
+    val isValid = validationResult is ValidateResult.Success
+    val errorMessage = (validationResult as? ValidateResult.Failure)?.message
+    
+    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
+
+    val onCancelEdit = {
+        tempText = currentText
+        isEditable = false
+        focusManager.clearFocus()
+        validationResult = validator.validate(currentText)
+    }
+
+    val onCommitChange = {
+        if (!allowEmptyText && tempText.isBlank()) {
+            onCancelEdit()
+        } else if (isValid) {
+            currentText = tempText
+            isEditable = false
+            focusManager.clearFocus()
+            onValueChange(tempText)
+            validationResult = validator.validate(tempText)
+        }
+        // If not valid, don't commit - stay in edit mode
+    }
+
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Box(contentAlignment = Alignment.CenterStart) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BasicTextField(
+                        value = tempText,
+                        onValueChange = { newText -> 
+                            tempText = newText
+                            validationResult = validator.validate(newText)
+                        },
+                        readOnly = !isEditable,
+                        singleLine = true,
+                        textStyle = textStyle.copy(
+                            color = if (isValid || !isEditable) {
+                                textStyle.color
+                            } else {
+                                MaterialTheme.colorScheme.error
+                            }
+                        ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            imeAction = ImeAction.Done,
+                        ),
+                        keyboardActions = KeyboardActions(
+                            onDone = {
+                                onCommitChange()
+                            },
+                        ),
+                        modifier = Modifier
+                            .focusRequester(focusRequester)
+                            .defaultMinSize(minWidth = Dp.Unspecified)
+                            .drawUnderline(isEditable, color = MaterialTheme.colorScheme.primary)
+                            .onPreviewKeyEvent { keyEvent ->
+                                if (isEditable && keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                    onCancelEdit()
+                                    true
+                                } else {
+                                    false
+                                }
+                            },
+                        interactionSource = interactionSource,
+                        decorationBox = { innerTextField ->
+                            Box(modifier = Modifier) {
+                                innerTextField()
+                            }
+                        },
+                    )
+
+                    if (isEditable) {
+                        ComposeFlowIconButton(
+                            onClick = {
+                                onCommitChange()
+                            },
+                            enabled = isValid, // Disable when validation fails
+                        ) {
+                            ComposeFlowIcon(
+                                imageVector = Icons.Default.Done,
+                                contentDescription = "Done",
+                                tint = if (isValid) {
+                                    MaterialTheme.colorScheme.onSurface
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (!isEditable) {
+                ComposeFlowIconButton(
+                    onClick = {
+                        isEditable = true
+                        tempText = currentText
+                        focusRequester.requestFocus()
+                    },
+                ) {
+                    ComposeFlowIcon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                    )
+                }
+            }
+        }
+        
+        // Show error message when validation fails and in edit mode
+        if (isEditable && !isValid && errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+            )
+        }
+    }
+}
+
+fun Modifier.drawUnderline(
+    isEditable: Boolean,
+    color: Color,
+): Modifier =
+    this.then(
+        if (isEditable) {
+            Modifier.drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                val y = size.height - strokeWidth / 2 + 1.dp.toPx()
+                drawLine(
+                    color = color,
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = strokeWidth,
+                )
+            }
+        } else {
+            Modifier
+        },
+    )
