@@ -32,6 +32,10 @@ sealed interface UserOperation {
         val node: ComposeNode,
     ) : UserOperation
 
+    data class ComposablesDeleted(
+        val nodes: List<ComposeNode>,
+    ) : UserOperation
+
     data class ComposablePasted(
         val node: ComposeNode,
     ) : UserOperation
@@ -110,8 +114,16 @@ sealed interface UserOperation {
         val node: ComposeNode,
     ) : UserOperation
 
+    data class BringNodesToFront(
+        val nodes: List<ComposeNode>,
+    ) : UserOperation
+
     data class SendToBack(
         val node: ComposeNode,
+    ) : UserOperation
+
+    data class SendNodesToBack(
+        val nodes: List<ComposeNode>,
     ) : UserOperation
 
     data class ActionsMapUpdated(

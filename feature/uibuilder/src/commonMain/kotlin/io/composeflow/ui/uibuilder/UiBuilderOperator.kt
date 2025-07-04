@@ -152,6 +152,17 @@ class UiBuilderOperator {
         return result
     }
 
+    fun onPreRemoveComposeNodes(composeNodes: List<ComposeNode>): EventResult {
+        val result = EventResult()
+        composeNodes.forEach { composeNode ->
+            val errorMessage = composeNode.checkIfNodeIsDeletable()
+            if (errorMessage != null) {
+                result.errorMessages.add(errorMessage)
+            }
+        }
+        return result
+    }
+
     @LlmTool(
         name = "remove_compose_node",
         description = "Removes a Compose UI component from the UI builder.",
@@ -169,34 +180,68 @@ class UiBuilderOperator {
                 Logger.e(it)
             }
         } else {
-            if (TraitCategory.ScreenOnly in (
-                    nodeToRemove?.trait?.value?.paletteCategories()
-                        ?: emptyList()
-                )
-            ) {
-                val canvasEditable = project.screenHolder.currentEditable()
-                when (nodeToRemove?.trait?.value) {
-                    is FabTrait -> {
-                        (canvasEditable as? Screen)?.fabNode?.value = null
-                    }
+            removeComposeNodeFromProject(project, nodeToRemove)
+        }
+        return eventResult
+    }
 
-                    is TopAppBarTrait -> {
-                        (canvasEditable as? Screen)?.topAppBarNode?.value = null
-                    }
-
-                    is BottomAppBarTrait -> {
-                        (canvasEditable as? Screen)?.bottomAppBarNode?.value = null
-                    }
-
-                    is NavigationDrawerTrait -> {
-                        (canvasEditable as? Screen)?.navigationDrawerNode?.value = null
-                    }
-
-                    else -> {}
+    private fun removeComposeNodeFromProject(
+        project: Project,
+        nodeToRemove: ComposeNode?,
+    ) {
+        if (TraitCategory.ScreenOnly in (
+                nodeToRemove?.trait?.value?.paletteCategories()
+                    ?: emptyList()
+            )
+        ) {
+            val canvasEditable = project.screenHolder.currentEditable()
+            when (nodeToRemove?.trait?.value) {
+                is FabTrait -> {
+                    (canvasEditable as? Screen)?.fabNode?.value = null
                 }
-            } else {
-                val operationTarget = nodeToRemove?.getOperationTargetNode(project)
-                operationTarget?.removeFromParent()
+
+                is TopAppBarTrait -> {
+                    (canvasEditable as? Screen)?.topAppBarNode?.value = null
+                }
+
+                is BottomAppBarTrait -> {
+                    (canvasEditable as? Screen)?.bottomAppBarNode?.value = null
+                }
+
+                is NavigationDrawerTrait -> {
+                    (canvasEditable as? Screen)?.navigationDrawerNode?.value = null
+                }
+
+                else -> {}
+            }
+        } else {
+            val operationTarget = nodeToRemove?.getOperationTargetNode(project)
+            operationTarget?.removeFromParent()
+        }
+    }
+
+    @LlmTool(
+        name = "remove_compose_nodes",
+        description = "Removes Compose UI components from the UI builder.",
+    )
+    fun onRemoveComposeNodes(
+        project: Project,
+        @LlmParam(description = "The IDs of the nodes to be removed.")
+        composeNodeIds: List<String>,
+    ): EventResult {
+        val nodesToRemove =
+            composeNodeIds.mapNotNull {
+                project.screenHolder.currentEditable().findNodeById(it)
+            }
+
+        val eventResult = onPreRemoveComposeNodes(nodesToRemove)
+        if (eventResult.errorMessages.isNotEmpty()) {
+            eventResult.errorMessages.forEach {
+                Logger.e(it)
+            }
+        } else {
+            nodesToRemove.forEach {
+                removeComposeNodeFromProject(project, it)
             }
         }
         return eventResult

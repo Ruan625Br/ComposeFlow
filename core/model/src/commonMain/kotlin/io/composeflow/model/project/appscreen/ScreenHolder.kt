@@ -128,11 +128,11 @@ data class ScreenHolder(
         screens.remove(screen)
     }
 
-    fun findFocusedNodeOrNull(): ComposeNode? =
+    fun findFocusedNodes(): List<ComposeNode> =
         if (editedComponent.value != null) {
-            editedComponent.value?.findFocusedNodeOrNull()
+            editedComponent.value?.findFocusedNodes()!!.distinctBy { it.id }
         } else {
-            currentScreen().findFocusedNodeOrNull()
+            currentScreen().findFocusedNodes().distinctBy { it.id }
         }
 
     fun findDeepestChildAtOrNull(position: Offset): ComposeNode? {
@@ -140,10 +140,20 @@ data class ScreenHolder(
         return currentEditable.findDeepestChildAtOrNull(position)
     }
 
-    fun updateFocusedNode(eventPosition: Offset) {
-        currentEditable().clearIsFocusedRecursively()
-        screens.forEach {
-            it.clearIsFocusedRecursively()
+    /**
+     * Update the focused node.
+     *
+     * if [addToSelection] is true, it doesn't clear the existing focused nodes.
+     */
+    fun updateFocusedNode(
+        eventPosition: Offset,
+        addToSelection: Boolean = false,
+    ) {
+        if (!addToSelection) {
+            currentEditable().clearIsFocusedRecursively()
+            screens.forEach {
+                it.clearIsFocusedRecursively()
+            }
         }
         val currentScreen = currentScreen()
         currentScreen.navigationDrawerNode.value?.findDeepestChildAtOrNull(eventPosition)?.let {
@@ -154,7 +164,7 @@ data class ScreenHolder(
             it.isFocused.value = true
             return
         }
-        currentEditable().updateFocusedNode(eventPosition)
+        currentEditable().updateFocusedNode(eventPosition, addToSelection)
     }
 
     fun updateHoveredNode(eventPosition: Offset) {
@@ -512,7 +522,10 @@ data class ScreenHolder(
                         .builder("isCurrentDestination")
                         .addParameter(
                             "backStackEntry",
-                            ClassName("androidx.navigation", "NavBackStackEntry").copy(nullable = true),
+                            ClassName(
+                                "androidx.navigation",
+                                "NavBackStackEntry",
+                            ).copy(nullable = true),
                         ).returns(Boolean::class)
                         .addCode("""return backStackEntry?.destination?.route == $routeName""")
                         .build(),

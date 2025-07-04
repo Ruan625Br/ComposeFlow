@@ -51,7 +51,7 @@ import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.inspector.modifier.AddModifierDialog
-import io.composeflow.ui.jewel.SingleSelectionLazyTree
+import io.composeflow.ui.jewel.MultipleSelectionLazyTree
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.mousePointerEvents
 import io.composeflow.ui.popup.SingleTextInputDialog
@@ -71,7 +71,7 @@ fun ComposeNodeTree(
     project: Project,
     canvasNodeCallbacks: CanvasNodeCallbacks,
     composeNodeCallbacks: ComposeNodeCallbacks,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     onFocusedStatusUpdated: (ComposeNode) -> Unit,
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
     onShowInspectorTab: () -> Unit,
@@ -81,7 +81,7 @@ fun ComposeNodeTree(
 ) {
     val editable = project.screenHolder.currentEditable()
     val rootNode = editable.getRootNode()
-    val focusedNode = project.screenHolder.findFocusedNodeOrNull()
+    val focusedNodes = project.screenHolder.findFocusedNodes()
 
     fun TreeGeneratorScope<ComposeNode>.addNodeRecursively(node: ComposeNode) {
         addNode(node, id = node.fallbackId) {
@@ -124,9 +124,8 @@ fun ComposeNodeTree(
     val lazyListState = rememberLazyListState()
     val selectableLazyListState = remember { SelectableLazyListState(lazyListState) }
     val treeState = rememberTreeState(selectableLazyListState = selectableLazyListState)
-    focusedNode?.let { focused ->
-        treeState.setFocus(focused)
-    }
+
+    treeState.setFocus(focusedNodes)
     var contextMenuExpanded by remember { mutableStateOf(false) }
     var addModifierDialogVisible by remember { mutableStateOf(false) }
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
@@ -141,19 +140,22 @@ fun ComposeNodeTree(
                     contextMenuExpanded = true
                 },
     ) {
-        SingleSelectionLazyTree(
+        MultipleSelectionLazyTree(
             tree = tree,
             treeState = treeState,
             style = LocalLazyTreeStyle.current,
-            onSelectionChange = {
-                if (it.isNotEmpty() &&
-                    !it
-                        .first()
-                        .data.isFocused.value
-                ) {
-                    project.screenHolder.clearIsFocused()
-                    val element = it.first()
-                    element.data.setFocus()
+            onSelectionChange = { selectedElements ->
+                if (selectedElements.isNotEmpty()) {
+                    // Check if any of the selected nodes are not currently focused
+                    val hasUnfocusedNodes = selectedElements.any { !it.data.isFocused.value }
+
+                    if (hasUnfocusedNodes) {
+                        project.screenHolder.clearIsFocused()
+                        // Set focus on all selected nodes
+                        selectedElements.forEach { element ->
+                            element.data.setFocus()
+                        }
+                    }
                 }
             },
         ) {
@@ -328,10 +330,12 @@ fun ComposeNodeTree(
         }
     }
 
-    LaunchedEffect(focusedNode?.fallbackId) {
-        focusedNode?.let { focused ->
-            val index = tree.findLazyListIndex(target = focused, treeState = treeState)
-            selectableLazyListState.scrollToItem(index, animateScroll = true)
+    if (focusedNodes.size == 1) {
+        LaunchedEffect(focusedNodes.firstOrNull()?.fallbackId) {
+            focusedNodes.firstOrNull()?.let { focused ->
+                val index = tree.findLazyListIndex(target = focused, treeState = treeState)
+                selectableLazyListState.scrollToItem(index, animateScroll = true)
+            }
         }
     }
 
@@ -340,7 +344,7 @@ fun ComposeNodeTree(
             project = project,
             canvasNodeCallbacks = canvasNodeCallbacks,
             composeNodeCallbacks = composeNodeCallbacks,
-            copiedNode = copiedNode,
+            copiedNodes = copiedNodes,
             currentEditable = project.screenHolder.currentEditable(),
             onAddModifier = {
                 addModifierDialogVisible = true
@@ -362,7 +366,7 @@ fun ComposeNodeTree(
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
     if (addModifierDialogVisible) {
         onAnyDialogIsShown()
-        project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
+        project.screenHolder.findFocusedNodes().firstOrNull()?.let { focused ->
             val modifiers =
                 ModifierWrapper
                     .values()
@@ -433,9 +437,12 @@ private fun Tree<ComposeNode>.findLazyListIndex(
     return result
 }
 
-private fun TreeState.setFocus(node: ComposeNode) {
-    if (!selectedKeys.contains(node.fallbackId)) {
-        openNodes(node.findNodesUntilRoot().map { it.fallbackId })
-        selectedKeys = listOf(node.fallbackId)
+private fun TreeState.setFocus(nodes: List<ComposeNode>) {
+    nodes.forEach { node ->
+        if (!selectedKeys.contains(node.fallbackId)) {
+            openNodes(node.findNodesUntilRoot().map { it.fallbackId })
+        }
     }
+    // Set the selected keys to show all focused nodes as selected
+    selectedKeys = nodes.map { it.fallbackId }
 }

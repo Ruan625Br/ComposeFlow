@@ -92,7 +92,7 @@ class UiBuilderViewModel(
     var draggedNode by mutableStateOf<ComposeNode?>(null)
         private set
 
-    var copiedNode by mutableStateOf<ComposeNode?>(null)
+    var copiedNodes by mutableStateOf<List<ComposeNode>>(emptyList())
         private set
 
     private val appDarkThemeSetting =
@@ -233,7 +233,7 @@ class UiBuilderViewModel(
         } else if (keyEvent.key == Key.Y && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
             onRedo()
         } else if (keyEvent.key == Key.C && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
-            onCopyFocusedNode()
+            onCopyFocusedNodes()
         } else if (keyEvent.key == Key.V && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
             onPaste()
         } else {
@@ -241,34 +241,31 @@ class UiBuilderViewModel(
         }
 
     fun onDeleteKey(): EventResult {
-        val focused = project.screenHolder.currentEditable().findFocusedNodeOrNull()
+        val focusedNodes = project.screenHolder.currentEditable().findFocusedNodes()
         val result = EventResult()
-        focused?.let {
-            val eventResult = uiBuilderOperator.onPreRemoveComposeNode(focused)
-            if (eventResult.errorMessages.isNotEmpty()) {
-                return eventResult
-            }
+        val eventResult = uiBuilderOperator.onPreRemoveComposeNodes(focusedNodes)
+        if (eventResult.errorMessages.isNotEmpty()) {
+            return eventResult
         }
-        return focused?.let { focusedNode ->
-            recordOperation(
-                project = project,
-                userOperation =
-                    UserOperation.ComposableDeleted(
-                        node =
-                            focusedNode.restoreInstance(
-                                sameId = true,
-                            ),
-                    ),
-            )
 
-            uiBuilderOperator.onRemoveComposeNode(
-                project,
-                focusedNode.id,
-            )
+        val nodesToDelete =
+            focusedNodes.map {
+                it.restoreInstance(sameId = true)
+            }
+        recordOperation(
+            project = project,
+            userOperation =
+                UserOperation.ComposablesDeleted(
+                    nodes = nodesToDelete,
+                ),
+        )
+        uiBuilderOperator.onRemoveComposeNodes(
+            project,
+            nodesToDelete.map { it.id },
+        )
 
-            saveProject(project)
-            result
-        } ?: result
+        saveProject(project)
+        return result
     }
 
     fun onUndo(): EventResult {
@@ -295,24 +292,32 @@ class UiBuilderViewModel(
         return EventResult()
     }
 
-    fun onCopyFocusedNode(): EventResult {
-        val focused = project.screenHolder.currentEditable().findFocusedNodeOrNull()
+    fun onCopyFocusedNodes(): EventResult {
+        val focused = project.screenHolder.currentEditable().findFocusedNodes()
         val result = EventResult()
-        val operationTarget = focused?.getOperationTargetNode(project)
-        operationTarget?.let {
-            copiedNode = it
-            result.errorMessages.add("Copied ${it.displayName(project)}")
+        val operationTargets = focused.map { it.getOperationTargetNode(project) }
+        if (operationTargets.size == 1) {
+            copiedNodes = operationTargets
+            result.errorMessages.add("Copied ${operationTargets[0].displayName(project)}")
+        } else if (operationTargets.size > 1) {
+            copiedNodes = operationTargets
+            result.errorMessages.add("Copied multiple nodes")
         }
         return result
     }
 
     fun onPaste(): EventResult {
         val result = EventResult()
-        copiedNode?.let { copied ->
+        if (copiedNodes.isEmpty()) {
+            result.errorMessages.add("No Composable in clipboard")
+            return result
+        }
+        copiedNodes.forEach { copied ->
             val container =
                 project.screenHolder
                     .currentEditable()
-                    .findFocusedNodeOrNull()
+                    .findFocusedNodes()
+                    .firstOrNull()
                     ?.findNearestContainerOrNull()
                     ?: project.screenHolder.currentRootNode()
 
@@ -345,7 +350,7 @@ class UiBuilderViewModel(
                 )
                 saveProject(project)
             }
-        } ?: { result.errorMessages.add("No Composable in clipboard") }
+        }
 
         return result
     }
@@ -459,8 +464,11 @@ class UiBuilderViewModel(
         draggedNode = node
     }
 
-    fun onMousePressedAt(eventPosition: Offset) {
-        project.screenHolder.updateFocusedNode(eventPosition)
+    fun onMousePressedAt(
+        eventPosition: Offset,
+        isCtrlOrMetaPressed: Boolean = false,
+    ) {
+        project.screenHolder.updateFocusedNode(eventPosition, isCtrlOrMetaPressed)
     }
 
     fun onMouseHoveredAt(eventPosition: Offset) {
@@ -576,33 +584,36 @@ class UiBuilderViewModel(
     }
 
     fun onBringToFront() {
-        val focused = project.screenHolder.findFocusedNodeOrNull()
-        focused?.let {
+        val focused = project.screenHolder.findFocusedNodes()
+        if (focused.isNotEmpty()) {
             recordOperation(
                 project = project,
                 userOperation =
-                    UserOperation.BringToFront(
-                        node = it.restoreInstance(sameId = true),
+                    UserOperation.BringNodesToFront(
+                        nodes = focused.map { it.restoreInstance(sameId = true) },
                     ),
             )
-
-            it.bringToFront()
+            focused.forEach {
+                it.bringToFront()
+            }
             saveProject(project)
         }
     }
 
     fun onSendToBack() {
-        val focused = project.screenHolder.findFocusedNodeOrNull()
-        focused?.let {
+        val focused = project.screenHolder.findFocusedNodes()
+        if (focused.isNotEmpty()) {
             recordOperation(
                 project = project,
                 userOperation =
-                    UserOperation.SendToBack(
-                        node = it.restoreInstance(sameId = true),
+                    UserOperation.SendNodesToBack(
+                        nodes = focused.map { it.restoreInstance(sameId = true) },
                     ),
             )
 
-            it.sendToBack()
+            focused.forEach {
+                it.sendToBack()
+            }
             saveProject(project)
         }
     }

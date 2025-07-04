@@ -77,7 +77,7 @@ fun UiBuilderContextMenuDropDown(
     project: Project,
     composeNodeCallbacks: ComposeNodeCallbacks,
     canvasNodeCallbacks: CanvasNodeCallbacks,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     currentEditable: CanvasEditable,
     onAddModifier: () -> Unit,
     onCloseMenu: () -> Unit,
@@ -88,7 +88,7 @@ fun UiBuilderContextMenuDropDown(
     coroutineScope: CoroutineScope,
 ) {
     var wrapWithMenuExpanded by remember { mutableStateOf(false) }
-    val focusedNode = currentEditable.findFocusedNodeOrNull()
+    val focusedNodes = currentEditable.findFocusedNodes()
     CursorDropdownMenu(
         expanded = true,
         onDismissRequest = {
@@ -146,8 +146,13 @@ fun UiBuilderContextMenuDropDown(
             onCloseMenu()
         })
 
-        if (focusedNode?.isContentRoot() == false &&
-            focusedNode.trait.value.isEditable()
+        if (
+            focusedNodes.size == 1 &&
+            focusedNodes.firstOrNull()?.isContentRoot() == false &&
+            focusedNodes
+                .first()
+                .trait.value
+                .isEditable()
         ) {
             ContextMenuEditItems(
                 canvasNodeCallbacks = canvasNodeCallbacks,
@@ -155,15 +160,24 @@ fun UiBuilderContextMenuDropDown(
                 onShowSnackbar = onShowSnackbar,
                 coroutineScope = coroutineScope,
                 onCloseMenu = onCloseMenu,
-                copiedNode = copiedNode,
+                copiedNodes = copiedNodes,
             )
         }
 
-        if (focusedNode?.isRoot() == false &&
-            !focusedNode.isContentRoot() &&
-            focusedNode.trait.value !is ComponentTrait &&
-            focusedNode.trait.value.isEditable() &&
-            TraitCategory.ScreenOnly !in focusedNode.trait.value.paletteCategories()
+        if (
+            focusedNodes.size == 1 &&
+            focusedNodes.firstOrNull()?.isRoot() == false &&
+            !focusedNodes.first().isContentRoot() &&
+            focusedNodes.first().trait.value !is ComponentTrait &&
+            focusedNodes
+                .first()
+                .trait.value
+                .isEditable() &&
+            TraitCategory.ScreenOnly !in
+            focusedNodes
+                .first()
+                .trait.value
+                .paletteCategories()
         ) {
             HorizontalDivider(
                 thickness = 1.dp,
@@ -193,16 +207,18 @@ fun UiBuilderContextMenuDropDown(
                     }
                 }
             }, onClick = {
-                onOpenConvertToComponentDialog(focusedNode)
+                onOpenConvertToComponentDialog(focusedNodes.first())
                 onCloseMenu()
             })
-        } else if (focusedNode?.trait?.value is ComponentTrait) {
+        } else if (focusedNodes.size == 1 &&
+            focusedNodes.firstOrNull()?.trait?.value is ComponentTrait
+        ) {
             HorizontalDivider(
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.surface,
             )
-            check(focusedNode.componentId != null)
-            val component = project.findComponentOrThrow(focusedNode.componentId!!)
+            check(focusedNodes.first().componentId != null)
+            val component = project.findComponentOrThrow(focusedNodes.first().componentId!!)
             DropdownMenuItem(text = {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ComposeFlowIcon(
@@ -228,11 +244,20 @@ fun UiBuilderContextMenuDropDown(
             })
         }
 
-        if (focusedNode?.isRoot() == false &&
-            !focusedNode.isContentRoot() &&
-            focusedNode.trait.value.isEditable() &&
-            !focusedNode.isContentRoot() &&
-            TraitCategory.ScreenOnly !in focusedNode.trait.value.paletteCategories()
+        if (
+            focusedNodes.size == 1 &&
+            focusedNodes.firstOrNull()?.isRoot() == false &&
+            !focusedNodes.first().isContentRoot() &&
+            focusedNodes
+                .first()
+                .trait.value
+                .isEditable() &&
+            !focusedNodes.first().isContentRoot() &&
+            TraitCategory.ScreenOnly !in
+            focusedNodes
+                .first()
+                .trait.value
+                .paletteCategories()
         ) {
             HorizontalDivider(
                 thickness = 1.dp,
@@ -297,7 +322,7 @@ fun UiBuilderContextMenuDropDown(
                                 },
                                 onClick = {
                                     composeNodeCallbacks.onWrapWithContainerComposable(
-                                        focusedNode,
+                                        focusedNodes.first(),
                                         container,
                                     )
                                     onCloseMenu()
@@ -308,7 +333,7 @@ fun UiBuilderContextMenuDropDown(
             }
         }
 
-        focusedNode?.let {
+        if (focusedNodes.size == 1) {
             HorizontalDivider(
                 thickness = 1.dp,
                 color = MaterialTheme.colorScheme.surface,
@@ -320,7 +345,7 @@ fun UiBuilderContextMenuDropDown(
                 modifier = Modifier.padding(start = 12.dp, top = 8.dp),
             )
 
-            focusedNode.findNodesUntilRoot().forEach {
+            focusedNodes.first().findNodesUntilRoot().forEach {
                 DropdownMenuItem(text = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -358,7 +383,7 @@ private fun ContextMenuEditItems(
     coroutineScope: CoroutineScope,
     onAddModifier: () -> Unit,
     onCloseMenu: () -> Unit,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
 ) {
     DropdownMenuItem(text = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -405,7 +430,7 @@ private fun ContextMenuEditItems(
                 )
             }
         },
-        enabled = copiedNode != null,
+        enabled = copiedNodes.isNotEmpty(),
         onClick = {
             val eventResult = canvasNodeCallbacks.onPaste()
             eventResult.handleMessages(onShowSnackbar, coroutineScope)

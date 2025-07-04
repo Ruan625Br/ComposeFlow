@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import io.composeflow.Res
 import io.composeflow.model.parameter.AbstractIconTrait
 import io.composeflow.model.parameter.BottomAppBarTrait
 import io.composeflow.model.parameter.BoxTrait
@@ -72,6 +73,9 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNodeCallbacks
 import io.composeflow.model.project.component.Component
 import io.composeflow.model.project.findComponentOrThrow
+import io.composeflow.multiple_composables_selected
+import io.composeflow.select_single_composable_to_edit_properties
+import io.composeflow.selected_composables
 import io.composeflow.ui.inspector.component.ComponentInspector
 import io.composeflow.ui.inspector.component.ComponentParameterInspector
 import io.composeflow.ui.inspector.component.ScreenParameterInspector
@@ -114,6 +118,7 @@ import io.composeflow.ui.inspector.visibility.VisibilityInspector
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.text.EditableText
 import io.composeflow.ui.utils.TreeExpanderInverse
+import org.jetbrains.compose.resources.stringResource
 
 @Composable
 fun PropertyInspector(
@@ -121,11 +126,17 @@ fun PropertyInspector(
     composeNodeCallbacks: ComposeNodeCallbacks,
     modifier: Modifier = Modifier,
 ) {
-    val composeNode = project.screenHolder.findFocusedNodeOrNull()
+    val focusedNodes = project.screenHolder.findFocusedNodes()
     val editable = project.screenHolder.currentEditable()
-    if (composeNode == null) {
+    if (focusedNodes.isEmpty()) {
         EmptyInspector()
+    } else if (focusedNodes.size > 1) {
+        MultipleSelectionInspector(
+            focusedNodes = focusedNodes,
+            modifier = modifier,
+        )
     } else {
+        val composeNode = focusedNodes[0]
         val lazyListState = rememberLazyListState()
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
@@ -587,4 +598,87 @@ private fun SectionDivider() {
         color = MaterialTheme.colorScheme.inverseOnSurface,
         modifier = Modifier.padding(vertical = 8.dp),
     )
+}
+
+@Composable
+private fun MultipleSelectionInspector(
+    focusedNodes: List<ComposeNode>,
+    modifier: Modifier = Modifier,
+) {
+    val lazyListState = rememberLazyListState()
+    LazyColumn(
+        contentPadding = PaddingValues(16.dp),
+        state = lazyListState,
+        modifier =
+            modifier
+                .background(MaterialTheme.colorScheme.surface)
+                .fillMaxSize(),
+    ) {
+        item {
+            // Show collective size information for multiple selected nodes
+            MultipleSelectionSizeInspector(focusedNodes)
+        }
+        item {
+            SectionDivider()
+            MultipleSelectionParamsInspector(
+                focusedNodes = focusedNodes,
+            )
+        }
+    }
+}
+
+@Composable
+private fun MultipleSelectionSizeInspector(focusedNodes: List<ComposeNode>) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+    ) {
+        NonEditableTextProperty(
+            "Selected",
+            stringResource(Res.string.selected_composables, focusedNodes.size),
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun MultipleSelectionParamsInspector(focusedNodes: List<ComposeNode>) {
+    Column(modifier = Modifier.animateContentSize(keyframes { durationMillis = 100 })) {
+        var expanded by remember { mutableStateOf(true) }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(8.dp))
+                    .clickable { expanded = !expanded }
+                    .hoverIconClickable(),
+        ) {
+            Text(
+                text = stringResource(Res.string.multiple_composables_selected, focusedNodes.size),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(modifier = Modifier.weight(1f))
+
+            TreeExpanderInverse(
+                expanded = expanded,
+                onClick = { expanded = !expanded },
+            )
+        }
+
+        if (expanded) {
+            Column(modifier = Modifier.padding(start = 8.dp)) {
+                Text(
+                    text = stringResource(Res.string.select_single_composable_to_edit_properties),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 8.dp),
+                )
+            }
+        }
+    }
 }

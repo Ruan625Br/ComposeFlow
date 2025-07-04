@@ -47,7 +47,7 @@ interface CanvasEditable : StateHolder {
      */
     fun getContentRootNode(): ComposeNode
 
-    fun findFocusedNodeOrNull(): ComposeNode?
+    fun findFocusedNodes(): List<ComposeNode>
 
     fun findNodeById(id: String): ComposeNode?
 
@@ -59,7 +59,15 @@ interface CanvasEditable : StateHolder {
 
     fun clearIndexToBeDroppedRecursively()
 
-    fun updateFocusedNode(eventPosition: Offset)
+    /**
+     * Update the focused node.
+     *
+     * if [addToSelection] is passed as true, it doesn't clear the existing focused nodes.
+     */
+    fun updateFocusedNode(
+        eventPosition: Offset,
+        addToSelection: Boolean = false,
+    )
 
     fun updateHoveredNode(eventPosition: Offset)
 

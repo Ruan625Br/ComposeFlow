@@ -41,6 +41,7 @@ import io.composeflow.Res
 import io.composeflow.cancel
 import io.composeflow.edit
 import io.composeflow.edit_actions_with_editor
+import io.composeflow.focus_single_composable_to_modify_actions
 import io.composeflow.model.action.Action
 import io.composeflow.model.action.ActionNode
 import io.composeflow.model.action.ActionType
@@ -76,157 +77,175 @@ fun ActionInspector(
     project: Project,
     composeNodeCallbacks: ComposeNodeCallbacks,
 ) {
-    val composeNode = project.screenHolder.findFocusedNodeOrNull() ?: return
-    var dialogOpen by remember { mutableStateOf(false) }
-    val actionInEdit by remember { mutableStateOf<Action?>(null) }
-    var actionEditorDialogOpen by remember { mutableStateOf(false) }
-    val actionTypes =
-        composeNode.trait.value
-            .actionTypes()
-            .sortedBy { it.priority }
-    var selectedActionType by remember(
-        composeNode.id,
-        actionTypes,
-    ) { mutableStateOf(actionTypes.first()) }
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(16.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            TextButton(
-                onClick = {
-                    dialogOpen = true
-                },
-                enabled = actionTypes.isNotEmpty(),
-            ) {
-                Text("+ Add action")
-            }
-
+    val focusedNodes = project.screenHolder.findFocusedNodes()
+    if (focusedNodes.isEmpty()) {
+        Text(text = "No node selected")
+    } else if (focusedNodes.size > 1) {
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+        ) {
             Text(
-                text = "for",
+                text = stringResource(Res.string.focus_single_composable_to_modify_actions),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(end = 8.dp),
             )
-
-            var actionTypeDropDownExpanded by remember { mutableStateOf(false) }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier =
-                    Modifier.clickable {
-                        actionTypeDropDownExpanded = true
+        }
+    } else {
+        val composeNode = focusedNodes[0]
+        var dialogOpen by remember { mutableStateOf(false) }
+        val actionInEdit by remember { mutableStateOf<Action?>(null) }
+        var actionEditorDialogOpen by remember { mutableStateOf(false) }
+        val actionTypes =
+            composeNode.trait.value
+                .actionTypes()
+                .sortedBy { it.priority }
+        var selectedActionType by remember(
+            composeNode.id,
+            actionTypes,
+        ) { mutableStateOf(actionTypes.first()) }
+        Column(
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(16.dp),
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                TextButton(
+                    onClick = {
+                        dialogOpen = true
                     },
-            ) {
-                Text(
-                    text = selectedActionType.name,
-                    color = MaterialTheme.colorScheme.secondary,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier =
-                        Modifier
-                            .padding(end = 8.dp),
-                )
-                Icon(
-                    imageVector = Icons.Outlined.ExpandMore,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                )
-                DropdownMenu(
-                    expanded = actionTypeDropDownExpanded,
-                    onDismissRequest = { actionTypeDropDownExpanded = false },
+                    enabled = actionTypes.isNotEmpty(),
                 ) {
-                    actionTypes.forEach { action ->
-                        DropdownMenuItem(
-                            onClick = {
-                                actionTypeDropDownExpanded = false
-                                selectedActionType = action
-                            },
-                            text = {
-                                Text(
-                                    action.name,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                )
-                            },
-                        )
-                    }
+                    Text("+ Add action")
                 }
 
-                Spacer(Modifier.weight(1f))
-                Tooltip(stringResource(Res.string.open_action_editor)) {
-                    TextButton(onClick = {
-                        actionEditorDialogOpen = true
-                    }) {
-                        Text("Action Editor")
+                Text(
+                    text = "for",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(end = 8.dp),
+                )
+
+                var actionTypeDropDownExpanded by remember { mutableStateOf(false) }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier =
+                        Modifier.clickable {
+                            actionTypeDropDownExpanded = true
+                        },
+                ) {
+                    Text(
+                        text = selectedActionType.name,
+                        color = MaterialTheme.colorScheme.secondary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier =
+                            Modifier
+                                .padding(end = 8.dp),
+                    )
+                    Icon(
+                        imageVector = Icons.Outlined.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.secondary,
+                    )
+                    DropdownMenu(
+                        expanded = actionTypeDropDownExpanded,
+                        onDismissRequest = { actionTypeDropDownExpanded = false },
+                    ) {
+                        actionTypes.forEach { action ->
+                            DropdownMenuItem(
+                                onClick = {
+                                    actionTypeDropDownExpanded = false
+                                    selectedActionType = action
+                                },
+                                text = {
+                                    Text(
+                                        action.name,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                },
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.weight(1f))
+                    Tooltip(stringResource(Res.string.open_action_editor)) {
+                        TextButton(onClick = {
+                            actionEditorDialogOpen = true
+                        }) {
+                            Text("Action Editor")
+                        }
                     }
                 }
             }
-        }
-        ActionTriggersContent(
-            project = project,
-            composeNode = composeNode,
-            composeNodeCallbacks = composeNodeCallbacks,
-            actionType = selectedActionType,
-        )
-    }
-
-    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    if (dialogOpen) {
-        onAnyDialogIsShown()
-        val closeDialog = {
-            dialogOpen = false
-            onAllDialogsClosed()
-        }
-        PositionCustomizablePopup(
-            expanded = dialogOpen,
-            onDismissRequest = {
-                closeDialog()
-            },
-            onKeyEvent = {
-                if (it.key == Key.Escape) {
-                    closeDialog()
-                    true
-                } else {
-                    false
-                }
-            },
-        ) {
-            AddActionDialogContent(
+            ActionTriggersContent(
                 project = project,
-                actionInEdit = actionInEdit,
-                onActionSelected = {
-                    val newActionsMap =
-                        mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
-                            putAll(composeNode.actionsMap)
-                        }
-//                    it.onActionAdded(project)
-                    newActionsMap[selectedActionType]?.add(it.asActionNode())
-                    composeNodeCallbacks.onActionsMapUpdated(
-                        composeNode,
-                        newActionsMap,
-                    )
-                },
-                onCloseClick = {
-                    closeDialog()
-                },
+                composeNode = composeNode,
+                composeNodeCallbacks = composeNodeCallbacks,
+                actionType = selectedActionType,
             )
         }
-    }
 
-    if (actionEditorDialogOpen) {
-        onAnyDialogIsShown()
-        val closeDialog = {
-            actionEditorDialogOpen = false
-            onAllDialogsClosed()
+        val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+        if (dialogOpen) {
+            onAnyDialogIsShown()
+            val closeDialog = {
+                dialogOpen = false
+                onAllDialogsClosed()
+            }
+            PositionCustomizablePopup(
+                expanded = dialogOpen,
+                onDismissRequest = {
+                    closeDialog()
+                },
+                onKeyEvent = {
+                    if (it.key == Key.Escape) {
+                        closeDialog()
+                        true
+                    } else {
+                        false
+                    }
+                },
+            ) {
+                AddActionDialogContent(
+                    project = project,
+                    actionInEdit = actionInEdit,
+                    onActionSelected = {
+                        val newActionsMap =
+                            mutableMapOf<ActionType, MutableList<ActionNode>>().apply {
+                                putAll(composeNode.actionsMap)
+                            }
+//                    it.onActionAdded(project)
+                        newActionsMap[selectedActionType]?.add(it.asActionNode())
+                        composeNodeCallbacks.onActionsMapUpdated(
+                            composeNode,
+                            newActionsMap,
+                        )
+                    },
+                    onCloseClick = {
+                        closeDialog()
+                    },
+                )
+            }
         }
-        ActionEditorDialog(
-            project = project,
-            composeNode = composeNode,
-            composeNodeCallbacks = composeNodeCallbacks,
-            onCloseDialog = closeDialog,
-        )
+
+        if (actionEditorDialogOpen) {
+            onAnyDialogIsShown()
+            val closeDialog = {
+                actionEditorDialogOpen = false
+                onAllDialogsClosed()
+            }
+            ActionEditorDialog(
+                project = project,
+                composeNode = composeNode,
+                composeNodeCallbacks = composeNodeCallbacks,
+                onCloseDialog = closeDialog,
+            )
+        }
     }
 }
 

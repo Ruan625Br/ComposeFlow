@@ -57,6 +57,35 @@ fun <T> SingleSelectionLazyTree(
 }
 
 /**
+ * Wrapper of LazyTree, whose selectionMode is set as [SelectionMode.Multiple]
+ */
+@Composable
+fun <T> MultipleSelectionLazyTree(
+    tree: Tree<T>,
+    modifier: Modifier = Modifier,
+    onElementClick: (Tree.Element<T>) -> Unit = {},
+    treeState: TreeState = rememberTreeState(),
+    onElementDoubleClick: (Tree.Element<T>) -> Unit = {},
+    onSelectionChange: (List<Tree.Element<T>>) -> Unit = {},
+    keyActions: KeyActions = DefaultTreeViewKeyActions(treeState),
+    style: LazyTreeStyle = JewelTheme.treeStyle,
+    nodeContent: @Composable (SelectableLazyItemScope.(Tree.Element<T>) -> Unit),
+) {
+    LazyTreeWithSelectionMode(
+        tree = tree,
+        selectionMode = SelectionMode.Multiple,
+        modifier = modifier,
+        onElementClick = onElementClick,
+        treeState = treeState,
+        onElementDoubleClick = onElementDoubleClick,
+        onSelectionChange = onSelectionChange,
+        keyActions = keyActions,
+        style = style,
+        nodeContent = nodeContent,
+    )
+}
+
+/**
  * Wrapper of LazyTree, whose selectionMode is set as [SelectionMode.None]
  */
 @Composable
@@ -169,7 +198,10 @@ fun ProvideLazyTreeStyle(content: @Composable () -> Unit) {
         LazyTreeColors(
             elementBackgroundFocused = MaterialTheme.colorScheme.surface,
             elementBackgroundSelected = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
-            elementBackgroundSelectedFocused = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
+            elementBackgroundSelectedFocused =
+                MaterialTheme.colorScheme.tertiaryContainer.copy(
+                    alpha = 0.8f,
+                ),
             content = MaterialTheme.colorScheme.onSurface,
             contentFocused = localTreeStyle.colors.contentFocused,
             contentSelected = localTreeStyle.colors.contentSelected,

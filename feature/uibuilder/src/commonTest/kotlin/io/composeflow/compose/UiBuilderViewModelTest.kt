@@ -6,11 +6,13 @@ import io.composeflow.model.parameter.ButtonTrait
 import io.composeflow.model.parameter.ColumnTrait
 import io.composeflow.model.parameter.RowTrait
 import io.composeflow.model.parameter.TextFieldTrait
+import io.composeflow.model.parameter.TextTrait
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.repository.fakeFirebaseIdToken
 import io.composeflow.repository.fakeProjectRepository
 import io.composeflow.ui.uibuilder.UiBuilderViewModel
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
@@ -146,5 +148,265 @@ class UiBuilderViewModelTest {
             screen.getRootNode().allChildren().firstOrNull { it.id == textField.id }
         assertNotEquals(row.id, afterTextField?.parentNode?.id)
         assertEquals(ColumnTrait(), afterTextField?.parentNode?.trait?.value)
+    }
+
+    // MARK: Multiple Focused Nodes Tests
+
+    @Test
+    fun testSingleClick_clearsPreviousFocus_andFocusesOneNode() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+        val textComponent = TextTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 100f, 100f, 150f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+        viewModel.onComposableDroppedToTarget(Offset(50f, 125f), textComponent)
+
+        // First click: Focus textField
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)
+        
+        // Verify only textField is focused
+        assertTrue("TextField should be focused", textField.isFocused.value)
+        assertFalse("Button should not be focused", button.isFocused.value)
+        assertFalse("Text should not be focused", textComponent.isFocused.value)
+
+        // Second click: Focus button (should clear textField focus)
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = false)
+
+        // Verify only button is focused
+        assertFalse("TextField should not be focused", textField.isFocused.value)
+        assertTrue("Button should be focused", button.isFocused.value)
+        assertFalse("Text should not be focused", textComponent.isFocused.value)
+    }
+
+    @Test
+    fun testCtrlClick_preservesPreviousFocus_andAddsNewNode() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+        val textComponent = TextTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 100f, 100f, 150f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+        viewModel.onComposableDroppedToTarget(Offset(50f, 125f), textComponent)
+
+        // First click: Focus textField
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)
+        
+        // Verify only textField is focused
+        assertTrue("TextField should be focused", textField.isFocused.value)
+        assertFalse("Button should not be focused", button.isFocused.value)
+        assertFalse("Text should not be focused", textComponent.isFocused.value)
+
+        // Ctrl+Click: Add button to selection
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = true)
+
+        // Verify both textField and button are focused
+        assertTrue("TextField should remain focused", textField.isFocused.value)
+        assertTrue("Button should be focused", button.isFocused.value)
+        assertFalse("Text should not be focused", textComponent.isFocused.value)
+
+        // Ctrl+Click: Add text to selection
+        viewModel.onMousePressedAt(Offset(50f, 125f), isCtrlOrMetaPressed = true)
+
+        // Verify all three nodes are focused
+        assertTrue("TextField should remain focused", textField.isFocused.value)
+        assertTrue("Button should remain focused", button.isFocused.value)
+        assertTrue("Text should be focused", textComponent.isFocused.value)
+    }
+
+    @Test
+    fun testMultipleFocusedNodes_findFocusedNodes_returnsAllFocused() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+        val textComponent = TextTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 100f, 100f, 150f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+        viewModel.onComposableDroppedToTarget(Offset(50f, 125f), textComponent)
+
+        // Focus multiple nodes using Ctrl+Click
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)   // Focus textField
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = true)   // Add button
+        viewModel.onMousePressedAt(Offset(50f, 125f), isCtrlOrMetaPressed = true)   // Add text
+
+        // Verify findFocusedNodes returns all focused nodes
+        val focusedNodes = project.screenHolder.findFocusedNodes()
+        assertEquals(3, focusedNodes.size)
+        
+        // Check by trait type instead of object identity since the nodes might be different objects
+        val focusedTraitTypes = focusedNodes.map { it.trait.value::class.simpleName }.toSet()
+        assertTrue("Should contain TextFieldTrait", focusedTraitTypes.contains("TextFieldTrait"))
+        assertTrue("Should contain ButtonTrait", focusedTraitTypes.contains("ButtonTrait"))
+        assertTrue("Should contain TextTrait", focusedTraitTypes.contains("TextTrait"))
+    }
+
+    @Test
+    fun testNormalClick_afterMultipleSelection_clearsAllAndFocusesOne() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+        val textComponent = TextTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 100f, 100f, 150f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+        viewModel.onComposableDroppedToTarget(Offset(50f, 125f), textComponent)
+
+        // Create multiple selection
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)   // Focus textField
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = true)   // Add button
+        viewModel.onMousePressedAt(Offset(50f, 125f), isCtrlOrMetaPressed = true)   // Add text
+
+        // Verify multiple nodes are focused
+        assertTrue("TextField should be focused", textField.isFocused.value)
+        assertTrue("Button should be focused", button.isFocused.value)
+        assertTrue("Text should be focused", textComponent.isFocused.value)
+
+        // Normal click on empty area (coordinates outside any node bounds)
+        // The screen bounds are set to (0f, 0f, 400f, 400f) in setUp(), so use coordinates outside that
+        viewModel.onMousePressedAt(Offset(500f, 500f), isCtrlOrMetaPressed = false)
+
+        // Verify findFocusedNodes returns empty list
+        val focusedNodes = project.screenHolder.findFocusedNodes()
+        assertEquals(0, focusedNodes.size)
+        
+        // Also verify individual focus states
+        assertFalse("TextField should not be focused", textField.isFocused.value)
+        assertFalse("Button should not be focused", button.isFocused.value)
+        assertFalse("Text should not be focused", textComponent.isFocused.value)
+    }
+
+    @Test
+    fun testCtrlClick_onAlreadyFocusedNode_maintainsMultipleSelection() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+
+        // Create multiple selection
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)   // Focus textField
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = true)   // Add button
+
+        // Verify both nodes are focused
+        assertTrue("TextField should be focused", textField.isFocused.value)
+        assertTrue("Button should be focused", button.isFocused.value)
+
+        // Ctrl+Click on already focused textField
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = true)
+
+        // Verify both nodes remain focused (Ctrl+Click on focused node should not clear it in this implementation)
+        assertTrue("TextField should remain focused", textField.isFocused.value)
+        assertTrue("Button should remain focused", button.isFocused.value)
+    }
+
+    @Test
+    fun testDeleteKey_withMultipleFocusedNodes_deletesAllFocused() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+        val textComponent = TextTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 100f, 100f, 150f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+        viewModel.onComposableDroppedToTarget(Offset(50f, 125f), textComponent)
+
+        val screen = project.screenHolder.currentEditable()
+        val rootNode = screen.getRootNode()
+
+        // Verify all nodes exist (expecting our 3 added nodes plus any defaults)
+        val initialNodeCount = rootNode.allChildren().size
+        assertTrue("Should have at least 3 nodes", initialNodeCount >= 3)
+
+        // Focus multiple nodes
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)   // Focus textField
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = true)   // Add button
+
+        // Verify 2 nodes are focused, 1 is not
+        assertTrue("TextField should be focused", textField.isFocused.value)
+        assertTrue("Button should be focused", button.isFocused.value)
+        assertFalse("Text should not be focused", textComponent.isFocused.value)
+
+        // Delete focused nodes
+        viewModel.onDeleteKey()
+
+        // Verify that 2 nodes were deleted (should have initialNodeCount - 2 remaining)
+        val expectedRemainingCount = initialNodeCount - 2
+        assertEquals(expectedRemainingCount, rootNode.allChildren().size)
+        
+        // Check by trait type since the nodes might be different objects
+        val remainingTraitTypes = rootNode.allChildren().map { it.trait.value::class.simpleName }.toSet()
+        assertTrue("Text component should remain", remainingTraitTypes.contains("TextTrait"))
+        assertFalse("TextField should be deleted", remainingTraitTypes.contains("TextFieldTrait"))
+        assertFalse("Button should be deleted", remainingTraitTypes.contains("ButtonTrait"))
+    }
+
+    @Test
+    fun testEmptyAreaClick_withMultipleFocusedNodes_clearsAllFocus() {
+        // Setup: Add multiple nodes to the screen
+        val textField = TextFieldTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(10f, 10f, 100f, 50f)
+        }
+        val button = ButtonTrait().defaultComposeNode(project).apply {
+            boundsInWindow.value = Rect(150f, 10f, 250f, 50f)
+        }
+
+        viewModel.onComposableDroppedToTarget(Offset(50f, 30f), textField)
+        viewModel.onComposableDroppedToTarget(Offset(200f, 30f), button)
+
+        // Focus multiple nodes
+        viewModel.onMousePressedAt(Offset(50f, 30f), isCtrlOrMetaPressed = false)   // Focus textField
+        viewModel.onMousePressedAt(Offset(200f, 30f), isCtrlOrMetaPressed = true)   // Add button
+
+        // Verify both nodes are focused
+        assertTrue("TextField should be focused", textField.isFocused.value)
+        assertTrue("Button should be focused", button.isFocused.value)
+        assertEquals(2, project.screenHolder.findFocusedNodes().size)
+
+        // Click on empty area (coordinates outside any node bounds)
+        // The screen bounds are set to (0f, 0f, 400f, 400f) in setUp(), so use coordinates outside that
+        viewModel.onMousePressedAt(Offset(500f, 500f), isCtrlOrMetaPressed = false)
+
+        // Verify all focus is cleared
+        assertEquals(0, project.screenHolder.findFocusedNodes().size)
+        assertFalse("TextField should lose focus", textField.isFocused.value)
+        assertFalse("Button should lose focus", button.isFocused.value)
     }
 }

@@ -119,6 +119,9 @@ data class Component(
     init {
         componentRoot.value.updateChildParentRelationships()
         getAllComposeNodes().forEach { it.updateComposeNodeReferencesForTrait() }
+        // isFocused is marked as non-Transient. But it's only used for giving LLM the context of
+        // which nodes are focused. When initializing a component, it should be cleared.
+        getAllComposeNodes().forEach { it.isFocused.value = false }
     }
 
     override fun getPackageName(project: Project): String = "${project.packageName}.components.$name".toPackageName()
@@ -273,7 +276,7 @@ data class Component(
 
     override fun getContentRootNode(): ComposeNode = componentRoot.value
 
-    override fun findFocusedNodeOrNull(): ComposeNode? = componentRoot.value.findFirstFocusedNodeOrNull()
+    override fun findFocusedNodes(): List<ComposeNode> = componentRoot.value.findFocusedNodes()
 
     override fun findNodeById(id: String): ComposeNode? {
         if (id == this.id) {
@@ -300,8 +303,13 @@ data class Component(
         componentRoot.value.clearIndexToBeDroppedRecursively()
     }
 
-    override fun updateFocusedNode(eventPosition: Offset) {
-        componentRoot.value.clearIsFocusedRecursively()
+    override fun updateFocusedNode(
+        eventPosition: Offset,
+        addToSelection: Boolean,
+    ) {
+        if (!addToSelection) {
+            componentRoot.value.clearIsFocusedRecursively()
+        }
         componentRoot.value.findDeepestChildAtOrNull(eventPosition)?.let {
             it.isFocused.value = true
         }

@@ -67,7 +67,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Offset
@@ -75,10 +74,14 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isCtrlPressed
+import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.onPointerEvent
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -200,7 +203,7 @@ fun UiBuilderScreen(
     val coroutineScope = rememberCoroutineScope()
     val currentEditable = project.screenHolder.currentEditable()
     val draggedNode = viewModel.draggedNode
-    val copiedNode = viewModel.copiedNode
+    val copiedNodes = viewModel.copiedNodes
     val currentFormFactor = viewModel.formFactor
     val canvasAreaUiState by viewModel.canvasAreaUiState.collectAsState()
     val mainViewUiState by viewModel.mainViewUiState.collectAsState()
@@ -246,7 +249,7 @@ fun UiBuilderScreen(
             onKeyPressed = viewModel::onKeyPressed,
             onDoubleTap = viewModel::onDoubleTap,
             onPopEditedComponent = viewModel::onPopEditedComponent,
-            onCopyFocusedNode = viewModel::onCopyFocusedNode,
+            onCopyFocusedNode = viewModel::onCopyFocusedNodes,
             onPaste = viewModel::onPaste,
             onDeleteFocusedNode = viewModel::onDeleteKey,
             onBringToFront = viewModel::onBringToFront,
@@ -337,7 +340,7 @@ fun UiBuilderScreen(
                 first = { firstModifier ->
                     LeftPane(
                         project = project,
-                        copiedNode = copiedNode,
+                        copiedNodes = copiedNodes,
                         canvasNodeCallbacks = canvasNodeCallbacks,
                         composeNodeCallbacks = composeNodeCallbacks,
                         paletteNodeCallbacks = paletteNodeCallbacks,
@@ -376,7 +379,7 @@ fun UiBuilderScreen(
                                     project = project,
                                     aiAssistantUiState = aiAssistantUiState,
                                     canvasEditable = currentEditable,
-                                    copiedNode = copiedNode,
+                                    copiedNodes = copiedNodes,
                                     currentFormFactor = currentFormFactor,
                                     canvasAreaUiState = canvasAreaUiState,
                                     canvasNodeCallbacks = canvasNodeCallbacks,
@@ -409,7 +412,10 @@ fun UiBuilderScreen(
                                         viewModel.onResetPendingInspectorTab()
                                     },
                                     selectedDestination =
-                                        (editingProject.screenHolder.pendingDestination as? NavigatableDestination.UiBuilderScreen)?.inspectorTabDestination
+                                        (
+                                            editingProject.screenHolder.pendingDestination as?
+                                                NavigatableDestination.UiBuilderScreen
+                                        )?.inspectorTabDestination
                                             ?: selectedInspectorDestination,
                                     modifier = inspectorModifier.width(viewModel.inspectorTabWidth),
                                 )
@@ -450,7 +456,7 @@ fun UiBuilderScreen(
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
     if (addModifierDialogVisible) {
         onAnyDialogIsShown()
-        project.screenHolder.findFocusedNodeOrNull()?.let { focused ->
+        project.screenHolder.findFocusedNodes().firstOrNull()?.let { focused ->
             val modifiers =
                 ModifierWrapper
                     .values()
@@ -491,7 +497,7 @@ const val ToggleNavButtonTestTag = "ToggleNavButton"
 @Composable
 private fun LeftPane(
     project: Project,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     canvasNodeCallbacks: CanvasNodeCallbacks,
     composeNodeCallbacks: ComposeNodeCallbacks,
     paletteNodeCallbacks: PaletteNodeCallbacks,
@@ -621,7 +627,7 @@ private fun LeftPane(
             second = { secondModifier ->
                 ComposeNodeTree(
                     project = project,
-                    copiedNode = copiedNode,
+                    copiedNodes = copiedNodes,
                     canvasNodeCallbacks = canvasNodeCallbacks,
                     composeNodeCallbacks = composeNodeCallbacks,
                     onFocusedStatusUpdated = onFocusedStatusUpdated,
@@ -643,7 +649,7 @@ private fun CanvasArea(
     project: Project,
     aiAssistantUiState: AiAssistantUiState,
     canvasEditable: CanvasEditable,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     currentFormFactor: FormFactor,
     canvasAreaUiState: CanvasAreaUiState,
     canvasNodeCallbacks: CanvasNodeCallbacks,
@@ -651,7 +657,7 @@ private fun CanvasArea(
     onAddScreen: (screen: Screen) -> Unit,
     onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
     onMouseHoveredAt: (Offset) -> Unit,
-    onMousePressedAt: (Offset) -> Unit,
+    onMousePressedAt: (Offset, Boolean) -> Unit,
     onShowSnackbar: suspend (String, String?) -> Boolean,
     onFocusedStatusUpdated: (ComposeNode) -> Unit,
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
@@ -660,7 +666,6 @@ private fun CanvasArea(
     modifier: Modifier = Modifier,
 ) {
     var canvasAreaPosition by remember { mutableStateOf(Offset.Zero) }
-
     val coroutineScope = rememberCoroutineScope()
 
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
@@ -672,11 +677,12 @@ private fun CanvasArea(
                 .fillMaxSize()
                 .clipToBounds()
                 .backgroundContainerNeutral()
-                .onPointerEvent(PointerEventType.Press) {
-                    it.changes.firstOrNull()?.let { change ->
+                .onPointerEvent(PointerEventType.Press) { event ->
+                    event.changes.firstOrNull()?.let { change ->
                         onMousePressedAt(
                             canvasAreaPosition +
                                 (change.position - zoomableContainerStateHolder.offset) / zoomableContainerStateHolder.scale,
+                            event.keyboardModifiers.isCtrlPressed || event.keyboardModifiers.isMetaPressed,
                         )
                     }
                 }.onPointerEvent(PointerEventType.Move) {
@@ -692,7 +698,9 @@ private fun CanvasArea(
                 }.onPointerEvent(PointerEventType.Move) { event ->
                     val change = event.changes.firstOrNull()
 
-                    zoomableContainerStateHolder.onMousePositionChanged(change?.position ?: Offset.Zero)
+                    zoomableContainerStateHolder.onMousePositionChanged(
+                        change?.position ?: Offset.Zero,
+                    )
                 }.onSizeChanged { size ->
                     zoomableContainerStateHolder.onSizeChanged(size)
                 },
@@ -718,7 +726,7 @@ private fun CanvasArea(
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             composeNodeCallbacks = composeNodeCallbacks,
                             onShowSnackbar = onShowSnackbar,
-                            copiedNode = copiedNode,
+                            copiedNodes = copiedNodes,
                             coroutineScope = coroutineScope,
                             onConvertToComponent = {
                                 convertToComponentNode = it
@@ -737,7 +745,7 @@ private fun CanvasArea(
                             composeNodeCallbacks = composeNodeCallbacks,
                             onShowSnackbar = onShowSnackbar,
                             rootNode = canvasEditable.componentRoot.value,
-                            copiedNode = copiedNode,
+                            copiedNodes = copiedNodes,
                             coroutineScope = coroutineScope,
                             onConvertToComponent = {
                                 convertToComponentNode = it
@@ -827,7 +835,7 @@ private fun BoxScope.DeviceInCanvas(
     canvasNodeCallbacks: CanvasNodeCallbacks,
     composeNodeCallbacks: ComposeNodeCallbacks,
     onShowSnackbar: suspend (String, String?) -> Boolean,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     coroutineScope: CoroutineScope,
     onConvertToComponent: (ComposeNode) -> Unit,
     onFocusedStatusUpdated: (ComposeNode) -> Unit,
@@ -883,7 +891,7 @@ private fun BoxScope.DeviceInCanvas(
                         toolbarUiState = toolbarUiState,
                         contextMenuExpanded = contextMenuExpanded,
                         composeNodeCallbacks = composeNodeCallbacks,
-                        copiedNode = copiedNode,
+                        copiedNodes = copiedNodes,
                         onOpenAddModifierDialog = onOpenAddModifierDialog,
                         onShowSnackbar = onShowSnackbar,
                         coroutineScope = coroutineScope,
@@ -1040,7 +1048,7 @@ private fun RenderedDevice(
     toolbarUiState: CanvasTopToolbarUiState,
     contextMenuExpanded: Boolean,
     composeNodeCallbacks: ComposeNodeCallbacks,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     onOpenAddModifierDialog: () -> Unit,
     onShowSnackbar: suspend (String, String?) -> Boolean,
     coroutineScope: CoroutineScope,
@@ -1159,7 +1167,7 @@ private fun RenderedDevice(
                             project = project,
                             canvasNodeCallbacks = canvasNodeCallbacks,
                             composeNodeCallbacks = composeNodeCallbacks,
-                            copiedNode = copiedNode,
+                            copiedNodes = copiedNodes,
                             currentEditable = screen,
                             onAddModifier = {
                                 onOpenAddModifierDialog()
@@ -1190,7 +1198,7 @@ private fun BoxScope.ComponentInCanvas(
     composeNodeCallbacks: ComposeNodeCallbacks,
     onShowSnackbar: suspend (String, String?) -> Boolean,
     rootNode: ComposeNode,
-    copiedNode: ComposeNode?,
+    copiedNodes: List<ComposeNode>,
     coroutineScope: CoroutineScope,
     onConvertToComponent: (ComposeNode) -> Unit,
     onFocusedStatusUpdated: (ComposeNode) -> Unit,
@@ -1228,7 +1236,10 @@ private fun BoxScope.ComponentInCanvas(
                         .drawLabel(
                             labelName = component.name,
                             textColor = MaterialTheme.colorScheme.onSurface,
-                            labelRectColor = MaterialTheme.colorScheme.surfaceContainerLow.copy(alpha = 0.7f),
+                            labelRectColor =
+                                MaterialTheme.colorScheme.surfaceContainerLow.copy(
+                                    alpha = 0.7f,
+                                ),
                         ),
             ) {
                 rootNode.RenderedNodeInCanvas(
@@ -1248,7 +1259,7 @@ private fun BoxScope.ComponentInCanvas(
                 project = project,
                 canvasNodeCallbacks = canvasNodeCallbacks,
                 composeNodeCallbacks = composeNodeCallbacks,
-                copiedNode = copiedNode,
+                copiedNodes = copiedNodes,
                 currentEditable = component,
                 onAddModifier = {
                     onOpenAddModifierDialog()

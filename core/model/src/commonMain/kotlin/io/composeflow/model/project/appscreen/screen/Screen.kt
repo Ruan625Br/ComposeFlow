@@ -211,6 +211,10 @@ data class Screen(
         rootNode.value.label.value = label.value
 
         getAllComposeNodes().forEach { it.updateComposeNodeReferencesForTrait() }
+
+        // isFocused is marked as non-Transient. But it's only used for giving LLM the context of
+        // which nodes are focused. When initializing a screen, it should be cleared.
+        getAllComposeNodes().forEach { it.isFocused.value = false }
     }
 
     /**
@@ -538,7 +542,7 @@ data class Screen(
             navParams.navigationDrawerType.toMemberName()
             funSpecBuilder.addStatement(
                 """%M(
-                    drawerState = ${ComposeScreenConstant.navDrawerState.name}, 
+                    drawerState = ${ComposeScreenConstant.navDrawerState.name},
                     drawerContent = {""",
                 navParams.navigationDrawerType.toMemberName(),
             )
@@ -702,7 +706,7 @@ data class Screen(
     %M<$screenRoute.$routeName> { backstackEntry ->
         ${paramsBlock.build()}
         $composableName($paramsPassersString$argumentPassersString)
-    } 
+    }
             """,
                     MemberName("androidx.navigation.compose", "composable"),
                 ).build()
@@ -736,11 +740,16 @@ data class Screen(
         }
     }
 
-    override fun updateFocusedNode(eventPosition: Offset) {
-        rootNode.value.clearIsFocusedRecursively()
-        fabNode.value?.clearIsFocusedRecursively()
-        bottomAppBarNode.value?.clearIsFocusedRecursively()
-        navigationDrawerNode.value?.clearIsFocusedRecursively()
+    override fun updateFocusedNode(
+        eventPosition: Offset,
+        addToSelection: Boolean,
+    ) {
+        if (!addToSelection) {
+            rootNode.value.clearIsFocusedRecursively()
+            fabNode.value?.clearIsFocusedRecursively()
+            bottomAppBarNode.value?.clearIsFocusedRecursively()
+            navigationDrawerNode.value?.clearIsFocusedRecursively()
+        }
         fabNode.value?.findDeepestChildAtOrNull(eventPosition)?.let {
             it.isFocused.value = true
             return
@@ -800,7 +809,7 @@ data class Screen(
 
     override fun getContentRootNode(): ComposeNode = contentRootNode()
 
-    override fun findFocusedNodeOrNull(): ComposeNode? = getAllComposeNodes().firstOrNull { it.isFocused.value }
+    override fun findFocusedNodes(): List<ComposeNode> = getAllComposeNodes().filter { it.isFocused.value }
 
     override fun clearIsHoveredRecursively() {
         getAllRootNodes().forEach { it?.clearIsHoveredRecursively() }

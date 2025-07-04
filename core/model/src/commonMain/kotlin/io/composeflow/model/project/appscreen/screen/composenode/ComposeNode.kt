@@ -112,8 +112,10 @@ data class ComposeNode(
     val visibilityParams: MutableState<VisibilityParams> = mutableStateOf(VisibilityParams()),
     /**
      * Updated to true when this node is focused. For example when it's clicked.
+     * Intentionally non-Transient meaning it's serialized in the yaml representation.
+     * So that information which nodes are focused in visual editor to LLM to give it more context.
      */
-    @Transient
+    @Serializable(MutableStateSerializer::class)
     val isFocused: MutableState<Boolean> = mutableStateOf(false),
     /**
      * Updated to true when the mouse cursor is hovered on this node.
@@ -372,6 +374,8 @@ data class ComposeNode(
     }
 
     fun findFirstFocusedNodeOrNull(): ComposeNode? = allChildren().firstOrNull { it.isFocused.value }
+
+    fun findFocusedNodes(): List<ComposeNode> = allChildren().filter { it.isFocused.value }
 
     fun clearIsDraggedOnBoundsRecursively() =
         doRecursively { node, _, _ ->
@@ -884,11 +888,13 @@ data class ComposeNode(
         doRecursively { self, _, level ->
             println(
                 "  ".repeat(level) +
-                    "name: ${project?.let {
-                        self.displayName(
-                            it,
-                        )
-                    } ?: self.label.value}, id: ${self.id}, isFocused: ${self.isFocused.value}, isHovered: ${self.isHovered.value}",
+                    "name: ${
+                        project?.let {
+                            self.displayName(
+                                it,
+                            )
+                        } ?: self.label.value
+                    }, id: ${self.id}, isFocused: ${self.isFocused.value}, isHovered: ${self.isHovered.value}",
             )
         }
     }

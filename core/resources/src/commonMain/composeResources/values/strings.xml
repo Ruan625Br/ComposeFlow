@@ -446,4 +446,8 @@ instead of in the canvas.</string>
     <string name="tooltip_component_trait">A reusable custom component that encapsulates UI elements and logic for multiple uses.</string>
     <string name="open_source_licenses">Open Source Licenses</string>
     <string name="close">Close</string>
+    <string name="multiple_composables_selected">+ %1$d Composables selected</string>
+    <string name="select_single_composable_to_edit_properties">Select a single Composable to edit properties</string>
+    <string name="focus_single_composable_to_modify_actions">Focus a single Composable to modify the actions</string>
+    <string name="selected_composables">%1$d Composables</string>
 </resources>

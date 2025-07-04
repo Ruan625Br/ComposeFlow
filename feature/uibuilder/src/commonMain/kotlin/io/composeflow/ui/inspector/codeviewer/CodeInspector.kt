@@ -41,7 +41,7 @@ fun CodeInspector(
     onShowSnackbar: suspend (String, String?) -> Boolean,
     modifier: Modifier = Modifier,
 ) {
-    val composeNode = project.screenHolder.findFocusedNodeOrNull() ?: return
+    val focusedNodes = project.screenHolder.findFocusedNodes()
     val codeTheme = LocalCodeTheme.current
     val viewModel =
         viewModel(modelClass = CodeInspectorViewModel::class) {
@@ -50,26 +50,31 @@ fun CodeInspector(
                 codeTheme = codeTheme,
             )
         }
-    viewModel.setComposeNode(composeNode)
-    val uiState by viewModel.uiState.collectAsState()
+    if (focusedNodes.isEmpty()) {
+    } else if (focusedNodes.size > 1) {
+    } else {
+        val composeNode = focusedNodes.first()
+        viewModel.setComposeNode(composeNode)
+        val uiState by viewModel.uiState.collectAsState()
 
-    when (val state = uiState) {
-        CodeInspectorUiState.Loading -> {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = modifier.fillMaxSize(),
-            ) {
-                CircularProgressIndicator()
+        when (val state = uiState) {
+            CodeInspectorUiState.Loading -> {
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = modifier.fillMaxSize(),
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        is CodeInspectorUiState.Success -> {
-            CodeViewer(
-                parsedCode = state.parsedCode,
-                onShowSnackbar = onShowSnackbar,
-                modifier = modifier,
-            )
+            is CodeInspectorUiState.Success -> {
+                CodeViewer(
+                    parsedCode = state.parsedCode,
+                    onShowSnackbar = onShowSnackbar,
+                    modifier = modifier,
+                )
+            }
         }
     }
 }
