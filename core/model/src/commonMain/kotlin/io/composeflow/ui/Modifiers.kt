@@ -140,7 +140,7 @@ fun Modifier.modifierForCanvas(
                 shape = borderShape,
                 paletteRenderParams = paletteRenderParams,
             ).drawPadding(node)
-            .drawErrorIndicator(project, node)
+            .drawOverlay(project, node)
             .dragHandlerAndTapGestures(
                 node = node,
                 canvasNodeCallbacks = canvasNodeCallbacks,
@@ -151,19 +151,25 @@ fun Modifier.modifierForCanvas(
 }
 
 @Composable
-private fun Modifier.drawErrorIndicator(
+private fun Modifier.drawOverlay(
     project: Project,
     node: ComposeNode,
-    color: Color = MaterialTheme.colorScheme.error,
+    focusedOverlayColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+    errorColor: Color = MaterialTheme.colorScheme.error,
 ): Modifier =
     composed {
         if (node.generateTrackableIssues(project).isNotEmpty()) {
             border(
                 width = 1.dp,
-                color = color.copy(0.6f),
+                color = errorColor.copy(0.6f),
             ).drawWithContent {
                 drawContent()
-                drawRect(color.copy(alpha = 0.2f))
+                drawRect(errorColor.copy(alpha = 0.2f))
+            }
+        } else if (node.isFocused.value) {
+            Modifier.drawWithContent {
+                drawContent()
+                drawRect(focusedOverlayColor.copy(alpha = 0.1f))
             }
         } else {
             Modifier
