@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.onClick
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
@@ -244,17 +243,18 @@ private fun ChatMessage(
 
     // Check if message is long enough to need expansion
     val isLongMessage = messageModel.message.length > 300
-    
+
     // Get styled text for display
     val styledText = messageModel.getStyledText(isLongMessage = isLongMessage, isExpanded = isExpanded)
-    
+
     // Determine icon color based on message type
-    val iconColor = when (messageModel.messageType) {
-        MessageType.ToolCall -> MaterialTheme.colorScheme.tertiary
-        MessageType.ToolCallError -> MaterialTheme.colorScheme.error
-        MessageType.Regular -> MaterialTheme.colorScheme.onPrimary
-    }
-    
+    val iconColor =
+        when (messageModel.messageType) {
+            MessageType.ToolCall -> MaterialTheme.colorScheme.tertiary
+            MessageType.ToolCallError -> MaterialTheme.colorScheme.error
+            MessageType.Regular -> MaterialTheme.colorScheme.onPrimary
+        }
+
     if (messageModel.messageOwner == MessageOwner.User) {
         Column(modifier = modifier) {
             Row(
@@ -282,9 +282,10 @@ private fun ChatMessage(
                         imageVector = Icons.Filled.Circle,
                         contentDescription = "User message",
                         tint = MaterialTheme.colorScheme.onPrimary,
-                        modifier = Modifier
-                            .size(12.dp)
-                            .padding(top = 4.dp, end = 8.dp),
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .padding(top = 4.dp, end = 8.dp),
                     )
                     Column(
                         modifier =
@@ -311,11 +312,11 @@ private fun ChatMessage(
                         if (isLongMessage) {
                             TextButton(
                                 onClick = { isExpanded = !isExpanded },
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                             ) {
                                 Text(
                                     text = if (isExpanded) "Show less" else "Show more",
-                                    style = MaterialTheme.typography.bodySmall
+                                    style = MaterialTheme.typography.bodySmall,
                                 )
                             }
                         }
@@ -337,15 +338,17 @@ private fun ChatMessage(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Circle,
-                        contentDescription = when (messageModel.messageType) {
-                            MessageType.ToolCall -> "Tool call message"
-                            MessageType.ToolCallError -> "Tool call error message"
-                            MessageType.Regular -> "AI message"
-                        },
+                        contentDescription =
+                            when (messageModel.messageType) {
+                                MessageType.ToolCall -> "Tool call message"
+                                MessageType.ToolCallError -> "Tool call error message"
+                                MessageType.Regular -> "AI message"
+                            },
                         tint = iconColor,
-                        modifier = Modifier
-                            .size(12.dp)
-                            .padding(top = 4.dp, end = 8.dp),
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .padding(top = 4.dp, end = 8.dp),
                     )
                     Column(
                         modifier =
@@ -377,11 +380,11 @@ private fun ChatMessage(
                         if (isLongMessage) {
                             TextButton(
                                 onClick = { isExpanded = !isExpanded },
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
                             ) {
                                 Text(
                                     text = if (isExpanded) "Show less" else "Show more",
-                                    style = MaterialTheme.typography.bodySmall
+                                    style = MaterialTheme.typography.bodySmall,
                                 )
                             }
                         }

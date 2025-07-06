@@ -17,7 +17,7 @@ data class Response(
     val role: String,
     val model: String,
     val content: List<
-        @Serializable(with = ContentItemSerializer::class)
+        @Serializable(with = ToolContentItemSerializer::class)
         ToolContentItem,
     >,
     val stop_reason: String? = null,

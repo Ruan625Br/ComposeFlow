@@ -90,10 +90,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.AddAppStateArgs -> {
-                val result = appStateEditorOperator.onAddAppState(
-                    project,
-                    toolArgs.appStateYaml,
-                )
+                val result =
+                    appStateEditorOperator.onAddAppState(
+                        project,
+                        toolArgs.appStateYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -101,10 +102,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.DeleteAppStateArgs -> {
-                val result = appStateEditorOperator.onDeleteAppState(
-                    project,
-                    toolArgs.appStateId,
-                )
+                val result =
+                    appStateEditorOperator.onDeleteAppState(
+                        project,
+                        toolArgs.appStateId,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -112,10 +114,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.UpdateAppStateArgs -> {
-                val result = appStateEditorOperator.onUpdateAppState(
-                    project,
-                    toolArgs.appStateYaml,
-                )
+                val result =
+                    appStateEditorOperator.onUpdateAppState(
+                        project,
+                        toolArgs.appStateYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -123,11 +126,12 @@ class ToolDispatcher(
             }
 
             is ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs -> {
-                val result = appStateEditorOperator.onUpdateCustomDataTypeListDefaultValues(
-                    project,
-                    toolArgs.appStateId,
-                    toolArgs.defaultValuesYaml,
-                )
+                val result =
+                    appStateEditorOperator.onUpdateCustomDataTypeListDefaultValues(
+                        project,
+                        toolArgs.appStateId,
+                        toolArgs.defaultValuesYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -159,10 +163,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.AddDataTypeArgs -> {
-                val result = dataTypeEditorOperator.onAddDataType(
-                    project,
-                    toolArgs.dataTypeYaml,
-                )
+                val result =
+                    dataTypeEditorOperator.onAddDataType(
+                        project,
+                        toolArgs.dataTypeYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -170,10 +175,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.DeleteDataTypeArgs -> {
-                val result = dataTypeEditorOperator.onDeleteDataType(
-                    project,
-                    toolArgs.dataTypeId,
-                )
+                val result =
+                    dataTypeEditorOperator.onDeleteDataType(
+                        project,
+                        toolArgs.dataTypeId,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -181,10 +187,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.UpdateDataTypeArgs -> {
-                val result = dataTypeEditorOperator.onUpdateDataType(
-                    project,
-                    toolArgs.dataTypeYaml,
-                )
+                val result =
+                    dataTypeEditorOperator.onUpdateDataType(
+                        project,
+                        toolArgs.dataTypeYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -192,11 +199,12 @@ class ToolDispatcher(
             }
 
             is ToolArgs.AddDataFieldArgs -> {
-                val result = dataTypeEditorOperator.onAddDataField(
-                    project,
-                    toolArgs.dataTypeId,
-                    toolArgs.dataFieldYaml,
-                )
+                val result =
+                    dataTypeEditorOperator.onAddDataField(
+                        project,
+                        toolArgs.dataTypeId,
+                        toolArgs.dataFieldYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -204,11 +212,12 @@ class ToolDispatcher(
             }
 
             is ToolArgs.DeleteDataFieldArgs -> {
-                val result = dataTypeEditorOperator.onDeleteDataField(
-                    project,
-                    toolArgs.dataTypeId,
-                    toolArgs.dataFieldId,
-                )
+                val result =
+                    dataTypeEditorOperator.onDeleteDataField(
+                        project,
+                        toolArgs.dataTypeId,
+                        toolArgs.dataFieldId,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -216,10 +225,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.AddCustomEnumArgs -> {
-                val result = dataTypeEditorOperator.onAddCustomEnum(
-                    project,
-                    toolArgs.customEnumYaml,
-                )
+                val result =
+                    dataTypeEditorOperator.onAddCustomEnum(
+                        project,
+                        toolArgs.customEnumYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -227,10 +237,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.DeleteCustomEnumArgs -> {
-                val result = dataTypeEditorOperator.onDeleteCustomEnum(
-                    project,
-                    toolArgs.customEnumId,
-                )
+                val result =
+                    dataTypeEditorOperator.onDeleteCustomEnum(
+                        project,
+                        toolArgs.customEnumId,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }
@@ -238,10 +249,11 @@ class ToolDispatcher(
             }
 
             is ToolArgs.UpdateCustomEnumArgs -> {
-                val result = dataTypeEditorOperator.onUpdateCustomEnum(
-                    project,
-                    toolArgs.customEnumYaml,
-                )
+                val result =
+                    dataTypeEditorOperator.onUpdateCustomEnum(
+                        project,
+                        toolArgs.customEnumYaml,
+                    )
                 if (result.errorMessages.isNotEmpty()) {
                     toolArgs.result = result.errorMessages.joinToString("; ")
                 }

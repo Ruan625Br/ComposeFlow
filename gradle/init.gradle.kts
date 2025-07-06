@@ -28,7 +28,7 @@ rootProject {
                         "src/**/*.kts",
                     )
                     targetExclude(
-                        "*main*.kt",
+                        "src/**/*main*.kt",
                     )
                     ktlint(ktlintVersion)
                 }

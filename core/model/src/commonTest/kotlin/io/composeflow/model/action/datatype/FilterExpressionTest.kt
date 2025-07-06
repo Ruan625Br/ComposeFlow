@@ -17,7 +17,7 @@ import org.junit.Before
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class FilterExpressionTests {
+class FilterExpressionTest {
     private val project = Project()
     private val dataType =
         DataType(

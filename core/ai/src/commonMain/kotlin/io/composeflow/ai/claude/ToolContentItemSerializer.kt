@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-object ContentItemSerializer :
+object ToolContentItemSerializer :
     JsonContentPolymorphicSerializer<ToolContentItem>(ToolContentItem::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<ToolContentItem> =
         when (val name = element.jsonObject["name"]?.jsonPrimitive?.content) {

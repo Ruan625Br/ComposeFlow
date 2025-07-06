@@ -61,7 +61,8 @@ enum class ViewModelConstant {
                         .add("%M()", MemberHolder.Koin.inject)
                         .build(),
                 ).build()
-    }, ;
+    },
+    ;
 
     abstract fun generateProperty(): PropertySpec
 }

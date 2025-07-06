@@ -146,21 +146,22 @@ class AppStateToolsTest {
     @Test
     fun testAddAppStateArgs_ValidStringStateYaml() {
         // Test adding a StringAppState via YAML
-        val appStateYaml = """
+        val appStateYaml =
+            """
 !<StringAppState>
 id: "test-id-123"
 name: "testStringState"
 defaultValue: "Hello World"
 userWritable: true
-        """.trimIndent()
+            """.trimIndent()
 
         val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
-        
+
         executeToolAndSetStatus(toolArgs)
 
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
         assertEquals("Successfully executed.", toolArgs.result)
-        
+
         // Verify state was added to project
         val states = project.globalStateHolder.getStates(project)
         assertEquals(1, states.size)
@@ -173,21 +174,22 @@ userWritable: true
     @Test
     fun testAddAppStateArgs_ValidBooleanStateYaml() {
         // Test adding a BooleanAppState via YAML
-        val appStateYaml = """
+        val appStateYaml =
+            """
 !<BooleanAppState>
 id: "bool-id-456"
 name: "isDarkMode"
 defaultValue: false
 userWritable: true
-        """.trimIndent()
+            """.trimIndent()
 
         val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
-        
+
         executeToolAndSetStatus(toolArgs)
 
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
         assertEquals("Successfully executed.", toolArgs.result)
-        
+
         // Verify state was added to project
         val states = project.globalStateHolder.getStates(project)
         assertEquals(1, states.size)
@@ -200,19 +202,20 @@ userWritable: true
     @Test
     fun testAddAppStateArgs_InvalidYaml() {
         // Test handling of malformed YAML
-        val invalidYaml = """
+        val invalidYaml =
+            """
 !<StringAppState>
 invalid: yaml: structure
 name missing quotes
-        """.trimIndent()
+            """.trimIndent()
 
         val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = invalidYaml)
-        
+
         executeToolAndSetStatus(toolArgs)
 
         assertEquals(ToolExecutionStatus.Error, toolArgs.status)
         assertTrue(toolArgs.result.contains("Failed to parse app state YAML"))
-        
+
         // Verify no state was added to project
         val states = project.globalStateHolder.getStates(project)
         assertEquals(0, states.size)
@@ -225,21 +228,22 @@ name missing quotes
         project.globalStateHolder.addState(existingState)
 
         // Try to add another state with the same name
-        val appStateYaml = """
+        val appStateYaml =
+            """
 !<StringAppState>
 id: "new-id-789"
 name: "duplicateName"
 defaultValue: "new value"
 userWritable: true
-        """.trimIndent()
+            """.trimIndent()
 
         val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
-        
+
         executeToolAndSetStatus(toolArgs)
 
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
         assertEquals("Successfully executed.", toolArgs.result)
-        
+
         // Verify both states exist with unique names
         val states = project.globalStateHolder.getStates(project)
         assertEquals(2, states.size)
@@ -254,21 +258,22 @@ userWritable: true
         // Test adding state to completely empty project
         assertTrue(project.globalStateHolder.getStates(project).isEmpty())
 
-        val appStateYaml = """
+        val appStateYaml =
+            """
 !<StringAppState>
 id: "first-state-id"
 name: "firstState" 
 defaultValue: "initial"
 userWritable: true
-        """.trimIndent()
+            """.trimIndent()
 
         val toolArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
-        
+
         executeToolAndSetStatus(toolArgs)
 
         assertEquals(ToolExecutionStatus.Success, toolArgs.status)
         assertEquals("Successfully executed.", toolArgs.result)
-        
+
         // Verify state was added
         val states = project.globalStateHolder.getStates(project)
         assertEquals(1, states.size)
@@ -280,13 +285,14 @@ userWritable: true
         // Test full workflow: add state via YAML, then list and get it
 
         // Add state via YAML
-        val appStateYaml = """
+        val appStateYaml =
+            """
 !<StringAppState>
 id: "integration-test-id"
 name: "integrationState"
 defaultValue: "integration test value"
 userWritable: true
-        """.trimIndent()
+            """.trimIndent()
 
         val addArgs = ToolArgs.AddAppStateArgs(appStateYaml = appStateYaml)
         executeToolAndSetStatus(addArgs)
@@ -302,7 +308,7 @@ userWritable: true
         val states = project.globalStateHolder.getStates(project)
         val addedState = states.find { it.name == "integrationState" }
         assertNotNull(addedState)
-        
+
         val getArgs = ToolArgs.GetAppStateArgs(appStateId = addedState!!.id)
         executeToolAndSetStatus(getArgs)
         assertEquals(ToolExecutionStatus.Success, getArgs.status)
