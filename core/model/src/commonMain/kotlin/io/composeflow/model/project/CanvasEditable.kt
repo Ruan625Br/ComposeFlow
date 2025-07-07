@@ -62,11 +62,11 @@ interface CanvasEditable : StateHolder {
     /**
      * Update the focused node.
      *
-     * if [addToSelection] is passed as true, it doesn't clear the existing focused nodes.
+     * if [isCtrlOrMetaPressed] is passed as true, it doesn't clear the existing focused nodes.
      */
     fun updateFocusedNode(
         eventPosition: Offset,
-        addToSelection: Boolean = false,
+        isCtrlOrMetaPressed: Boolean = false,
     )
 
     fun updateHoveredNode(eventPosition: Offset)

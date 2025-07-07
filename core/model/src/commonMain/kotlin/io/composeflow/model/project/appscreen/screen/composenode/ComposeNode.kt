@@ -778,9 +778,17 @@ data class ComposeNode(
         }
     }
 
-    fun setFocus() {
+    /**
+     * Update the focus state of this node.
+     * if [toggleValue] is true,
+     */
+    fun setFocus(toggleValue: Boolean = false) {
         setTabSelectedIndex()
-        isFocused.value = true
+        if (toggleValue) {
+            isFocused.value = isFocused.value.not()
+        } else {
+            isFocused.value = true
+        }
     }
 
     fun updateChildParentRelationships(rootToUpdate: ComposeNode = findRoot()) {

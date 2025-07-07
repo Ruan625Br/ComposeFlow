@@ -742,30 +742,30 @@ data class Screen(
 
     override fun updateFocusedNode(
         eventPosition: Offset,
-        addToSelection: Boolean,
+        isCtrlOrMetaPressed: Boolean,
     ) {
-        if (!addToSelection) {
+        if (!isCtrlOrMetaPressed) {
             rootNode.value.clearIsFocusedRecursively()
             fabNode.value?.clearIsFocusedRecursively()
             bottomAppBarNode.value?.clearIsFocusedRecursively()
             navigationDrawerNode.value?.clearIsFocusedRecursively()
         }
         fabNode.value?.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.isFocused.value = true
+            it.setFocus(toggleValue = isCtrlOrMetaPressed)
             return
         }
         navigationDrawerNode.value?.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.isFocused.value = true
+            it.setFocus(toggleValue = isCtrlOrMetaPressed)
             return
         }
         getBottomAppBar()?.let { bottomAppBar ->
             bottomAppBar.findDeepestChildAtOrNull(eventPosition)?.let {
-                it.isFocused.value = true
+                it.setFocus(toggleValue = isCtrlOrMetaPressed)
                 return
             }
         }
         rootNode.value.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.isFocused.value = true
+            it.setFocus(toggleValue = isCtrlOrMetaPressed)
         }
     }
 

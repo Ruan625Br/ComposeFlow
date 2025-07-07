@@ -305,13 +305,13 @@ data class Component(
 
     override fun updateFocusedNode(
         eventPosition: Offset,
-        addToSelection: Boolean,
+        isCtrlOrMetaPressed: Boolean,
     ) {
-        if (!addToSelection) {
+        if (!isCtrlOrMetaPressed) {
             componentRoot.value.clearIsFocusedRecursively()
         }
         componentRoot.value.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.isFocused.value = true
+            it.setFocus(toggleValue = isCtrlOrMetaPressed)
         }
     }
 

@@ -143,13 +143,13 @@ data class ScreenHolder(
     /**
      * Update the focused node.
      *
-     * if [addToSelection] is true, it doesn't clear the existing focused nodes.
+     * if [isCtrlOrMetaPressed] is true, it doesn't clear the existing focused nodes.
      */
     fun updateFocusedNode(
         eventPosition: Offset,
-        addToSelection: Boolean = false,
+        isCtrlOrMetaPressed: Boolean = false,
     ) {
-        if (!addToSelection) {
+        if (!isCtrlOrMetaPressed) {
             currentEditable().clearIsFocusedRecursively()
             screens.forEach {
                 it.clearIsFocusedRecursively()
@@ -157,14 +157,14 @@ data class ScreenHolder(
         }
         val currentScreen = currentScreen()
         currentScreen.navigationDrawerNode.value?.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.isFocused.value = true
+            it.setFocus(toggleValue = isCtrlOrMetaPressed)
             return
         }
         currentScreen.topAppBarNode.value?.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.isFocused.value = true
+            it.setFocus(toggleValue = isCtrlOrMetaPressed)
             return
         }
-        currentEditable().updateFocusedNode(eventPosition, addToSelection)
+        currentEditable().updateFocusedNode(eventPosition, isCtrlOrMetaPressed)
     }
 
     fun updateHoveredNode(eventPosition: Offset) {
