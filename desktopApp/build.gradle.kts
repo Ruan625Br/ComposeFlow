@@ -112,6 +112,7 @@ compose.desktop {
 
             windows {
                 menu = true
+                menuGroup = "ComposeFlow"
                 // see https://wixtoolset.org/documentation/manual/v3/howtos/general/generate_guids.html
                 upgradeUuid = "AF792DA6-2EA3-495A-95E5-C3C6CBCB9948"
                 iconFile.set(project.file("src/jvmMain/resources/ic_composeflow_launcher.ico"))
@@ -119,10 +120,17 @@ compose.desktop {
 
             macOS {
                 // Use -Pcompose.desktop.mac.sign=true to sign and notarize.
+                packageName = "ComposeFlow"
+                dockName = "ComposeFlow"
                 bundleID = "in.composeflow"
                 iconFile.set(project.file("src/jvmMain/resources/ic_composeflow_launcher.icns"))
+
+                infoPlist {
+                    "CFBundleName" to "ComposeFlow"
+                }
             }
             linux {
+                menuGroup = "ComposeFlow"
                 iconFile.set(project.file("src/jvmMain/resources/ic_composeflow_launcher.png"))
                 installationPath = "/opt"
             }

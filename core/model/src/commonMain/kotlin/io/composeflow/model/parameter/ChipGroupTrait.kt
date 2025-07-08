@@ -55,7 +55,13 @@ data class ChipGroupTrait(
             .StringIntrinsicValue("Chip1,Chip2,Chip3")
             .apply {
                 propertyTransformers.add(
-                    FromString.ToStringList.Split(mutableStateOf(StringProperty.StringIntrinsicValue(","))),
+                    FromString.ToStringList.Split(
+                        mutableStateOf(
+                            StringProperty.StringIntrinsicValue(
+                                ",",
+                            ),
+                        ),
+                    ),
                 )
             },
     val selectable: Boolean = true,
@@ -217,7 +223,7 @@ data class ChipGroupTrait(
         val chipGroupTrait = node.trait.value as ChipGroupTrait
 
         val companionState =
-            node.companionStateId?.let {
+            node.companionStateId.let {
                 project.findLocalStateOrNull(it)
             }
         val updatedState =
