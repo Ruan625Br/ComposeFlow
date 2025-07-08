@@ -59,6 +59,8 @@ import io.composeflow.ui.UiBuilderHelper
 import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
 import io.composeflow.ui.calculateScale
 import io.composeflow.ui.common.buildUiState
+import io.composeflow.ui.utils.isMinusPressed
+import io.composeflow.ui.utils.isPlusPressed
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.util.generateUniqueName
 import kotlinx.coroutines.flow.SharingStarted
@@ -181,8 +183,9 @@ class UiBuilderViewModel(
         zoomableContainerStateHolder.onToolbarZoomScaleChanged(scale)
     }
 
-    fun onScaleChanged(newScale: Float) {
+    fun onScaleChanged(newScale: Float): EventResult {
         zoomableContainerStateHolder.onToolbarZoomScaleChanged(newScale)
+        return EventResult(consumed = true)
     }
 
     fun onUiBuilderCanvasSizeChanged(newSize: IntSize) {
@@ -236,6 +239,10 @@ class UiBuilderViewModel(
             onCopyFocusedNodes()
         } else if (keyEvent.key == Key.V && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
             onPaste()
+        } else if (isPlusPressed(keyEvent) && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
+            onScaleChanged(newScale = zoomableContainerStateHolder.scale + 0.1f)
+        } else if (isMinusPressed(keyEvent) && (keyEvent.isMetaPressed || keyEvent.isCtrlPressed)) {
+            onScaleChanged(newScale = zoomableContainerStateHolder.scale - 0.1f)
         } else {
             EventResult(consumed = false)
         }

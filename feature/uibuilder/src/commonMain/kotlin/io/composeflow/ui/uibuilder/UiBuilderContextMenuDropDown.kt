@@ -483,7 +483,7 @@ private fun ContextMenuEditItems(
             )
             Spacer(Modifier.weight(1f))
             Text(
-                text = "(\"+\")",
+                text = "(${getCtrlKeyStr()} + M)",
                 style = MaterialTheme.typography.titleSmall,
                 modifier = Modifier.alpha(0.6f),
             )

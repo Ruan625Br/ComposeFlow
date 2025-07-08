@@ -10,3 +10,5 @@ fun isPlusPressed(keyEvent: KeyEvent): Boolean {
     return keyEvent.key == Key.Plus ||
         (keyEvent.key == Key.Equals && isShiftPressed)
 }
+
+fun isMinusPressed(keyEvent: KeyEvent): Boolean = keyEvent.key == Key.Minus

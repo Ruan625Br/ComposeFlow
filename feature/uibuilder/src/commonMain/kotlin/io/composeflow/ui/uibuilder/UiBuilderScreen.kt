@@ -73,9 +73,11 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isCtrlPressed
 import androidx.compose.ui.input.key.isMetaPressed
+import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.PointerButton
@@ -109,6 +111,7 @@ import io.composeflow.component
 import io.composeflow.component_name
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.NounAi
+import io.composeflow.keyboard.getCtrlKeyStr
 import io.composeflow.model.InspectorTabDestination
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.toModifierChain
@@ -166,7 +169,6 @@ import io.composeflow.ui.screenbuilder.ScreenBuilderTab
 import io.composeflow.ui.screenbuilder.ScreenNameDialog
 import io.composeflow.ui.screenbuilder.SelectNewScreenDialog
 import io.composeflow.ui.tab.ComposeFlowTab
-import io.composeflow.ui.utils.isPlusPressed
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.ui.zoomablecontainer.calculateAdjustedBoundsInZoomableContainer
 import io.composeflow.zoom_in
@@ -318,7 +320,10 @@ fun UiBuilderScreen(
                     .focusRequester(focusRequester)
                     .onKeyEvent {
                         var consumed = false
-                        if (isPlusPressed(it)) {
+                        if ((it.isCtrlPressed || it.isMetaPressed) &&
+                            it.type == KeyEventType.KeyDown &&
+                            it.key == Key.M
+                        ) {
                             addModifierDialogVisible = true
                             consumed = true
                         } else {
@@ -1378,7 +1383,8 @@ fun CanvasTopToolbar(
                 shape = RoundedCornerShape(8.dp),
             ) {
                 Row {
-                    val contentDesc = stringResource(Res.string.reset_position_and_zoom)
+                    val contentDesc =
+                        stringResource(Res.string.reset_position_and_zoom)
                     Tooltip(contentDesc) {
                         Icon(
                             modifier =
@@ -1400,7 +1406,7 @@ fun CanvasTopToolbar(
                                 .width(1.dp)
                                 .background(MaterialTheme.colorScheme.outline),
                     )
-                    Tooltip(stringResource(Res.string.zoom_out)) {
+                    Tooltip(stringResource(Res.string.zoom_out) + " (${getCtrlKeyStr()} + \"-\")") {
                         Text(
                             modifier =
                                 Modifier
@@ -1440,7 +1446,7 @@ fun CanvasTopToolbar(
                                 .width(1.dp)
                                 .background(MaterialTheme.colorScheme.outline),
                     )
-                    Tooltip(stringResource(Res.string.zoom_in)) {
+                    Tooltip(stringResource(Res.string.zoom_in) + " (${getCtrlKeyStr()} + \"+\")") {
                         Text(
                             modifier =
                                 Modifier
