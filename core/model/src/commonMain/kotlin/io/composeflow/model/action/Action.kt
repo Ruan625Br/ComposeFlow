@@ -163,23 +163,26 @@ sealed interface Action {
 }
 
 /**
- * Placeholder to be replaced by action blocks for the true condition
- */
-const val TRUE_ACTIONS_PLACEHOLDER = "//[trueActionsPlaceholder]"
-
-/**
- * Placeholder to be replaced by action blocks for the false condition
- */
-const val FALSE_ACTIONS_PLACEHOLDER = "//[falseActionsPlaceholder]"
-
-/**
  * Action that has action blocks depending on the result of the action.
  * E.g. Confirmation dialog action:
  *        - true blocks : Executed when the user selects the positive button
  *        - false blocks : Executed when the user selects the negative button
  */
 @Serializable
-sealed interface ForkedAction : Action
+sealed interface ForkedAction : Action {
+
+    /**
+     * Generate the code block when it's initialized. This accepts the code blocks for both
+     * true nodes and false nodes
+     */
+    fun generateInitializationCodeBlockWithForkedActions(
+        project: Project,
+        context: GenerationContext,
+        dryRun: Boolean,
+        trueNodesCodeBlock: CodeBlock?,
+        falseNodesCodeBlock: CodeBlock?,
+    ): CodeBlock? = null
+}
 
 @Serializable
 sealed interface Navigation : Action {
@@ -325,7 +328,8 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateToRoute.name
+        override fun argumentName(project: Project): String =
+            ComposeScreenConstant.onNavigateToRoute.name
 
         override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
             argumentName(project).let { argumentName ->
@@ -345,7 +349,7 @@ sealed interface Navigation : Action {
         override fun generateNavigationInitializationBlock(): CodeBlock {
             val builder = CodeBlock.builder()
             builder.addStatement(
-                """{ 
+                """{
                 navController.navigate(it)
             }
             """,
@@ -353,7 +357,8 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun isDependent(sourceId: String): Boolean = paramsMap.any { it.value.isDependent(sourceId) }
+        override fun isDependent(sourceId: String): Boolean =
+            paramsMap.any { it.value.isDependent(sourceId) }
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -388,7 +393,8 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateBack.name
+        override fun argumentName(project: Project): String =
+            ComposeScreenConstant.onNavigateBack.name
 
         override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
             argumentName(project).let { argumentName ->
@@ -644,7 +650,8 @@ data class CallApi(
         }
     }
 
-    override fun isDependent(sourceId: String): Boolean = paramsMap.any { it.value.isDependent(sourceId) }
+    override fun isDependent(sourceId: String): Boolean =
+        paramsMap.any { it.value.isDependent(sourceId) }
 
     override fun generateActionTriggerCodeBlock(
         project: Project,
@@ -661,7 +668,15 @@ data class CallApi(
                             apiDefinition.parameters.firstOrNull { it.parameterId == parameterId }
                         parameter?.let {
                             append("${parameter.variableName} = ")
-                            append("${value.transformedCodeBlock(project, context, dryRun = dryRun)}")
+                            append(
+                                "${
+                                    value.transformedCodeBlock(
+                                        project,
+                                        context,
+                                        dryRun = dryRun,
+                                    )
+                                }",
+                            )
                             if (index != paramsMap.entries.size - 1) {
                                 append(",")
                             }
@@ -752,10 +767,12 @@ data class ShowConfirmationDialog(
         }
     }
 
-    override fun generateInitializationCodeBlock(
+    override fun generateInitializationCodeBlockWithForkedActions(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
+        trueNodesCodeBlock: CodeBlock?,
+        falseNodesCodeBlock: CodeBlock?,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
@@ -764,51 +781,62 @@ data class ShowConfirmationDialog(
                 id = "$id-$dialogOpenVariableName",
                 initialIdentifier = dialogOpenVariableName,
             )
-        val titleArg =
-            title?.let {
-                "title = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
-            } ?: ""
-        val messageArg =
-            message?.let {
-                "message = ${it.transformedCodeBlock(project, context, dryRun = dryRun)},"
-            } ?: ""
         builder.addStatement(
             """
-                var $variableName by %M { %M(false) }    
+                var $variableName by %M { %M(false) }
                 if ($dialogOpenVariableName) {
                     %M(
-                        positiveText = ${
-                positiveText.transformedCodeBlock(
-                    project,
-                    context,
-                    dryRun = dryRun,
-                )
-            },
-                        negativeText = ${
-                negativeText.transformedCodeBlock(
-                    project,
-                    context,
-                    dryRun = dryRun,
-                )
-            },
-                        positiveBlock = {
-                            $TRUE_ACTIONS_PLACEHOLDER
-                        }, 
-                        negativeBlock = {
-                            $FALSE_ACTIONS_PLACEHOLDER
-                        },
-                        onDismissRequest = {
-                            $dialogOpenVariableName = false
-                        },
-                        $titleArg
-                        $messageArg
-                    )
-                }
-            """,
+                        positiveText = """,
             MemberHolder.AndroidX.Runtime.remember,
             MemberHolder.AndroidX.Runtime.mutableStateOf,
             MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "ConfirmationDialog"),
         )
+        builder.add(
+            positiveText.transformedCodeBlock(
+                project,
+                context,
+                dryRun = dryRun,
+            ),
+        )
+        builder.add(",")
+        builder.addStatement("""negativeText = """)
+        builder.add(
+            negativeText.transformedCodeBlock(
+                project,
+                context,
+                dryRun = dryRun,
+            ),
+        )
+        builder.add(",")
+        builder.addStatement("""positiveBlock = {""")
+        trueNodesCodeBlock?.let {
+            builder.add(it)
+        }
+        builder.addStatement("},")
+        builder.addStatement("""negativeBlock = {""")
+        falseNodesCodeBlock?.let {
+            builder.add(it)
+        }
+        builder.addStatement("},")
+        builder.addStatement(
+            """
+            onDismissRequest = {
+                $dialogOpenVariableName = false
+            },
+        """,
+        )
+        builder.add("title = ")
+        builder.add(
+            title?.transformedCodeBlock(project, context, dryRun = dryRun) ?: CodeBlock.of(""),
+        )
+        builder.addStatement(",")
+        builder.add("message = ")
+        builder.add(
+            message?.transformedCodeBlock(project, context, dryRun = dryRun) ?: CodeBlock.of(""),
+        )
+        builder.addStatement(",")
+        builder.addStatement(")") // Close ConfirmationDialog
+        builder.addStatement("}") // Close if
         return builder.build()
     }
 
@@ -903,7 +931,7 @@ data class ShowInformationDialog(
             } ?: ""
         builder.addStatement(
             """
-                var $dialogVariableName by %M { %M(false) }    
+                var $dialogVariableName by %M { %M(false) }
                 if ($dialogVariableName) {
                     %M(
                         confirmText = ${
@@ -949,7 +977,7 @@ sealed interface ShowModalWithComponent : ShowModal {
         paramsMap: MutableMap<
             ParameterId,
             AssignableProperty,
-        >,
+            >,
     ): ShowModalWithComponent
 
     fun findComponentOrNull(project: Project): Component? =
@@ -1013,7 +1041,8 @@ data class ShowCustomDialog(
     @Transient
     val dialogOpenVariableName: String = "openCustomDialog",
 ) : ShowModalWithComponent {
-    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent = this.copy(paramsMap = paramsMap)
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent =
+        this.copy(paramsMap = paramsMap)
 
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
         paramsMap.entries.flatMap {
@@ -1075,7 +1104,7 @@ data class ShowCustomDialog(
             """
                 %M(
                     ${paramBuilder.build()}
-                    $componentKeyName = "${component.name}-$componentInvocationCount" 
+                    $componentKeyName = "${component.name}-$componentInvocationCount"
                 )""",
             component.asMemberName(project),
         )
@@ -1083,7 +1112,7 @@ data class ShowCustomDialog(
         val builder = CodeBlock.builder()
         builder.addStatement(
             """
-                var $dialogOpenVariableName by %M { %M(false) }    
+                var $dialogOpenVariableName by %M { %M(false) }
                 if ($dialogOpenVariableName) {
                     %M(
                         onDismissRequest = {
@@ -1128,7 +1157,8 @@ data class ShowBottomSheet(
     @Transient
     val bottomSheetOpenVariableName: String = "openBottomSheet",
 ) : ShowModalWithComponent {
-    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent = this.copy(paramsMap = paramsMap)
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent =
+        this.copy(paramsMap = paramsMap)
 
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
         paramsMap.entries.flatMap {
@@ -1198,7 +1228,7 @@ data class ShowBottomSheet(
             """
                 %M(
                     ${paramBuilder.build()}
-                    $componentKeyName = "${component.name}-$componentInvocationCount" 
+                    $componentKeyName = "${component.name}-$componentInvocationCount"
                 )""",
             component.asMemberName(project),
         )
@@ -1206,7 +1236,7 @@ data class ShowBottomSheet(
         val builder = CodeBlock.builder()
         builder.addStatement(
             """
-                var $bottomSheetOpenVariableName by %M { %M(false) }    
+                var $bottomSheetOpenVariableName by %M { %M(false) }
                 val $bottomSheetStateVariable = %M()
                 if ($bottomSheetOpenVariableName) {
                     %M(
@@ -1306,7 +1336,7 @@ data class ShowNavigationDrawer(
                ${ComposeScreenConstant.navDrawerState}.apply {
                    if (isClosed) { open() } else {}
                }
-           } 
+           }
         """,
                 MemberHolder.Coroutines.launch,
             )
@@ -1622,7 +1652,7 @@ sealed interface DateOrTimePicker : Action {
                                 }
                                 %M(%M.%M(8.dp))
                             }
-                        }, 
+                        },
                         dismissButton = {
                             %M(
                                 onClick = {
@@ -1778,7 +1808,7 @@ sealed interface DateOrTimePicker : Action {
                 composableContext.addComposeFileVariable(
                     id = "$id-$timePickerStateName",
                     initialIdentifier =
-                    timePickerStateName,
+                        timePickerStateName,
                     dryRun = dryRun,
                 )
             val rememberedStateName =
@@ -1826,7 +1856,7 @@ sealed interface DateOrTimePicker : Action {
                                 }
                                 %M(%M.%M(8.dp))
                             }
-                        }, 
+                        },
                         dismissButton = {
                             %M(
                                 onClick = {
@@ -1914,7 +1944,7 @@ sealed interface DateOrTimePicker : Action {
                 }
             }
         }
-    } 
+    }
                 """,
                     MemberHolder.AndroidX.Ui.Dialog,
                     MemberHolder.Material3.Card,
@@ -1983,7 +2013,8 @@ sealed interface Share : Action {
         @Transient
         val uriHandlerName: String = "uriHandler",
     ) : Share {
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> = url.getDependentComposeNodes(project)
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
+            url.getDependentComposeNodes(project)
 
         override fun generateIssues(project: Project): List<Issue> =
             buildList {
@@ -2236,7 +2267,7 @@ sealed interface Auth : Action {
                     .addParameter(ParameterSpec.builder("email", String::class).build())
                     .addParameter(ParameterSpec.builder("password", String::class).build())
                     .addCode(
-                        """%M.%M {   
+                        """%M.%M {
             _$signInStateName.value = %T.Loading
             try {
                 val authResult = %M.%M.signInWithEmailAndPassword(email, password)
@@ -2459,7 +2490,7 @@ sealed interface Auth : Action {
                     .addParameter(ParameterSpec.builder("email", String::class).build())
                     .addParameter(ParameterSpec.builder("password", String::class).build())
                     .addCode(
-                        """%M.%M {   
+                        """%M.%M {
             _$createStateName.value = %T.Loading
             try {
                 val authResult = %M.%M.createUserWithEmailAndPassword(email, password)
@@ -2751,7 +2782,7 @@ sealed interface FirestoreAction : Action {
                 }
 
             funSpecBuilder.addCode(
-                """val document = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}").document 
+                """val document = ${ViewModelConstant.firestore}.collection("${firestoreCollection.name}").document
                 val updated = %T($updateString)
                 %M.%M {
                     document.set(updated)
@@ -2942,7 +2973,7 @@ sealed interface FirestoreAction : Action {
                     CodeBlock.of(
                         """%M.%M {
                     collection.snapshots.%M().documents.forEach { document ->
-                        val entity = document.data(%T.serializer()) 
+                        val entity = document.data(%T.serializer())
                         document.reference.set(entity.copy($updateString))
                     }
                 }

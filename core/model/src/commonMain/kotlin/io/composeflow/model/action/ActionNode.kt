@@ -402,13 +402,14 @@ sealed interface ActionNode {
                 }
             }
             val initializationBlock =
-                CodeBlock.of(
-                    forkedAction
-                        .generateInitializationCodeBlock(project, context, dryRun = dryRun)
-                        .toString()
-                        .replace(TRUE_ACTIONS_PLACEHOLDER, trueBlockBuilder.build().toString())
-                        .replace(FALSE_ACTIONS_PLACEHOLDER, falseBlockBuilder.build().toString()),
-                )
+                forkedAction
+                    .generateInitializationCodeBlockWithForkedActions(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                        trueNodesCodeBlock = trueBlockBuilder.build(),
+                        falseNodesCodeBlock = falseBlockBuilder.build(),
+                    )
             return trueNodes.flatMap {
                 it.generateInitializationCodeBlocks(
                     project,

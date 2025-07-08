@@ -16,3 +16,27 @@ typescript-json-schema generate-jsonschema-cli/create_project_airesponse.d.ts "*
 # Now we can use the correct paths relative to the root directory
 python3 scripts/trim_json_space.py schema.json minified_schema.json
 python3 scripts/make_system_prompts.py
+
+# Move YAML template files to composeflow-api-ts if the directory exists
+COMPOSEFLOW_API_DIR="../composeflow-api-ts/prompts/example_yaml"
+if [ -d "$COMPOSEFLOW_API_DIR" ]; then
+    echo "Moving YAML template files to $COMPOSEFLOW_API_DIR..."
+    
+    # Move login screen template
+    if [ -f "core/model/src/commonMain/resources/login_screen_template.yaml" ]; then
+        cp "core/model/src/commonMain/resources/login_screen_template.yaml" "$COMPOSEFLOW_API_DIR/"
+        echo "✓ Copied login_screen_template.yaml"
+    else
+        echo "⚠ login_screen_template.yaml not found"
+    fi
+    
+    # Move messages screen template
+    if [ -f "core/model/src/commonMain/resources/messages_screen_template.yaml" ]; then
+        cp "core/model/src/commonMain/resources/messages_screen_template.yaml" "$COMPOSEFLOW_API_DIR/"
+        echo "✓ Copied messages_screen_template.yaml"
+    else
+        echo "⚠ messages_screen_template.yaml not found"
+    fi
+else
+    echo "⚠ Target directory $COMPOSEFLOW_API_DIR does not exist, skipping YAML file move"
+fi
