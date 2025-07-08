@@ -97,13 +97,15 @@ sealed interface ActionNode {
 
         override fun isValid(): Boolean = action != null
 
-        override fun findFocusableActionOrNull(id: ActionNodeId): FocusableActionNode? = if (this.id == id) this else null
+        override fun findFocusableActionOrNull(id: ActionNodeId): FocusableActionNode? =
+            if (this.id == id) this else null
 
         override fun hasActionNode(id: ActionNodeId): Boolean = this.id == id
 
         override fun allActions(): List<Action> = action?.let { listOf(it) } ?: emptyList()
 
-        override fun isDependent(sourceId: String): Boolean = action is CallApi && action.apiId == sourceId
+        override fun isDependent(sourceId: String): Boolean =
+            action is CallApi && action.apiId == sourceId
 
         override fun generateCodeBlock(
             project: Project,
@@ -125,7 +127,8 @@ sealed interface ActionNode {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): List<CodeBlock?> = listOf(action?.generateInitializationCodeBlock(project, context, dryRun = dryRun))
+        ): List<CodeBlock?> =
+            listOf(action?.generateInitializationCodeBlock(project, context, dryRun = dryRun))
     }
 
     @Serializable
@@ -206,7 +209,8 @@ sealed interface ActionNode {
             }
         }
 
-        override fun hasActionNode(id: ActionNodeId): Boolean = trueNodes.any { it.id == id } || falseNodes.any { it.id == id }
+        override fun hasActionNode(id: ActionNodeId): Boolean =
+            trueNodes.any { it.id == id } || falseNodes.any { it.id == id }
 
         override fun allActions(): List<Action> =
             trueNodes.flatMap {
@@ -231,16 +235,16 @@ sealed interface ActionNode {
                 return builder.build()
             }
             ifCondition.addReadProperty(project, context, dryRun = dryRun)
-            builder.addStatement(
-                "if (${
-                    ifCondition.transformedCodeBlock(
-                        project,
-                        context,
-                        ComposeFlowType.BooleanType(),
-                        dryRun = dryRun,
-                    )
-                }) {",
+            builder.add("if (")
+            builder.add(
+                ifCondition.transformedCodeBlock(
+                    project,
+                    context,
+                    ComposeFlowType.BooleanType(),
+                    dryRun = dryRun,
+                )
             )
+            builder.addStatement(") {")
             trueNodes.forEach { actionNode ->
                 builder.add(actionNode.generateCodeBlock(project, context, dryRun))
             }
