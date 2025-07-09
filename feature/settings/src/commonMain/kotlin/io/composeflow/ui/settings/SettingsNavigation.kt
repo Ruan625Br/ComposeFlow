@@ -1,7 +1,7 @@
 package io.composeflow.ui.settings
 
+import io.composeflow.model.SETTINGS_ROUTE
 import io.composeflow.model.project.Project
-import io.composeflow.model.settingsRoute
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.query
 import moe.tlaster.precompose.navigation.transition.NavTransition
@@ -11,7 +11,7 @@ fun RouteBuilder.settingsScreen(
     navTransition: NavTransition? = null,
 ) {
     scene(
-        route = settingsRoute,
+        route = SETTINGS_ROUTE,
         navTransition = navTransition,
     ) {
         val destination = it.query<String>("destination")

@@ -2439,7 +2439,7 @@ fun <T> AppState<T>.copy(
     }
 }
 
-private const val authenticatedUser = "authenticatedUser"
+private const val AUTHENTICATED_USER = "authenticatedUser"
 
 @Serializable
 sealed interface AuthenticatedUserState : ReadableState {
@@ -2448,7 +2448,7 @@ sealed interface AuthenticatedUserState : ReadableState {
         context: GenerationContext,
         dryRun: Boolean,
     ): CodeBlock {
-        val authenticatedUser = "authenticatedUser"
+        val authenticatedUser = AUTHENTICATED_USER
         context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
             id = authenticatedUser,
             authenticatedUser,
@@ -2470,7 +2470,7 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("""$authenticatedUser != null""")
+        ): CodeBlock = CodeBlock.of("""$AUTHENTICATED_USER != null""")
 
         override fun valueType(
             project: Project,
@@ -2489,7 +2489,7 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.displayName ?: "Invalid display name")""")
+        ): CodeBlock = CodeBlock.of("""($AUTHENTICATED_USER?.displayName ?: "Invalid display name")""")
 
         override fun valueType(
             project: Project,
@@ -2508,7 +2508,7 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.email ?: "Invalid email")""")
+        ): CodeBlock = CodeBlock.of("""($AUTHENTICATED_USER?.email ?: "Invalid email")""")
 
         override fun valueType(
             project: Project,
@@ -2527,7 +2527,7 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.phoneNumber ?: "Invalid phone number")""")
+        ): CodeBlock = CodeBlock.of("""($AUTHENTICATED_USER?.phoneNumber ?: "Invalid phone number")""")
 
         override fun valueType(
             project: Project,
@@ -2546,7 +2546,7 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.photoURL ?: "Invalid photo url")""")
+        ): CodeBlock = CodeBlock.of("""($AUTHENTICATED_USER?.photoURL ?: "Invalid photo url")""")
 
         override fun valueType(
             project: Project,
@@ -2565,7 +2565,7 @@ sealed interface AuthenticatedUserState : ReadableState {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("""($authenticatedUser?.isAnonymous ?: false)""")
+        ): CodeBlock = CodeBlock.of("""($AUTHENTICATED_USER?.isAnonymous ?: false)""")
 
         override fun valueType(
             project: Project,

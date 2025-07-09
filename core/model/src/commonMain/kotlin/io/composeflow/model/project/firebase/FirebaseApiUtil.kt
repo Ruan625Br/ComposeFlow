@@ -4,8 +4,8 @@ import co.touchlab.kermit.Logger
 import io.composeflow.auth.AuthRepository
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.firebase.FirebaseAppIdentifier
-import io.composeflow.firebase.management.firebaseScope
-import io.composeflow.firebase.management.identityToolkitScope
+import io.composeflow.firebase.management.FIREBASE_SCOPE
+import io.composeflow.firebase.management.IDENTITY_TOOLKIT_SCOPE
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -19,8 +19,8 @@ suspend fun StateFlow<FirebaseIdToken?>.prepareFirebaseApiCall(
     executeApiCall: suspend (FirebaseAppIdentifier) -> Unit,
 ) {
     if (value?.googleTokenResponse?.hasSufficientScopes(
-            firebaseScope,
-            identityToolkitScope,
+            FIREBASE_SCOPE,
+            IDENTITY_TOOLKIT_SCOPE,
         ) != true
     ) {
         if (ignoreInsufficientScope) {

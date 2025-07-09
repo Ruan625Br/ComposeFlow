@@ -42,7 +42,7 @@ object AppRunner {
     private val adbWrapper = AdbWrapper()
     private val xcodeToolsWrapper = XcodeCommandLineToolsWrapper(buildLogger)
     private val ioDispatcher: CoroutineDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         }
 

@@ -9,8 +9,8 @@ import dev.gitlive.firebase.firestore.FirebaseFirestore
 import io.composeflow.kotlinpoet.MemberHolder
 import kotlinx.serialization.json.Json
 
-const val onScreenInitiallyLoaded = "onScreenInitiallyLoaded"
-const val screenInitiallyLoadedFlag = "screenInitiallyLoadedFlag"
+const val ON_SCREEN_INITIALLY_LOADED = "onScreenInitiallyLoaded"
+const val SCREEN_INITIALLY_LOADED_FLAG = "screenInitiallyLoadedFlag"
 
 @Suppress("EnumEntryName")
 enum class ComposeScreenConstant {

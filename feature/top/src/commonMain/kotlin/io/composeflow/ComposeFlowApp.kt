@@ -11,7 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import io.composeflow.ui.ProvideOnShowSnackbar
 import io.composeflow.ui.jewel.TitleBarContent
-import io.composeflow.ui.login.loginRoute
+import io.composeflow.ui.login.LOGIN_ROUTE
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.navigation.Navigator
 import moe.tlaster.precompose.viewmodel.viewModel
@@ -44,7 +44,7 @@ fun ComposeFlowApp(
                     onLogOut = {
                         coroutine.launch {
                             appViewModel.onLogOut()
-                            navigator.navigate(loginRoute)
+                            navigator.navigate(LOGIN_ROUTE)
                         }
                     },
                     onTitleBarRightContentSet = onTitleBarRightContentSet,

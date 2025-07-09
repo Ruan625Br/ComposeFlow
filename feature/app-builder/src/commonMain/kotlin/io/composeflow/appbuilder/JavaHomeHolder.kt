@@ -7,7 +7,7 @@ import io.composeflow.logger.logger
 import java.io.File
 
 object JavaHomeHolder {
-    private const val LinuxDefaultJavaHome = "/opt/composeflow/lib/runtime"
+    private const val LINUX_DEFAULT_JAVA_HOME = "/opt/composeflow/lib/runtime"
 
     val javaHome: String? =
         if (BuildConfig.isRelease) {
@@ -25,8 +25,8 @@ object JavaHomeHolder {
                 }
 
                 CurrentOs.Linux -> {
-                    if (File(LinuxDefaultJavaHome).resolve("bin").resolve("java").exists()) {
-                        LinuxDefaultJavaHome
+                    if (File(LINUX_DEFAULT_JAVA_HOME).resolve("bin").resolve("java").exists()) {
+                        LINUX_DEFAULT_JAVA_HOME
                     } else {
                         getJavaHomeFromEnv()
                     }

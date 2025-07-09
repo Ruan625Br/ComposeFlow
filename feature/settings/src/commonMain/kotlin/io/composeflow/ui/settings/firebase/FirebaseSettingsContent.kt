@@ -45,7 +45,7 @@ import io.composeflow.custom.composeflowicons.Web
 import io.composeflow.edit_firebase_project_id
 import io.composeflow.enable_auth_on_firebase
 import io.composeflow.enabled
-import io.composeflow.firebase.management.firebaseConsoleUrl
+import io.composeflow.firebase.management.FIREBASE_CONSOLE_URL
 import io.composeflow.firebase_auth_description
 import io.composeflow.firebase_integration_description
 import io.composeflow.model.project.Project
@@ -141,7 +141,7 @@ private fun FirebaseProjectIdEditor(
                     ) {
                         append("Create a new Firebase project at ")
 
-                        withLink(LinkAnnotation.Url(url = firebaseConsoleUrl)) {
+                        withLink(LinkAnnotation.Url(url = FIREBASE_CONSOLE_URL)) {
                             withStyle(SpanStyle(color = MaterialTheme.colorScheme.primary)) {
                                 append("Firebase console")
                             }
@@ -439,7 +439,7 @@ private fun FirebaseAuthContent(
                 onClick = {
                     openInBrowser(
                         URI(
-                            "${firebaseConsoleUrl}project/${firebaseAppInfo.firebaseProjectId}/authentication",
+                            "${FIREBASE_CONSOLE_URL}project/${firebaseAppInfo.firebaseProjectId}/authentication",
                         ),
                     )
                 },

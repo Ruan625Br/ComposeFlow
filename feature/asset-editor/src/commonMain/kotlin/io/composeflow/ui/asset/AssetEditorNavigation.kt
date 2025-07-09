@@ -1,6 +1,6 @@
 package io.composeflow.ui.asset
 
-import io.composeflow.model.assetEditorRoute
+import io.composeflow.model.ASSET_EDITOR_ROUTE
 import io.composeflow.model.project.Project
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
@@ -10,7 +10,7 @@ fun RouteBuilder.assetEditorScreen(
     navTransition: NavTransition? = null,
 ) {
     scene(
-        route = assetEditorRoute,
+        route = ASSET_EDITOR_ROUTE,
         navTransition = navTransition,
     ) {
         AssetEditorScreen(

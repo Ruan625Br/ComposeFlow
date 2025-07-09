@@ -24,8 +24,8 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlin.uuid.Uuid
 
-const val DataTypePackage = "datatype"
-const val firestoreDocumentId = "documentId"
+const val DATA_TYPE_PACKAGE = "datatype"
+const val FIRESTORE_DOCUMENT_ID = "documentId"
 
 val EmptyDataType = DataType(name = "")
 
@@ -52,7 +52,7 @@ data class DataType(
         return if (matchingFirestoreCollection != null) {
             listOf(
                 DataField(
-                    name = firestoreDocumentId,
+                    name = FIRESTORE_DOCUMENT_ID,
                     fieldType = FieldType.DocumentId(firestoreCollectionId = matchingFirestoreCollection.id),
                 ),
             ) + fields
@@ -61,7 +61,7 @@ data class DataType(
         }
     }
 
-    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$DataTypePackage", name.asClassName())
+    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$DATA_TYPE_PACKAGE", name.asClassName())
 
 //    fun findDataFieldOrNull(fieldName: String): DataField? {
 //        return fields.firstOrNull { it.variableName == fieldName }
@@ -87,16 +87,16 @@ data class DataType(
         if (this.findMatchingFirestoreCollection(project) != null) {
             constructorSpecBuilder.addParameter(
                 ParameterSpec
-                    .builder(firestoreDocumentId, String::class.asTypeName())
+                    .builder(FIRESTORE_DOCUMENT_ID, String::class.asTypeName())
                     .defaultValue("\"\"")
                     .build(),
             )
             typeSpecBuilder.addProperty(
                 PropertySpec
                     .builder(
-                        name = firestoreDocumentId,
+                        name = FIRESTORE_DOCUMENT_ID,
                         type = String::class.asTypeName(),
-                    ).initializer(firestoreDocumentId)
+                    ).initializer(FIRESTORE_DOCUMENT_ID)
                     .build(),
             )
         }

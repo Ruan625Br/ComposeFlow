@@ -559,7 +559,7 @@ fun NewNameDialog(
     }
 }
 
-const val emptyJSON = "Empty JSON"
+const val EMPTY_JSON = "Empty JSON"
 
 @Composable
 private fun DataTypeFromJsonDialog(
@@ -590,11 +590,11 @@ private fun DataTypeFromJsonDialog(
     val errorMessage: String? by remember(parseResult) {
         mutableStateOf(
             when (val result = parseResult) {
-                DataTypeParseResult.EmptyInput -> emptyJSON
+                DataTypeParseResult.EmptyInput -> EMPTY_JSON
                 is DataTypeParseResult.Failure -> result.message
                 is DataTypeParseResult.Success -> null
                 is DataTypeParseResult.SuccessWithWarning -> result.warningMessage
-                null -> emptyJSON
+                null -> EMPTY_JSON
             },
         )
     }

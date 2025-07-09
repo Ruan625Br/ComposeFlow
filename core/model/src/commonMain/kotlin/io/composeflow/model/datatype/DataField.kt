@@ -29,7 +29,7 @@ sealed interface DataFieldType {
     data class DocumentId(
         val firestoreCollectionId: CollectionId,
     ) : DataFieldType {
-        override fun fieldName(project: Project): String = ".$firestoreDocumentId"
+        override fun fieldName(project: Project): String = ".$FIRESTORE_DOCUMENT_ID"
     }
 
     @Serializable

@@ -1,6 +1,6 @@
 package io.composeflow.datastore
 
-const val projectYamlFileName = "project.yaml"
+const val PROJECT_YAML_FILE_NAME = "project.yaml"
 
 interface ProjectSaver {
     suspend fun saveProjectYaml(

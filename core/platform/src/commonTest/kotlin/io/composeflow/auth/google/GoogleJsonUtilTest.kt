@@ -8,7 +8,7 @@ class GoogleJsonUtilTest {
     fun testExtractClientIdFromGoogleServicesJson() {
         val clientId =
             extractClientIdFromGoogleServicesJson(
-                exampleGoogleJson,
+                EXAMPLE_GOOGLE_JSON,
                 packageName = "com.example.test3",
             )
         assertEquals(
@@ -18,7 +18,7 @@ class GoogleJsonUtilTest {
     }
 }
 
-private const val exampleGoogleJson = """
+private const val EXAMPLE_GOOGLE_JSON = """
 {
   "project_info": {
     "project_number": "571511600000",

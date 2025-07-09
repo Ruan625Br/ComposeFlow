@@ -73,7 +73,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.awt.Cursor
 
-const val DeviceCanvasTestTag = "DeviceCanvas"
+const val DEVICE_CANVAS_TEST_TAG = "DeviceCanvas"
 
 /**
  * Modifier used for a Composable dropped in the canvas.
@@ -125,7 +125,7 @@ fun Modifier.modifierForCanvas(
             }
 
         Modifier
-            .testTag("$DeviceCanvasTestTag/" + node.displayName(project))
+            .testTag("$DEVICE_CANVAS_TEST_TAG/" + node.displayName(project))
             .onGloballyPositioned {
                 canvasNodeCallbacks.onBoundsInNodeUpdated(
                     node,

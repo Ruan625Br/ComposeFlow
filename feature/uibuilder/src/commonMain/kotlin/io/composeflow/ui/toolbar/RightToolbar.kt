@@ -43,8 +43,8 @@ import org.jetbrains.jewel.ui.painter.hints.Badge
 import org.jetbrains.jewel.ui.painter.rememberResourcePainterProvider
 import org.jetbrains.jewel.ui.theme.colorPalette
 
-const val ToolbarTestTag = "Toolbar"
-const val ToolbarRunButtonTestTag = "$ToolbarTestTag/RunButton"
+const val TOOLBAR_TEST_TAG = "Toolbar"
+const val TOOLBAR_RUN_BUTTON_TEST_TAG = "$TOOLBAR_TEST_TAG/RunButton"
 
 @Composable
 fun RightToolbar(
@@ -98,7 +98,7 @@ fun RightToolbar(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             modifier
-                .testTag(ToolbarTestTag),
+                .testTag(TOOLBAR_TEST_TAG),
     ) {
         val selectedDevice by viewModel.selectedDevice.collectAsState()
 
@@ -235,7 +235,7 @@ fun RightToolbar(
                 enabled = statusBarUiState !is StatusBarUiState.Loading && issues.isEmpty(),
                 modifier =
                     Modifier
-                        .testTag(ToolbarRunButtonTestTag)
+                        .testTag(TOOLBAR_RUN_BUTTON_TEST_TAG)
                         .then(
                             if (issues.isEmpty()) {
                                 buttonModifier

@@ -424,7 +424,7 @@ private fun AppStateDetailRow(
     }
 }
 
-private const val emptyJson = "Empty JSON"
+private const val EMPTY_JSON = "Empty JSON"
 
 @Composable
 private fun DataTypeListDefaultValuesFromJsonDialog(
@@ -448,11 +448,11 @@ private fun DataTypeListDefaultValuesFromJsonDialog(
     val errorMessage: String? by remember(parseResult) {
         mutableStateOf(
             when (val result = parseResult) {
-                DefaultValuesParseResult.EmptyInput -> emptyJson
+                DefaultValuesParseResult.EmptyInput -> EMPTY_JSON
                 is DefaultValuesParseResult.Failure -> result.message
                 is DefaultValuesParseResult.Success -> null
                 is DefaultValuesParseResult.SuccessWithWarning -> result.warningMessage
-                null -> emptyJson
+                null -> EMPTY_JSON
             },
         )
     }

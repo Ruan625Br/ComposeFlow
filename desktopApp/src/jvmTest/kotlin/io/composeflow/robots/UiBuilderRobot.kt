@@ -10,13 +10,13 @@ import io.composeflow.ScreenTestRule
 import io.composeflow.model.parameter.ComposeTrait
 import io.composeflow.testing.dragTo
 import io.composeflow.testing.exists
-import io.composeflow.ui.palette.PaletteTestTag
-import io.composeflow.ui.uibuilder.CanvasTopToolbarDarkModeSwitchTestTag
-import io.composeflow.ui.uibuilder.CanvasTopToolbarZoomInTestTag
-import io.composeflow.ui.uibuilder.DeviceCanvasTestTag
-import io.composeflow.ui.uibuilder.ToggleNavButtonTestTag
-import io.composeflow.ui.uibuilder.ToggleTopAppBarButtonTestTag
-import io.composeflow.ui.uibuilder.UiBuilderScreenBuilderTabTestTag
+import io.composeflow.ui.palette.PALETTE_TEST_TAG
+import io.composeflow.ui.uibuilder.CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG
+import io.composeflow.ui.uibuilder.CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG
+import io.composeflow.ui.uibuilder.DEVICE_CANVAS_TEST_TAG
+import io.composeflow.ui.uibuilder.TOGGLE_NAV_BUTTON_TEST_TAG
+import io.composeflow.ui.uibuilder.TOGGLE_TOP_APP_BAR_BUTTON_TEST_TAG
+import io.composeflow.ui.uibuilder.UI_BUILDER_SCREEN_BUILDER_TAB_TEST_TAG
 
 @OptIn(ExperimentalTestApi::class)
 class UiBuilderRobot(
@@ -24,12 +24,12 @@ class UiBuilderRobot(
 ) {
     context (DesktopComposeUiTest)
     fun dragToCanvas(composeTrait: ComposeTrait) {
-        onAllNodesWithTag("$PaletteTestTag/$composeTrait")
+        onAllNodesWithTag("$PALETTE_TEST_TAG/$composeTrait")
             .onFirst()
             .dragTo(
-                target = onNodeWithTag(DeviceCanvasTestTag),
+                target = onNodeWithTag(DEVICE_CANVAS_TEST_TAG),
             ) {
-                onNodeWithTag("$DeviceCanvasTestTag/${composeTrait.iconText()}").exists()
+                onNodeWithTag("$DEVICE_CANVAS_TEST_TAG/${composeTrait.iconText()}").exists()
             }
     }
 
@@ -38,14 +38,14 @@ class UiBuilderRobot(
         composeTrait: ComposeTrait,
         canvasNode: ComposeTrait,
     ) {
-        onAllNodesWithTag("$PaletteTestTag/${composeTrait.iconText()}")
+        onAllNodesWithTag("$PALETTE_TEST_TAG/${composeTrait.iconText()}")
             .onFirst()
             .dragTo(
-                target = onNodeWithTag(DeviceCanvasTestTag),
+                target = onNodeWithTag(DEVICE_CANVAS_TEST_TAG),
                 targetPointXRatio = 0.1F,
                 targetPointYRatio = 0.1F,
             ) {
-                onNodeWithTag("$DeviceCanvasTestTag/${composeTrait.iconText()}").exists()
+                onNodeWithTag("$DEVICE_CANVAS_TEST_TAG/${composeTrait.iconText()}").exists()
             }
     }
 
@@ -54,53 +54,53 @@ class UiBuilderRobot(
         paletteNode: ComposeTrait,
         canvasNode: ComposeTrait,
     ) {
-        onAllNodesWithTag("$PaletteTestTag/$paletteNode")
+        onAllNodesWithTag("$PALETTE_TEST_TAG/$paletteNode")
             .onFirst()
             .dragTo(
-                target = onNodeWithTag("$DeviceCanvasTestTag/${canvasNode.iconText()}"),
+                target = onNodeWithTag("$DEVICE_CANVAS_TEST_TAG/${canvasNode.iconText()}"),
             ) {
-                onNodeWithTag("$DeviceCanvasTestTag/${canvasNode.iconText()}").exists()
+                onNodeWithTag("$DEVICE_CANVAS_TEST_TAG/${canvasNode.iconText()}").exists()
             }
     }
 
     context(DesktopComposeUiTest)
     fun clickCanvasNode(paletteNode: ComposeTrait) {
-        val paletteSemanticsNode = onNodeWithTag("$DeviceCanvasTestTag/$paletteNode")
+        val paletteSemanticsNode = onNodeWithTag("$DEVICE_CANVAS_TEST_TAG/$paletteNode")
         paletteSemanticsNode
             .performClick()
     }
 
     context(DesktopComposeUiTest)
     fun clickDarkThemeSwitch() {
-        onNodeWithTag(CanvasTopToolbarDarkModeSwitchTestTag)
+        onNodeWithTag(CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG)
             .performClick()
         screenTestRule.coroutinesDispatcherRule.advanceUntilIdle()
     }
 
     context(DesktopComposeUiTest)
     fun clickZoomIn() {
-        onNodeWithTag(CanvasTopToolbarZoomInTestTag)
+        onNodeWithTag(CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG)
             .performClick()
         screenTestRule.coroutinesDispatcherRule.advanceUntilIdle()
     }
 
     context(DesktopComposeUiTest)
     fun clickScreenBuilderTab() {
-        onNodeWithTag(UiBuilderScreenBuilderTabTestTag)
+        onNodeWithTag(UI_BUILDER_SCREEN_BUILDER_TAB_TEST_TAG)
             .performClick()
         screenTestRule.coroutinesDispatcherRule.advanceUntilIdle()
     }
 
     context(DesktopComposeUiTest)
     fun clickToggleTopAppBarButton() {
-        onNodeWithTag(ToggleTopAppBarButtonTestTag)
+        onNodeWithTag(TOGGLE_TOP_APP_BAR_BUTTON_TEST_TAG)
             .performClick()
         screenTestRule.coroutinesDispatcherRule.advanceUntilIdle()
     }
 
     context(DesktopComposeUiTest)
     fun clickToggleNavigationButton() {
-        onNodeWithTag(ToggleNavButtonTestTag)
+        onNodeWithTag(TOGGLE_NAV_BUTTON_TEST_TAG)
             .performClick()
         screenTestRule.coroutinesDispatcherRule.advanceUntilIdle()
     }

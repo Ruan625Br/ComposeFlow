@@ -6,10 +6,10 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 object OperationHistory {
-    private const val operationHistoryCapacity = 50
+    private const val OPERATION_HISTORY_CAPACITY = 50
 
-    private val undoStack: ArrayDeque<UndoableOperation> by dequeLimiter(operationHistoryCapacity)
-    private val redoStack: ArrayDeque<UndoableOperation> by dequeLimiter(operationHistoryCapacity)
+    private val undoStack: ArrayDeque<UndoableOperation> by dequeLimiter(OPERATION_HISTORY_CAPACITY)
+    private val redoStack: ArrayDeque<UndoableOperation> by dequeLimiter(OPERATION_HISTORY_CAPACITY)
 
     fun record(
         project: Project,

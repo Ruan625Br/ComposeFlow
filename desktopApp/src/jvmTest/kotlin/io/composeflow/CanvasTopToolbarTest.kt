@@ -6,8 +6,8 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import io.composeflow.model.parameter.TextTrait
 import io.composeflow.robots.MainViewRobot
 import io.composeflow.robots.UiBuilderRobot
-import io.composeflow.ui.uibuilder.CanvasTopToolbarDarkModeSwitchTestTag
-import io.composeflow.ui.uibuilder.CanvasTopToolbarZoomInTestTag
+import io.composeflow.ui.uibuilder.CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG
+import io.composeflow.ui.uibuilder.CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG
 import org.junit.Rule
 import org.junit.runner.RunWith
 import kotlin.test.Ignore
@@ -36,7 +36,7 @@ class CanvasTopToolbarTest {
                     clickDarkThemeSwitch()
                 }
 
-                captureNode(CanvasTopToolbarDarkModeSwitchTestTag)
+                captureNode(CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG)
             }
         }
     }
@@ -54,7 +54,7 @@ class CanvasTopToolbarTest {
                     clickZoomIn()
                 }
 
-                captureNode(CanvasTopToolbarZoomInTestTag)
+                captureNode(CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG)
             }
         }
     }

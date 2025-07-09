@@ -28,7 +28,7 @@ class FirebaseStorageClient(
     private val clientVersion: String = "webjs/11.3.0",
     private val okHttpClient: OkHttpClient = OkHttpClient(),
     private val ioDispatcher: CoroutineDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         },
 ) {

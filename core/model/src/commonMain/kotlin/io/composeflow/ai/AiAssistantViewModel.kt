@@ -159,7 +159,7 @@ class AiAssistantViewModel(
                     val originalPrompts = state.screenPrompts
                     val updatedPrompts = originalPrompts.toMutableList()
 
-                    val semaphore = Semaphore(permits = maxConcurrentLlmCalls)
+                    val semaphore = Semaphore(permits = MAX_CONCURRENT_LLM_CALLS)
 
                     val jobs =
                         originalPrompts.mapIndexed { index, prompt ->
@@ -225,7 +225,7 @@ class AiAssistantViewModel(
                                                         errorMessage = e.message ?: "Unknown error",
                                                     )
                                             }
-                                        } while (result is CreateScreenResponse.Error && retryCount < maxRetryCount)
+                                        } while (result is CreateScreenResponse.Error && retryCount < MAX_RETRY_COUNT)
 
                                         when (result) {
                                             is CreateScreenResponse.Success -> {
@@ -324,7 +324,7 @@ class AiAssistantViewModel(
                         prompt =
                             "${result.errorMessage}. Fix the yaml parse error. Previously generated Yaml: ${result.errorContent}"
                     }
-                } while (result is CreateScreenResponse.Error && retryCount < maxRetryCount)
+                } while (result is CreateScreenResponse.Error && retryCount < MAX_RETRY_COUNT)
 
                 when (result) {
                     is CreateScreenResponse.Success -> {

@@ -182,9 +182,9 @@ sealed interface ComposeTrait : PaletteDraggable {
         }
 
     companion object {
-        const val NumOfItemsInLazyList = 1
-        const val NumOfItemsInPager = 1
-        const val NumOfDefaultTabs = 3
+        const val NUM_OF_ITEMS_IN_LAZY_LIST = 1
+        const val NUM_OF_ITEMS_IN_PAGER = 1
+        const val NUM_OF_DEFAULT_TABS = 3
     }
 }
 

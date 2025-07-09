@@ -21,6 +21,7 @@ import io.composeflow.custom.composeflowicons.NounAi
 import io.composeflow.keyboard.getCtrlKeyStr
 import io.composeflow.ui.Tooltip
 import io.composeflow.ui.modifier.hoverIconClickable
+import io.composeflow.ui.toolbar.TOOLBAR_TEST_TAG
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -32,7 +33,7 @@ fun LeftToolbar(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
             modifier
-                .testTag(ToolbarTestTag),
+                .testTag(TOOLBAR_TEST_TAG),
     ) {
         Spacer(Modifier.width(32.dp))
 

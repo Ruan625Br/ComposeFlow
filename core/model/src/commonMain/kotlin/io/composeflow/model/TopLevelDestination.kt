@@ -6,14 +6,14 @@ import androidx.compose.material.icons.outlined.FlashOn
 import androidx.compose.material.icons.outlined.ZoomIn
 import androidx.compose.ui.graphics.vector.ImageVector
 
-const val uiBuilderRoute = "ui_builder_route"
-const val dataTypeEditorRoute = "datatype_editor_route"
-const val appStateEditorRoute = "appstate_editor_route"
-const val firestoreEditorRoute = "firestore_editor_route"
-const val apiEditorRoute = "api_editor_route"
-const val themeEditorRoute = "theme_editor_route"
-const val assetEditorRoute = "asset_editor_route"
-const val settingsRoute = "settings_route"
+const val UI_BUILDER_ROUTE = "ui_builder_route"
+const val DATA_TYPE_EDITOR_ROUTE = "datatype_editor_route"
+const val APP_STATE_EDITOR_ROUTE = "appstate_editor_route"
+const val FIRESTORE_EDITOR_ROUTE = "firestore_editor_route"
+const val API_EDITOR_ROUTE = "api_editor_route"
+const val THEME_EDITOR_ROUTE = "theme_editor_route"
+const val ASSET_EDITOR_ROUTE = "asset_editor_route"
+const val SETTINGS_ROUTE = "settings_route"
 
 enum class TopLevelDestination(
     val iconPath: String,
@@ -23,42 +23,42 @@ enum class TopLevelDestination(
     UiBuilder(
         "icons/editFolder.svg",
         "UI Builder",
-        uiBuilderRoute,
+        UI_BUILDER_ROUTE,
     ),
     DataTypeEditor(
         "icons/dataColumn.svg",
         "Data type",
-        dataTypeEditorRoute,
+        DATA_TYPE_EDITOR_ROUTE,
     ),
     AppStateEditor(
         "icons/dbms.svg",
         "App State",
-        appStateEditorRoute,
+        APP_STATE_EDITOR_ROUTE,
     ),
     FirestoreEditor(
         "icons/cloud_firestore.svg",
         "Firestore",
-        firestoreEditorRoute,
+        FIRESTORE_EDITOR_ROUTE,
     ),
     ApiEditor(
         "icons/http_requests_filetype.svg",
         "API editor",
-        apiEditorRoute,
+        API_EDITOR_ROUTE,
     ),
     ThemeEditor(
         "icons/colors.svg",
         "Theme editor",
-        themeEditorRoute,
+        THEME_EDITOR_ROUTE,
     ),
     AssetEditor(
         "icons/assets.svg",
         "Assets",
-        assetEditorRoute,
+        ASSET_EDITOR_ROUTE,
     ),
     Settings(
         "icons/settings.svg",
         "Settings",
-        settingsRoute,
+        SETTINGS_ROUTE,
     ),
 }
 

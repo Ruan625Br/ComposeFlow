@@ -17,7 +17,7 @@ import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.ParameterId
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.model.project.component.componentKeyName
+import io.composeflow.model.project.component.COMPONENT_KEY_NAME
 import io.composeflow.model.project.findComponentOrNull
 import io.composeflow.model.project.findParameterOrThrow
 import io.composeflow.model.property.AssignableProperty
@@ -132,7 +132,7 @@ data class ComponentTrait(
         )
         val componentInvocationCount = context.componentCountMap[component.name] ?: 0
         context.componentCountMap[component.name] = componentInvocationCount + 1
-        codeBlockBuilder.addStatement("$componentKeyName = \"${component.name}-$componentInvocationCount\"")
+        codeBlockBuilder.addStatement("$COMPONENT_KEY_NAME = \"${component.name}-$componentInvocationCount\"")
         codeBlockBuilder.addStatement(")")
         return codeBlockBuilder.build()
     }

@@ -18,11 +18,11 @@ class DependencyInjectionRule(
 ) : TestWatcher() {
     override fun starting(description: Description) {
         ServiceLocator.putWithKey(
-            key = ServiceLocator.KeyIoDispatcherCoroutineScope,
+            key = ServiceLocator.KEY_IO_DISPATCHER_COROUTINE_SCOPE,
             value = CoroutineScope(coroutinesDispatcherRule.standardTestDispatcher + SupervisorJob()),
         )
         ServiceLocator.putWithKey(
-            key = ServiceLocator.KeyDeafultDispatcher,
+            key = ServiceLocator.KEY_DEFAULT_DISPATCHER,
             value = coroutinesDispatcherRule.standardTestDispatcher,
         )
         ServiceLocator.put<DataStore<Preferences>>(

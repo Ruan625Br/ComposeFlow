@@ -1,6 +1,6 @@
 package io.composeflow.ui.firestore
 
-import io.composeflow.model.firestoreEditorRoute
+import io.composeflow.model.FIRESTORE_EDITOR_ROUTE
 import io.composeflow.model.project.Project
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
@@ -10,7 +10,7 @@ fun RouteBuilder.firestoreEditorScreen(
     navTransition: NavTransition? = null,
 ) {
     scene(
-        route = firestoreEditorRoute,
+        route = FIRESTORE_EDITOR_ROUTE,
         navTransition = navTransition,
     ) {
         FirestoreEditorScreen(project = project)

@@ -160,14 +160,14 @@ fun NavigationSuiteScaffoldLayout(
     Layout({
         // Wrap the navigation suite and content composables each in a Box to not propagate the
         // parent's (Surface) min constraints to its children (see b/312664933).
-        Box(Modifier.layoutId(NavigationSuiteLayoutIdTag)) { navigationSuite() }
-        Box(Modifier.layoutId(ContentLayoutIdTag)) { content() }
+        Box(Modifier.layoutId(NAVIGATION_SUITE_LAYOUT_ID_TAG)) { navigationSuite() }
+        Box(Modifier.layoutId(CONTENT_LAYOUT_ID_TAG)) { content() }
     }) { measurables, constraints ->
         val looseConstraints = constraints.copy(minWidth = 0, minHeight = 0)
         // Find the navigation suite composable through it's layoutId tag
         val navigationPlaceable =
             measurables
-                .fastFirst { it.layoutId == NavigationSuiteLayoutIdTag }
+                .fastFirst { it.layoutId == NAVIGATION_SUITE_LAYOUT_ID_TAG }
                 .measure(looseConstraints)
         val isNavigationBar = layoutType == NavigationSuiteType.NavigationBar
         val layoutHeight = constraints.maxHeight
@@ -175,7 +175,7 @@ fun NavigationSuiteScaffoldLayout(
         // Find the content composable through it's layoutId tag
         val contentPlaceable =
             measurables
-                .fastFirst { it.layoutId == ContentLayoutIdTag }
+                .fastFirst { it.layoutId == CONTENT_LAYOUT_ID_TAG }
                 .measure(
                     if (isNavigationBar) {
                         constraints.copy(
@@ -636,5 +636,5 @@ private fun NavigationItemIcon(
 
 private val NoWindowInsets = WindowInsets(0, 0, 0, 0)
 
-private const val NavigationSuiteLayoutIdTag = "navigationSuite"
-private const val ContentLayoutIdTag = "content"
+private const val NAVIGATION_SUITE_LAYOUT_ID_TAG = "navigationSuite"
+private const val CONTENT_LAYOUT_ID_TAG = "content"

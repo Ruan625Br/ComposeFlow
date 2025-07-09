@@ -57,7 +57,7 @@ data object TabsTrait : ComposeTrait {
                     ),
                 )
             }
-        for (i in 1..ComposeTrait.NumOfDefaultTabs) {
+        for (i in 1..ComposeTrait.NUM_OF_DEFAULT_TABS) {
             tabContainer.addTab()
         }
         return tabContainer

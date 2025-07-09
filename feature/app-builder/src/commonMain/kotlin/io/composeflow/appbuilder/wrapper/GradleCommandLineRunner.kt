@@ -120,7 +120,7 @@ class GradleCommandLineRunner(
                                     return@forEachLine
                                 }
                                 if (line.hasWebPackMessage() ||
-                                    line.contains(ignoreWarning) ||
+                                    line.contains(IGNORE_WARNING) ||
                                     line.startsWith(
                                         "warning",
                                     )
@@ -182,4 +182,4 @@ private fun String.isJsBrowserRunSuccessful() = hasWebPackMessage() && contains(
 
 private fun String.hasWebPackMessage() = contains("[webpack-dev-server]") || contains("[webpack-dev-middleware]")
 
-private const val ignoreWarning = "warning Ignored scripts due to flag."
+private const val IGNORE_WARNING = "warning Ignored scripts due to flag."

@@ -11,7 +11,7 @@ import co.touchlab.kermit.Severity
 import co.touchlab.kermit.TestLogWriter
 import co.touchlab.kermit.loggerConfigInit
 import com.github.takahirom.roborazzi.DEFAULT_ROBORAZZI_OUTPUT_DIR_PATH
-import io.composeflow.NavigationRailTestTag
+import io.composeflow.NAVIGATION_RAIL_TEST_TAG
 import io.composeflow.ProjectEditorView
 import io.composeflow.ProvideTestPreCompose
 import io.composeflow.TestPreComposeWindowHolder
@@ -19,7 +19,7 @@ import io.composeflow.appbuilder.AppRunner
 import io.composeflow.model.TopLevelDestination
 import io.composeflow.ui.ProvideCloseDialogCallback
 import io.composeflow.ui.ProvideShowDialogCallback
-import io.composeflow.ui.toolbar.ToolbarRunButtonTestTag
+import io.composeflow.ui.toolbar.TOOLBAR_RUN_BUTTON_TEST_TAG
 import io.github.takahirom.roborazzi.captureRoboImage
 import org.jetbrains.jewel.intui.standalone.theme.IntUiTheme
 import kotlin.test.assertTrue
@@ -75,7 +75,7 @@ class MainViewRobot(
                 loggable = Severity.Verbose, // accept everything
             )
         AppRunner.buildLogger = Logger(loggerConfigInit(testLogWriter))
-        onNodeWithTag(ToolbarRunButtonTestTag)
+        onNodeWithTag(TOOLBAR_RUN_BUTTON_TEST_TAG)
             .performClick()
         return testLogWriter.logs
     }
@@ -87,7 +87,7 @@ class MainViewRobot(
     context(DesktopComposeUiTest)
     fun clickNavigationRailItem(topLevelDestination: TopLevelDestination) {
         val navigationRailSemanticsNode =
-            onNodeWithTag("$NavigationRailTestTag/${topLevelDestination.name}")
+            onNodeWithTag("$NAVIGATION_RAIL_TEST_TAG/${topLevelDestination.name}")
         navigationRailSemanticsNode
             .performClick()
     }

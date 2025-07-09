@@ -1,8 +1,8 @@
 package io.composeflow.model.project.datatype
 
 import com.squareup.kotlinpoet.FileSpec
+import io.composeflow.model.datatype.DATA_TYPE_PACKAGE
 import io.composeflow.model.datatype.DataType
-import io.composeflow.model.datatype.DataTypePackage
 import io.composeflow.model.project.Project
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackMutableStateListSerializer
@@ -19,7 +19,7 @@ data class DataTypeHolder(
         dataTypes.map { dataType ->
             dataType.generateDataClassSpec(project)?.let {
                 FileSpec
-                    .builder("${project.packageName}.$DataTypePackage", dataType.className)
+                    .builder("${project.packageName}.$DATA_TYPE_PACKAGE", dataType.className)
                     .addType(it)
                     .build()
             }

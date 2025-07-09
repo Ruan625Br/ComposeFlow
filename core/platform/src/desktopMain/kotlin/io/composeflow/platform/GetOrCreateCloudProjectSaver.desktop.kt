@@ -3,9 +3,9 @@ package io.composeflow.platform
 import co.touchlab.kermit.Logger
 import com.github.michaelbull.result.mapBoth
 import io.composeflow.cloud.storage.GoogleCloudStorageWrapper
+import io.composeflow.datastore.PROJECT_YAML_FILE_NAME
 import io.composeflow.datastore.ProjectSaver
 import io.composeflow.datastore.ProjectYamlNameWithLastModified
-import io.composeflow.datastore.projectYamlFileName
 import io.composeflow.di.ServiceLocator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -17,7 +17,7 @@ actual fun createCloudProjectSaver(cloudStorageWrapper: GoogleCloudStorageWrappe
 class CloudProjectSaverImpl(
     private val cloudStorageWrapper: GoogleCloudStorageWrapper,
     private val ioDispatcher: CoroutineDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         },
 ) : ProjectSaver {
@@ -30,7 +30,7 @@ class CloudProjectSaverImpl(
             .uploadFile(
                 userId = userId,
                 projectId = projectId,
-                fileName = projectYamlFileName,
+                fileName = PROJECT_YAML_FILE_NAME,
                 content = yamlContent,
             ).mapBoth(
                 success = {
@@ -61,7 +61,7 @@ class CloudProjectSaverImpl(
         projectId: String,
     ): ProjectYamlNameWithLastModified? =
         withContext(ioDispatcher) {
-            cloudStorageWrapper.getFile("$userId/$projectId/$projectYamlFileName").mapBoth(
+            cloudStorageWrapper.getFile("$userId/$projectId/$PROJECT_YAML_FILE_NAME").mapBoth(
                 success = {
                     it.contentBytes?.let { contentBytes ->
                         ProjectYamlNameWithLastModified(

@@ -10,7 +10,7 @@ import java.io.File
 
 class LocalAssetSaver(
     private val ioDispatcher: CoroutineDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         },
 ) {

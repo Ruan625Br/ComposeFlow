@@ -3,6 +3,7 @@ package io.composeflow
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.geometry.Size
 import io.composeflow.ai.AiAssistantUiState
+import io.composeflow.model.UI_BUILDER_ROUTE
 import io.composeflow.model.project.Project
 import io.composeflow.ui.apieditor.apiEditorScreen
 import io.composeflow.ui.appstate.appStateEditorScreen
@@ -11,7 +12,6 @@ import io.composeflow.ui.datatype.dataTypeEditorScreen
 import io.composeflow.ui.firestore.firestoreEditorScreen
 import io.composeflow.ui.settings.settingsScreen
 import io.composeflow.ui.themeeditor.themeEditorScreen
-import io.composeflow.ui.uibuilder.uiBuilderRoute
 import io.composeflow.ui.uibuilder.uiBuilderScreen
 import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
@@ -26,7 +26,7 @@ fun ProjectEditorNavHost(
 ) {
     NavHost(
         navigator = navigator,
-        initialRoute = uiBuilderRoute,
+        initialRoute = UI_BUILDER_ROUTE,
     ) {
         uiBuilderScreen(
             project = project,

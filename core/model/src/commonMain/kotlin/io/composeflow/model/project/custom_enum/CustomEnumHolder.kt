@@ -22,7 +22,7 @@ data class CustomEnumHolder(
             enum.generateCustomEnumSpec()?.let {
                 val fileBuilder =
                     FileSpec
-                        .builder("${project.packageName}.$EnumPackage", enum.enumName)
+                        .builder("${project.packageName}.$ENUM_PACKAGE", enum.enumName)
                         .addType(it)
                 fileBuilder.suppressRedundantVisibilityModifier()
                 fileBuilder.build()

@@ -48,9 +48,9 @@ import kotlinx.serialization.json.Json
 import moe.tlaster.precompose.viewmodel.ViewModel
 import org.koin.core.component.KoinComponent
 
-const val appViewModel = "AppViewModel"
-const val screenRoute = "ScreenRoute"
-val screenRouteClass = ClassName(packageName = "", screenRoute)
+const val APP_VIEW_MODEL = "AppViewModel"
+const val SCREEN_ROUTE = "ScreenRoute"
+val screenRouteClass = ClassName(packageName = "", SCREEN_ROUTE)
 
 @Serializable
 @SerialName("ScreenHolder")
@@ -289,7 +289,7 @@ data class ScreenHolder(
         val appFunSpecBuilder = FunSpec.builder("App").addAnnotation(Composable::class)
         appFunSpecBuilder.addStatement(
             """
-    val appViewModel = %M($appViewModel::class)
+    val appViewModel = %M($APP_VIEW_MODEL::class)
     val navController = %M()
     val snackbarHostState = %M { %M() }
     """,
@@ -408,10 +408,10 @@ data class ScreenHolder(
 
     @OptIn(ExperimentalSettingsApi::class)
     fun generateAppViewModel(project: Project): FileSpec {
-        val fileBuilder = FileSpec.builder("", appViewModel)
+        val fileBuilder = FileSpec.builder("", APP_VIEW_MODEL)
         val typeBuilder =
             TypeSpec
-                .classBuilder(appViewModel)
+                .classBuilder(APP_VIEW_MODEL)
                 .superclass(ViewModel::class)
                 .addSuperinterface(KoinComponent::class)
         if (project.globalStateHolder
@@ -489,7 +489,7 @@ data class ScreenHolder(
                 .returns(org.koin.core.module.Module::class)
                 .addCode("return %M {", MemberName("org.koin.dsl", "module"))
 
-        funSpecBuilder.addStatement("factory { %T() } ", ClassName("", appViewModel))
+        funSpecBuilder.addStatement("factory { %T() } ", ClassName("", APP_VIEW_MODEL))
 
         screens.forEach {
             funSpecBuilder.addStatement(
@@ -506,14 +506,14 @@ data class ScreenHolder(
     fun generateScreenRouteFileSpec(project: Project): FileSpec {
         val fileBuilder =
             FileSpec.builder(
-                fileName = screenRoute,
+                fileName = SCREEN_ROUTE,
                 packageName = "",
             )
 
         val routeName = "routeName"
         val screenRouteBuilder =
             TypeSpec
-                .interfaceBuilder(screenRoute)
+                .interfaceBuilder(SCREEN_ROUTE)
                 .addAnnotation(ClassHolder.Kotlinx.Serialization.Serializable)
                 .addModifiers(KModifier.SEALED)
                 .addProperty(PropertySpec.builder(routeName, String::class).build())
@@ -561,7 +561,7 @@ data class ScreenHolder(
                         PropertySpec
                             .builder(routeName, String::class)
                             .addModifiers(KModifier.OVERRIDE)
-                            .initializer("%S", "$screenRoute.${screen.routeName}")
+                            .initializer("%S", "$SCREEN_ROUTE.${screen.routeName}")
                             .build(),
                     )
                 }

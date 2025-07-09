@@ -6,6 +6,8 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import io.composeflow.ON_SCREEN_INITIALLY_LOADED
+import io.composeflow.SCREEN_INITIALLY_LOADED_FLAG
 import io.composeflow.ViewModelConstant
 import io.composeflow.formatter.suppressRedundantVisibilityModifier
 import io.composeflow.kotlinpoet.ComposeEditableContext
@@ -19,8 +21,6 @@ import io.composeflow.model.state.AuthenticatedUserState
 import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolder
-import io.composeflow.onScreenInitiallyLoaded
-import io.composeflow.screenInitiallyLoadedFlag
 import io.composeflow.util.generateUniqueName
 import io.composeflow.util.toKotlinFileName
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -162,12 +162,12 @@ interface CanvasEditable : StateHolder {
             val allProperties = context.getCurrentComposableContext().allProperties()
             val backingFieldName =
                 generateUniqueName(
-                    initial = "_$screenInitiallyLoadedFlag",
+                    initial = "_$SCREEN_INITIALLY_LOADED_FLAG",
                     existing = allProperties.map { it.name }.toSet(),
                 )
             val fieldName =
                 generateUniqueName(
-                    initial = screenInitiallyLoadedFlag,
+                    initial = SCREEN_INITIALLY_LOADED_FLAG,
                     existing = allProperties.map { it.name }.toSet(),
                 )
             context.addProperty(
@@ -190,7 +190,7 @@ interface CanvasEditable : StateHolder {
             )
             context.addFunction(
                 FunSpec
-                    .builder(onScreenInitiallyLoaded)
+                    .builder(ON_SCREEN_INITIALLY_LOADED)
                     .addCode("$backingFieldName.value = true")
                     .build(),
                 dryRun = dryRun,

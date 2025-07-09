@@ -7,7 +7,7 @@ import com.squareup.kotlinpoet.ParameterSpec
 import io.composeflow.asVariableName
 import io.composeflow.editor.validator.FloatValidator
 import io.composeflow.editor.validator.IntValidator
-import io.composeflow.kotlinpoet.kotlinpoetColumnLimit
+import io.composeflow.kotlinpoet.KOTLINPOET_COLUMN_LIMIT
 import io.composeflow.model.parameter.lazylist.LazyListChildParams
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.AssignableProperty
@@ -55,7 +55,7 @@ sealed interface ParameterWrapper<T> {
         override fun defaultValueAsCodeBlock(project: Project): CodeBlock =
             if (defaultValue.contains("\n") ||
                 defaultValue.contains("\r") ||
-                defaultValue.length >= kotlinpoetColumnLimit
+                defaultValue.length >= KOTLINPOET_COLUMN_LIMIT
             ) {
                 // It looks like Kotlinpoet's column limit is hard-coded as 100.
                 // That means a string more than 100 characters can be translated as multiline

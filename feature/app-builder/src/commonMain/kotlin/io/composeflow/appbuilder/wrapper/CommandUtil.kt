@@ -8,7 +8,7 @@ import java.io.BufferedReader
 
 object CommandUtil {
     private val ioDispatcher: CoroutineDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         }
 

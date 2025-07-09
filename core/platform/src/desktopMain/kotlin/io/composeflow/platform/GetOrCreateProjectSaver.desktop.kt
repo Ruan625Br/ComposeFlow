@@ -1,8 +1,8 @@
 package io.composeflow.platform
 
+import io.composeflow.datastore.PROJECT_YAML_FILE_NAME
 import io.composeflow.datastore.ProjectSaver
 import io.composeflow.datastore.ProjectYamlNameWithLastModified
-import io.composeflow.datastore.projectYamlFileName
 import io.composeflow.di.ServiceLocator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -14,7 +14,7 @@ actual fun createLocalProjectSaver(): ProjectSaver = LocalProjectSaverImpl()
 
 class LocalProjectSaverImpl(
     private val ioDispatcher: CoroutineDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         },
 ) : ProjectSaver {
@@ -25,7 +25,7 @@ class LocalProjectSaverImpl(
     ) {
         withContext(ioDispatcher) {
             val projectsDir = prepareProjectDir(userId = userId, projectId = projectId)
-            val file = projectsDir.resolve(projectYamlFileName)
+            val file = projectsDir.resolve(PROJECT_YAML_FILE_NAME)
             file.writeText(yamlContent)
         }
     }
@@ -47,7 +47,7 @@ class LocalProjectSaverImpl(
         projectId: String,
     ): ProjectYamlNameWithLastModified? {
         val projectsDir = prepareProjectDir(userId = userId, projectId = projectId)
-        val file = projectsDir.resolve(projectYamlFileName)
+        val file = projectsDir.resolve(PROJECT_YAML_FILE_NAME)
         if (!file.exists()) {
             return null
         }
@@ -61,7 +61,7 @@ class LocalProjectSaverImpl(
         val userProjectDir = getCacheDir().resolve("projects").resolve(userId)
         return buildList {
             userProjectDir.listFiles()?.toList()?.forEach { projectDir ->
-                if (projectDir.resolve(projectYamlFileName).exists()) {
+                if (projectDir.resolve(PROJECT_YAML_FILE_NAME).exists()) {
                     add(projectDir.name)
                 }
             }

@@ -51,7 +51,7 @@ data class LazyColumnTrait(
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
-    override var defaultChildNumOfItems: Int = ComposeTrait.NumOfItemsInLazyList
+    override var defaultChildNumOfItems: Int = ComposeTrait.NUM_OF_ITEMS_IN_LAZY_LIST
 
     override fun areAllParamsEmpty(): Boolean =
         contentPadding == null &&

@@ -1,6 +1,6 @@
 package io.composeflow.ui.apieditor
 
-import io.composeflow.model.apiEditorRoute
+import io.composeflow.model.API_EDITOR_ROUTE
 import io.composeflow.model.project.Project
 import io.composeflow.ui.apieditor.ui.ApiEditorScreen
 import moe.tlaster.precompose.navigation.RouteBuilder
@@ -11,7 +11,7 @@ fun RouteBuilder.apiEditorScreen(
     navTransition: NavTransition? = null,
 ) {
     scene(
-        route = apiEditorRoute,
+        route = API_EDITOR_ROUTE,
         navTransition = navTransition,
     ) {
         ApiEditorScreen(project = project)

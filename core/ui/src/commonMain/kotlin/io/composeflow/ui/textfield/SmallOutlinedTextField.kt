@@ -131,7 +131,7 @@ fun SmallOutlinedTextField(
     )
 }
 
-private const val DisabledInputOpacity = 0.38f
+private const val DISABLED_INPUT_OPACITY = 0.38f
 
 @Composable
 fun textColor(
@@ -143,7 +143,7 @@ fun textColor(
 
     val targetValue =
         when {
-            !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = DisabledInputOpacity)
+            !enabled -> MaterialTheme.colorScheme.onSurface.copy(alpha = DISABLED_INPUT_OPACITY)
             isError -> MaterialTheme.colorScheme.onSurface
             focused -> MaterialTheme.colorScheme.onSurface
             else -> MaterialTheme.colorScheme.onSurface

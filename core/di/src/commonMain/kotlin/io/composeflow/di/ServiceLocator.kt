@@ -32,7 +32,7 @@ object ServiceLocator {
         map.clear()
     }
 
-    const val KeyIoDispatcherCoroutineScope = "IoDispatcherCoroutineScope"
-    const val KeyDeafultDispatcher = "DispatcherDefault"
-    const val KeyIoDispatcher = "DispatcherIO"
+    const val KEY_IO_DISPATCHER_COROUTINE_SCOPE = "IoDispatcherCoroutineScope"
+    const val KEY_DEFAULT_DISPATCHER = "DispatcherDefault"
+    const val KEY_IO_DISPATCHER = "DispatcherIO"
 }

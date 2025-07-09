@@ -489,15 +489,15 @@ fun UiBuilderScreen(
     }
 }
 
-const val DeviceCanvasTestTag = "DeviceCanvas"
+const val DEVICE_CANVAS_TEST_TAG = "DeviceCanvas"
 
 @Immutable
 data class CanvasAreaUiState(
     val topToolbarUiState: CanvasTopToolbarUiState,
 )
 
-const val ToggleTopAppBarButtonTestTag = "ToggleTopAppBarButton"
-const val ToggleNavButtonTestTag = "ToggleNavButton"
+const val TOGGLE_TOP_APP_BAR_BUTTON_TEST_TAG = "ToggleTopAppBarButton"
+const val TOGGLE_NAV_BUTTON_TEST_TAG = "ToggleNavButton"
 
 @Composable
 private fun LeftPane(
@@ -547,7 +547,7 @@ private fun LeftPane(
                                         modifier = Modifier.size(20.dp),
                                     )
                                 },
-                                modifier = Modifier.testTag(UiBuilderPaletteTabTestTag),
+                                modifier = Modifier.testTag(UI_BUILDER_PALETTE_TAB_TEST_TAG),
                             )
                         }
                         val screenBuilder = "Screen Builder"
@@ -564,7 +564,7 @@ private fun LeftPane(
                                         modifier = Modifier.size(20.dp),
                                     )
                                 },
-                                modifier = Modifier.testTag(UiBuilderScreenBuilderTabTestTag),
+                                modifier = Modifier.testTag(UI_BUILDER_SCREEN_BUILDER_TAB_TEST_TAG),
                             )
                         }
                         val componentPalette = stringResource(Res.string.component)
@@ -591,7 +591,7 @@ private fun LeftPane(
                                         modifier = Modifier.size(18.dp, 20.dp),
                                     )
                                 },
-                                modifier = Modifier.testTag(UiBuilderComponentTabTestTag),
+                                modifier = Modifier.testTag(UI_BUILDER_COMPONENT_TAB_TEST_TAG),
                             )
                         }
                     }
@@ -1013,7 +1013,7 @@ private fun BoxScope.DeviceInCanvas(
     Column(
         modifier =
             Modifier
-                .testTag(DeviceCanvasTestTag)
+                .testTag(DEVICE_CANVAS_TEST_TAG)
                 .width(animatedWidth)
                 .height(animatedHeight)
                 .align(Alignment.Center)
@@ -1216,7 +1216,7 @@ private fun BoxScope.ComponentInCanvas(
     Column(
         modifier =
             Modifier
-                .testTag(DeviceCanvasTestTag)
+                .testTag(DEVICE_CANVAS_TEST_TAG)
                 .wrapContentSize()
                 .width(componentSize.first)
                 .height(componentSize.second)
@@ -1297,7 +1297,7 @@ fun BoxScope.ToggleBottomNavButton(project: Project) {
                     y = (-32).dp,
                 ).size(40.dp, 32.dp)
                 .hoverIconClickable()
-                .testTag(ToggleNavButtonTestTag),
+                .testTag(TOGGLE_NAV_BUTTON_TEST_TAG),
     ) {
         val contentDesc =
             if (project.screenHolder.showNavigation.value) {
@@ -1322,17 +1322,17 @@ fun BoxScope.ToggleBottomNavButton(project: Project) {
     }
 }
 
-const val CanvasTopToolbarTestTag = "CanvasTopToolbar"
-const val CanvasTopToolbarDarkModeSwitchTestTag = "$CanvasTopToolbarTestTag/DarkModeSwitch"
-const val CanvasTopToolbarShowBordersSwitchTestTag = "$CanvasTopToolbarTestTag/ShowBordersSwitch"
-const val CanvasTopToolbarZoomInTestTag = "$CanvasTopToolbarTestTag/ZoomIn"
-const val CanvasTopToolbarZoomOutTestTag = "$CanvasTopToolbarTestTag/ZoomOut"
-const val CanvasTopToolbarPositionAndZoomResetTestTag =
-    "$CanvasTopToolbarTestTag/PositionAndZoomReset"
-const val UiBuilderTabTestTag = "UiBuilderTab"
-const val UiBuilderPaletteTabTestTag = "$UiBuilderTabTestTag/Palette"
-const val UiBuilderComponentTabTestTag = "$UiBuilderTabTestTag/Component"
-const val UiBuilderScreenBuilderTabTestTag = "$UiBuilderTabTestTag/ScreenBuilder"
+const val CANVAS_TOP_TOOLBAR_TEST_TAG = "CanvasTopToolbar"
+const val CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/DarkModeSwitch"
+const val CANVAS_TOP_TOOLBAR_SHOW_BORDERS_SWITCH_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/ShowBordersSwitch"
+const val CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/ZoomIn"
+const val CANVAS_TOP_TOOLBAR_ZOOM_OUT_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/ZoomOut"
+const val CANVAS_TOP_TOOLBAR_POSITION_AND_ZOOM_RESET_TEST_TAG =
+    "$CANVAS_TOP_TOOLBAR_TEST_TAG/PositionAndZoomReset"
+const val UI_BUILDER_TAB_TEST_TAG = "UiBuilderTab"
+const val UI_BUILDER_PALETTE_TAB_TEST_TAG = "$UI_BUILDER_TAB_TEST_TAG/Palette"
+const val UI_BUILDER_COMPONENT_TAB_TEST_TAG = "$UI_BUILDER_TAB_TEST_TAG/Component"
+const val UI_BUILDER_SCREEN_BUILDER_TAB_TEST_TAG = "$UI_BUILDER_TAB_TEST_TAG/ScreenBuilder"
 
 @Immutable
 data class CanvasTopToolbarUiState(
@@ -1359,7 +1359,7 @@ fun CanvasTopToolbar(
         modifier =
             modifier
                 .fillMaxWidth()
-                .testTag(CanvasTopToolbarTestTag)
+                .testTag(CANVAS_TOP_TOOLBAR_TEST_TAG)
                 .padding(
                     horizontal = 32.dp,
                     vertical = 8.dp,
@@ -1389,7 +1389,7 @@ fun CanvasTopToolbar(
                         Icon(
                             modifier =
                                 Modifier
-                                    .testTag(CanvasTopToolbarPositionAndZoomResetTestTag)
+                                    .testTag(CANVAS_TOP_TOOLBAR_POSITION_AND_ZOOM_RESET_TEST_TAG)
                                     .clickable {
                                         onResetZoom()
                                     }.hoverIconClickable()
@@ -1413,7 +1413,7 @@ fun CanvasTopToolbar(
                                     .clickable {
                                         onToolbarZoomScaleChange(canvasScale - 0.1f)
                                     }.fillMaxHeight()
-                                    .testTag(CanvasTopToolbarZoomOutTestTag)
+                                    .testTag(CANVAS_TOP_TOOLBAR_ZOOM_OUT_TEST_TAG)
                                     .wrapContentHeight(Alignment.CenterVertically)
                                     .hoverIconClickable()
                                     .width(40.dp),
@@ -1454,7 +1454,7 @@ fun CanvasTopToolbar(
                                         onToolbarZoomScaleChange(canvasScale + 0.1f)
                                     }.fillMaxHeight()
                                     .wrapContentHeight(Alignment.CenterVertically)
-                                    .testTag(CanvasTopToolbarZoomInTestTag)
+                                    .testTag(CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG)
                                     .hoverIconClickable()
                                     .width(40.dp),
                             text = "+",
@@ -1486,7 +1486,7 @@ fun CanvasTopToolbar(
                     Icon(
                         modifier =
                             Modifier
-                                .testTag(CanvasTopToolbarDarkModeSwitchTestTag)
+                                .testTag(CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG)
                                 .clickable {
                                     toolbarUiState.onDarkModeChanged(!toolbarUiState.isDarkMode)
                                 }.padding(8.dp)
@@ -1522,7 +1522,7 @@ fun CanvasTopToolbar(
                     Icon(
                         modifier =
                             Modifier
-                                .testTag(CanvasTopToolbarShowBordersSwitchTestTag)
+                                .testTag(CANVAS_TOP_TOOLBAR_SHOW_BORDERS_SWITCH_TEST_TAG)
                                 .clickable {
                                     toolbarUiState.onShowBordersChanged(!toolbarUiState.showBorders)
                                 }.padding(8.dp)

@@ -28,7 +28,7 @@ object Factory {
                     .createWithPath(
                         produceFile = { producePath().toPath() },
                         scope =
-                            ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcherCoroutineScope) {
+                            ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER_COROUTINE_SCOPE) {
                                 CoroutineScope(Dispatchers.IO + SupervisorJob())
                             },
                     ).also { dataStore = it }

@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import io.composeflow.di.ServiceLocator
-import io.composeflow.di.ServiceLocator.KeyDeafultDispatcher
+import io.composeflow.di.ServiceLocator.KEY_DEFAULT_DISPATCHER
 import io.composeflow.json.jsonSerializer
 import io.composeflow.platform.getEnvVar
 import io.composeflow.platform.getOrCreateDataStore
@@ -24,7 +24,7 @@ class SettingsRepository(
         getEnvVar("JAVA_HOME")?.let {
             PathSetting.FromEnvVar("JAVA_HOME", it)
         },
-    dispatchers: CoroutineDispatcher = ServiceLocator.getOrPutWithKey(KeyDeafultDispatcher) { Dispatchers.Default },
+    dispatchers: CoroutineDispatcher = ServiceLocator.getOrPutWithKey(KEY_DEFAULT_DISPATCHER) { Dispatchers.Default },
 ) {
     private val scope: CoroutineScope = CoroutineScope(dispatchers)
 

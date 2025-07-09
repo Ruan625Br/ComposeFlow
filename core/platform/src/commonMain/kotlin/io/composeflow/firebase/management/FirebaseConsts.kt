@@ -1,5 +1,5 @@
 package io.composeflow.firebase.management
 
-const val firebaseScope = "https://www.googleapis.com/auth/firebase"
-const val identityToolkitScope = "https://www.googleapis.com/auth/identitytoolkit"
-const val firebaseConsoleUrl = "https://console.firebase.google.com/"
+const val FIREBASE_SCOPE = "https://www.googleapis.com/auth/firebase"
+const val IDENTITY_TOOLKIT_SCOPE = "https://www.googleapis.com/auth/identitytoolkit"
+const val FIREBASE_CONSOLE_URL = "https://console.firebase.google.com/"

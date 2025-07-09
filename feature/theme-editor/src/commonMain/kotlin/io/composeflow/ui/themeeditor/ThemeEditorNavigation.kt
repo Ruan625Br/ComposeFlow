@@ -1,7 +1,7 @@
 package io.composeflow.ui.themeeditor
 
+import io.composeflow.model.THEME_EDITOR_ROUTE
 import io.composeflow.model.project.Project
-import io.composeflow.model.themeEditorRoute
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
 
@@ -10,7 +10,7 @@ fun RouteBuilder.themeEditorScreen(
     navTransition: NavTransition? = null,
 ) {
     scene(
-        route = themeEditorRoute,
+        route = THEME_EDITOR_ROUTE,
         navTransition = navTransition,
     ) {
         ThemeEditorScreen(

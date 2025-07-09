@@ -57,7 +57,7 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-const val PaletteTestTag = "Palette"
+const val PALETTE_TEST_TAG = "Palette"
 
 @Composable
 fun PaletteTab(
@@ -99,7 +99,7 @@ fun PaletteTab(
                 Icon(
                     modifier =
                         Modifier
-                            .testTag("$PaletteTestTag/${paletteDraggable.iconText()}")
+                            .testTag("$PALETTE_TEST_TAG/${paletteDraggable.iconText()}")
                             .draggableFromPalette(
                                 project = project,
                                 paletteNodeCallbacks = paletteNodeCallbacks,

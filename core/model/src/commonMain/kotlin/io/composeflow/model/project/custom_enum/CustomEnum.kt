@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlin.uuid.Uuid
 
-const val EnumPackage = "custom_enum"
+const val ENUM_PACKAGE = "custom_enum"
 
 typealias CustomEnumId = String
 
@@ -28,7 +28,7 @@ data class CustomEnum(
     @Transient
     val enumName = name.asClassName()
 
-    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$EnumPackage", enumName)
+    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$ENUM_PACKAGE", enumName)
 
     fun generateCustomEnumSpec(): TypeSpec? {
         if (values.isEmpty()) return null

@@ -8,7 +8,7 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-const val DefaultNumOfItems = 8
+const val DEFAULT_NUM_OF_ITEMS = 8
 
 @Serializable
 @SerialName("LazyListChildParams")
@@ -18,7 +18,7 @@ sealed interface LazyListChildParams {
     @Serializable
     @SerialName("FixedNumber")
     data class FixedNumber(
-        val numOfItems: Int = ComposeTrait.NumOfItemsInLazyList,
+        val numOfItems: Int = ComposeTrait.NUM_OF_ITEMS_IN_LAZY_LIST,
     ) : LazyListChildParams {
         override fun getNumOfItems(
             project: Project,
@@ -38,7 +38,7 @@ sealed interface LazyListChildParams {
         override fun getNumOfItems(
             project: Project,
             lazyList: ComposeNode,
-        ): Int = DefaultNumOfItems
+        ): Int = DEFAULT_NUM_OF_ITEMS
     }
 
     fun boundsIncludingChildren(

@@ -4,7 +4,7 @@ import io.composeflow.ui.jewel.TitleBarContent
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
 
-const val loginRoute = "login_route"
+const val LOGIN_ROUTE = "login_route"
 
 fun RouteBuilder.loginScreen(
     onGoogleSignInClicked: () -> Unit,
@@ -14,7 +14,7 @@ fun RouteBuilder.loginScreen(
     navTransition: NavTransition? = null,
 ) {
     scene(
-        route = loginRoute,
+        route = LOGIN_ROUTE,
         navTransition = navTransition,
     ) {
         LoginScreen(

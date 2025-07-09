@@ -1,6 +1,6 @@
 package io.composeflow.firebase
 
-import io.composeflow.firebase.management.firebaseConsoleUrl
+import io.composeflow.firebase.management.FIREBASE_CONSOLE_URL
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import org.apache.commons.codec.binary.Base64
@@ -19,7 +19,7 @@ data class AndroidAppMetadata(
     val packageName: String,
     val displayName: String? = null,
 ) {
-    fun buildUrl(): String = "${firebaseConsoleUrl}project/$projectId/settings/general/android:$packageName"
+    fun buildUrl(): String = "${FIREBASE_CONSOLE_URL}project/$projectId/settings/general/android:$packageName"
 }
 
 @Serializable
@@ -50,7 +50,7 @@ data class IosAppMetadata(
     val bundleId: String,
     val displayName: String? = null,
 ) {
-    fun buildUrl(): String = "${firebaseConsoleUrl}project/$projectId/settings/general/ios:$bundleId"
+    fun buildUrl(): String = "${FIREBASE_CONSOLE_URL}project/$projectId/settings/general/ios:$bundleId"
 }
 
 @Serializable
@@ -87,7 +87,7 @@ data class WebAppMetadata(
     val appUrls: List<String>? = null,
     val apiKeyId: String? = null,
 ) {
-    fun buildUrl(): String = "${firebaseConsoleUrl}project/$projectId/settings/general/web:$appId"
+    fun buildUrl(): String = "${FIREBASE_CONSOLE_URL}project/$projectId/settings/general/web:$appId"
 }
 
 @Serializable

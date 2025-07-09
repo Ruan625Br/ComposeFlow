@@ -36,6 +36,8 @@ import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import io.composeflow.ComposeScreenConstant
+import io.composeflow.ON_SCREEN_INITIALLY_LOADED
+import io.composeflow.SCREEN_INITIALLY_LOADED_FLAG
 import io.composeflow.ViewModelConstant
 import io.composeflow.asClassName
 import io.composeflow.asVariableName
@@ -58,9 +60,9 @@ import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.CanvasEditable
 import io.composeflow.model.project.ParameterWrapper
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.SCREEN_ROUTE
 import io.composeflow.model.project.appscreen.ScreenHolder
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.model.project.appscreen.screenRoute
 import io.composeflow.model.project.appscreen.screenRouteClass
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.state.AppState
@@ -72,10 +74,8 @@ import io.composeflow.model.state.StateHolderImpl
 import io.composeflow.model.state.StateHolderType
 import io.composeflow.model.state.StateId
 import io.composeflow.model.state.StateResult
-import io.composeflow.onScreenInitiallyLoaded
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.random
-import io.composeflow.screenInitiallyLoadedFlag
 import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.serializer.yamlSerializer
@@ -482,12 +482,12 @@ data class Screen(
             }
             funSpecBuilder.addCode(
                 """
-                val screenLoaded by $viewModelName.$screenInitiallyLoadedFlag.%M()
+                val screenLoaded by $viewModelName.$SCREEN_INITIALLY_LOADED_FLAG.%M()
                 %M(screenLoaded) {
                     if (screenLoaded) {
                         ${onInitialLoadCodeBlock.build()}
                     } else {
-                        $viewModelName.$onScreenInitiallyLoaded()
+                        $viewModelName.$ON_SCREEN_INITIALLY_LOADED()
                     }
                 }
             """,
@@ -685,7 +685,7 @@ data class Screen(
         val paramsBlock =
             if (parameters.isNotEmpty()) {
                 CodeBlock.builder().add(
-                    "val arguments: $screenRoute.$routeName = %M(backstackEntry)",
+                    "val arguments: $SCREEN_ROUTE.$routeName = %M(backstackEntry)",
                     MemberName("${COMPOSEFLOW_PACKAGE}.util", "toRoute"),
                 )
             } else {
@@ -703,7 +703,7 @@ data class Screen(
             funSpecBuilder
                 .addCode(
                     """
-    %M<$screenRoute.$routeName> { backstackEntry ->
+    %M<$SCREEN_ROUTE.$routeName> { backstackEntry ->
         ${paramsBlock.build()}
         $composableName($paramsPassersString$argumentPassersString)
     }

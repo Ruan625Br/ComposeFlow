@@ -55,7 +55,7 @@ class LlmRepository(
         projectContext: ProjectContext? = null,
     ): CreateScreenResponse =
         withTimeout(5.minutes) {
-            if (retryCount >= maxRetryCount) {
+            if (retryCount >= MAX_RETRY_COUNT) {
                 Logger.e("Failed to generate screen. Tried maximum number of attempts.")
                 throw IllegalStateException("Failed to generate screen. Tried maximum number of attempts.")
             }

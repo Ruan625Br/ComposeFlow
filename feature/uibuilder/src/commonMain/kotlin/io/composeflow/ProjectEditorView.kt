@@ -51,7 +51,7 @@ import org.jetbrains.jewel.ui.component.styling.LocalIconButtonStyle
 import org.jetbrains.jewel.ui.painter.hints.Stroke
 import org.jetbrains.jewel.ui.painter.rememberResourcePainterProvider
 
-const val MainViewTestTag = "MainView"
+const val MAIN_VIEW_TEST_TAG = "MainView"
 
 @Composable
 fun ProjectEditorView(
@@ -59,7 +59,7 @@ fun ProjectEditorView(
     onTitleBarRightContentSet: (TitleBarContent) -> Unit,
     onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
-    Column(modifier = Modifier.testTag(MainViewTestTag)) {
+    Column(modifier = Modifier.testTag(MAIN_VIEW_TEST_TAG)) {
         ProjectEditorContent(
             onTitleBarRightContentSet = onTitleBarRightContentSet,
             onTitleBarLeftContentSet = onTitleBarLeftContentSet,
@@ -68,7 +68,7 @@ fun ProjectEditorView(
     }
 }
 
-const val NavigationRailTestTag = "NavigationRail"
+const val NAVIGATION_RAIL_TEST_TAG = "NavigationRail"
 
 class MainViewUiState(
     val appDarkTheme: Boolean,
@@ -174,7 +174,7 @@ fun ProjectEditorContent(
                                             Modifier
                                                 .size(40.dp)
                                                 .padding(5.dp)
-                                                .testTag("$NavigationRailTestTag/${item.name}"),
+                                                .testTag("$NAVIGATION_RAIL_TEST_TAG/${item.name}"),
                                     ) { state ->
                                         val tint by LocalIconButtonStyle.current.colors.foregroundFor(
                                             state,

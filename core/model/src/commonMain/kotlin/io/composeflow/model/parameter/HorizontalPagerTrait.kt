@@ -31,7 +31,7 @@ import io.composeflow.model.palette.Orientation
 import io.composeflow.model.palette.PagerTraitNode
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
-import io.composeflow.model.parameter.lazylist.DefaultNumOfItems
+import io.composeflow.model.parameter.lazylist.DEFAULT_NUM_OF_ITEMS
 import io.composeflow.model.parameter.lazylist.LazyListChildParams
 import io.composeflow.model.parameter.wrapper.AlignmentVerticalWrapper
 import io.composeflow.model.parameter.wrapper.ColorWrapper
@@ -76,7 +76,7 @@ data class HorizontalPagerTrait(
     // Explicitly extending ComposeTrait so that this class is recognized as a subclass of it.
     // As a result this class is considered as a subclass of ComposeTrait in the jsonschema
 
-    override var defaultChildNumOfItems: Int = ComposeTrait.NumOfItemsInPager
+    override var defaultChildNumOfItems: Int = ComposeTrait.NUM_OF_ITEMS_IN_PAGER
 
     override fun generateParamsCode(): CodeBlock {
         val codeBlockBuilder = CodeBlock.builder()
@@ -164,7 +164,7 @@ data class HorizontalPagerTrait(
             val pagerState =
                 rememberPagerState(
                     pageCount = {
-                        DefaultNumOfItems
+                        DEFAULT_NUM_OF_ITEMS
                     },
                 )
             Box(
@@ -224,7 +224,7 @@ data class HorizontalPagerTrait(
                                 .padding(bottom = 8.dp)
                                 .align(Alignment.BottomCenter),
                     ) {
-                        repeat(DefaultNumOfItems) { index ->
+                        repeat(DEFAULT_NUM_OF_ITEMS) { index ->
                             val isSelected = pagerState.currentPage == index
                             Box(
                                 modifier =

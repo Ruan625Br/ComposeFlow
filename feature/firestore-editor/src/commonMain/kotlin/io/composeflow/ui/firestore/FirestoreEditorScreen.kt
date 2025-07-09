@@ -61,7 +61,7 @@ import io.composeflow.data_type
 import io.composeflow.delete_data_type
 import io.composeflow.editor.validator.KotlinIdentifierValidator.MUST_NOT_BE_EMPTY
 import io.composeflow.editor.validator.ValidateResult
-import io.composeflow.firebase.management.firebaseConsoleUrl
+import io.composeflow.firebase.management.FIREBASE_CONSOLE_URL
 import io.composeflow.firebase_firestore_enable_message
 import io.composeflow.firestore_collection_associate
 import io.composeflow.firestore_collection_associate_description
@@ -69,9 +69,9 @@ import io.composeflow.firestore_collection_delete_data_type_relationship_confirm
 import io.composeflow.firestore_collection_name_warning
 import io.composeflow.firestore_collection_tooltip
 import io.composeflow.model.LocalNavigator
+import io.composeflow.model.SETTINGS_ROUTE
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.firebase.FirebaseAppInfo
-import io.composeflow.model.settingsRoute
 import io.composeflow.open_firebase_console
 import io.composeflow.open_settings
 import io.composeflow.ui.LocalOnAllDialogsClosed
@@ -202,7 +202,7 @@ private fun ConnectWithFirebaseMessage() {
         val openSettings = stringResource(Res.string.open_settings)
         val navigator = LocalNavigator.current
         TextButton(onClick = {
-            navigator.navigate("$settingsRoute?destination=Firebase")
+            navigator.navigate("$SETTINGS_ROUTE?destination=Firebase")
         }) {
             ComposeFlowIcon(
                 imageVector = Icons.AutoMirrored.Outlined.OpenInNew,
@@ -301,7 +301,7 @@ private fun FirebaseFirestoreContent(
     Column(modifier = modifier) {
         TextButton(
             onClick = {
-                openInBrowser(URI("${firebaseConsoleUrl}project/${firebaseAppInfo.firebaseProjectId}/firestore"))
+                openInBrowser(URI("${FIREBASE_CONSOLE_URL}project/${firebaseAppInfo.firebaseProjectId}/firestore"))
             },
             modifier = Modifier.hoverIconClickable(),
         ) {

@@ -14,7 +14,7 @@ object CloudProjectSaverRunner {
     var userId: String? = null
     var projectId: String? = null
     private val ioDispatcher =
-        ServiceLocator.getOrPutWithKey(ServiceLocator.KeyIoDispatcher) {
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
             Dispatchers.IO
         }
 

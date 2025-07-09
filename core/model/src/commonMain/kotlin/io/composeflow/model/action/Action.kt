@@ -44,12 +44,12 @@ import io.composeflow.model.datatype.SingleFilter
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.ParameterId
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.SCREEN_ROUTE
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.model.project.appscreen.screenRoute
 import io.composeflow.model.project.appscreen.screenRouteClass
+import io.composeflow.model.project.component.COMPONENT_KEY_NAME
 import io.composeflow.model.project.component.Component
 import io.composeflow.model.project.component.ComponentId
-import io.composeflow.model.project.component.componentKeyName
 import io.composeflow.model.project.findApiDefinitionOrNull
 import io.composeflow.model.project.findComponentOrNull
 import io.composeflow.model.project.findDataTypeOrNull
@@ -321,7 +321,7 @@ sealed interface Navigation : Action {
                         }
                     }
                 builder.addStatement(
-                    """${argumentName(project)}($screenRoute.${it.routeName}$argString)""",
+                    """${argumentName(project)}($SCREEN_ROUTE.${it.routeName}$argString)""",
                 )
             }
             return builder.build()
@@ -1098,7 +1098,7 @@ data class ShowCustomDialog(
             """
                 %M(
                     ${paramBuilder.build()}
-                    $componentKeyName = "${component.name}-$componentInvocationCount"
+                    $COMPONENT_KEY_NAME = "${component.name}-$componentInvocationCount" 
                 )""",
             component.asMemberName(project),
         )
@@ -1221,7 +1221,7 @@ data class ShowBottomSheet(
             """
                 %M(
                     ${paramBuilder.build()}
-                    $componentKeyName = "${component.name}-$componentInvocationCount"
+                    $COMPONENT_KEY_NAME = "${component.name}-$componentInvocationCount" 
                 )""",
             component.asMemberName(project),
         )

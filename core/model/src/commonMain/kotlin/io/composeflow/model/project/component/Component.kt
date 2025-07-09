@@ -98,7 +98,7 @@ import kotlin.uuid.Uuid
 
 typealias ComponentId = String
 
-const val componentKeyName = "componentKey"
+const val COMPONENT_KEY_NAME = "componentKey"
 
 @Serializable
 @SerialName("Component")
@@ -413,7 +413,7 @@ data class Component(
         funSpecBuilder.addParameter(
             ParameterSpec
                 .builder(
-                    componentKeyName,
+                    COMPONENT_KEY_NAME,
                     String::class.asTypeName().copy(nullable = true),
                 ).defaultValue("null")
                 .build(),
@@ -437,7 +437,7 @@ data class Component(
 
         // "componentKey" should be passed as a function in the Component
         funSpecBuilder.addStatement(
-            "val $viewModelName = %M($viewModelFileName::class, key = $componentKeyName)",
+            "val $viewModelName = %M($viewModelFileName::class, key = $COMPONENT_KEY_NAME)",
             MemberHolder.PreCompose.koinViewModel,
         )
         getStates(project).forEach { state ->

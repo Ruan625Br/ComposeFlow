@@ -315,7 +315,7 @@ data class TextTrait(
     }
 }
 
-private const val defaultPlaceholderText = "This is a placeholder only visible in the editor"
+private const val DEFAULT_PLACEHOLDER_TEXT = "This is a placeholder only visible in the editor"
 
 /**
  * Represents the text only visible in the editor as a placeholder.
@@ -329,6 +329,6 @@ sealed interface PlaceholderText {
     @Serializable
     @SerialName("Used")
     data class Used(
-        val value: StringProperty = StringProperty.StringIntrinsicValue(defaultPlaceholderText),
+        val value: StringProperty = StringProperty.StringIntrinsicValue(DEFAULT_PLACEHOLDER_TEXT),
     ) : PlaceholderText
 }
