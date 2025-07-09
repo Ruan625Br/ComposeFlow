@@ -31,7 +31,6 @@ import io.composeflow.Res
 import io.composeflow.form_factor_compact
 import io.composeflow.form_factor_expanded
 import io.composeflow.form_factor_medium
-import io.composeflow.model.enumwrapper.EnumWrapper
 import io.composeflow.model.enumwrapper.NodeVisibility
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -113,12 +112,12 @@ private fun VisibilityInspectorContent(
                 project = project,
                 items = NodeVisibility.entries,
                 label = "Conditional visibility",
-                selectedIndex = (nodeVisibility as? EnumProperty)?.value?.enumValue()?.ordinal ?: 0,
+                selectedItem = (nodeVisibility as? EnumProperty)?.value,
                 onValueChanged = { _, item ->
                     composeNodeCallbacks.onVisibilityParamsUpdated(
                         node,
                         node.visibilityParams.value.copy(
-                            nodeVisibility = EnumProperty(item as EnumWrapper),
+                            nodeVisibility = EnumProperty(item),
                         ),
                     )
                 },

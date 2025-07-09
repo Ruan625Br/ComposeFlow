@@ -19,6 +19,7 @@ import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.model.project.Project
 import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.propertyeditor.CustomizedDropdownTextDisplayable
+import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.enums.EnumEntries
@@ -384,10 +385,25 @@ enum class TextFieldColorsWrapper : EnumWrapper {
 
 @SerialName("NodeVisibility")
 @Serializable(NodeVisibility.NodeVisibilitySerializer::class)
-enum class NodeVisibility : EnumWrapper {
+enum class NodeVisibility :
+    EnumWrapper,
+    DropdownItem {
     AlwaysVisible,
     Conditional,
     ;
+
+    @Composable
+    override fun asDropdownText(): AnnotatedString =
+        when (this) {
+            AlwaysVisible -> AnnotatedString("Always Visible")
+            Conditional -> AnnotatedString("Conditional")
+        }
+
+    override fun isSameItem(item: Any): Boolean =
+        when (this) {
+            AlwaysVisible -> item == AlwaysVisible
+            Conditional -> item == Conditional
+        }
 
     override fun <E : Enum<E>> entries(): EnumEntries<E> {
         @Suppress("UNCHECKED_CAST")

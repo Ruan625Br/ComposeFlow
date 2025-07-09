@@ -42,7 +42,7 @@ data class VisibilityParams(
         if (visibilityCondition is BooleanProperty.Empty) return emptyList()
         return buildList {
             val transformedValueType = visibilityCondition.transformedValueType(project)
-            if (transformedValueType.isAbleToAssign(ComposeFlowType.BooleanType())) {
+            if (!transformedValueType.isAbleToAssign(ComposeFlowType.BooleanType())) {
                 add(
                     TrackableIssue(
                         destinationContext =
@@ -58,24 +58,26 @@ data class VisibilityParams(
                     ),
                 )
             }
-            visibilityCondition.getAssignableProperties().forEach { property ->
-                val transformedType = property.transformedValueType(project)
-                if (transformedType is ComposeFlowType.UnknownType) {
-                    add(
-                        TrackableIssue(
-                            destinationContext =
-                                DestinationContext.UiBuilderScreen(
-                                    canvasEditableId = canvasEditable.id,
-                                    composeNodeId = composeNode.id,
-                                ),
-                            issue =
-                                Issue.ResolvedToUnknownType(
-                                    property = property,
-                                ),
-                        ),
-                    )
+            visibilityCondition
+                .getAssignableProperties(includeSelf = false)
+                .forEach { property ->
+                    val transformedType = property.transformedValueType(project)
+                    if (transformedType is ComposeFlowType.UnknownType) {
+                        add(
+                            TrackableIssue(
+                                destinationContext =
+                                    DestinationContext.UiBuilderScreen(
+                                        canvasEditableId = canvasEditable.id,
+                                        composeNodeId = composeNode.id,
+                                    ),
+                                issue =
+                                    Issue.ResolvedToUnknownType(
+                                        property = property,
+                                    ),
+                            ),
+                        )
+                    }
                 }
-            }
         }
     }
 

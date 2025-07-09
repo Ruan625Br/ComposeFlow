@@ -27,6 +27,7 @@ inline fun <reified T> BasicDropdownPropertyEditor(
         val text: AnnotatedString? =
             when (it) {
                 is String -> AnnotatedString(it)
+                is AnnotatedString -> it
                 is DropdownTextDisplayable -> it.asDropdownText()
                 is Enum<*> -> AnnotatedString(it.name)
                 else -> null
@@ -46,6 +47,7 @@ inline fun <reified T> BasicDropdownPropertyEditor(
         val text: AnnotatedString? =
             when (it) {
                 is String -> AnnotatedString(it)
+                is AnnotatedString -> it
                 is DropdownTextDisplayable -> it.asDropdownText()
                 is Enum<*> -> AnnotatedString(it.name)
                 else -> null
