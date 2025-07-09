@@ -8,7 +8,8 @@ object AppInitializer {
     fun onApplicationStart() {
         onApplicationStartPlatformSpecific()
         initializeGoogleAuthProvider(
-            credentials = GoogleAuthCredentials(serverId = "OAUTH_CLIENT_ID"), // e.g. client_id where client_type is 3 in google-services.json
+            // e.g. client_id where client_type is 3 in google-services.json
+            credentials = GoogleAuthCredentials(serverId = "OAUTH_CLIENT_ID"),
         )
     }
 }

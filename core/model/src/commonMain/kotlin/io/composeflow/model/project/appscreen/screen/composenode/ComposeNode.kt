@@ -293,6 +293,7 @@ data class ComposeNode(
     @Transient
     var parentNode: ComposeNode? = null
 
+    @Suppress("ktlint:standard:backing-property-naming")
     private val _allChildren: List<ComposeNode>
         get() = children + children.flatMap { it._allChildren }
 
@@ -882,7 +883,7 @@ data class ComposeNode(
     private fun doRecursively(
         level: Int = 0,
         parentNode: ComposeNode? = null,
-        operation: (/* self */ ComposeNode, /* parent */ ComposeNode?, Int) -> Unit,
+        operation: (self: ComposeNode, parent: ComposeNode?, level: Int) -> Unit,
     ) {
         operation(this, parentNode, level)
         val self = this

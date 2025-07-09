@@ -5,6 +5,7 @@ import kotlinx.serialization.json.JsonObject
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
+@Suppress("ktlint:standard:max-line-length")
 class LlmToolJsonTransformerTest {
     @Test
     fun `test transform with example annotation`() {

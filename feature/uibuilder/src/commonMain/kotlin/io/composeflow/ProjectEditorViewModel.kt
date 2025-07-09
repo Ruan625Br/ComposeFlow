@@ -21,6 +21,7 @@ class ProjectEditorViewModel(
 ) : ViewModel() {
     private val _projectUiState: MutableStateFlow<LoadedProjectUiState> =
         MutableStateFlow(LoadedProjectUiState.Loading)
+    val projectUiState: StateFlow<LoadedProjectUiState> = _projectUiState.asStateFlow()
 
     private val _project = MutableStateFlow(Project())
     val project = _project.asStateFlow()

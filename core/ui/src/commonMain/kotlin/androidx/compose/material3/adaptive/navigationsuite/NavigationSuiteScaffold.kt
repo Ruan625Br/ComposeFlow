@@ -397,8 +397,6 @@ value class NavigationSuiteType private constructor(
          * custom behavior. Different `NavigationSuite` implementations will exhibit different
          * behaviors when using this type.
          */
-        //        @get:ExperimentalMaterial3AdaptiveNavigationSuiteApi
-//        @ExperimentalMaterial3AdaptiveNavigationSuiteApi
         @Suppress("OPT_IN_MARKER_ON_WRONG_TARGET")
         val Custom = NavigationSuiteType(description = "Custom")
 

@@ -170,7 +170,6 @@ sealed interface Action {
  */
 @Serializable
 sealed interface ForkedAction : Action {
-
     /**
      * Generate the code block when it's initialized. This accepts the code blocks for both
      * true nodes and false nodes
@@ -328,8 +327,7 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun argumentName(project: Project): String =
-            ComposeScreenConstant.onNavigateToRoute.name
+        override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateToRoute.name
 
         override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
             argumentName(project).let { argumentName ->
@@ -357,8 +355,7 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun isDependent(sourceId: String): Boolean =
-            paramsMap.any { it.value.isDependent(sourceId) }
+        override fun isDependent(sourceId: String): Boolean = paramsMap.any { it.value.isDependent(sourceId) }
 
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
@@ -393,8 +390,7 @@ sealed interface Navigation : Action {
             return builder.build()
         }
 
-        override fun argumentName(project: Project): String =
-            ComposeScreenConstant.onNavigateBack.name
+        override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateBack.name
 
         override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
             argumentName(project).let { argumentName ->
@@ -650,8 +646,7 @@ data class CallApi(
         }
     }
 
-    override fun isDependent(sourceId: String): Boolean =
-        paramsMap.any { it.value.isDependent(sourceId) }
+    override fun isDependent(sourceId: String): Boolean = paramsMap.any { it.value.isDependent(sourceId) }
 
     override fun generateActionTriggerCodeBlock(
         project: Project,
@@ -977,7 +972,7 @@ sealed interface ShowModalWithComponent : ShowModal {
         paramsMap: MutableMap<
             ParameterId,
             AssignableProperty,
-            >,
+        >,
     ): ShowModalWithComponent
 
     fun findComponentOrNull(project: Project): Component? =
@@ -1041,8 +1036,7 @@ data class ShowCustomDialog(
     @Transient
     val dialogOpenVariableName: String = "openCustomDialog",
 ) : ShowModalWithComponent {
-    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent =
-        this.copy(paramsMap = paramsMap)
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent = this.copy(paramsMap = paramsMap)
 
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
         paramsMap.entries.flatMap {
@@ -1157,8 +1151,7 @@ data class ShowBottomSheet(
     @Transient
     val bottomSheetOpenVariableName: String = "openBottomSheet",
 ) : ShowModalWithComponent {
-    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent =
-        this.copy(paramsMap = paramsMap)
+    override fun copy(paramsMap: MutableMap<ParameterId, AssignableProperty>): ShowModalWithComponent = this.copy(paramsMap = paramsMap)
 
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
         paramsMap.entries.flatMap {
@@ -1808,7 +1801,7 @@ sealed interface DateOrTimePicker : Action {
                 composableContext.addComposeFileVariable(
                     id = "$id-$timePickerStateName",
                     initialIdentifier =
-                        timePickerStateName,
+                    timePickerStateName,
                     dryRun = dryRun,
                 )
             val rememberedStateName =
@@ -2013,8 +2006,7 @@ sealed interface Share : Action {
         @Transient
         val uriHandlerName: String = "uriHandler",
     ) : Share {
-        override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
-            url.getDependentComposeNodes(project)
+        override fun getDependentComposeNodes(project: Project): List<ComposeNode> = url.getDependentComposeNodes(project)
 
         override fun generateIssues(project: Project): List<Issue> =
             buildList {

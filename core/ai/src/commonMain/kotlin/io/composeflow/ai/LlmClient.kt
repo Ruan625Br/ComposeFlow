@@ -223,7 +223,9 @@ class LlmClient(
                         } catch (e: SerializationException) {
                             Logger.e("Error during JSON deserialization: ${e.message}")
                             return@withContext invokeHandleGeneralRequest(
-                                promptString = "Original prompt: $promptString. Error: $e. Fix the json parse error. Previously generated Json: $responseBodyString",
+                                promptString =
+                                    "Original prompt: $promptString. Error: $e. Fix the json parse error. " +
+                                        "Previously generated Json: $responseBodyString",
                                 projectContextString = projectContextString,
                                 dispatcher = dispatcher,
                                 retryCount = retryCount + 1,

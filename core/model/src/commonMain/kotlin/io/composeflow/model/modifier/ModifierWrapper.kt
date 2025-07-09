@@ -62,7 +62,8 @@ import kotlin.reflect.full.primaryConstructor
 @Serializable
 @SerialName("ModifierWrapper")
 sealed class ModifierWrapper(
-    @Transient // Doesn't have to be restored because this is a tentative property
+    // Doesn't have to be restored because this is a tentative property
+    @Transient
     val visible: MutableState<Boolean> = mutableStateOf(true),
 ) {
     @Serializable

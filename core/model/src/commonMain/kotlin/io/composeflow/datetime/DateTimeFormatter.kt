@@ -20,6 +20,7 @@ interface PaddingHolder {
     var padding: PaddingWrapper
 }
 
+@Suppress("ktlint:standard:class-naming")
 @Serializable
 sealed interface DateTimeFormatter : DropdownItem {
     fun asFormatter(): DateTimeFormat<LocalDateTime>

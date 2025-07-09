@@ -1,3 +1,5 @@
+@file:Suppress("ktlint:standard:package-name")
+
 package io.composeflow.model.project.custom_enum
 
 import com.squareup.kotlinpoet.FileSpec

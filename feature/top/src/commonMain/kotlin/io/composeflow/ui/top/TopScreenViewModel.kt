@@ -22,9 +22,9 @@ class TopScreenViewModel(
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
     settingsRepository: SettingsRepository = SettingsRepository(),
 ) : ViewModel() {
-    private val _projectUiState: MutableStateFlow<ProjectUiState> =
+    private val _projectListUiState: MutableStateFlow<ProjectUiState> =
         MutableStateFlow(ProjectUiState.HasNotSelected.ProjectListLoading)
-    val projectListUiState: StateFlow<ProjectUiState> = _projectUiState
+    val projectListUiState: StateFlow<ProjectUiState> = _projectListUiState.asStateFlow()
 
     val settings =
         settingsRepository.settings.stateIn(
@@ -37,7 +37,7 @@ class TopScreenViewModel(
         loadProjectList()
 
         viewModelScope.launch {
-            _projectUiState.collect {
+            _projectListUiState.collect {
                 when (it) {
                     is ProjectUiState.HasNotSelected.ProjectListLoaded -> {}
                     ProjectUiState.HasNotSelected.ProjectListLoading -> {}
@@ -53,8 +53,8 @@ class TopScreenViewModel(
 
     private fun loadProjectList() {
         viewModelScope.launch {
-            _projectUiState.value = ProjectUiState.HasNotSelected.ProjectListLoading
-            _projectUiState.value =
+            _projectListUiState.value = ProjectUiState.HasNotSelected.ProjectListLoading
+            _projectListUiState.value =
                 ProjectUiState.HasNotSelected.ProjectListLoaded(
                     projectRepository.loadProjectIdList().map {
                         projectRepository.loadProject(it).asLoadedProjectUiState(it)
@@ -73,7 +73,7 @@ class TopScreenViewModel(
                     projectName = projectName,
                     packageName = packageName,
                 )
-            _projectUiState.value = ProjectUiState.Selected(project)
+            _projectListUiState.value = ProjectUiState.Selected(project)
         }
     }
 
@@ -100,7 +100,7 @@ class TopScreenViewModel(
             }
             projectRepository.updateProject(project)
 
-            _projectUiState.value = ProjectUiState.Selected(project)
+            _projectListUiState.value = ProjectUiState.Selected(project)
         }
     }
 
@@ -112,7 +112,7 @@ class TopScreenViewModel(
     }
 
     fun onProjectSelected(project: Project) {
-        _projectUiState.value = ProjectUiState.Selected(project)
+        _projectListUiState.value = ProjectUiState.Selected(project)
     }
 }
 

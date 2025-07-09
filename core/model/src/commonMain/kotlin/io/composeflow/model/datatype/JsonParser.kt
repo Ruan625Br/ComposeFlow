@@ -163,7 +163,12 @@ class JsonParser(
                                 name = key ?: "",
                                 fieldType =
                                     FieldType.Instant(
-                                        defaultValue = if (includeDefaultValue) element.content.tryToParseToInstant()!! else InstantWrapper(),
+                                        defaultValue =
+                                            if (includeDefaultValue) {
+                                                element.content.tryToParseToInstant()!!
+                                            } else {
+                                                InstantWrapper()
+                                            },
                                     ),
                             ),
                         )
