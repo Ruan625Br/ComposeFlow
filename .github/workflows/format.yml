@@ -1,9 +1,7 @@
 name: Apply Spotless
 
 on:
-  # TODO: We're temporarily disabling spotless on pull requests because applying it creates a large
-  #       number of changes, and we're waiting for the right time to apply it.
-  # pull_request:
+  pull_request:
   workflow_dispatch:
 
 concurrency:
@@ -22,6 +20,10 @@ jobs:
       - uses: ./.github/actions/setup-java
       - name: Apply spotless formatting
         run: ./gradlew --init-script gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
+      - name: Apply spotless formatting (build-logic)
+        run: ./gradlew --project-dir build-logic --init-script ../gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
+      - name: Apply spotless formatting (app-template)
+        run: ./gradlew --project-dir feature/app-builder/app-template --init-script ../../../gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_message: 🤖 Apply Spotless
