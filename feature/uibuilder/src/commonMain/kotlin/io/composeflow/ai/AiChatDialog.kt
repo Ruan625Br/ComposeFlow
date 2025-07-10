@@ -50,6 +50,8 @@ import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
+import io.composeflow.Res
+import io.composeflow.ai_chat_input_placeholder
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.project.Project
 import io.composeflow.ui.modifier.hoverIconClickable
@@ -60,6 +62,7 @@ import kotlinx.datetime.format.DateTimeComponents.Companion.Format
 import kotlinx.datetime.format.Padding
 import kotlinx.datetime.offsetAt
 import moe.tlaster.precompose.viewmodel.viewModel
+import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -133,6 +136,13 @@ fun AiChatDialog(
                     value = textFieldValue,
                     onValueChange = {
                         textFieldValue = it
+                    },
+                    placeholder = {
+                        Text(
+                            stringResource(Res.string.ai_chat_input_placeholder),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.alpha(0.7f),
+                        )
                     },
                     trailingIcon = {
                         Row {
