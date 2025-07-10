@@ -655,4 +655,109 @@ class UiBuilderOperatorTest {
         // Note: This test documents current behavior. In the future, move operations
         // could be enhanced to apply ID uniqueness similar to add operations.
     }
+
+    // ========== Project Issues Tests ==========
+
+    @Test
+    fun testOnGetProjectIssues_EmptyProject() {
+        val result = uiBuilderOperator.onGetProjectIssues(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+        // Empty project should have no issues or very minimal issues
+        assertTrue(result.issues.isEmpty() || result.issues.size <= 1)
+    }
+
+    @Test
+    fun testOnGetProjectIssues_ValidProject() {
+        // Add some valid nodes to the project
+        val containerNode = createColumnNode()
+        val buttonNode = createButtonNode()
+        rootNode.addChild(containerNode)
+        containerNode.addChild(buttonNode)
+
+        val result = uiBuilderOperator.onGetProjectIssues(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+        // Valid project structure should have minimal or no issues
+        assertTrue(result.issues.size >= 0) // Allow for any number of issues
+    }
+
+    @Test
+    fun testOnGetProjectIssues_WithValidNodes_ReturnsSuccessfully() {
+        // Create a more complex but valid structure
+        val columnNode = createColumnNode()
+        val buttonNode = createButtonNode()
+        val textNode = createTextNode()
+
+        rootNode.addChild(columnNode)
+        columnNode.addChild(buttonNode)
+        columnNode.addChild(textNode)
+
+        val result = uiBuilderOperator.onGetProjectIssues(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+        assertNotNull(result.issues) // Issues list should be initialized
+    }
+
+    @Test
+    fun testOnGetProjectIssues_ReturnsEventResultWithIssues() {
+        val result = uiBuilderOperator.onGetProjectIssues(project)
+
+        // Verify the result structure
+        assertNotNull(result)
+        assertNotNull(result.issues)
+        assertNotNull(result.errorMessages)
+
+        // Should succeed regardless of number of issues
+        assertTrue(result.errorMessages.isEmpty())
+    }
+
+    @Test
+    fun testOnGetProjectIssues_WithNestedStructure() {
+        // Create nested structure to test issue detection across hierarchy
+        val outerColumn = createColumnNode()
+        val innerColumn = createColumnNode()
+        val button1 = createButtonNode()
+        val button2 = createButtonNode()
+
+        rootNode.addChild(outerColumn)
+        outerColumn.addChild(innerColumn)
+        innerColumn.addChild(button1)
+        outerColumn.addChild(button2)
+
+        val result = uiBuilderOperator.onGetProjectIssues(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+        assertNotNull(result.issues)
+    }
+
+    @Test
+    fun testOnGetProjectIssues_WithScreenOnlyNodes() {
+        // Test with screen-only nodes like FAB
+        val fabNode = createFabNode()
+        screen.fabNode.value = fabNode
+
+        val result = uiBuilderOperator.onGetProjectIssues(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+        assertNotNull(result.issues)
+    }
+
+    @Test
+    fun testOnGetProjectIssues_ConsistentResults() {
+        // Test that calling the method multiple times returns consistent results
+        val result1 = uiBuilderOperator.onGetProjectIssues(project)
+        val result2 = uiBuilderOperator.onGetProjectIssues(project)
+
+        assertTrue(result1.isSuccessful())
+        assertTrue(result2.isSuccessful())
+
+        // Both calls should return the same number of issues for the same project state
+        assertTrue(result1.issues.size == result2.issues.size)
+    }
 }

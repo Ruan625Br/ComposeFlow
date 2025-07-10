@@ -16,9 +16,13 @@ import io.composeflow.model.project.appscreen.screen.ScreenId
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.not_assignable_to
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 import moe.tlaster.precompose.navigation.Navigator
 import org.jetbrains.compose.resources.stringResource
 
+@Serializable
+@SerialName("TrackableIssue")
 data class TrackableIssue(
     val destinationContext: DestinationContext,
     val issue: Issue,
@@ -32,6 +36,8 @@ data class TrackableIssue(
     }
 }
 
+@Serializable
+@SerialName("Issue")
 sealed interface Issue {
     val destination: NavigatableDestination
 

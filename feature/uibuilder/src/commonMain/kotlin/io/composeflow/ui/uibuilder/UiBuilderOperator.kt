@@ -473,4 +473,32 @@ class UiBuilderOperator {
         }
         return result
     }
+
+    @LlmTool(
+        name = "get_project_issues",
+        description = "Retrieves all current issues in the project including invalid references, type mismatches, configuration problems, and other validation errors. This helps identify and resolve problems in the UI design.",
+    )
+    fun onGetProjectIssues(project: Project): EventResult {
+        val result = EventResult()
+        try {
+            val issues = project.generateTrackableIssues()
+            result.issues.addAll(issues)
+
+            Logger.i { "Found ${issues.size} project issues" }
+            issues.forEach { trackableIssue ->
+                val contextInfo =
+                    when (val context = trackableIssue.destinationContext) {
+                        is io.composeflow.model.project.issue.DestinationContext.UiBuilderScreen ->
+                            "Screen: ${context.canvasEditableId}, Node: ${context.composeNodeId}"
+                        is io.composeflow.model.project.issue.DestinationContext.ApiEditorScreen ->
+                            "API: ${context.apiId}"
+                    }
+                Logger.i { "Issue: $contextInfo - ${trackableIssue.issue.javaClass.simpleName}" }
+            }
+        } catch (e: Exception) {
+            Logger.e(e) { "Error retrieving project issues" }
+            result.errorMessages.add("Error retrieving project issues: ${e.message}")
+        }
+        return result
+    }
 }
