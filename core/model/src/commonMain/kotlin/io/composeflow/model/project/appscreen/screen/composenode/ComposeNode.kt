@@ -20,6 +20,7 @@ import io.composeflow.eachEquals
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.IdMap
 import io.composeflow.model.createNewIdIfNotPresent
+import io.composeflow.model.enumwrapper.NodeVisibility
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.toModifierChain
 import io.composeflow.model.palette.PaletteRenderParams
@@ -52,6 +53,8 @@ import io.composeflow.model.project.findComposeNodeOrThrow
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.issue.TrackableIssue
 import io.composeflow.model.property.AssignableProperty
+import io.composeflow.model.property.BooleanProperty
+import io.composeflow.model.property.EnumProperty
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateId
 import io.composeflow.override.mutableStateListEqualsOverrideOf
@@ -208,6 +211,13 @@ data class ComposeNode(
             if (actionsMap[actionType] == null) {
                 actionsMap[actionType] = mutableStateListOf()
             }
+        }
+
+        // Verify the visibilityCondition. If LLM-generated parameters set some condition, but failed
+        // to set the nodeVisibility
+        if (visibilityParams.value.visibilityCondition !is BooleanProperty.Empty) {
+            visibilityParams.value =
+                visibilityParams.value.copy(nodeVisibility = EnumProperty(value = NodeVisibility.Conditional))
         }
     }
 
