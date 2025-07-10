@@ -1,11 +1,13 @@
 package io.composeflow.ui
 
-import androidx.compose.foundation.TooltipArea
+import androidx.compose.foundation.BasicTooltipBox
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberBasicTooltipState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,7 +20,8 @@ actual fun Tooltip(
     modifier: Modifier,
     content: @Composable () -> Unit,
 ) {
-    TooltipArea(
+    BasicTooltipBox(
+        positionProvider = TooltipDefaults.rememberPlainTooltipPositionProvider(),
         tooltip = {
             ComposeFlowTheme {
                 Text(
@@ -34,7 +37,7 @@ actual fun Tooltip(
                 )
             }
         },
-        delayMillis = 200,
+        state = rememberBasicTooltipState(),
         modifier = modifier,
     ) {
         content()
