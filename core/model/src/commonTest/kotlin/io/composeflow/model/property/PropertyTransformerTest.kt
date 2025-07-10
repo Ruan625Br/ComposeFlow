@@ -626,7 +626,10 @@ class PropertyTransformerTest {
         val assignableProperties = transformer.getAssignableProperties()
         assertEquals(2, assignableProperties.size) // transformer value + self
         assertEquals("test", (assignableProperties[0] as StringProperty.StringIntrinsicValue).value)
-        assertEquals("test", (assignableProperties[1] as StringProperty.StringIntrinsicValue).value) // self
+        assertEquals(
+            "test",
+            (assignableProperties[1] as StringProperty.StringIntrinsicValue).value,
+        ) // self
     }
 
     @Test
@@ -643,7 +646,10 @@ class PropertyTransformerTest {
         // Should contain: nestedProperty + suffix property from its transformer + nested property self + transformer self
         assertEquals(4, assignableProperties.size)
         // Check that all expected values are present, order may vary due to self-inclusion
-        val stringValues = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>().map { it.value }
+        val stringValues =
+            assignableProperties
+                .filterIsInstance<StringProperty.StringIntrinsicValue>()
+                .map { it.value }
         assertEquals(2, stringValues.count { it == "nested" }) // original + self
         assertEquals(2, stringValues.count { it == "suffix" }) // has a self too
     }
@@ -660,8 +666,14 @@ class PropertyTransformerTest {
         assertEquals(4, assignableProperties.size) // mod + equalsTo + their selfs
         assertEquals(5, (assignableProperties[0] as IntProperty.IntIntrinsicValue).value)
         assertEquals(0, (assignableProperties[1] as IntProperty.IntIntrinsicValue).value)
-        assertEquals(5, (assignableProperties[2] as IntProperty.IntIntrinsicValue).value) // mod self
-        assertEquals(0, (assignableProperties[3] as IntProperty.IntIntrinsicValue).value) // equalsTo self
+        assertEquals(
+            5,
+            (assignableProperties[2] as IntProperty.IntIntrinsicValue).value,
+        ) // mod self
+        assertEquals(
+            0,
+            (assignableProperties[3] as IntProperty.IntIntrinsicValue).value,
+        ) // equalsTo self
     }
 
     @Test
@@ -687,7 +699,8 @@ class PropertyTransformerTest {
         // Should contain: modProperty, equalsToProperty, and their nested properties + selfs + transformer self
         assertEquals(8, assignableProperties.size)
         // Check that all expected values are present, order may vary due to self-inclusion
-        val intValues = assignableProperties.filterIsInstance<IntProperty.IntIntrinsicValue>().map { it.value }
+        val intValues =
+            assignableProperties.filterIsInstance<IntProperty.IntIntrinsicValue>().map { it.value }
         // Check that all expected values are present, allowing for self-inclusion effects
         assertTrue(intValues.count { it == 5 } >= 2) // modProperty + self + possible more from transformers
         assertTrue(intValues.count { it == 0 } >= 2) // equalsToProperty + self + possible more
@@ -719,8 +732,12 @@ class PropertyTransformerTest {
         // Should contain: conditionProperty + StringIntrinsicValue from transformer + conditionProperty self + transformer self
         assertEquals(4, assignableProperties.size)
         // Check that all expected values are present, order may vary due to self-inclusion
-        val functionProperties = assignableProperties.filterIsInstance<FunctionScopeParameterProperty>()
-        val stringValues = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>().map { it.value }
+        val functionProperties =
+            assignableProperties.filterIsInstance<FunctionScopeParameterProperty>()
+        val stringValues =
+            assignableProperties
+                .filterIsInstance<StringProperty.StringIntrinsicValue>()
+                .map { it.value }
         assertEquals(2, functionProperties.count { it == conditionProperty }) // includes self
         assertEquals(2, stringValues.count { it == "filtered" }) // has a self too
     }
@@ -742,7 +759,10 @@ class PropertyTransformerTest {
         // Should contain: valueProperty + prefix property from transformer + valueProperty self + transformer self
         assertEquals(4, assignableProperties.size)
         // Check that all expected values are present, order may vary due to self-inclusion
-        val stringValues = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>().map { it.value }
+        val stringValues =
+            assignableProperties
+                .filterIsInstance<StringProperty.StringIntrinsicValue>()
+                .map { it.value }
         assertEquals(2, stringValues.count { it == "searchValue" }) // original + self
         assertEquals(2, stringValues.count { it == "prefix_" }) // has a self too
     }
@@ -759,8 +779,14 @@ class PropertyTransformerTest {
         assertEquals(4, assignableProperties.size) // mod + equalsTo + their selfs
         assertEquals(3.5f, (assignableProperties[0] as FloatProperty.FloatIntrinsicValue).value)
         assertEquals(1.5f, (assignableProperties[1] as FloatProperty.FloatIntrinsicValue).value)
-        assertEquals(3.5f, (assignableProperties[2] as FloatProperty.FloatIntrinsicValue).value) // mod self
-        assertEquals(1.5f, (assignableProperties[3] as FloatProperty.FloatIntrinsicValue).value) // equalsTo self
+        assertEquals(
+            3.5f,
+            (assignableProperties[2] as FloatProperty.FloatIntrinsicValue).value,
+        ) // mod self
+        assertEquals(
+            1.5f,
+            (assignableProperties[3] as FloatProperty.FloatIntrinsicValue).value,
+        ) // equalsTo self
     }
 
     @Test
@@ -792,8 +818,80 @@ class PropertyTransformerTest {
         // Should contain: delimiterProperty + space property from transformer + delimiterProperty self + transformer self
         assertEquals(4, assignableProperties.size)
         // Check that all expected values are present, order may vary due to self-inclusion
-        val stringValues = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>().map { it.value }
+        val stringValues =
+            assignableProperties
+                .filterIsInstance<StringProperty.StringIntrinsicValue>()
+                .map { it.value }
         assertEquals(2, stringValues.count { it == "," }) // original + self
         assertEquals(2, stringValues.count { it == " " }) // has a self too
+    }
+
+    @Test
+    fun testFromIntToString() {
+        val transformer = FromInt.ToString.ToStringValue
+
+        val property = IntProperty.IntIntrinsicValue(42)
+        property.propertyTransformers.add(transformer)
+        val result = property.transformedCodeBlock(project, context, dryRun = false)
+
+        assertEquals(result.toString(), "42.toString()")
+    }
+
+    @Test
+    fun testFromFloatToString() {
+        val transformer = FromFloat.ToString.ToStringValue
+
+        val property = FloatProperty.FloatIntrinsicValue(3.14f)
+        property.propertyTransformers.add(transformer)
+        val result = property.transformedCodeBlock(project, context, dryRun = false)
+
+        assertEquals(result.toString(), "3.14f.toString()")
+    }
+
+    @Test
+    fun testFromListToString() {
+        val transformer = FromList.ToString.ToStringValue(innerType = ComposeFlowType.StringType())
+
+        val stringListState = AppState.StringListAppState(name = "stringList")
+        project.globalStateHolder.addState(stringListState)
+        val property = ValueFromState(readFromStateId = stringListState.id)
+        property.propertyTransformers.add(transformer)
+        val result = property.transformedCodeBlock(project, context, dryRun = false)
+
+        assertEquals(result.toString(), "stringList.toString()")
+    }
+
+    @Test
+    fun testFromListJoinToString() {
+        val transformer =
+            FromList.JoinToString.JoinToStringValue(
+                innerType = ComposeFlowType.StringType(),
+                separator = mutableStateOf(StringProperty.StringIntrinsicValue(", ")),
+            )
+
+        val stringListState = AppState.StringListAppState(name = "stringList")
+        project.globalStateHolder.addState(stringListState)
+        val property = ValueFromState(readFromStateId = stringListState.id)
+        property.propertyTransformers.add(transformer)
+        val result = property.transformedCodeBlock(project, context, dryRun = false)
+
+        assertEquals(result.toString(), "stringList.joinToString(\", \")")
+    }
+
+    @Test
+    fun testFromListJoinToStringWithEmptyList() {
+        val transformer =
+            FromList.JoinToString.JoinToStringValue(
+                innerType = ComposeFlowType.IntType(),
+                separator = mutableStateOf(StringProperty.StringIntrinsicValue("-")),
+            )
+
+        val intListState = AppState.IntListAppState(name = "intList")
+        project.globalStateHolder.addState(intListState)
+        val property = ValueFromState(readFromStateId = intListState.id)
+        property.propertyTransformers.add(transformer)
+        val result = property.transformedCodeBlock(project, context, dryRun = false)
+
+        assertEquals(result.toString(), "intList.joinToString(\"-\")")
     }
 }

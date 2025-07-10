@@ -981,6 +981,39 @@ sealed interface FromInt : PropertyTransformer {
     }
 
     @Serializable
+    sealed interface ToString :
+        FromInt,
+        PropertyTransformer {
+        override fun toType(): ComposeFlowType = ComposeFlowType.StringType()
+
+        @Serializable
+        @SerialName("FromIntToString")
+        data object ToStringValue : ToString {
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.toString()"
+
+            override fun transformedCodeBlock(
+                project: Project,
+                input: CodeBlock,
+                context: GenerationContext,
+                dryRun: Boolean,
+            ): CodeBlock {
+                val builder = CodeBlock.builder()
+                builder.add(input)
+                builder.add(".toString()")
+                return builder.build()
+            }
+
+            override fun isDependent(sourceId: String): Boolean = false
+
+            @Composable
+            override fun displayName(): String = stringResource(Res.string.to_string)
+        }
+    }
+
+    @Serializable
     sealed interface ToBoolean :
         FromInt,
         PropertyTransformer {
@@ -1380,6 +1413,7 @@ sealed interface FromInt : PropertyTransformer {
                 ToBoolean.IntGreaterThanOrEqualTo(),
                 ToBoolean.IntGreaterThan(),
                 ToBoolean.IntModEqualsTo(),
+                ToString.ToStringValue,
             )
     }
 }
@@ -1509,6 +1543,39 @@ sealed interface FromFloat : PropertyTransformer {
         }
 
         override fun toType(): ComposeFlowType = ComposeFlowType.FloatType()
+    }
+
+    @Serializable
+    sealed interface ToString :
+        FromFloat,
+        PropertyTransformer {
+        override fun toType(): ComposeFlowType = ComposeFlowType.StringType()
+
+        @Serializable
+        @SerialName("FromFloatToString")
+        data object ToStringValue : ToString {
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.toString()"
+
+            override fun transformedCodeBlock(
+                project: Project,
+                input: CodeBlock,
+                context: GenerationContext,
+                dryRun: Boolean,
+            ): CodeBlock {
+                val builder = CodeBlock.builder()
+                builder.add(input)
+                builder.add(".toString()")
+                return builder.build()
+            }
+
+            override fun isDependent(sourceId: String): Boolean = false
+
+            @Composable
+            override fun displayName(): String = stringResource(Res.string.to_string)
+        }
     }
 
     @Serializable
@@ -1911,6 +1978,7 @@ sealed interface FromFloat : PropertyTransformer {
                 ToBoolean.FloatGreaterThanOrEqualTo(),
                 ToBoolean.FloatGreaterThan(),
                 ToBoolean.FloatModEqualsTo(),
+                ToString.ToStringValue,
             )
     }
 }
@@ -2606,7 +2674,9 @@ sealed interface FromList : PropertyTransformer {
                                             existingProperties.entries
                                                 .firstOrNull {
                                                     it.key == dataField.id
-                                                }?.value ?: dataField.fieldType.type().defaultValue(),
+                                                }?.value ?: dataField.fieldType
+                                                .type()
+                                                .defaultValue(),
                                         label = dataField.variableName,
                                         onValidPropertyChanged = { property, _ ->
                                             existingProperties[dataField.id] = property
@@ -2672,6 +2742,117 @@ sealed interface FromList : PropertyTransformer {
                     }
                 }
             }
+        }
+    }
+
+    @Serializable
+    sealed interface JoinToString :
+        FromList,
+        PropertyTransformer {
+        override fun toType(): ComposeFlowType = ComposeFlowType.StringType()
+
+        @Serializable
+        @SerialName("FromListJoinToString")
+        data class JoinToStringValue(
+            private val innerType: ComposeFlowType,
+            @Serializable(MutableStateSerializer::class)
+            val separator: MutableState<AssignableProperty> =
+                mutableStateOf(StringProperty.StringIntrinsicValue(", ")),
+        ) : JoinToString {
+            override fun getAssignableProperties() = listOf(separator.value) + separator.value.getAssignableProperties()
+
+            override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
+
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.joinToString(${separator.value.transformedValueExpression(project)})"
+
+            override fun transformedCodeBlock(
+                project: Project,
+                input: CodeBlock,
+                context: GenerationContext,
+                dryRun: Boolean,
+            ): CodeBlock {
+                val builder = CodeBlock.builder()
+                builder.add(input)
+                builder.add(".joinToString(")
+                builder.add(separator.value.transformedCodeBlock(project, context, dryRun = dryRun))
+                builder.add(")")
+                separator.value.addReadProperty(project, context, dryRun = dryRun)
+                return builder.build()
+            }
+
+            override fun isDependent(sourceId: String): Boolean = separator.value.isDependent(sourceId)
+
+            @Composable
+            override fun displayName(): String = "Join to String"
+
+            @Composable
+            override fun Editor(
+                project: Project,
+                node: ComposeNode,
+                onTransformerEdited: (transformer: PropertyTransformer) -> Unit,
+                modifier: Modifier,
+            ) {
+                Column(modifier = modifier) {
+                    AssignableEditableTextPropertyEditor(
+                        project = project,
+                        node = node,
+                        acceptableType = ComposeFlowType.StringType(),
+                        label = "Separator",
+                        onValidPropertyChanged = { property, _ ->
+                            separator.value = property
+                            onTransformerEdited(this@JoinToStringValue)
+                        },
+                        onInitializeProperty = {
+                            separator.value = StringProperty.StringIntrinsicValue(", ")
+                            onTransformerEdited(this@JoinToStringValue)
+                        },
+                        initialProperty = separator.value,
+                        modifier = Modifier.padding(vertical = 4.dp),
+                    )
+                }
+            }
+        }
+    }
+
+    @Serializable
+    sealed interface ToString :
+        FromList,
+        PropertyTransformer {
+        override fun toType(): ComposeFlowType = ComposeFlowType.StringType()
+
+        @Serializable
+        @SerialName("FromListToString")
+        data class ToStringValue(
+            private val innerType: ComposeFlowType,
+        ) : ToString {
+            override fun getAssignableProperties() = emptyList<AssignableProperty>()
+
+            override fun fromType(): ComposeFlowType = innerType.copyWith(newIsList = true)
+
+            override fun transformedValueExpression(
+                project: Project,
+                input: String,
+            ): String = "$input.toString()"
+
+            override fun transformedCodeBlock(
+                project: Project,
+                input: CodeBlock,
+                context: GenerationContext,
+                dryRun: Boolean,
+            ): CodeBlock {
+                val builder = CodeBlock.builder()
+                builder.add(input)
+                builder.add(".toString()")
+                return builder.build()
+            }
+
+            override fun isDependent(sourceId: String): Boolean = false
+
+            @Composable
+            override fun displayName(): String = stringResource(Res.string.to_string)
         }
     }
 
@@ -2841,6 +3022,8 @@ sealed interface FromList : PropertyTransformer {
                 ToBoolean.ListContains(innerType.copyWith(newIsList = false)),
                 ToBoolean.IsEmpty(innerType.copyWith(newIsList = false)),
                 ToInt.Size(innerType.copyWith(newIsList = false)),
+                JoinToString.JoinToStringValue(innerType.copyWith(newIsList = false)),
+                ToString.ToStringValue(innerType.copyWith(newIsList = false)),
             )
         }
     }
