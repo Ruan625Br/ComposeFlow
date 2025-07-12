@@ -73,6 +73,10 @@ fun TopScreen(
     onTitleBarRightContentSet: (TitleBarContent) -> Unit,
     onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
+    // To reset the TitleBar content when the user navigates back to top screen
+    onTitleBarLeftContentSet({})
+    onTitleBarRightContentSet({})
+
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel =
         viewModel(
@@ -109,7 +113,10 @@ fun TopScreen(
                                     if (anyDialogShown) {
                                         Modifier
                                             .alpha(0.2f)
-                                            .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                                            .blur(
+                                                8.dp,
+                                                edgeTreatment = BlurredEdgeTreatment.Unbounded,
+                                            )
                                     } else {
                                         Modifier
                                     }
