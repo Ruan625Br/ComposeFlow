@@ -47,6 +47,7 @@ kotlin {
             implementation(kotlin("test-junit"))
             implementation(libs.precompose)
             implementation(libs.precompose.viewmodel)
+            implementation(libs.google.cloud.storage)
         }
         all {
             optInComposeExperimentalApis()
