@@ -48,6 +48,8 @@ import androidx.compose.ui.input.key.isMetaPressed
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import io.composeflow.Res
@@ -127,11 +129,34 @@ fun AiChatDialog(
                     .fillMaxSize()
                     .padding(16.dp),
             ) {
-                var textFieldValue by remember { mutableStateOf("") }
+                var textFieldValue by remember { mutableStateOf(TextFieldValue("")) }
                 val onSendInput = {
-                    viewModel.onSendGeneralRequest(textFieldValue)
-                    textFieldValue = ""
+                    viewModel.onSendGeneralRequest(textFieldValue.text)
+                    textFieldValue = TextFieldValue("")
                 }
+
+                // Helper functions to check if cursor is at text boundaries
+                val isCursorAtTop = textFieldValue.selection.start == 0
+                val isCursorAtBottom = textFieldValue.selection.start == textFieldValue.text.length
+
+                // For multi-line text, check if cursor is on first or last line
+                val lines = textFieldValue.text.lines()
+                val cursorPosition = textFieldValue.selection.start
+                val isOnFirstLine =
+                    if (lines.isEmpty()) {
+                        true
+                    } else {
+                        val firstLineEnd = lines[0].length
+                        cursorPosition <= firstLineEnd
+                    }
+                val isOnLastLine =
+                    if (lines.isEmpty()) {
+                        true
+                    } else {
+                        val lastLineStart = textFieldValue.text.lastIndexOf('\n') + 1
+                        cursorPosition >= lastLineStart
+                    }
+
                 TextField(
                     value = textFieldValue,
                     onValueChange = {
@@ -166,7 +191,7 @@ fun AiChatDialog(
                                         onSendInput()
                                     }
                                 },
-                                enabled = textFieldValue.isNotEmpty() && !aiAssistantUiState.isGenerating.value,
+                                enabled = textFieldValue.text.isNotEmpty() && !aiAssistantUiState.isGenerating.value,
                             ) {
                                 if (aiAssistantUiState.isGenerating.value) {
                                     CircularProgressIndicator(
@@ -192,12 +217,45 @@ fun AiChatDialog(
                                 if (aiAssistantUiState.isGenerating.value) {
                                     Modifier
                                 } else {
-                                    Modifier.onKeyEvent {
-                                        if (it.key == Key.Enter) {
-                                            onSendInput()
-                                            true
-                                        } else {
-                                            false
+                                    Modifier.onKeyEvent { keyEvent ->
+                                        when (keyEvent.key) {
+                                            Key.Enter -> {
+                                                onSendInput()
+                                                true
+                                            }
+                                            Key.DirectionUp -> {
+                                                // Navigate to previous message if cursor is at top line or text field is empty
+                                                if (textFieldValue.text.isEmpty() || (isOnFirstLine && isCursorAtTop)) {
+                                                    val previousMessage = viewModel.navigateToPreviousMessage()
+                                                    if (previousMessage != null) {
+                                                        textFieldValue =
+                                                            TextFieldValue(
+                                                                text = previousMessage,
+                                                                selection = TextRange(previousMessage.length),
+                                                            )
+                                                    }
+                                                    true
+                                                } else {
+                                                    false // Let default behavior handle cursor movement
+                                                }
+                                            }
+                                            Key.DirectionDown -> {
+                                                // Navigate to next message if cursor is at bottom line or text field is empty
+                                                if (textFieldValue.text.isEmpty() || (isOnLastLine && isCursorAtBottom)) {
+                                                    val nextMessage = viewModel.navigateToNextMessage()
+                                                    if (nextMessage != null) {
+                                                        textFieldValue =
+                                                            TextFieldValue(
+                                                                text = nextMessage,
+                                                                selection = TextRange(nextMessage.length),
+                                                            )
+                                                    }
+                                                    true
+                                                } else {
+                                                    false // Let default behavior handle cursor movement
+                                                }
+                                            }
+                                            else -> false
                                         }
                                     }
                                 },

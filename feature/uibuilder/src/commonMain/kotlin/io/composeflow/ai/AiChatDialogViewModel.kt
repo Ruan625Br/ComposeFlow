@@ -39,9 +39,25 @@ class AiChatDialogViewModel(
     private val _messages = MutableStateFlow<List<MessageModel>>(emptyList())
     val messages = _messages.asStateFlow()
 
+    // Message history for navigation
+    private val _messageHistory = MutableStateFlow<List<String>>(emptyList())
+    val messageHistory = _messageHistory.asStateFlow()
+
+    private val _currentHistoryIndex = MutableStateFlow(-1)
+    val currentHistoryIndex = _currentHistoryIndex.asStateFlow()
+
     private var generationJob: Job? = null
 
     fun onSendGeneralRequest(userInput: String) {
+        // Add message to history if it's not empty and not a duplicate of the last entry
+        if (userInput.isNotBlank() &&
+            (messageHistory.value.isEmpty() || messageHistory.value.last() != userInput)
+        ) {
+            _messageHistory.value = _messageHistory.value + userInput
+        }
+        // Reset history index
+        _currentHistoryIndex.value = -1
+
         generationJob =
             viewModelScope.launch {
                 aiAssistantUiState.isGenerating.value = true
@@ -206,6 +222,48 @@ class AiChatDialogViewModel(
                     createdAt = Clock.System.now(),
                 )
         }
+    }
+
+    /**
+     * Navigate to previous message in history (up arrow)
+     * Returns the message to display in the text field, or null if no navigation occurred
+     */
+    fun navigateToPreviousMessage(): String? {
+        val history = messageHistory.value
+        if (history.isEmpty()) return null
+
+        val currentIndex = currentHistoryIndex.value
+        val newIndex =
+            when (currentIndex) {
+                -1 -> history.lastIndex // Start from the most recent message
+                0 -> 0 // Stay at the oldest message
+                else -> currentIndex - 1 // Go to previous message
+            }
+
+        _currentHistoryIndex.value = newIndex
+        return history[newIndex]
+    }
+
+    /**
+     * Navigate to next message in history (down arrow)
+     * Returns the message to display in the text field, or null if no navigation occurred
+     */
+    fun navigateToNextMessage(): String? {
+        val history = messageHistory.value
+        if (history.isEmpty()) return null
+
+        val currentIndex = currentHistoryIndex.value
+        if (currentIndex == -1) return null // Not currently navigating
+
+        val newIndex =
+            if (currentIndex >= history.lastIndex) {
+                -1 // Reset to empty text field
+            } else {
+                currentIndex + 1 // Go to next message
+            }
+
+        _currentHistoryIndex.value = newIndex
+        return if (newIndex == -1) "" else history[newIndex]
     }
 
     private fun saveProject(project: Project) {
