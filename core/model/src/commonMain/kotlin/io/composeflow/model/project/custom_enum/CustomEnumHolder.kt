@@ -4,6 +4,7 @@ package io.composeflow.model.project.custom_enum
 
 import com.squareup.kotlinpoet.FileSpec
 import io.composeflow.formatter.suppressRedundantVisibilityModifier
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.model.project.Project
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackMutableStateListSerializer
@@ -17,17 +18,20 @@ data class CustomEnumHolder(
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val enumList: MutableList<CustomEnum> = mutableStateListEqualsOverrideOf(),
 ) {
-    fun generateEnumFiles(project: Project): List<FileSpec?> =
-        enumList.map { enum ->
-            enum.generateCustomEnumSpec()?.let {
-                val fileBuilder =
-                    FileSpec
-                        .builder("${project.packageName}.$ENUM_PACKAGE", enum.enumName)
-                        .addType(it)
-                fileBuilder.suppressRedundantVisibilityModifier()
-                fileBuilder.build()
+    fun generateEnumFiles(project: Project): List<FileSpecWithDirectory> =
+        enumList
+            .mapNotNull { enum ->
+                enum.generateCustomEnumSpec()?.let {
+                    val fileBuilder =
+                        FileSpec
+                            .builder("${project.packageName}.$ENUM_PACKAGE", enum.enumName)
+                            .addType(it)
+                    fileBuilder.suppressRedundantVisibilityModifier()
+                    fileBuilder.build()
+                }
+            }.map {
+                FileSpecWithDirectory(it)
             }
-        }
 
     fun newCustomEnum(name: String): CustomEnum {
         val newName =

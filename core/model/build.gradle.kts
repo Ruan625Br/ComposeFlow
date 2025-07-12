@@ -42,12 +42,17 @@ kotlin {
             implementation(libs.precompose.viewmodel)
             implementation(libs.precompose.koin)
             implementation(libs.richeditor.compose)
+            implementation(libs.xmlutil.core)
         }
         commonTest.dependencies {
             implementation(kotlin("test-junit"))
             implementation(libs.precompose)
             implementation(libs.precompose.viewmodel)
             implementation(libs.google.cloud.storage)
+        }
+        jvmMain.dependencies {
+            implementation(libs.xmlutil.core.jdk)
+            implementation(libs.xmlutil.serialization.jvm)
         }
         all {
             optInComposeExperimentalApis()

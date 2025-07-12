@@ -45,6 +45,8 @@ import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.cloud.storage.asDateString
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.asset.RemoveResult
+import io.composeflow.model.project.asset.UploadResult
 import io.composeflow.pick_icon_description
 import io.composeflow.remove
 import io.composeflow.remove_asset

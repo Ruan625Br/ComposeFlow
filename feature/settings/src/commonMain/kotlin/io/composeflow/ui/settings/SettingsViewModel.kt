@@ -261,7 +261,10 @@ class SettingsViewModel(
                                         .createAndroidApp(
                                             identifier,
                                             packageName = project.bundleId,
-                                            displayName = FirebaseAppInfo.defaultAppDisplayName(project.name),
+                                            displayName =
+                                                FirebaseAppInfo.defaultAppDisplayName(
+                                                    project.name,
+                                                ),
                                         ).onSuccess {
                                             // Intentionally put some delay because right after creating the
                                             // web app, it doesn't show app in the list result
@@ -292,7 +295,9 @@ class SettingsViewModel(
                                                                             androidApp = appWrapper,
                                                                         )
                                                                     project.firebaseAppInfoHolder.firebaseAppInfo =
-                                                                        firebaseAppInfo.copy(androidApp = appWrapper)
+                                                                        firebaseAppInfo.copy(
+                                                                            androidApp = appWrapper,
+                                                                        )
                                                                     saveProject()
                                                                 }
                                                             }.onFailure {
@@ -393,7 +398,10 @@ class SettingsViewModel(
                                         .createIosApp(
                                             identifier,
                                             bundleId = project.bundleId,
-                                            displayName = FirebaseAppInfo.defaultAppDisplayName(project.name),
+                                            displayName =
+                                                FirebaseAppInfo.defaultAppDisplayName(
+                                                    project.name,
+                                                ),
                                         ).onSuccess {
                                             // Intentionally put some delay because right after creating the
                                             // web app, it doesn't show app in the list result
@@ -566,7 +574,9 @@ class SettingsViewModel(
                                                                             config = config,
                                                                         )
                                                                     _firebaseWebAppApiResultState.value =
-                                                                        FirebaseWebAppApiResultState(webApp = appWrapper)
+                                                                        FirebaseWebAppApiResultState(
+                                                                            webApp = appWrapper,
+                                                                        )
                                                                     project.firebaseAppInfoHolder.firebaseAppInfo =
                                                                         firebaseAppInfo.copy(webApp = appWrapper)
                                                                     saveProject()

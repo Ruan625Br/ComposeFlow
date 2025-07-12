@@ -3,7 +3,6 @@ package io.composeflow.appbuilder
 import co.touchlab.kermit.Logger
 import co.touchlab.kermit.SystemWriter
 import co.touchlab.kermit.loggerConfigInit
-import com.squareup.kotlinpoet.FileSpec
 import io.composeflow.appbuilder.wrapper.AdbWrapper
 import io.composeflow.appbuilder.wrapper.AndroidEmulatorWrapper
 import io.composeflow.appbuilder.wrapper.GradleCommandLineRunner
@@ -13,6 +12,7 @@ import io.composeflow.auth.google.extractClientIdFromGoogleServicesJson
 import io.composeflow.di.ServiceLocator
 import io.composeflow.formatter.Formatter
 import io.composeflow.json.jsonSerializer
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.model.device.Device
 import io.composeflow.model.device.EmulatorStatus
 import io.composeflow.model.device.SimulatorStatus
@@ -48,7 +48,7 @@ object AppRunner {
 
     suspend fun runAndroidApp(
         device: Device.AndroidEmulator,
-        fileSpecs: List<FileSpec?>,
+        fileSpecs: List<FileSpecWithDirectory>,
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
         portNumber: Int,
         packageName: String,
@@ -91,7 +91,7 @@ object AppRunner {
 
     suspend fun runIosApp(
         device: Device.IosSimulator,
-        fileSpecs: List<FileSpec?>,
+        fileSpecs: List<FileSpecWithDirectory>,
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
         packageName: String,
         projectName: String,
@@ -130,7 +130,7 @@ object AppRunner {
     }
 
     suspend fun runJsApp(
-        fileSpecs: List<FileSpec?>,
+        fileSpecs: List<FileSpecWithDirectory>,
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
         packageName: String,
         projectName: String,
@@ -167,7 +167,7 @@ object AppRunner {
     }
 
     fun buildApp(
-        fileSpecs: List<FileSpec?>,
+        fileSpecs: List<FileSpecWithDirectory>,
         packageName: String,
         projectName: String,
         copyInstructions: Map<String, String>,
@@ -198,7 +198,7 @@ object AppRunner {
 
     suspend fun downloadCode(
         project: Project,
-        fileSpecs: List<FileSpec?>,
+        fileSpecs: List<FileSpecWithDirectory>,
         onStatusBarUiStateChanged: (StatusBarUiState) -> Unit,
         packageName: String,
         projectName: String,
@@ -361,23 +361,21 @@ object AppRunner {
 
     private fun addComposeBuilderImplementation(
         appDir: File,
-        fileSpecs: List<FileSpec?>,
+        fileSpecs: List<FileSpecWithDirectory>,
         formatCode: Boolean = true,
     ) {
-        val sharedKotlinDir = appDir.resolve("composeApp/src/commonMain/kotlin/")
         fileSpecs.forEach {
             try {
-                it?.let {
-                    if (formatCode) {
-                        val ktFile =
-                            sharedKotlinDir
-                                .resolve(it.packageName.replace(".", File.separator))
-                                .resolve("${it.name}.kt")
-                        ktFile.parentFile?.mkdirs()
-                        ktFile.writeText(Formatter.format(it))
-                    } else {
-                        it.writeTo(sharedKotlinDir)
-                    }
+                val outputDir = appDir.resolve(it.baseDirectory.directoryName)
+                if (formatCode) {
+                    val ktFile =
+                        outputDir
+                            .resolve(it.fileSpec.packageName.replace(".", File.separator))
+                            .resolve("${it.fileSpec.name}.kt")
+                    ktFile.parentFile?.mkdirs()
+                    ktFile.writeText(Formatter.format(it.fileSpec))
+                } else {
+                    it.fileSpec.writeTo(outputDir)
                 }
             } catch (e: Exception) {
                 Logger.e("Failed to create file: $it", e)
@@ -402,8 +400,6 @@ object AppRunner {
         val appTemplateDir = tempDir.resolve("app-template")
         val settingsGradleKts = tempDir.resolve("app-template").resolve("settings.gradle.kts")
         val buildGradleKts = appTemplateDir.resolve("composeApp").resolve("build.gradle.kts")
-        val mainActivity =
-            appTemplateDir.resolve("composeApp/src/androidMain/kotlin/MainActivity.kt")
         val mainApplication =
             appTemplateDir.resolve("composeApp/src/androidMain/kotlin/MainApplication.kt")
         val stringsXml = appTemplateDir.resolve("composeApp/src/androidMain/res/values/strings.xml")
@@ -418,11 +414,6 @@ object AppRunner {
         )
         replacePackageAndProject(
             file = settingsGradleKts,
-            packageName = packageName,
-            projectName = projectName,
-        )
-        replacePackageAndProject(
-            file = mainActivity,
             packageName = packageName,
             projectName = projectName,
         )
@@ -456,15 +447,6 @@ object AppRunner {
             file = iosXCConfig,
             packageName = packageName,
             projectName = projectName,
-        )
-
-        moveFile(
-            sourceFile = mainActivity,
-            targetFile =
-                appTemplateDir
-                    .resolve("composeApp/src/androidMain/kotlin")
-                    .resolve(packageName.replace(".", "/"))
-                    .resolve("MainActivity.kt"),
         )
         moveFile(
             sourceFile = mainApplication,

@@ -14,6 +14,16 @@ class LocalAssetSaver(
             Dispatchers.IO
         },
 ) {
+    fun isAssetExistLocally(
+        userId: String,
+        projectId: String,
+        blobInfoWrapper: BlobInfoWrapper,
+    ): Boolean {
+        val assetDir = prepareAssetDir(userId, projectId)
+        val file = assetDir.resolve(blobInfoWrapper.fileName)
+        return file.exists()
+    }
+
     suspend fun saveAsset(
         userId: String,
         projectId: String,

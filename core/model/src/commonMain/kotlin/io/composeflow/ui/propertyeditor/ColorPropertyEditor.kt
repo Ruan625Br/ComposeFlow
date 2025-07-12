@@ -70,11 +70,11 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun ColorPropertyEditor(
     label: String,
     initialColor: ColorWrapper?,
-    fallbackColor: Color = Color.Unspecified,
     onColorUpdated: (Color) -> Unit,
     onThemeColorSelected: (Material3ColorWrapper) -> Unit,
     modifier: Modifier = Modifier,
     onColorDeleted: (() -> Unit)? = null,
+    includeThemeColor: Boolean = true,
 ) {
     var dialogOpen by remember { mutableStateOf(false) }
 
@@ -106,10 +106,12 @@ fun ColorPropertyEditor(
                 },
     ) {
         val colorExpression =
-            if (initialColor?.themeColor != null) {
+            if (initialColor == null) {
+                "Unset"
+            } else if (initialColor.themeColor != null) {
                 initialColor.themeColor.colorName
             } else {
-                initialColor?.getColor()?.asString() ?: "Unspecified"
+                initialColor.getColor()?.asString() ?: "Unspecified"
             }
 
         LabeledBorderBox(
@@ -117,7 +119,7 @@ fun ColorPropertyEditor(
             modifier = Modifier.weight(1f),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ColorBox(color = initialColor?.getColor() ?: fallbackColor)
+                ColorBox(color = initialColor?.getColor() ?: Color.Unspecified)
                 Text(
                     text = colorExpression,
                     style = MaterialTheme.typography.labelLarge,
@@ -137,6 +139,8 @@ fun ColorPropertyEditor(
                             tint = MaterialTheme.colorScheme.error,
                         )
                     }
+                } else {
+                    Spacer(Modifier.weight(1f))
                 }
             }
         }
@@ -147,13 +151,13 @@ fun ColorPropertyEditor(
         onAnyDialogIsShown()
         ColorPropertyDialog(
             initialColor = initialColor,
-            fallbackColor = fallbackColor,
             onThemeColorSelected = onThemeColorSelected,
             onColorUpdated = onColorUpdated,
             onCloseClick = {
                 dialogOpen = false
                 onAllDialogsClosed()
             },
+            includeThemeColor = includeThemeColor,
         )
     }
 }
@@ -161,10 +165,10 @@ fun ColorPropertyEditor(
 @Composable
 private fun ColorPropertyDialog(
     initialColor: ColorWrapper?,
-    fallbackColor: Color,
     onThemeColorSelected: (Material3ColorWrapper) -> Unit,
     onColorUpdated: (Color) -> Unit,
     onCloseClick: () -> Unit,
+    includeThemeColor: Boolean,
 ) {
     DialogWindow(
         onCloseRequest = {
@@ -173,7 +177,7 @@ private fun ColorPropertyDialog(
         state =
             rememberDialogState(
                 position = WindowPosition(Alignment.TopCenter),
-                size = DpSize(800.dp, 1060.dp),
+                size = DpSize(800.dp, if (includeThemeColor) 900.dp else 480.dp),
             ),
         title = "Select color",
         undecorated = true,
@@ -188,10 +192,10 @@ private fun ColorPropertyDialog(
         content = {
             ColorPropertyDialogContent(
                 initialColor = initialColor,
-                fallbackColor = fallbackColor,
                 onThemeColorSelected = onThemeColorSelected,
                 onCloseClick = onCloseClick,
                 onColorUpdated = onColorUpdated,
+                includeThemeColor = includeThemeColor,
             )
         },
     )
@@ -200,16 +204,16 @@ private fun ColorPropertyDialog(
 @Composable
 fun ColorPropertyDialogContent(
     initialColor: ColorWrapper?,
-    fallbackColor: Color,
     onThemeColorSelected: (Material3ColorWrapper) -> Unit,
     onCloseClick: () -> Unit,
     onColorUpdated: (Color) -> Unit,
+    includeThemeColor: Boolean,
 ) {
     Surface(
         modifier =
             Modifier
                 .fillMaxSize()
-                .size(width = 760.dp, height = 680.dp),
+                .size(width = 760.dp, height = if (includeThemeColor) 680.dp else 420.dp),
     ) {
         Column(
             modifier =
@@ -221,9 +225,9 @@ fun ColorPropertyDialogContent(
                 modifier = Modifier.padding(bottom = 16.dp),
             )
 
-            val resolvedColor = initialColor?.getColor() ?: fallbackColor
-            var currentColor by remember {
-                mutableStateOf(HsvColor.from(resolvedColor))
+            val resolvedColor = initialColor?.getColor()
+            var currentColor by remember(resolvedColor) {
+                mutableStateOf(HsvColor.from(resolvedColor ?: Color.Unspecified))
             }
 
             Row {
@@ -232,7 +236,7 @@ fun ColorPropertyDialogContent(
                     modifier =
                         Modifier
                             .width(540.dp)
-                            .height(300.dp)
+                            .height(260.dp)
                             .padding(horizontal = 24.dp, vertical = 16.dp),
                     onColorChanged = { hsvColor: HsvColor ->
                         // Triggered when the color changes, do something with the newly picked color here!
@@ -240,68 +244,76 @@ fun ColorPropertyDialogContent(
                     },
                 )
 
-                ColorPreviewInfo(currentColor.toColor().convert(ColorSpaces.Srgb))
+                val previewColor = currentColor.toColor().convert(ColorSpaces.Srgb)
+                ColorPreviewInfo(previewColor)
             }
 
-            LazyVerticalGrid(
-                columns = GridCells.Adaptive(148.dp),
-                modifier = Modifier.weight(1f),
-                contentPadding = PaddingValues(16.dp),
-            ) {
-                item(
-                    span = {
-                        GridItemSpan(maxLineSpan)
-                    },
+            if (includeThemeColor) {
+                LazyVerticalGrid(
+                    columns = GridCells.Adaptive(148.dp),
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(16.dp),
                 ) {
-                    Text(
-                        text = stringResource(Res.string.theme_colors),
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
-                items(
-                    Material3ColorWrapper.entries.toTypedArray(),
-                ) { themeColor ->
-
-                    val borderModifier =
-                        if (initialColor?.themeColor == themeColor) {
-                            Modifier.border(
-                                width = 1.dp,
-                                color = MaterialTheme.colorScheme.tertiary,
-                                shape = RoundedCornerShape(8.dp),
-                            )
-                        } else {
-                            Modifier
-                        }
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier =
-                            borderModifier
-                                .size(
-                                    width = 164.dp,
-                                    height = 64.dp,
-                                ).padding(8.dp)
-                                .background(
-                                    color = themeColor.getAppColor(),
-                                    shape = RoundedCornerShape(8.dp),
-                                ).border(
-                                    width = 1.dp,
-                                    color = MaterialTheme.colorScheme.surfaceVariant,
-                                    shape = RoundedCornerShape(8.dp),
-                                ).clickable {
-                                    onThemeColorSelected(themeColor)
-                                    onCloseClick()
-                                }.hoverIconClickable(),
+                    item(
+                        span = {
+                            GridItemSpan(maxLineSpan)
+                        },
                     ) {
                         Text(
-                            text = themeColor.colorName,
-                            color = themeColor.getTextColor(),
-                            style = MaterialTheme.typography.labelSmall,
-                            modifier =
-                                Modifier
-                                    .padding(start = 8.dp, top = 8.dp, end = 8.dp, bottom = 8.dp),
+                            text = stringResource(Res.string.theme_colors),
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(start = 8.dp),
                         )
+                    }
+                    items(
+                        Material3ColorWrapper.entries.toTypedArray(),
+                    ) { themeColor ->
+
+                        val borderModifier =
+                            if (initialColor?.themeColor == themeColor) {
+                                Modifier.border(
+                                    width = 1.dp,
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                    shape = RoundedCornerShape(8.dp),
+                                )
+                            } else {
+                                Modifier
+                            }
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier =
+                                borderModifier
+                                    .size(
+                                        width = 164.dp,
+                                        height = 64.dp,
+                                    ).padding(8.dp)
+                                    .background(
+                                        color = themeColor.getAppColor(),
+                                        shape = RoundedCornerShape(8.dp),
+                                    ).border(
+                                        width = 1.dp,
+                                        color = MaterialTheme.colorScheme.surfaceVariant,
+                                        shape = RoundedCornerShape(8.dp),
+                                    ).clickable {
+                                        onThemeColorSelected(themeColor)
+                                        onCloseClick()
+                                    }.hoverIconClickable(),
+                        ) {
+                            Text(
+                                text = themeColor.colorName,
+                                color = themeColor.getTextColor(),
+                                style = MaterialTheme.typography.labelSmall,
+                                modifier =
+                                    Modifier
+                                        .padding(
+                                            start = 8.dp,
+                                            top = 8.dp,
+                                            end = 8.dp,
+                                            bottom = 8.dp,
+                                        ),
+                            )
+                        }
                     }
                 }
             }
@@ -399,28 +411,43 @@ fun ColorPropertyEditorPreview_Dark() {
 }
 
 @Composable
-private fun ThemedColorPropertyDialogContentPreview(useDarkTheme: Boolean) {
+private fun ThemedColorPropertyDialogContentPreview(
+    useDarkTheme: Boolean,
+    includeThemeColor: Boolean,
+) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
         ColorPropertyDialogContent(
             initialColor = ColorWrapper(Material3ColorWrapper.PrimaryContainer),
-            fallbackColor = Color.Gray,
             onThemeColorSelected = {},
             onCloseClick = {},
             onColorUpdated = {},
+            includeThemeColor = includeThemeColor,
         )
     }
 }
 
 @Preview
 @Composable
-fun ColorPropertyDialogContentPreview_Light() {
-    ThemedColorPropertyDialogContentPreview(useDarkTheme = false)
+fun ColorPropertyDialogContentPreview_Light_includeThemeColor() {
+    ThemedColorPropertyDialogContentPreview(useDarkTheme = false, includeThemeColor = true)
 }
 
 @Preview
 @Composable
-fun ColorPropertyDialogContentPreview_Dark() {
-    ThemedColorPropertyDialogContentPreview(useDarkTheme = true)
+fun ColorPropertyDialogContentPreview_Light_withoutThemeColor() {
+    ThemedColorPropertyDialogContentPreview(useDarkTheme = false, includeThemeColor = false)
+}
+
+@Preview
+@Composable
+fun ColorPropertyDialogContentPreview_Dark_includeThemeColor() {
+    ThemedColorPropertyDialogContentPreview(useDarkTheme = true, includeThemeColor = true)
+}
+
+@Preview
+@Composable
+fun ColorPropertyDialogContentPreview_Dark_withoutThemeColor() {
+    ThemedColorPropertyDialogContentPreview(useDarkTheme = true, includeThemeColor = false)
 }
 
 @Composable

@@ -22,6 +22,7 @@ allprojects {
         maven("https://maven.pkg.jetbrains.space/public/p/kotlin/dev")
         maven { url = uri("https://repo.gradle.org/gradle/libs-releases") }
         maven { url = uri("https://jitpack.io") }
+        maven { url = uri("https://s01.oss.sonatype.org/content/repositories/releases/") }
         mavenLocal()
     }
 }

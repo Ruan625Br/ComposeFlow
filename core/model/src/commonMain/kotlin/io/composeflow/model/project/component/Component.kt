@@ -44,6 +44,7 @@ import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.ComposeLogo
 import io.composeflow.edit_component
 import io.composeflow.formatter.suppressRedundantVisibilityModifier
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.kotlinpoet.GeneratedPlace
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
@@ -563,7 +564,7 @@ data class Component(
     fun generateCode(
         project: Project,
         context: GenerationContext,
-    ): List<FileSpec?> {
+    ): List<FileSpecWithDirectory> {
         val localContext = context.copy(currentEditable = this)
         // Execute generation first to construct the related dependencies in the GenerationContext
         // by passing dryRun as true
@@ -577,7 +578,7 @@ data class Component(
             context = localContext.copy(generatedPlace = GeneratedPlace.ViewModel),
             dryRun = true,
         )
-        return listOf(
+        return listOfNotNull(
             generateViewModelFileSpec(
                 project,
                 context = localContext.copy(generatedPlace = GeneratedPlace.ViewModel),
@@ -586,6 +587,8 @@ data class Component(
                 project,
                 context = localContext.copy(generatedPlace = GeneratedPlace.ComposeScreen),
             ),
-        )
+        ).map {
+            FileSpecWithDirectory(it)
+        }
     }
 }

@@ -387,6 +387,8 @@ instead of in the canvas.</string>
     <string name="update_value_at_index">Update value at index</string>
     <string name="updated_color_schemes">Updated color schemes</string>
     <string name="updated_fonts">Updated fonts</string>
+    <string name="upload_file">Upload file</string>
+    <string name="upload_failed">Upload failed</string>
     <string name="upload_succeeded">Upload succeeded</string>
     <string name="undo">Undo</string>
     <string name="unselect_all">Unselect all</string>

@@ -1,4 +1,4 @@
-package io.composeflow.ui.asset
+package io.composeflow.model.project.asset
 
 import io.composeflow.cloud.storage.BlobInfoWrapper
 
@@ -11,7 +11,10 @@ sealed interface UploadResult {
         val blobInfoWrapper: BlobInfoWrapper,
     ) : UploadResult
 
-    data object Failure : UploadResult
+    data class Failure(
+        val message: String?,
+        val e: Throwable? = null,
+    ) : UploadResult
 }
 
 sealed interface RemoveResult {
@@ -25,5 +28,8 @@ sealed interface RemoveResult {
         val blobInfoWrapper: BlobInfoWrapper,
     ) : RemoveResult
 
-    data object Failure : RemoveResult
+    data class Failure(
+        val message: String?,
+        val e: Throwable? = null,
+    ) : RemoveResult
 }

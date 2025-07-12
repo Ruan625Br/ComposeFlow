@@ -21,7 +21,7 @@ data class ColorWrapper(
     val color: Color? = null,
 ) {
     @Composable
-    fun getColor(): Color = themeColor?.getAppColor() ?: color!!
+    fun getColor(): Color? = themeColor?.getAppColor() ?: color
 
     fun generateCode(): CodeBlock {
         val builder = CodeBlock.builder()
@@ -31,12 +31,15 @@ data class ColorWrapper(
                 MemberHolder.Material3.MaterialTheme,
             )
         } else {
-            val colorProperty = color!!
             val colorMember = MemberName("androidx.compose.ui.graphics", "Color")
-            builder.add(
-                """%M(${colorProperty.asString()})""",
-                colorMember,
-            )
+            color?.let {
+                builder.add(
+                    """%M(${color.asString()})""",
+                    colorMember,
+                )
+            } ?: run {
+                builder.add("%M.Unspecified", colorMember)
+            }
         }
         return builder.build()
     }

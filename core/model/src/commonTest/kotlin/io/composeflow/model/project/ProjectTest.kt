@@ -96,4 +96,56 @@ class ProjectTest {
         assertEquals("Component1", target.componentHolder.components[0].name)
         assertEquals("Component2", target.componentHolder.components[1].name)
     }
+
+    @Test
+    fun testGenerateWriteFileInstructionsIncludesAndroidManifestWithoutSplashScreen() {
+        val project = Project(name = "test-project")
+
+        // No splash screen enabled
+        val writeInstructions = project.generateWriteFileInstructions()
+
+        // Should still include AndroidManifest.xml
+        assertTrue(writeInstructions.containsKey("composeApp/src/androidMain/AndroidManifest.xml"))
+
+        // Should not include splash screen files
+        assertTrue(!writeInstructions.containsKey("composeApp/src/androidMain/res/values/splash_theme.xml"))
+        assertTrue(!writeInstructions.containsKey("composeApp/src/androidMain/res/drawable/ic_splash_image.xml"))
+
+        // Verify AndroidManifest content
+        val manifestContent = String(writeInstructions["composeApp/src/androidMain/AndroidManifest.xml"]!!, Charsets.UTF_8)
+        assertTrue(manifestContent.contains("<manifest"))
+    }
+
+    @Test
+    fun testGenerateWriteFileInstructionsIncludesAppAssetXml() {
+        val project = Project(name = "test-project")
+
+        // Enable splash screen
+        val testBlobInfo =
+            io.composeflow.cloud.storage.BlobInfoWrapper(
+                blobId =
+                    io.composeflow.cloud.storage
+                        .BlobIdWrapper(bucket = "test", name = "splash", generation = null),
+                fileName = "splash.png",
+                folderName = "test",
+                mediaLink = null,
+                size = 0L,
+            )
+        project.appAssetHolder.splashScreenInfoHolder.androidSplashScreenImageBlobInfo.value = testBlobInfo
+
+        val writeInstructions = project.generateWriteFileInstructions()
+
+        // Should include AndroidManifest and splash screen XML files
+        assertTrue(writeInstructions.containsKey("composeApp/src/androidMain/AndroidManifest.xml"))
+        assertTrue(writeInstructions.containsKey("composeApp/src/androidMain/res/values/splash_theme.xml"))
+        assertTrue(writeInstructions.containsKey("composeApp/src/androidMain/res/drawable/ic_splash_image.xml"))
+
+        // Verify content is properly converted to ByteArray
+        val splashThemeContent = String(writeInstructions["composeApp/src/androidMain/res/values/splash_theme.xml"]!!, Charsets.UTF_8)
+        assertTrue(splashThemeContent.contains("Theme.App.Splash"))
+
+        // Verify AndroidManifest content
+        val manifestContent = String(writeInstructions["composeApp/src/androidMain/AndroidManifest.xml"]!!, Charsets.UTF_8)
+        assertTrue(manifestContent.contains("<manifest"))
+    }
 }

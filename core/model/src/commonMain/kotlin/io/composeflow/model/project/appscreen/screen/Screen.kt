@@ -43,6 +43,7 @@ import io.composeflow.asClassName
 import io.composeflow.asVariableName
 import io.composeflow.cloud.storage.asDateString
 import io.composeflow.formatter.suppressRedundantVisibilityModifier
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.kotlinpoet.GeneratedPlace
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
@@ -328,7 +329,7 @@ data class Screen(
     fun generateCode(
         project: Project,
         context: GenerationContext,
-    ): List<FileSpec?> {
+    ): List<FileSpecWithDirectory> {
         val localContext = context.copy(currentEditable = this)
 
         // Execute generation first to construct the related dependencies in the GenerationContext
@@ -343,7 +344,7 @@ data class Screen(
             context = localContext.copy(generatedPlace = GeneratedPlace.ViewModel),
             dryRun = true,
         )
-        return listOf(
+        return listOfNotNull(
             generateComposeScreenFileSpec(
                 project,
                 context = localContext.copy(generatedPlace = GeneratedPlace.ComposeScreen),
@@ -355,7 +356,9 @@ data class Screen(
                 dryRun = false,
             ),
             generateComposeNavigationFileSpec(project),
-        )
+        ).map {
+            FileSpecWithDirectory(it)
+        }
     }
 
     fun getBottomAppBar(): ComposeNode? = bottomAppBarNode.value

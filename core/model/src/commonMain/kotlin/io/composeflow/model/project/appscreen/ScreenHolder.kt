@@ -20,6 +20,7 @@ import com.squareup.kotlinpoet.TypeSpec
 import io.composeflow.ViewModelConstant
 import io.composeflow.formatter.suppressRedundantVisibilityModifier
 import io.composeflow.kotlinpoet.ClassHolder
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.materialicons.Filled
@@ -223,7 +224,7 @@ data class ScreenHolder(
     fun generateAppNavHostFile(
         project: Project,
         context: GenerationContext,
-    ): FileSpec {
+    ): FileSpecWithDirectory {
         val fileSpecBuilder = FileSpec.builder("", "AppNavHost")
         val funSpecBuilder = FunSpec.builder("AppNavHost").addAnnotation(Composable::class)
         val defaultScreen = screens.first { it.isDefault.value }
@@ -276,10 +277,10 @@ data class ScreenHolder(
         funSpecBuilder.addCode("}")
         fileSpecBuilder.addFunction(funSpecBuilder.build())
         fileSpecBuilder.suppressRedundantVisibilityModifier()
-        return fileSpecBuilder.build()
+        return FileSpecWithDirectory(fileSpecBuilder.build())
     }
 
-    fun generateComposeLauncherFile(): FileSpec {
+    fun generateComposeLauncherFile(): FileSpecWithDirectory {
         val fileBuilder =
             FileSpec
                 .builder("", "App")
@@ -403,11 +404,11 @@ data class ScreenHolder(
         fileBuilder.addFunction(appFunSpecBuilder.build())
         fileBuilder.addType(generateScreenDestinationEnum())
         fileBuilder.suppressRedundantVisibilityModifier()
-        return fileBuilder.build()
+        return FileSpecWithDirectory(fileBuilder.build())
     }
 
     @OptIn(ExperimentalSettingsApi::class)
-    fun generateAppViewModel(project: Project): FileSpec {
+    fun generateAppViewModel(project: Project): FileSpecWithDirectory {
         val fileBuilder = FileSpec.builder("", APP_VIEW_MODEL)
         val typeBuilder =
             TypeSpec
@@ -474,10 +475,10 @@ data class ScreenHolder(
         fileBuilder.addType(typeBuilder.build())
         fileBuilder.suppressRedundantVisibilityModifier()
 
-        return fileBuilder.build()
+        return FileSpecWithDirectory(fileBuilder.build())
     }
 
-    fun generateKoinViewModelModule(project: Project): FileSpec {
+    fun generateKoinViewModelModule(project: Project): FileSpecWithDirectory {
         val fileBuilder =
             FileSpec.builder(
                 fileName = "ViewModelModule",
@@ -500,10 +501,10 @@ data class ScreenHolder(
         funSpecBuilder.addCode("}")
         fileBuilder.addFunction(funSpecBuilder.build())
         fileBuilder.suppressRedundantVisibilityModifier()
-        return fileBuilder.build()
+        return FileSpecWithDirectory(fileBuilder.build())
     }
 
-    fun generateScreenRouteFileSpec(project: Project): FileSpec {
+    fun generateScreenRouteFileSpec(project: Project): FileSpecWithDirectory {
         val fileBuilder =
             FileSpec.builder(
                 fileName = SCREEN_ROUTE,
@@ -570,7 +571,7 @@ data class ScreenHolder(
 
         fileBuilder.addType(screenRouteBuilder.build())
         fileBuilder.suppressRedundantVisibilityModifier()
-        return fileBuilder.build()
+        return FileSpecWithDirectory(fileBuilder.build())
     }
 
     private fun generateScreenDestinationEnum(): TypeSpec {

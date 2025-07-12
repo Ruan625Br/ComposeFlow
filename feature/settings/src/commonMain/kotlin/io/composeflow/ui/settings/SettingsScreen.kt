@@ -30,6 +30,7 @@ import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.model.project.Project
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.modifier.backgroundContainerNeutral
+import io.composeflow.ui.settings.appassets.AppAssetsScreen
 import io.composeflow.ui.settings.firebase.FirebaseApiAppResultState
 import io.composeflow.ui.settings.firebase.FirebaseSettingsContent
 import io.composeflow.ui.settings.preference.PreferencesContent
@@ -109,6 +110,12 @@ fun SettingsScreen(
                                 firebaseApiResultState = firebaseApiResultState,
                                 firebaseApiAppResultState = firebaseApiAppResultState,
                                 settingsCallbacks = settingsCallbacks,
+                            )
+                        }
+
+                        SettingsScreenDestination.AppAssets -> {
+                            AppAssetsScreen(
+                                project = project,
                             )
                         }
                     }

@@ -5,6 +5,7 @@ import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.MemberName
 import io.composeflow.formatter.suppressRedundantVisibilityModifier
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.Project
 import io.composeflow.override.mutableStateListEqualsOverrideOf
@@ -18,7 +19,7 @@ data class ComponentHolder(
     @Serializable(with = FallbackMutableStateListSerializer::class)
     val components: MutableList<Component> = mutableStateListEqualsOverrideOf(),
 ) {
-    fun generateKoinViewModelModule(project: Project): FileSpec {
+    fun generateKoinViewModelModule(project: Project): FileSpecWithDirectory {
         val fileBuilder =
             FileSpec.builder(
                 fileName = "ViewModelModule",
@@ -38,6 +39,6 @@ data class ComponentHolder(
         funSpecBuilder.addCode("}")
         fileBuilder.addFunction(funSpecBuilder.build())
         fileBuilder.suppressRedundantVisibilityModifier()
-        return fileBuilder.build()
+        return FileSpecWithDirectory(fileBuilder.build())
     }
 }

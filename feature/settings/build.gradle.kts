@@ -17,6 +17,7 @@ kotlin {
             implementation(project(":core:serializer"))
             implementation(libs.datastore.core.okio)
             implementation(libs.datastore.preferences.core)
+            implementation(libs.filekit.compose)
             implementation(libs.kotlin.result)
             implementation(libs.precompose)
             implementation(libs.precompose.viewmodel)

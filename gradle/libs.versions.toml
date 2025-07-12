@@ -11,6 +11,7 @@ compose-adaptive-layout = "1.1.1"
 compose-color-picker = "0.7.0"
 compose-multiplatform = "1.8.1"
 compose-navigation = "2.8.0-alpha13"
+core-splashscreen = "1.0.1"
 coroutine = "1.10.2"
 dataStore = "1.1.7"
 gitlive-firebase = "2.1.0"
@@ -39,11 +40,13 @@ reorderable = "0.9.6"
 roborazzi = "1.44.0"
 sentry = "8.13.2"
 testparameterinjector = "1.18"
+xmlutil = "0.90.3"
 
 [libraries]
 # AndroidX
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity-compose" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
 
 # com.google
 kotlin-compile-testing = { module = "com.github.tschuchortdev:kotlin-compile-testing", version.ref = "kotlinCompileTesting" }
@@ -160,6 +163,9 @@ filekit-compose = "io.github.vinceglb:filekit-compose:0.8.8"
 kotlin-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.2"
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 conveyor-control = "dev.hydraulic.conveyor:conveyor-control:1.1"
+xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
+xmlutil-core-jdk = { module = "io.github.pdvrieze.xmlutil:core-jdk", version.ref = "xmlutil" }
+xmlutil-serialization-jvm = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil" }
 
 [plugins]
 roborazzi = { id = "io.github.takahirom.roborazzi", version = "1.44.0" }

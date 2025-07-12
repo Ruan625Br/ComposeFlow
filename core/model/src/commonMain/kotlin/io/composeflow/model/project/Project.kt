@@ -1,11 +1,14 @@
 package io.composeflow.model.project
 
-import com.squareup.kotlinpoet.FileSpec
+import io.composeflow.cloud.storage.BlobInfoWrapper
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.apieditor.ApiDefinition
 import io.composeflow.model.apieditor.ApiId
 import io.composeflow.model.datatype.DataType
 import io.composeflow.model.project.api.ApiHolder
+import io.composeflow.model.project.appassets.AppAssetHolder
+import io.composeflow.model.project.appassets.copyContents
 import io.composeflow.model.project.appscreen.ScreenHolder
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -53,6 +56,7 @@ data class Project(
     val componentHolder: ComponentHolder = ComponentHolder(),
     val themeHolder: ThemeHolder = ThemeHolder(),
     val assetHolder: AssetHolder = AssetHolder(),
+    val appAssetHolder: AppAssetHolder = AppAssetHolder(),
     val stringResourceHolder: StringResourceHolder = StringResourceHolder(),
     val firebaseAppInfoHolder: FirebaseAppInfoHolder = FirebaseAppInfoHolder(),
     val globalStateHolder: StateHolderImpl = StateHolderImpl(),
@@ -63,23 +67,25 @@ data class Project(
     @Transient
     val bundleId: String = "$packageName.$name"
 
-    fun generateCode(): List<FileSpec?> {
+    fun generateCode(): List<FileSpecWithDirectory> {
         // Memorize the count of how many components are used to generate the viewModelKey
         val context = GenerationContext()
-        screenHolder.generateComposeLauncherFile()
-        return screenHolder.screens.flatMap { it.generateCode(this, context = context) } +
-            screenHolder.generateComposeLauncherFile() +
-            screenHolder.generateAppNavHostFile(this, context = context) +
-            screenHolder.generateKoinViewModelModule(this) +
-            screenHolder.generateAppViewModel(this) +
-            screenHolder.generateScreenRouteFileSpec(this) +
-            dataTypeHolder.generateDataTypeFiles(this) +
-            customEnumHolder.generateEnumFiles(this) +
-            themeHolder.generateThemeFiles() +
-            componentHolder.generateKoinViewModelModule(this) +
-            componentHolder.components.flatMap {
-                it.generateCode(this, context = context)
-            }
+
+        val commonMainFiles =
+            screenHolder.screens.flatMap { it.generateCode(this, context = context) } +
+                screenHolder.generateComposeLauncherFile() +
+                screenHolder.generateAppNavHostFile(this, context = context) +
+                screenHolder.generateKoinViewModelModule(this) +
+                screenHolder.generateAppViewModel(this) +
+                screenHolder.generateScreenRouteFileSpec(this) +
+                dataTypeHolder.generateDataTypeFiles(this) +
+                customEnumHolder.generateEnumFiles(this) +
+                themeHolder.generateThemeFiles() +
+                componentHolder.generateKoinViewModelModule(this) +
+                componentHolder.components.flatMap {
+                    it.generateCode(this, context = context)
+                }
+        return commonMainFiles + appAssetHolder.generateCode(this)
     }
 
     /**
@@ -98,7 +104,11 @@ data class Project(
         assetHolder.generateCopyLocalFileInstructions(
             userId = userId,
             projectId = id,
-        )
+        ) +
+            appAssetHolder.generateCopyLocalFileInstructions(
+                userId = userId,
+                projectId = id,
+            )
 
     fun getAllCanvasEditable(): List<CanvasEditable> = componentHolder.components + screenHolder.screens
 
@@ -112,7 +122,7 @@ data class Project(
      * The value represents the content of the file as ByteArray.
      */
     fun generateWriteFileInstructions(): Map<String, ByteArray> =
-        stringResourceHolder.generateStringResourceFiles().mapValues { (_, content) ->
+        (stringResourceHolder.generateStringResourceFiles() + appAssetHolder.generateXmlFiles()).mapValues { (_, content) ->
             content.toByteArray(Charsets.UTF_8)
         }
 
@@ -120,6 +130,8 @@ data class Project(
         (screenHolder.screens + componentHolder.components).flatMap {
             it.getAllComposeNodes()
         }
+
+    fun getAssetFiles(): List<BlobInfoWrapper> = assetHolder.images + assetHolder.icons + appAssetHolder.getAssetFiles()
 
     fun generateTrackableIssues(): List<TrackableIssue> =
         (screenHolder.screens + componentHolder.components)
@@ -280,4 +292,5 @@ fun Project.copyProjectContents(other: Project) {
     stringResourceHolder.copyContents(other.stringResourceHolder)
     firebaseAppInfoHolder.firebaseAppInfo = other.firebaseAppInfoHolder.firebaseAppInfo
     globalStateHolder.copyContents(other.globalStateHolder)
+    appAssetHolder.copyContents(other.appAssetHolder)
 }

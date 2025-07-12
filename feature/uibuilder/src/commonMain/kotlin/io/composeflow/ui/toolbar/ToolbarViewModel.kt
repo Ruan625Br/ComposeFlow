@@ -5,6 +5,9 @@ import io.composeflow.Res
 import io.composeflow.appbuilder.AppRunner
 import io.composeflow.auth.AuthRepository
 import io.composeflow.auth.FirebaseIdToken
+import io.composeflow.cloud.storage.AssetSynchronizer
+import io.composeflow.cloud.storage.GoogleCloudStorageWrapper
+import io.composeflow.datastore.LocalAssetSaver
 import io.composeflow.download_jdk_needed_message
 import io.composeflow.downloading_jdk
 import io.composeflow.failed_to_download_jdk
@@ -52,6 +55,13 @@ class ToolbarViewModel(
     private val authRepository: AuthRepository = AuthRepository(),
     private val firebaseApiCaller: FirebaseApiCaller = FirebaseApiCaller(),
     private val settingsRepository: SettingsRepository = SettingsRepository(),
+    private val googleCloudStorageWrapper: GoogleCloudStorageWrapper = GoogleCloudStorageWrapper(),
+    private val localAssetSaver: LocalAssetSaver = LocalAssetSaver(),
+    private val assertSynchronizer: AssetSynchronizer =
+        AssetSynchronizer(
+            googleCloudStorageWrapper,
+            localAssetSaver,
+        ),
 ) : ViewModel() {
     val editingProject =
         projectRepository.editingProject.stateIn(
@@ -247,6 +257,12 @@ class ToolbarViewModel(
                     project.firebaseAppInfoHolder.firebaseAppInfo =
                         obtainUpdatedFirebaseAppInfo(project.firebaseAppInfoHolder.firebaseAppInfo)
                     saveProject(project)
+                    assertSynchronizer.syncFilesLocally(
+                        userId = firebaseIdTokenArg.user_id,
+                        projectId = project.id,
+                        assetFiles = project.getAssetFiles(),
+                    )
+
                     val fileSpecs = project.generateCode()
 
                     when (device) {
@@ -349,7 +365,11 @@ class ToolbarViewModel(
             project.firebaseAppInfoHolder.firebaseAppInfo =
                 obtainUpdatedFirebaseAppInfo(project.firebaseAppInfoHolder.firebaseAppInfo)
             saveProject(project)
-
+            assertSynchronizer.syncFilesLocally(
+                userId = firebaseIdTokenArg.user_id,
+                projectId = project.id,
+                assetFiles = project.getAssetFiles(),
+            )
             val fileSpecs = project.generateCode()
             AppRunner.downloadCode(
                 project = project,
@@ -362,6 +382,7 @@ class ToolbarViewModel(
                     project.generateCopyLocalFileInstructions(
                         userId = localFirebaseIdToken.user_id,
                     ),
+                writeFileInstructions = project.generateWriteFileInstructions(),
                 firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
             )
         }
@@ -429,5 +450,10 @@ class ToolbarViewModel(
         viewModelScope.launch {
             projectRepository.updateProject(project)
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        runPreviewJob?.cancel()
     }
 }

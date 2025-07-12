@@ -1,6 +1,5 @@
 package io.composeflow.robots
 
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.test.DesktopComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.onRoot
@@ -45,10 +44,10 @@ class ColorPropertyDialogRobot(
                             ProvideAppThemeTokens(isDarkTheme = isDarkTheme) {
                                 ColorPropertyDialogContent(
                                     initialColor = null,
-                                    fallbackColor = Color.Red,
                                     onThemeColorSelected = { color -> },
                                     onColorUpdated = {},
                                     onCloseClick = {},
+                                    includeThemeColor = true,
                                 )
                             }
                         }

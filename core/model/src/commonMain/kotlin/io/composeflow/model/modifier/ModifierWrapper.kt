@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.debugInspectorInfo
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -150,10 +151,17 @@ sealed class ModifierWrapper(
 
         override fun toModifier(): Modifier =
             Modifier.composed {
-                Modifier.background(
-                    color =
+                val resolvedColor =
+                    if ((colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor() != null) {
                         (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                            ?: defaultColorProperty().value.getColor(),
+                    } else if (defaultColorProperty().value.getColor() != null) {
+                        defaultColorProperty().value.getColor()
+                    } else {
+                        Color.Unspecified
+                    }
+
+                Modifier.background(
+                    color = resolvedColor!!,
                     shape = shapeWrapper.toShape(),
                 )
             }
@@ -209,11 +217,17 @@ sealed class ModifierWrapper(
 
         override fun toModifier(): Modifier =
             Modifier.composed {
+                val resolvedColor =
+                    if ((colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor() != null) {
+                        (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                    } else if (defaultColorProperty().value.getColor() != null) {
+                        defaultColorProperty().value.getColor()
+                    } else {
+                        Color.Unspecified
+                    }
                 Modifier.border(
                     width = width,
-                    color =
-                        (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                            ?: defaultColorProperty().value.getColor(),
+                    color = resolvedColor!!,
                     shape = shapeWrapper.toShape(),
                 )
             }

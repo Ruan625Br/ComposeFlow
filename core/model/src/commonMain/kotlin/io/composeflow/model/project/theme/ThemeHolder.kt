@@ -1,6 +1,6 @@
 package io.composeflow.model.project.theme
 
-import com.squareup.kotlinpoet.FileSpec
+import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -10,7 +10,11 @@ class ThemeHolder(
     val colorSchemeHolder: ColorSchemeHolder = ColorSchemeHolder(),
     val fontHolder: FontHolder = FontHolder(),
 ) {
-    fun generateThemeFiles(): List<FileSpec> = listOf(colorSchemeHolder.generateColorFile(), fontHolder.generateFontFile())
+    fun generateThemeFiles(): List<FileSpecWithDirectory> =
+        listOf(colorSchemeHolder.generateColorFile(), fontHolder.generateFontFile())
+            .map {
+                FileSpecWithDirectory(it)
+            }
 }
 
 fun ThemeHolder.copyContents(other: ThemeHolder) {

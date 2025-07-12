@@ -54,3 +54,23 @@ fun Color.asString(): String {
         }
     return colorString
 }
+
+/**
+ * Represent a Color as String in a format that conforms with Android xml.
+ * Always represent the alpha in sRGB space.
+ *
+ * For example following values are represented as:
+ * Color(0xFF8A123F) -> "#FF8A123F"
+ * Color(0x238A123F) -> "#238A123F"
+ * Color(0x8A123F) -> "#FF0x8A123F"
+ */
+fun Color.asAndroidXmlString(): String {
+    val colorInt = toArgb()
+    val colorString =
+        if (colorInt ushr 24 == 0) {
+            "#FF${colorInt.toString(16).uppercase().padStart(6, '0')}"
+        } else {
+            "#${colorInt.toUInt().toString(16).uppercase().padStart(8, '0')}"
+        }
+    return colorString
+}

@@ -95,6 +95,7 @@ kotlin {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
             implementation(libs.androidx.appcompat)
+            implementation(libs.androidx.core.splashscreen)
             implementation(libs.androidx.credentials.play.services.auth)
             implementation(libs.datastore.preferences)
             implementation(libs.datastore.preferences.core)

@@ -56,6 +56,8 @@ import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.cloud.storage.GoogleCloudStorageWrapper
 import io.composeflow.cloud.storage.asDateString
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.asset.RemoveResult
+import io.composeflow.model.project.asset.UploadResult
 import io.composeflow.remove
 import io.composeflow.remove_asset
 import io.composeflow.remove_succeeded
@@ -122,7 +124,7 @@ fun AssetEditorScreen(
         )
     val onShowSnackbar = LocalOnShowSnackbar.current
     when (val result = uploadResult) {
-        UploadResult.Failure -> {}
+        is UploadResult.Failure -> {}
         UploadResult.NotStarted -> {}
         is UploadResult.Success -> {
             coroutineScope.launch {
@@ -138,7 +140,7 @@ fun AssetEditorScreen(
     }
     val removeSucceeded = stringResource(Res.string.remove_succeeded)
     when (val result = removeResult) {
-        RemoveResult.Failure -> {}
+        is RemoveResult.Failure -> {}
         RemoveResult.NotStarted -> {}
         is RemoveResult.Removing -> {}
         is RemoveResult.Success -> {
