@@ -11,22 +11,25 @@ class StateHolderTest {
         val target = StateHolderImpl()
 
         // Add states to source
-        val state1 = ScreenState.StringScreenState(
-            name = "globalState1",
-            defaultValue = "globalValue1"
-        )
-        val state2 = ScreenState.BooleanScreenState(
-            name = "globalState2",
-            defaultValue = false
-        )
+        val state1 =
+            ScreenState.StringScreenState(
+                name = "globalState1",
+                defaultValue = "globalValue1",
+            )
+        val state2 =
+            ScreenState.BooleanScreenState(
+                name = "globalState2",
+                defaultValue = false,
+            )
         source.addState(state1)
         source.addState(state2)
 
         // Add different state to target that should be cleared
-        val targetState = ScreenState.StringScreenState(
-            name = "targetGlobalState",
-            defaultValue = "targetGlobalValue"
-        )
+        val targetState =
+            ScreenState.StringScreenState(
+                name = "targetGlobalState",
+                defaultValue = "targetGlobalValue",
+            )
         target.addState(targetState)
 
         // Copy contents
@@ -44,10 +47,11 @@ class StateHolderTest {
         val target = StateHolderImpl()
 
         // Add state to target
-        val targetState = ScreenState.StringScreenState(
-            name = "targetState",
-            defaultValue = "targetValue"
-        )
+        val targetState =
+            ScreenState.StringScreenState(
+                name = "targetState",
+                defaultValue = "targetValue",
+            )
         target.addState(targetState)
 
         // Copy empty source
@@ -60,25 +64,41 @@ class StateHolderTest {
     @Test
     fun testCopyContentsWithNonStateHolderImpl() {
         val target = StateHolderImpl()
-        
+
         // Add state to target
-        val targetState = ScreenState.StringScreenState(
-            name = "targetState",
-            defaultValue = "targetValue"
-        )
+        val targetState =
+            ScreenState.StringScreenState(
+                name = "targetState",
+                defaultValue = "targetValue",
+            )
         target.addState(targetState)
 
         // Create a mock StateHolder that is not StateHolderImpl
-        val mockStateHolder = object : StateHolder {
-            override fun getStateResults(project: io.composeflow.model.project.Project): List<StateResult> = emptyList()
-            override fun getStates(project: io.composeflow.model.project.Project): List<ReadableState> = emptyList()
-            override fun addState(readableState: ReadableState) {}
-            override fun updateState(readableState: ReadableState) {}
-            override fun createUniqueLabel(project: io.composeflow.model.project.Project, composeNode: io.composeflow.model.project.appscreen.screen.composenode.ComposeNode, initial: String): String = ""
-            override fun findStateOrNull(project: io.composeflow.model.project.Project, stateId: StateId): ReadableState? = null
-            override fun removeState(stateId: StateId): Boolean = false
-            override fun copyContents(other: StateHolder) {}
-        }
+        val mockStateHolder =
+            object : StateHolder {
+                override fun getStateResults(project: io.composeflow.model.project.Project): List<StateResult> = emptyList()
+
+                override fun getStates(project: io.composeflow.model.project.Project): List<ReadableState> = emptyList()
+
+                override fun addState(readableState: ReadableState) {}
+
+                override fun updateState(readableState: ReadableState) {}
+
+                override fun createUniqueLabel(
+                    project: io.composeflow.model.project.Project,
+                    composeNode: io.composeflow.model.project.appscreen.screen.composenode.ComposeNode,
+                    initial: String,
+                ): String = ""
+
+                override fun findStateOrNull(
+                    project: io.composeflow.model.project.Project,
+                    stateId: StateId,
+                ): ReadableState? = null
+
+                override fun removeState(stateId: StateId): Boolean = false
+
+                override fun copyContents(other: StateHolder) {}
+            }
 
         // Copy from non-StateHolderImpl source
         target.copyContents(mockStateHolder)

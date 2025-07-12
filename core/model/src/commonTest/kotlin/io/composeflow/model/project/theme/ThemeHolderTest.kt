@@ -10,12 +10,12 @@ class ThemeHolderTest {
     @Test
     fun testCopyContents() {
         val source = ThemeHolder()
-        
+
         // Modify source ColorSchemeHolder
         source.colorSchemeHolder.sourceColor = Color.Red
         source.colorSchemeHolder.paletteStyle = PaletteStyle.Vibrant
-        
-        // Modify source FontHolder  
+
+        // Modify source FontHolder
         source.fontHolder.primaryFontFamily = FontFamilyWrapper.Caveat
         source.fontHolder.secondaryFontFamily = FontFamilyWrapper.DancingScript
 
@@ -25,7 +25,7 @@ class ThemeHolderTest {
         // Verify ColorSchemeHolder was copied
         assertEquals(Color.Red, target.colorSchemeHolder.sourceColor)
         assertEquals(PaletteStyle.Vibrant, target.colorSchemeHolder.paletteStyle)
-        
+
         // Verify FontHolder was copied
         assertEquals(FontFamilyWrapper.Caveat, target.fontHolder.primaryFontFamily)
         assertEquals(FontFamilyWrapper.DancingScript, target.fontHolder.secondaryFontFamily)

@@ -1,7 +1,6 @@
 package io.composeflow.model.project.appscreen.screen
 
 import io.composeflow.model.project.Project
-import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolderImpl
 import kotlin.test.Test
@@ -15,22 +14,25 @@ class ScreenTest {
         val target = Screen(id = "target", name = "TargetScreen")
 
         // Add states to source
-        val state1 = ScreenState.StringScreenState(
-            name = "screenState1",
-            defaultValue = "screenValue1"
-        )
-        val state2 = ScreenState.BooleanScreenState(
-            name = "screenState2", 
-            defaultValue = true
-        )
+        val state1 =
+            ScreenState.StringScreenState(
+                name = "screenState1",
+                defaultValue = "screenValue1",
+            )
+        val state2 =
+            ScreenState.BooleanScreenState(
+                name = "screenState2",
+                defaultValue = true,
+            )
         source.addState(state1)
         source.addState(state2)
 
         // Add different state to target that should be cleared
-        val targetState = ScreenState.StringScreenState(
-            name = "targetScreenState",
-            defaultValue = "targetScreenValue"
-        )
+        val targetState =
+            ScreenState.StringScreenState(
+                name = "targetScreenState",
+                defaultValue = "targetScreenValue",
+            )
         target.addState(targetState)
 
         // Copy contents - Note: Screen.copyContents only works with StateHolderImpl
@@ -39,7 +41,7 @@ class ScreenTest {
         val sourceStateHolder = StateHolderImpl()
         sourceStateHolder.addState(state1)
         sourceStateHolder.addState(state2)
-        
+
         target.copyContents(sourceStateHolder)
 
         // Verify states were copied by checking the target's state count
@@ -57,10 +59,11 @@ class ScreenTest {
         val target = Screen(id = "target", name = "TargetScreen")
 
         // Add state to target
-        val targetState = ScreenState.StringScreenState(
-            name = "targetState",
-            defaultValue = "targetValue"
-        )
+        val targetState =
+            ScreenState.StringScreenState(
+                name = "targetState",
+                defaultValue = "targetValue",
+            )
         target.addState(targetState)
 
         // Copy empty source

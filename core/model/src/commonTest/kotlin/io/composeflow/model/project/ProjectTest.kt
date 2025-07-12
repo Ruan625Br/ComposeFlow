@@ -1,17 +1,7 @@
 package io.composeflow.model.project
 
-import io.composeflow.model.project.api.ApiHolder
-import io.composeflow.model.project.appscreen.ScreenHolder
 import io.composeflow.model.project.appscreen.screen.Screen
-import io.composeflow.model.project.asset.AssetHolder
 import io.composeflow.model.project.component.Component
-import io.composeflow.model.project.component.ComponentHolder
-import io.composeflow.model.project.custom_enum.CustomEnumHolder
-import io.composeflow.model.project.datatype.DataTypeHolder
-import io.composeflow.model.project.firebase.FirebaseAppInfoHolder
-import io.composeflow.model.project.string.StringResourceHolder
-import io.composeflow.model.project.theme.ThemeHolder
-import io.composeflow.model.state.StateHolderImpl
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -20,11 +10,12 @@ class ProjectTest {
     @Test
     fun testCopyProjectContents() {
         // Create source project with test data
-        val source = Project(
-            id = "source-id",
-            name = "source-project",
-            packageName = "com.source.test"
-        )
+        val source =
+            Project(
+                id = "source-id",
+                name = "source-project",
+                packageName = "com.source.test",
+            )
 
         // Clear default screens and add our test screen
         source.screenHolder.screens.clear()
@@ -35,12 +26,13 @@ class ProjectTest {
         val sourceComponent = Component(id = "comp-1", name = "TestComponent")
         source.componentHolder.components.add(sourceComponent)
 
-        // Create target project 
-        val target = Project(
-            id = "target-id", 
-            name = "target-project",
-            packageName = "com.target.test"
-        )
+        // Create target project
+        val target =
+            Project(
+                id = "target-id",
+                name = "target-project",
+                packageName = "com.target.test",
+            )
 
         // Add initial data to target that should be cleared
         val targetScreen = Screen(id = "screen-2", name = "TargetScreen")
@@ -74,15 +66,19 @@ class ProjectTest {
 
         // Clear default screens and add our test screens
         source.screenHolder.screens.clear()
-        source.screenHolder.screens.addAll(listOf(
-            Screen(id = "s1", name = "Screen1"),
-            Screen(id = "s2", name = "Screen2")
-        ))
-        
-        source.componentHolder.components.addAll(listOf(
-            Component(id = "c1", name = "Component1"),
-            Component(id = "c2", name = "Component2")
-        ))
+        source.screenHolder.screens.addAll(
+            listOf(
+                Screen(id = "s1", name = "Screen1"),
+                Screen(id = "s2", name = "Screen2"),
+            ),
+        )
+
+        source.componentHolder.components.addAll(
+            listOf(
+                Component(id = "c1", name = "Component1"),
+                Component(id = "c2", name = "Component2"),
+            ),
+        )
 
         // Clear default data and add data to target that should be replaced
         target.screenHolder.screens.clear()
