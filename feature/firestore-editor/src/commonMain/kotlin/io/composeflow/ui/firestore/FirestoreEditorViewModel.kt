@@ -8,6 +8,7 @@ import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.firestore_collection_same_name_exists
 import io.composeflow.model.datatype.DataField
 import io.composeflow.model.datatype.DataType
+import io.composeflow.model.datatype.FieldType
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.firebase.FirestoreCollection
 import io.composeflow.repository.ProjectRepository
@@ -110,6 +111,21 @@ class FirestoreEditorViewModel(
                     )
                 }
             dataType.fields[dataFieldIndex] = dataType.fields[dataFieldIndex].copy(name = newName)
+            saveProject()
+        }
+    }
+
+    fun onDataFieldDefaultValueUpdated(
+        dataFieldIndex: Int,
+        newFieldType: FieldType<*>,
+    ) {
+        focusedFirestoreCollectionIndex?.let { focusedIndex ->
+            val dataTypeId =
+                project.firebaseAppInfoHolder.firebaseAppInfo.firestoreCollections[focusedIndex]
+                    .dataTypeId
+            val dataType =
+                project.dataTypeHolder.dataTypes.firstOrNull { it.id == dataTypeId } ?: return
+            dataType.fields[dataFieldIndex] = dataType.fields[dataFieldIndex].copy(fieldType = newFieldType)
             saveProject()
         }
     }

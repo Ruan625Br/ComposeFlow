@@ -118,6 +118,7 @@ fun FirestoreEditorScreen(
                     onFocusedFirestoreCollectionIndexUpdated = viewModel::onFocusedFirestoreCollectionIndexUpdated,
                     onDataFieldAdded = viewModel::onDataFieldAdded,
                     onDataFieldNameUpdated = viewModel::onDataFieldNameUpdated,
+                    onDataFieldDefaultValueUpdated = viewModel::onDataFieldDefaultValueUpdated,
                     onDeleteDataField = viewModel::onDeleteDataField,
                     onDeleteFirestoreCollectionRelationship = viewModel::onDeleteFirestoreCollectionRelationship,
                 )
@@ -628,6 +629,7 @@ private fun FirestoreCollectionRelationshipDetailContent(
                         dataField = dataField,
                         index = i,
                         onDataFieldNameUpdated = callbacks.onDataFieldNameUpdated,
+                        onDataFieldDefaultValueUpdated = callbacks.onDataFieldDefaultValueUpdated,
                         onDeleteDataFieldDialogOpen = {
                             indexOfDataFieldToBeDeleted = i
                         },

@@ -7,6 +7,7 @@ import io.composeflow.asClassName
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.datatype.DataField
 import io.composeflow.model.datatype.DataType
+import io.composeflow.model.datatype.FieldType
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.custom_enum.CustomEnum
 import io.composeflow.repository.ProjectRepository
@@ -93,6 +94,20 @@ class DataTypeEditorViewModel(
                 project.dataTypeHolder.dataTypes[focusedIndex]
                     .fields[index]
                     .copy(name = newName)
+            saveProject()
+        }
+    }
+
+    fun onDataFieldDefaultValueUpdated(
+        index: Int,
+        newFieldType: FieldType<*>,
+    ) {
+        focusedDataTypeIndex?.let { focusedIndex ->
+            val editedDataType = project.dataTypeHolder.dataTypes[focusedIndex]
+            editedDataType.fields[index] =
+                project.dataTypeHolder.dataTypes[focusedIndex]
+                    .fields[index]
+                    .copy(fieldType = newFieldType)
             saveProject()
         }
     }

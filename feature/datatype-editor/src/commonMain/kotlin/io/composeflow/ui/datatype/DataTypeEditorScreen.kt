@@ -2,9 +2,12 @@ package io.composeflow.ui.datatype
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,11 +19,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,18 +51,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component4
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component5
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.add_data_type
@@ -71,6 +84,7 @@ import io.composeflow.delete_data_field
 import io.composeflow.delete_data_type
 import io.composeflow.delete_enum
 import io.composeflow.editor.validator.FloatValidator
+import io.composeflow.editor.validator.InputValidator
 import io.composeflow.editor.validator.IntValidator
 import io.composeflow.editor.validator.KotlinClassNameValidator
 import io.composeflow.editor.validator.KotlinIdentifierValidator.MUST_NOT_BE_EMPTY
@@ -88,6 +102,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.Tooltip
+import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.modifier.backgroundContainerNeutral
 import io.composeflow.ui.modifier.hoverIconClickable
@@ -146,6 +161,7 @@ fun DataTypeEditor(
                         focusedDataTypeIndex = viewModel.focusedDataTypeIndex,
                         onDataFieldAdded = viewModel::onDataFieldAdded,
                         onDataFieldNameUpdated = viewModel::onDataFieldNameUpdated,
+                        onDataFieldDefaultValueUpdated = viewModel::onDataFieldDefaultValueUpdated,
                         onDeleteDataTypeIconClicked = {
                             deleteDataTypeDialogOpen = true
                         },
@@ -722,6 +738,7 @@ private fun DataTypeDetail(
     focusedDataTypeIndex: Int?,
     onDataFieldAdded: (DataField) -> Unit,
     onDataFieldNameUpdated: (Int, String) -> Unit,
+    onDataFieldDefaultValueUpdated: (Int, FieldType<*>) -> Unit,
     onDeleteDataTypeIconClicked: () -> Unit,
     onDeleteDataFieldOfIndex: (Int) -> Unit,
 ) {
@@ -738,6 +755,7 @@ private fun DataTypeDetail(
             focusedDataTypeIndex = focusedDataTypeIndex,
             onDataFieldAdded = onDataFieldAdded,
             onDataFieldNameUpdated = onDataFieldNameUpdated,
+            onDataFieldDefaultValueUpdated = onDataFieldDefaultValueUpdated,
             onDeleteDataTypeIconClicked = onDeleteDataTypeIconClicked,
             onDeleteDataFieldOfIndex = onDeleteDataFieldOfIndex,
         )
@@ -751,6 +769,7 @@ private fun DataTypeDetailContent(
     focusedDataTypeIndex: Int?,
     onDataFieldAdded: (DataField) -> Unit,
     onDataFieldNameUpdated: (Int, String) -> Unit,
+    onDataFieldDefaultValueUpdated: (Int, FieldType<*>) -> Unit,
     onDeleteDataTypeIconClicked: () -> Unit,
     onDeleteDataFieldOfIndex: (Int) -> Unit,
 ) {
@@ -802,6 +821,9 @@ private fun DataTypeDetailContent(
                             dataField = dataField,
                             index = i,
                             onDataFieldNameUpdated = onDataFieldNameUpdated,
+                            onDataFieldDefaultValueUpdated = { index, newFieldType ->
+                                onDataFieldDefaultValueUpdated(index, newFieldType)
+                            },
                             onDeleteDataFieldDialogOpen = {
                                 indexOfDataFieldToBeDeleted = i
                             },
@@ -1243,6 +1265,7 @@ fun DataTypeDetailFieldRow(
     dataField: DataField,
     index: Int,
     onDataFieldNameUpdated: (Int, String) -> Unit,
+    onDataFieldDefaultValueUpdated: (Int, FieldType<*>) -> Unit,
     onDeleteDataFieldDialogOpen: (Int) -> Unit,
 ) {
     Column {
@@ -1268,10 +1291,11 @@ fun DataTypeDetailFieldRow(
                 modifier = Modifier.width(240.dp),
             )
 
-            Text(
-                dataField.fieldType.defaultValue()?.toString() ?: "",
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurface,
+            EditableFieldDefaultValue(
+                dataField = dataField,
+                onDefaultValueUpdated = { newFieldType ->
+                    onDataFieldDefaultValueUpdated(index, newFieldType)
+                },
                 modifier = Modifier.width(300.dp),
             )
             Spacer(Modifier.weight(1f))
@@ -1418,3 +1442,262 @@ private fun DeleteDataTypeDialog(
         }
     }
 }
+
+@Composable
+private fun EditableFieldDefaultValue(
+    dataField: DataField,
+    onDefaultValueUpdated: (FieldType<*>) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    when (val fieldType = dataField.fieldType) {
+        is FieldType.String -> {
+            EditableText(
+                initialText = fieldType.defaultValue(),
+                onValueChange = { newValue ->
+                    onDefaultValueUpdated(fieldType.copyWithDefaultValue(newValue))
+                },
+                allowEmptyText = true,
+                textStyle =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                modifier = modifier,
+            )
+        }
+
+        is FieldType.Int -> {
+            ValidatedEditableText(
+                initialText = fieldType.defaultValue().toString(),
+                onValueChange = { newValue ->
+                    onDefaultValueUpdated(fieldType.copyWithDefaultValue(newValue.toInt()))
+                },
+                validator = IntValidator(),
+                textStyle =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                modifier = modifier,
+            )
+        }
+
+        is FieldType.Float -> {
+            ValidatedEditableText(
+                initialText = fieldType.defaultValue().toString(),
+                onValueChange = { newValue ->
+                    onDefaultValueUpdated(fieldType.copyWithDefaultValue(newValue.toFloat()))
+                },
+                validator = FloatValidator(),
+                textStyle =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = MaterialTheme.colorScheme.onSurface,
+                    ),
+                modifier = modifier,
+            )
+        }
+
+        is FieldType.Boolean -> {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = modifier,
+            ) {
+                Checkbox(
+                    checked = fieldType.defaultValue(),
+                    onCheckedChange = { newValue ->
+                        onDefaultValueUpdated(fieldType.copyWithDefaultValue(newValue))
+                    },
+                )
+                Text(
+                    text = fieldType.defaultValue().toString(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+        }
+
+        else -> {
+            // For all other types (Instant, CustomDataType, DocumentId), show as read-only
+            Text(
+                text = fieldType.defaultValue()?.toString() ?: "null",
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.tertiary,
+                maxLines = 1,
+                modifier = modifier,
+            )
+        }
+    }
+}
+
+@Composable
+private fun ValidatedEditableText(
+    initialText: String,
+    onValueChange: (String) -> Unit,
+    validator: InputValidator,
+    textStyle: TextStyle,
+    modifier: Modifier = Modifier,
+    allowEmptyText: Boolean = false,
+) {
+    var currentText by remember(initialText) { mutableStateOf(initialText) }
+    var tempText by remember(initialText) { mutableStateOf(initialText) }
+    var isEditable by remember { mutableStateOf(false) }
+    var validationResult by remember(initialText) {
+        mutableStateOf(validator.validate(initialText))
+    }
+
+    val isValid = validationResult is ValidateResult.Success
+    val errorMessage = (validationResult as? ValidateResult.Failure)?.message
+
+    val focusRequester = remember { FocusRequester() }
+    val interactionSource = remember { MutableInteractionSource() }
+    val focusManager = LocalFocusManager.current
+
+    val onCancelEdit = {
+        tempText = currentText
+        isEditable = false
+        focusManager.clearFocus()
+        validationResult = validator.validate(currentText)
+    }
+
+    val onCommitChange = {
+        if (!allowEmptyText && tempText.isBlank()) {
+            onCancelEdit()
+        } else if (isValid) {
+            currentText = tempText
+            isEditable = false
+            focusManager.clearFocus()
+            onValueChange(tempText)
+            validationResult = validator.validate(tempText)
+        }
+        // If not valid, don't commit - stay in edit mode
+    }
+
+    Column(modifier = modifier) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Box(contentAlignment = Alignment.CenterStart) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    BasicTextField(
+                        value = tempText,
+                        onValueChange = { newText ->
+                            tempText = newText
+                            validationResult = validator.validate(newText)
+                        },
+                        readOnly = !isEditable,
+                        singleLine = true,
+                        textStyle =
+                            textStyle.copy(
+                                color =
+                                    if (isValid || !isEditable) {
+                                        textStyle.color
+                                    } else {
+                                        MaterialTheme.colorScheme.error
+                                    },
+                            ),
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        keyboardOptions =
+                            KeyboardOptions.Default.copy(
+                                imeAction = ImeAction.Done,
+                            ),
+                        keyboardActions =
+                            KeyboardActions(
+                                onDone = {
+                                    onCommitChange()
+                                },
+                            ),
+                        modifier =
+                            Modifier
+                                .focusRequester(focusRequester)
+                                .defaultMinSize(minWidth = Dp.Unspecified)
+                                .drawUnderline(
+                                    isEditable,
+                                    color = MaterialTheme.colorScheme.primary,
+                                ).onPreviewKeyEvent { keyEvent ->
+                                    if (isEditable && keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
+                                        onCancelEdit()
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                },
+                        interactionSource = interactionSource,
+                        decorationBox = { innerTextField ->
+                            Box(modifier = Modifier) {
+                                innerTextField()
+                            }
+                        },
+                    )
+
+                    if (isEditable) {
+                        ComposeFlowIconButton(
+                            onClick = {
+                                onCommitChange()
+                            },
+                            enabled = isValid, // Disable when validation fails
+                        ) {
+                            ComposeFlowIcon(
+                                imageVector = Icons.Default.Done,
+                                contentDescription = "Done",
+                                tint =
+                                    if (isValid) {
+                                        MaterialTheme.colorScheme.onSurface
+                                    } else {
+                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    },
+                            )
+                        }
+                    }
+                }
+            }
+
+            if (!isEditable) {
+                ComposeFlowIconButton(
+                    onClick = {
+                        isEditable = true
+                        tempText = currentText
+                        focusRequester.requestFocus()
+                    },
+                ) {
+                    ComposeFlowIcon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = "Edit",
+                    )
+                }
+            }
+        }
+
+        // Show error message when validation fails and in edit mode
+        if (isEditable && !isValid && errorMessage != null) {
+            Text(
+                text = errorMessage,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 4.dp),
+            )
+        }
+    }
+}
+
+fun Modifier.drawUnderline(
+    isEditable: Boolean,
+    color: Color,
+): Modifier =
+    this.then(
+        if (isEditable) {
+            Modifier.drawBehind {
+                val strokeWidth = 1.dp.toPx()
+                val y = size.height - strokeWidth / 2 + 1.dp.toPx()
+                drawLine(
+                    color = color,
+                    start = Offset(0f, y),
+                    end = Offset(size.width, y),
+                    strokeWidth = strokeWidth,
+                )
+            }
+        } else {
+            Modifier
+        },
+    )
