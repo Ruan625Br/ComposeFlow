@@ -1,0 +1,77 @@
+package io.composeflow.model.project.string
+
+import io.composeflow.override.mutableStateMapEqualsOverrideOf
+import io.composeflow.override.toMutableStateMapEqualsOverride
+import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+@Serializable
+@SerialName("StringResource")
+data class StringResource(
+    val key: String,
+    @Serializable(with = FallbackMutableStateMapSerializer::class)
+    val localizedValues: MutableMap<Locale, String> = mutableStateMapEqualsOverrideOf(),
+) {
+    // Compose Multiplatform supports language and region qualifiers for resources.
+    // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-setup.html#language-and-regional-qualifiers
+    @Serializable
+    @SerialName("Locale")
+    data class Locale(
+        /** Two-letter ISO 639-1 language code */
+        val language: String,
+        /** Two-letter ISO 3166-1 alpha-2 region code */
+        val region: String? = null,
+    ) {
+        override fun toString(): String =
+            buildString {
+                append(language)
+                if (region != null) {
+                    append("-r$region")
+                }
+            }
+
+        companion object {
+            /**
+             * Creates a Locale from a string like "en" or "en-rUS".
+             * If region is not specified, defaults to null.
+             */
+            fun fromString(locale: String): Locale {
+                val parts = locale.split("-")
+                return if (parts.size == 2) {
+                    if (parts[1].startsWith("r")) {
+                        Locale(parts[0], parts[1].substring(1))
+                    } else {
+                        Locale(parts[0], parts[1])
+                    }
+                } else {
+                    Locale(parts[0])
+                }
+            }
+        }
+    }
+}
+
+@JvmName("stringResourceOfWithLocale")
+fun stringResourceOf(
+    key: String,
+    vararg localizedValues: Pair<StringResource.Locale, String>,
+): StringResource =
+    StringResource(
+        key = key,
+        localizedValues = localizedValues.toMap().toMutableStateMapEqualsOverride(),
+    )
+
+@JvmName("stringResourceOfWithString")
+fun stringResourceOf(
+    key: String,
+    vararg localizedValues: Pair<String, String>,
+): StringResource =
+    StringResource(
+        key = key,
+        localizedValues =
+            localizedValues
+                .associate { (locale, value) ->
+                    StringResource.Locale.fromString(locale) to value
+                }.toMutableStateMapEqualsOverride(),
+    )

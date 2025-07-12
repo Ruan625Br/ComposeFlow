@@ -55,6 +55,7 @@ object AppRunner {
         projectName: String,
         copyInstructions: Map<String, String> = emptyMap(),
         copyLocalFileInstructions: Map<String, String> = emptyMap(),
+        writeFileInstructions: Map<String, ByteArray> = emptyMap(),
         firebaseAppInfo: FirebaseAppInfo,
         localJavaHomePath: PathSetting,
     ) {
@@ -66,6 +67,7 @@ object AppRunner {
                     projectName = projectName,
                     copyInstructions = copyInstructions,
                     copyLocalFileInstructions = copyLocalFileInstructions,
+                    writeFileInstructions = writeFileInstructions,
                     firebaseAppInfo = firebaseAppInfo,
                 )
             // For isolating problem when build error happens, not formatting the code
@@ -95,6 +97,7 @@ object AppRunner {
         projectName: String,
         copyInstructions: Map<String, String> = emptyMap(),
         copyLocalFileInstructions: Map<String, String> = emptyMap(),
+        writeFileInstructions: Map<String, ByteArray> = emptyMap(),
         firebaseAppInfo: FirebaseAppInfo,
     ) {
         buildLogger.i("runIosApp. $device")
@@ -105,8 +108,10 @@ object AppRunner {
                     projectName = projectName,
                     copyInstructions = copyInstructions,
                     copyLocalFileInstructions = copyLocalFileInstructions,
+                    writeFileInstructions = writeFileInstructions,
                     firebaseAppInfo = firebaseAppInfo,
                 )
+
             // For isolating problem when build error happens, not formatting the code
             // when building the app
             addComposeBuilderImplementation(appDir, fileSpecs, formatCode = false)
@@ -131,6 +136,7 @@ object AppRunner {
         projectName: String,
         copyInstructions: Map<String, String> = emptyMap(),
         copyLocalFileInstructions: Map<String, String> = emptyMap(),
+        writeFileInstructions: Map<String, ByteArray> = emptyMap(),
         firebaseAppInfo: FirebaseAppInfo,
         localJavaHomePath: PathSetting,
     ) {
@@ -141,8 +147,10 @@ object AppRunner {
                     projectName = projectName,
                     copyInstructions = copyInstructions,
                     copyLocalFileInstructions = copyLocalFileInstructions,
+                    writeFileInstructions = writeFileInstructions,
                     firebaseAppInfo = firebaseAppInfo,
                 )
+
             // For isolating problem when build error happens, not formatting the code
             // when building the app
             addComposeBuilderImplementation(appDir, fileSpecs, formatCode = false)
@@ -164,6 +172,7 @@ object AppRunner {
         projectName: String,
         copyInstructions: Map<String, String>,
         copyLocalFileInstructions: Map<String, String>,
+        writeFileInstructions: Map<String, ByteArray> = emptyMap(),
         firebaseAppInfo: FirebaseAppInfo,
     ) {
         val appDir =
@@ -172,6 +181,7 @@ object AppRunner {
                 projectName = projectName,
                 copyInstructions = copyInstructions,
                 copyLocalFileInstructions = copyLocalFileInstructions,
+                writeFileInstructions = writeFileInstructions,
                 firebaseAppInfo = firebaseAppInfo,
             )
 
@@ -194,6 +204,7 @@ object AppRunner {
         projectName: String,
         copyInstructions: Map<String, String> = emptyMap(),
         copyLocalFileInstructions: Map<String, String> = emptyMap(),
+        writeFileInstructions: Map<String, ByteArray> = emptyMap(),
         firebaseAppInfo: FirebaseAppInfo,
     ) {
         withContext(ioDispatcher) {
@@ -203,8 +214,10 @@ object AppRunner {
                     projectName = projectName,
                     copyInstructions = copyInstructions,
                     copyLocalFileInstructions = copyLocalFileInstructions,
+                    writeFileInstructions = writeFileInstructions,
                     firebaseAppInfo = firebaseAppInfo,
                 )
+
             addComposeBuilderImplementation(appDir, fileSpecs)
             val downloadDir = prepareDownloadDir()
 
@@ -377,6 +390,7 @@ object AppRunner {
         projectName: String,
         copyInstructions: Map<String, String>,
         copyLocalFileInstructions: Map<String, String>,
+        writeFileInstructions: Map<String, ByteArray> = emptyMap(),
         firebaseAppInfo: FirebaseAppInfo,
     ): File {
         val zipStream =
@@ -435,6 +449,7 @@ object AppRunner {
 
         copyFiles(appTemplateDir, copyInstructions)
         copyLocalFiles(appTemplateDir, copyLocalFileInstructions)
+        writeFiles(appTemplateDir, writeFileInstructions)
 
         val iosXCConfig = appTemplateDir.resolve("iosApp/Configuration/Config.xcconfig")
         replacePackageAndProject(
@@ -588,6 +603,22 @@ object AppRunner {
                 sourceFile.copyTo(destFile, overwrite = true)
                 Logger.v("File copied from ${it.key} to ${it.value}")
             }
+        }
+    }
+
+    private fun writeFiles(
+        targetDirectory: File,
+        writeFileInstructions: Map<String, ByteArray>,
+    ) {
+        writeFileInstructions.forEach { (path, content) ->
+            val destFile = targetDirectory.resolve(path)
+            destFile.parentFile?.let { parent ->
+                if (!parent.exists()) {
+                    parent.mkdirs()
+                }
+            }
+            destFile.writeBytes(content)
+            Logger.v("File written to $path")
         }
     }
 

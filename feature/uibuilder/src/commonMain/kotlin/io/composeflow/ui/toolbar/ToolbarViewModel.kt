@@ -237,6 +237,7 @@ class ToolbarViewModel(
                     project.generateCopyLocalFileInstructions(
                         userId = localFirebaseIdToken.user_id,
                     ),
+                writeFileInstructions = project.generateWriteFileInstructions(),
                 firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
             )
         } else {
@@ -268,6 +269,7 @@ class ToolbarViewModel(
                                     project.generateCopyLocalFileInstructions(
                                         userId = localFirebaseIdToken.user_id,
                                     ),
+                                writeFileInstructions = project.generateWriteFileInstructions(),
                                 firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
                                 localJavaHomePath = localJavaHomePath,
                             )
@@ -285,6 +287,7 @@ class ToolbarViewModel(
                                     project.generateCopyLocalFileInstructions(
                                         userId = localFirebaseIdToken.user_id,
                                     ),
+                                writeFileInstructions = project.generateWriteFileInstructions(),
                                 firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
                             )
                         }
@@ -300,6 +303,7 @@ class ToolbarViewModel(
                                     project.generateCopyLocalFileInstructions(
                                         userId = localFirebaseIdToken.user_id,
                                     ),
+                                writeFileInstructions = project.generateWriteFileInstructions(),
                                 firebaseAppInfo = project.firebaseAppInfoHolder.firebaseAppInfo,
                                 localJavaHomePath = localJavaHomePath,
                             )

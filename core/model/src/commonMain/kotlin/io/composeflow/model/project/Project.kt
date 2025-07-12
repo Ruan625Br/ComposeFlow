@@ -20,6 +20,8 @@ import io.composeflow.model.project.firebase.CollectionId
 import io.composeflow.model.project.firebase.FirebaseAppInfoHolder
 import io.composeflow.model.project.firebase.FirestoreCollection
 import io.composeflow.model.project.issue.TrackableIssue
+import io.composeflow.model.project.string.StringResourceHolder
+import io.composeflow.model.project.string.copyContents
 import io.composeflow.model.project.theme.ThemeHolder
 import io.composeflow.model.project.theme.copyContents
 import io.composeflow.model.state.ReadableState
@@ -51,6 +53,7 @@ data class Project(
     val componentHolder: ComponentHolder = ComponentHolder(),
     val themeHolder: ThemeHolder = ThemeHolder(),
     val assetHolder: AssetHolder = AssetHolder(),
+    val stringResourceHolder: StringResourceHolder = StringResourceHolder(),
     val firebaseAppInfoHolder: FirebaseAppInfoHolder = FirebaseAppInfoHolder(),
     val globalStateHolder: StateHolderImpl = StateHolderImpl(),
 ) : StateHolder by globalStateHolder {
@@ -98,6 +101,20 @@ data class Project(
         )
 
     fun getAllCanvasEditable(): List<CanvasEditable> = componentHolder.components + screenHolder.screens
+
+    /**
+     * Generate the instructions to write files to the destination directory.
+     * For example, to generate string resource XML files.
+     *
+     * The key represents a relative path from the app's root directory e.g.:
+     * `"composeApp/src/commonMain/composeResources/values/strings.xml"`
+     *
+     * The value represents the content of the file as ByteArray.
+     */
+    fun generateWriteFileInstructions(): Map<String, ByteArray> =
+        stringResourceHolder.generateStringResourceFiles().mapValues { (_, content) ->
+            content.toByteArray(Charsets.UTF_8)
+        }
 
     fun getAllComposeNodes(): List<ComposeNode> =
         (screenHolder.screens + componentHolder.components).flatMap {
@@ -260,6 +277,7 @@ fun Project.copyProjectContents(other: Project) {
     assetHolder.images.addAll(other.assetHolder.images)
     assetHolder.icons.clear()
     assetHolder.icons.addAll(other.assetHolder.icons)
+    stringResourceHolder.copyContents(other.stringResourceHolder)
     firebaseAppInfoHolder.firebaseAppInfo = other.firebaseAppInfoHolder.firebaseAppInfo
     globalStateHolder.copyContents(other.globalStateHolder)
 }
