@@ -5,10 +5,14 @@ import io.composeflow.override.toMutableStateMapEqualsOverride
 import io.composeflow.serializer.FallbackMutableStateMapSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.uuid.Uuid
+
+typealias StringResourceId = String
 
 @Serializable
 @SerialName("StringResource")
 data class StringResource(
+    val id: StringResourceId = Uuid.random().toString(),
     val key: String,
     /** Optional description for the string resource. Can be used to provide context for translators. */
     val description: String? = null,
@@ -59,8 +63,10 @@ fun stringResourceOf(
     key: String,
     vararg localizedValues: Pair<StringResource.Locale, String>,
     description: String? = null,
+    id: StringResourceId = Uuid.random().toString(),
 ): StringResource =
     StringResource(
+        id = id,
         key = key,
         description = description,
         localizedValues = localizedValues.toMap().toMutableStateMapEqualsOverride(),
@@ -71,8 +77,10 @@ fun stringResourceOf(
     key: String,
     vararg localizedValues: Pair<String, String>,
     description: String? = null,
+    id: StringResourceId = Uuid.random().toString(),
 ): StringResource =
     StringResource(
+        id = id,
         key = key,
         description = description,
         localizedValues =
