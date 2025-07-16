@@ -29,9 +29,9 @@ class DpSerializerTest {
     @Test
     fun negativeValue() {
         val dp = Dp(-2f)
-        val encoded = yamlSerializer.encodeToString(serializer = DpNonNegativeSerializer, dp)
+        val encoded = yamlDefaultSerializer.encodeToString(serializer = DpNonNegativeSerializer, dp)
         val decoded =
-            yamlSerializer.decodeFromString(
+            yamlDefaultSerializer.decodeFromString(
                 deserializer = DpNonNegativeSerializer,
                 encoded,
             )
@@ -39,8 +39,8 @@ class DpSerializerTest {
     }
 
     private fun verifySerializeDeserialize(dp: Dp) {
-        val encoded = yamlSerializer.encodeToString(serializer = DpSerializer, dp)
-        val decoded = yamlSerializer.decodeFromString(deserializer = DpSerializer, encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(serializer = DpSerializer, dp)
+        val decoded = yamlDefaultSerializer.decodeFromString(deserializer = DpSerializer, encoded)
 
         assertEquals(dp, decoded)
     }

@@ -189,7 +189,7 @@ private fun DestinationScreenWrapper(content: @Composable () -> Unit) {
 @Composable
 private fun TopNavigationDrawerScreen(
     onCreateProject: (String, String) -> Unit,
-    onCreateProjectWithScreens: (String, String, List<Screen>) -> Unit,
+    onCreateProjectWithScreens: (project: Project, List<Screen>) -> Unit,
     onDeleteProject: (String) -> Unit,
     onProjectSelected: (Project) -> Unit,
     onLogOut: () -> Unit,

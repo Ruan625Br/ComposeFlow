@@ -3,7 +3,7 @@ package io.composeflow.model.modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -19,7 +19,7 @@ class OffsetTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.offset(
                    x = 0.androidx.compose.ui.unit.dp,
@@ -48,8 +48,8 @@ class OffsetTest {
     fun serialize_verify_restored_instance() {
         val offset = ModifierWrapper.Offset(x = 8.dp, y = 32.dp)
 
-        val encodedString = yamlSerializer.encodeToString(offset)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Offset>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(offset)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Offset>(encodedString)
         assertEquals(offset, decoded)
     }
 }

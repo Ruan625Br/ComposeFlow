@@ -1,7 +1,7 @@
 package io.composeflow.template
 
 import io.composeflow.model.project.appscreen.screen.Screen
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.template.ScreenTemplates.createNewScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,6 +75,6 @@ object ScreenTemplates {
         val yaml = object {}.javaClass.getResourceAsStream(fileName)
         check(yaml != null)
         val newYaml = replaceUuids(yaml.reader().readText())
-        return yamlSerializer.decodeFromString<Screen>(newYaml)
+        return yamlDefaultSerializer.decodeFromString<Screen>(newYaml)
     }
 }

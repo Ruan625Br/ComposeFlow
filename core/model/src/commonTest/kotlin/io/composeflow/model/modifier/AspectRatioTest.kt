@@ -2,7 +2,7 @@ package io.composeflow.model.modifier
 
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -18,7 +18,7 @@ class AspectRatioTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                 androidx.compose.ui.Modifier.androidx.compose.foundation.layout.aspectRatio(ratio=1.0f,),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
@@ -32,8 +32,8 @@ class AspectRatioTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
-                 androidx.compose.ui.Modifier.androidx.compose.foundation.layout.aspectRatio(ratio = 1.0f, 
+            """modifier =
+                 androidx.compose.ui.Modifier.androidx.compose.foundation.layout.aspectRatio(ratio = 1.0f,
                  matchHeightConstraintsFirst = true,),""".trimForCompare(),
             code.build().toString().trimForCompare(),
         )
@@ -43,8 +43,9 @@ class AspectRatioTest {
     fun serialize_verify_restored_instance() {
         val aspectRatio = ModifierWrapper.AspectRatio(0.5f)
 
-        val encodedString = yamlSerializer.encodeToString(aspectRatio)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.AspectRatio>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(aspectRatio)
+        val decoded =
+            yamlDefaultSerializer.decodeFromString<ModifierWrapper.AspectRatio>(encodedString)
         assertEquals(aspectRatio, decoded)
     }
 }

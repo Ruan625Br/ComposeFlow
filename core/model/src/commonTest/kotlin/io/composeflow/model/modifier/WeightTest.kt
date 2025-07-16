@@ -2,7 +2,7 @@ package io.composeflow.model.modifier
 
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -34,8 +34,8 @@ class WeightTest {
     fun serialize_verify_restored_instance() {
         val weight = ModifierWrapper.Weight(weight = 1f, fill = false)
 
-        val encodedString = yamlSerializer.encodeToString(weight)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Weight>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(weight)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Weight>(encodedString)
         assertEquals(weight, decoded)
     }
 }

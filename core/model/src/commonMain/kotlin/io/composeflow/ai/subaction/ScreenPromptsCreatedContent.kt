@@ -38,7 +38,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.composeflow.ai.AiAssistantDialogCallbacks
-import io.composeflow.ai.AiAssistantUiState
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.project.Project
 import io.composeflow.ui.adaptive.ProvideDeviceSizeDp
@@ -53,7 +52,7 @@ import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 @Composable
 fun ScreenPromptsCreatedContent(
     callbacks: AiAssistantDialogCallbacks,
-    uiState: AiAssistantUiState.Success.ScreenPromptsCreated,
+    screenPrompts: List<GeneratedScreenPrompt>,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier) {
@@ -62,7 +61,7 @@ fun ScreenPromptsCreatedContent(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(uiState.screenPrompts) { screenPrompt ->
+            items(screenPrompts) { screenPrompt ->
                 ScreenPromptItem(screenPrompt, callbacks)
             }
         }

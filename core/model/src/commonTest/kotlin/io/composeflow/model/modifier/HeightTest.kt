@@ -3,7 +3,7 @@ package io.composeflow.model.modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -19,7 +19,7 @@ class HeightTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.height(
                    50.androidx.compose.ui.unit.dp),""".trimForCompare(),
@@ -31,8 +31,8 @@ class HeightTest {
     fun serialize_verify_restored_instance() {
         val height = ModifierWrapper.Height(height = 8.dp)
 
-        val encodedString = yamlSerializer.encodeToString(height)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Height>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(height)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Height>(encodedString)
         assertEquals(height, decoded)
     }
 }

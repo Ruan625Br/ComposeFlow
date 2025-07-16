@@ -2,7 +2,7 @@ package io.composeflow.model.modifier
 
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -18,7 +18,7 @@ class ScaleTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.ui.draw.scale(
                    1.0f
@@ -37,7 +37,7 @@ class ScaleTest {
         assertEquals(
             """modifier = androidx.compose.ui.Modifier
                  .androidx.compose.ui.draw.scale(
-                   scaleX = -1.0f, 
+                   scaleX = -1.0f,
                    scaleY = 1.0f
                  ),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -64,8 +64,8 @@ class ScaleTest {
     fun serialize_verify_restored_instance() {
         val scale = ModifierWrapper.Scale(scaleX = 2f, scaleY = 3f)
 
-        val encodedString = yamlSerializer.encodeToString(scale)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Scale>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(scale)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Scale>(encodedString)
         assertEquals(scale, decoded)
     }
 }

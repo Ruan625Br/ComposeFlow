@@ -3,7 +3,7 @@ package io.composeflow.model.modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -63,7 +63,7 @@ class PaddingTest {
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                    all = 8.androidx.compose.ui.unit.dp),""".trimForCompare(),
@@ -81,7 +81,7 @@ class PaddingTest {
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                    horizontal = 8.androidx.compose.ui.unit.dp,
@@ -101,7 +101,7 @@ class PaddingTest {
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                    start = 8.androidx.compose.ui.unit.dp,
@@ -124,7 +124,7 @@ class PaddingTest {
         val code =
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                    all = 8.androidx.compose.ui.unit.dp)
@@ -138,8 +138,8 @@ class PaddingTest {
     fun serialize_verify_restored_instance() {
         val padding = ModifierWrapper.Padding(all = 16.dp)
 
-        val encodedString = yamlSerializer.encodeToString(padding)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Padding>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(padding)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Padding>(encodedString)
         assertEquals(padding, decoded)
     }
 }

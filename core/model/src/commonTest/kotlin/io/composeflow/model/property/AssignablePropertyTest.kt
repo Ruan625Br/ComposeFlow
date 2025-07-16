@@ -4,7 +4,7 @@ import androidx.compose.runtime.mutableStateOf
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.enumwrapper.TextDecorationWrapper
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -114,8 +114,8 @@ class AssignablePropertyTest {
                     ),
             )
 
-        val encoded = yamlSerializer.encodeToString(conditional)
-        val decoded = yamlSerializer.decodeFromString<ConditionalProperty>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(conditional)
+        val decoded = yamlDefaultSerializer.decodeFromString<ConditionalProperty>(encoded)
         assertEquals(conditional, decoded)
     }
 
@@ -142,10 +142,14 @@ class AssignablePropertyTest {
 
         // Check that all properties are present
         val enumProperties = assignableProperties.filterIsInstance<EnumProperty>()
-        val booleanProperties = assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
+        val booleanProperties =
+            assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
         val conditionalProperties = assignableProperties.filterIsInstance<ConditionalProperty>()
 
-        assertEquals(6, enumProperties.size) // defaultValue, thenValue, elseBlock.value + their selfs
+        assertEquals(
+            6,
+            enumProperties.size,
+        ) // defaultValue, thenValue, elseBlock.value + their selfs
         assertEquals(2, booleanProperties.size) // ifExpression + self
         assertEquals(1, conditionalProperties.size) // conditional self
     }
@@ -182,10 +186,14 @@ class AssignablePropertyTest {
         assertEquals(17, assignableProperties.size) // 8 properties + 8 selfs + 1 conditional self
 
         val enumProperties = assignableProperties.filterIsInstance<EnumProperty>()
-        val booleanProperties = assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
+        val booleanProperties =
+            assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
         val conditionalProperties = assignableProperties.filterIsInstance<ConditionalProperty>()
 
-        assertEquals(10, enumProperties.size) // defaultValue, thenValue, 2 elseIf values, elseBlock.value + their selfs
+        assertEquals(
+            10,
+            enumProperties.size,
+        ) // defaultValue, thenValue, 2 elseIf values, elseBlock.value + their selfs
         assertEquals(6, booleanProperties.size) // ifExpression + 2 elseIf expressions + their selfs
         assertEquals(1, conditionalProperties.size) // conditional self
     }
@@ -222,10 +230,15 @@ class AssignablePropertyTest {
         // - defaultValue, ifExpression, thenValue, elseValue
         // - prefix_ (from thenValue transformer), _suffix (from elseValue transformer)
         // - all their selfs + conditional self
-        assertEquals(13, assignableProperties.size) // 6 properties + 6 selfs + 1 conditional self (adjusted from actual)
+        assertEquals(
+            13,
+            assignableProperties.size,
+        ) // 6 properties + 6 selfs + 1 conditional self (adjusted from actual)
 
-        val stringProperties = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>()
-        val booleanProperties = assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
+        val stringProperties =
+            assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>()
+        val booleanProperties =
+            assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
         val conditionalProperties = assignableProperties.filterIsInstance<ConditionalProperty>()
 
         assertEquals(
@@ -237,7 +250,10 @@ class AssignablePropertyTest {
 
         // Verify specific values (accounting for duplicates due to self-inclusion)
         val stringValues = stringProperties.map { it.value }.toSet()
-        assertEquals(setOf("default", "then_value", "else_value", "prefix_", "_suffix"), stringValues)
+        assertEquals(
+            setOf("default", "then_value", "else_value", "prefix_", "_suffix"),
+            stringValues,
+        )
     }
 
     @Test
@@ -276,19 +292,36 @@ class AssignablePropertyTest {
         // Outer: outer_default, ifExpression(true), nestedConditional, outer_else
         // Nested (from nestedConditional): nested_default, ifExpression(false), nested_then, nested_else + nested self
         // Plus all individual property selfs + outer conditional self
-        assertEquals(17, assignableProperties.size) // 8 original + 8 selfs + 1 nested conditional self (actual count)
+        assertEquals(
+            17,
+            assignableProperties.size,
+        ) // 8 original + 8 selfs + 1 nested conditional self (actual count)
 
-        val stringProperties = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>()
-        val booleanProperties = assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
+        val stringProperties =
+            assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>()
+        val booleanProperties =
+            assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
         val conditionalProperties = assignableProperties.filterIsInstance<ConditionalProperty>()
 
         assertEquals(10, stringProperties.size) // All string values + their selfs
         assertEquals(4, booleanProperties.size) // Both boolean expressions + their selfs
-        assertEquals(3, conditionalProperties.size) // The nested conditional + outer conditional self + additional from self-inclusion
+        assertEquals(
+            3,
+            conditionalProperties.size,
+        ) // The nested conditional + outer conditional self + additional from self-inclusion
 
         // Verify string values
         val stringValues = stringProperties.map { it.value }.toSet()
-        assertEquals(setOf("outer_default", "outer_else", "nested_default", "nested_then", "nested_else"), stringValues)
+        assertEquals(
+            setOf(
+                "outer_default",
+                "outer_else",
+                "nested_default",
+                "nested_then",
+                "nested_else",
+            ),
+            stringValues,
+        )
     }
 
     @Test
@@ -320,11 +353,16 @@ class AssignablePropertyTest {
         // - All their selfs + conditional self
         assertEquals(11, assignableProperties.size) // 5 properties + 5 selfs + 1 conditional self
 
-        val stringProperties = assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>()
-        val booleanProperties = assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
+        val stringProperties =
+            assignableProperties.filterIsInstance<StringProperty.StringIntrinsicValue>()
+        val booleanProperties =
+            assignableProperties.filterIsInstance<BooleanProperty.BooleanIntrinsicValue>()
         val conditionalProperties = assignableProperties.filterIsInstance<ConditionalProperty>()
 
-        assertEquals(8, stringProperties.size) // default, then, else, _added + their selfs (adjusted from actual: was 10 but got 8)
+        assertEquals(
+            8,
+            stringProperties.size,
+        ) // default, then, else, _added + their selfs (adjusted from actual: was 10 but got 8)
         assertEquals(2, booleanProperties.size) // ifExpression + self
         assertEquals(1, conditionalProperties.size) // conditional self
 

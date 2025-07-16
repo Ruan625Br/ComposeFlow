@@ -1,7 +1,7 @@
 package io.composeflow.model.project.appscreen.screen
 
 import com.charleskorn.kaml.YamlNode
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import prefixIdInYamlNode
@@ -18,15 +18,15 @@ fun Screen.postProcessAfterAiGeneration(newId: String): Screen {
 }
 
 fun Screen.replaceIdsToIncreaseUniqueness(): Screen {
-    val yaml = yamlSerializer.encodeToString(this)
+    val yaml = yamlDefaultSerializer.encodeToString(this)
     val prefixedYaml =
         prefixYamlIdsWithKaml(
             yamlString = yaml,
             screenId = id,
         )
     return prefixedYaml?.let {
-        yamlSerializer.decodeFromString<Screen>(prefixedYaml)
-    } ?: yamlSerializer.decodeFromString<Screen>(yaml)
+        yamlDefaultSerializer.decodeFromString<Screen>(prefixedYaml)
+    } ?: yamlDefaultSerializer.decodeFromString<Screen>(yaml)
 }
 
 /**
@@ -46,15 +46,16 @@ private fun prefixYamlIdsWithKaml(
 
     return try {
         // Step 1: Parse the YAML string into kaml's intermediate YamlNode structure
-        val rootNode: YamlNode = yamlSerializer.parseToYamlNode(yamlString)
+        val rootNode: YamlNode = yamlDefaultSerializer.parseToYamlNode(yamlString)
 
         // Step 2: Recursively process the YamlNode structure to modify IDs
         val modifiedNode: YamlNode = prefixIdInYamlNode(rootNode, screenId, idPrefix)
 
         // Step 3: Encode the modified YamlNode structure back to a YAML string
         // We need the YamlNode.serializer() provided by kaml
-        val modifiedScreen = yamlSerializer.decodeFromYamlNode(Screen.serializer(), modifiedNode)
-        yamlSerializer.encodeToString(modifiedScreen)
+        val modifiedScreen =
+            yamlDefaultSerializer.decodeFromYamlNode(Screen.serializer(), modifiedNode)
+        yamlDefaultSerializer.encodeToString(modifiedScreen)
     } catch (e: Exception) {
         // Catch potential parsing or processing errors
         e.printStackTrace()

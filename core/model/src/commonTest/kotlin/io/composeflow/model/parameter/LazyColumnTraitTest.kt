@@ -6,7 +6,7 @@ import io.composeflow.model.parameter.wrapper.AlignmentHorizontalWrapper
 import io.composeflow.model.parameter.wrapper.ArrangementVerticalWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -74,8 +74,8 @@ class LazyColumnTraitTest {
                 horizontalAlignment = AlignmentHorizontalWrapper.End,
             )
 
-        val encoded = yamlSerializer.encodeToString(lazyColumnParams)
-        val decoded = yamlSerializer.decodeFromString<LazyColumnTrait>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(lazyColumnParams)
+        val decoded = yamlDefaultSerializer.decodeFromString<LazyColumnTrait>(encoded)
 
         assertEquals(lazyColumnParams, decoded)
     }

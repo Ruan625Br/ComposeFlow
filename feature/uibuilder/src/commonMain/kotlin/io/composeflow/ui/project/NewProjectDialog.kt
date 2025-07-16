@@ -29,9 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
@@ -66,7 +63,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun NewProjectDialog(
     onDismissDialog: () -> Unit,
     onConfirmProject: (projectName: String, packageName: String) -> Unit,
-    onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
+    onConfirmProjectWithScreens: (project: Project, screens: List<Screen>) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     PositionCustomizablePopup(
@@ -94,7 +91,7 @@ fun NewProjectDialog(
 @Composable
 private fun AiAssistedCreationInputs(
     onConfirmProject: (projectName: String, packageName: String) -> Unit,
-    onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
+    onConfirmProjectWithScreens: (project: Project, screens: List<Screen>) -> Unit,
     onDismissDialog: () -> Unit,
 ) {
     var userQuery by remember { mutableStateOf("") }
@@ -252,7 +249,7 @@ private fun AiAssistedCreationInputs(
 @Composable
 fun NewProjectDialogContent(
     onConfirmProject: (projectName: String, packageName: String) -> Unit,
-    onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
+    onConfirmProjectWithScreens: (project: Project, screens: List<Screen>) -> Unit,
     onDismissDialog: () -> Unit,
 ) {
     Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
@@ -276,7 +273,7 @@ private fun ThemedNewProjectDialogPreview(useDarkTheme: Boolean) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
         NewProjectDialogContent(
             onConfirmProject = { _, _ -> },
-            onConfirmProjectWithScreens = { _, _, _ -> },
+            onConfirmProjectWithScreens = { _, _ -> },
             onDismissDialog = {},
         )
     }

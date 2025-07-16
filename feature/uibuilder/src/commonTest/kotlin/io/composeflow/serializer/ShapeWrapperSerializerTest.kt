@@ -29,8 +29,8 @@ class ShapeWrapperSerializerTest {
     }
 
     private fun verifySerializeDeserialize(shapeWrapper: ShapeWrapper) {
-        val encoded = yamlSerializer.encodeToString(shapeWrapper)
-        val decoded = yamlSerializer.decodeFromString<ShapeWrapper>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(shapeWrapper)
+        val decoded = yamlDefaultSerializer.decodeFromString<ShapeWrapper>(encoded)
 
         Assert.assertEquals(shapeWrapper, decoded)
     }

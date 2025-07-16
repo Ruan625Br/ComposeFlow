@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -27,6 +28,7 @@ import io.composeflow.ai_action_create_project
 import io.composeflow.ai_action_discard_result
 import io.composeflow.ai_action_proceed_to_generate_screens
 import io.composeflow.create
+import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import org.jetbrains.compose.resources.stringResource
@@ -85,11 +87,61 @@ sealed class AiAssistantUiState {
             }
         }
 
+        data class ToolResponseProcessed(
+            val result: ToolResponseWrapper,
+        ) : Success()
+    }
+
+    sealed class ScreensCreationSuccess : AiAssistantUiState() {
+        abstract var screenPrompts: MutableList<GeneratedScreenPrompt>
+
         data class ScreenPromptsCreated(
-            val projectName: String,
             val packageName: String,
-            val screenPrompts: List<GeneratedScreenPrompt>,
-        ) : Success() {
+            override var screenPrompts: MutableList<GeneratedScreenPrompt> = mutableStateListOf(),
+        ) : ScreensCreationSuccess() {
+            @Composable
+            override fun ActionContent(
+                callbacks: AiAssistantDialogCallbacks,
+                onCloseClick: () -> Unit,
+                onDiscardResult: () -> Unit,
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp).height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    val buttonModifier = Modifier.weight(1f).fillMaxHeight()
+                    OutlinedButton(
+                        onClick = {
+                            onDiscardResult()
+                        },
+                        modifier = buttonModifier,
+                    ) {
+                        Text(
+                            stringResource(Res.string.ai_action_discard_result),
+                        )
+                    }
+
+                    if (screenPrompts.all { it is GeneratedScreenPrompt.BeforeGeneration }) {
+                        Button(
+                            onClick = {
+                                callbacks.onProceedToGenerateScreens()
+                            },
+                            enabled = !isGenerating.value,
+                            modifier = buttonModifier,
+                        ) {
+                            Text(
+                                stringResource(Res.string.ai_action_proceed_to_generate_screens),
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        data class InitialProjectCreated(
+            val project: Project,
+            override var screenPrompts: MutableList<GeneratedScreenPrompt>,
+        ) : ScreensCreationSuccess() {
             @Composable
             override fun ActionContent(
                 callbacks: AiAssistantDialogCallbacks,
@@ -114,26 +166,14 @@ sealed class AiAssistantUiState {
                         )
                     }
 
-                    if (screenPrompts.all { it is GeneratedScreenPrompt.BeforeGeneration }) {
-                        Button(
-                            onClick = {
-                                callbacks.onProceedToGenerateScreens()
-                            },
-                            modifier = buttonModifier,
-                        ) {
-                            Text(
-                                stringResource(Res.string.ai_action_proceed_to_generate_screens),
-                            )
-                        }
-                    } else if (screenPrompts.all {
+                    if (screenPrompts.all {
                             it is GeneratedScreenPrompt.ScreenGenerated || (it is GeneratedScreenPrompt.Error && !it.withRetry)
                         }
                     ) {
                         Button(
                             onClick = {
                                 callbacks.onConfirmProjectWithScreens(
-                                    projectName,
-                                    packageName,
+                                    project,
                                     screenPrompts.mapNotNull {
                                         (it as? GeneratedScreenPrompt.ScreenGenerated)?.screen
                                     },
@@ -166,8 +206,7 @@ sealed class AiAssistantUiState {
                         positiveButtonColor = MaterialTheme.colorScheme.primary,
                         onConfirmClick = {
                             callbacks.onConfirmProjectWithScreens(
-                                projectName,
-                                packageName,
+                                project,
                                 screenPrompts.mapNotNull {
                                     (it as? GeneratedScreenPrompt.ScreenGenerated)?.screen
                                 },
@@ -180,10 +219,6 @@ sealed class AiAssistantUiState {
                 }
             }
         }
-
-        data class ToolResponseProcessed(
-            val result: ToolResponseWrapper,
-        ) : Success()
     }
 
     data class Error(

@@ -14,12 +14,11 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.getOperationTargetNode
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
 import io.composeflow.swap
 import io.composeflow.ui.EventResult
 import io.composeflow.ui.UiBuilderHelper
 import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
-import kotlinx.serialization.decodeFromString
 
 /**
  * Handles operations related to UI builder, such as adding or removing nodes.
@@ -116,7 +115,7 @@ class UiBuilderOperator {
     ): EventResult {
         val result = EventResult()
         try {
-            val composeNode: ComposeNode = yamlSerializer.decodeFromString(composeNodeYaml)
+            val composeNode: ComposeNode = decodeFromStringWithFallback(composeNodeYaml)
             val eventResult =
                 onPreAddComposeNodeToContainerNode(
                     project,
@@ -267,7 +266,7 @@ class UiBuilderOperator {
                 return result
             }
 
-            val modifier: ModifierWrapper = yamlSerializer.decodeFromString(modifierYaml)
+            val modifier: ModifierWrapper = decodeFromStringWithFallback(modifierYaml)
             onAddModifier(
                 project,
                 composeNodeId,
@@ -317,7 +316,7 @@ class UiBuilderOperator {
                 return result
             }
 
-            val modifier: ModifierWrapper = yamlSerializer.decodeFromString(modifierYaml)
+            val modifier: ModifierWrapper = decodeFromStringWithFallback(modifierYaml)
             onUpdateModifier(project, composeNodeId, index, modifier)
         } catch (e: Exception) {
             Logger.e(e) { "Error updating modifier at index $index" }
@@ -490,6 +489,7 @@ class UiBuilderOperator {
                     when (val context = trackableIssue.destinationContext) {
                         is io.composeflow.model.project.issue.DestinationContext.UiBuilderScreen ->
                             "Screen: ${context.canvasEditableId}, Node: ${context.composeNodeId}"
+
                         is io.composeflow.model.project.issue.DestinationContext.ApiEditorScreen ->
                             "API: ${context.apiId}"
                     }

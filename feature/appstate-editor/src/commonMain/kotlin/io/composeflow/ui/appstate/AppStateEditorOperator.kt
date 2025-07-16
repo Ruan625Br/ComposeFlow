@@ -8,10 +8,10 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.state.AppState
 import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.copy
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.ui.EventResult
 import io.composeflow.util.generateUniqueName
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 /**
@@ -53,7 +53,7 @@ class AppStateEditorOperator {
         appStateYaml: String,
     ): EventResult =
         try {
-            val appState = yamlSerializer.decodeFromString<ReadableState>(appStateYaml)
+            val appState = decodeFromStringWithFallback<ReadableState>(appStateYaml)
             if (appState is AppState<*>) {
                 addAppState(project, appState)
             } else {
@@ -62,9 +62,9 @@ class AppStateEditorOperator {
                 }
             }
         } catch (e: Exception) {
-            Logger.e(e) { "Error parsing app state YAML" }
+            Logger.e(e) { "Error parsing app state YAML: \n $appStateYaml" }
             EventResult().apply {
-                errorMessages.add("Failed to parse app state YAML: ${e.message}")
+                errorMessages.add("Failed to parse app state YAML: ${e.message}. YAML: $appStateYaml")
             }
         }
 
@@ -138,7 +138,7 @@ class AppStateEditorOperator {
         appStateYaml: String,
     ): EventResult =
         try {
-            val appState = yamlSerializer.decodeFromString<ReadableState>(appStateYaml)
+            val appState = decodeFromStringWithFallback<ReadableState>(appStateYaml)
             if (appState is AppState<*>) {
                 updateAppState(project, appState)
             } else {
@@ -147,9 +147,9 @@ class AppStateEditorOperator {
                 }
             }
         } catch (e: Exception) {
-            Logger.e(e) { "Error parsing app state YAML" }
+            Logger.e(e) { "Error parsing app state YAML: \n $appStateYaml\n" }
             EventResult().apply {
-                errorMessages.add("Failed to parse app state YAML: ${e.message}")
+                errorMessages.add("Failed to parse app state YAML: ${e.message}. YAML:\n$appStateYaml")
             }
         }
 
@@ -193,10 +193,10 @@ class AppStateEditorOperator {
     ): EventResult =
         try {
             val defaultValues =
-                yamlSerializer.decodeFromString<List<DataTypeDefaultValue>>(defaultValuesYaml)
+                decodeFromStringWithFallback<List<DataTypeDefaultValue>>(defaultValuesYaml)
             updateCustomDataTypeListDefaultValues(project, appStateId, defaultValues)
         } catch (e: Exception) {
-            Logger.e(e) { "Error parsing default values YAML" }
+            Logger.e(e) { "Error parsing default values YAML: \n $defaultValuesYaml" }
             EventResult().apply {
                 errorMessages.add("Failed to parse default values YAML: ${e.message}")
             }
@@ -209,7 +209,7 @@ class AppStateEditorOperator {
     fun onListAppStates(project: Project): String =
         try {
             val states = project.globalStateHolder.getStates(project)
-            yamlSerializer.encodeToString(states)
+            yamlDefaultSerializer.encodeToString(states)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing app states" }
             "Error listing app states: ${e.message}"
@@ -227,7 +227,7 @@ class AppStateEditorOperator {
         try {
             val state = project.globalStateHolder.getStates(project).find { it.id == appStateId }
             if (state != null) {
-                yamlSerializer.encodeToString(state)
+                yamlDefaultSerializer.encodeToString(state)
             } else {
                 "App state with ID $appStateId not found."
             }

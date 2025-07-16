@@ -26,7 +26,7 @@ data class CreateProject(
     val id: String,
     val projectName: String,
     val packageName: String,
-    val screenPrompts: List<ScreenPrompt>,
+    val screenPrompts: MutableList<ScreenPrompt>,
 )
 
 @Serializable

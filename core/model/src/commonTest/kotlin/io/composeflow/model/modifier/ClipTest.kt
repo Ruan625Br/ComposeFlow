@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.parameter.wrapper.ShapeWrapper
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -47,8 +47,8 @@ class ClipTest {
     fun serialize_verify_restored_instance() {
         val clip = ModifierWrapper.Clip(shapeWrapper = ShapeWrapper.CutCorner(8.dp))
 
-        val encodedString = yamlSerializer.encodeToString(clip)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Clip>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(clip)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Clip>(encodedString)
         assertEquals(clip, decoded)
     }
 }

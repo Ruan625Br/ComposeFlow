@@ -38,10 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component1
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component2
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component3
-import androidx.compose.ui.focus.FocusRequester.Companion.FocusRequesterFactory.component4
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -79,7 +75,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun ProjectScreen(
     onCreateProject: (projectName: String, packageName: String) -> Unit,
-    onCreateProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
+    onCreateProjectWithScreens: (project: Project, screens: List<Screen>) -> Unit,
     onDeleteProject: (String) -> Unit,
     onProjectSelected: (Project) -> Unit,
     projectUiStateList: List<LoadedProjectUiState>,
@@ -98,7 +94,7 @@ fun ProjectScreen(
 @Composable
 private fun ProjectListBody(
     onCreateProject: (projectName: String, packageName: String) -> Unit,
-    onCreateProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
+    onCreateProjectWithScreens: (project: Project, screens: List<Screen>) -> Unit,
     onDeleteProject: (String) -> Unit,
     onProjectSelected: (Project) -> Unit,
     projectUiStateList: List<LoadedProjectUiState>,
@@ -203,9 +199,9 @@ private fun ProjectListBody(
                     onCreateProject(projectName, packageName)
                     onAllDialogsClosed()
                 },
-                onConfirmProjectWithScreens = { projectName, packageName, screens ->
+                onConfirmProjectWithScreens = { projectName, screens ->
                     createProjectDialogOpen = false
-                    onCreateProjectWithScreens(projectName, packageName, screens)
+                    onCreateProjectWithScreens(projectName, screens)
                     onAllDialogsClosed()
                 },
             )

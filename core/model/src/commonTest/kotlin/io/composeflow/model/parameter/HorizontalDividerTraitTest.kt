@@ -7,7 +7,7 @@ import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.ColorProperty
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -66,8 +66,8 @@ class HorizontalDividerTraitTest {
                 thickness = 4.dp,
                 color = ColorProperty.ColorIntrinsicValue(ColorWrapper(themeColor = Material3ColorWrapper.Outline)),
             )
-        val encoded = yamlSerializer.encodeToString(dividerParams)
-        val decoded = yamlSerializer.decodeFromString<HorizontalDividerTrait>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(dividerParams)
+        val decoded = yamlDefaultSerializer.decodeFromString<HorizontalDividerTrait>(encoded)
 
         Assert.assertEquals(dividerParams, decoded)
     }

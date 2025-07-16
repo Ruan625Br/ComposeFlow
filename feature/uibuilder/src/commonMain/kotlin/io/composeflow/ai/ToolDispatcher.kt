@@ -152,7 +152,8 @@ class ToolDispatcher(
 
             is ToolArgs.GetAppStateArgs -> {
                 try {
-                    val appStateResult = appStateEditorOperator.onGetAppState(project, toolArgs.appStateId)
+                    val appStateResult =
+                        appStateEditorOperator.onGetAppState(project, toolArgs.appStateId)
                     toolArgs.result = appStateResult
                     EventResult() // Success
                 } catch (e: Exception) {
@@ -274,7 +275,8 @@ class ToolDispatcher(
 
             is ToolArgs.GetDataTypeArgs -> {
                 try {
-                    val dataTypeResult = dataTypeEditorOperator.onGetDataType(project, toolArgs.dataTypeId)
+                    val dataTypeResult =
+                        dataTypeEditorOperator.onGetDataType(project, toolArgs.dataTypeId)
                     toolArgs.result = dataTypeResult
                     EventResult() // Success
                 } catch (e: Exception) {
@@ -298,7 +300,8 @@ class ToolDispatcher(
 
             is ToolArgs.GetCustomEnumArgs -> {
                 try {
-                    val customEnumResult = dataTypeEditorOperator.onGetCustomEnum(project, toolArgs.customEnumId)
+                    val customEnumResult =
+                        dataTypeEditorOperator.onGetCustomEnum(project, toolArgs.customEnumId)
                     toolArgs.result = customEnumResult
                     EventResult() // Success
                 } catch (e: Exception) {

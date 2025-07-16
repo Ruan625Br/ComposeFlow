@@ -1,7 +1,7 @@
 package io.composeflow.model.parameter
 
 import io.composeflow.model.parameter.wrapper.AlignmentWrapper
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Assert.assertEquals
@@ -12,8 +12,8 @@ class BoxTraitTest {
     fun serialize_deserialize() {
         val boxParams = BoxTrait(contentAlignment = AlignmentWrapper.Center)
 
-        val encoded = yamlSerializer.encodeToString(boxParams)
-        val decoded = yamlSerializer.decodeFromString<BoxTrait>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(boxParams)
+        val decoded = yamlDefaultSerializer.decodeFromString<BoxTrait>(encoded)
 
         assertEquals(boxParams, decoded)
     }

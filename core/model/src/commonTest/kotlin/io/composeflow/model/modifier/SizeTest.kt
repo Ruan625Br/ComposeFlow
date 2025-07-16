@@ -4,7 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -28,10 +28,10 @@ class SizeTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.size(
-                   width = 50.androidx.compose.ui.unit.dp, 
+                   width = 50.androidx.compose.ui.unit.dp,
                    height = 50.androidx.compose.ui.unit.dp,
                  ),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -48,7 +48,7 @@ class SizeTest {
         assertEquals(
             """modifier = androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.size(
-                   width = 50.androidx.compose.ui.unit.dp, 
+                   width = 50.androidx.compose.ui.unit.dp,
                    height = androidx.compose.ui.unit.Dp.Unspecified,
                  ),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -59,8 +59,8 @@ class SizeTest {
     fun serialize_verify_restored_instance() {
         val size = ModifierWrapper.Size(height = 8.dp, width = Dp.Unspecified)
 
-        val encodedString = yamlSerializer.encodeToString(size)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Size>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(size)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Size>(encodedString)
         assertEquals(size, decoded)
     }
 }

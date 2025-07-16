@@ -1323,8 +1323,10 @@ fun BoxScope.ToggleBottomNavButton(project: Project) {
 }
 
 const val CANVAS_TOP_TOOLBAR_TEST_TAG = "CanvasTopToolbar"
-const val CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/DarkModeSwitch"
-const val CANVAS_TOP_TOOLBAR_SHOW_BORDERS_SWITCH_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/ShowBordersSwitch"
+const val CANVAS_TOP_TOOLBAR_DARK_MODE_SWITCH_TEST_TAG =
+    "$CANVAS_TOP_TOOLBAR_TEST_TAG/DarkModeSwitch"
+const val CANVAS_TOP_TOOLBAR_SHOW_BORDERS_SWITCH_TEST_TAG =
+    "$CANVAS_TOP_TOOLBAR_TEST_TAG/ShowBordersSwitch"
 const val CANVAS_TOP_TOOLBAR_ZOOM_IN_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/ZoomIn"
 const val CANVAS_TOP_TOOLBAR_ZOOM_OUT_TEST_TAG = "$CANVAS_TOP_TOOLBAR_TEST_TAG/ZoomOut"
 const val CANVAS_TOP_TOOLBAR_POSITION_AND_ZOOM_RESET_TEST_TAG =
@@ -1721,7 +1723,7 @@ private fun RowScope.OpenAiAssistantDialog(
                 onAllDialogsClosed()
             },
             // This is only used from the initial project creation
-            onConfirmProjectWithScreens = { _, _, _ -> },
+            onConfirmProjectWithScreens = { _, _ -> },
         )
     }
 }

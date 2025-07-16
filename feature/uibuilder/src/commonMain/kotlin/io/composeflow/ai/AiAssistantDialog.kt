@@ -12,8 +12,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -70,7 +72,7 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun AiAssistantDialog(
     project: Project,
-    onConfirmProjectWithScreens: (projectName: String, packageName: String, screens: List<Screen>) -> Unit,
+    onConfirmProjectWithScreens: (project: Project, screens: List<Screen>) -> Unit,
     callbacks: AiAssistantDialogCallbacks = AiAssistantDialogCallbacks(),
     onCloseClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -157,8 +159,17 @@ private fun AiConversationArea(
 ) {
     var inputValue by remember { mutableStateOf("") }
     val focusRequester = remember { FocusRequester() }
+    val listState = rememberLazyListState()
+
     LaunchedEffect(Unit) {
         focusRequester.requestFocus()
+    }
+
+    // Auto-scroll to the latest message when a new message is added
+    LaunchedEffect(messages.size) {
+        if (messages.isNotEmpty()) {
+            listState.animateScrollToItem(messages.size - 1)
+        }
     }
     Column(modifier = modifier.fillMaxHeight()) {
         Column(
@@ -176,6 +187,7 @@ private fun AiConversationArea(
                     ),
         ) {
             LazyColumn(
+                state = listState,
                 contentPadding = PaddingValues(16.dp),
                 modifier =
                     Modifier
@@ -245,14 +257,15 @@ private fun ChatMessage(
     val isLongMessage = messageModel.message.length > 300
 
     // Get styled text for display
-    val styledText = messageModel.getStyledText(isLongMessage = isLongMessage, isExpanded = isExpanded)
+    val styledText =
+        messageModel.getStyledText(isLongMessage = isLongMessage, isExpanded = isExpanded)
 
     // Determine icon color based on message type
     val iconColor =
         when (messageModel.messageType) {
             MessageType.ToolCall -> MaterialTheme.colorScheme.tertiary
             MessageType.ToolCallError -> MaterialTheme.colorScheme.error
-            MessageType.Regular -> MaterialTheme.colorScheme.onPrimary
+            MessageType.Regular -> MaterialTheme.colorScheme.onSurface
         }
 
     if (messageModel.messageOwner == MessageOwner.User) {
@@ -347,9 +360,9 @@ private fun ChatMessage(
                         tint = iconColor,
                         modifier =
                             Modifier
-                                .size(12.dp)
-                                .padding(top = 4.dp, end = 8.dp),
+                                .size(12.dp),
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     Column(
                         modifier =
                             Modifier
@@ -486,10 +499,17 @@ private fun AiWorkspaceArea(
                     }
                 }
 
-                is AiAssistantUiState.Success.ScreenPromptsCreated -> {
+                is AiAssistantUiState.ScreensCreationSuccess.ScreenPromptsCreated -> {
                     ScreenPromptsCreatedContent(
                         callbacks = callbacks,
-                        uiState = uiState,
+                        screenPrompts = uiState.screenPrompts,
+                    )
+                }
+
+                is AiAssistantUiState.ScreensCreationSuccess.InitialProjectCreated -> {
+                    ScreenPromptsCreatedContent(
+                        callbacks = callbacks,
+                        screenPrompts = uiState.screenPrompts,
                     )
                 }
 

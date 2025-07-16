@@ -453,4 +453,5 @@ instead of in the canvas.</string>
     <string name="focus_single_composable_to_modify_actions">Focus a single Composable to modify the actions</string>
     <string name="selected_composables">%1$d Composables</string>
     <string name="ai_chat_input_placeholder">Ask me anything about your project...</string>
+    <string name="ai_preparing_architecture">Preparing app architecture...</string>
 </resources>

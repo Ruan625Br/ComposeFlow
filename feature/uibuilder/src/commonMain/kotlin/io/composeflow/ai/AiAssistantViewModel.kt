@@ -1,13 +1,23 @@
 package io.composeflow.ai
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
+import co.touchlab.kermit.Logger
 import io.composeflow.Res
+import io.composeflow.ai.openrouter.tools.ToolArgs
+import io.composeflow.ai.openrouter.tools.ToolExecutionStatus
 import io.composeflow.ai.subaction.GeneratedScreenPrompt
 import io.composeflow.ai_failed_to_generate_response
 import io.composeflow.ai_failed_to_generate_response_timeout
+import io.composeflow.ai_preparing_architecture
+import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.postProcessAfterAiGeneration
 import io.composeflow.removeLineBreak
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.ui.EventResult
 import io.composeflow.util.toKotlinFileName
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
@@ -25,6 +35,7 @@ import org.jetbrains.compose.resources.getString
 class AiAssistantViewModel(
     projectCreationQuery: String = "",
     private val repository: LlmRepository = LlmRepository(),
+    private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<AiAssistantUiState>(AiAssistantUiState.Idle)
     val uiState: StateFlow<AiAssistantUiState> = _uiState.asStateFlow()
@@ -32,13 +43,16 @@ class AiAssistantViewModel(
     private val _messages = MutableStateFlow<List<MessageModel>>(emptyList())
     val messages = _messages.asStateFlow()
 
+    var initialProject by mutableStateOf(Project())
+        private set
+
     init {
         if (projectCreationQuery.isNotBlank()) {
             onSendProjectCreationQuery(projectCreationQuery)
         }
     }
 
-    fun onSendProjectCreationQuery(projectCreationQuery: String) {
+    private fun onSendProjectCreationQuery(projectCreationQuery: String) {
         viewModelScope.launch {
             _messages.value +=
                 MessageModel(
@@ -58,18 +72,20 @@ class AiAssistantViewModel(
                 )
             _uiState.value.isGenerating.value = false
 
+            initialProject =
+                initialProject.copy(name = result.projectName, packageName = result.packageName)
             _uiState.value =
-                AiAssistantUiState.Success.ScreenPromptsCreated(
-                    projectName = result.projectName,
+                AiAssistantUiState.ScreensCreationSuccess.ScreenPromptsCreated(
                     packageName = result.packageName,
                     screenPrompts =
-                        result.prompts.map {
-                            GeneratedScreenPrompt.BeforeGeneration(
-                                id = it.screenName.toKotlinFileName(),
-                                screenName = it.screenName,
-                                prompt = it.prompt,
-                            )
-                        },
+                        result.prompts
+                            .map {
+                                GeneratedScreenPrompt.BeforeGeneration(
+                                    id = it.screenName.toKotlinFileName(),
+                                    screenName = it.screenName,
+                                    prompt = it.prompt,
+                                )
+                            }.toMutableStateList(),
                 )
         }
     }
@@ -79,7 +95,7 @@ class AiAssistantViewModel(
         newTitle: String,
     ) {
         when (val state = _uiState.value) {
-            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.ScreensCreationSuccess.ScreenPromptsCreated -> {
                 val updatedPrompts =
                     state.screenPrompts.map { prompt ->
                         when (prompt) {
@@ -100,7 +116,7 @@ class AiAssistantViewModel(
                             }
                         }
                     }
-                _uiState.value = state.copy(screenPrompts = updatedPrompts.toList())
+                _uiState.value = state.copy(screenPrompts = updatedPrompts.toMutableStateList())
             }
 
             else -> {}
@@ -109,10 +125,10 @@ class AiAssistantViewModel(
 
     fun onScreenPromptDeleted(id: String) {
         when (val state = _uiState.value) {
-            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.ScreensCreationSuccess.ScreenPromptsCreated -> {
                 val updatedPrompts =
                     state.screenPrompts.filter { prompt -> prompt.id != id }
-                _uiState.value = state.copy(screenPrompts = updatedPrompts.toList())
+                _uiState.value = state.copy(screenPrompts = updatedPrompts.toMutableStateList())
             }
 
             else -> {}
@@ -124,7 +140,7 @@ class AiAssistantViewModel(
         newPrompt: String,
     ) {
         when (val state = _uiState.value) {
-            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.ScreensCreationSuccess.ScreenPromptsCreated -> {
                 val updatedPrompts =
                     state.screenPrompts.map { prompt ->
                         when (prompt) {
@@ -145,7 +161,7 @@ class AiAssistantViewModel(
                             }
                         }
                     }
-                _uiState.value = state.copy(screenPrompts = updatedPrompts.toList())
+                _uiState.value = state.copy(screenPrompts = updatedPrompts.toMutableStateList())
             }
 
             else -> {}
@@ -155,9 +171,136 @@ class AiAssistantViewModel(
     fun onProceedToGenerateScreens() {
         viewModelScope.launch {
             when (val state = _uiState.value) {
-                is AiAssistantUiState.Success.ScreenPromptsCreated -> {
+                is AiAssistantUiState.ScreensCreationSuccess -> {
                     val originalPrompts = state.screenPrompts
                     val updatedPrompts = originalPrompts.toMutableList()
+
+                    // Call prepare_architecture endpoint before generating screens
+                    try {
+                        val projectContext =
+                            ProjectContext(
+                                screenContexts =
+                                    state.screenPrompts.map {
+                                        ScreenContext(
+                                            id = it.id,
+                                            screenName = it.screenName,
+                                        )
+                                    },
+                            )
+                        _uiState.value.isGenerating.value = true
+                        _messages.value +=
+                            MessageModel(
+                                messageOwner = MessageOwner.Ai,
+                                message = getString(Res.string.ai_preparing_architecture),
+                                createdAt = Clock.System.now(),
+                                messageType = MessageType.Regular,
+                            )
+
+                        var architectureResponse: ToolResponse? = null
+                        val previousToolArgs = mutableListOf<ToolArgs>()
+                        // Dispatch tool results if successful
+                        while ((architectureResponse as? ToolResponse.Success)?.response?.isConsideredComplete() != true) {
+                            architectureResponse =
+                                repository.prepareArchitecture(
+                                    promptString = "Prepare architecture for screens: ${
+                                        originalPrompts.joinToString(
+                                            ", ",
+                                        ) { it.screenName }
+                                    }",
+                                    projectContext = projectContext,
+                                    previousToolArgs = previousToolArgs,
+                                )
+
+                            when (architectureResponse) {
+                                is ToolResponse.Error -> {
+                                    _messages.value +=
+                                        MessageModel(
+                                            messageOwner = MessageOwner.Ai,
+                                            message = architectureResponse.message,
+                                            isFailed = true,
+                                            createdAt = Clock.System.now(),
+                                            messageType = MessageType.ToolCallError,
+                                        )
+                                    previousToolArgs.add(
+                                        ToolArgs.FakeArgs().apply {
+                                            status =
+                                                ToolExecutionStatus.Error
+                                        },
+                                    )
+                                }
+
+                                is ToolResponse.Success -> {
+                                    Logger.i("Success tool result received:")
+                                    Logger.i(jsonSerializer.encodeToString(architectureResponse.response))
+
+                                    val toolCallSummary =
+                                        architectureResponse.response.tool_calls?.let { toolCalls ->
+                                            if (toolCalls.isNotEmpty()) {
+                                                "Tool calls: ${
+                                                    toolCalls.joinToString(", ") {
+                                                        it.tool_args.javaClass.simpleName.removeSuffix(
+                                                            "Args",
+                                                        )
+                                                    }
+                                                }"
+                                            } else {
+                                                null
+                                            }
+                                        }
+
+                                    _messages.value +=
+                                        MessageModel(
+                                            messageOwner = MessageOwner.Ai,
+                                            message = architectureResponse.message,
+                                            createdAt = Clock.System.now(),
+                                            messageType =
+                                                if (architectureResponse.response.tool_calls?.isNotEmpty() ==
+                                                    true
+                                                ) {
+                                                    MessageType.ToolCall
+                                                } else {
+                                                    MessageType.Regular
+                                                },
+                                            toolCallSummary = toolCallSummary,
+                                        )
+                                    architectureResponse.response.tool_calls?.forEach {
+                                        val toolEventResult =
+                                            dispatchToolResponse(initialProject, it.tool_args)
+                                        if (toolEventResult.isSuccessful()) {
+                                            it.tool_args.status = ToolExecutionStatus.Success
+                                            previousToolArgs.add(it.tool_args)
+                                        } else {
+                                            it.tool_args.status =
+                                                ToolExecutionStatus.Error
+                                            it.tool_args.result =
+                                                toolEventResult.errorMessages.joinToString("\n")
+                                            previousToolArgs.add(it.tool_args)
+
+                                            _messages.value +=
+                                                MessageModel(
+                                                    messageOwner = MessageOwner.Ai,
+                                                    message =
+                                                        toolEventResult.errorMessages.joinToString(
+                                                            "\n",
+                                                        ),
+                                                    isFailed = true,
+                                                    createdAt = Clock.System.now(),
+                                                    messageType = MessageType.ToolCallError,
+                                                )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Logger.w("Failed to prepare architecture: ${e.message}")
+                    } finally {
+                        _uiState.value =
+                            AiAssistantUiState.ScreensCreationSuccess.InitialProjectCreated(
+                                project = initialProject,
+                                screenPrompts = state.screenPrompts,
+                            )
+                    }
 
                     val semaphore = Semaphore(permits = MAX_CONCURRENT_LLM_CALLS)
 
@@ -173,8 +316,9 @@ class AiAssistantViewModel(
                                                 screenName = prompt.screenName,
                                                 prompt = prompt.prompt,
                                             )
-                                        _uiState.value =
-                                            state.copy(screenPrompts = updatedPrompts.toList())
+                                        (_uiState.value as? AiAssistantUiState.ScreensCreationSuccess.InitialProjectCreated)?.let {
+                                            it.screenPrompts = updatedPrompts.toMutableStateList()
+                                        }
                                         _uiState.value.isGenerating.value = true
 
                                         var result: CreateScreenResponse =
@@ -247,8 +391,10 @@ class AiAssistantViewModel(
                                                 // We care only success state here
                                             }
                                         }
-                                        _uiState.value =
-                                            state.copy(screenPrompts = updatedPrompts.toList())
+                                        (_uiState.value as? AiAssistantUiState.ScreensCreationSuccess.InitialProjectCreated)?.let {
+                                            _uiState.value =
+                                                it.copy(screenPrompts = updatedPrompts.toMutableStateList())
+                                        }
                                     }
                                 }
                             }
@@ -265,7 +411,7 @@ class AiAssistantViewModel(
 
     fun onRenderedErrorDetected(errorPrompt: GeneratedScreenPrompt.Error) {
         when (val state = _uiState.value) {
-            is AiAssistantUiState.Success.ScreenPromptsCreated -> {
+            is AiAssistantUiState.ScreensCreationSuccess.ScreenPromptsCreated -> {
                 val originalPrompts = state.screenPrompts
                 val updatedPrompts = originalPrompts.toMutableList()
                 val indexOfScreen =
@@ -273,7 +419,7 @@ class AiAssistantViewModel(
                 if (indexOfScreen != -1) {
                     updatedPrompts[indexOfScreen] = errorPrompt
                 }
-                _uiState.value = state.copy(screenPrompts = updatedPrompts.toList())
+                _uiState.value = state.copy(screenPrompts = updatedPrompts.toMutableStateList())
             }
 
             else -> {
@@ -288,7 +434,10 @@ class AiAssistantViewModel(
             val existingContext =
                 when (val state = uiState.value) {
                     is AiAssistantUiState.Success.NewScreenCreated -> {
-                        yamlSerializer.encodeToString(Screen.serializer(), state.screen) + " "
+                        yamlDefaultSerializer.encodeToString(
+                            Screen.serializer(),
+                            state.screen,
+                        ) + " "
                     }
 
                     else -> ""
@@ -372,4 +521,9 @@ class AiAssistantViewModel(
         _uiState.value = AiAssistantUiState.Idle
         _uiState.value.isGenerating.value = false
     }
+
+    private fun dispatchToolResponse(
+        project: Project,
+        toolArgs: ToolArgs,
+    ): EventResult = toolDispatcher.dispatchToolResponse(project, toolArgs)
 }

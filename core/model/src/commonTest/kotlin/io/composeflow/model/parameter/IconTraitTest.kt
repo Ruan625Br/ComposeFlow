@@ -7,7 +7,7 @@ import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.ColorProperty
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -73,8 +73,8 @@ class IconTraitTest {
     fun serialize_deserialize() {
         val iconParams = IconTrait(imageVectorHolder = Outlined.ViewArray)
 
-        val encoded = yamlSerializer.encodeToString(iconParams)
-        val decoded = yamlSerializer.decodeFromString<IconTrait>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(iconParams)
+        val decoded = yamlDefaultSerializer.decodeFromString<IconTrait>(encoded)
 
         Assert.assertEquals(iconParams, decoded)
     }

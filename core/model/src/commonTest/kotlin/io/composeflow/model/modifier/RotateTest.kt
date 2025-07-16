@@ -2,7 +2,7 @@ package io.composeflow.model.modifier
 
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -18,7 +18,7 @@ class RotateTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.ui.draw.rotate(0.0f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -33,7 +33,7 @@ class RotateTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.ui.draw.rotate(30.0f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -44,8 +44,8 @@ class RotateTest {
     fun serialize_verify_restored_instance() {
         val rotate = ModifierWrapper.Rotate(60f)
 
-        val encodedString = yamlSerializer.encodeToString(rotate)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Rotate>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(rotate)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Rotate>(encodedString)
         assertEquals(rotate, decoded)
     }
 }

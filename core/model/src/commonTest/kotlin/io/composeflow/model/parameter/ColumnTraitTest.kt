@@ -2,7 +2,7 @@ package io.composeflow.model.parameter
 
 import io.composeflow.model.parameter.wrapper.AlignmentHorizontalWrapper
 import io.composeflow.model.parameter.wrapper.ArrangementVerticalWrapper
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Assert.assertEquals
@@ -17,8 +17,8 @@ class ColumnTraitTest {
                 horizontalAlignmentWrapper = AlignmentHorizontalWrapper.CenterHorizontally,
             )
 
-        val encoded = yamlSerializer.encodeToString(columnParams)
-        val decoded = yamlSerializer.decodeFromString<ColumnTrait>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(columnParams)
+        val decoded = yamlDefaultSerializer.decodeFromString<ColumnTrait>(encoded)
 
         assertEquals(columnParams, decoded)
     }

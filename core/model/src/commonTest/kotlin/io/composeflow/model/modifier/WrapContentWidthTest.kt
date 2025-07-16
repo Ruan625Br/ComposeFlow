@@ -3,7 +3,7 @@ package io.composeflow.model.modifier
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.parameter.wrapper.AlignmentHorizontalWrapper
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -46,9 +46,9 @@ class WrapContentWidthTest {
     fun serialize_verify_restored_instance() {
         val size = ModifierWrapper.WrapContentWidth()
 
-        val encodedString = yamlSerializer.encodeToString(size)
+        val encodedString = yamlDefaultSerializer.encodeToString(size)
         val decoded =
-            yamlSerializer.decodeFromString<ModifierWrapper.WrapContentWidth>(encodedString)
+            yamlDefaultSerializer.decodeFromString<ModifierWrapper.WrapContentWidth>(encodedString)
         assertEquals(size, decoded)
     }
 }

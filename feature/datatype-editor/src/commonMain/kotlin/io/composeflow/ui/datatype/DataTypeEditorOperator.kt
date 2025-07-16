@@ -7,10 +7,10 @@ import io.composeflow.model.datatype.DataField
 import io.composeflow.model.datatype.DataType
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.custom_enum.CustomEnum
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.ui.EventResult
 import io.composeflow.util.generateUniqueName
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 /**
@@ -51,7 +51,7 @@ class DataTypeEditorOperator {
         dataTypeYaml: String,
     ): EventResult =
         try {
-            val dataType = yamlSerializer.decodeFromString<DataType>(dataTypeYaml)
+            val dataType = decodeFromStringWithFallback<DataType>(dataTypeYaml)
             addDataType(project, dataType)
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing data type YAML" }
@@ -130,7 +130,7 @@ class DataTypeEditorOperator {
         dataTypeYaml: String,
     ): EventResult =
         try {
-            val dataType = yamlSerializer.decodeFromString<DataType>(dataTypeYaml)
+            val dataType = decodeFromStringWithFallback<DataType>(dataTypeYaml)
             updateDataType(project, dataType)
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing data type YAML" }
@@ -178,7 +178,7 @@ class DataTypeEditorOperator {
         dataFieldYaml: String,
     ): EventResult =
         try {
-            val dataField = yamlSerializer.decodeFromString<DataField>(dataFieldYaml)
+            val dataField = decodeFromStringWithFallback<DataField>(dataFieldYaml)
             addDataField(project, dataTypeId, dataField)
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing data field YAML" }
@@ -258,7 +258,7 @@ class DataTypeEditorOperator {
         customEnumYaml: String,
     ): EventResult =
         try {
-            val customEnum = yamlSerializer.decodeFromString<CustomEnum>(customEnumYaml)
+            val customEnum = decodeFromStringWithFallback<CustomEnum>(customEnumYaml)
             addCustomEnum(project, customEnum)
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing custom enum YAML" }
@@ -342,7 +342,7 @@ class DataTypeEditorOperator {
         customEnumYaml: String,
     ): EventResult =
         try {
-            val customEnum = yamlSerializer.decodeFromString<CustomEnum>(customEnumYaml)
+            val customEnum = decodeFromStringWithFallback<CustomEnum>(customEnumYaml)
             updateCustomEnum(project, customEnum)
         } catch (e: Exception) {
             Logger.e(e) { "Error parsing custom enum YAML" }
@@ -358,7 +358,7 @@ class DataTypeEditorOperator {
     fun onListDataTypes(project: Project): String =
         try {
             val dataTypes = project.dataTypeHolder.dataTypes
-            yamlSerializer.encodeToString(dataTypes)
+            yamlDefaultSerializer.encodeToString(dataTypes)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing data types" }
             "Error listing data types: ${e.message}"
@@ -376,7 +376,7 @@ class DataTypeEditorOperator {
         try {
             val dataType = project.dataTypeHolder.dataTypes.find { it.id == dataTypeId }
             if (dataType != null) {
-                yamlSerializer.encodeToString(dataType)
+                yamlDefaultSerializer.encodeToString(dataType)
             } else {
                 "Data type with ID $dataTypeId not found."
             }
@@ -392,7 +392,7 @@ class DataTypeEditorOperator {
     fun onListCustomEnums(project: Project): String =
         try {
             val customEnums = project.customEnumHolder.enumList
-            yamlSerializer.encodeToString(customEnums)
+            yamlDefaultSerializer.encodeToString(customEnums)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing custom enums" }
             "Error listing custom enums: ${e.message}"
@@ -411,7 +411,7 @@ class DataTypeEditorOperator {
             val customEnum =
                 project.customEnumHolder.enumList.find { it.customEnumId == customEnumId }
             if (customEnum != null) {
-                yamlSerializer.encodeToString(customEnum)
+                yamlDefaultSerializer.encodeToString(customEnum)
             } else {
                 "Custom enum with ID $customEnumId not found."
             }

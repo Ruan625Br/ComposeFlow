@@ -61,7 +61,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackActionHandlerSerializer
 import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.MutableStateSerializer
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.adaptive.computeWindowAdaptiveInfo
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
@@ -1025,14 +1025,14 @@ data class ComposeNode(
  * @param sameId When set to true, the same [ComposeNode.id] values are used for the new instance.
  */
 fun ComposeNode.restoreInstance(sameId: Boolean = false): ComposeNode {
-    val encoded = yamlSerializer.encodeToString(this)
+    val encoded = yamlDefaultSerializer.encodeToString(this)
     return if (sameId) {
-        yamlSerializer.decodeFromString<ComposeNode>(encoded)
+        yamlDefaultSerializer.decodeFromString<ComposeNode>(encoded)
     } else {
-        val rootNode: YamlNode = yamlSerializer.parseToYamlNode(encoded)
+        val rootNode: YamlNode = yamlDefaultSerializer.parseToYamlNode(encoded)
         val modifiedNode: YamlNode = replaceIdInYamlNode(rootNode)
         val modifiedComposeNode =
-            yamlSerializer.decodeFromYamlNode(ComposeNode.serializer(), modifiedNode)
+            yamlDefaultSerializer.decodeFromYamlNode(ComposeNode.serializer(), modifiedNode)
         modifiedComposeNode
     }
 }

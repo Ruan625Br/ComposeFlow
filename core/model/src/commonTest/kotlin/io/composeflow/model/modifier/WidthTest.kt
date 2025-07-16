@@ -3,7 +3,7 @@ package io.composeflow.model.modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -19,7 +19,7 @@ class WidthTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.width(
                    50.androidx.compose.ui.unit.dp
@@ -32,8 +32,8 @@ class WidthTest {
     fun serialize_verify_restored_instance() {
         val width = ModifierWrapper.Width(width = 8.dp)
 
-        val encodedString = yamlSerializer.encodeToString(width)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Width>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(width)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Width>(encodedString)
         assertEquals(width, decoded)
     }
 }

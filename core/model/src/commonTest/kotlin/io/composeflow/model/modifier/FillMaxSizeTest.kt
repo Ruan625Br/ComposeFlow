@@ -3,7 +3,7 @@ package io.composeflow.model.modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -19,7 +19,7 @@ class FillMaxSizeTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.fillMaxSize(),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -34,7 +34,7 @@ class FillMaxSizeTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.fillMaxSize(fraction = 0.5f),""".trimForCompare(),
             code.build().toString().trimForCompare(),
@@ -53,7 +53,7 @@ class FillMaxSizeTest {
             modifierList.generateCode(Project(), context = GenerationContext(), dryRun = false)
 
         assertEquals(
-            """modifier = 
+            """modifier =
                  androidx.compose.ui.Modifier
                  .androidx.compose.foundation.layout.padding(
                    all = 8.androidx.compose.ui.unit.dp)
@@ -66,8 +66,9 @@ class FillMaxSizeTest {
     fun serialize_verify_restored_instance() {
         val fillMaxSize = ModifierWrapper.FillMaxSize(0.5f)
 
-        val encodedString = yamlSerializer.encodeToString(fillMaxSize)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.FillMaxSize>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(fillMaxSize)
+        val decoded =
+            yamlDefaultSerializer.decodeFromString<ModifierWrapper.FillMaxSize>(encodedString)
         assertEquals(fillMaxSize, decoded)
     }
 }

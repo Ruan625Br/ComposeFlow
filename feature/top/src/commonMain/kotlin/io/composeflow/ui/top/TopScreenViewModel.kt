@@ -79,16 +79,10 @@ class TopScreenViewModel(
     }
 
     fun onCreateProjectWithScreens(
-        projectName: String,
-        packageName: String,
+        project: Project,
         screens: List<Screen>,
     ) {
         viewModelScope.launch {
-            val project =
-                projectRepository.createProject(
-                    projectName = projectName,
-                    packageName = packageName,
-                )
             if (screens.isNotEmpty()) {
                 project.screenHolder.screens.forEach {
                     project.screenHolder.deleteScreen(it)

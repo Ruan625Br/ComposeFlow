@@ -7,7 +7,7 @@ import io.composeflow.model.parameter.wrapper.ShapeWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.StringProperty
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -140,8 +140,8 @@ class TextFieldTraitTest {
                 shapeWrapper = ShapeWrapper.Circle,
             )
 
-        val encoded = yamlSerializer.encodeToString(textFieldParams)
-        val decoded = yamlSerializer.decodeFromString<TextFieldTrait>(encoded)
+        val encoded = yamlDefaultSerializer.encodeToString(textFieldParams)
+        val decoded = yamlDefaultSerializer.decodeFromString<TextFieldTrait>(encoded)
 
         Assert.assertEquals(textFieldParams, decoded)
     }

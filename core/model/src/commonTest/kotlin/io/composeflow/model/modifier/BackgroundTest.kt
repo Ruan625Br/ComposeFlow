@@ -5,7 +5,7 @@ import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.property.ColorProperty
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -39,8 +39,9 @@ class BackgroundTest {
                     ),
             )
 
-        val encodedString = yamlSerializer.encodeToString(background)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Background>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(background)
+        val decoded =
+            yamlDefaultSerializer.decodeFromString<ModifierWrapper.Background>(encodedString)
         assertEquals(background, decoded)
     }
 }

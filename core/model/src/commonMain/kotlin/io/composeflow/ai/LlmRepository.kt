@@ -1,14 +1,14 @@
 package io.composeflow.ai
 
+import androidx.compose.runtime.mutableStateListOf
 import co.touchlab.kermit.Logger
 import com.github.michaelbull.result.mapBoth
 import io.composeflow.ai.openrouter.tools.ToolArgs
 import io.composeflow.ai.openrouter.tools.ToolExecutionStatus
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.createCopyOfNewName
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.decodeFromString
 import kotlin.time.Duration.Companion.minutes
 
 class LlmRepository(
@@ -35,7 +35,7 @@ class LlmRepository(
                         message = it.message,
                         projectName = it.createProject?.projectName ?: "projectName",
                         packageName = it.createProject?.packageName ?: "com.example",
-                        prompts = it.createProject?.screenPrompts ?: emptyList(),
+                        prompts = it.createProject?.screenPrompts ?: mutableStateListOf(),
                     )
                 },
                 failure = {
@@ -73,7 +73,7 @@ class LlmRepository(
                             var result: CreateScreenResponse
                             try {
                                 screen =
-                                    yamlSerializer.decodeFromString<Screen>(
+                                    decodeFromStringWithFallback<Screen>(
                                         responseDetail.yamlContent,
                                     )
                                 if (screenName != null) {
@@ -175,13 +175,52 @@ class LlmRepository(
                 },
             )
         }
+
+    suspend fun prepareArchitecture(
+        promptString: String,
+        projectContext: ProjectContext? = null,
+        previousToolArgs: List<ToolArgs> = emptyList(),
+        retryCount: Int = 0,
+    ): ToolResponse =
+        withTimeout(5.minutes) {
+            if (retryCount >= MAX_RETRY_COUNT) {
+                Logger.e("Failed to prepare architecture. Tried maximum number of attempts.")
+                throw IllegalStateException("Failed to prepare architecture. Tried maximum number of attempts.")
+            }
+
+            Logger.i("Preparing architecture: $promptString, Retry count: $retryCount")
+            val response =
+                client.invokeHandleGeneralRequest(
+                    promptString = "Prepare the project architecture for the following: $promptString",
+                    projectContextString = projectContext?.toContextString() ?: "",
+                    previousToolArgs = previousToolArgs,
+                )
+            response.mapBoth(
+                success = {
+                    ToolResponse.Success(
+                        originalPrompt = promptString,
+                        message = it.message ?: "Architecture prepared successfully",
+                        response = it,
+                        previousToolArgs = previousToolArgs,
+                    )
+                },
+                failure = {
+                    ToolResponse.Error(
+                        originalPrompt = promptString,
+                        throwable = it,
+                        message = it.message ?: "Unknown error preparing architecture",
+                        previousToolArgs = previousToolArgs,
+                    )
+                },
+            )
+        }
 }
 
 data class CreateProjectResult(
     val message: String,
     val projectName: String,
     val packageName: String,
-    val prompts: List<ScreenPrompt>,
+    val prompts: MutableList<ScreenPrompt>,
 )
 
 data class ProjectContext(

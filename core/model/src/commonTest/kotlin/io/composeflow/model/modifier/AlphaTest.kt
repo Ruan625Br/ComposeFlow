@@ -2,7 +2,7 @@ package io.composeflow.model.modifier
 
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.trimForCompare
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -41,8 +41,8 @@ class AlphaTest {
         val alpha = ModifierWrapper.Alpha(0.5f)
         alpha.visible.value = false
 
-        val encodedString = yamlSerializer.encodeToString(alpha)
-        val decoded = yamlSerializer.decodeFromString<ModifierWrapper.Alpha>(encodedString)
+        val encodedString = yamlDefaultSerializer.encodeToString(alpha)
+        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Alpha>(encodedString)
         assertEquals(alpha, decoded)
     }
 }

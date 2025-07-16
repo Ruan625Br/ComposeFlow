@@ -14,7 +14,7 @@ import io.composeflow.model.useroperation.OperationHistory
 import io.composeflow.model.useroperation.UserOperation
 import io.composeflow.removeLineBreak
 import io.composeflow.repository.ProjectRepository
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.ui.EventResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
@@ -78,7 +78,7 @@ class AiChatDialogViewModel(
                             llmRepository.handleToolRequest(
                                 promptString = prompt,
                                 projectContext =
-                                    yamlSerializer.encodeToString(
+                                    yamlDefaultSerializer.encodeToString(
                                         Project.serializer(),
                                         project,
                                     ),

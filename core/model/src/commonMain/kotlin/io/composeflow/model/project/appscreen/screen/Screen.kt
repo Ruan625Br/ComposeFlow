@@ -79,7 +79,7 @@ import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.random
 import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.MutableStateSerializer
-import io.composeflow.serializer.yamlSerializer
+import io.composeflow.serializer.yamlDefaultSerializer
 import io.composeflow.ui.adaptive.ProvideDeviceSizeDp
 import io.composeflow.ui.common.LocalUseDarkTheme
 import io.composeflow.ui.common.ProvideAppThemeTokens
@@ -938,8 +938,8 @@ data class Screen(
 }
 
 fun Screen.restoreInstance(): Screen {
-    val encoded = yamlSerializer.encodeToString(this)
-    val decoded = yamlSerializer.decodeFromString<Screen>(encoded)
+    val encoded = yamlDefaultSerializer.encodeToString(this)
+    val decoded = yamlDefaultSerializer.decodeFromString<Screen>(encoded)
     return decoded
 }
 
