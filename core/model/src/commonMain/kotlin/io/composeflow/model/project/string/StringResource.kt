@@ -15,7 +15,7 @@ data class StringResource(
 ) {
     // Compose Multiplatform supports language and region qualifiers for resources.
     // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-setup.html#language-and-regional-qualifiers
-    @Serializable
+    @Serializable(with = LocaleSerializer::class)
     @SerialName("Locale")
     data class Locale(
         /** Two-letter ISO 639-1 language code */
