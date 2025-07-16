@@ -21,7 +21,9 @@ class StringResourceHolderTest {
     @Test
     fun testSingleStringResourceSingleLocale() {
         val holder = StringResourceHolder()
-        holder.stringResources.add(stringResourceOf("hello_world", "en" to "Hello World"))
+        holder.stringResources.add(
+            stringResourceOf("hello_world", "en" to "Hello World", description = "Greeting message shown on the main screen"),
+        )
 
         val resourceFiles = holder.generateStringResourceFiles()
         assertEquals(1, resourceFiles.size)
@@ -44,8 +46,12 @@ class StringResourceHolderTest {
 
         holder.supportedLocales.add(spanishLocale)
 
-        holder.stringResources.add(stringResourceOf("hello", "en" to "Hello", "es" to "Hola"))
-        holder.stringResources.add(stringResourceOf("goodbye", "en" to "Goodbye", "es" to "Adiós"))
+        holder.stringResources.add(
+            stringResourceOf("hello", "en" to "Hello", "es" to "Hola", description = "Greeting message shown on the main screen"),
+        )
+        holder.stringResources.add(
+            stringResourceOf("goodbye", "en" to "Goodbye", "es" to "Adiós", description = "Farewell message shown on the logout screen"),
+        )
 
         val resourceFiles = holder.generateStringResourceFiles()
         assertEquals(2, resourceFiles.size)
@@ -118,7 +124,9 @@ class StringResourceHolderTest {
 
         holder.supportedLocales.add(germanLocale)
 
-        holder.stringResources.add(stringResourceOf("hello", "en" to "Hello", "de" to "Hallo"))
+        holder.stringResources.add(
+            stringResourceOf("hello", "en" to "Hello", "de" to "Hallo", description = "Greeting message shown on the main screen"),
+        )
         holder.stringResources.add(stringResourceOf("english_only", "en" to "English Only"))
 
         val resourceFiles = holder.generateStringResourceFiles()
@@ -189,7 +197,9 @@ class StringResourceHolderTest {
         holder.supportedLocales.add(frCaLocale)
 
         holder.stringResources.add(stringResourceOf("color", "en" to "Color", "en-rUS" to "Color", "en-rGB" to "Colour"))
-        holder.stringResources.add(stringResourceOf("greeting", "en" to "Hello", "fr-rCA" to "Bonjour"))
+        holder.stringResources.add(
+            stringResourceOf("greeting", "en" to "Hello", "fr-rCA" to "Bonjour", description = "Greeting message shown on the main screen"),
+        )
 
         val resourceFiles = holder.generateStringResourceFiles()
         assertEquals(4, resourceFiles.size) // en (default), en-rUS, en-rGB, fr-rCA

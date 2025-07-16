@@ -10,6 +10,8 @@ import kotlinx.serialization.Serializable
 @SerialName("StringResource")
 data class StringResource(
     val key: String,
+    /** Optional description for the string resource. Can be used to provide context for translators. */
+    val description: String? = null,
     @Serializable(with = FallbackMutableStateMapSerializer::class)
     val localizedValues: MutableMap<Locale, String> = mutableStateMapEqualsOverrideOf(),
 ) {
@@ -56,9 +58,11 @@ data class StringResource(
 fun stringResourceOf(
     key: String,
     vararg localizedValues: Pair<StringResource.Locale, String>,
+    description: String? = null,
 ): StringResource =
     StringResource(
         key = key,
+        description = description,
         localizedValues = localizedValues.toMap().toMutableStateMapEqualsOverride(),
     )
 
@@ -66,9 +70,11 @@ fun stringResourceOf(
 fun stringResourceOf(
     key: String,
     vararg localizedValues: Pair<String, String>,
+    description: String? = null,
 ): StringResource =
     StringResource(
         key = key,
+        description = description,
         localizedValues =
             localizedValues
                 .associate { (locale, value) ->
