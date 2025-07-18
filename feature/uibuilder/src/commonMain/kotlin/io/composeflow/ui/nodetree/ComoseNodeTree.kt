@@ -134,9 +134,7 @@ fun ComposeNodeTree(
             modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surface)
-                .onClick(
-                    matcher = PointerMatcher.mouse(PointerButton.Secondary),
-                ) {
+                .onClick(matcher = PointerMatcher.mouse(PointerButton.Secondary)) {
                     contextMenuExpanded = true
                 },
     ) {
@@ -328,6 +326,77 @@ fun ComposeNodeTree(
                 }
             }
         }
+
+        if (contextMenuExpanded) {
+            println("Context menu in ComposeNodeTree is expanded")
+            UiBuilderContextMenuDropDown(
+                project = project,
+                canvasNodeCallbacks = canvasNodeCallbacks,
+                composeNodeCallbacks = composeNodeCallbacks,
+                copiedNodes = copiedNodes,
+                currentEditable = project.screenHolder.currentEditable(),
+                onAddModifier = {
+                    addModifierDialogVisible = true
+                },
+                onCloseMenu = {
+                    contextMenuExpanded = !contextMenuExpanded
+                },
+                onShowSnackbar = onShowSnackbar,
+                coroutineScope = coroutineScope,
+                onFocusedStatusUpdated = onFocusedStatusUpdated,
+                onHoveredStatusUpdated = onHoveredStatusUpdated,
+                onOpenConvertToComponentDialog = {
+                    convertToComponentNode = it
+                },
+            )
+        }
+
+        val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+        if (addModifierDialogVisible) {
+            onAnyDialogIsShown()
+            project.screenHolder.findFocusedNodes().firstOrNull()?.let { focused ->
+                val modifiers =
+                    ModifierWrapper
+                        .values()
+                        .filter { m ->
+                            focused.parentNode?.let {
+                                m.hasValidParent(it.trait.value)
+                            } ?: true
+                        }.mapIndexed { i, modifierWrapper ->
+                            i to modifierWrapper
+                        }
+
+                AddModifierDialog(
+                    modifiers = modifiers,
+                    onModifierSelected = {
+                        addModifierDialogVisible = false
+                        composeNodeCallbacks.onModifierAdded(focused, modifiers[it].second)
+                        onAllDialogsClosed()
+                    },
+                    onCloseClick = {
+                        addModifierDialogVisible = false
+                        onAllDialogsClosed()
+                    },
+                )
+            }
+        }
+
+        convertToComponentNode?.let { nodeToConvert ->
+            onAnyDialogIsShown()
+            SingleTextInputDialog(
+                textLabel = stringResource(Res.string.component_name),
+                onTextConfirmed = {
+                    canvasNodeCallbacks.onConvertToComponent(it, nodeToConvert)
+                    convertToComponentNode = null
+                    onAllDialogsClosed()
+                },
+                onDismissDialog = {
+                    convertToComponentNode = null
+                    onAllDialogsClosed()
+                },
+            )
+        }
     }
 
     if (focusedNodes.size == 1) {
@@ -337,76 +406,6 @@ fun ComposeNodeTree(
                 selectableLazyListState.scrollToItem(index, animateScroll = true)
             }
         }
-    }
-
-    if (contextMenuExpanded) {
-        UiBuilderContextMenuDropDown(
-            project = project,
-            canvasNodeCallbacks = canvasNodeCallbacks,
-            composeNodeCallbacks = composeNodeCallbacks,
-            copiedNodes = copiedNodes,
-            currentEditable = project.screenHolder.currentEditable(),
-            onAddModifier = {
-                addModifierDialogVisible = true
-            },
-            onCloseMenu = {
-                contextMenuExpanded = !contextMenuExpanded
-            },
-            onShowSnackbar = onShowSnackbar,
-            coroutineScope = coroutineScope,
-            onFocusedStatusUpdated = onFocusedStatusUpdated,
-            onHoveredStatusUpdated = onHoveredStatusUpdated,
-            onOpenConvertToComponentDialog = {
-                convertToComponentNode = it
-            },
-        )
-    }
-
-    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    if (addModifierDialogVisible) {
-        onAnyDialogIsShown()
-        project.screenHolder.findFocusedNodes().firstOrNull()?.let { focused ->
-            val modifiers =
-                ModifierWrapper
-                    .values()
-                    .filter { m ->
-                        focused.parentNode?.let {
-                            m.hasValidParent(it.trait.value)
-                        } ?: true
-                    }.mapIndexed { i, modifierWrapper ->
-                        i to modifierWrapper
-                    }
-
-            AddModifierDialog(
-                modifiers = modifiers,
-                onModifierSelected = {
-                    addModifierDialogVisible = false
-                    composeNodeCallbacks.onModifierAdded(focused, modifiers[it].second)
-                    onAllDialogsClosed()
-                },
-                onCloseClick = {
-                    addModifierDialogVisible = false
-                    onAllDialogsClosed()
-                },
-            )
-        }
-    }
-
-    convertToComponentNode?.let { nodeToConvert ->
-        onAnyDialogIsShown()
-        SingleTextInputDialog(
-            textLabel = stringResource(Res.string.component_name),
-            onTextConfirmed = {
-                canvasNodeCallbacks.onConvertToComponent(it, nodeToConvert)
-                convertToComponentNode = null
-                onAllDialogsClosed()
-            },
-            onDismissDialog = {
-                convertToComponentNode = null
-                onAllDialogsClosed()
-            },
-        )
     }
 }
 
