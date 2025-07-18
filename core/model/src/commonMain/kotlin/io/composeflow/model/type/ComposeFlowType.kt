@@ -17,6 +17,7 @@ import io.composeflow.model.project.firebase.CollectionId
 import io.composeflow.model.property.ApiResultProperty
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.BooleanProperty
+import io.composeflow.model.property.BrushProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.CustomDataTypeProperty
 import io.composeflow.model.property.DocumentIdProperty
@@ -387,6 +388,51 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Color")
+    }
+
+    @Serializable
+    @SerialName("Brush")
+    data class Brush(
+        override val isList: Boolean = false,
+    ) : ComposeFlowType {
+        override fun isAbleToAssign(
+            type: ComposeFlowType,
+            exactMatch: Boolean,
+        ): Boolean {
+            if (isList != type.isList) return false
+            return when (type) {
+                is Brush -> true
+                else -> false
+            }
+        }
+
+        override fun displayName(
+            project: Project,
+            listAware: Boolean,
+        ): String =
+            if (listAware) {
+                if (isList) "List<Brush>" else "Brush"
+            } else {
+                "Brush"
+            }
+
+        override fun copyWith(newIsList: Boolean): ComposeFlowType = this.copy(isList = newIsList)
+
+        override fun defaultValue(): AssignableProperty = BrushProperty.BrushIntrinsicValue()
+
+        override fun isPrimitive() = true
+
+        override fun asKotlinPoetTypeName(project: Project): TypeName =
+            if (isList) {
+                List::class
+                    .asTypeName()
+                    .parameterizedBy(androidx.compose.ui.graphics.Brush::class.asTypeName())
+            } else {
+                androidx.compose.ui.graphics.Brush::class.asTypeName()
+            }
+
+        @Composable
+        override fun asDropdownText(): AnnotatedString = AnnotatedString("Brush")
     }
 
     @Serializable

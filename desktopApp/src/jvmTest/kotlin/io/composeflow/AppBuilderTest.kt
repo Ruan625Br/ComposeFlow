@@ -76,6 +76,8 @@ import io.composeflow.model.parameter.TextTrait
 import io.composeflow.model.parameter.TopAppBarTrait
 import io.composeflow.model.parameter.lazylist.LazyListChildParams
 import io.composeflow.model.parameter.wrapper.AlignmentWrapper
+import io.composeflow.model.parameter.wrapper.BrushType
+import io.composeflow.model.parameter.wrapper.BrushWrapper
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.parameter.wrapper.defaultColorWrapper
@@ -93,6 +95,7 @@ import io.composeflow.model.project.theme.TextStyleOverride
 import io.composeflow.model.property.ApiResultProperty
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.BooleanProperty
+import io.composeflow.model.property.BrushProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.ComposableParameterProperty
 import io.composeflow.model.property.ConditionalProperty
@@ -169,6 +172,119 @@ class AppBuilderTest {
         val screen = project.screenHolder.currentEditable() as Screen
         screen.addState(ScreenState.StringScreenState(id = "state1", name = "name"))
         screen.addState(ScreenState.StringScreenState(id = "state2", name = "name"))
+        toolbarViewModel.onRunPreviewApp(
+            project = project,
+            onStatusBarUiStateChanged = { _ -> },
+        )
+        assertBuildSucceed()
+    }
+
+    @Test
+    fun testBrushBackground() {
+        val project = Project()
+        val rootNode = project.screenHolder.currentContentRootNode()
+
+        // Create a text component with a brush background
+        val textNode =
+            ComposeNode(
+                trait =
+                    mutableStateOf(
+                        TextTrait(
+                            text = StringProperty.StringIntrinsicValue("Text with Brush Background"),
+                        ),
+                    ),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Background(
+                            brushWrapper =
+                                BrushProperty.BrushIntrinsicValue(
+                                    BrushWrapper(
+                                        brushType = BrushType.LinearGradient,
+                                        colors =
+                                            listOf(
+                                                ColorWrapper(themeColor = Material3ColorWrapper.Primary),
+                                                ColorWrapper(themeColor = Material3ColorWrapper.Secondary),
+                                            ),
+                                        startX = 0f,
+                                        startY = 0f,
+                                        endX = Float.POSITIVE_INFINITY,
+                                        endY = Float.POSITIVE_INFINITY,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        rootNode.addChild(textNode)
+
+        // Create a column with horizontal gradient background
+        val columnNode =
+            ComposeNode(
+                trait = mutableStateOf(ColumnTrait()),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Background(
+                            brushWrapper =
+                                BrushProperty.BrushIntrinsicValue(
+                                    BrushWrapper(
+                                        brushType = BrushType.HorizontalGradient,
+                                        colors =
+                                            listOf(
+                                                ColorWrapper(themeColor = Material3ColorWrapper.Tertiary),
+                                                ColorWrapper(themeColor = Material3ColorWrapper.Surface),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        columnNode.addChild(
+            ComposeNode(
+                trait =
+                    mutableStateOf(
+                        TextTrait(
+                            text = StringProperty.StringIntrinsicValue("Inside Column"),
+                        ),
+                    ),
+            ),
+        )
+        rootNode.addChild(columnNode)
+
+        // Create a box with radial gradient background
+        val boxNode =
+            ComposeNode(
+                trait = mutableStateOf(BoxTrait()),
+                modifierList =
+                    mutableStateListEqualsOverrideOf(
+                        ModifierWrapper.Background(
+                            brushWrapper =
+                                BrushProperty.BrushIntrinsicValue(
+                                    BrushWrapper(
+                                        brushType = BrushType.RadialGradient,
+                                        colors =
+                                            listOf(
+                                                ColorWrapper(themeColor = Material3ColorWrapper.Error),
+                                                ColorWrapper(themeColor = Material3ColorWrapper.ErrorContainer),
+                                            ),
+                                        centerX = 0.5f,
+                                        centerY = 0.5f,
+                                        radius = 100f,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        boxNode.addChild(
+            ComposeNode(
+                trait =
+                    mutableStateOf(
+                        TextTrait(
+                            text = StringProperty.StringIntrinsicValue("Inside Box"),
+                        ),
+                    ),
+            ),
+        )
+        rootNode.addChild(boxNode)
+
         toolbarViewModel.onRunPreviewApp(
             project = project,
             onStatusBarUiStateChanged = { _ -> },
@@ -838,11 +954,20 @@ class AppBuilderTest {
                                             StateOperation.SetValue(
                                                 readProperty =
                                                     ConditionalProperty(
-                                                        defaultValue = StringProperty.StringIntrinsicValue("defaultValue"),
+                                                        defaultValue =
+                                                            StringProperty.StringIntrinsicValue(
+                                                                "defaultValue",
+                                                            ),
                                                         ifThen =
                                                             ConditionalProperty.IfThenBlock(
-                                                                ifExpression = ValueFromState(readFromStateId = switchScreenState.id),
-                                                                thenValue = StringProperty.StringIntrinsicValue("abc"),
+                                                                ifExpression =
+                                                                    ValueFromState(
+                                                                        readFromStateId = switchScreenState.id,
+                                                                    ),
+                                                                thenValue =
+                                                                    StringProperty.StringIntrinsicValue(
+                                                                        "abc",
+                                                                    ),
                                                             ),
                                                         elseIfBlocks =
                                                             mutableListOf(
@@ -851,19 +976,28 @@ class AppBuilderTest {
                                                                         BooleanProperty.BooleanIntrinsicValue(
                                                                             true,
                                                                         ),
-                                                                    thenValue = StringProperty.StringIntrinsicValue("def"),
+                                                                    thenValue =
+                                                                        StringProperty.StringIntrinsicValue(
+                                                                            "def",
+                                                                        ),
                                                                 ),
                                                                 ConditionalProperty.IfThenBlock(
                                                                     ifExpression =
                                                                         BooleanProperty.BooleanIntrinsicValue(
                                                                             false,
                                                                         ),
-                                                                    thenValue = StringProperty.StringIntrinsicValue("hgi"),
+                                                                    thenValue =
+                                                                        StringProperty.StringIntrinsicValue(
+                                                                            "hgi",
+                                                                        ),
                                                                 ),
                                                             ),
                                                         elseBlock =
                                                             ConditionalProperty.ElseBlock(
-                                                                value = StringProperty.StringIntrinsicValue("hgi"),
+                                                                value =
+                                                                    StringProperty.StringIntrinsicValue(
+                                                                        "hgi",
+                                                                    ),
                                                             ),
                                                     ),
                                             ),
@@ -946,7 +1080,10 @@ class AppBuilderTest {
                                                 dataFieldUpdateProperties.add(
                                                     DataFieldUpdateProperty(
                                                         dataFieldId = todoItemDataType.fields[0].id,
-                                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
+                                                        assignableProperty =
+                                                            StringProperty.StringIntrinsicValue(
+                                                                "testItem",
+                                                            ),
                                                     ),
                                                 )
                                                 dataFieldUpdateProperties.add(
@@ -960,20 +1097,25 @@ class AppBuilderTest {
                                     SetValueToState(
                                         writeToStateId = todoItemListAppState.id,
                                         operation =
-                                            StateOperationForList.AddValueForCustomDataType().apply {
-                                                dataFieldUpdateProperties.add(
-                                                    DataFieldUpdateProperty(
-                                                        dataFieldId = todoItemDataType.fields[0].id,
-                                                        assignableProperty = StringProperty.StringIntrinsicValue("testItem"),
-                                                    ),
-                                                )
-                                                dataFieldUpdateProperties.add(
-                                                    DataFieldUpdateProperty(
-                                                        dataFieldId = todoItemDataType.fields[1].id,
-                                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(),
-                                                    ),
-                                                )
-                                            },
+                                            StateOperationForList
+                                                .AddValueForCustomDataType()
+                                                .apply {
+                                                    dataFieldUpdateProperties.add(
+                                                        DataFieldUpdateProperty(
+                                                            dataFieldId = todoItemDataType.fields[0].id,
+                                                            assignableProperty =
+                                                                StringProperty.StringIntrinsicValue(
+                                                                    "testItem",
+                                                                ),
+                                                        ),
+                                                    )
+                                                    dataFieldUpdateProperties.add(
+                                                        DataFieldUpdateProperty(
+                                                            dataFieldId = todoItemDataType.fields[1].id,
+                                                            assignableProperty = BooleanProperty.BooleanIntrinsicValue(),
+                                                        ),
+                                                    )
+                                                },
                                     ),
                                     SetValueToState(
                                         writeToStateId = todoItemListAppState.id,
@@ -1242,7 +1384,10 @@ class AppBuilderTest {
                                         writeToStateId = appStringListState.id,
                                         operation =
                                             StateOperationForList.AddValue(
-                                                readProperty = ComposableParameterProperty(parameterId = stringParameter.id),
+                                                readProperty =
+                                                    ComposableParameterProperty(
+                                                        parameterId = stringParameter.id,
+                                                    ),
                                             ),
                                     ),
                                 ),
@@ -1900,7 +2045,10 @@ class AppBuilderTest {
                                     ),
                                     DataFieldUpdateProperty(
                                         dataFieldId = todoItemDataType.fields[1].id,
-                                        assignableProperty = BooleanProperty.BooleanIntrinsicValue(true),
+                                        assignableProperty =
+                                            BooleanProperty.BooleanIntrinsicValue(
+                                                true,
+                                            ),
                                     ),
                                 ),
                         ),
@@ -1951,7 +2099,10 @@ class AppBuilderTest {
                                                     property =
                                                         ValueFromDynamicItem(
                                                             composeNodeId = lazyColumn.id,
-                                                            fieldType = DataFieldType.DocumentId(firestoreCollection.id),
+                                                            fieldType =
+                                                                DataFieldType.DocumentId(
+                                                                    firestoreCollection.id,
+                                                                ),
                                                         ),
                                                 ),
                                         ),

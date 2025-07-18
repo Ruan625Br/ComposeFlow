@@ -187,6 +187,7 @@ fun <T> ParameterWrapper<T>.copy(
 
         is ComposeFlowType.InstantType -> throw IllegalArgumentException("Instant type isn't supported for parameter")
         is ComposeFlowType.Color -> throw IllegalArgumentException("Color type isn't supported for parameter")
+        is ComposeFlowType.Brush -> throw IllegalArgumentException("Brush type isn't supported for parameter")
         is ComposeFlowType.Enum<*> -> throw IllegalArgumentException("Enum type isn't supported for parameter")
         is ComposeFlowType.CustomDataType -> throw IllegalArgumentException("Custom data type isn't supported for parameter")
         is ComposeFlowType.JsonElementType -> throw IllegalArgumentException("JsonElement type isn't supported for parameter")

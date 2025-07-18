@@ -48,10 +48,12 @@ import io.composeflow.model.parameter.wrapper.AlignmentWrapper
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.Material3ColorWrapper
 import io.composeflow.model.parameter.wrapper.ShapeWrapper
+import io.composeflow.model.parameter.wrapper.defaultBrushWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.issue.Issue
 import io.composeflow.model.property.AssignableProperty
+import io.composeflow.model.property.BrushProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.serializer.DpNonNegativeSerializer
 import io.composeflow.serializer.DpSerializer
@@ -142,6 +144,7 @@ sealed class ModifierWrapper(
             ColorProperty.ColorIntrinsicValue(
                 ColorWrapper(Material3ColorWrapper.SecondaryContainer),
             ),
+        val brushWrapper: AssignableProperty? = null,
         val shapeWrapper: ShapeWrapper = ShapeWrapper.Rectangle,
     ) : ModifierWrapper() {
         fun defaultColorProperty() =
@@ -149,21 +152,37 @@ sealed class ModifierWrapper(
                 ColorWrapper(Material3ColorWrapper.SecondaryContainer),
             )
 
+        fun defaultBrushProperty() =
+            BrushProperty.BrushIntrinsicValue(
+                defaultBrushWrapper,
+            )
+
         override fun toModifier(): Modifier =
             Modifier.composed {
-                val resolvedColor =
-                    if ((colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor() != null) {
-                        (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
-                    } else if (defaultColorProperty().value.getColor() != null) {
-                        defaultColorProperty().value.getColor()
-                    } else {
-                        Color.Unspecified
-                    }
+                // Check if we have a brush first
+                val resolvedBrush = (brushWrapper as? BrushProperty.BrushIntrinsicValue)?.value?.getBrush()
 
-                Modifier.background(
-                    color = resolvedColor!!,
-                    shape = shapeWrapper.toShape(),
-                )
+                if (resolvedBrush != null) {
+                    Modifier.background(
+                        brush = resolvedBrush,
+                        shape = shapeWrapper.toShape(),
+                    )
+                } else {
+                    // Fall back to color
+                    val resolvedColor =
+                        if ((colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor() != null) {
+                            (colorWrapper as? ColorProperty.ColorIntrinsicValue)?.value?.getColor()
+                        } else if (defaultColorProperty().value.getColor() != null) {
+                            defaultColorProperty().value.getColor()
+                        } else {
+                            Color.Unspecified
+                        }
+
+                    Modifier.background(
+                        color = resolvedColor!!,
+                        shape = shapeWrapper.toShape(),
+                    )
+                }
             }
 
         override fun displayName(): String = "Background"
@@ -179,14 +198,28 @@ sealed class ModifierWrapper(
                 """.%M(""",
                 backgroundMember,
             )
-            codeBlockBuilder.add("color = ")
-            codeBlockBuilder.add(
-                colorWrapper.transformedCodeBlock(
-                    project,
-                    context,
-                    dryRun = dryRun,
-                ),
-            )
+
+            // Check if we have a brush first
+            if (brushWrapper != null) {
+                codeBlockBuilder.add("brush = ")
+                codeBlockBuilder.add(
+                    brushWrapper.transformedCodeBlock(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                    ),
+                )
+            } else {
+                // Fall back to color
+                codeBlockBuilder.add("color = ")
+                codeBlockBuilder.add(
+                    colorWrapper.transformedCodeBlock(
+                        project,
+                        context,
+                        dryRun = dryRun,
+                    ),
+                )
+            }
             codeBlockBuilder.addStatement(",")
 
             shapeWrapper.generateCode(codeBlockBuilder)

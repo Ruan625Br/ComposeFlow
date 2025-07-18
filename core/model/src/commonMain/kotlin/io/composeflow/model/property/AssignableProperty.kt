@@ -1,6 +1,7 @@
 package io.composeflow.model.property
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.outlined.ColorLens
 import androidx.compose.material.icons.outlined.DataObject
 import androidx.compose.material.icons.outlined.DateRange
@@ -38,8 +39,10 @@ import io.composeflow.model.datatype.DataFieldType
 import io.composeflow.model.datatype.DataTypeId
 import io.composeflow.model.enumwrapper.EnumWrapper
 import io.composeflow.model.parameter.lazylist.LazyListChildParams
+import io.composeflow.model.parameter.wrapper.BrushWrapper
 import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.InstantWrapper
+import io.composeflow.model.parameter.wrapper.defaultBrushWrapper
 import io.composeflow.model.parameter.wrapper.defaultColorWrapper
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.ParameterId
@@ -72,6 +75,7 @@ import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.JsonAsStringSerializer
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.propertyeditor.AssignableBooleanPropertyEditor
+import io.composeflow.ui.propertyeditor.AssignableBrushPropertyEditor
 import io.composeflow.ui.propertyeditor.AssignableColorPropertyEditor
 import io.composeflow.ui.propertyeditor.AssignableDataTypePropertyEditor
 import io.composeflow.ui.propertyeditor.AssignableEditableTextPropertyEditor
@@ -787,6 +791,60 @@ sealed interface ColorProperty : AssignableProperty {
         editable: Boolean,
     ) {
         AssignableColorPropertyEditor(
+            project = project,
+            node = node,
+            label = label,
+            initialProperty = initialProperty,
+            onValidPropertyChanged = onValidPropertyChanged,
+            onInitializeProperty = onInitializeProperty,
+            modifier = modifier,
+            destinationStateId = destinationStateId,
+            editable = editable,
+            functionScopeProperties = functionScopeProperties,
+        )
+    }
+}
+
+@Serializable
+sealed interface BrushProperty : AssignableProperty {
+    override fun valueType(project: Project) = ComposeFlowType.Brush()
+
+    @Serializable
+    @SerialName("BrushIntrinsicValue")
+    data class BrushIntrinsicValue(
+        override val value: BrushWrapper = defaultBrushWrapper,
+    ) : AssignablePropertyBase(),
+        BrushProperty,
+        IntrinsicProperty<BrushWrapper> {
+        override fun valueExpression(project: Project) = value.asString()
+
+        override fun displayText(project: Project): String = value.asString()
+
+        override fun generateCodeBlock(
+            project: Project,
+            context: GenerationContext,
+            writeType: ComposeFlowType,
+            dryRun: Boolean,
+        ) = asCodeBlock()
+
+        override fun asCodeBlock(): CodeBlock = value.generateCode()
+    }
+
+    @Composable
+    override fun Editor(
+        project: Project,
+        node: ComposeNode,
+        initialProperty: AssignableProperty?,
+        label: String,
+        onValidPropertyChanged: (AssignableProperty, lazyListSource: LazyListChildParams?) -> Unit,
+        onInitializeProperty: (() -> Unit)?,
+        functionScopeProperties: List<FunctionScopeParameterProperty>,
+        modifier: Modifier,
+        destinationStateId: StateId?,
+        validateInput: ((String) -> ValidateResult)?,
+        editable: Boolean,
+    ) {
+        AssignableBrushPropertyEditor(
             project = project,
             node = node,
             label = label,
@@ -2127,6 +2185,7 @@ fun ComposeFlowType.leadingIcon(): ImageVector =
     when (this) {
         is ComposeFlowType.BooleanType -> Icons.Outlined.ToggleOff
         is ComposeFlowType.Color -> Icons.Outlined.ColorLens
+        is ComposeFlowType.Brush -> Icons.Filled.Brush
         is ComposeFlowType.CustomDataType -> ComposeFlowIcons.Dbms
         is ComposeFlowType.Enum<*> -> Icons.Outlined.Menu
         is ComposeFlowType.IntType -> Icons.Outlined.Numbers

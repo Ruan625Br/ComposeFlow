@@ -454,4 +454,22 @@ instead of in the canvas.</string>
     <string name="selected_composables">%1$d Composables</string>
     <string name="ai_chat_input_placeholder">Ask me anything about your project...</string>
     <string name="ai_preparing_architecture">Preparing app architecture...</string>
+    <string name="edit_brush">Edit brush</string>
+    <string name="delete_brush">Delete brush</string>
+    <string name="brush_type">Brush type</string>
+    <string name="brush_colors">Brush colors</string>
+    <string name="linear_gradient">Linear Gradient</string>
+    <string name="radial_gradient">Radial Gradient</string>
+    <string name="sweep_gradient">Sweep Gradient</string>
+    <string name="add_color">Add color</string>
+    <string name="brush_preview">Brush preview</string>
+    <string name="gradient_parameters">Gradient parameters</string>
+    <string name="tile_mode">Tile mode</string>
+    <string name="start_x">Start X</string>
+    <string name="start_y">Start Y</string>
+    <string name="end_x">End X</string>
+    <string name="end_y">End Y</string>
+    <string name="center_x">Center X</string>
+    <string name="center_y">Center Y</string>
+    <string name="radius">Radius</string>
 </resources>

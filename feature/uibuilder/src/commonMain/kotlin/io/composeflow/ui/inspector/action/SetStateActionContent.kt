@@ -316,6 +316,7 @@ private fun EditStateArea(
 
             is ComposeFlowType.Enum<*> -> {}
             is ComposeFlowType.Color -> throw UnsupportedOperationException("Color isn't supported for the state")
+            is ComposeFlowType.Brush -> throw UnsupportedOperationException("Brush isn't supported for the state")
             is ComposeFlowType.InstantType -> throw UnsupportedOperationException("Instant isn't supported for the state")
             is ComposeFlowType.JsonElementType -> throw UnsupportedOperationException("JsonElement isn't supported for the state")
             is ComposeFlowType.AnyType -> throw UnsupportedOperationException("Any isn't supported for the state")

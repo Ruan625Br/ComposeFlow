@@ -137,6 +137,7 @@ sealed interface PropertyTransformer {
                     }
 
                     is ComposeFlowType.Color -> emptyList()
+                    is ComposeFlowType.Brush -> emptyList()
                     is ComposeFlowType.CustomDataType -> emptyList()
                     is ComposeFlowType.Enum<*> -> emptyList()
                     is ComposeFlowType.IntType -> {
