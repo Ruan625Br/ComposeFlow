@@ -43,7 +43,7 @@ data class BrushWrapper(
         if (resolvedColors.isEmpty()) return null
 
         val composeTileMode = tileMode?.toTileMode() ?: TileMode.Clamp
-        
+
         return when (brushType) {
             BrushType.LinearGradient -> {
                 if (colorStops != null && colorStops.size == resolvedColors.size) {
