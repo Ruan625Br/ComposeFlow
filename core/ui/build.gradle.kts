@@ -17,7 +17,7 @@ kotlin {
             implementation(libs.kotlin.result)
             implementation(libs.jewel.int.ui.standalone)
             implementation(libs.jewel.int.ui.decorated.window)
-            implementation(libs.reorderable)
+            api(libs.reorderable)
         }
         commonTest.dependencies {
             implementation(kotlin("test-junit"))

@@ -19,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.DragIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -57,8 +58,12 @@ import io.composeflow.tile_mode
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.popup.PositionCustomizablePopup
+import io.composeflow.ui.reorderable.ComposeFlowReorderableItem
 import io.composeflow.ui.textfield.DropdownMenuTextField
 import io.composeflow.ui.textfield.SmallOutlinedTextField
+import org.burnoutcrew.reorderable.detectReorder
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
@@ -172,27 +177,45 @@ fun BrushEditDialog(
                         }
                     }
 
+                    val reorderableLazyListState =
+                        rememberReorderableLazyListState(onMove = { from, to ->
+                            val updatedColors = editedBrush.colors.toMutableList()
+                            val item = updatedColors.removeAt(from.index)
+                            updatedColors.add(to.index, item)
+                            editedBrush = editedBrush.copy(colors = updatedColors)
+                        })
+
                     LazyColumn(
-                        modifier = Modifier.height(200.dp),
+                        state = reorderableLazyListState.listState,
+                        modifier =
+                            Modifier
+                                .height(200.dp)
+                                .reorderable(reorderableLazyListState)
+                                .detectReorder(reorderableLazyListState),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         itemsIndexed(editedBrush.colors) { index, colorWrapper ->
-                            ColorListItem(
-                                colorWrapper = colorWrapper,
-                                onColorChange = { newColor ->
-                                    val updatedColors = editedBrush.colors.toMutableList()
-                                    updatedColors[index] = newColor
-                                    editedBrush = editedBrush.copy(colors = updatedColors)
-                                },
-                                onDelete = {
-                                    if (editedBrush.colors.size > 1) {
+                            ComposeFlowReorderableItem(
+                                index = index,
+                                reorderableLazyListState = reorderableLazyListState,
+                            ) {
+                                ColorListItem(
+                                    colorWrapper = colorWrapper,
+                                    onColorChange = { newColor ->
                                         val updatedColors = editedBrush.colors.toMutableList()
-                                        updatedColors.removeAt(index)
+                                        updatedColors[index] = newColor
                                         editedBrush = editedBrush.copy(colors = updatedColors)
-                                    }
-                                },
-                                canDelete = editedBrush.colors.size > 1,
-                            )
+                                    },
+                                    onDelete = {
+                                        if (editedBrush.colors.size > 1) {
+                                            val updatedColors = editedBrush.colors.toMutableList()
+                                            updatedColors.removeAt(index)
+                                            editedBrush = editedBrush.copy(colors = updatedColors)
+                                        }
+                                    },
+                                    canDelete = editedBrush.colors.size > 1,
+                                )
+                            }
                         }
                     }
                 }
@@ -256,6 +279,12 @@ private fun ColorListItem(
             },
             modifier = Modifier.weight(1f),
             includeThemeColor = true,
+        )
+
+        ComposeFlowIcon(
+            imageVector = Icons.Outlined.DragIndicator,
+            contentDescription = "Drag to reorder",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         ComposeFlowIconButton(
