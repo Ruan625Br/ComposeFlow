@@ -16,7 +16,7 @@ import io.composeflow.model.project.findDataTypeOrNull
 import io.composeflow.model.project.firebase.FirestoreCollection
 import io.composeflow.model.property.IntrinsicProperty
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.FallbackMutableStateListSerializer
+import io.composeflow.serializer.MutableStateListSerializer
 import io.composeflow.ui.propertyeditor.DropdownItem
 import io.composeflow.ui.propertyeditor.DropdownTextDisplayable
 import kotlinx.serialization.SerialName
@@ -36,7 +36,7 @@ typealias DataTypeId = String
 data class DataType(
     val id: DataTypeId = Uuid.random().toString(),
     private val name: String,
-    @Serializable(FallbackMutableStateListSerializer::class)
+    @Serializable(MutableStateListSerializer::class)
     val fields: MutableList<DataField> = mutableStateListEqualsOverrideOf(),
 ) : DropdownTextDisplayable {
     @Transient
