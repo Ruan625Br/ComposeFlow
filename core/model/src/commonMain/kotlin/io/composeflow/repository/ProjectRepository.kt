@@ -13,12 +13,12 @@ import io.composeflow.di.ServiceLocator
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.serialize
 import io.composeflow.platform.getOrCreateDataStore
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.util.toKotlinFileName
 import io.composeflow.util.toPackageName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 
 class ProjectRepository(
@@ -30,7 +30,7 @@ class ProjectRepository(
 
     val editingProject: Flow<Project> =
         dataStore.data.map { preference ->
-            preference[editingProjectKey]?.let { yamlDefaultSerializer.decodeFromString<Project>(it) }
+            preference[editingProjectKey]?.let { decodeFromStringWithFallback<Project>(it) }
                 ?: Project()
         }
 
@@ -81,7 +81,7 @@ class ProjectRepository(
 
         // Save the project to DataStore, too so that Flow
         dataStore.edit {
-            it[editingProjectKey] = yamlDefaultSerializer.encodeToString(project)
+            it[editingProjectKey] = encodeToString(project)
         }
     }
 

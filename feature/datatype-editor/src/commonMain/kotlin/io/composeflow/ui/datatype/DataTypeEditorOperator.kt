@@ -8,10 +8,9 @@ import io.composeflow.model.datatype.DataType
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.custom_enum.CustomEnum
 import io.composeflow.serializer.decodeFromStringWithFallback
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.EventResult
 import io.composeflow.util.generateUniqueName
-import kotlinx.serialization.encodeToString
 
 /**
  * Handles operations related to data type editor, such as adding, updating, or removing data types and custom enums.
@@ -358,7 +357,7 @@ class DataTypeEditorOperator {
     fun onListDataTypes(project: Project): String =
         try {
             val dataTypes = project.dataTypeHolder.dataTypes
-            yamlDefaultSerializer.encodeToString(dataTypes)
+            encodeToString(dataTypes)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing data types" }
             "Error listing data types: ${e.message}"
@@ -376,7 +375,7 @@ class DataTypeEditorOperator {
         try {
             val dataType = project.dataTypeHolder.dataTypes.find { it.id == dataTypeId }
             if (dataType != null) {
-                yamlDefaultSerializer.encodeToString(dataType)
+                encodeToString(dataType)
             } else {
                 "Data type with ID $dataTypeId not found."
             }
@@ -392,7 +391,7 @@ class DataTypeEditorOperator {
     fun onListCustomEnums(project: Project): String =
         try {
             val customEnums = project.customEnumHolder.enumList
-            yamlDefaultSerializer.encodeToString(customEnums)
+            encodeToString(customEnums)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing custom enums" }
             "Error listing custom enums: ${e.message}"
@@ -411,7 +410,7 @@ class DataTypeEditorOperator {
             val customEnum =
                 project.customEnumHolder.enumList.find { it.customEnumId == customEnumId }
             if (customEnum != null) {
-                yamlDefaultSerializer.encodeToString(customEnum)
+                encodeToString(customEnum)
             } else {
                 "Custom enum with ID $customEnumId not found."
             }

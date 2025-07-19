@@ -6,9 +6,9 @@ import io.composeflow.model.parameter.wrapper.AlignmentVerticalWrapper
 import io.composeflow.model.parameter.wrapper.ArrangementHorizontalWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -74,8 +74,8 @@ class LazyRowTraitTest {
                 verticalAlignment = AlignmentVerticalWrapper.Bottom,
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(lazyRowParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<LazyRowTrait>(encoded)
+        val encoded = encodeToString(lazyRowParams)
+        val decoded = decodeFromStringWithFallback<LazyRowTrait>(encoded)
 
         assertEquals(lazyRowParams, decoded)
     }

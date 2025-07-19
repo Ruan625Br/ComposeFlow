@@ -4,9 +4,9 @@ import androidx.compose.runtime.mutableStateOf
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.enumwrapper.TextDecorationWrapper
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -114,8 +114,8 @@ class AssignablePropertyTest {
                     ),
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(conditional)
-        val decoded = yamlDefaultSerializer.decodeFromString<ConditionalProperty>(encoded)
+        val encoded = encodeToString(conditional)
+        val decoded = decodeFromStringWithFallback<ConditionalProperty>(encoded)
         assertEquals(conditional, decoded)
     }
 

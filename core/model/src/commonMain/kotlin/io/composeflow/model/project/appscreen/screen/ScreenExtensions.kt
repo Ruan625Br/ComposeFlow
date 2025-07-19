@@ -1,9 +1,10 @@
 package io.composeflow.model.project.appscreen.screen
 
 import com.charleskorn.kaml.YamlNode
-import io.composeflow.serializer.yamlDefaultSerializer
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.decodeFromYamlNodeWithFallback
+import io.composeflow.serializer.encodeToString
+import io.composeflow.serializer.parseToYamlNode
 import prefixIdInYamlNode
 
 fun Screen.postProcessAfterAiGeneration(newId: String): Screen {
@@ -18,15 +19,15 @@ fun Screen.postProcessAfterAiGeneration(newId: String): Screen {
 }
 
 fun Screen.replaceIdsToIncreaseUniqueness(): Screen {
-    val yaml = yamlDefaultSerializer.encodeToString(this)
+    val yaml = encodeToString(this)
     val prefixedYaml =
         prefixYamlIdsWithKaml(
             yamlString = yaml,
             screenId = id,
         )
     return prefixedYaml?.let {
-        yamlDefaultSerializer.decodeFromString<Screen>(prefixedYaml)
-    } ?: yamlDefaultSerializer.decodeFromString<Screen>(yaml)
+        decodeFromStringWithFallback<Screen>(prefixedYaml)
+    } ?: decodeFromStringWithFallback<Screen>(yaml)
 }
 
 /**
@@ -46,7 +47,7 @@ private fun prefixYamlIdsWithKaml(
 
     return try {
         // Step 1: Parse the YAML string into kaml's intermediate YamlNode structure
-        val rootNode: YamlNode = yamlDefaultSerializer.parseToYamlNode(yamlString)
+        val rootNode: YamlNode = parseToYamlNode(yamlString)
 
         // Step 2: Recursively process the YamlNode structure to modify IDs
         val modifiedNode: YamlNode = prefixIdInYamlNode(rootNode, screenId, idPrefix)
@@ -54,8 +55,8 @@ private fun prefixYamlIdsWithKaml(
         // Step 3: Encode the modified YamlNode structure back to a YAML string
         // We need the YamlNode.serializer() provided by kaml
         val modifiedScreen =
-            yamlDefaultSerializer.decodeFromYamlNode(Screen.serializer(), modifiedNode)
-        yamlDefaultSerializer.encodeToString(modifiedScreen)
+            decodeFromYamlNodeWithFallback(Screen.serializer(), modifiedNode)
+        encodeToString(modifiedScreen)
     } catch (e: Exception) {
         // Catch potential parsing or processing errors
         e.printStackTrace()

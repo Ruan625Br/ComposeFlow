@@ -23,9 +23,9 @@ import io.composeflow.model.property.ApiResultProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.StringProperty
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import junit.framework.TestCase.assertFalse
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Assert.assertNotEquals
 import org.junit.Before
@@ -322,24 +322,24 @@ class ComposeNodeTest {
 
     @Test
     fun serialize_deserialize_grandChild() {
-        val encoded = yamlDefaultSerializer.encodeToString(grandChild)
-        val decoded = yamlDefaultSerializer.decodeFromString<ComposeNode>(encoded)
+        val encoded = encodeToString(grandChild)
+        val decoded = decodeFromStringWithFallback<ComposeNode>(encoded)
 
         assertTrue(grandChild.contentEquals(decoded))
     }
 
     @Test
     fun serialize_deserialize_child() {
-        val encoded = yamlDefaultSerializer.encodeToString(child)
-        val decoded = yamlDefaultSerializer.decodeFromString<ComposeNode>(encoded)
+        val encoded = encodeToString(child)
+        val decoded = decodeFromStringWithFallback<ComposeNode>(encoded)
 
         assertTrue(child.contentEquals(decoded))
     }
 
     @Test
     fun serialize_deserialize_root() {
-        val encoded = yamlDefaultSerializer.encodeToString(root)
-        val decoded = yamlDefaultSerializer.decodeFromString<ComposeNode>(encoded)
+        val encoded = encodeToString(root)
+        val decoded = decodeFromStringWithFallback<ComposeNode>(encoded)
 
         assertTrue(root.contentEquals(decoded))
     }
@@ -355,8 +355,8 @@ class ComposeNodeTest {
                         ),
                     ),
             )
-        val encoded = yamlDefaultSerializer.encodeToString(node)
-        val decoded = yamlDefaultSerializer.decodeFromString<ComposeNode>(encoded)
+        val encoded = encodeToString(node)
+        val decoded = decodeFromStringWithFallback<ComposeNode>(encoded)
 
         assertTrue(node.contentEquals(decoded))
     }

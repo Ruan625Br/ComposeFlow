@@ -3,9 +3,9 @@ package io.composeflow.model.modifier
 import androidx.compose.ui.unit.dp
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -138,8 +138,8 @@ class PaddingTest {
     fun serialize_verify_restored_instance() {
         val padding = ModifierWrapper.Padding(all = 16.dp)
 
-        val encodedString = yamlDefaultSerializer.encodeToString(padding)
-        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Padding>(encodedString)
+        val encodedString = encodeToString(padding)
+        val decoded = decodeFromStringWithFallback<ModifierWrapper.Padding>(encodedString)
         assertEquals(padding, decoded)
     }
 }

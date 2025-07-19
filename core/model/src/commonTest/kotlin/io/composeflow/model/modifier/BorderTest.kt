@@ -7,9 +7,9 @@ import io.composeflow.model.parameter.wrapper.ColorWrapper
 import io.composeflow.model.parameter.wrapper.ShapeWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.property.ColorProperty
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -47,8 +47,8 @@ class BorderTest {
                 shapeWrapper = ShapeWrapper.RoundedCorner(16.dp),
             )
 
-        val encodedString = yamlDefaultSerializer.encodeToString(border)
-        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Border>(encodedString)
+        val encodedString = encodeToString(border)
+        val decoded = decodeFromStringWithFallback<ModifierWrapper.Border>(encodedString)
         assertEquals(border, decoded)
     }
 }

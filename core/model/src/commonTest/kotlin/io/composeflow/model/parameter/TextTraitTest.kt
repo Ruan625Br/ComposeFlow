@@ -15,9 +15,9 @@ import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.ConditionalProperty
 import io.composeflow.model.property.EnumProperty
 import io.composeflow.model.property.StringProperty
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Assert
@@ -309,8 +309,8 @@ class TextTraitTest {
                 textStyleWrapper = EnumProperty(TextStyleWrapper.BodyMedium),
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(textParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<TextTrait>(encoded)
+        val encoded = encodeToString(textParams)
+        val decoded = decodeFromStringWithFallback<TextTrait>(encoded)
 
         Assert.assertEquals(textParams, decoded)
     }
@@ -350,8 +350,8 @@ class TextTraitTest {
                 textStyleWrapper = EnumProperty(TextStyleWrapper.BodyMedium),
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(textParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<TextTrait>(encoded)
+        val encoded = encodeToString(textParams)
+        val decoded = decodeFromStringWithFallback<TextTrait>(encoded)
 
         Assert.assertEquals(textParams, decoded)
     }

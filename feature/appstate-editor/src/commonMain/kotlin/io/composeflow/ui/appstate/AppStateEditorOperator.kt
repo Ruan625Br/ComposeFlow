@@ -9,10 +9,9 @@ import io.composeflow.model.state.AppState
 import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.copy
 import io.composeflow.serializer.decodeFromStringWithFallback
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.EventResult
 import io.composeflow.util.generateUniqueName
-import kotlinx.serialization.encodeToString
 
 /**
  * Handles operations related to app state editor, such as adding, updating, or removing app states.
@@ -209,7 +208,7 @@ class AppStateEditorOperator {
     fun onListAppStates(project: Project): String =
         try {
             val states = project.globalStateHolder.getStates(project)
-            yamlDefaultSerializer.encodeToString(states)
+            encodeToString(states)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing app states" }
             "Error listing app states: ${e.message}"
@@ -227,7 +226,7 @@ class AppStateEditorOperator {
         try {
             val state = project.globalStateHolder.getStates(project).find { it.id == appStateId }
             if (state != null) {
-                yamlDefaultSerializer.encodeToString(state)
+                encodeToString(state)
             } else {
                 "App state with ID $appStateId not found."
             }

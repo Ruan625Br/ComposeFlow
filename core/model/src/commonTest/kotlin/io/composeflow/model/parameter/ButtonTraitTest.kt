@@ -1,8 +1,8 @@
 package io.composeflow.model.parameter
 
 import io.composeflow.model.property.StringProperty
-import io.composeflow.serializer.yamlDefaultSerializer
-import kotlinx.serialization.decodeFromString
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import kotlinx.serialization.encodeToString
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -15,8 +15,8 @@ class ButtonTraitTest {
                 textProperty = StringProperty.StringIntrinsicValue("button"),
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(buttonParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<ButtonTrait>(encoded)
+        val encoded = encodeToString(buttonParams)
+        val decoded = decodeFromStringWithFallback<ButtonTrait>(encoded)
 
         assertEquals(buttonParams, decoded)
     }

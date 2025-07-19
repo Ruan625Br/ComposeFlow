@@ -16,7 +16,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.postProcessAfterAiGeneration
 import io.composeflow.removeLineBreak
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.EventResult
 import io.composeflow.util.toKotlinFileName
 import kotlinx.coroutines.TimeoutCancellationException
@@ -434,7 +434,7 @@ class AiAssistantViewModel(
             val existingContext =
                 when (val state = uiState.value) {
                     is AiAssistantUiState.Success.NewScreenCreated -> {
-                        yamlDefaultSerializer.encodeToString(
+                        encodeToString(
                             Screen.serializer(),
                             state.screen,
                         ) + " "

@@ -2,8 +2,6 @@ package io.composeflow.serializer
 
 import androidx.compose.ui.unit.dp
 import io.composeflow.model.parameter.wrapper.ShapeWrapper
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import org.junit.Assert
 import org.junit.Test
 
@@ -29,8 +27,8 @@ class ShapeWrapperSerializerTest {
     }
 
     private fun verifySerializeDeserialize(shapeWrapper: ShapeWrapper) {
-        val encoded = yamlDefaultSerializer.encodeToString(shapeWrapper)
-        val decoded = yamlDefaultSerializer.decodeFromString<ShapeWrapper>(encoded)
+        val encoded = encodeToString(shapeWrapper)
+        val decoded = decodeFromStringWithFallback<ShapeWrapper>(encoded)
 
         Assert.assertEquals(shapeWrapper, decoded)
     }

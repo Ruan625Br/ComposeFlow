@@ -40,7 +40,10 @@ class DataTypeEditorOperatorTest {
         val result = dataTypeEditorOperator.addDataType(project, userDataType)
 
         // Verify the operation succeeded
-        assertTrue(result.errorMessages.isEmpty(), "Expected no errors but got: ${result.errorMessages}")
+        assertTrue(
+            result.errorMessages.isEmpty(),
+            "Expected no errors but got: ${result.errorMessages}",
+        )
         assertEquals(1, project.dataTypeHolder.dataTypes.size)
 
         val addedDataType = project.dataTypeHolder.dataTypes.first()
@@ -91,8 +94,10 @@ class DataTypeEditorOperatorTest {
             assertEquals(0, project.dataTypeHolder.dataTypes.size)
             val errorMessage = result.errorMessages.first()
             assertTrue(
-                errorMessage.contains("parse") || errorMessage.contains("YAML") ||
-                    errorMessage.contains("serialization") || errorMessage.contains("deserialize"),
+                errorMessage.contains("parse") ||
+                    errorMessage.contains("YAML") ||
+                    errorMessage.contains("serialization") ||
+                    errorMessage.contains("deserialize"),
                 "Expected meaningful error message about parsing, got: $errorMessage",
             )
         }
@@ -182,7 +187,7 @@ class DataTypeEditorOperatorTest {
         // Test exactly the format mentioned in the GitHub issue
         val problematicYaml =
             """
-            name: "User"  
+            name: "User"
             fields:
               - name: "id"
                 fieldType:
@@ -243,7 +248,10 @@ class DataTypeEditorOperatorTest {
 
         val result = dataTypeEditorOperator.onAddDataType(project, mixedFieldTypesYaml)
 
-        assertTrue(result.errorMessages.isEmpty(), "Expected no errors but got: ${result.errorMessages}")
+        assertTrue(
+            result.errorMessages.isEmpty(),
+            "Expected no errors but got: ${result.errorMessages}",
+        )
         assertEquals(1, project.dataTypeHolder.dataTypes.size)
 
         val addedDataType = project.dataTypeHolder.dataTypes.first()
@@ -296,9 +304,16 @@ class DataTypeEditorOperatorTest {
 
         val dataTypes = project.dataTypeHolder.dataTypes
         val names = dataTypes.map { it.className }.toSet()
-        assertEquals(2, names.size, "Expected unique names but got: ${dataTypes.map { it.className }}")
+        assertEquals(
+            2,
+            names.size,
+            "Expected unique names but got: ${dataTypes.map { it.className }}",
+        )
         assertTrue(names.contains("User"))
-        assertTrue(names.any { it.startsWith("User") && it != "User" }, "Expected a uniquely named variant of 'User'")
+        assertTrue(
+            names.any { it.startsWith("User") && it != "User" },
+            "Expected a uniquely named variant of 'User'",
+        )
     }
 
     @Test
@@ -311,7 +326,10 @@ class DataTypeEditorOperatorTest {
 
         val result = dataTypeEditorOperator.onAddDataType(project, emptyFieldsYaml)
 
-        assertTrue(result.errorMessages.isEmpty(), "Expected no errors but got: ${result.errorMessages}")
+        assertTrue(
+            result.errorMessages.isEmpty(),
+            "Expected no errors but got: ${result.errorMessages}",
+        )
         assertEquals(1, project.dataTypeHolder.dataTypes.size)
 
         val addedDataType = project.dataTypeHolder.dataTypes.first()

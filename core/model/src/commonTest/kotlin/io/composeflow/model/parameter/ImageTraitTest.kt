@@ -7,9 +7,9 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.EnumProperty
 import io.composeflow.model.property.StringProperty
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import org.junit.Test
@@ -112,8 +112,8 @@ class ImageTraitTest {
                     ),
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(imageParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<ImageTrait>(encoded)
+        val encoded = encodeToString(imageParams)
+        val decoded = decodeFromStringWithFallback<ImageTrait>(encoded)
 
         assertEquals(imageParams, decoded)
     }

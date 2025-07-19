@@ -9,7 +9,7 @@ import io.composeflow.model.parameter.TextTrait
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.encodeToString
 import kotlinx.serialization.encodeToString
 import org.junit.Before
 import org.junit.Test
@@ -113,7 +113,7 @@ class UiBuilderOperatorTest {
         val containerNode = createColumnNode()
         rootNode.addChild(containerNode)
         val buttonNode = createButtonNode()
-        val buttonYaml = yamlDefaultSerializer.encodeToString(buttonNode)
+        val buttonYaml = encodeToString(buttonNode)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -174,7 +174,7 @@ class UiBuilderOperatorTest {
     @Test
     fun testOnAddModifier_NodeNotFound() {
         val modifier = createPaddingModifier()
-        val modifierYaml = yamlDefaultSerializer.encodeToString(modifier)
+        val modifierYaml = encodeToString(modifier)
 
         val result =
             uiBuilderOperator.onAddModifier(
@@ -190,7 +190,7 @@ class UiBuilderOperatorTest {
     @Test
     fun testOnUpdateModifier_NodeNotFound() {
         val modifier = createPaddingModifier()
-        val modifierYaml = yamlDefaultSerializer.encodeToString(modifier)
+        val modifierYaml = encodeToString(modifier)
 
         val result =
             uiBuilderOperator.onUpdateModifier(
@@ -209,7 +209,7 @@ class UiBuilderOperatorTest {
         val node = createButtonNode()
         rootNode.addChild(node)
         val modifier = createPaddingModifier()
-        val modifierYaml = yamlDefaultSerializer.encodeToString(modifier)
+        val modifierYaml = encodeToString(modifier)
 
         val result =
             uiBuilderOperator.onUpdateModifier(
@@ -342,7 +342,7 @@ class UiBuilderOperatorTest {
     @Test
     fun testModifierSerialization() {
         val modifier = createPaddingModifier()
-        val yaml = yamlDefaultSerializer.encodeToString(modifier)
+        val yaml = encodeToString(modifier)
 
         // Basic check that serialization produces non-empty result
         assertTrue(yaml.isNotEmpty())
@@ -352,7 +352,7 @@ class UiBuilderOperatorTest {
     @Test
     fun testNodeSerialization() {
         val buttonNode = createButtonNode()
-        val yaml = yamlDefaultSerializer.encodeToString(buttonNode)
+        val yaml = encodeToString(buttonNode)
 
         // Basic check that serialization produces non-empty result
         assertTrue(yaml.isNotEmpty())
@@ -373,7 +373,7 @@ class UiBuilderOperatorTest {
 
         // Try to add another button with the same ID
         val secondButton = createButtonNode().copy(id = originalId)
-        val secondButtonYaml = yamlDefaultSerializer.encodeToString(secondButton)
+        val secondButtonYaml = encodeToString(secondButton)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -410,7 +410,7 @@ class UiBuilderOperatorTest {
 
         // Try to add another button with the same ID at index 0
         val secondButton = createButtonNode().copy(id = originalId)
-        val secondButtonYaml = yamlDefaultSerializer.encodeToString(secondButton)
+        val secondButtonYaml = encodeToString(secondButton)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -442,7 +442,7 @@ class UiBuilderOperatorTest {
 
         val buttonNode = createButtonNode()
         val originalId = buttonNode.id
-        val buttonYaml = yamlDefaultSerializer.encodeToString(buttonNode)
+        val buttonYaml = encodeToString(buttonNode)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -471,7 +471,7 @@ class UiBuilderOperatorTest {
 
         // Add second button with same ID - should become "Button1"
         val secondButton = createButtonNode().copy(id = baseId)
-        val secondButtonYaml = yamlDefaultSerializer.encodeToString(secondButton)
+        val secondButtonYaml = encodeToString(secondButton)
 
         uiBuilderOperator.onAddComposeNodeToContainerNode(
             project = project,
@@ -482,7 +482,7 @@ class UiBuilderOperatorTest {
 
         // Add third button with same ID - should become "Button2"
         val thirdButton = createButtonNode().copy(id = baseId)
-        val thirdButtonYaml = yamlDefaultSerializer.encodeToString(thirdButton)
+        val thirdButtonYaml = encodeToString(thirdButton)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -520,7 +520,7 @@ class UiBuilderOperatorTest {
 
         // Try to add button with same ID to outer column
         val secondButton = createButtonNode().copy(id = baseId)
-        val secondButtonYaml = yamlDefaultSerializer.encodeToString(secondButton)
+        val secondButtonYaml = encodeToString(secondButton)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -550,7 +550,7 @@ class UiBuilderOperatorTest {
         // Screen-only nodes (like FAB) are handled differently and don't go through ID uniqueness logic
         val fabNode = createFabNode()
         val originalId = fabNode.id
-        val fabYaml = yamlDefaultSerializer.encodeToString(fabNode)
+        val fabYaml = encodeToString(fabNode)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(
@@ -586,7 +586,7 @@ class UiBuilderOperatorTest {
 
         // Try to add another node with "SharedId" to column2
         val button2 = createButtonNode().copy(id = "SharedId")
-        val button2Yaml = yamlDefaultSerializer.encodeToString(button2)
+        val button2Yaml = encodeToString(button2)
 
         val result =
             uiBuilderOperator.onAddComposeNodeToContainerNode(

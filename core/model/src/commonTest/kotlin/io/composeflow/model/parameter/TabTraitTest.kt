@@ -5,9 +5,9 @@ import io.composeflow.materialicons.Outlined
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.StringProperty
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Assert
 import org.junit.Test
@@ -79,8 +79,8 @@ class TabTraitTest {
                 enabled = false,
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(tabParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<TabTrait>(encoded)
+        val encoded = encodeToString(tabParams)
+        val decoded = decodeFromStringWithFallback<TabTrait>(encoded)
 
         Assert.assertEquals(tabParams, decoded)
     }

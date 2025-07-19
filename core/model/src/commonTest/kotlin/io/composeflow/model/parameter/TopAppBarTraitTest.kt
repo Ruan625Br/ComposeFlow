@@ -1,8 +1,8 @@
 package io.composeflow.model.parameter
 
 import io.composeflow.model.property.StringProperty
-import io.composeflow.serializer.yamlDefaultSerializer
-import kotlinx.serialization.decodeFromString
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import kotlinx.serialization.encodeToString
 import org.junit.Assert
 import org.junit.Test
@@ -17,8 +17,8 @@ class TopAppBarTraitTest {
                 scrollBehaviorWrapper = ScrollBehaviorWrapper.EnterAlways,
             )
 
-        val encoded = yamlDefaultSerializer.encodeToString(topAppBarParams)
-        val decoded = yamlDefaultSerializer.decodeFromString<TopAppBarTrait>(encoded)
+        val encoded = encodeToString(topAppBarParams)
+        val decoded = decodeFromStringWithFallback<TopAppBarTrait>(encoded)
 
         Assert.assertTrue(topAppBarParams.contentEquals(decoded))
     }

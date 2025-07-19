@@ -2,9 +2,9 @@ package io.composeflow.model.parameter.wrapper
 
 import androidx.compose.ui.graphics.Color
 import io.composeflow.serializer.asString
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import junit.framework.TestCase.assertEquals
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlin.test.Test
 
@@ -12,22 +12,22 @@ class ColorWrapperTest {
     @Test
     fun withThemeColor_verify_restoredAsSame() {
         val colorWrapper = ColorWrapper(themeColor = Material3ColorWrapper.Surface)
-        val decoded = yamlDefaultSerializer.encodeToString(colorWrapper)
-        assertEquals(colorWrapper, yamlDefaultSerializer.decodeFromString<ColorWrapper>(decoded))
+        val decoded = encodeToString(colorWrapper)
+        assertEquals(colorWrapper, decodeFromStringWithFallback<ColorWrapper>(decoded))
     }
 
     @Test
     fun withoutThemeColorWithAlpha_verify_restoredAsSame() {
         val colorWrapper = ColorWrapper(themeColor = null, color = Color(0xFF8A123F))
-        val decoded = yamlDefaultSerializer.encodeToString(colorWrapper)
-        assertEquals(colorWrapper, yamlDefaultSerializer.decodeFromString<ColorWrapper>(decoded))
+        val decoded = encodeToString(colorWrapper)
+        assertEquals(colorWrapper, decodeFromStringWithFallback<ColorWrapper>(decoded))
     }
 
     @Test
     fun withoutThemeColorWithAlpha_nonFullOpaque_verify_restoredAsSame() {
         val colorWrapper = ColorWrapper(themeColor = null, color = Color(0x328A123F))
-        val decoded = yamlDefaultSerializer.encodeToString(colorWrapper)
-        assertEquals(colorWrapper, yamlDefaultSerializer.decodeFromString<ColorWrapper>(decoded))
+        val decoded = encodeToString(colorWrapper)
+        assertEquals(colorWrapper, decodeFromStringWithFallback<ColorWrapper>(decoded))
     }
 
     @Test
@@ -53,14 +53,14 @@ class ColorWrapperTest {
         val yaml =
             "themeColor: null\n" +
                 "color: \"#23AB01\""
-        val decoded = yamlDefaultSerializer.decodeFromString<ColorWrapper>(yaml)
+        val decoded = decodeFromStringWithFallback<ColorWrapper>(yaml)
         assertEquals(Color(0xFF23AB01.toInt()), decoded.color)
     }
 
     @Test
     fun deserialize_without_themColor() {
         val yaml = "color: \"#23AB01\""
-        val decoded = yamlDefaultSerializer.decodeFromString<ColorWrapper>(yaml)
+        val decoded = decodeFromStringWithFallback<ColorWrapper>(yaml)
         assertEquals(Color(0xFF23AB01.toInt()), decoded.color)
     }
 
@@ -69,7 +69,7 @@ class ColorWrapperTest {
         val yaml =
             "themeColor: null\n" +
                 "color: \"#8023AB01\""
-        val decoded = yamlDefaultSerializer.decodeFromString<ColorWrapper>(yaml)
+        val decoded = decodeFromStringWithFallback<ColorWrapper>(yaml)
         assertEquals(Color(0x8023AB01.toInt()), decoded.color)
     }
 }

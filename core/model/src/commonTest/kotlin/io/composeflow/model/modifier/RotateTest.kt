@@ -2,9 +2,9 @@ package io.composeflow.model.modifier
 
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import io.composeflow.trimForCompare
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import org.junit.Test
 import kotlin.test.assertEquals
@@ -44,8 +44,8 @@ class RotateTest {
     fun serialize_verify_restored_instance() {
         val rotate = ModifierWrapper.Rotate(60f)
 
-        val encodedString = yamlDefaultSerializer.encodeToString(rotate)
-        val decoded = yamlDefaultSerializer.decodeFromString<ModifierWrapper.Rotate>(encodedString)
+        val encodedString = encodeToString(rotate)
+        val decoded = decodeFromStringWithFallback<ModifierWrapper.Rotate>(encodedString)
         assertEquals(rotate, decoded)
     }
 }

@@ -31,13 +31,13 @@ import io.composeflow.model.state.ReadableState
 import io.composeflow.model.state.StateHolder
 import io.composeflow.model.state.StateHolderImpl
 import io.composeflow.model.state.StateId
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.decodeFromStringWithFallback
+import io.composeflow.serializer.encodeToString
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlin.uuid.Uuid
 
@@ -142,14 +142,14 @@ data class Project(
 
     companion object {
         fun deserializeFromString(yaml: String): Project {
-            val project = yamlDefaultSerializer.decodeFromString<Project>(yaml)
+            val project = decodeFromStringWithFallback<Project>(yaml)
             project.screenHolder.updateChildParentRelationships()
             return project
         }
     }
 }
 
-fun Project.serialize(): String = yamlDefaultSerializer.encodeToString(this)
+fun Project.serialize(): String = encodeToString(this)
 
 /**
  * Find matching State from the all states including all Screens within the project
