@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.MaterialTheme
@@ -40,6 +41,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogWindow
@@ -63,8 +65,32 @@ import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.labeledbox.LabeledBorderBox
 import io.composeflow.ui.modifier.hoverIconClickable
+import io.composeflow.ui.textfield.SmallOutlinedTextField
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+
+// Helper functions for hex color conversion
+private fun Color.toHexString(): String {
+    val red = (red * 255).toInt()
+    val green = (green * 255).toInt()
+    val blue = (blue * 255).toInt()
+    return String.format("#%02X%02X%02X", red, green, blue)
+}
+
+private fun String.toColorOrNull(): Color? {
+    return try {
+        val hex = if (startsWith("#")) substring(1) else this
+        if (hex.length != 6) return null
+
+        val red = hex.substring(0, 2).toInt(16) / 255f
+        val green = hex.substring(2, 4).toInt(16) / 255f
+        val blue = hex.substring(4, 6).toInt(16) / 255f
+
+        Color(red = red, green = green, blue = blue)
+    } catch (e: Exception) {
+        null
+    }
+}
 
 @Composable
 fun ColorPropertyEditor(
@@ -245,7 +271,12 @@ fun ColorPropertyDialogContent(
                 )
 
                 val previewColor = currentColor.toColor().convert(ColorSpaces.Srgb)
-                ColorPreviewInfo(previewColor)
+                ColorPreviewInfo(
+                    color = previewColor,
+                    onColorChanged = { newColor ->
+                        currentColor = HsvColor.from(newColor)
+                    },
+                )
             }
 
             if (includeThemeColor) {
@@ -349,11 +380,15 @@ fun ColorPropertyDialogContent(
 fun ColorPreviewInfo(
     color: Color,
     showAlpha: Boolean = true,
+    onColorChanged: ((Color) -> Unit)? = null,
 ) {
+    var hexText by remember(color) { mutableStateOf(color.toHexString()) }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         val red: Int = color.red.times(255).toInt()
         val green: Int = color.green.times(255).toInt()
         val blue: Int = color.blue.times(255).toInt()
+
         Text(
             modifier = Modifier.padding(16.dp),
             color = MaterialTheme.colorScheme.secondary,
@@ -367,6 +402,30 @@ fun ColorPreviewInfo(
                     "G: $green \n" +
                     "B: $blue",
         )
+
+        // Hex color input field
+        if (onColorChanged != null) {
+            SmallOutlinedTextField(
+                value = hexText,
+                onValueChange = { newHex ->
+                    hexText = newHex
+                    val newColor = newHex.toColorOrNull()
+                    if (newColor != null) {
+                        onColorChanged(newColor)
+                    }
+                },
+                label = { Text("Hex") },
+                modifier =
+                    Modifier
+                        .padding(horizontal = 16.dp)
+                        .fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                singleLine = true,
+                placeholder = { Text("#RRGGBB") },
+            )
+            Spacer(Modifier.height(8.dp))
+        }
+
         Box(
             modifier =
                 Modifier
@@ -455,6 +514,7 @@ private fun ThemedColorPreviewInfoPreview(useDarkTheme: Boolean) {
     ComposeFlowTheme(useDarkTheme = useDarkTheme) {
         ColorPreviewInfo(
             color = Color(0xFF1976D2),
+            onColorChanged = { /* Preview - no action */ },
         )
     }
 }
