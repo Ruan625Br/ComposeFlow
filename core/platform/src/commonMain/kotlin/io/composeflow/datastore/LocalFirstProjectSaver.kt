@@ -15,9 +15,13 @@ class LocalFirstProjectSaver(
         userId: String,
         projectId: String,
         yamlContent: String,
+        syncWithCloud: Boolean,
     ) {
         localProjectSaver.saveProjectYaml(userId, projectId, yamlContent)
         // Don't save to the cloud unless CloudProjectSaver is used explicitly
+        if (syncWithCloud) {
+            cloudProjectSaver.saveProjectYaml(userId, projectId, yamlContent)
+        }
     }
 
     override suspend fun deleteProject(

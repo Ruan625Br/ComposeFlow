@@ -30,6 +30,7 @@ val fakeProjectRepository =
                     userId: String,
                     projectId: String,
                     yamlContent: String,
+                    syncWithCloud: Boolean,
                 ) {
                 }
 

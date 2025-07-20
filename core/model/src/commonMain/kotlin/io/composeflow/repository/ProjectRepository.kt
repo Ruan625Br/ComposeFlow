@@ -19,7 +19,6 @@ import io.composeflow.util.toKotlinFileName
 import io.composeflow.util.toPackageName
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
 
 class ProjectRepository(
     private val firebaseIdToken: FirebaseIdToken,
@@ -72,11 +71,15 @@ class ProjectRepository(
             }
         }
 
-    suspend fun updateProject(project: Project) {
+    suspend fun updateProject(
+        project: Project,
+        syncWithCloud: Boolean = false,
+    ) {
         projectSaver.saveProjectYaml(
             userId = firebaseIdToken.user_id,
             projectId = project.id,
             yamlContent = project.serialize(),
+            syncWithCloud = syncWithCloud,
         )
 
         // Save the project to DataStore, too so that Flow

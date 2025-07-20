@@ -22,6 +22,7 @@ class LocalProjectSaverImpl(
         userId: String,
         projectId: String,
         yamlContent: String,
+        syncWithCloud: Boolean,
     ) {
         withContext(ioDispatcher) {
             val projectsDir = prepareProjectDir(userId = userId, projectId = projectId)

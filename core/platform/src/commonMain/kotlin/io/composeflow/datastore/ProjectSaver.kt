@@ -7,6 +7,7 @@ interface ProjectSaver {
         userId: String,
         projectId: String,
         yamlContent: String,
+        syncWithCloud: Boolean = false,
     )
 
     suspend fun deleteProject(

@@ -199,9 +199,9 @@ private fun ProjectListBody(
                     onCreateProject(projectName, packageName)
                     onAllDialogsClosed()
                 },
-                onConfirmProjectWithScreens = { projectName, screens ->
+                onConfirmProjectWithScreens = { project, screens ->
                     createProjectDialogOpen = false
-                    onCreateProjectWithScreens(projectName, screens)
+                    onCreateProjectWithScreens(project, screens)
                     onAllDialogsClosed()
                 },
             )

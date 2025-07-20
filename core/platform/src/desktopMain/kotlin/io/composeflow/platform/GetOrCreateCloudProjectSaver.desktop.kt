@@ -25,6 +25,7 @@ class CloudProjectSaverImpl(
         userId: String,
         projectId: String,
         yamlContent: String,
+        syncWithCloud: Boolean,
     ) = withContext(ioDispatcher) {
         cloudStorageWrapper
             .uploadFile(

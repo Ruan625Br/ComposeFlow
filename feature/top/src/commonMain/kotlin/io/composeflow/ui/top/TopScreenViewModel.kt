@@ -43,7 +43,7 @@ class TopScreenViewModel(
                     is ProjectUiState.HasNotSelected.ProjectListLoaded -> {}
                     ProjectUiState.HasNotSelected.ProjectListLoading -> {}
                     is ProjectUiState.Selected -> {
-                        CloudProjectSaverRunner.projectId = it.project.id.toString()
+                        CloudProjectSaverRunner.projectId = it.project.id
                         CloudProjectSaverRunner.userId = firebaseIdToken.user_id
                         CloudProjectSaverRunner.startSavingProjectPeriodically()
                     }
@@ -93,7 +93,7 @@ class TopScreenViewModel(
                     project.screenHolder.addScreen(it.name, it)
                 }
             }
-            projectRepository.updateProject(project)
+            projectRepository.updateProject(project, syncWithCloud = true)
 
             _projectListUiState.value = ProjectUiState.Selected(project)
         }

@@ -56,6 +56,7 @@ class AppStateEditorOperator {
             if (appState is AppState<*>) {
                 addAppState(project, appState)
             } else {
+                Logger.w("Parsed state is not an AppState: ${appState::class.simpleName}")
                 EventResult().apply {
                     errorMessages.add("Parsed state is not an AppState: ${appState::class.simpleName}")
                 }

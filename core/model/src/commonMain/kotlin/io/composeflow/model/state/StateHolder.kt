@@ -53,10 +53,11 @@ data class StateHolderImpl(
     val states: MutableList<ReadableState> = mutableStateListEqualsOverrideOf(),
 ) : StateHolder {
     init {
-        states.clear()
         // Explicitly ignore the companion states if it's created from LLM.
         // It should be explicitly created, but to be on the safe side, filtering out here
-        states.addAll(states.filter { it.name.contains("-companionState") })
+        val nonCompanionStates = states.filter { !it.name.contains("-companionState") }
+        states.clear()
+        states.addAll(nonCompanionStates)
     }
 
     override fun getStates(project: Project): List<ReadableState> = states
