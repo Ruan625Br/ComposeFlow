@@ -39,7 +39,7 @@ import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.issue.NavigatableDestination
 import io.composeflow.model.state.AppState
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.FallbackMutableStateListSerializer
+import io.composeflow.serializer.MutableStateListSerializer
 import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.util.generateUniqueName
 import io.composeflow.util.toKotlinFileName
@@ -56,7 +56,7 @@ val screenRouteClass = ClassName(packageName = "", SCREEN_ROUTE)
 @Serializable
 @SerialName("ScreenHolder")
 data class ScreenHolder(
-    @Serializable(with = FallbackMutableStateListSerializer::class)
+    @Serializable(with = MutableStateListSerializer::class)
     val screens: MutableList<Screen> =
         mutableStateListEqualsOverrideOf(
             Screen(

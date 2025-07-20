@@ -282,7 +282,7 @@ sealed interface ActionNode {
     @SerialName("Forked")
     data class Forked(
         override val id: ActionNodeId = Uuid.random().toString(),
-        val forkedAction: ForkedAction,
+        val forkedAction: Action,
         @Serializable(FallbackMutableStateListSerializer::class)
         val trueNodes: MutableList<ActionNode> = mutableStateListOf(),
         @Serializable(FallbackMutableStateListSerializer::class)
@@ -403,12 +403,15 @@ sealed interface ActionNode {
             }
             val initializationBlock =
                 forkedAction
-                    .generateInitializationCodeBlockWithForkedActions(
+                    .generateInitializationCodeBlock(
                         project,
                         context,
                         dryRun = dryRun,
-                        trueNodesCodeBlock = trueBlockBuilder.build(),
-                        falseNodesCodeBlock = falseBlockBuilder.build(),
+                        additionalCodeBlocks =
+                            arrayOf(
+                                trueBlockBuilder.build(),
+                                falseBlockBuilder.build(),
+                            ),
                     )
             return trueNodes.flatMap {
                 it.generateInitializationCodeBlocks(

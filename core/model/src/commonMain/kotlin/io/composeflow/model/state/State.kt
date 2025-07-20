@@ -84,7 +84,7 @@ sealed interface ReadableState {
     fun getUniqueIdentifier(context: GenerationContext): String =
         context.getCurrentComposableContext().getOrAddIdentifier(
             id = id,
-            initialIdentifier = name,
+            initialIdentifier = name.asVariableName(),
         )
 }
 
@@ -921,10 +921,9 @@ sealed interface ScreenState<T> : State<T> {
             val builder = CodeBlock.builder()
             val composeContext = context.getCurrentComposableContext()
             val newItems =
-                composeContext.addComposeFileVariable(
+                composeContext.getOrAddIdentifier(
                     id = id,
-                    "newItems",
-                    dryRun = dryRun,
+                    initialIdentifier = "newItems",
                 )
             if (singleValueOnly) {
                 builder.add(

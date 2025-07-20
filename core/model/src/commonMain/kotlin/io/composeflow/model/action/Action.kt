@@ -107,10 +107,18 @@ sealed interface Action {
         dryRun: Boolean,
     ): CodeBlock? = null
 
+    /**
+     * Generate the CodeBlock when the action is initialized.
+     *
+     * @param additionalCodeBlocks codeBlocks are passed if any additional code blocks are needed
+     * for the action. For example, [ShowConfirmationDialog] accepts code blocks when the
+     * positive text is clicked and negative text is clicked for each.
+     */
     fun generateInitializationCodeBlock(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
+        vararg additionalCodeBlocks: CodeBlock = arrayOf(),
     ): CodeBlock? = null
 
     fun argumentName(project: Project): String? = null
@@ -160,27 +168,6 @@ sealed interface Action {
     fun getDependentComposeNodes(project: Project): List<ComposeNode> = emptyList()
 
     fun generateIssues(project: Project): List<Issue> = emptyList()
-}
-
-/**
- * Action that has action blocks depending on the result of the action.
- * E.g. Confirmation dialog action:
- *        - true blocks : Executed when the user selects the positive button
- *        - false blocks : Executed when the user selects the negative button
- */
-@Serializable
-sealed interface ForkedAction : Action {
-    /**
-     * Generate the code block when it's initialized. This accepts the code blocks for both
-     * true nodes and false nodes
-     */
-    fun generateInitializationCodeBlockWithForkedActions(
-        project: Project,
-        context: GenerationContext,
-        dryRun: Boolean,
-        trueNodesCodeBlock: CodeBlock?,
-        falseNodesCodeBlock: CodeBlock?,
-    ): CodeBlock? = null
 }
 
 @Serializable
@@ -714,7 +701,7 @@ data class ShowConfirmationDialog(
     override val name: String = "Show confirmation dialog",
     var dialogOpenVariableName: String = "openConfirmationDialog",
 ) : ShowModal,
-    ForkedAction {
+    Action {
     override fun getDependentComposeNodes(project: Project): List<ComposeNode> =
         (title?.getDependentComposeNodes(project) ?: emptyList()) +
             (message?.getDependentComposeNodes(project) ?: emptyList()) +
@@ -762,12 +749,11 @@ data class ShowConfirmationDialog(
         }
     }
 
-    override fun generateInitializationCodeBlockWithForkedActions(
+    override fun generateInitializationCodeBlock(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-        trueNodesCodeBlock: CodeBlock?,
-        falseNodesCodeBlock: CodeBlock?,
+        vararg additionalCodeBlocks: CodeBlock,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
@@ -779,7 +765,7 @@ data class ShowConfirmationDialog(
         builder.addStatement(
             """
                 var $variableName by %M { %M(false) }
-                if ($dialogOpenVariableName) {
+                if ($variableName) {
                     %M(
                         positiveText = """,
             MemberHolder.AndroidX.Runtime.remember,
@@ -804,19 +790,20 @@ data class ShowConfirmationDialog(
         )
         builder.add(",")
         builder.addStatement("""positiveBlock = {""")
-        trueNodesCodeBlock?.let {
-            builder.add(it)
+        if (additionalCodeBlocks.isNotEmpty()) {
+            builder.add(additionalCodeBlocks[0])
         }
         builder.addStatement("},")
         builder.addStatement("""negativeBlock = {""")
-        falseNodesCodeBlock?.let {
-            builder.add(it)
+        if (additionalCodeBlocks.size > 1) {
+            builder.add(additionalCodeBlocks[1])
         }
+
         builder.addStatement("},")
         builder.addStatement(
             """
             onDismissRequest = {
-                $dialogOpenVariableName = false
+                $variableName = false
             },
         """,
         )
@@ -908,6 +895,7 @@ data class ShowInformationDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
+        vararg additionalCodeBlocks: CodeBlock,
     ): CodeBlock {
         val builder = CodeBlock.builder()
         val composableContext = context.getCurrentComposableContext()
@@ -1067,6 +1055,7 @@ data class ShowCustomDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
+        vararg additionalCodeBlocks: CodeBlock,
     ): CodeBlock {
         val component = findComponentOrNull(project) ?: return CodeBlock.of("")
         val composableContext = context.getCurrentComposableContext()
@@ -1098,7 +1087,7 @@ data class ShowCustomDialog(
             """
                 %M(
                     ${paramBuilder.build()}
-                    $COMPONENT_KEY_NAME = "${component.name}-$componentInvocationCount" 
+                    $COMPONENT_KEY_NAME = "${component.name}-$componentInvocationCount"
                 )""",
             component.asMemberName(project),
         )
@@ -1182,6 +1171,7 @@ data class ShowBottomSheet(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
+        vararg additionalCodeBlocks: CodeBlock,
     ): CodeBlock {
         val component = findComponentOrNull(project) ?: return CodeBlock.of("")
 
@@ -1221,7 +1211,7 @@ data class ShowBottomSheet(
             """
                 %M(
                     ${paramBuilder.build()}
-                    $COMPONENT_KEY_NAME = "${component.name}-$componentInvocationCount" 
+                    $COMPONENT_KEY_NAME = "${component.name}-$componentInvocationCount"
                 )""",
             component.asMemberName(project),
         )
@@ -1404,6 +1394,7 @@ sealed interface ShowMessaging : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
+            vararg additionalCodeBlocks: CodeBlock,
         ): CodeBlock {
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                 id = "$id-$snackbarOpenVariableName",
@@ -1589,6 +1580,7 @@ sealed interface DateOrTimePicker : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
+            vararg additionalCodeBlocks: CodeBlock,
         ): CodeBlock {
             val builder = CodeBlock.builder()
             val composableContext = context.getCurrentComposableContext()
@@ -1776,6 +1768,7 @@ sealed interface DateOrTimePicker : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
+            vararg additionalCodeBlocks: CodeBlock,
         ): CodeBlock {
             val builder = CodeBlock.builder()
             val composableContext = context.getCurrentComposableContext()
@@ -1783,12 +1776,6 @@ sealed interface DateOrTimePicker : Action {
                 composableContext.addComposeFileVariable(
                     id = "$id-$dateDialogOpenVariableName",
                     initialIdentifier = dateDialogOpenVariableName,
-                    dryRun = dryRun,
-                )
-            val datePickerStateName =
-                composableContext.addComposeFileVariable(
-                    id = "$id-$datePickerStateName",
-                    initialIdentifier = datePickerStateName,
                     dryRun = dryRun,
                 )
             val timeDialogOpenVariableName =
@@ -2054,6 +2041,7 @@ sealed interface Share : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
+            vararg additionalCodeBlocks: CodeBlock,
         ): CodeBlock {
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                 id = "$id-$uriHandlerName",
@@ -2235,6 +2223,7 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
+            vararg additionalCodeBlocks: CodeBlock,
         ): CodeBlock {
             val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
@@ -2458,6 +2447,7 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
+            vararg additionalCodeBlocks: CodeBlock,
         ): CodeBlock {
             val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
