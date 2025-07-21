@@ -19,6 +19,7 @@ kotlin {
             implementation(project(":core:formatter"))
             implementation(project(":core:model"))
             implementation(project(":core:platform"))
+            implementation(project(":core:resources"))
             implementation(project(":core:serializer"))
             implementation(project(":core:ui"))
             implementation(project(":feature:api-editor"))

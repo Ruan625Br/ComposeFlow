@@ -80,6 +80,9 @@ class UiBuilderViewModel(
     private val uiBuilderOperator: UiBuilderOperator = UiBuilderOperator(),
     private val onUpdateProject: (Project) -> Unit,
 ) : ViewModel() {
+    // Expose settings repository for onboarding
+    val settings: SettingsRepository get() = settingsRepository
+
     // Project that is updated when the the project that is being edited.
     // This may conflicts with the [project] field in this ViewModel, but to detect the real time
     // updates when the Project.ScreenHolder.pending* fields, having this field.

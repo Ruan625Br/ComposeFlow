@@ -144,7 +144,9 @@ fun ScreenNameDialog(
             }
         },
     ) {
-        val (first, second, third) = remember { FocusRequester.createRefs() }
+        val first = remember { FocusRequester() }
+        val second = remember { FocusRequester() }
+        val third = remember { FocusRequester() }
         LaunchedEffect(Unit) {
             first.requestFocus()
         }

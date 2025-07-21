@@ -169,6 +169,11 @@ import io.composeflow.ui.screenbuilder.ScreenBuilderTab
 import io.composeflow.ui.screenbuilder.ScreenNameDialog
 import io.composeflow.ui.screenbuilder.SelectNewScreenDialog
 import io.composeflow.ui.tab.ComposeFlowTab
+import io.composeflow.ui.uibuilder.onboarding.OnboardingManager
+import io.composeflow.ui.uibuilder.onboarding.OnboardingOverlay
+import io.composeflow.ui.uibuilder.onboarding.TargetArea
+import io.composeflow.ui.uibuilder.onboarding.onboardingTarget
+import io.composeflow.ui.uibuilder.onboarding.rememberOnboardingManager
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import io.composeflow.ui.zoomablecontainer.calculateAdjustedBoundsInZoomableContainer
 import io.composeflow.zoom_in
@@ -201,6 +206,9 @@ fun UiBuilderScreen(
             viewModel.onSetPendingFocus(destination)
         }
     }
+
+    // Initialize onboarding manager
+    val onboardingManager = rememberOnboardingManager(viewModel.settings)
 
     val coroutineScope = rememberCoroutineScope()
     val currentEditable = project.screenHolder.currentEditable()
@@ -277,10 +285,7 @@ fun UiBuilderScreen(
             onDragEnd = viewModel::onDragEnd,
         )
     val zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder
-    val (focusRequester) = remember { FocusRequester.createRefs() }
-    LaunchedEffect(Unit) {
-        focusRequester.requestFocus()
-    }
+    val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(screenMaxSize) {
         val scale =
@@ -300,139 +305,153 @@ fun UiBuilderScreen(
         darkScheme = colorSchemeHolder.darkColorScheme.value.toColorScheme(),
         typography = project.themeHolder.fontHolder.generateTypography(),
     ) {
-        Box(
-            modifier =
-                Modifier
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null,
-                        onClick = {
-                            // To make sure the UI builder screen area has the proper focus.
-                            // Otherwise it doesn't often receive key events such as delete, or
-                            // plus (which opens the add modifier dialog)
-                            focusRequester.requestFocus()
-                        },
-                    ).onPointerEvent(PointerEventType.Move) {
-                        it.changes.firstOrNull()?.let { change ->
-                            dragStartPosition = change.position
-                        }
-                    }.focusProperties { canFocus = true }
-                    .focusRequester(focusRequester)
-                    .onKeyEvent {
-                        var consumed = false
-                        if ((it.isCtrlPressed || it.isMetaPressed) &&
-                            it.type == KeyEventType.KeyDown &&
-                            it.key == Key.M
-                        ) {
-                            addModifierDialogVisible = true
-                            consumed = true
-                        } else {
-                            if (it.type == KeyEventType.KeyDown) {
-                                val eventResult = canvasNodeCallbacks.onKeyPressed(it)
-                                eventResult.handleMessages(onShowSnackbar, coroutineScope)
-                                consumed = eventResult.consumed
-                            }
-                        }
-                        consumed
-                    },
+        OnboardingOverlay(
+            state = onboardingManager.state,
+            onAction = onboardingManager::handleAction,
         ) {
-            val leftPaneSplitState =
-                rememberSplitLayoutState(initialDividerPosition = viewModel.leftPaneDividerPosition)
-            StatefulHorizontalSplitLayout(
-                state = leftPaneSplitState,
-                maxRatio = 0.4f,
-                onDividerPositionChanged = viewModel::onLeftPaneDividerPositionChanged,
-                first = { firstModifier ->
-                    LeftPane(
-                        project = project,
-                        copiedNodes = copiedNodes,
-                        canvasNodeCallbacks = canvasNodeCallbacks,
-                        composeNodeCallbacks = composeNodeCallbacks,
-                        paletteNodeCallbacks = paletteNodeCallbacks,
-                        zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
-                        onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
-                        onSelectScreen = viewModel::onSelectScreen,
-                        onScreenUpdated = viewModel::onScreenUpdated,
-                        onDeleteScreen = viewModel::onDeleteScreen,
-                        onScreensSwapped = viewModel::onScreensSwapped,
-                        onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
-                        onHoveredStatusUpdated = viewModel::onHoveredStatusUpdated,
-                        onShowInspectorTab = {
-                            selectedInspectorDestination = InspectorTabDestination.Inspector
-                        },
-                        onShowActionTab = {
-                            selectedInspectorDestination = InspectorTabDestination.Action
-                        },
-                        onShowSnackbar = onShowSnackbar,
-                        modifier = firstModifier,
-                    )
-                },
-                second = { secondModifier ->
-                    BoxWithConstraints(modifier = secondModifier) {
-                        val canvasDividerPosition = this.maxWidth - viewModel.inspectorTabWidth
-                        // TODO: Moving speed doesn't align with the actual amount of in this
-                        // SplitLayout
-                        StatefulHorizontalSplitLayout(
-                            state = SplitLayoutState.DpBased(canvasDividerPosition),
-                            maxRatio = 0.8f,
-                            onDividerPositionChanged = { newPosition ->
-                                val newInspectorWidth = maxWidth - newPosition
-                                viewModel.onInspectorTabWidthChanged(newInspectorWidth)
-                            },
-                            first = { canvasModifier ->
-                                CanvasArea(
-                                    project = project,
-                                    aiAssistantUiState = aiAssistantUiState,
-                                    canvasEditable = currentEditable,
-                                    copiedNodes = copiedNodes,
-                                    currentFormFactor = currentFormFactor,
-                                    canvasAreaUiState = canvasAreaUiState,
-                                    canvasNodeCallbacks = canvasNodeCallbacks,
-                                    composeNodeCallbacks = composeNodeCallbacks,
-                                    onAddScreen = viewModel::onAddScreen,
-                                    onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
-                                    onMousePressedAt = viewModel::onMousePressedAt,
-                                    onMouseHoveredAt = viewModel::onMouseHoveredAt,
-                                    onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
-                                    onHoveredStatusUpdated =
-                                        { node, isHovered ->
-                                            viewModel.onHoveredStatusUpdated(
-                                                node,
-                                                isHovered,
-                                            )
-                                        },
-                                    onOpenAddModifierDialog = { addModifierDialogVisible = true },
-                                    onShowSnackbar = onShowSnackbar,
-                                    zoomableContainerStateHolder = zoomableContainerStateHolder,
-                                    modifier = canvasModifier,
-                                )
-                            },
-                            second = { inspectorModifier ->
-                                InspectorTab(
-                                    project = project,
-                                    composeNodeCallbacks = composeNodeCallbacks,
-                                    onShowSnackbar = onShowSnackbar,
-                                    onResetPendingDestination = {
-                                        selectedInspectorDestination = null
-                                        viewModel.onResetPendingInspectorTab()
-                                    },
-                                    selectedDestination =
-                                        (
-                                            editingProject.screenHolder.pendingDestination as?
-                                                NavigatableDestination.UiBuilderScreen
-                                        )?.inspectorTabDestination
-                                            ?: selectedInspectorDestination,
-                                    modifier = inspectorModifier.width(viewModel.inspectorTabWidth),
-                                )
-                            },
-                        )
-                    }
-                },
+            Box(
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .background(MaterialTheme.colorScheme.secondaryContainer),
-            )
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {
+                                // To make sure the UI builder screen area has the proper focus.
+                                // Otherwise it doesn't often receive key events such as delete, or
+                                // plus (which opens the add modifier dialog)
+                                focusRequester.requestFocus()
+                            },
+                        ).onPointerEvent(PointerEventType.Move) {
+                            it.changes.firstOrNull()?.let { change ->
+                                dragStartPosition = change.position
+                            }
+                        }.focusProperties { canFocus = true }
+                        .focusRequester(focusRequester)
+                        .onKeyEvent {
+                            var consumed = false
+                            if ((it.isCtrlPressed || it.isMetaPressed) &&
+                                it.type == KeyEventType.KeyDown &&
+                                it.key == Key.M
+                            ) {
+                                addModifierDialogVisible = true
+                                consumed = true
+                            } else {
+                                if (it.type == KeyEventType.KeyDown) {
+                                    val eventResult = canvasNodeCallbacks.onKeyPressed(it)
+                                    eventResult.handleMessages(onShowSnackbar, coroutineScope)
+                                    consumed = eventResult.consumed
+                                }
+                            }
+                            consumed
+                        },
+            ) {
+                val leftPaneSplitState =
+                    rememberSplitLayoutState(initialDividerPosition = viewModel.leftPaneDividerPosition)
+                StatefulHorizontalSplitLayout(
+                    state = leftPaneSplitState,
+                    maxRatio = 0.4f,
+                    onDividerPositionChanged = viewModel::onLeftPaneDividerPositionChanged,
+                    first = { firstModifier ->
+                        LeftPane(
+                            project = project,
+                            copiedNodes = copiedNodes,
+                            canvasNodeCallbacks = canvasNodeCallbacks,
+                            composeNodeCallbacks = composeNodeCallbacks,
+                            paletteNodeCallbacks = paletteNodeCallbacks,
+                            zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
+                            onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                            onSelectScreen = viewModel::onSelectScreen,
+                            onScreenUpdated = viewModel::onScreenUpdated,
+                            onDeleteScreen = viewModel::onDeleteScreen,
+                            onScreensSwapped = viewModel::onScreensSwapped,
+                            onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
+                            onHoveredStatusUpdated = viewModel::onHoveredStatusUpdated,
+                            onShowInspectorTab = {
+                                selectedInspectorDestination = InspectorTabDestination.Inspector
+                            },
+                            onShowActionTab = {
+                                selectedInspectorDestination = InspectorTabDestination.Action
+                            },
+                            onShowSnackbar = onShowSnackbar,
+                            onboardingManager = onboardingManager,
+                            modifier =
+                                firstModifier
+                                    .onboardingTarget(TargetArea.Palette, onboardingManager),
+                        )
+                    },
+                    second = { secondModifier ->
+                        BoxWithConstraints(modifier = secondModifier) {
+                            val canvasDividerPosition = this.maxWidth - viewModel.inspectorTabWidth
+                            // TODO: Moving speed doesn't align with the actual amount of in this
+                            // SplitLayout
+                            StatefulHorizontalSplitLayout(
+                                state = SplitLayoutState.DpBased(canvasDividerPosition),
+                                maxRatio = 0.8f,
+                                onDividerPositionChanged = { newPosition ->
+                                    val newInspectorWidth = maxWidth - newPosition
+                                    viewModel.onInspectorTabWidthChanged(newInspectorWidth)
+                                },
+                                first = { canvasModifier ->
+                                    CanvasArea(
+                                        project = project,
+                                        aiAssistantUiState = aiAssistantUiState,
+                                        canvasEditable = currentEditable,
+                                        copiedNodes = copiedNodes,
+                                        currentFormFactor = currentFormFactor,
+                                        canvasAreaUiState = canvasAreaUiState,
+                                        canvasNodeCallbacks = canvasNodeCallbacks,
+                                        composeNodeCallbacks = composeNodeCallbacks,
+                                        onAddScreen = viewModel::onAddScreen,
+                                        onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                                        onMousePressedAt = viewModel::onMousePressedAt,
+                                        onMouseHoveredAt = viewModel::onMouseHoveredAt,
+                                        onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
+                                        onHoveredStatusUpdated =
+                                            { node, isHovered ->
+                                                viewModel.onHoveredStatusUpdated(
+                                                    node,
+                                                    isHovered,
+                                                )
+                                            },
+                                        onOpenAddModifierDialog = { addModifierDialogVisible = true },
+                                        onShowSnackbar = onShowSnackbar,
+                                        zoomableContainerStateHolder = zoomableContainerStateHolder,
+                                        onboardingManager = onboardingManager,
+                                        modifier =
+                                            canvasModifier
+                                                .onboardingTarget(TargetArea.Canvas, onboardingManager),
+                                    )
+                                },
+                                second = { inspectorModifier ->
+                                    InspectorTab(
+                                        project = project,
+                                        composeNodeCallbacks = composeNodeCallbacks,
+                                        onShowSnackbar = onShowSnackbar,
+                                        onResetPendingDestination = {
+                                            selectedInspectorDestination = null
+                                            viewModel.onResetPendingInspectorTab()
+                                        },
+                                        selectedDestination =
+                                            (
+                                                editingProject.screenHolder.pendingDestination as?
+                                                    NavigatableDestination.UiBuilderScreen
+                                            )?.inspectorTabDestination
+                                                ?: selectedInspectorDestination,
+                                        modifier =
+                                            inspectorModifier
+                                                .width(viewModel.inspectorTabWidth)
+                                                .onboardingTarget(TargetArea.Inspector, onboardingManager),
+                                    )
+                                },
+                            )
+                        }
+                    },
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.secondaryContainer),
+                )
+            }
         }
     }
 
@@ -517,6 +536,7 @@ private fun LeftPane(
     onShowSnackbar: suspend (String, String?) -> Boolean,
     onShowInspectorTab: () -> Unit,
     onShowActionTab: () -> Unit,
+    onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
 ) {
     BoxWithConstraints(
@@ -642,7 +662,7 @@ private fun LeftPane(
                     onShowInspectorTab = onShowInspectorTab,
                     onShowActionTab = onShowActionTab,
                     onShowSnackbar = onShowSnackbar,
-                    modifier = secondModifier,
+                    modifier = secondModifier.onboardingTarget(TargetArea.ProjectStructure, onboardingManager),
                 )
             },
         )
@@ -668,6 +688,7 @@ private fun CanvasArea(
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
     onOpenAddModifierDialog: () -> Unit,
     zoomableContainerStateHolder: ZoomableContainerStateHolder,
+    onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
 ) {
     var canvasAreaPosition by remember { mutableStateOf(Offset.Zero) }
@@ -779,6 +800,7 @@ private fun CanvasArea(
             onToolbarZoomScaleChange = { scale ->
                 zoomableContainerStateHolder.onToolbarZoomScaleChanged(scale)
             },
+            onboardingManager = onboardingManager,
         )
 
         if (canvasEditable is Screen) {
@@ -1355,6 +1377,7 @@ fun CanvasTopToolbar(
     onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
     onToolbarZoomScaleChange: (Float) -> Unit,
     onResetZoom: () -> Unit = {},
+    onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
 ) {
     Box(
@@ -1365,7 +1388,8 @@ fun CanvasTopToolbar(
                 .padding(
                     horizontal = 32.dp,
                     vertical = 8.dp,
-                ).height(48.dp),
+                ).height(48.dp)
+                .onboardingTarget(TargetArea.Toolbar, onboardingManager),
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -1373,6 +1397,7 @@ fun CanvasTopToolbar(
             OpenAiAssistantDialog(
                 project = project,
                 onAddScreen = onAddScreen,
+                modifier = Modifier.onboardingTarget(TargetArea.AiAssistant, onboardingManager),
             )
             Spacer(modifier = Modifier.weight(1f))
 
@@ -1544,7 +1569,11 @@ fun CanvasTopToolbar(
         DeviceFormFactorCard(
             canvasNodeCallbacks = canvasNodeCallbacks,
             currentFormFactor = currentFormFactor,
-            modifier = Modifier.align(Alignment.Center),
+            onboardingManager = onboardingManager,
+            modifier =
+                Modifier
+                    .align(Alignment.Center)
+                    .onboardingTarget(TargetArea.DevicePreview, onboardingManager),
         )
     }
 }
@@ -1553,6 +1582,7 @@ fun CanvasTopToolbar(
 private fun DeviceFormFactorCard(
     canvasNodeCallbacks: CanvasNodeCallbacks,
     currentFormFactor: FormFactor,
+    onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
 ) {
     Card(

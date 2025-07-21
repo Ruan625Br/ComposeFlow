@@ -472,4 +472,29 @@ instead of in the canvas.</string>
     <string name="center_x">Center X</string>
     <string name="center_y">Center Y</string>
     <string name="radius">Radius</string>
+
+    <!-- Onboarding strings -->
+    <string name="onboarding_welcome_title">Welcome to ComposeFlow!</string>
+    <string name="onboarding_welcome_description">Let's take a quick tour of the visual UI builder that helps you create beautiful Jetpack Compose interfaces.</string>
+
+    <string name="onboarding_palette_title">Component Palette</string>
+    <string name="onboarding_palette_description">Drag and drop UI components from this palette onto your canvas. You'll find buttons, text fields, images, and more layout components here.</string>
+
+    <string name="onboarding_canvas_title">Design Canvas</string>
+    <string name="onboarding_canvas_description">This is your design canvas where you build your UI. You can preview it on different devices and interact with components in real-time.</string>
+
+    <string name="onboarding_inspector_title">Property Inspector</string>
+    <string name="onboarding_inspector_description">Select any component on the canvas to edit its properties here. Modify colors, text, sizes, and add modifiers to customize your components.</string>
+
+    <string name="onboarding_ai_assistant_title">AI Assistant</string>
+    <string name="onboarding_ai_assistant_description">Use the built-in AI assistant to describe what you want to build. It can create entire screens, modify components, and help with complex layouts using natural language.</string>
+
+    <string name="onboarding_getting_started_title">Ready to Build!</string>
+    <string name="onboarding_getting_started_description">You're all set! Start by dragging a component from the palette or ask the AI assistant to create something for you. Happy building!</string>
+
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_previous">Previous</string>
+    <string name="onboarding_skip">Skip Tour</string>
+    <string name="onboarding_finish">Get Started!</string>
+    <string name="onboarding_got_it">Got It</string>
 </resources>

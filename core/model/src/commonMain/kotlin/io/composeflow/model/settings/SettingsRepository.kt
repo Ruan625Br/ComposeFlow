@@ -33,6 +33,7 @@ class SettingsRepository(
     private val javaHomeKey = stringPreferencesKey("java_home")
     private val showBordersKey = booleanPreferencesKey("show_borders")
     private val versionAskedToUpdateKey = stringPreferencesKey("version_asked_to_update")
+    private val onboardingCompletedKey = booleanPreferencesKey("onboarding_completed")
 
     val settings: Flow<ComposeBuilderSettings> =
         dataStore.data.map { preference ->
@@ -99,6 +100,19 @@ class SettingsRepository(
         scope.launch {
             dataStore.edit {
                 it[versionAskedToUpdateKey] = versionAskedToUpdate
+            }
+        }
+    }
+
+    val hasShownOnboarding: Flow<Boolean> =
+        dataStore.data.map { preferences ->
+            preferences[onboardingCompletedKey] ?: false
+        }
+
+    fun saveOnboardingCompleted(completed: Boolean) {
+        scope.launch {
+            dataStore.edit {
+                it[onboardingCompletedKey] = completed
             }
         }
     }

@@ -77,7 +77,10 @@ fun AddParameterDialog(
             }
         },
     ) {
-        val (first, second, third, fourth) = remember { FocusRequester.createRefs() }
+        val first = remember { FocusRequester() }
+        val second = remember { FocusRequester() }
+        val third = remember { FocusRequester() }
+        val fourth = remember { FocusRequester() }
         LaunchedEffect(Unit) {
             first.requestFocus()
         }
