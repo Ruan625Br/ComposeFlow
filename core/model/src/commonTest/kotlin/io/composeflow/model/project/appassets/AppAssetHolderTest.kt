@@ -55,7 +55,7 @@ class AppAssetHolderTest {
         // Verify android splash screen background color was copied
         assertEquals(
             Color.Blue,
-            target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value
+            target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value,
         )
 
         // Verify iOS splash screen image was copied
@@ -74,7 +74,7 @@ class AppAssetHolderTest {
         // Verify iOS splash screen background color was copied
         assertEquals(
             Color.Green,
-            target.splashScreenInfoHolder.iOSSplashScreenBackgroundColor.value
+            target.splashScreenInfoHolder.iOSSplashScreenBackgroundColor.value,
         )
     }
 
@@ -129,7 +129,7 @@ class AppAssetHolderTest {
         )
         assertEquals(
             Color.Yellow,
-            target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value
+            target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value,
         )
     }
 

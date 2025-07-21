@@ -9,7 +9,6 @@ import kotlin.time.Instant
 
 @OptIn(ExperimentalTime::class)
 class InstantTypeWrapperTest {
-
     @Test
     fun testParseString() {
         val instant = Instant.parse("2024-07-15T00:00:00Z")

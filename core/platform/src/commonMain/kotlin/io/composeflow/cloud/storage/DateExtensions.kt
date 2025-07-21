@@ -6,8 +6,7 @@ import java.time.OffsetDateTime
 import kotlin.time.Instant
 
 @OptIn(kotlin.time.ExperimentalTime::class)
-fun OffsetDateTime.toKotlinxInstant(): Instant =
-    Instant.fromEpochSeconds(this.toEpochSecond(), this.nano.toLong())
+fun OffsetDateTime.toKotlinxInstant(): Instant = Instant.fromEpochSeconds(this.toEpochSecond(), this.nano.toLong())
 
 @OptIn(kotlin.time.ExperimentalTime::class)
 fun Instant.asDateString(timeZone: TimeZone? = null): String {

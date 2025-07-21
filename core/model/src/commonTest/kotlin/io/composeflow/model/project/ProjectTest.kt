@@ -115,10 +115,11 @@ class ProjectTest {
         assertTrue(!writeInstructions.containsKey("composeApp/src/androidMain/res/drawable/ic_splash_image.xml"))
 
         // Verify AndroidManifest content
-        val manifestContent = String(
-            writeInstructions["composeApp/src/androidMain/AndroidManifest.xml"]!!,
-            Charsets.UTF_8
-        )
+        val manifestContent =
+            String(
+                writeInstructions["composeApp/src/androidMain/AndroidManifest.xml"]!!,
+                Charsets.UTF_8,
+            )
         assertTrue(manifestContent.contains("<manifest"))
     }
 
@@ -147,17 +148,19 @@ class ProjectTest {
         assertTrue(writeInstructions.containsKey("composeApp/src/androidMain/res/drawable/ic_splash_image.xml"))
 
         // Verify content is properly converted to ByteArray
-        val splashThemeContent = String(
-            writeInstructions["composeApp/src/androidMain/res/values/splash_theme.xml"]!!,
-            Charsets.UTF_8
-        )
+        val splashThemeContent =
+            String(
+                writeInstructions["composeApp/src/androidMain/res/values/splash_theme.xml"]!!,
+                Charsets.UTF_8,
+            )
         assertTrue(splashThemeContent.contains("Theme.App.Splash"))
 
         // Verify AndroidManifest content
-        val manifestContent = String(
-            writeInstructions["composeApp/src/androidMain/AndroidManifest.xml"]!!,
-            Charsets.UTF_8
-        )
+        val manifestContent =
+            String(
+                writeInstructions["composeApp/src/androidMain/AndroidManifest.xml"]!!,
+                Charsets.UTF_8,
+            )
         assertTrue(manifestContent.contains("<manifest"))
     }
 }
