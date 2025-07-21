@@ -207,6 +207,7 @@ fun ProjectEditorContent(
                             project = project,
                             aiAssistantUiState = aiAssistantUiState,
                             onUpdateProject = viewModel::onUpdateProject,
+                            onToggleVisibilityOfAiChatDialog = viewModel::onToggleShowAiChatDialog,
                             screenMaxSize = screenMaxSize,
                         )
                     }

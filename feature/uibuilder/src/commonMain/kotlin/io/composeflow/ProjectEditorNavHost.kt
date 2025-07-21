@@ -22,6 +22,7 @@ fun ProjectEditorNavHost(
     project: Project,
     aiAssistantUiState: AiAssistantUiState,
     onUpdateProject: (Project) -> Unit,
+    onToggleVisibilityOfAiChatDialog: () -> Unit,
     screenMaxSize: Size,
 ) {
     NavHost(
@@ -32,6 +33,7 @@ fun ProjectEditorNavHost(
             project = project,
             aiAssistantUiState = aiAssistantUiState,
             onUpdateProject = onUpdateProject,
+            onToggleVisibilityOfAiChatDialog = onToggleVisibilityOfAiChatDialog,
             screenMaxSize = screenMaxSize,
         )
         dataTypeEditorScreen(

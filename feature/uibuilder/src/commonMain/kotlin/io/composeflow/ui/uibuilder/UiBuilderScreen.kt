@@ -27,7 +27,6 @@ import androidx.compose.foundation.onClick
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.AddToQueue
 import androidx.compose.material.icons.filled.BorderBottom
 import androidx.compose.material.icons.filled.BorderClear
 import androidx.compose.material.icons.filled.BorderOuter
@@ -98,9 +97,8 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.valentinilk.shimmer.shimmer
 import io.composeflow.Res
-import io.composeflow.ai.AiAssistantDialog
-import io.composeflow.ai.AiAssistantDialogCallbacks
 import io.composeflow.ai.AiAssistantUiState
+import io.composeflow.ai_open_assistant
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.back_to_screen
 import io.composeflow.borders_hide
@@ -166,8 +164,6 @@ import io.composeflow.ui.palette.PaletteIcon
 import io.composeflow.ui.palette.PaletteTab
 import io.composeflow.ui.popup.SingleTextInputDialog
 import io.composeflow.ui.screenbuilder.ScreenBuilderTab
-import io.composeflow.ui.screenbuilder.ScreenNameDialog
-import io.composeflow.ui.screenbuilder.SelectNewScreenDialog
 import io.composeflow.ui.tab.ComposeFlowTab
 import io.composeflow.ui.uibuilder.onboarding.OnboardingManager
 import io.composeflow.ui.uibuilder.onboarding.OnboardingOverlay
@@ -190,6 +186,7 @@ fun UiBuilderScreen(
     aiAssistantUiState: AiAssistantUiState,
     onUpdateProject: (Project) -> Unit,
     screenMaxSize: Size,
+    onToggleVisibilityOfAiChatDialog: () -> Unit,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel =
@@ -360,6 +357,7 @@ fun UiBuilderScreen(
                             paletteNodeCallbacks = paletteNodeCallbacks,
                             zoomableContainerStateHolder = viewModel.zoomableContainerStateHolder,
                             onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
+                            onAddScreen = viewModel::onAddScreen,
                             onSelectScreen = viewModel::onSelectScreen,
                             onScreenUpdated = viewModel::onScreenUpdated,
                             onDeleteScreen = viewModel::onDeleteScreen,
@@ -401,8 +399,6 @@ fun UiBuilderScreen(
                                         canvasAreaUiState = canvasAreaUiState,
                                         canvasNodeCallbacks = canvasNodeCallbacks,
                                         composeNodeCallbacks = composeNodeCallbacks,
-                                        onAddScreen = viewModel::onAddScreen,
-                                        onAddScreenFromTemplate = viewModel::onAddScreenFromTemplate,
                                         onMousePressedAt = viewModel::onMousePressedAt,
                                         onMouseHoveredAt = viewModel::onMouseHoveredAt,
                                         onFocusedStatusUpdated = viewModel::onFocusedStatusUpdated,
@@ -413,13 +409,19 @@ fun UiBuilderScreen(
                                                     isHovered,
                                                 )
                                             },
-                                        onOpenAddModifierDialog = { addModifierDialogVisible = true },
+                                        onOpenAddModifierDialog = {
+                                            addModifierDialogVisible = true
+                                        },
+                                        onToggleVisibilityOfAiChatDialog = onToggleVisibilityOfAiChatDialog,
                                         onShowSnackbar = onShowSnackbar,
                                         zoomableContainerStateHolder = zoomableContainerStateHolder,
                                         onboardingManager = onboardingManager,
                                         modifier =
                                             canvasModifier
-                                                .onboardingTarget(TargetArea.Canvas, onboardingManager),
+                                                .onboardingTarget(
+                                                    TargetArea.Canvas,
+                                                    onboardingManager,
+                                                ),
                                     )
                                 },
                                 second = { inspectorModifier ->
@@ -440,7 +442,10 @@ fun UiBuilderScreen(
                                         modifier =
                                             inspectorModifier
                                                 .width(viewModel.inspectorTabWidth)
-                                                .onboardingTarget(TargetArea.Inspector, onboardingManager),
+                                                .onboardingTarget(
+                                                    TargetArea.Inspector,
+                                                    onboardingManager,
+                                                ),
                                     )
                                 },
                             )
@@ -527,6 +532,7 @@ private fun LeftPane(
     paletteNodeCallbacks: PaletteNodeCallbacks,
     zoomableContainerStateHolder: ZoomableContainerStateHolder,
     onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+    onAddScreen: (screen: Screen) -> Unit,
     onSelectScreen: (screen: Screen) -> Unit,
     onScreenUpdated: (screen: Screen) -> Unit,
     onDeleteScreen: (screen: Screen) -> Unit,
@@ -630,6 +636,7 @@ private fun LeftPane(
                             ScreenBuilderTab(
                                 project = project,
                                 onAddScreenFromTemplate = onAddScreenFromTemplate,
+                                onAddScreen = onAddScreen,
                                 onSelectScreen = onSelectScreen,
                                 onScreenUpdated = onScreenUpdated,
                                 onDeleteScreen = onDeleteScreen,
@@ -662,7 +669,11 @@ private fun LeftPane(
                     onShowInspectorTab = onShowInspectorTab,
                     onShowActionTab = onShowActionTab,
                     onShowSnackbar = onShowSnackbar,
-                    modifier = secondModifier.onboardingTarget(TargetArea.ProjectStructure, onboardingManager),
+                    modifier =
+                        secondModifier.onboardingTarget(
+                            TargetArea.ProjectStructure,
+                            onboardingManager,
+                        ),
                 )
             },
         )
@@ -679,14 +690,13 @@ private fun CanvasArea(
     canvasAreaUiState: CanvasAreaUiState,
     canvasNodeCallbacks: CanvasNodeCallbacks,
     composeNodeCallbacks: ComposeNodeCallbacks,
-    onAddScreen: (screen: Screen) -> Unit,
-    onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
     onMouseHoveredAt: (Offset) -> Unit,
     onMousePressedAt: (Offset, Boolean) -> Unit,
     onShowSnackbar: suspend (String, String?) -> Boolean,
     onFocusedStatusUpdated: (ComposeNode) -> Unit,
     onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
     onOpenAddModifierDialog: () -> Unit,
+    onToggleVisibilityOfAiChatDialog: () -> Unit,
     zoomableContainerStateHolder: ZoomableContainerStateHolder,
     onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
@@ -787,19 +797,17 @@ private fun CanvasArea(
             }
         }
         CanvasTopToolbar(
-            project = project,
             toolbarUiState = canvasAreaUiState.topToolbarUiState,
             canvasNodeCallbacks = canvasNodeCallbacks,
             currentFormFactor = currentFormFactor,
             canvasScale = zoomableContainerStateHolder.scale,
-            onAddScreen = onAddScreen,
-            onAddScreenFromTemplate = onAddScreenFromTemplate,
             onResetZoom = {
                 zoomableContainerStateHolder.resetZoom()
             },
             onToolbarZoomScaleChange = { scale ->
                 zoomableContainerStateHolder.onToolbarZoomScaleChanged(scale)
             },
+            onToggleVisibilityOfAiChatDialog = onToggleVisibilityOfAiChatDialog,
             onboardingManager = onboardingManager,
         )
 
@@ -1368,15 +1376,13 @@ data class CanvasTopToolbarUiState(
 
 @Composable
 fun CanvasTopToolbar(
-    project: Project,
     canvasNodeCallbacks: CanvasNodeCallbacks,
     toolbarUiState: CanvasTopToolbarUiState,
     currentFormFactor: FormFactor,
     canvasScale: Float,
-    onAddScreen: (screen: Screen) -> Unit,
-    onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
     onToolbarZoomScaleChange: (Float) -> Unit,
     onResetZoom: () -> Unit = {},
+    onToggleVisibilityOfAiChatDialog: () -> Unit,
     onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
 ) {
@@ -1394,9 +1400,8 @@ fun CanvasTopToolbar(
         Row(
             modifier = Modifier.fillMaxWidth(),
         ) {
-            OpenAiAssistantDialog(
-                project = project,
-                onAddScreen = onAddScreen,
+            OpenAiChatButton(
+                onToggleVisibilityOfAiChatDialog = onToggleVisibilityOfAiChatDialog,
                 modifier = Modifier.onboardingTarget(TargetArea.AiAssistant, onboardingManager),
             )
             Spacer(modifier = Modifier.weight(1f))
@@ -1569,7 +1574,6 @@ fun CanvasTopToolbar(
         DeviceFormFactorCard(
             canvasNodeCallbacks = canvasNodeCallbacks,
             currentFormFactor = currentFormFactor,
-            onboardingManager = onboardingManager,
             modifier =
                 Modifier
                     .align(Alignment.Center)
@@ -1582,7 +1586,6 @@ fun CanvasTopToolbar(
 private fun DeviceFormFactorCard(
     canvasNodeCallbacks: CanvasNodeCallbacks,
     currentFormFactor: FormFactor,
-    onboardingManager: OnboardingManager,
     modifier: Modifier = Modifier,
 ) {
     Card(
@@ -1644,15 +1647,10 @@ private fun DeviceFormFactorCard(
 }
 
 @Composable
-private fun RowScope.AddNewScreenCard(
-    project: Project,
-    onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+private fun RowScope.OpenAiChatButton(
+    onToggleVisibilityOfAiChatDialog: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var addNewScreenDialogOpen by remember { mutableStateOf(false) }
-    var screenTemplatePair by remember { mutableStateOf<ScreenTemplatePair?>(null) }
-    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
     Card(
         modifier =
             modifier
@@ -1662,98 +1660,18 @@ private fun RowScope.AddNewScreenCard(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(8.dp),
     ) {
-        val contentDesc = "Add new screen"
-        Tooltip(contentDesc) {
+        val openAiAssistant = stringResource(Res.string.ai_open_assistant)
+        Tooltip(openAiAssistant + " (${getCtrlKeyStr()} + K)") {
             Icon(
                 modifier =
                     Modifier
                         .clickable {
-                            addNewScreenDialogOpen = true
-                            onAnyDialogIsShown()
-                        }.padding(8.dp)
-                        .size(24.dp),
-                imageVector = Icons.Default.AddToQueue,
-                contentDescription = contentDesc,
-            )
-        }
-    }
-
-    if (addNewScreenDialogOpen) {
-        SelectNewScreenDialog(
-            project = project,
-            onCloseClick = {
-                addNewScreenDialogOpen = false
-                onAllDialogsClosed()
-            },
-            onScreenTemplateSelected = {
-                screenTemplatePair = it
-            },
-        )
-    }
-    screenTemplatePair?.let { pair ->
-        ScreenNameDialog(
-            initialName = pair.screen.name,
-            onCloseClick = {
-                screenTemplatePair = null
-                onAllDialogsClosed()
-            },
-            onNameConfirmed = {
-                onAddScreenFromTemplate(it, pair)
-                addNewScreenDialogOpen = false
-                screenTemplatePair = null
-                onAllDialogsClosed()
-            },
-        )
-    }
-}
-
-@Composable
-private fun RowScope.OpenAiAssistantDialog(
-    project: Project,
-    onAddScreen: (screen: Screen) -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    var openAiAssistantDialog by remember { mutableStateOf(false) }
-    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    Card(
-        modifier =
-            modifier
-                .height(32.dp)
-                .align(Alignment.CenterVertically)
-                .hoverIconClickable(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(8.dp),
-    ) {
-        val contentDesc = "Open AI Assistant"
-        Tooltip(contentDesc) {
-            Icon(
-                modifier =
-                    Modifier
-                        .clickable {
-                            openAiAssistantDialog = true
-                            onAnyDialogIsShown()
+                            onToggleVisibilityOfAiChatDialog()
                         }.padding(4.dp)
                         .size(24.dp),
                 imageVector = ComposeFlowIcons.NounAi,
-                contentDescription = contentDesc,
+                contentDescription = openAiAssistant,
             )
         }
-    }
-
-    if (openAiAssistantDialog) {
-        AiAssistantDialog(
-            project = project,
-            callbacks =
-                AiAssistantDialogCallbacks(
-                    onAddNewScreen = onAddScreen,
-                ),
-            onCloseClick = {
-                openAiAssistantDialog = false
-                onAllDialogsClosed()
-            },
-            // This is only used from the initial project creation
-            onConfirmProjectWithScreens = { _, _ -> },
-        )
     }
 }

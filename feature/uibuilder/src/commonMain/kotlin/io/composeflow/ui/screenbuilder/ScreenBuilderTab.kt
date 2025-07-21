@@ -78,6 +78,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 fun ScreenBuilderTab(
     project: Project,
     onAddScreenFromTemplate: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+    onAddScreen: (screen: Screen) -> Unit,
     onSelectScreen: (screen: Screen) -> Unit,
     onScreenUpdated: (screen: Screen) -> Unit,
     onDeleteScreen: (screen: Screen) -> Unit,
@@ -94,7 +95,8 @@ fun ScreenBuilderTab(
     ) {
         ScreensHeader(
             project = project,
-            onAddScreen = onAddScreenFromTemplate,
+            onAddScreenFromTemplatePair = onAddScreenFromTemplate,
+            onAddScreen = onAddScreen,
         )
 
         val reorderableLazyListState =
@@ -160,7 +162,8 @@ fun ScreenBuilderTab(
 @Composable
 private fun ScreensHeader(
     project: Project,
-    onAddScreen: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+    onAddScreenFromTemplatePair: (name: String, screenTemplatePair: ScreenTemplatePair) -> Unit,
+    onAddScreen: (screen: Screen) -> Unit,
 ) {
     var addNewScreenDialogOpen by remember { mutableStateOf(false) }
     var screenTemplatePair by remember { mutableStateOf<ScreenTemplatePair?>(null) }
@@ -204,6 +207,7 @@ private fun ScreensHeader(
             onScreenTemplateSelected = {
                 screenTemplatePair = it
             },
+            onAddScreen = onAddScreen,
         )
     }
     screenTemplatePair?.let { pair ->
@@ -214,7 +218,7 @@ private fun ScreensHeader(
                 screenTemplatePair = null
             },
             onNameConfirmed = {
-                onAddScreen(it, pair)
+                onAddScreenFromTemplatePair(it, pair)
                 addNewScreenDialogOpen = false
                 screenTemplatePair = null
                 onAllDialogsClosed()
@@ -453,6 +457,7 @@ private fun ThemedScreenBuilderTabPreview(useDarkTheme: Boolean) {
         ScreenBuilderTab(
             project = mockProject,
             onAddScreenFromTemplate = { _, _ -> },
+            onAddScreen = { },
             onSelectScreen = { },
             onScreenUpdated = { },
             onDeleteScreen = { },

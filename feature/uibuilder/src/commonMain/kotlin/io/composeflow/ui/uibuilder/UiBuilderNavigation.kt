@@ -12,6 +12,7 @@ fun RouteBuilder.uiBuilderScreen(
     project: Project,
     aiAssistantUiState: AiAssistantUiState,
     onUpdateProject: (Project) -> Unit,
+    onToggleVisibilityOfAiChatDialog: () -> Unit,
     screenMaxSize: Size,
     navTransition: NavTransition? = null,
 ) {
@@ -24,6 +25,7 @@ fun RouteBuilder.uiBuilderScreen(
             aiAssistantUiState = aiAssistantUiState,
             onUpdateProject = onUpdateProject,
             screenMaxSize = screenMaxSize,
+            onToggleVisibilityOfAiChatDialog = onToggleVisibilityOfAiChatDialog,
         )
     }
 }

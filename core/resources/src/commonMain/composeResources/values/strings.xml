@@ -3,6 +3,7 @@
     <string name="ai_create_project_alternative_manually">Or create from blank</string>
     <string name="ai_generating_response">Generating the content. This may take few minutes...</string>
     <string name="ai_action_add_screen">Add screen</string>
+    <string name="ai_add_screen_with_ai">Create screen with AI</string>
     <string name="ai_action_proceed_to_generate_screens">Proceed to generate screens</string>
     <string name="ai_action_create_project">Create project</string>
     <string name="ai_action_confirm_to_create_project">Do you want to create the project? Some screens are still being generated.</string>
