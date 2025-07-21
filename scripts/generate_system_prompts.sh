@@ -17,14 +17,31 @@ typescript-json-schema generate-jsonschema-cli/create_project_airesponse.d.ts "*
 python3 scripts/trim_json_space.py schema.json minified_schema.json
 python3 scripts/make_system_prompts.py
 
+# Define directories
+COMPOSEFLOW_API_DIR="${COMPOSEFLOW_API_DIR:-../composeflow-api-ts}"
+PROMPTS_DIR="$COMPOSEFLOW_API_DIR/prompts"
+EXAMPLE_YAML_DIR="$PROMPTS_DIR/example_yaml"
+
+# Move minified_schema.json to composeflow-api-ts if the directory exists
+if [ -d "$PROMPTS_DIR" ]; then
+    echo "Moving minified_schema.json to $PROMPTS_DIR..."
+    if [ -f "minified_schema.json" ]; then
+        cp "minified_schema.json" "$PROMPTS_DIR/"
+        echo "✓ Copied minified_schema.json"
+    else
+        echo "⚠ minified_schema.json not found"
+    fi
+else
+    echo "⚠ Target directory $PROMPTS_DIR does not exist, skipping minified_schema.json move"
+fi
+
 # Move YAML template files to composeflow-api-ts if the directory exists
-COMPOSEFLOW_API_DIR="../composeflow-api-ts/prompts/example_yaml"
-if [ -d "$COMPOSEFLOW_API_DIR" ]; then
-    echo "Moving YAML template files to $COMPOSEFLOW_API_DIR..."
+if [ -d "$EXAMPLE_YAML_DIR" ]; then
+    echo "Moving YAML template files to $EXAMPLE_YAML_DIR..."
     
     # Move login screen template
     if [ -f "core/model/src/commonMain/resources/login_screen_template.yaml" ]; then
-        cp "core/model/src/commonMain/resources/login_screen_template.yaml" "$COMPOSEFLOW_API_DIR/"
+        cp "core/model/src/commonMain/resources/login_screen_template.yaml" "$EXAMPLE_YAML_DIR/"
         echo "✓ Copied login_screen_template.yaml"
     else
         echo "⚠ login_screen_template.yaml not found"
@@ -32,11 +49,11 @@ if [ -d "$COMPOSEFLOW_API_DIR" ]; then
     
     # Move messages screen template
     if [ -f "core/model/src/commonMain/resources/messages_screen_template.yaml" ]; then
-        cp "core/model/src/commonMain/resources/messages_screen_template.yaml" "$COMPOSEFLOW_API_DIR/"
+        cp "core/model/src/commonMain/resources/messages_screen_template.yaml" "$EXAMPLE_YAML_DIR/"
         echo "✓ Copied messages_screen_template.yaml"
     else
         echo "⚠ messages_screen_template.yaml not found"
     fi
 else
-    echo "⚠ Target directory $COMPOSEFLOW_API_DIR does not exist, skipping YAML file move"
+    echo "⚠ Target directory $EXAMPLE_YAML_DIR does not exist, skipping YAML file move"
 fi
