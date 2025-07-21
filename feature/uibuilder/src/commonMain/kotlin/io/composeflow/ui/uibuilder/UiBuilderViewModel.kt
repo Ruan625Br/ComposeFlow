@@ -67,6 +67,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.getString
@@ -388,15 +389,17 @@ class UiBuilderViewModel(
         composeNode: ComposeNode,
         indexToDrop: Int,
     ): EventResult {
-        val result =
-            uiBuilderOperator.onPreAddComposeNodeToContainerNode(
-                project,
-                containerNodeId,
-                composeNode,
-            )
-        return if (result.errorMessages.isNotEmpty()) {
-            result
-        } else {
+        return runBlocking {
+            val preValidationResult =
+                uiBuilderOperator.onPreAddComposeNodeToContainerNode(
+                    project,
+                    containerNodeId,
+                    composeNode,
+                )
+            if (preValidationResult.errorMessages.isNotEmpty()) {
+                return@runBlocking preValidationResult
+            }
+
             recordOperation(
                 project = project,
                 userOperation =
@@ -415,7 +418,7 @@ class UiBuilderViewModel(
                 indexToDrop,
             )
             saveProject(project)
-            result
+            EventResult()
         }
     }
 

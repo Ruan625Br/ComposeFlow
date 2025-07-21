@@ -522,7 +522,7 @@ class AiAssistantViewModel(
         _uiState.value.isGenerating.value = false
     }
 
-    private fun dispatchToolResponse(
+    private suspend fun dispatchToolResponse(
         project: Project,
         toolArgs: ToolArgs,
     ): EventResult = toolDispatcher.dispatchToolResponse(project, toolArgs)

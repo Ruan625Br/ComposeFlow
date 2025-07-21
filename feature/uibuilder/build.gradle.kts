@@ -70,6 +70,8 @@ kotlin {
             implementation(project(":core:model"))
             implementation(project(":core:testing"))
             implementation(kotlin("test-junit"))
+            implementation(libs.coroutines.core)
+            implementation(libs.kotlinx.coroutines.test)
         }
         all {
             optInComposeExperimentalApis()

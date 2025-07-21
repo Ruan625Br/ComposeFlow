@@ -23,7 +23,7 @@ class ToolDispatcher(
      * @param toolArgs The tool arguments containing the operation details
      * @return EventResult indicating success or failure with error messages
      */
-    fun dispatchToolResponse(
+    suspend fun dispatchToolResponse(
         project: Project,
         toolArgs: ToolArgs,
     ): EventResult {

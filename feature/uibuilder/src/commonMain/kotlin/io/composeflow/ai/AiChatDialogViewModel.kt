@@ -196,7 +196,7 @@ class AiChatDialogViewModel(
             }
     }
 
-    private fun dispatchToolResponse(toolArgs: ToolArgs): EventResult {
+    private suspend fun dispatchToolResponse(toolArgs: ToolArgs): EventResult {
         if (toolArgs !is ToolArgs.FakeArgs) {
             recordOperation(
                 project,

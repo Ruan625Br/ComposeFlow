@@ -51,6 +51,7 @@ sealed class Constraint {
 
     open fun getErrorIfInvalid(parentNode: ComposeNode): String? = null
 
+    // TODO: Add these as string resources
     companion object {
         const val DUPLICATE_VERTICAL_INFINITE_SCROLL =
             "Nesting vertically infinite scrolling lists is not allowed"

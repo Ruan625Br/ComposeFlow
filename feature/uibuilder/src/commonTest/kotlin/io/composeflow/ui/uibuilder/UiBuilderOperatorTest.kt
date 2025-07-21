@@ -10,7 +10,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.serializer.encodeToString
-import kotlinx.serialization.encodeToString
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import kotlin.test.assertFalse
@@ -74,58 +74,61 @@ class UiBuilderOperatorTest {
     // ========== Node Addition Tests ==========
 
     @Test
-    fun testOnPreAddComposeNodeToContainerNode_ContainerNotFound() {
-        val nodeToAdd = createButtonNode()
+    fun testOnPreAddComposeNodeToContainerNode_ContainerNotFound() =
+        runTest {
+            val nodeToAdd = createButtonNode()
 
-        val result =
-            uiBuilderOperator.onPreAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = "non-existent-id",
-                composeNode = nodeToAdd,
+            val result =
+                uiBuilderOperator.onPreAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = "non-existent-id",
+                    composeNode = nodeToAdd,
+                )
+
+            assertFalse(result.errorMessages.isEmpty())
+            assertTrue(
+                result.errorMessages
+                    .first()
+                    .contains("Container node with ID non-existent-id not found"),
             )
-
-        assertFalse(result.errorMessages.isEmpty())
-        assertTrue(
-            result.errorMessages
-                .first()
-                .contains("Container node with ID non-existent-id not found"),
-        )
-    }
+        }
 
     @Test
-    fun testOnPreAddComposeNodeToContainerNode_Success() {
-        val containerNode = createColumnNode()
-        rootNode.addChild(containerNode)
-        val nodeToAdd = createButtonNode()
+    fun testOnPreAddComposeNodeToContainerNode_Success() =
+        runTest {
+            val containerNode = createColumnNode()
+            rootNode.addChild(containerNode)
+            val nodeToAdd = createButtonNode()
 
-        val result =
-            uiBuilderOperator.onPreAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = containerNode.id,
-                composeNode = nodeToAdd,
-            )
+            val result =
+                uiBuilderOperator.onPreAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNode.id,
+                    composeNode = nodeToAdd,
+                )
 
-        assertTrue(result.isSuccessful())
-    }
+            assertTrue(result.isSuccessful())
+        }
 
     @Test
-    fun testOnAddComposeNodeToContainerNode_LlmMethod() {
-        val containerNode = createColumnNode()
-        rootNode.addChild(containerNode)
-        val buttonNode = createButtonNode()
-        val buttonYaml = encodeToString(buttonNode)
+    fun testOnAddComposeNodeToContainerNode_LlmMethod() =
+        runTest {
+            val containerNode = createColumnNode()
+            rootNode.addChild(containerNode)
+            val buttonNode = createButtonNode()
+            val buttonYaml = encodeToString(buttonNode)
 
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = containerNode.id,
-                composeNodeYaml = buttonYaml,
-                indexToDrop = 0,
-            )
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNode.id,
+                    composeNodeYaml = buttonYaml,
+                    indexToDrop = 0,
+                )
 
-        // The method returns an empty EventResult on success
-        assertTrue(result.isSuccessful())
-    }
+            // The method returns an empty EventResult on success
+            assertTrue(result.isSuccessful())
+        }
 
     // ========== Node Removal Tests ==========
 
@@ -362,254 +365,261 @@ class UiBuilderOperatorTest {
     // ========== ComposeNode ID Uniqueness Tests ==========
 
     @Test
-    fun testAddComposeNode_UniqueIdGeneration_WhenIdAlreadyExists() {
-        val containerNode = createColumnNode()
-        rootNode.addChild(containerNode)
+    fun testAddComposeNode_UniqueIdGeneration_WhenIdAlreadyExists() =
+        runTest {
+            val containerNode = createColumnNode()
+            rootNode.addChild(containerNode)
 
-        // Add first button with a specific ID
-        val firstButton = createButtonNode()
-        val originalId = firstButton.id
-        containerNode.addChild(firstButton)
+            // Add first button with a specific ID
+            val firstButton = createButtonNode()
+            val originalId = firstButton.id
+            containerNode.addChild(firstButton)
 
-        // Try to add another button with the same ID
-        val secondButton = createButtonNode().copy(id = originalId)
-        val secondButtonYaml = encodeToString(secondButton)
+            // Try to add another button with the same ID
+            val secondButton = createButtonNode().copy(id = originalId)
+            val secondButtonYaml = encodeToString(secondButton)
 
-        val result =
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNode.id,
+                    composeNodeYaml = secondButtonYaml,
+                    indexToDrop = 1, // Add at end
+                )
+
+            assertTrue(result.isSuccessful())
+
+            // Verify that both nodes exist but with different IDs
+            val children = containerNode.children
+            assertTrue(children.size == 2)
+
+            val firstChildId = children[0].id
+            val secondChildId = children[1].id
+
+            // IDs should be different (second one should have been made unique)
+            assertTrue(firstChildId != secondChildId)
+            assertTrue(firstChildId == originalId) // First keeps original ID
+            assertTrue(secondChildId.startsWith(originalId)) // Second gets modified ID
+        }
+
+    @Test
+    fun testAddComposeNode_UniqueIdGeneration_WhenIdAlreadyExistsAtSpecificIndex() =
+        runTest {
+            val containerNode = createColumnNode()
+            rootNode.addChild(containerNode)
+
+            // Add first button with a specific ID
+            val firstButton = createButtonNode()
+            val originalId = firstButton.id
+            containerNode.addChild(firstButton)
+
+            // Try to add another button with the same ID at index 0
+            val secondButton = createButtonNode().copy(id = originalId)
+            val secondButtonYaml = encodeToString(secondButton)
+
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNode.id,
+                    composeNodeYaml = secondButtonYaml,
+                    indexToDrop = 0,
+                )
+
+            assertTrue(result.isSuccessful())
+
+            // Verify that both nodes exist but with different IDs
+            val children = containerNode.children
+            assertTrue(children.size == 2)
+
+            val firstChildId = children[0].id // This should be the new node at index 0
+            val secondChildId = children[1].id // This should be the original node moved to index 1
+
+            // IDs should be different
+            assertTrue(firstChildId != secondChildId)
+            assertTrue(secondChildId == originalId) // Original keeps its ID
+            assertTrue(firstChildId.startsWith(originalId)) // New one gets modified ID
+        }
+
+    @Test
+    fun testAddComposeNode_NoIdConflict_PreservesOriginalId() =
+        runTest {
+            val containerNode = createColumnNode()
+            rootNode.addChild(containerNode)
+
+            val buttonNode = createButtonNode()
+            val originalId = buttonNode.id
+            val buttonYaml = encodeToString(buttonNode)
+
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNode.id,
+                    composeNodeYaml = buttonYaml,
+                    indexToDrop = 0, // Add at beginning
+                )
+
+            assertTrue(result.isSuccessful())
+
+            // Verify that the node keeps its original ID when no conflict exists
+            val addedNode = containerNode.children.first()
+            assertTrue(addedNode.id == originalId)
+        }
+
+    @Test
+    fun testAddComposeNode_MultipleIdConflicts_GeneratesUniqueIds() =
+        runTest {
+            val containerNode = createColumnNode()
+            rootNode.addChild(containerNode)
+
+            // Add first button
+            val baseId = "Button"
+            val firstButton = createButtonNode().copy(id = baseId)
+            containerNode.addChild(firstButton)
+
+            // Add second button with same ID - should become "Button1"
+            val secondButton = createButtonNode().copy(id = baseId)
+            val secondButtonYaml = encodeToString(secondButton)
+
             uiBuilderOperator.onAddComposeNodeToContainerNode(
                 project = project,
                 containerNodeId = containerNode.id,
                 composeNodeYaml = secondButtonYaml,
-                indexToDrop = 1, // Add at end
+                indexToDrop = 1, // Add at position 1
             )
 
-        assertTrue(result.isSuccessful())
+            // Add third button with same ID - should become "Button2"
+            val thirdButton = createButtonNode().copy(id = baseId)
+            val thirdButtonYaml = encodeToString(thirdButton)
 
-        // Verify that both nodes exist but with different IDs
-        val children = containerNode.children
-        assertTrue(children.size == 2)
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = containerNode.id,
+                    composeNodeYaml = thirdButtonYaml,
+                    indexToDrop = 2, // Add at position 2
+                )
 
-        val firstChildId = children[0].id
-        val secondChildId = children[1].id
+            assertTrue(result.isSuccessful())
 
-        // IDs should be different (second one should have been made unique)
-        assertTrue(firstChildId != secondChildId)
-        assertTrue(firstChildId == originalId) // First keeps original ID
-        assertTrue(secondChildId.startsWith(originalId)) // Second gets modified ID
-    }
+            // Verify all three nodes have unique IDs
+            val children = containerNode.children
+            assertTrue(children.size == 3)
+
+            val ids = children.map { it.id }.toSet()
+            assertTrue(ids.size == 3) // All IDs should be unique
+            assertTrue(ids.contains(baseId)) // Original ID preserved
+            assertTrue(ids.any { it.startsWith(baseId) && it != baseId }) // Generated IDs present
+        }
 
     @Test
-    fun testAddComposeNode_UniqueIdGeneration_WhenIdAlreadyExistsAtSpecificIndex() {
-        val containerNode = createColumnNode()
-        rootNode.addChild(containerNode)
+    fun testAddComposeNode_NestedContainers_IdUniquenessAcrossHierarchy() =
+        runTest {
+            // Create nested structure: root -> outer column -> inner column
+            val outerColumn = createColumnNode()
+            val innerColumn = createColumnNode()
 
-        // Add first button with a specific ID
-        val firstButton = createButtonNode()
-        val originalId = firstButton.id
-        containerNode.addChild(firstButton)
+            rootNode.addChild(outerColumn)
+            outerColumn.addChild(innerColumn)
 
-        // Try to add another button with the same ID at index 0
-        val secondButton = createButtonNode().copy(id = originalId)
-        val secondButtonYaml = encodeToString(secondButton)
+            // Add button to inner column first
+            val baseId = "TestButton"
+            val firstButton = createButtonNode().copy(id = baseId)
+            innerColumn.addChild(firstButton)
 
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = containerNode.id,
-                composeNodeYaml = secondButtonYaml,
-                indexToDrop = 0,
-            )
+            // Try to add button with same ID to outer column
+            val secondButton = createButtonNode().copy(id = baseId)
+            val secondButtonYaml = encodeToString(secondButton)
 
-        assertTrue(result.isSuccessful())
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = outerColumn.id,
+                    composeNodeYaml = secondButtonYaml,
+                    indexToDrop = 0, // Add at beginning
+                )
 
-        // Verify that both nodes exist but with different IDs
-        val children = containerNode.children
-        assertTrue(children.size == 2)
+            assertTrue(result.isSuccessful())
 
-        val firstChildId = children[0].id // This should be the new node at index 0
-        val secondChildId = children[1].id // This should be the original node moved to index 1
+            // Verify that IDs are unique across the entire canvas hierarchy
+            val allNodes = screen.getRootNode().allChildren()
+            val allIds = allNodes.map { it.id }
+            val uniqueIds = allIds.toSet()
 
-        // IDs should be different
-        assertTrue(firstChildId != secondChildId)
-        assertTrue(secondChildId == originalId) // Original keeps its ID
-        assertTrue(firstChildId.startsWith(originalId)) // New one gets modified ID
-    }
+            assertTrue(allIds.size == uniqueIds.size) // No duplicate IDs
 
-    @Test
-    fun testAddComposeNode_NoIdConflict_PreservesOriginalId() {
-        val containerNode = createColumnNode()
-        rootNode.addChild(containerNode)
-
-        val buttonNode = createButtonNode()
-        val originalId = buttonNode.id
-        val buttonYaml = encodeToString(buttonNode)
-
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = containerNode.id,
-                composeNodeYaml = buttonYaml,
-                indexToDrop = 0, // Add at beginning
-            )
-
-        assertTrue(result.isSuccessful())
-
-        // Verify that the node keeps its original ID when no conflict exists
-        val addedNode = containerNode.children.first()
-        assertTrue(addedNode.id == originalId)
-    }
+            // Both buttons should exist with different IDs
+            val buttonNodes = allNodes.filter { it.trait.value is ButtonTrait }
+            assertTrue(buttonNodes.size == 2)
+            assertTrue(buttonNodes[0].id != buttonNodes[1].id)
+        }
 
     @Test
-    fun testAddComposeNode_MultipleIdConflicts_GeneratesUniqueIds() {
-        val containerNode = createColumnNode()
-        rootNode.addChild(containerNode)
+    fun testAddComposeNode_ScreenOnlyNodes_DoNotGetIdUniqueness() =
+        runTest {
+            // Screen-only nodes (like FAB) are handled differently and don't go through ID uniqueness logic
+            val fabNode = createFabNode()
+            val originalId = fabNode.id
+            val fabYaml = encodeToString(fabNode)
 
-        // Add first button
-        val baseId = "Button"
-        val firstButton = createButtonNode().copy(id = baseId)
-        containerNode.addChild(firstButton)
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = rootNode.id,
+                    composeNodeYaml = fabYaml,
+                    indexToDrop = 0, // Add at beginning
+                )
 
-        // Add second button with same ID - should become "Button1"
-        val secondButton = createButtonNode().copy(id = baseId)
-        val secondButtonYaml = encodeToString(secondButton)
+            assertTrue(result.isSuccessful())
 
-        uiBuilderOperator.onAddComposeNodeToContainerNode(
-            project = project,
-            containerNodeId = containerNode.id,
-            composeNodeYaml = secondButtonYaml,
-            indexToDrop = 1, // Add at position 1
-        )
-
-        // Add third button with same ID - should become "Button2"
-        val thirdButton = createButtonNode().copy(id = baseId)
-        val thirdButtonYaml = encodeToString(thirdButton)
-
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = containerNode.id,
-                composeNodeYaml = thirdButtonYaml,
-                indexToDrop = 2, // Add at position 2
-            )
-
-        assertTrue(result.isSuccessful())
-
-        // Verify all three nodes have unique IDs
-        val children = containerNode.children
-        assertTrue(children.size == 3)
-
-        val ids = children.map { it.id }.toSet()
-        assertTrue(ids.size == 3) // All IDs should be unique
-        assertTrue(ids.contains(baseId)) // Original ID preserved
-        assertTrue(ids.any { it.startsWith(baseId) && it != baseId }) // Generated IDs present
-    }
+            // FAB should be set on the screen, not added as a child
+            assertNotNull(screen.fabNode.value)
+            assertTrue(screen.fabNode.value?.id == originalId) // Original ID preserved
+            // Note: We don't test rootNode.children.isEmpty() because FAB nodes may
+            // still be added to the hierarchy in some cases
+        }
 
     @Test
-    fun testAddComposeNode_NestedContainers_IdUniquenessAcrossHierarchy() {
-        // Create nested structure: root -> outer column -> inner column
-        val outerColumn = createColumnNode()
-        val innerColumn = createColumnNode()
+    fun testAddComposeNode_IdUniquenessWithComplexHierarchy() =
+        runTest {
+            // Create a more complex hierarchy to test ID collision detection
+            val column1 = createColumnNode().copy(id = "Column1")
+            val column2 = createColumnNode().copy(id = "Column2")
+            val button1 = createButtonNode().copy(id = "SharedId")
+            val text1 = createTextNode().copy(id = "Text1")
 
-        rootNode.addChild(outerColumn)
-        outerColumn.addChild(innerColumn)
+            // Build hierarchy: root -> column1 -> button1, text1
+            //                       -> column2
+            rootNode.addChild(column1)
+            rootNode.addChild(column2)
+            column1.addChild(button1)
+            column1.addChild(text1)
 
-        // Add button to inner column first
-        val baseId = "TestButton"
-        val firstButton = createButtonNode().copy(id = baseId)
-        innerColumn.addChild(firstButton)
+            // Try to add another node with "SharedId" to column2
+            val button2 = createButtonNode().copy(id = "SharedId")
+            val button2Yaml = encodeToString(button2)
 
-        // Try to add button with same ID to outer column
-        val secondButton = createButtonNode().copy(id = baseId)
-        val secondButtonYaml = encodeToString(secondButton)
+            val result =
+                uiBuilderOperator.onAddComposeNodeToContainerNode(
+                    project = project,
+                    containerNodeId = column2.id,
+                    composeNodeYaml = button2Yaml,
+                    indexToDrop = 0, // Add at beginning
+                )
 
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = outerColumn.id,
-                composeNodeYaml = secondButtonYaml,
-                indexToDrop = 0, // Add at beginning
-            )
+            assertTrue(result.isSuccessful())
 
-        assertTrue(result.isSuccessful())
+            // Verify uniqueness across entire canvas
+            val allNodes = screen.getRootNode().allChildren()
+            val allIds = allNodes.map { it.id }
+            val uniqueIds = allIds.toSet()
 
-        // Verify that IDs are unique across the entire canvas hierarchy
-        val allNodes = screen.getRootNode().allChildren()
-        val allIds = allNodes.map { it.id }
-        val uniqueIds = allIds.toSet()
+            assertTrue(allIds.size == uniqueIds.size) // All IDs unique
 
-        assertTrue(allIds.size == uniqueIds.size) // No duplicate IDs
-
-        // Both buttons should exist with different IDs
-        val buttonNodes = allNodes.filter { it.trait.value is ButtonTrait }
-        assertTrue(buttonNodes.size == 2)
-        assertTrue(buttonNodes[0].id != buttonNodes[1].id)
-    }
-
-    @Test
-    fun testAddComposeNode_ScreenOnlyNodes_DoNotGetIdUniqueness() {
-        // Screen-only nodes (like FAB) are handled differently and don't go through ID uniqueness logic
-        val fabNode = createFabNode()
-        val originalId = fabNode.id
-        val fabYaml = encodeToString(fabNode)
-
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = rootNode.id,
-                composeNodeYaml = fabYaml,
-                indexToDrop = 0, // Add at beginning
-            )
-
-        assertTrue(result.isSuccessful())
-
-        // FAB should be set on the screen, not added as a child
-        assertNotNull(screen.fabNode.value)
-        assertTrue(screen.fabNode.value?.id == originalId) // Original ID preserved
-        // Note: We don't test rootNode.children.isEmpty() because FAB nodes may
-        // still be added to the hierarchy in some cases
-    }
-
-    @Test
-    fun testAddComposeNode_IdUniquenessWithComplexHierarchy() {
-        // Create a more complex hierarchy to test ID collision detection
-        val column1 = createColumnNode().copy(id = "Column1")
-        val column2 = createColumnNode().copy(id = "Column2")
-        val button1 = createButtonNode().copy(id = "SharedId")
-        val text1 = createTextNode().copy(id = "Text1")
-
-        // Build hierarchy: root -> column1 -> button1, text1
-        //                       -> column2
-        rootNode.addChild(column1)
-        rootNode.addChild(column2)
-        column1.addChild(button1)
-        column1.addChild(text1)
-
-        // Try to add another node with "SharedId" to column2
-        val button2 = createButtonNode().copy(id = "SharedId")
-        val button2Yaml = encodeToString(button2)
-
-        val result =
-            uiBuilderOperator.onAddComposeNodeToContainerNode(
-                project = project,
-                containerNodeId = column2.id,
-                composeNodeYaml = button2Yaml,
-                indexToDrop = 0, // Add at beginning
-            )
-
-        assertTrue(result.isSuccessful())
-
-        // Verify uniqueness across entire canvas
-        val allNodes = screen.getRootNode().allChildren()
-        val allIds = allNodes.map { it.id }
-        val uniqueIds = allIds.toSet()
-
-        assertTrue(allIds.size == uniqueIds.size) // All IDs unique
-
-        // New button should have modified ID
-        val addedButton = column2.children.first()
-        assertTrue(addedButton.id != "SharedId")
-        assertTrue(addedButton.id.startsWith("SharedId"))
-    }
+            // New button should have modified ID
+            val addedButton = column2.children.first()
+            assertTrue(addedButton.id != "SharedId")
+            assertTrue(addedButton.id.startsWith("SharedId"))
+        }
 
     @Test
     fun testAddComposeNode_MoveOperation_DoesNotApplyIdUniqueness() {

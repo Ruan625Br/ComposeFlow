@@ -129,6 +129,11 @@ sealed interface ComposeTrait : PaletteDraggable {
     fun isLazyList(): Boolean = false
 
     /**
+     * Indicates if the node having the trait can be added as children of another node
+     */
+    fun canBeAddedAsChildren(): Boolean = true
+
+    /**
      * True if onClick parameter is included as part of the parameters for the Composable.
      * This is to distinguish whether the onClick action is set to the Composable through the
      * onClick parameter or through a modifier.

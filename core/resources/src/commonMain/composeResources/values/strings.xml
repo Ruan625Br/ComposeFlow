@@ -498,4 +498,5 @@ instead of in the canvas.</string>
     <string name="onboarding_skip">Skip Tour</string>
     <string name="onboarding_finish">Get Started!</string>
     <string name="onboarding_got_it">Got It</string>
+    <string name="can_not_add_this_node">Can't add this node as a child of another node</string>
 </resources>

@@ -34,6 +34,8 @@ data object ScreenTrait : ComposeTrait {
 
     override fun actionTypes(): List<ActionType> = listOf(ActionType.OnInitialLoad)
 
+    override fun canBeAddedAsChildren(): Boolean = false
+
     override fun generateCode(
         project: Project,
         node: ComposeNode,

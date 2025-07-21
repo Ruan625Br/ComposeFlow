@@ -1,6 +1,8 @@
 package io.composeflow.ui.uibuilder
 
 import co.touchlab.kermit.Logger
+import io.composeflow.Res
+import io.composeflow.can_not_add_this_node
 import io.composeflow.ksp.LlmParam
 import io.composeflow.ksp.LlmTool
 import io.composeflow.model.modifier.ModifierWrapper
@@ -19,6 +21,7 @@ import io.composeflow.swap
 import io.composeflow.ui.EventResult
 import io.composeflow.ui.UiBuilderHelper
 import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
+import org.jetbrains.compose.resources.getString
 
 /**
  * Handles operations related to UI builder, such as adding or removing nodes.
@@ -30,7 +33,7 @@ class UiBuilderOperator {
     /**
      * Pre operations before adding a node to a container node to validate if the node can be added.
      */
-    fun onPreAddComposeNodeToContainerNode(
+    suspend fun onPreAddComposeNodeToContainerNode(
         project: Project,
         containerNodeId: String,
         composeNode: ComposeNode,
@@ -57,6 +60,12 @@ class UiBuilderOperator {
                     CANT_DROP_NODE,
                     containerNode.trait.value.iconText(),
                 ),
+            )
+            return eventResult
+        }
+        if (!composeNode.trait.value.canBeAddedAsChildren()) {
+            eventResult.errorMessages.add(
+                getString(Res.string.can_not_add_this_node),
             )
             return eventResult
         }
@@ -100,7 +109,7 @@ class UiBuilderOperator {
         name = "add_compose_node_to_container",
         description = "Adds a Compose UI component to a container node in the UI builder. This allows placing UI elements inside containers like Column, Row, or Box.",
     )
-    fun onAddComposeNodeToContainerNode(
+    suspend fun onAddComposeNodeToContainerNode(
         project: Project,
         @LlmParam(
             description = "The ID of the container node where the component will be added. Must be a node that can contain other components.",
