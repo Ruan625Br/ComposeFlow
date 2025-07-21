@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.util
 
 import androidx.compose.runtime.Composable
@@ -8,12 +10,12 @@ import androidx.navigation.toRoute
 import com.mohamedrejeb.richeditor.model.rememberRichTextState
 import io.github.nomisrev.JsonPath
 import io.github.nomisrev.path
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.JsonElement
+import kotlin.time.Instant
 
 fun selectString(
     jsonElement: JsonElement,
@@ -63,7 +65,8 @@ fun Instant.setMinute(
     return updatedDateTime.toInstant(timeZone)
 }
 
-fun LocalDateTime.setHour(newHour: Int): LocalDateTime = LocalDateTime(year, monthNumber, dayOfMonth, newHour, minute, second, nanosecond)
+fun LocalDateTime.setHour(newHour: Int): LocalDateTime =
+    LocalDateTime(year, monthNumber, dayOfMonth, newHour, minute, second, nanosecond)
 
 fun LocalDateTime.setMinute(newMinute: Int): LocalDateTime =
     LocalDateTime(year, monthNumber, dayOfMonth, hour, newMinute, second, nanosecond)

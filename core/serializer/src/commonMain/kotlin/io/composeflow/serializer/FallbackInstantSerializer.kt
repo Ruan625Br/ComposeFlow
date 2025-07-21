@@ -1,14 +1,16 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.serializer
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.serializer
+import kotlin.time.Instant
 
 object FallbackInstantSerializer : KSerializer<Instant> {
-    private val delegate = Instant.serializer()
+    private val delegate = serializer<Instant>()
 
     override val descriptor: SerialDescriptor = delegate.descriptor
 
@@ -23,6 +25,6 @@ object FallbackInstantSerializer : KSerializer<Instant> {
         try {
             delegate.deserialize(decoder)
         } catch (e: Exception) {
-            Clock.System.now()
+            Instant.DISTANT_PAST
         }
 }

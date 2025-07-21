@@ -9,6 +9,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
+@OptIn(kotlin.time.ExperimentalTime::class)
 class AppAssetHolderTest {
     private fun createTestBlobInfoWrapper(
         id: String,
@@ -52,7 +53,10 @@ class AppAssetHolderTest {
         )
 
         // Verify android splash screen background color was copied
-        assertEquals(Color.Blue, target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value)
+        assertEquals(
+            Color.Blue,
+            target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value
+        )
 
         // Verify iOS splash screen image was copied
         assertEquals(
@@ -68,7 +72,10 @@ class AppAssetHolderTest {
         )
 
         // Verify iOS splash screen background color was copied
-        assertEquals(Color.Green, target.splashScreenInfoHolder.iOSSplashScreenBackgroundColor.value)
+        assertEquals(
+            Color.Green,
+            target.splashScreenInfoHolder.iOSSplashScreenBackgroundColor.value
+        )
     }
 
     @Test
@@ -120,7 +127,10 @@ class AppAssetHolderTest {
             target.splashScreenInfoHolder.androidSplashScreenImageBlobInfo.value
                 ?.fileName,
         )
-        assertEquals(Color.Yellow, target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value)
+        assertEquals(
+            Color.Yellow,
+            target.splashScreenInfoHolder.androidSplashScreenBackgroundColor.value
+        )
     }
 
     // XML Generation Tests
@@ -188,7 +198,8 @@ class AppAssetHolderTest {
         assertTrue(infoPlistContent.contains("SplashImage"))
 
         // Verify Contents.json includes the image reference
-        val contentsJsonContent = xmlFiles["iosApp/iosApp/Assets.xcassets/SplashImage.imageset/Contents.json"]!!
+        val contentsJsonContent =
+            xmlFiles["iosApp/iosApp/Assets.xcassets/SplashImage.imageset/Contents.json"]!!
         assertTrue(contentsJsonContent.contains("ios_splash.png"))
         assertTrue(contentsJsonContent.contains("universal"))
     }

@@ -7,8 +7,8 @@ import io.composeflow.di.ServiceLocator
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import java.io.File
+import kotlin.time.Instant
 
 actual fun createLocalProjectSaver(): ProjectSaver = LocalProjectSaverImpl()
 
@@ -43,6 +43,7 @@ class LocalProjectSaverImpl(
         }
     }
 
+    @OptIn(kotlin.time.ExperimentalTime::class)
     override suspend fun loadProject(
         userId: String,
         projectId: String,

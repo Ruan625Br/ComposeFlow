@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.ai
 
 import androidx.compose.runtime.getValue
@@ -27,10 +29,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.datetime.Clock
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.getString
+import kotlin.time.Clock
 
 class AiAssistantViewModel(
     projectCreationQuery: String = "",

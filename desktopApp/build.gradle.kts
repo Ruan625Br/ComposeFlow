@@ -65,8 +65,8 @@ kotlin {
     }
 }
 tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions {
-        freeCompilerArgs += "-Xcontext-receivers"
+    compilerOptions {
+        freeCompilerArgs.add("-Xcontext-receivers")
     }
 }
 

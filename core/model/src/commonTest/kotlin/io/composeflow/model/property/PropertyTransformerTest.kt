@@ -17,6 +17,7 @@ import org.junit.Assert.assertEquals
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
+@OptIn(kotlin.time.ExperimentalTime::class)
 class PropertyTransformerTest {
     private val project = Project()
     private val context = GenerationContext()
