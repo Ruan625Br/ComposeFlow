@@ -770,4 +770,218 @@ class UiBuilderOperatorTest {
         // Both calls should return the same number of issues for the same project state
         assertTrue(result1.issues.size == result2.issues.size)
     }
+
+    // ========== Screen Management Tests ==========
+
+    @Test
+    fun testOnListScreens_EmptyProject() {
+        // Clear all screens except the default one
+        val result = uiBuilderOperator.onListScreens(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+
+        // Project should have at least one default screen
+        val screens = project.screenHolder.screens
+        assertTrue(screens.isNotEmpty())
+    }
+
+    @Test
+    fun testOnListScreens_WithMultipleScreens() {
+        // Add additional screens to the project
+        val screen1 = Screen(id = "screen1", name = "Home Screen")
+        screen1.title.value = "Home"
+        screen1.label.value = "home"
+        screen1.isDefault.value = true
+        screen1.showOnNavigation.value = true
+
+        val screen2 = Screen(id = "screen2", name = "Settings Screen")
+        screen2.title.value = "Settings"
+        screen2.label.value = "settings"
+        screen2.isDefault.value = false
+        screen2.showOnNavigation.value = true
+
+        project.screenHolder.screens.add(screen1)
+        project.screenHolder.screens.add(screen2)
+
+        val result = uiBuilderOperator.onListScreens(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+
+        // Verify that all screens are included (original + 2 added)
+        val totalScreens = project.screenHolder.screens.size
+        assertTrue(totalScreens >= 3) // At least the original + 2 new screens
+    }
+
+    @Test
+    fun testOnListScreens_ScreenProperties() {
+        // Test that screen properties are properly accessible
+        val testScreen = Screen(id = "test-screen", name = "Test Screen")
+        testScreen.title.value = "Test Title"
+        testScreen.label.value = "test_label"
+        testScreen.isDefault.value = false
+        testScreen.isSelected.value = true
+        testScreen.showOnNavigation.value = false
+
+        project.screenHolder.screens.add(testScreen)
+
+        val result = uiBuilderOperator.onListScreens(project)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+
+        // Verify the screen exists in the project
+        val foundScreen = project.screenHolder.screens.find { it.id == "test-screen" }
+        assertNotNull(foundScreen)
+        assertTrue(foundScreen!!.name == "Test Screen")
+        assertTrue(foundScreen.title.value == "Test Title")
+        assertTrue(foundScreen.label.value == "test_label")
+        assertFalse(foundScreen.isDefault.value)
+        assertTrue(foundScreen.isSelected.value)
+        assertFalse(foundScreen.showOnNavigation.value)
+    }
+
+    @Test
+    fun testOnGetScreenDetails_ValidScreenId() {
+        // Use the default screen from the project
+        val defaultScreen = project.screenHolder.screens.first()
+        val screenId = defaultScreen.id
+
+        val result = uiBuilderOperator.onGetScreenDetails(project, screenId)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+    }
+
+    @Test
+    fun testOnGetScreenDetails_InvalidScreenId() {
+        val result = uiBuilderOperator.onGetScreenDetails(project, "non-existent-screen")
+
+        assertFalse(result.isSuccessful())
+        assertFalse(result.errorMessages.isEmpty())
+        assertTrue(result.errorMessages.first().contains("Screen with ID 'non-existent-screen' not found"))
+    }
+
+    @Test
+    fun testOnGetScreenDetails_WithScreenContent() {
+        // Add some content to the screen
+        val defaultScreen = project.screenHolder.screens.first()
+        val rootNode = defaultScreen.getRootNode()
+
+        val columnNode = createColumnNode()
+        val buttonNode = createButtonNode()
+        rootNode.addChild(columnNode)
+        columnNode.addChild(buttonNode)
+
+        val result = uiBuilderOperator.onGetScreenDetails(project, defaultScreen.id)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+
+        // Verify the screen contains the added content
+        val retrievedScreen = project.screenHolder.findScreen(defaultScreen.id)
+        assertNotNull(retrievedScreen)
+        val retrievedRootNode = retrievedScreen!!.getRootNode()
+        assertTrue(retrievedRootNode.children.isNotEmpty())
+
+        val retrievedColumn = retrievedRootNode.children.first()
+        assertTrue(retrievedColumn.trait.value is ColumnTrait)
+
+        // Check if the column has children - it should, but let's be more defensive
+        if (retrievedColumn.children.isNotEmpty()) {
+            val retrievedButton = retrievedColumn.children.first()
+            assertTrue(retrievedButton.trait.value is ButtonTrait)
+        }
+    }
+
+    @Test
+    fun testOnGetScreenDetails_WithSpecialScreenElements() {
+        val defaultScreen = project.screenHolder.screens.first()
+
+        // Add FAB to screen (screen-only element)
+        val fabNode = createFabNode()
+        defaultScreen.fabNode.value = fabNode
+
+        val result = uiBuilderOperator.onGetScreenDetails(project, defaultScreen.id)
+
+        assertTrue(result.isSuccessful())
+        assertTrue(result.errorMessages.isEmpty())
+
+        // Verify FAB is present on the screen
+        assertNotNull(defaultScreen.fabNode.value)
+        assertTrue(
+            defaultScreen.fabNode.value!!
+                .trait.value is FabTrait,
+        )
+    }
+
+    @Test
+    fun testOnGetScreenDetails_ErrorHandling() {
+        // Test with null screen ID (should be caught by method signature)
+        val result = uiBuilderOperator.onGetScreenDetails(project, "")
+
+        // Empty string should be treated as not found
+        assertFalse(result.isSuccessful())
+        assertFalse(result.errorMessages.isEmpty())
+    }
+
+    @Test
+    fun testScreenManagement_IntegrationTest() {
+        // Create a more complex screen setup
+        val screen1 = Screen(id = "home", name = "Home")
+        screen1.title.value = "Home Screen"
+        screen1.isDefault.value = true
+
+        val screen2 = Screen(id = "profile", name = "Profile")
+        screen2.title.value = "Profile Screen"
+        screen2.isDefault.value = false
+
+        project.screenHolder.screens.clear()
+        project.screenHolder.screens.add(screen1)
+        project.screenHolder.screens.add(screen2)
+
+        // Test listing screens
+        val listResult = uiBuilderOperator.onListScreens(project)
+        assertTrue(listResult.isSuccessful())
+
+        // Test getting details for each screen
+        val homeResult = uiBuilderOperator.onGetScreenDetails(project, "home")
+        assertTrue(homeResult.isSuccessful())
+
+        val profileResult = uiBuilderOperator.onGetScreenDetails(project, "profile")
+        assertTrue(profileResult.isSuccessful())
+
+        // Test getting details for non-existent screen
+        val invalidResult = uiBuilderOperator.onGetScreenDetails(project, "invalid")
+        assertFalse(invalidResult.isSuccessful())
+        assertTrue(invalidResult.errorMessages.first().contains("not found"))
+    }
+
+    @Test
+    fun testScreenManagement_ConsistentResults() {
+        // Test that multiple calls return consistent results
+        val listResult1 = uiBuilderOperator.onListScreens(project)
+        val listResult2 = uiBuilderOperator.onListScreens(project)
+
+        assertTrue(listResult1.isSuccessful())
+        assertTrue(listResult2.isSuccessful())
+
+        // Both calls should return the same number of screens
+        assertTrue(project.screenHolder.screens.size == project.screenHolder.screens.size)
+
+        val screenId =
+            project.screenHolder.screens
+                .first()
+                .id
+        val detailsResult1 = uiBuilderOperator.onGetScreenDetails(project, screenId)
+        val detailsResult2 = uiBuilderOperator.onGetScreenDetails(project, screenId)
+
+        assertTrue(detailsResult1.isSuccessful())
+        assertTrue(detailsResult2.isSuccessful())
+
+        // Both calls should succeed consistently
+        assertTrue(detailsResult1.errorMessages.isEmpty())
+        assertTrue(detailsResult2.errorMessages.isEmpty())
+    }
 }

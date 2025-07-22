@@ -12,11 +12,11 @@ import io.composeflow.ai_response_stopped_by_user
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.json.jsonSerializer
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.asSummarizedContext
 import io.composeflow.model.useroperation.OperationHistory
 import io.composeflow.model.useroperation.UserOperation
 import io.composeflow.removeLineBreak
 import io.composeflow.repository.ProjectRepository
-import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.EventResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
@@ -28,6 +28,7 @@ import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.getString
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 class AiChatDialogViewModel(
     private val project: Project,
@@ -50,12 +51,13 @@ class AiChatDialogViewModel(
 
     private var generationJob: Job? = null
 
+    @OptIn(ExperimentalTime::class)
     fun onSendGeneralRequest(userInput: String) {
         // Add message to history if it's not empty and not a duplicate of the last entry
         if (userInput.isNotBlank() &&
             (messageHistory.value.isEmpty() || messageHistory.value.last() != userInput)
         ) {
-            _messageHistory.value = _messageHistory.value + userInput
+            _messageHistory.value += userInput
         }
         // Reset history index
         _currentHistoryIndex.value = -1
@@ -79,11 +81,7 @@ class AiChatDialogViewModel(
                         result =
                             llmRepository.handleToolRequest(
                                 promptString = prompt,
-                                projectContext =
-                                    encodeToString(
-                                        Project.serializer(),
-                                        project,
-                                    ),
+                                projectContext = project.asSummarizedContext(),
                                 previousToolArgs = previousToolArgs,
                             )
 

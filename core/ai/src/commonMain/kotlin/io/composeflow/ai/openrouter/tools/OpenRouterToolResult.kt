@@ -190,4 +190,18 @@ sealed interface OpenRouterToolResult {
         override val tool_call_id: String,
         override val tool_args: ToolArgs.GetCustomEnumArgs,
     ) : OpenRouterToolResult
+
+    @Serializable
+    data class ListScreensArgs(
+        override val tool_name: String = "list_screens",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.ListScreensArgs,
+    ) : OpenRouterToolResult
+
+    @Serializable
+    data class GetScreenDetailsArgs(
+        override val tool_name: String = "get_screen_details",
+        override val tool_call_id: String,
+        override val tool_args: ToolArgs.GetScreenDetailsArgs,
+    ) : OpenRouterToolResult
 }

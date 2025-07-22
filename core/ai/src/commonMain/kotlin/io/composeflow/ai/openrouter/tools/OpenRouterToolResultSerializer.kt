@@ -269,6 +269,24 @@ object OpenRouterToolResultSerializer : KSerializer<OpenRouterToolResult> {
                                 value.tool_args,
                             ),
                         )
+
+                    is OpenRouterToolResult.ListScreensArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.ListScreensArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
+
+                    is OpenRouterToolResult.GetScreenDetailsArgs ->
+                        put(
+                            "tool_args",
+                            json.encodeToJsonElement(
+                                ToolArgs.GetScreenDetailsArgs.serializer(),
+                                value.tool_args,
+                            ),
+                        )
                 }
             }
 
@@ -628,6 +646,32 @@ object OpenRouterToolResultSerializer : KSerializer<OpenRouterToolResult> {
                         processedToolArgsElement,
                     )
                 OpenRouterToolResult.GetCustomEnumArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "list_screens" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.ListScreensArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.ListScreensArgs(
+                    tool_name = toolName,
+                    tool_call_id = toolCallId,
+                    tool_args = toolArgs,
+                )
+            }
+
+            "get_screen_details" -> {
+                val toolArgs =
+                    json.decodeFromJsonElement(
+                        ToolArgs.GetScreenDetailsArgs.serializer(),
+                        processedToolArgsElement,
+                    )
+                OpenRouterToolResult.GetScreenDetailsArgs(
                     tool_name = toolName,
                     tool_call_id = toolCallId,
                     tool_args = toolArgs,

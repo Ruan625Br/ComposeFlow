@@ -3,6 +3,8 @@ package io.composeflow.ai
 import co.touchlab.kermit.Logger
 import io.composeflow.ai.openrouter.tools.ToolArgs
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.appscreen.screen.Screen
+import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.EventResult
 import io.composeflow.ui.appstate.AppStateEditorOperator
 import io.composeflow.ui.datatype.DataTypeEditorOperator
@@ -308,6 +310,57 @@ class ToolDispatcher(
                     Logger.e(e) { "Error getting custom enum" }
                     toolArgs.result = "Error getting custom enum: ${e.message}"
                     EventResult().apply { errorMessages.add("Failed to get custom enum: ${e.message}") }
+                }
+            }
+
+            is ToolArgs.ListScreensArgs -> {
+                try {
+                    val result = uiBuilderOperator.onListScreens(project)
+                    if (result.errorMessages.isEmpty()) {
+                        val screens = project.screenHolder.screens
+                        val screenList =
+                            screens.map { screen ->
+                                mapOf(
+                                    "id" to screen.id,
+                                    "name" to screen.name,
+                                    "title" to screen.title.value,
+                                    "label" to screen.label.value,
+                                    "isDefault" to screen.isDefault.value,
+                                    "isSelected" to screen.isSelected.value,
+                                    "showOnNavigation" to screen.showOnNavigation.value,
+                                )
+                            }
+                        toolArgs.result = encodeToString(screenList)
+                    } else {
+                        toolArgs.result = result.errorMessages.joinToString("; ")
+                    }
+                    result
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error listing screens" }
+                    toolArgs.result = "Error listing screens: ${e.message}"
+                    EventResult().apply { errorMessages.add("Failed to list screens: ${e.message}") }
+                }
+            }
+
+            is ToolArgs.GetScreenDetailsArgs -> {
+                try {
+                    val result = uiBuilderOperator.onGetScreenDetails(project, toolArgs.screenId)
+                    if (result.errorMessages.isEmpty()) {
+                        val screen = project.screenHolder.findScreen(toolArgs.screenId)
+                        if (screen != null) {
+                            toolArgs.result = encodeToString(Screen.serializer(), screen)
+                        } else {
+                            toolArgs.result = "Screen with ID '${toolArgs.screenId}' not found"
+                            result.errorMessages.add("Screen with ID '${toolArgs.screenId}' not found")
+                        }
+                    } else {
+                        toolArgs.result = result.errorMessages.joinToString("; ")
+                    }
+                    result
+                } catch (e: Exception) {
+                    Logger.e(e) { "Error getting screen details" }
+                    toolArgs.result = "Error getting screen details: ${e.message}"
+                    EventResult().apply { errorMessages.add("Failed to get screen details: ${e.message}") }
                 }
             }
 

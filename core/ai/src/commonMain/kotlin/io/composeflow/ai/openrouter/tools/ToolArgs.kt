@@ -186,6 +186,18 @@ sealed class ToolArgs {
     ) : ToolArgs()
 
     @Serializable
+    @SerialName("list_screens")
+    data class ListScreensArgs(
+        val dummy: String = "",
+    ) : ToolArgs()
+
+    @Serializable
+    @SerialName("get_screen_details")
+    data class GetScreenDetailsArgs(
+        val screenId: String,
+    ) : ToolArgs()
+
+    @Serializable
     data class FakeArgs(
         val fakeString: String = "fakeString",
     ) : ToolArgs()

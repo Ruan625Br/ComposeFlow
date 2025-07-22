@@ -510,4 +510,66 @@ class UiBuilderOperator {
         }
         return result
     }
+
+    @LlmTool(
+        name = "list_screens",
+        description = "Lists all screens in the project with their IDs and names. This helps understand the available screens in the project for navigation and modification purposes.",
+    )
+    fun onListScreens(project: Project): EventResult {
+        val result = EventResult()
+        try {
+            val screens = project.screenHolder.screens
+            val screenList =
+                screens.map { screen ->
+                    mapOf(
+                        "id" to screen.id,
+                        "name" to screen.name,
+                        "title" to screen.title.value,
+                        "label" to screen.label.value,
+                        "isDefault" to screen.isDefault.value,
+                        "isSelected" to screen.isSelected.value,
+                        "showOnNavigation" to screen.showOnNavigation.value,
+                    )
+                }
+
+            Logger.i { "Listed ${screens.size} screens in project" }
+            screens.forEach { screen ->
+                Logger.i {
+                    "Screen: ${screen.id} - ${screen.name} (default: ${screen.isDefault.value}, selected: ${screen.isSelected.value})"
+                }
+            }
+
+            // Success - no action needed, data will be stored in ToolArgs.result by ToolDispatcher
+        } catch (e: Exception) {
+            Logger.e(e) { "Error listing screens" }
+            result.errorMessages.add("Error listing screens: ${e.message}")
+        }
+        return result
+    }
+
+    @LlmTool(
+        name = "get_screen_details",
+        description = "Retrieves detailed information about a specific screen including its complete structure as YAML. This provides full access to screen configuration, components, and state for analysis or modification.",
+    )
+    fun onGetScreenDetails(
+        project: Project,
+        @LlmParam(description = "The ID of the screen to retrieve details for.")
+        screenId: String,
+    ): EventResult {
+        val result = EventResult()
+        try {
+            val screen = project.screenHolder.findScreen(screenId)
+            if (screen == null) {
+                Logger.e { "Screen with ID '$screenId' not found" }
+                result.errorMessages.add("Screen with ID '$screenId' not found")
+            } else {
+                Logger.i { "Retrieved details for screen: ${screen.name} (${screen.id})" }
+                // Success - screen details will be stored in ToolArgs.result by ToolDispatcher
+            }
+        } catch (e: Exception) {
+            Logger.e(e) { "Error retrieving screen details for ID: $screenId" }
+            result.errorMessages.add("Error retrieving screen details: ${e.message}")
+        }
+        return result
+    }
 }

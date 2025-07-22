@@ -38,7 +38,6 @@ import io.composeflow.serializer.encodeToString
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.encodeToString
 import kotlin.time.Clock
 import kotlin.time.Instant
 import kotlin.uuid.Uuid
@@ -165,15 +164,81 @@ fun Project.findLocalStateOrNull(stateId: StateId): ReadableState? =
             .firstOrNull { it.findStateOrNull(this, stateId) != null }
             ?.findStateOrNull(this, stateId)
 
-fun Project.removeLocalState(stateId: StateId) {
-    screenHolder.screens
-        .firstOrNull {
-            it.findStateOrNull(this, stateId) != null
-        }?.removeState(stateId)
-    componentHolder.components
-        .firstOrNull {
-            it.findStateOrNull(this, stateId) != null
-        }?.removeState(stateId)
+fun Project.asSummarizedContext(): String {
+    val currentEditable = screenHolder.currentEditable()
+
+    // Serialize the current editable as full YAML based on its concrete type
+    val currentEditableYaml =
+        when (currentEditable) {
+            is Screen -> encodeToString(Screen.serializer(), currentEditable)
+            is Component -> encodeToString(Component.serializer(), currentEditable)
+            else -> encodeToString(currentEditable)
+        }
+
+    // Create summarized versions of all other screens and components
+    val otherScreensSummary =
+        screenHolder.screens
+            .filter { it.id != currentEditable.id }
+            .map { screen ->
+                mapOf(
+                    "type" to "Screen",
+                    "id" to screen.id,
+                    "name" to screen.name,
+                    "title" to screen.title.value,
+                    "label" to screen.label.value,
+                    "isDefault" to screen.isDefault.value,
+                    "showOnNavigation" to screen.showOnNavigation.value,
+                    "nodeCount" to screen.getAllComposeNodes().size,
+                )
+            }
+
+    val otherComponentsSummary =
+        componentHolder.components
+            .filter { it.id != currentEditable.id }
+            .map { component ->
+                mapOf(
+                    "type" to "Component",
+                    "id" to component.id,
+                    "name" to component.name,
+                    "nodeCount" to component.getAllComposeNodes().size,
+                    "parameterCount" to component.parameters.size,
+                )
+            }
+
+    // Build the summarized context structure
+    val summarizedContext =
+        mapOf(
+            "projectInfo" to
+                mapOf(
+                    "id" to id,
+                    "name" to name,
+                    "packageName" to packageName,
+                ),
+            "currentEditable" to
+                mapOf(
+                    "type" to
+                        when (currentEditable) {
+                            is Screen -> "Screen"
+                            is Component -> "Component"
+                            else -> "Unknown"
+                        },
+                    "id" to currentEditable.id,
+                    "name" to currentEditable.name,
+                    "fullYaml" to currentEditableYaml,
+                ),
+            "otherScreens" to otherScreensSummary,
+            "otherComponents" to otherComponentsSummary,
+            "globalInfo" to
+                mapOf(
+                    "totalScreens" to screenHolder.screens.size,
+                    "totalComponents" to componentHolder.components.size,
+                    "totalDataTypes" to dataTypeHolder.dataTypes.size,
+                    "totalAPIs" to apiHolder.apiDefinitions.size,
+                    "hasNavigation" to screenHolder.showNavigation.value,
+                ),
+        )
+
+    return summarizedContext.toString()
 }
 
 fun Project.findComposeNodeOrNull(nodeId: String): ComposeNode? {

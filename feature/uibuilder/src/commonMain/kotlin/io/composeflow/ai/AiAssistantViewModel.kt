@@ -33,7 +33,9 @@ import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.getString
 import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
+@OptIn(ExperimentalTime::class)
 class AiAssistantViewModel(
     projectCreationQuery: String = "",
     private val repository: LlmRepository = LlmRepository(),
