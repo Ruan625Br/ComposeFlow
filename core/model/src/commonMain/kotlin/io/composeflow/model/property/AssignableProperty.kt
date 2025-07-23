@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.model.property
 
 import androidx.compose.material.icons.Icons

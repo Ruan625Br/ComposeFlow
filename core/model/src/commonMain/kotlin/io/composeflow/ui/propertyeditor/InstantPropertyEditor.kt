@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.ui.propertyeditor
 
 import androidx.compose.foundation.clickable

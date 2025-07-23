@@ -1,17 +1,19 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.model.parameter.wrapper
 
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.asClassName
 import io.composeflow.serializer.FallbackInstantSerializer
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 @Serializable
 data class InstantWrapper(
@@ -38,6 +40,9 @@ data class InstantWrapper(
 
     fun asString(): String {
         // TODO: Other candidates
-        return instant?.format(dateFormat) ?: ""
+        return instant?.let {
+            val kotlinxInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(it.toEpochMilliseconds())
+            kotlinxInstant.format(dateFormat)
+        } ?: ""
     }
 }

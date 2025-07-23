@@ -45,5 +45,6 @@ fun KotlinSourceSet.optInComposeExperimentalApis() {
         optIn("androidx.compose.material3.ExperimentalMaterial3Api")
         optIn("androidx.compose.ui.text.ExperimentalTextApi")
         optIn("androidx.compose.ui.ExperimentalComposeUiApi")
+        optIn("kotlin.time.ExperimentalTime")
     }
 }

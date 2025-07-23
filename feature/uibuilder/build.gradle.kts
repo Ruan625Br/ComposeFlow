@@ -2,7 +2,7 @@ plugins {
     id("io.compose.flow.kmp.library")
     kotlin("plugin.serialization")
     id("io.compose.flow.compose.multiplatform")
-    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
+    id("com.google.devtools.ksp") version libs.versions.ksp
 }
 
 version = "1.0-SNAPSHOT"

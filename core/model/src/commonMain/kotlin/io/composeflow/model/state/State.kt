@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.model.state
 
 import androidx.compose.runtime.Composable
@@ -34,10 +36,10 @@ import io.composeflow.serializer.FallbackInstantSerializer
 import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 typealias StateId = String

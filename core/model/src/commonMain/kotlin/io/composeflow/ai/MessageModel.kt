@@ -1,3 +1,5 @@
+@file:OptIn(kotlin.time.ExperimentalTime::class)
+
 package io.composeflow.ai
 
 import androidx.compose.material3.MaterialTheme
@@ -7,7 +9,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class MessageModel(
     val messageOwner: MessageOwner,

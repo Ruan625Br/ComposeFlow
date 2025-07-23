@@ -1,7 +1,7 @@
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("com.google.devtools.ksp") version "2.1.21-2.0.1"
+    id("com.google.devtools.ksp") version libs.versions.ksp
     application
 }
 
@@ -28,11 +28,8 @@ ksp {
 
 // Configure Kotlin compiler options
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
-    kotlinOptions {
-        freeCompilerArgs = freeCompilerArgs +
-            listOf(
-                "-Xopt-in=kotlin.RequiresOptIn",
-            )
+    compilerOptions {
+        freeCompilerArgs.add("-Xopt-in=kotlin.RequiresOptIn")
     }
 }
 

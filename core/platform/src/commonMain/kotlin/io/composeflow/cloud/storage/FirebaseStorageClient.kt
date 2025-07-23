@@ -21,6 +21,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 
+@OptIn(kotlin.time.ExperimentalTime::class)
 class FirebaseStorageClient(
     val authRepository: AuthRepository = AuthRepository(),
     val host: String = "firebasestorage.googleapis.com",
