@@ -1,8 +1,7 @@
 package io.composeflow.datastore
 
-import kotlin.time.Instant
+import kotlinx.datetime.Instant
 
-@OptIn(kotlin.time.ExperimentalTime::class)
 data class ProjectYamlNameWithLastModified(
     val yaml: String,
     val lastModified: Instant?,

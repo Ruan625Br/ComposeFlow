@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow.model.datatype
 
 import androidx.compose.runtime.Composable
@@ -11,9 +9,9 @@ import io.composeflow.model.project.findDataTypeOrThrow
 import io.composeflow.model.project.firebase.CollectionId
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.ui.propertyeditor.DropdownItem
+import kotlinx.datetime.Clock
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.time.Clock
 
 @Serializable
 sealed interface FieldType<T> : DropdownItem {
@@ -105,12 +103,12 @@ sealed interface FieldType<T> : DropdownItem {
     @SerialName("FieldTypeInstant")
     data class Instant(
         private val defaultValue: InstantWrapper = InstantWrapper(),
-    ) : FieldType<kotlin.time.Instant> {
+    ) : FieldType<kotlinx.datetime.Instant> {
         override fun isList(): kotlin.Boolean = false
 
         override fun type() = ComposeFlowType.InstantType(isList = false)
 
-        override fun defaultValue(): kotlin.time.Instant = defaultValue.instant ?: Clock.System.now()
+        override fun defaultValue(): kotlinx.datetime.Instant = defaultValue.instant ?: Clock.System.now()
 
         override fun defaultValueAsCodeBlock(project: Project): CodeBlock = defaultValue.generateCode()
 

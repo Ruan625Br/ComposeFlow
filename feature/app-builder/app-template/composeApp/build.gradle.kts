@@ -31,7 +31,7 @@ kotlin {
     }
 
     js(IR) {
-        outputModuleName = "composeApp"
+        moduleName = "composeApp"
         browser {
             commonWebpackConfig {
                 outputFileName = "composeApp.js"
@@ -115,7 +115,6 @@ kotlin {
             languageSettings.optIn("androidx.compose.foundation.ExperimentalFoundationApi")
             languageSettings.optIn("androidx.compose.material3.ExperimentalMaterial3Api")
             languageSettings.optIn("com.russhwolf.settings.ExperimentalSettingsApi")
-            languageSettings.optIn("kotlin.time.ExperimentalTime")
         }
     }
 }

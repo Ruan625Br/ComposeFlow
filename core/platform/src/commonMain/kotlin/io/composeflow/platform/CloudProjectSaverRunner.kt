@@ -7,9 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.time.delay
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
 import java.time.Duration
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 object CloudProjectSaverRunner {
     var userId: String? = null
@@ -35,7 +34,6 @@ object CloudProjectSaverRunner {
         }
     }
 
-    @OptIn(ExperimentalTime::class)
     suspend fun syncProjectYaml() {
         withContext(ioDispatcher) {
             val userId = userId ?: return@withContext

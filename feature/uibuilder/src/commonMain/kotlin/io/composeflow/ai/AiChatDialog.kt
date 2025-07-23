@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow.ai
 
 import androidx.compose.animation.animateContentSize
@@ -59,6 +57,7 @@ import io.composeflow.ai_chat_input_placeholder
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.project.Project
 import io.composeflow.ui.modifier.hoverIconClickable
+import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
 import kotlinx.datetime.format.DateTimeComponents.Companion.Format
@@ -67,7 +66,6 @@ import kotlinx.datetime.offsetAt
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import kotlin.time.Clock
 
 @Composable
 fun AiChatDialog(

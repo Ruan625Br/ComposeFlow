@@ -3,44 +3,44 @@ activity-compose = "1.10.1"
 agp = "8.10.1"
 androidx-credentials = "1.5.0"
 appcompat = "1.7.1"
-atomicfu = "0.29.0"
+atomicfu = "0.27.0"
 kotlinCompileTesting = "1.6.0"
 kotlinCompileTestingKsp = "1.6.0"
-ksp = "2.2.0-2.0.2"
-compose-adaptive-layout = "1.1.2"
+ksp = "2.1.21-2.0.1"
+compose-adaptive-layout = "1.1.1"
 compose-color-picker = "0.7.0"
-compose-multiplatform = "1.8.2"
+compose-multiplatform = "1.8.1"
 compose-navigation = "2.8.0-alpha13"
 core-splashscreen = "1.0.1"
 coroutine = "1.10.2"
 dataStore = "1.1.7"
 gitlive-firebase = "2.1.0"
-google-services = "4.4.3"
-google-cloud-bom = "26.64.0"
+google-services = "4.4.2"
+google-cloud-bom = "26.62.0"
 google-cloud-firebase = "9.4.3"
 gradle = "8.4"
 jewel = "0.9.0"
-kermit = "2.0.6"
+kermit = "2.0.5"
 # TODO: Updating 2.3.0 requires `app-template/composeApp/src/jsMain/kotlin/io/composeflow/auth/JsGoogleAuthProvider.kt` to implement the method in the parent class.
 #       Or use the built-in JS support
 kmpauth = "2.1.0-alpha02"
 koin = "4.1.0"
-kotlin = "2.2.0"
+kotlin = "2.1.21"
 kotlinpoet = "2.2.0"
-kotlinx-serialization = "1.9.0"
+kotlinx-serialization = "1.8.1"
 # Intentionall keeping this version to run format that takes a String
 ktlint = "0.39.0"
-ktor = "3.2.2"
+ktor = "3.1.3"
 logback = "1.5.18"
 multiplatform-settings = "1.3.0"
-okhttp = "5.1.0"
+okhttp = "4.12.0"
 paging-multiplatform = "3.3.0-alpha02-0.5.1"
 precompose = "1.6.2"
 reorderable = "0.9.6"
-roborazzi = "1.46.1"
-sentry = "8.17.0"
+roborazzi = "1.44.0"
+sentry = "8.13.2"
 testparameterinjector = "1.18"
-xmlutil = "0.91.1"
+xmlutil = "0.90.3"
 
 [libraries]
 # AndroidX
@@ -81,7 +81,7 @@ paging-common = { module = "app.cash.paging:paging-common", version.ref = "pagin
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging-multiplatform" }
 reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable" }
 # 1.0.0-rc12 introduced an issue where the JS preview doesn't compile. Keeping the old version intentionally
-richeditor-compose = "com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13"
+richeditor-compose = "com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc05-k2"
 
 # Data
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStore" }
@@ -100,7 +100,7 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-jsonpath = "io.github.nomisrev:kotlinx-serialization-jsonpath:1.0.0"
 kotlin-result = "com.michael-bull.kotlin-result:kotlin-result:2.0.1"
-kaml = "com.charleskorn.kaml:kaml:0.85.0"
+kaml = "com.charleskorn.kaml:kaml:0.81.0"
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }
 multiplatform-settings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatform-settings" }
@@ -131,7 +131,7 @@ kotlinx-coroutines-test = "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2"
 # Plugins
 kotlin-plugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 compose-multiplatform-plugin = { module = "org.jetbrains.compose:compose-gradle-plugin", version.ref = "compose-multiplatform" }
-buildconfig-plugin = "com.github.gmazzo.buildconfig:plugin:5.6.7"
+buildconfig-plugin = "com.github.gmazzo.buildconfig:plugin:5.6.5"
 
 # Monitoring
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
@@ -151,7 +151,7 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 
 # MaterialKolor
-material-kolor = "com.materialkolor:material-kolor:3.0.0"
+material-kolor = "com.materialkolor:material-kolor:2.1.1"
 
 # Google Cloud
 google-cloud-bom = { module = "com.google.cloud:libraries-bom", version.ref = "google-cloud-bom" }
@@ -161,7 +161,7 @@ google-firebase-admin = { module = "com.google.firebase:firebase-admin", version
 commons-compress = "org.apache.commons:commons-compress:1.27.1"
 compose-shimmer = "com.valentinilk.shimmer:compose-shimmer:1.3.3"
 filekit-compose = "io.github.vinceglb:filekit-compose:0.8.8"
-kotlin-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.7.1"
+kotlin-datetime = "org.jetbrains.kotlinx:kotlinx-datetime:0.6.2"
 kotlinx-atomicfu = { module = "org.jetbrains.kotlinx:atomicfu", version.ref = "atomicfu" }
 conveyor-control = "dev.hydraulic.conveyor:conveyor-control:1.1"
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
@@ -169,7 +169,7 @@ xmlutil-core-jdk = { module = "io.github.pdvrieze.xmlutil:core-jdk", version.ref
 xmlutil-serialization-jvm = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil" }
 
 [plugins]
-roborazzi = { id = "io.github.takahirom.roborazzi", version = "1.46.1" }
+roborazzi = { id = "io.github.takahirom.roborazzi", version = "1.44.0" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }

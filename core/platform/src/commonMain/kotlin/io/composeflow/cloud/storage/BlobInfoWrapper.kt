@@ -1,15 +1,13 @@
 package io.composeflow.cloud.storage
 
 import com.google.cloud.storage.BlobInfo
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @Serializable
 @SerialName("BlobInfoWrapper")
-@OptIn(ExperimentalTime::class)
 data class BlobInfoWrapper(
     val blobId: BlobIdWrapper,
     val fileName: String,
@@ -58,7 +56,6 @@ data class BlobInfoWrapper(
     }
 }
 
-@OptIn(ExperimentalTime::class)
 fun BlobInfo.toKotlinWrapper(contentBytes: ByteArray? = null): BlobInfoWrapper {
     val split = blobId.name.split("/")
     return BlobInfoWrapper(
@@ -74,7 +71,6 @@ fun BlobInfo.toKotlinWrapper(contentBytes: ByteArray? = null): BlobInfoWrapper {
     )
 }
 
-@OptIn(ExperimentalTime::class)
 fun Reference.toKotlinWrapper(contentBytes: ByteArray? = null): BlobInfoWrapper {
     val split = location.path.split("/")
     return BlobInfoWrapper(

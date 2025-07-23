@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow
 
 import androidx.compose.runtime.mutableStateListOf

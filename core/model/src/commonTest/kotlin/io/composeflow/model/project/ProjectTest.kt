@@ -1,14 +1,11 @@
 package io.composeflow.model.project
 
-import io.composeflow.cloud.storage.BlobIdWrapper
-import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.component.Component
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
-@OptIn(kotlin.time.ExperimentalTime::class)
 class ProjectTest {
     @Test
     fun testCopyProjectContents() {
@@ -129,9 +126,10 @@ class ProjectTest {
 
         // Enable splash screen
         val testBlobInfo =
-            BlobInfoWrapper(
+            io.composeflow.cloud.storage.BlobInfoWrapper(
                 blobId =
-                    BlobIdWrapper(bucket = "test", name = "splash", generation = null),
+                    io.composeflow.cloud.storage
+                        .BlobIdWrapper(bucket = "test", name = "splash", generation = null),
                 fileName = "splash.png",
                 folderName = "test",
                 mediaLink = null,

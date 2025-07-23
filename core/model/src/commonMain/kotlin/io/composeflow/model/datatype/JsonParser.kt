@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow.model.datatype
 
 import io.composeflow.model.parameter.wrapper.InstantWrapper

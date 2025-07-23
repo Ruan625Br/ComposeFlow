@@ -1,13 +1,13 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow.serializer
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import kotlin.time.Instant
+import kotlin.test.assertTrue
 
 class FallbackInstantSerializerTest {
     @Serializable
@@ -20,7 +20,7 @@ class FallbackInstantSerializerTest {
 
     @Test
     fun deserialize_validInstant_shouldReturnCorrectInstant() {
-        val instant = Instant.fromEpochSeconds(1693571696) // 2023-09-01T12:34:56Z
+        val instant = Instant.parse("2023-09-01T12:34:56Z")
         val jsonString = """{"timestamp":"$instant"}"""
 
         val result = json.decodeFromString<TestData>(jsonString)
@@ -29,18 +29,20 @@ class FallbackInstantSerializerTest {
     }
 
     @Test
-    fun deserialize_invalidInstant_shouldFallbackToDistantPast() {
+    fun deserialize_invalidInstant_shouldFallbackToNow() {
         val jsonString = """{"timestamp":"invalid-date"}"""
 
+        val nowBefore = Clock.System.now()
         val result = json.decodeFromString<TestData>(jsonString)
+        val nowAfter = Clock.System.now()
 
         assertNotNull(result.timestamp)
-        assertEquals(Instant.DISTANT_PAST, result.timestamp)
+        assertTrue(result.timestamp >= nowBefore && result.timestamp <= nowAfter)
     }
 
     @Test
     fun serialize_shouldProduceValidJson() {
-        val instant = Instant.fromEpochSeconds(1711710000) // 2024-03-29T10:00:00Z
+        val instant = Instant.parse("2024-03-29T10:00:00Z")
         val data = TestData(timestamp = instant)
 
         val jsonString = json.encodeToString(data)
@@ -50,7 +52,7 @@ class FallbackInstantSerializerTest {
 
     @Test
     fun roundTripSerialization_validInstant_shouldMatchOriginal() {
-        val original = TestData(timestamp = Instant.fromEpochSeconds(1640995200)) // 2022-01-01T00:00:00Z
+        val original = TestData(timestamp = Instant.parse("2022-01-01T00:00:00Z"))
         val jsonString = json.encodeToString(original)
         val decoded = json.decodeFromString<TestData>(jsonString)
 

@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow.model.project
 
 import io.composeflow.cloud.storage.BlobInfoWrapper
@@ -35,11 +33,11 @@ import io.composeflow.model.state.StateHolderImpl
 import io.composeflow.model.state.StateId
 import io.composeflow.serializer.decodeFromStringWithFallback
 import io.composeflow.serializer.encodeToString
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 const val COMPOSEFLOW_PACKAGE = "io.composeflow"

@@ -1,5 +1,3 @@
-@file:OptIn(kotlin.time.ExperimentalTime::class)
-
 package io.composeflow.ai
 
 import co.touchlab.kermit.Logger
@@ -24,11 +22,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 import org.jetbrains.compose.resources.getString
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
 class AiChatDialogViewModel(
     private val project: Project,
@@ -51,7 +48,6 @@ class AiChatDialogViewModel(
 
     private var generationJob: Job? = null
 
-    @OptIn(ExperimentalTime::class)
     fun onSendGeneralRequest(userInput: String) {
         // Add message to history if it's not empty and not a duplicate of the last entry
         if (userInput.isNotBlank() &&

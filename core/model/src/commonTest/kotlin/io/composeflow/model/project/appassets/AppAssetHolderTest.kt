@@ -9,7 +9,6 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
-@OptIn(kotlin.time.ExperimentalTime::class)
 class AppAssetHolderTest {
     private fun createTestBlobInfoWrapper(
         id: String,
