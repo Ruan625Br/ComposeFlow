@@ -840,24 +840,24 @@ private fun CanvasArea(
                 }
             }
         }
-    }
 
-    val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-    val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    convertToComponentNode?.let { nodeToConvert ->
-        onAnyDialogIsShown()
-        SingleTextInputDialog(
-            textLabel = stringResource(Res.string.component_name),
-            onTextConfirmed = {
-                canvasNodeCallbacks.onConvertToComponent(it, nodeToConvert)
-                convertToComponentNode = null
-                onAllDialogsClosed()
-            },
-            onDismissDialog = {
-                convertToComponentNode = null
-                onAllDialogsClosed()
-            },
-        )
+        val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+        convertToComponentNode?.let { nodeToConvert ->
+            onAnyDialogIsShown()
+            SingleTextInputDialog(
+                textLabel = stringResource(Res.string.component_name),
+                onTextConfirmed = {
+                    canvasNodeCallbacks.onConvertToComponent(it, nodeToConvert)
+                    convertToComponentNode = null
+                    onAllDialogsClosed()
+                },
+                onDismissDialog = {
+                    convertToComponentNode = null
+                    onAllDialogsClosed()
+                },
+            )
+        }
     }
 }
 
