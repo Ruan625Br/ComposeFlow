@@ -14,6 +14,12 @@ import kotlin.time.Duration.Companion.minutes
 class LlmRepository(
     private val client: LlmClient = LlmClient(),
 ) {
+    companion object {
+        private const val MAX_RETRY_COUNT = 4
+        private const val MAX_CONTEXT_CHARS = 50000 // Maximum characters for tool context
+        private const val MAX_TOOL_COUNT = 20 // Maximum number of tools to keep
+    }
+
     suspend fun createProject(
         promptString: String,
         retryCount: Int = 0,
@@ -149,12 +155,15 @@ class LlmRepository(
                 throw IllegalStateException("Failed to handle request. Tried maximum number of attempts.")
             }
 
+            // Apply sliding window to manage context size
+            val windowedToolArgs = applySlidingWindow(previousToolArgs)
+
             Logger.i("$promptString,  Retry count: $retryCount")
             val response =
                 client.invokeHandleGeneralRequest(
                     promptString = promptString,
                     projectContextString = projectContext,
-                    previousToolArgs = previousToolArgs,
+                    previousToolArgs = windowedToolArgs,
                 )
             response.mapBoth(
                 success = {
@@ -188,12 +197,15 @@ class LlmRepository(
                 throw IllegalStateException("Failed to prepare architecture. Tried maximum number of attempts.")
             }
 
+            // Apply sliding window to manage context size
+            val windowedToolArgs = applySlidingWindow(previousToolArgs)
+
             Logger.i("Preparing architecture: $promptString, Retry count: $retryCount")
             val response =
                 client.invokeHandleGeneralRequest(
                     promptString = "Prepare the project architecture for the following: $promptString",
                     projectContextString = projectContext?.toContextString() ?: "",
-                    previousToolArgs = previousToolArgs,
+                    previousToolArgs = windowedToolArgs,
                 )
             response.mapBoth(
                 success = {
@@ -214,6 +226,172 @@ class LlmRepository(
                 },
             )
         }
+
+    /**
+     * Applies a sliding window approach to previousToolArgs to prevent sending too much context
+     * to the LLM endpoint. This helps avoid large request payloads and potential timeout issues.
+     *
+     * Strategy:
+     * 1. Keep recent tools (last MAX_TOOL_COUNT)
+     * 2. Prioritize successful executions over errors
+     * 3. Limit total character count to MAX_CONTEXT_CHARS
+     * 4. Always keep the most recent tool call regardless of size
+     */
+    internal fun applySlidingWindow(previousToolArgs: List<ToolArgs>): List<ToolArgs> {
+        if (previousToolArgs.isEmpty()) return emptyList()
+
+        // Step 1: Keep only the most recent MAX_TOOL_COUNT tools
+        val recentTools = previousToolArgs.takeLast(MAX_TOOL_COUNT)
+
+        // Step 2: Calculate approximate serialized size for each tool
+        val toolsWithSize =
+            recentTools.map { toolArg ->
+                val approximateSize = estimateToolSize(toolArg)
+                toolArg to approximateSize
+            }
+
+        // Step 3: Apply sliding window based on character count
+        val resultTools = mutableListOf<ToolArgs>()
+        var totalSize = 0
+
+        // Always include the most recent tool
+        if (toolsWithSize.isNotEmpty()) {
+            val (mostRecent, mostRecentSize) = toolsWithSize.last()
+            resultTools.add(mostRecent)
+            totalSize += mostRecentSize
+        }
+
+        // Add previous tools from most recent to oldest, respecting size limits
+        for (i in toolsWithSize.size - 2 downTo 0) {
+            val (tool, size) = toolsWithSize[i]
+
+            // Check if adding this tool would exceed our limit
+            if (totalSize + size > MAX_CONTEXT_CHARS) {
+                break
+            }
+
+            resultTools.add(0, tool) // Add to beginning to maintain order
+            totalSize += size
+        }
+
+        Logger.i(
+            "Applied sliding window: ${previousToolArgs.size} -> ${resultTools.size} tools, " +
+                "estimated size: $totalSize chars",
+        )
+
+        return resultTools
+    }
+
+    /**
+     * Estimates the serialized size of a ToolArgs object for sliding window calculations.
+     * This provides a quick approximation without full JSON serialization.
+     */
+    internal fun estimateToolSize(toolArg: ToolArgs): Int {
+        // Base serialization overhead (field names, brackets, etc.)
+        var estimatedSize = 100
+
+        // Add sizes based on tool content
+        estimatedSize += toolArg.status.name.length
+        estimatedSize += toolArg.result.length
+
+        // Add tool-specific field sizes
+        when (toolArg) {
+            is ToolArgs.AddComposeNodeArgs -> {
+                estimatedSize += toolArg.containerNodeId.length
+                estimatedSize += toolArg.composeNodeYaml.length
+                estimatedSize += 20 // indexToDrop
+            }
+            is ToolArgs.RemoveComposeNodeArgs -> {
+                estimatedSize += toolArg.composeNodeId.length
+            }
+            is ToolArgs.AddModifierArgs -> {
+                estimatedSize += toolArg.composeNodeId.length
+                estimatedSize += toolArg.modifierYaml.length
+            }
+            is ToolArgs.UpdateModifierArgs -> {
+                estimatedSize += toolArg.composeNodeId.length
+                estimatedSize += toolArg.modifierYaml.length
+                estimatedSize += 20 // index
+            }
+            is ToolArgs.RemoveModifierArgs -> {
+                estimatedSize += toolArg.composeNodeId.length
+                estimatedSize += 20 // index
+            }
+            is ToolArgs.SwapModifiersArgs -> {
+                estimatedSize += toolArg.composeNodeId.length
+                estimatedSize += 40 // fromIndex + toIndex
+            }
+            is ToolArgs.MoveComposeNodeToContainerArgs -> {
+                estimatedSize += toolArg.composeNodeId.length
+                estimatedSize += toolArg.containerNodeId.length
+                estimatedSize += 20 // index
+            }
+            is ToolArgs.AddAppStateArgs -> {
+                estimatedSize += toolArg.appStateYaml.length
+            }
+            is ToolArgs.DeleteAppStateArgs -> {
+                estimatedSize += toolArg.appStateId.length
+            }
+            is ToolArgs.UpdateAppStateArgs -> {
+                estimatedSize += toolArg.appStateYaml.length
+            }
+            is ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs -> {
+                estimatedSize += toolArg.appStateId.length
+                estimatedSize += toolArg.defaultValuesYaml.length
+            }
+            is ToolArgs.GetAppStateArgs -> {
+                estimatedSize += toolArg.appStateId.length
+            }
+            is ToolArgs.AddDataTypeArgs -> {
+                estimatedSize += toolArg.dataTypeYaml.length
+            }
+            is ToolArgs.DeleteDataTypeArgs -> {
+                estimatedSize += toolArg.dataTypeId.length
+            }
+            is ToolArgs.UpdateDataTypeArgs -> {
+                estimatedSize += toolArg.dataTypeYaml.length
+            }
+            is ToolArgs.AddDataFieldArgs -> {
+                estimatedSize += toolArg.dataTypeId.length
+                estimatedSize += toolArg.dataFieldYaml.length
+            }
+            is ToolArgs.DeleteDataFieldArgs -> {
+                estimatedSize += toolArg.dataTypeId.length
+                estimatedSize += toolArg.dataFieldId.length
+            }
+            is ToolArgs.AddCustomEnumArgs -> {
+                estimatedSize += toolArg.customEnumYaml.length
+            }
+            is ToolArgs.DeleteCustomEnumArgs -> {
+                estimatedSize += toolArg.customEnumId.length
+            }
+            is ToolArgs.UpdateCustomEnumArgs -> {
+                estimatedSize += toolArg.customEnumYaml.length
+            }
+            is ToolArgs.GetDataTypeArgs -> {
+                estimatedSize += toolArg.dataTypeId.length
+            }
+            is ToolArgs.GetCustomEnumArgs -> {
+                estimatedSize += toolArg.customEnumId.length
+            }
+            is ToolArgs.GetScreenDetailsArgs -> {
+                estimatedSize += toolArg.screenId.length
+            }
+            is ToolArgs.ListAppStatesArgs,
+            is ToolArgs.ListDataTypesArgs,
+            is ToolArgs.ListCustomEnumsArgs,
+            is ToolArgs.ListScreensArgs,
+            -> {
+                // These have minimal content but potentially large results
+                estimatedSize += 50
+            }
+            is ToolArgs.FakeArgs -> {
+                estimatedSize += toolArg.fakeString.length
+            }
+        }
+
+        return estimatedSize
+    }
 }
 
 data class CreateProjectResult(
