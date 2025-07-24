@@ -92,11 +92,11 @@ data class NavigationDrawerItemTrait(
                     dryRun,
                 ),
             )
-            codeBlockBuilder.add(
-                node.generateModifierCode(project, context, dryRun = dryRun),
-            )
             codeBlockBuilder.addStatement("},")
         }
+        codeBlockBuilder.add(
+            node.generateModifierCode(project, context, dryRun = dryRun),
+        )
         return codeBlockBuilder.build()
     }
 
