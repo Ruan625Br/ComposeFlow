@@ -65,8 +65,7 @@ fun Instant.setMinute(
     return updatedDateTime.toInstant(timeZone)
 }
 
-fun LocalDateTime.setHour(newHour: Int): LocalDateTime =
-    LocalDateTime(year, monthNumber, dayOfMonth, newHour, minute, second, nanosecond)
+fun LocalDateTime.setHour(newHour: Int): LocalDateTime = LocalDateTime(year, monthNumber, dayOfMonth, newHour, minute, second, nanosecond)
 
 fun LocalDateTime.setMinute(newMinute: Int): LocalDateTime =
     LocalDateTime(year, monthNumber, dayOfMonth, hour, newMinute, second, nanosecond)

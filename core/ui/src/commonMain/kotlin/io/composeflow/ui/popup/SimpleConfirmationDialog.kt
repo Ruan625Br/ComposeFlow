@@ -3,8 +3,9 @@ package io.composeflow.ui.popup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
@@ -51,7 +52,8 @@ fun SimpleConfirmationDialog(
             Column(
                 modifier =
                     Modifier
-                        .size(width = 300.dp, height = 160.dp)
+                        .width(300.dp)
+                        .heightIn(min = 160.dp)
                         .padding(16.dp),
             ) {
                 Text(text = text)

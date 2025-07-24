@@ -48,6 +48,8 @@ echo "Copying MCP tool schema files to ${TARGET_DIR}..."
 find feature/uibuilder/build/generated/llm-tools -name "*_mcp_tool.json" -exec cp {} "${TARGET_DIR}" \;
 find feature/appstate-editor/build/generated/llm-tools -name "*_mcp_tool.json" -exec cp {} "${TARGET_DIR}" \;
 find feature/datatype-editor/build/generated/llm-tools -name "*_mcp_tool.json" -exec cp {} "${TARGET_DIR}" \;
+# TODO Add *_mcp_tool.json files from feature/string-editor/build/generated/llm-tools when the module is wired with LLM.
+#      https://github.com/ComposeFlow/ComposeFlow/issues/64
 
 # Count the number of files copied
 NUM_FILES=$(find "${TARGET_DIR}" -name "*_mcp_tool.json" | wc -l)

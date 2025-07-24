@@ -13,6 +13,7 @@ const val FIRESTORE_EDITOR_ROUTE = "firestore_editor_route"
 const val API_EDITOR_ROUTE = "api_editor_route"
 const val THEME_EDITOR_ROUTE = "theme_editor_route"
 const val ASSET_EDITOR_ROUTE = "asset_editor_route"
+const val STRING_EDITOR_ROUTE = "string_editor_route"
 const val SETTINGS_ROUTE = "settings_route"
 
 enum class TopLevelDestination(
@@ -54,6 +55,11 @@ enum class TopLevelDestination(
         "icons/assets.svg",
         "Assets",
         ASSET_EDITOR_ROUTE,
+    ),
+    StringEditor(
+        "icons/translate.svg",
+        "Strings",
+        STRING_EDITOR_ROUTE,
     ),
     Settings(
         "icons/settings.svg",

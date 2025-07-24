@@ -154,6 +154,12 @@ fun ProjectEditorContent(
                                     .background(color = MaterialTheme.colorScheme.surface),
                         ) {
                             TopLevelDestination.entries.forEachIndexed { index, item ->
+                                @Suppress("KotlinConstantConditions")
+                                if (BuildConfig.isRelease) {
+                                    if (item == TopLevelDestination.StringEditor) {
+                                        return@forEachIndexed
+                                    }
+                                }
                                 Tooltip(item.label) {
                                     SelectableIconButton(
                                         selected = selectedItem == item.ordinal,

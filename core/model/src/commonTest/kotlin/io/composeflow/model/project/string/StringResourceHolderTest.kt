@@ -253,7 +253,7 @@ class StringResourceHolderTest {
     @Test
     fun testCopyContents() {
         val source = StringResourceHolder()
-        source.defaultLocale = StringResource.Locale("fr")
+        source.defaultLocale.value = StringResource.Locale("fr")
         source.supportedLocales.clear()
         source.supportedLocales.add(StringResource.Locale("fr"))
         source.supportedLocales.add(StringResource.Locale("en"))

@@ -1,7 +1,10 @@
 package io.composeflow.model.project.string
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.FallbackMutableStateListSerializer
+import io.composeflow.serializer.MutableStateListSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -20,11 +23,12 @@ private fun String.escapeXml(): String =
 @Serializable
 @SerialName("StringResourceHolder")
 data class StringResourceHolder(
-    @Serializable(with = FallbackMutableStateListSerializer::class)
+    @Serializable(with = MutableStateListSerializer::class)
     val stringResources: MutableList<StringResource> = mutableStateListEqualsOverrideOf(),
-    var defaultLocale: StringResource.Locale = StringResource.Locale("en"),
-    @Serializable(with = FallbackMutableStateListSerializer::class)
-    val supportedLocales: MutableList<StringResource.Locale> = mutableStateListEqualsOverrideOf(defaultLocale),
+    @Serializable(MutableStateSerializer::class)
+    val defaultLocale: MutableState<StringResource.Locale> = mutableStateOf(StringResource.Locale("en")),
+    @Serializable(with = MutableStateListSerializer::class)
+    val supportedLocales: MutableList<StringResource.Locale> = mutableStateListEqualsOverrideOf(defaultLocale.value),
 ) {
     /**
      * Generates strings.xml content for each supported locale.
@@ -57,7 +61,7 @@ data class StringResourceHolder(
 
             // Default locale goes to values/strings.xml (empty key)
             // Other locales go to values-{locale}/strings.xml
-            val localeKey = if (locale == defaultLocale) "" else locale.toString()
+            val localeKey = if (locale == defaultLocale.value) "" else locale.toString()
             result[localeKey] = xmlContent
         }
 
@@ -81,12 +85,30 @@ data class StringResourceHolder(
                 path to content
             }.toMap()
     }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is StringResourceHolder) return false
+
+        if (stringResources != other.stringResources) return false
+        if (defaultLocale.value != other.defaultLocale.value) return false
+        if (supportedLocales != other.supportedLocales) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = stringResources.hashCode()
+        result = 31 * result + defaultLocale.value.hashCode()
+        result = 31 * result + supportedLocales.hashCode()
+        return result
+    }
 }
 
 fun StringResourceHolder.copyContents(other: StringResourceHolder) {
     stringResources.clear()
     stringResources.addAll(other.stringResources)
-    defaultLocale = other.defaultLocale
+    defaultLocale.value = other.defaultLocale.value
     supportedLocales.clear()
     supportedLocales.addAll(other.supportedLocales)
 }

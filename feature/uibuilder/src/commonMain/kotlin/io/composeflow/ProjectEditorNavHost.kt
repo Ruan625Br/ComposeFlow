@@ -11,6 +11,7 @@ import io.composeflow.ui.asset.assetEditorScreen
 import io.composeflow.ui.datatype.dataTypeEditorScreen
 import io.composeflow.ui.firestore.firestoreEditorScreen
 import io.composeflow.ui.settings.settingsScreen
+import io.composeflow.ui.string.stringResourceEditorScreen
 import io.composeflow.ui.themeeditor.themeEditorScreen
 import io.composeflow.ui.uibuilder.uiBuilderScreen
 import moe.tlaster.precompose.navigation.NavHost
@@ -54,6 +55,12 @@ fun ProjectEditorNavHost(
         assetEditorScreen(
             project = project,
         )
+        @Suppress("KotlinConstantConditions")
+        if (!BuildConfig.isRelease) {
+            stringResourceEditorScreen(
+                project = project,
+            )
+        }
         settingsScreen(
             project = project,
         )

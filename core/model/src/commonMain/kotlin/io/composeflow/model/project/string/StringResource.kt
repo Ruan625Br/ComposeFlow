@@ -19,6 +19,10 @@ data class StringResource(
     @Serializable(with = FallbackMutableStateMapSerializer::class)
     val localizedValues: MutableMap<Locale, String> = mutableStateMapEqualsOverrideOf(),
 ) {
+    // TODO: Replace Locale with an enum class to provide a list of languages and regions in the UI
+    //       and to detect when LLM uses a non-existent locale.
+    //       https://github.com/ComposeFlow/ComposeFlow/issues/63
+
     // Compose Multiplatform supports language and region qualifiers for resources.
     // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-setup.html#language-and-regional-qualifiers
     @Serializable(with = LocaleSerializer::class)

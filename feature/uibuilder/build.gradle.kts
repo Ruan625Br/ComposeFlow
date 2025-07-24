@@ -14,6 +14,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":ksp-llm-tools"))
             implementation(project(":core:ai"))
+            implementation(project(":core:config"))
             implementation(project(":core:di"))
             implementation(project(":core:icons"))
             implementation(project(":core:formatter"))
@@ -29,6 +30,7 @@ kotlin {
             implementation(project(":feature:asset-editor"))
             implementation(project(":feature:datatype-editor"))
             implementation(project(":feature:settings"))
+            implementation(project(":feature:string-editor"))
             implementation(project(":feature:theme-editor"))
             implementation(libs.compose.code.editor)
             implementation(libs.compose.color.picker)
