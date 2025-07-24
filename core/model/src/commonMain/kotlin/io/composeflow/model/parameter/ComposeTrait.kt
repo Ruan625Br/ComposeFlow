@@ -71,6 +71,8 @@ sealed interface ComposeTrait : PaletteDraggable {
 
     fun defaultConstraints(): Set<Constraint> = emptySet()
 
+    fun isModifierAttachable(): Boolean = true
+
     override fun defaultComposeNode(project: Project): ComposeNode? {
         TODO("Not yet implemented")
     }

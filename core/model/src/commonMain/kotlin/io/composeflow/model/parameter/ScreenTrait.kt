@@ -36,6 +36,8 @@ data object ScreenTrait : ComposeTrait {
 
     override fun canBeAddedAsChildren(): Boolean = false
 
+    override fun isModifierAttachable(): Boolean = false
+
     override fun generateCode(
         project: Project,
         node: ComposeNode,

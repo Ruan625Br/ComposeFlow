@@ -237,10 +237,7 @@ fun PropertyInspector(
                     SectionDivider()
                 }
             }
-            // When editing a Component always show the Modifier inspector
-            if (!composeNode.isRoot() ||
-                project.screenHolder.editedComponent.value != null
-            ) {
+            if (composeNode.trait.value.isModifierAttachable()) {
                 modifierInspector(
                     project = project,
                     listState = lazyListState,
