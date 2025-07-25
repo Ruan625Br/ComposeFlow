@@ -1,0 +1,87 @@
+---
+title: Component System
+description: Create and manage reusable UI components in ComposeFlow
+sidebar:
+  order: 4
+---
+
+import { Image } from 'astro:assets';
+
+ComposeFlow's **Component System** allows you to create reusable UI elements that can be used across multiple screens and projects. This powerful feature helps you maintain consistency, reduce development time, and create scalable applications.
+
+## Key Features
+
+### Reusable
+Create once, use everywhere. Components can be used across multiple screens and projects without rebuilding the same UI patterns.
+
+### Self-Contained
+Components include their own layout, styling, and behavior. Everything needed for the component to function is encapsulated within it.
+
+### Customizable
+Components accept parameters to vary their appearance and behavior, making them flexible for different use cases.
+
+## Example Use Case: PostCard Component
+
+Consider a **PostCard** component for a social media app that displays user posts:
+
+**Initial Creation**: 
+- Create a PostCard component in a LazyColumn for the main feed
+- Include user avatar, name, post content, like button, and comment count
+- Make it customizable with parameters for user data and post content
+
+![component creation](/image/component_create_dropdown.png)
+
+:::tip[Before creating a component]
+Before creating a component, each Composables within the post card item is considered as single
+Composable for each
+![component before creation](/image/component_before_create.png)
+
+After creating a component, the item in the main feed screen is treated as a single component
+
+![component after creation](/image/component_after_create.png)
+![component after creation in list](/image/component_after_create_in_list.png)
+:::
+
+**Reusable Across Screens**:
+- **Main Feed**: Display all posts in a scrollable list
+- **Search Results**: Show matching posts when users search
+- **User Profile**: Display posts from a specific user
+- **Saved Posts**: Show bookmarked posts
+
+:::tip[Component library]
+After the creation, the list of components are visible in the component tab and can be used in
+other places
+
+![component library](/image/component_library.png)
+:::
+
+**Benefits**:
+- **Consistency**: All post displays look and behave the same
+- **Efficiency**: No need to recreate the post layout for each screen
+- **Maintenance**: Updates to PostCard automatically apply everywhere it's used
+
+## Creating Components
+
+### From Existing UI Elements
+
+1. **Design Your UI Pattern**: Create the desired layout (e.g., PostCard with avatar, text, buttons)
+2. **Select Elements**: Choose all elements that should be part of the component
+3. **Convert to Component**: Right-click and select "Create Component" 
+4. **Configure Parameters**: Define which properties should be customizable (user name, post text, etc.)
+5. **Save**: The component is now available in your component palette
+
+### Using Components
+
+1. **Access Component Library**: Find your custom components in the left component palette
+2. **Drag and Drop**: Place the component on any screen
+3. **Customize Instance**: Set parameter values specific to each usage
+4. **Bind Data**: Connect component parameters to app state or data sources
+
+## Best Practices
+
+- **Single Purpose**: Each component should have a clear, focused responsibility
+- **Consistent Naming**: Use descriptive names that make the component's purpose obvious
+- **Parameter Design**: Make components flexible with well-designed parameters
+- **Test Reusability**: Verify components work well in different contexts before finalizing
+
+The Component System enables you to build consistent, maintainable UIs by creating reusable building blocks that can be used throughout your application.

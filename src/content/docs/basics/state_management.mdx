@@ -59,15 +59,31 @@ State management in ComposeFlow is organized hierarchically to provide scope and
     - **App State**: Global level.
     - **Local State**: Includes both screen states and component states at the same level.
 
-### Automatic Creation of Local States
+### Implicit Companion States
 
-- **Implicit State Creation**:
-    - ComposeFlow simplifies state management by automatically creating local states when certain composables are added to the canvas.
-- **Example**: TextField Composable
-    - When you drag a `TextField` onto the canvas, ComposeFlow automatically creates a local state variable to hold the input text.
+- **Automatic State Creation**:
+    - Composables with input values automatically have **implicit companion states** by default.
+    - These states manage the composable's current value without requiring manual setup.
+
+- **Input Composables with Companion States**:
+    - **TextField**: Automatically creates a state to hold the text input value
+    - **Checkbox**: Creates a boolean state to track checked/unchecked status
+    - **Slider**: Maintains a numeric state for the current slider position
+    - **Switch**: Has a boolean state for on/off status
+    - **RadioButton**: Tracks selection state within a group
+
+:::tip[TextField example]
+For example, TextField is dropped to the canvas, the companion state is automatically created.
+
+![Companion state TextField](/image/companion_state_textfield.png)
+![Companion state in state dialog](/image/companion_state_in_state_dialog.png)
+
+:::
+
 - **Benefits**:
-    - **Ease of Use**: Reduces the need for manual state setup.
-    - **Encapsulation**: Keeps the state localized to the composable, promoting cleaner state management.
+    - **Ease of Use**: No manual state setup required for basic input handling
+    - **Immediate Functionality**: Input composables work out-of-the-box with state management
+    - **Encapsulation**: Each composable manages its own state automatically
 
 ---
 
