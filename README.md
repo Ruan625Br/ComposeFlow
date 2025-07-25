@@ -39,6 +39,17 @@ e.g.
 sdk.dir=C:\\Users\\thagikura\\AppData\\Local\\Android\\Sdk
 ```
 
+## Initialize submodule
+
+Documents repository is added as a git submodule.
+
+Update the documents by following command.
+
+```bash
+git submodule update --remote
+```
+
+
 ## How to run
 
 Choose a run configuration for an appropriate target in Android Studio and run it.
@@ -72,8 +83,4 @@ conveyor make copied-site
 ./gradlew --project-dir build-logic --init-script ../gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
 ./gradlew --project-dir feature/app-builder/app-template --init-script ../../../gradle/init.gradle.kts --no-configuration-cache --continue spotlessApply
 ```
-
-## How to generate a system prompt for Gemini
-
-`bash generate_system_prompts.sh`
 
