@@ -6,8 +6,8 @@ import androidx.compose.ui.graphics.Color
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.serializer.LocationAwareColorSerializer
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.serializer.asString
 import io.composeflow.ui.common.AppTheme
 import kotlinx.serialization.Serializable
@@ -48,7 +48,7 @@ data class ColorWrapper(
 }
 
 object Material3ColorWrapperSerializer :
-    LocationAwareFallbackEnumSerializer<Material3ColorWrapper>(Material3ColorWrapper::class)
+    FallbackEnumSerializer<Material3ColorWrapper>(Material3ColorWrapper::class)
 
 /**
  * Wrapper class for [Color] to distinguish the same color by semantics.

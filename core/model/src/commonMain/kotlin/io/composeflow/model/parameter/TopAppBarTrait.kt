@@ -34,7 +34,7 @@ import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.tooltip_top_app_bar_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -437,7 +437,7 @@ data class TopAppBarTrait(
             scrollBehaviorWrapper == other.scrollBehaviorWrapper
 }
 
-object TopAppBarTypeWrapperSerializer : LocationAwareFallbackEnumSerializer<TopAppBarTypeWrapper>(
+object TopAppBarTypeWrapperSerializer : FallbackEnumSerializer<TopAppBarTypeWrapper>(
     TopAppBarTypeWrapper::class,
 )
 
@@ -449,7 +449,7 @@ enum class TopAppBarTypeWrapper {
     Large,
 }
 
-object ScrollBehaviorWrapperSerializer : LocationAwareFallbackEnumSerializer<ScrollBehaviorWrapper>(
+object ScrollBehaviorWrapperSerializer : FallbackEnumSerializer<ScrollBehaviorWrapper>(
     ScrollBehaviorWrapper::class,
 )
 

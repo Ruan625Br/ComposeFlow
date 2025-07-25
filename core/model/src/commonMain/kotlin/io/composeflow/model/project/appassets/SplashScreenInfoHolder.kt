@@ -5,16 +5,16 @@ import androidx.compose.ui.graphics.Color
 import io.composeflow.android.generateSplashThemeXml
 import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.serializer.LocationAwareColorSerializer
-import io.composeflow.serializer.LocationAwareMutableStateSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import kotlinx.serialization.Serializable
 
 const val ANDROID_IC_SPLASH_IMAGE = "ic_splash_image"
 
 @Serializable
 data class SplashScreenInfoHolder(
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val androidSplashScreenImageBlobInfo: MutableState<BlobInfoWrapper?> = mutableStateOf(null),
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val androidSplashScreenBackgroundColor: MutableState<
         @Serializable(LocationAwareColorSerializer::class)
         Color?,
@@ -22,9 +22,9 @@ data class SplashScreenInfoHolder(
         mutableStateOf(
             null,
         ),
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val iOSSplashScreenImageBlobInfo: MutableState<BlobInfoWrapper?> = mutableStateOf(null),
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val iOSSplashScreenBackgroundColor: MutableState<
         @Serializable(LocationAwareColorSerializer::class)
         Color?,

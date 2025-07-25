@@ -4,16 +4,16 @@ import io.composeflow.asVariableName
 import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.platform.getAssetCacheFileFor
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("AssetHolder")
 data class AssetHolder(
-    @Serializable(with = LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(with = FallbackMutableStateListSerializer::class)
     val images: MutableList<BlobInfoWrapper> = mutableStateListEqualsOverrideOf(),
-    @Serializable(with = LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(with = FallbackMutableStateListSerializer::class)
     val icons: MutableList<BlobInfoWrapper> = mutableStateListEqualsOverrideOf(),
 ) {
     /**

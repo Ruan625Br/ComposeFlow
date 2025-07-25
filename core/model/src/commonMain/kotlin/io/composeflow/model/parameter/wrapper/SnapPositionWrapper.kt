@@ -2,11 +2,11 @@ package io.composeflow.model.parameter.wrapper
 
 import androidx.compose.foundation.gestures.snapping.SnapPosition
 import com.squareup.kotlinpoet.MemberName
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.Serializable
 
 object SnapPositionWrapperSerializer :
-    LocationAwareFallbackEnumSerializer<SnapPositionWrapper>(SnapPositionWrapper::class)
+    FallbackEnumSerializer<SnapPositionWrapper>(SnapPositionWrapper::class)
 
 @Serializable(SnapPositionWrapperSerializer::class)
 enum class SnapPositionWrapper {

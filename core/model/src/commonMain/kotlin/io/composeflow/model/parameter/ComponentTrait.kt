@@ -21,7 +21,7 @@ import io.composeflow.model.project.component.COMPONENT_KEY_NAME
 import io.composeflow.model.project.findComponentOrNull
 import io.composeflow.model.project.findParameterOrThrow
 import io.composeflow.model.property.AssignableProperty
-import io.composeflow.serializer.LocationAwareFallbackMutableStateMapSerializer
+import io.composeflow.serializer.FallbackMutableStateMapSerializer
 import io.composeflow.tooltip_component_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -33,7 +33,7 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("ComponentTrait")
 data class ComponentTrait(
-    @Serializable(LocationAwareFallbackMutableStateMapSerializer::class)
+    @Serializable(FallbackMutableStateMapSerializer::class)
     val paramsMap: MutableMap<ParameterId, AssignableProperty> =
         mutableStateMapOf(),
 ) : ComposeTrait {

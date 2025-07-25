@@ -51,11 +51,11 @@ import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material.icons.twotone.ThumbUp
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-object TwoToneSerializer : LocationAwareFallbackEnumSerializer<TwoTone>(TwoTone::class)
+object TwoToneSerializer : FallbackEnumSerializer<TwoTone>(TwoTone::class)
 
 /**
  * Enum of TwoTone icons from material-icons-core

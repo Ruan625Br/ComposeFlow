@@ -6,7 +6,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-private class FallbackSealedSerializer<T : Any>(
+private class FallbackSealedSerializerInternal<T : Any>(
     private val defaultInstance: T,
     private val serializer: KSerializer<T>,
 ) : KSerializer<T> {
@@ -32,12 +32,12 @@ private class FallbackSealedSerializer<T : Any>(
  * Location-aware FallbackSealedSerializer class that can be used in @Serializable annotations.
  * Provides enhanced error reporting with precise location information when sealed class parsing fails.
  */
-class LocationAwareFallbackSealedSerializer<T : Any>(
+class FallbackSealedSerializer<T : Any>(
     defaultInstance: T,
     serializer: KSerializer<T>,
 ) : KSerializer<T> {
     private val delegate =
-        FallbackSealedSerializer(defaultInstance, serializer).withLocationAwareExceptions()
+        FallbackSealedSerializerInternal(defaultInstance, serializer).withLocationAwareExceptions()
 
     override val descriptor: SerialDescriptor = delegate.descriptor
 

@@ -19,7 +19,7 @@ import kotlin.reflect.KClass
  * - Proper logging of fallback scenarios
  * - Null-safe implementation
  */
-private open class FallbackEnumSerializer<T : Enum<T>>(
+private open class FallbackEnumSerializerInternal<T : Enum<T>>(
     enumClass: KClass<T>,
 ) : KSerializer<T> {
     private val values = enumClass.java.enumConstants ?: arrayOf()
@@ -64,10 +64,10 @@ private open class FallbackEnumSerializer<T : Enum<T>>(
  * Location-aware FallbackEnumSerializer class that can be used in @Serializable annotations.
  * Provides enhanced error reporting with precise location information when enum parsing fails.
  */
-open class LocationAwareFallbackEnumSerializer<T : Enum<T>>(
+open class FallbackEnumSerializer<T : Enum<T>>(
     enumClass: KClass<T>,
 ) : KSerializer<T> {
-    private val delegate = FallbackEnumSerializer(enumClass).withLocationAwareExceptions()
+    private val delegate = FallbackEnumSerializerInternal(enumClass).withLocationAwareExceptions()
 
     override val descriptor: SerialDescriptor = delegate.descriptor
 

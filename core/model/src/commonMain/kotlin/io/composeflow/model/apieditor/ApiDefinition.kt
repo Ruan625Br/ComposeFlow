@@ -18,7 +18,7 @@ import io.composeflow.model.project.issue.Issue
 import io.composeflow.model.project.issue.NavigatableDestination
 import io.composeflow.model.project.issue.TrackableIssue
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.ktor.http.HttpHeaders
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -37,7 +37,7 @@ data class ApiDefinition(
     val queryParameters: List<Pair<String, ApiProperty>> = emptyList(),
     val exampleJsonResponse: JsonWithJsonPath? = null,
     val authorization: Authorization = Authorization.BasicAuth(),
-    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(FallbackMutableStateListSerializer::class)
     val parameters: MutableList<ApiProperty.StringParameter> = mutableStateListEqualsOverrideOf(),
 ) {
     fun isValid(): Boolean = exampleJsonResponse != null && generateTrackableIssue().isEmpty()

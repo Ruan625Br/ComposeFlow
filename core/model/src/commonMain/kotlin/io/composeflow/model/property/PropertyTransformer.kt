@@ -1,4 +1,5 @@
 package io.composeflow.model.property
+
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
@@ -46,7 +47,7 @@ import io.composeflow.plus
 import io.composeflow.plus_days
 import io.composeflow.plus_months
 import io.composeflow.plus_years
-import io.composeflow.serializer.LocationAwareMutableStateSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.size
 import io.composeflow.sorted
 import io.composeflow.sorted_by
@@ -187,7 +188,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("AddBefore")
         data class AddBefore(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
@@ -245,7 +246,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("AddAfter")
         data class AddAfter(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
@@ -303,7 +304,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("SubstringBefore")
         data class SubstringBefore(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
@@ -362,7 +363,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("SubstringAfter")
         data class SubstringAfter(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToString {
@@ -428,7 +429,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("StringContains")
         data class StringContains(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
@@ -486,7 +487,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("StartsWith")
         data class StartsWith(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
@@ -544,7 +545,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("EndsWith")
         data class EndsWith(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue("")),
         ) : ToBoolean {
@@ -699,7 +700,7 @@ sealed interface FromString : PropertyTransformer {
         @Serializable
         @SerialName("split")
         data class Split(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue(",")),
         ) : ToStringList {
@@ -864,7 +865,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntPlus")
         data class IntPlus(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInt {
@@ -922,7 +923,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntMultipliedBy")
         data class IntMultipliedBy(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInt {
@@ -1020,7 +1021,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntLessThan")
         data class IntLessThan(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
@@ -1078,7 +1079,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntLessThanOrEqualTo")
         data class IntLessThanOrEqualTo(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
@@ -1136,7 +1137,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntEquals")
         data class IntEquals(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
@@ -1194,7 +1195,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntGreaterThanOrEqualTo")
         data class IntGreaterThanOrEqualTo(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
@@ -1252,7 +1253,7 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntGreaterThan")
         data class IntGreaterThan(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
@@ -1310,10 +1311,10 @@ sealed interface FromInt : PropertyTransformer {
         @Serializable
         @SerialName("IntModEqualsTo")
         data class IntModEqualsTo(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val mod: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(2)),
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val equalsTo: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToBoolean {
@@ -1429,7 +1430,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatPlus")
         data class FloatPlus(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToFloat {
@@ -1487,7 +1488,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatMultipliedBy")
         data class FloatMultipliedBy(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToFloat {
@@ -1585,7 +1586,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatLessThan")
         data class FloatLessThan(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
@@ -1643,7 +1644,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatLessThanOrEqualTo")
         data class FloatLessThanOrEqualTo(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
@@ -1701,7 +1702,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatEquals")
         data class FloatEquals(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
@@ -1759,7 +1760,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatGreaterThanOrEqualTo")
         data class FloatGreaterThanOrEqualTo(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
@@ -1817,7 +1818,7 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatGreaterThan")
         data class FloatGreaterThan(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
@@ -1875,10 +1876,10 @@ sealed interface FromFloat : PropertyTransformer {
         @Serializable
         @SerialName("FloatModEqualsTo")
         data class FloatModEqualsTo(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val mod: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(2f)),
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val equalsTo: MutableState<AssignableProperty> =
                 mutableStateOf(FloatProperty.FloatIntrinsicValue(0f)),
         ) : ToBoolean {
@@ -1994,7 +1995,7 @@ sealed interface FromInstant : PropertyTransformer {
         @Serializable
         @SerialName("PlusDay")
         data class PlusDay(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
@@ -2064,7 +2065,7 @@ sealed interface FromInstant : PropertyTransformer {
         @Serializable
         @SerialName("PlusMonth")
         data class PlusMonth(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
@@ -2134,7 +2135,7 @@ sealed interface FromInstant : PropertyTransformer {
         @Serializable
         @SerialName("PlusYear")
         data class PlusYear(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> =
                 mutableStateOf(IntProperty.IntIntrinsicValue(0)),
         ) : ToInstant {
@@ -2211,7 +2212,7 @@ sealed interface FromInstant : PropertyTransformer {
         @Serializable
         @SerialName("FormatAs")
         data class FormatAs(
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val dateTimeFormatter: MutableState<DateTimeFormatter> =
                 mutableStateOf(
                     DateTimeFormatter.YYYY_MM_DD(),
@@ -2330,7 +2331,7 @@ sealed interface FromList : PropertyTransformer {
         @SerialName("Filter")
         data class Filter(
             private val innerType: ComposeFlowType,
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val condition: MutableState<AssignableProperty> = mutableStateOf(BooleanProperty.Empty),
         ) : ToList {
             override fun getAssignableProperties() = listOf(condition.value) + condition.value.getAssignableProperties()
@@ -2457,7 +2458,7 @@ sealed interface FromList : PropertyTransformer {
         @SerialName("SortedBy")
         data class SortedBy(
             private val innerType: ComposeFlowType,
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             private val dataFieldIdToSort: MutableState<DataFieldId> =
                 mutableStateOf(
                     Uuid.random().toString(),
@@ -2539,9 +2540,9 @@ sealed interface FromList : PropertyTransformer {
         @SerialName("Map")
         data class Map(
             private val innerType: ComposeFlowType,
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             private val outputType: MutableState<ComposeFlowType> = mutableStateOf(ComposeFlowType.StringType()),
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignablePropertyValue> =
                 mutableStateOf(
                     AssignablePropertyValue.ForPrimitive(),
@@ -2755,7 +2756,7 @@ sealed interface FromList : PropertyTransformer {
         @SerialName("FromListJoinToString")
         data class JoinToStringValue(
             private val innerType: ComposeFlowType,
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val separator: MutableState<AssignableProperty> =
                 mutableStateOf(StringProperty.StringIntrinsicValue(", ")),
         ) : JoinToString {
@@ -2866,7 +2867,7 @@ sealed interface FromList : PropertyTransformer {
         @SerialName("ListContains")
         data class ListContains(
             private val innerType: ComposeFlowType,
-            @Serializable(LocationAwareMutableStateSerializer::class)
+            @Serializable(MutableStateSerializer::class)
             val value: MutableState<AssignableProperty> = mutableStateOf(innerType.defaultValue()),
         ) : ToBoolean {
             override fun getAssignableProperties() = listOf(value.value) + value.value.getAssignableProperties()

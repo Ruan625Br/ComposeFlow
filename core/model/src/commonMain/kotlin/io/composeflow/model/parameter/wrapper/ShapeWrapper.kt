@@ -1,4 +1,5 @@
 package io.composeflow.model.parameter.wrapper
+
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,9 +9,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
-import io.composeflow.model.parameter.wrapper.LocationAwareShapeWrapperSerializer
+import io.composeflow.serializer.FallbackSealedSerializer
 import io.composeflow.serializer.LocationAwareDpSerializer
-import io.composeflow.serializer.LocationAwareFallbackSealedSerializer
 import io.composeflow.serializer.withLocationAwareExceptions
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.PolymorphicSerializer
@@ -24,7 +24,7 @@ import kotlinx.serialization.modules.polymorphic
 
 object ShapeWrapperSerializer : KSerializer<ShapeWrapper> {
     private val delegate =
-        LocationAwareFallbackSealedSerializer(
+        FallbackSealedSerializer(
             defaultInstance = ShapeWrapper.Rectangle,
             serializer = PolymorphicSerializer(ShapeWrapper::class),
         )

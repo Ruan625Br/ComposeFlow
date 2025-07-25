@@ -76,9 +76,9 @@ import io.composeflow.open_date_picker
 import io.composeflow.open_date_plus_time_picker
 import io.composeflow.open_url
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
-import io.composeflow.serializer.LocationAwareFallbackMutableStateMapSerializer
-import io.composeflow.serializer.LocationAwareMutableStateSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.set_state
 import io.composeflow.show_bottom_sheet
 import io.composeflow.show_nav_drawer
@@ -413,7 +413,7 @@ sealed interface StateAction : Action {
     @SerialName("SetAppStateValue")
     data class SetAppStateValue(
         override val id: String = Uuid.random().toString(),
-        @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+        @Serializable(FallbackMutableStateListSerializer::class)
         val setValueToStates: MutableList<SetValueToState> = mutableStateListEqualsOverrideOf(),
         @Transient
         override val name: String = "Set state",
@@ -1018,7 +1018,7 @@ sealed interface ShowModalWithComponent : ShowModal {
 data class ShowCustomDialog(
     override val id: ActionId = Uuid.random().toString(),
     override val componentId: ComponentId? = null,
-    @Serializable(LocationAwareFallbackMutableStateMapSerializer::class)
+    @Serializable(FallbackMutableStateMapSerializer::class)
     override val paramsMap: MutableMap<ParameterId, AssignableProperty> =
         mutableStateMapOf(),
     @Transient
@@ -1134,7 +1134,7 @@ data class ShowCustomDialog(
 data class ShowBottomSheet(
     override val id: ActionId = Uuid.random().toString(),
     override val componentId: ComponentId? = null,
-    @Serializable(LocationAwareFallbackMutableStateMapSerializer::class)
+    @Serializable(FallbackMutableStateMapSerializer::class)
     override val paramsMap: MutableMap<ParameterId, AssignableProperty> =
         mutableStateMapOf(),
     @Transient
@@ -1514,13 +1514,13 @@ sealed interface DateOrTimePicker : Action {
     @SerialName("OpenDatePicker")
     data class OpenDatePicker(
         override val id: ActionId = Uuid.random().toString(),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var minSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var maxSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var onlyPastDates: MutableState<Boolean> = mutableStateOf(false),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
         @Transient
         override val name: String = "Date picker",
@@ -1696,13 +1696,13 @@ sealed interface DateOrTimePicker : Action {
     @SerialName("OpenDateAndTimePicker")
     data class OpenDateAndTimePicker(
         override val id: ActionId = Uuid.random().toString(),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var minSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var maxSelectableYear: MutableState<AssignableProperty?> = mutableStateOf(null),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var onlyPastDates: MutableState<Boolean> = mutableStateOf(false),
-        @Serializable(LocationAwareMutableStateSerializer::class)
+        @Serializable(MutableStateSerializer::class)
         override var onlyFutureDates: MutableState<Boolean> = mutableStateOf(false),
         @Transient
         override val name: String = "Date+Time picker",

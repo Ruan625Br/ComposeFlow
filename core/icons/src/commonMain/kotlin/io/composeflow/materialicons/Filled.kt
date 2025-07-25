@@ -51,11 +51,11 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-object FilledSerializer : LocationAwareFallbackEnumSerializer<Filled>(Filled::class)
+object FilledSerializer : FallbackEnumSerializer<Filled>(Filled::class)
 
 /**
  * Enum of Filled icons from material-icons-core

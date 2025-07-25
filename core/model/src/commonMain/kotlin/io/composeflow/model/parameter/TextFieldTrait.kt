@@ -42,7 +42,7 @@ import io.composeflow.model.state.WriteableState
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.model.validator.ComposeStateValidator
 import io.composeflow.model.validator.TextFieldValidator
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.tooltip_textfield_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -625,7 +625,7 @@ data class TextFieldTrait(
         }
 }
 
-object TextFieldTypeSerializer : LocationAwareFallbackEnumSerializer<TextFieldType>(
+object TextFieldTypeSerializer : FallbackEnumSerializer<TextFieldType>(
     TextFieldType::class,
 )
 

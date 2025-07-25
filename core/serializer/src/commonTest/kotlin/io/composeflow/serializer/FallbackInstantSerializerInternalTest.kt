@@ -9,10 +9,10 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.time.Instant
 
-class FallbackInstantSerializerTest {
+class FallbackInstantSerializerInternalTest {
     @Serializable
     data class TestData(
-        @Serializable(with = LocationAwareFallbackInstantSerializer::class)
+        @Serializable(with = FallbackInstantSerializer::class)
         val timestamp: Instant,
     )
 

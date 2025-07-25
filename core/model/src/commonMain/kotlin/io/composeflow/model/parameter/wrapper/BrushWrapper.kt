@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.Serializable
 
 val defaultBrushWrapper =
@@ -307,7 +307,7 @@ data class BrushWrapper(
     }
 }
 
-object BrushTypeSerializer : LocationAwareFallbackEnumSerializer<BrushType>(BrushType::class)
+object BrushTypeSerializer : FallbackEnumSerializer<BrushType>(BrushType::class)
 
 @Serializable(BrushTypeSerializer::class)
 enum class BrushType(

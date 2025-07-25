@@ -7,7 +7,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.BooleanProperty
 import io.composeflow.model.type.ComposeFlowType
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -133,9 +133,9 @@ sealed interface ActionNode {
     data class Conditional(
         override val id: ActionNodeId = Uuid.random().toString(),
         val ifCondition: AssignableProperty = BooleanProperty.Empty,
-        @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+        @Serializable(FallbackMutableStateListSerializer::class)
         val trueNodes: MutableList<ActionNode> = mutableStateListOf(),
-        @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+        @Serializable(FallbackMutableStateListSerializer::class)
         val falseNodes: MutableList<ActionNode> = mutableStateListOf(),
     ) : ActionNode {
         override fun isValid(): Boolean {
@@ -283,9 +283,9 @@ sealed interface ActionNode {
     data class Forked(
         override val id: ActionNodeId = Uuid.random().toString(),
         val forkedAction: Action,
-        @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+        @Serializable(FallbackMutableStateListSerializer::class)
         val trueNodes: MutableList<ActionNode> = mutableStateListOf(),
-        @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+        @Serializable(FallbackMutableStateListSerializer::class)
         val falseNodes: MutableList<ActionNode> = mutableStateListOf(),
     ) : ActionNode,
         FocusableActionNode {

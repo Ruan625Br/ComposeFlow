@@ -79,8 +79,8 @@ import io.composeflow.model.state.StateId
 import io.composeflow.model.state.StateResult
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.random
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
-import io.composeflow.serializer.LocationAwareMutableStateSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.serializer.decodeFromStringWithFallback
 import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.adaptive.ProvideDeviceSizeDp
@@ -106,7 +106,7 @@ typealias ScreenId = String
 data class Screen(
     override val id: String = Uuid.random().toString(),
     override val name: String,
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val rootNode: MutableState<ComposeNode> =
         mutableStateOf(
             ComposeNode(
@@ -119,19 +119,19 @@ data class Screen(
     /**
      * If set to true, this Screen is visible in the Navigation.
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val showOnNavigation: MutableState<Boolean> = mutableStateOf(true),
     /**
      * Title in the TopAppBar
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val title: MutableState<String> = mutableStateOf(name),
     /**
      * Displayed label in the Navigation
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val label: MutableState<String> = mutableStateOf(name),
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val icon: MutableState<ImageVectorHolder> =
         mutableStateOf(
             Filled.entries.toTypedArray().random(),
@@ -139,17 +139,17 @@ data class Screen(
     /**
      * The default destination when the app is launched
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val isDefault: MutableState<Boolean> = mutableStateOf(false),
     /**
      * Set to true when this screen is active in the UI Builder
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val isSelected: MutableState<Boolean> = mutableStateOf(false),
     /**
      * ComposeNode that represents the TopAppBar specific to this Screen.
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val topAppBarNode: MutableState<ComposeNode?> =
         mutableStateOf(
             ComposeNode(
@@ -176,21 +176,21 @@ data class Screen(
     /**
      * ComposeNode that represents the TopAppBar specific to this Screen.
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val bottomAppBarNode: MutableState<ComposeNode?> = mutableStateOf(null),
     /**
      * ComposeNode that represents the NavigationDrawer
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val navigationDrawerNode: MutableState<ComposeNode?> =
         mutableStateOf(null),
     /**
      * ComposeNode that represents the FAB
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val fabNode: MutableState<ComposeNode?> =
         mutableStateOf(null),
-    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(FallbackMutableStateListSerializer::class)
     override val parameters: MutableList<ParameterWrapper<*>> = mutableStateListEqualsOverrideOf(),
     private val stateHolderImpl: StateHolderImpl = StateHolderImpl(),
 ) : StateHolder,

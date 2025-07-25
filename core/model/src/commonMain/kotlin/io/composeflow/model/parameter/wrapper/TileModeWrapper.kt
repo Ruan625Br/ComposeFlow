@@ -1,11 +1,11 @@
 package io.composeflow.model.parameter.wrapper
 
 import androidx.compose.ui.graphics.TileMode
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.Serializable
 
 object TileModeWrapperSerializer :
-    LocationAwareFallbackEnumSerializer<TileModeWrapper>(TileModeWrapper::class)
+    FallbackEnumSerializer<TileModeWrapper>(TileModeWrapper::class)
 
 @Serializable(TileModeWrapperSerializer::class)
 enum class TileModeWrapper {

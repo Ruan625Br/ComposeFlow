@@ -9,14 +9,14 @@ import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.Project
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 @SerialName("ComponentHolder")
 data class ComponentHolder(
-    @Serializable(with = LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(with = FallbackMutableStateListSerializer::class)
     val components: MutableList<Component> = mutableStateListEqualsOverrideOf(),
 ) {
     fun generateKoinViewModelModule(project: Project): FileSpecWithDirectory {

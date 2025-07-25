@@ -20,7 +20,7 @@ import kotlinx.serialization.encoding.Encoder
  *  Falls back to the built-in serializer when the MutableStateMap cannot be deserialized.
  */
 @OptIn(ExperimentalSerializationApi::class)
-private class FallbackMutableStateMapSerializer<K, V>(
+private class FallbackMutableStateMapSerializerInternal<K, V>(
     private val keySerializer: KSerializer<K>,
     private val valueSerializer: KSerializer<V>,
 ) : KSerializer<MutableMap<K, V>> {
@@ -49,12 +49,12 @@ private class FallbackMutableStateMapSerializer<K, V>(
  * Location-aware FallbackMutableStateMapSerializer class that can be used in @Serializable annotations.
  * Provides enhanced error reporting with precise location information when state map parsing fails.
  */
-class LocationAwareFallbackMutableStateMapSerializer<K, V>(
+class FallbackMutableStateMapSerializer<K, V>(
     keySerializer: KSerializer<K>,
     valueSerializer: KSerializer<V>,
 ) : KSerializer<MutableMap<K, V>> {
     private val delegate =
-        FallbackMutableStateMapSerializer(
+        FallbackMutableStateMapSerializerInternal(
             keySerializer,
             valueSerializer,
         ).withLocationAwareExceptions()

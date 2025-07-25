@@ -32,7 +32,7 @@ import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.model.type.convertCodeFromType
-import io.composeflow.serializer.LocationAwareFallbackInstantSerializer
+import io.composeflow.serializer.FallbackInstantSerializer
 import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -717,7 +717,7 @@ sealed interface ScreenState<T> : State<T> {
     data class InstantScreenState(
         override val id: StateId = Uuid.random().toString(),
         override var name: String,
-        @Serializable(LocationAwareFallbackInstantSerializer::class)
+        @Serializable(FallbackInstantSerializer::class)
         override val defaultValue: Instant = Clock.System.now(),
         override val userWritable: Boolean = true,
         override val companionNodeId: String? = null,

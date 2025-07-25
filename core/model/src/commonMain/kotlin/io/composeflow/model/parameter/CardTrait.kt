@@ -24,7 +24,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.StringProperty
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.tooltip_card_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -222,7 +222,7 @@ data class CardTrait(
     }
 }
 
-object CardTypeSerializer : LocationAwareFallbackEnumSerializer<CardType>(CardType::class)
+object CardTypeSerializer : FallbackEnumSerializer<CardType>(CardType::class)
 
 @Serializable(CardTypeSerializer::class)
 enum class CardType {

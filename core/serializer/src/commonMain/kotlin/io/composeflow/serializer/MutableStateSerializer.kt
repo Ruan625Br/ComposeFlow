@@ -7,7 +7,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-private class MutableStateSerializer<T>(
+private class MutableStateSerializerInternal<T>(
     private val dataSerializer: KSerializer<T>,
 ) : KSerializer<MutableState<T>> {
     override val descriptor: SerialDescriptor = dataSerializer.descriptor
@@ -24,10 +24,10 @@ private class MutableStateSerializer<T>(
  * Location-aware MutableStateSerializer class that can be used in @Serializable annotations.
  * Provides enhanced error reporting with precise location information when state parsing fails.
  */
-class LocationAwareMutableStateSerializer<T>(
-    private val dataSerializer: KSerializer<T>,
+class MutableStateSerializer<T>(
+    dataSerializer: KSerializer<T>,
 ) : KSerializer<MutableState<T>> {
-    private val delegate = MutableStateSerializer(dataSerializer).withLocationAwareExceptions()
+    private val delegate = MutableStateSerializerInternal(dataSerializer).withLocationAwareExceptions()
 
     override val descriptor: SerialDescriptor = delegate.descriptor
 

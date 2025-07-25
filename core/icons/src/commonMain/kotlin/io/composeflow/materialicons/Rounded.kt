@@ -51,11 +51,11 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.ThumbUp
 import androidx.compose.material.icons.rounded.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-object RoundedSerializer : LocationAwareFallbackEnumSerializer<Rounded>(Rounded::class)
+object RoundedSerializer : FallbackEnumSerializer<Rounded>(Rounded::class)
 
 /**
  * Enum of rounded icons from material-icons-core

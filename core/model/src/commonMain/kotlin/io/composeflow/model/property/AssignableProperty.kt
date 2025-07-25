@@ -73,8 +73,8 @@ import io.composeflow.model.type.emptyDocumentIdType
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.replaceSpaces
 import io.composeflow.selectString
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.serializer.JsonAsStringSerializer
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.propertyeditor.AssignableBooleanPropertyEditor
 import io.composeflow.ui.propertyeditor.AssignableBrushPropertyEditor
@@ -284,7 +284,7 @@ fun AssignableProperty?.mergeProperty(
 @Serializable
 @SerialName("AssignablePropertyBase")
 abstract class AssignablePropertyBase : AssignableProperty {
-    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(FallbackMutableStateListSerializer::class)
     final override val propertyTransformers: MutableList<PropertyTransformer> =
         mutableStateListEqualsOverrideOf()
 
@@ -1999,7 +1999,7 @@ data class FunctionScopeParameterProperty(
 data class ConditionalProperty(
     private val defaultValue: AssignableProperty,
     val ifThen: IfThenBlock = IfThenBlock(thenValue = defaultValue),
-    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(FallbackMutableStateListSerializer::class)
     val elseIfBlocks: MutableList<IfThenBlock> = mutableStateListEqualsOverrideOf(),
     val elseBlock: ElseBlock = ElseBlock(value = defaultValue),
 ) : AssignablePropertyBase(),

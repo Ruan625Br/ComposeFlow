@@ -7,7 +7,7 @@ import io.composeflow.formatter.suppressRedundantVisibilityModifier
 import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.model.project.Project
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import io.composeflow.util.generateUniqueName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,7 +15,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("CustomEnumHolder")
 data class CustomEnumHolder(
-    @Serializable(with = LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(with = FallbackMutableStateListSerializer::class)
     val enumList: MutableList<CustomEnum> = mutableStateListEqualsOverrideOf(),
 ) {
     fun generateEnumFiles(project: Project): List<FileSpecWithDirectory> =

@@ -59,8 +59,8 @@ import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateId
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.serializer.FallbackActionHandlerSerializer
-import io.composeflow.serializer.LocationAwareMutableStateListSerializer
-import io.composeflow.serializer.LocationAwareMutableStateSerializer
+import io.composeflow.serializer.MutableStateListSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.serializer.decodeFromStringWithFallback
 import io.composeflow.serializer.decodeFromYamlNodeWithFallback
 import io.composeflow.serializer.encodeToString
@@ -78,9 +78,9 @@ import kotlin.uuid.Uuid
 @SerialName("ComposeNode")
 data class ComposeNode(
     val id: String = Uuid.random().toString(),
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val trait: MutableState<ComposeTrait> = mutableStateOf(EmptyTrait),
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val label: MutableState<String> = mutableStateOf(trait.value.iconText()),
     /**
      * The level of this node in the tree. The root node's level is 0.
@@ -95,31 +95,31 @@ data class ComposeNode(
      * (e.g. inspect/modify a specific modifier) because Compose doesn't expose a way to access a
      * specific modifier due to its declarative nature.
      */
-    @Serializable(with = LocationAwareMutableStateListSerializer::class)
+    @Serializable(with = MutableStateListSerializer::class)
     val modifierList: MutableList<ModifierWrapper> = mutableStateListEqualsOverrideOf(),
     /**
      * The direct children that belong to this node.
      */
-    @Serializable(with = LocationAwareMutableStateListSerializer::class)
+    @Serializable(with = MutableStateListSerializer::class)
     val children: MutableList<ComposeNode> = mutableStateListEqualsOverrideOf(),
     /**
      * Parameters only used if when this node is a child of any LazyList (such as LazyColumn, LazyRow)
      */
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val lazyListChildParams: MutableState<LazyListChildParams> = mutableStateOf(LazyListChildParams.FixedNumber()),
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val dynamicItems: MutableState<AssignableProperty?> = mutableStateOf(null),
     @Serializable(with = FallbackActionHandlerSerializer::class)
     val actionHandler: ActionHandler = ActionHandlerImpl(),
     val inspectable: Boolean = true,
-    @Serializable(with = LocationAwareMutableStateSerializer::class)
+    @Serializable(with = MutableStateSerializer::class)
     val visibilityParams: MutableState<VisibilityParams> = mutableStateOf(VisibilityParams()),
     /**
      * Updated to true when this node is focused. For example when it's clicked.
      * Intentionally non-Transient meaning it's serialized in the yaml representation.
      * So that information which nodes are focused in visual editor to LLM to give it more context.
      */
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val isFocused: MutableState<Boolean> = mutableStateOf(false),
     /**
      * Updated to true when the mouse cursor is hovered on this node.

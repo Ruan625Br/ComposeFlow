@@ -7,7 +7,7 @@ import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.TypeSpec
 import io.composeflow.asClassName
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.FallbackMutableStateListSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -22,7 +22,7 @@ typealias CustomEnumId = String
 data class CustomEnum(
     val customEnumId: CustomEnumId = Uuid.random().toString(),
     private val name: String,
-    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
+    @Serializable(FallbackMutableStateListSerializer::class)
     val values: MutableList<String> = mutableStateListOf(),
 ) {
     @Transient

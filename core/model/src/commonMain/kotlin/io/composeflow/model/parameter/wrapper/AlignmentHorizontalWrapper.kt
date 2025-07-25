@@ -1,11 +1,11 @@
 package io.composeflow.model.parameter.wrapper
 
 import androidx.compose.ui.Alignment
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import kotlinx.serialization.Serializable
 
 object AlignmentHorizontalWrapperSerializer :
-    LocationAwareFallbackEnumSerializer<AlignmentHorizontalWrapper>(AlignmentHorizontalWrapper::class)
+    FallbackEnumSerializer<AlignmentHorizontalWrapper>(AlignmentHorizontalWrapper::class)
 
 @Serializable(AlignmentHorizontalWrapperSerializer::class)
 enum class AlignmentHorizontalWrapper(

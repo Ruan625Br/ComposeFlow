@@ -7,7 +7,7 @@ import com.squareup.kotlinpoet.FileSpec
 import io.composeflow.model.color.ColorSchemeWrapper
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.serializer.LocationAwareColorSerializer
-import io.composeflow.serializer.LocationAwareMutableStateSerializer
+import io.composeflow.serializer.MutableStateSerializer
 import io.composeflow.ui.common.defaultDarkScheme
 import io.composeflow.ui.common.defaultLightScheme
 import kotlinx.serialization.SerialName
@@ -27,10 +27,10 @@ data class ColorSchemeHolder(
     var paletteStyle: PaletteStyle = PaletteStyle.TonalSpot,
     // Using MutableState so that the color scheme editor screen is aware of any changes of
     // color schemes
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val lightColorScheme: MutableState<ColorSchemeWrapper> =
         mutableStateOf(ColorSchemeWrapper.fromColorScheme(defaultLightScheme)),
-    @Serializable(LocationAwareMutableStateSerializer::class)
+    @Serializable(MutableStateSerializer::class)
     val darkColorScheme: MutableState<ColorSchemeWrapper> =
         mutableStateOf(ColorSchemeWrapper.fromColorScheme(defaultDarkScheme)),
 ) {

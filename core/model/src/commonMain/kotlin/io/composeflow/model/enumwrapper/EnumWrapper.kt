@@ -17,7 +17,7 @@ import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.CodeConvertible
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
+import io.composeflow.serializer.FallbackEnumSerializer
 import io.composeflow.ui.propertyeditor.CustomizedDropdownTextDisplayable
 import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.serialization.SerialName
@@ -56,7 +56,7 @@ enum class TextDecorationWrapper(
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextDecoration"))
 
     object TextDecorationWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<TextDecorationWrapper>(TextDecorationWrapper::class)
+        FallbackEnumSerializer<TextDecorationWrapper>(TextDecorationWrapper::class)
 }
 
 @SerialName("TextStyleWrapper")
@@ -256,7 +256,7 @@ enum class TextStyleWrapper(
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.typography.$styleName", MemberHolder.Material3.MaterialTheme)
 
     object TextStyleWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<TextStyleWrapper>(TextStyleWrapper::class)
+        FallbackEnumSerializer<TextStyleWrapper>(TextStyleWrapper::class)
 }
 
 @SerialName("FontStyleWrapper")
@@ -278,7 +278,7 @@ enum class FontStyleWrapper(
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.font", "FontStyle"))
 
     object FontStyleWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<FontStyleWrapper>(FontStyleWrapper::class)
+        FallbackEnumSerializer<FontStyleWrapper>(FontStyleWrapper::class)
 }
 
 @SerialName("TextAlignWrapper")
@@ -304,7 +304,7 @@ enum class TextAlignWrapper(
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextAlign"))
 
     object TextAlignWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<TextAlignWrapper>(TextAlignWrapper::class)
+        FallbackEnumSerializer<TextAlignWrapper>(TextAlignWrapper::class)
 }
 
 @SerialName("TextOverflowWrapper")
@@ -327,7 +327,7 @@ enum class TextOverflowWrapper(
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.text.style", "TextOverflow"))
 
     object TextOverflowWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<TextOverflowWrapper>(TextOverflowWrapper::class)
+        FallbackEnumSerializer<TextOverflowWrapper>(TextOverflowWrapper::class)
 }
 
 @SerialName("ContentScaleWrapper")
@@ -354,7 +354,7 @@ enum class ContentScaleWrapper(
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("%M.$name", MemberName("androidx.compose.ui.layout", "ContentScale"))
 
     object ContentScaleWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<ContentScaleWrapper>(ContentScaleWrapper::class)
+        FallbackEnumSerializer<ContentScaleWrapper>(ContentScaleWrapper::class)
 }
 
 @SerialName("TextFieldColorsWrapper")
@@ -380,7 +380,7 @@ enum class TextFieldColorsWrapper : EnumWrapper {
         }
 
     object TextFieldColorsWrapperSerializer :
-        LocationAwareFallbackEnumSerializer<TextFieldColorsWrapper>(TextFieldColorsWrapper::class)
+        FallbackEnumSerializer<TextFieldColorsWrapper>(TextFieldColorsWrapper::class)
 }
 
 @SerialName("NodeVisibility")
@@ -415,5 +415,5 @@ enum class NodeVisibility :
     override fun asCodeBlock(): CodeBlock = CodeBlock.of("")
 
     object NodeVisibilitySerializer :
-        LocationAwareFallbackEnumSerializer<NodeVisibility>(NodeVisibility::class)
+        FallbackEnumSerializer<NodeVisibility>(NodeVisibility::class)
 }
