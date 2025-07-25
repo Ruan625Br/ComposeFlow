@@ -1,0 +1,188 @@
+---
+title: AI Assistant
+description: Use the AI Assistant to build UIs with natural language
+sidebar:
+  order: 1
+---
+
+import { Image } from 'astro:assets';
+
+ComposeFlow includes powerful **AI Assistants** that allow you to create and modify user interfaces using natural language. There are two types of AI assistants, each designed for different workflows:
+
+1. **AI Chat Interface** - Modifies and enhances your current project, including screens, app architecture, states, and data types
+2. **AI Screen Creator** - Creates entirely new screens from scratch
+
+Instead of manually dragging and dropping components, you can simply describe what you want to build, and the AI will generate the UI for you.
+
+## Types of AI Assistants
+
+### 1. AI Chat Interface (Project-Wide Modifications)
+
+The **AI Chat Interface** is designed to modify and enhance your current project comprehensively. This assistant works within the context of your entire project and can make changes across different aspects of your application.
+
+<video controls>
+  <source src="/video/ai_assistant_add_nav_drawer.webm" type="video/webm" />
+</video>
+
+**How to Access**:
+- **Keyboard Shortcut**: Press `Cmd + K` (or `Ctrl + K` on Windows/Linux) while in the UI Builder
+- **Toolbar Button**: Click the AI chat button in the left toolbar
+- **Menu**: Navigate to the AI Assistant option in the main menu
+
+**Scope of Modifications**:
+- **Screen-Level Changes**: Modify the currently opened screen's layout and components
+- **App Architecture**: Update app states, navigation flows, and screen relationships
+- **Data Management**: Create and modify data types, app state variables, and data structures
+- **Cross-Screen Features**: Implement functionality that spans multiple screens
+- **Project Configuration**: Adjust themes, settings, and project-wide configurations
+
+**Best For**:
+- Making changes to existing screens and components
+- Creating and managing app states and data types
+- Implementing features that affect multiple parts of your app
+- Refining overall app architecture and data flow
+- Adding project-wide functionality and integrations
+
+### 2. AI Screen Creator (New Screen Generation)
+
+The **AI Screen Creator** creates entirely new screens from scratch based on your description.
+
+<video controls>
+  <source src="/video/ai_assistant_create_screen.webm" type="video/webm" />
+</video>
+
+**How to Access**:
+1. **Navigate to Screens Tab**: Select the screens tab in the left pane
+2. **Add New Screen**: Click the "Add Screen" button  
+3. **Choose AI Creation**: Click the "Create screen with AI" button
+4. **Describe Your Screen**: Enter a natural language description of the screen you want to create
+
+**Best For**:
+- Creating new screens from scratch
+- Generating complete UI layouts
+- Building screens for new features or sections
+- Rapid prototyping of screen concepts
+
+## Getting Started with AI Assistants
+
+### Using the AI Chat Interface (Project-Wide Modifications)
+
+**Workflow**:
+1. **Access AI Chat**: Press `Cmd + K` to open the AI chat interface from anywhere in your project
+2. **Describe Changes**: Tell the AI what you want to modify, create, or enhance across your project
+3. **Review Changes**: The AI will make changes to screens, data structures, or app architecture as needed
+4. **Iterate**: Continue the conversation to refine and expand the changes
+5. **Test Integration**: Verify that changes work correctly across different parts of your app
+
+**Example Prompts for Project Modifications**:
+
+**Screen-Level Changes**:
+- "Add a search bar at the top of this screen"
+- "Make the buttons bigger and change them to blue"
+- "Change the layout to use cards instead of a list"
+
+**App Architecture & Data Management**:
+- "Create a user profile app state with name, email, and avatar fields"
+- "Add a shopping cart data type that can store multiple products"
+- "Create an authentication system with login and logout states"
+- "Set up navigation between the login screen and dashboard"
+
+**Cross-Project Features**:
+- "Implement a dark mode toggle that affects the entire app"
+- "Create a notification system that works across all screens"
+- "Add a user preferences data type and connect it to the settings screen"
+- "Set up a global loading state for API calls"
+
+### Using the AI Screen Creator (New Screen Generation)
+
+**Workflow**:
+1. **Navigate to Screens**: Go to the screens tab in the left pane
+2. **Add New Screen**: Click the "Add Screen" button
+3. **Choose AI Creation**: Click "Create screen with AI"
+4. **Describe Your Screen**: Provide a comprehensive description of the screen you want
+5. **Review Generated Screen**: The AI creates a complete new screen
+6. **Refine if Needed**: Use the AI Chat Interface to make adjustments
+
+**Example Prompts for New Screen Creation**:
+- "Create a login screen with email and password fields, a login button, and forgot password link"
+- "Make a product catalog screen with a grid of products, each showing image, name, and price"
+- "Build a user profile screen with photo, name, bio, and edit button"
+- "Create a settings screen with toggle switches and preference options"
+
+### Context Awareness
+
+The AI Assistant understands your current project context:
+
+- **Existing Components**: References components already in your project
+- **Theme Colors**: Uses your project's color scheme
+- **Screen Structure**: Builds upon your existing screen layouts
+- **Data Types**: Incorporates your defined data models
+
+## Best Practices
+
+### Writing Effective Prompts
+
+#### For AI Chat Interface (Project-Wide Modifications)
+
+**Specify Scope Clearly**: Indicate whether you want screen-level or project-wide changes
+```
+❌ "Add a button"
+✅ "Add a submit button below the password field on this screen"
+✅ "Create a global navigation button that appears on all screens"
+```
+
+**Reference Project Context**: Mention existing elements, data types, or app states
+```
+❌ "Make it better"
+✅ "Update the user profile data type to include a bio field and connect it to the profile screen"
+```
+
+**Be Explicit About Scope**: Clarify if changes should affect one screen or the entire project
+```
+❌ "Change the colors"
+✅ "Update the primary theme color across the entire app"
+✅ "Change the header background color on this screen only"
+```
+
+**Describe Architectural Changes**: When working with app states and data types
+```
+❌ "Add some data"
+✅ "Create a shopping cart app state that tracks items, quantities, and total price across all screens"
+```
+
+#### For AI Screen Creator (New Screen Generation)
+
+**Provide Comprehensive Descriptions**: Include all major elements
+```
+❌ "Make a form"
+✅ "Create a user registration form with name, email, password fields, a submit button, and a link to login"
+```
+
+**Describe Layout and Structure**: Explain how elements should be arranged
+```
+❌ "Add some buttons"  
+✅ "Add three rounded buttons arranged horizontally at the bottom, with icons and labels"
+```
+
+**Include Interaction Patterns**: Mention expected behaviors
+```
+❌ "Make a list"
+✅ "Create a scrollable product list where tapping each item navigates to a detail screen"
+```
+
+### If Results Aren't as Expected
+
+**Be More Specific**: Add more details about your requirements
+**Ask for Modifications**: Request specific changes to the generated UI
+**Start Over**: Sometimes it's easier to begin with a new description
+
+## Integration with Other Features
+
+The AI Assistant works seamlessly with other ComposeFlow features:
+
+- **Theme Editor**: AI-generated UIs use your custom themes
+- **Component Library**: AI can create and reference reusable components
+- **State Management**: AI helps set up app state and data binding
+- **Firebase Integration**: AI can configure database connections and authentication
+
+The AI Assistants transform ComposeFlow into a conversational UI development platform, making it accessible to developers of all skill levels while dramatically speeding up the development process. By understanding when to use each type of assistant, you can maximize your productivity and create better designs more efficiently.
