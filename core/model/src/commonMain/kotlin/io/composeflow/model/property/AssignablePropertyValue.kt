@@ -8,7 +8,7 @@ import io.composeflow.model.datatype.DataTypeId
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.findDataTypeOrNull
 import io.composeflow.model.project.findDataTypeOrThrow
-import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateMapSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -52,7 +52,7 @@ sealed interface AssignablePropertyValue {
     @SerialName("ForDataType")
     data class ForDataType(
         val dataTypeId: DataTypeId,
-        @Serializable(FallbackMutableStateMapSerializer::class)
+        @Serializable(LocationAwareFallbackMutableStateMapSerializer::class)
         val properties: MutableMap<DataFieldId, AssignableProperty> =
             mutableStateMapOf(),
     ) : AssignablePropertyValue {

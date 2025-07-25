@@ -43,7 +43,7 @@ import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.testing.isTest
 import io.composeflow.tooltip_image_trait
 import io.composeflow.ui.CanvasNodeCallbacks
@@ -344,7 +344,8 @@ data class ImageTrait(
 
 const val DEFAULT_URL = "https://picsum.photos/480"
 
-object ImageAssetTypeSerializer : FallbackEnumSerializer<ImageAssetType>(ImageAssetType::class)
+object ImageAssetTypeSerializer :
+    LocationAwareFallbackEnumSerializer<ImageAssetType>(ImageAssetType::class)
 
 @Serializable(ImageAssetTypeSerializer::class)
 enum class ImageAssetType {

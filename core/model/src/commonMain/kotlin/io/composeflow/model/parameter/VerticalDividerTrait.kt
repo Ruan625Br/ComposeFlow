@@ -1,5 +1,4 @@
 package io.composeflow.model.parameter
-
 import DividerVertical
 import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.VerticalDivider
@@ -22,7 +21,7 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.DpSerializer
+import io.composeflow.serializer.LocationAwareDpSerializer
 import io.composeflow.tooltip_vertical_divider_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -34,7 +33,7 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("VerticalDividerTrait")
 data class VerticalDividerTrait(
-    @Serializable(DpSerializer::class)
+    @Serializable(LocationAwareDpSerializer::class)
     override val thickness: Dp? = null,
     override val color: AssignableProperty? = null,
 ) : DividerTrait(thickness, color),

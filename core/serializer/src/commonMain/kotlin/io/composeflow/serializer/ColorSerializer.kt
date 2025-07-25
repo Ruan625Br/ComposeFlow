@@ -9,7 +9,7 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-object ColorSerializer : KSerializer<Color> {
+private object ColorSerializer : KSerializer<Color> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Color", PrimitiveKind.STRING)
 
@@ -73,4 +73,23 @@ fun Color.asAndroidXmlString(): String {
             "#${colorInt.toUInt().toString(16).uppercase().padStart(8, '0')}"
         }
     return colorString
+}
+
+/**
+ * Location-aware ColorSerializer class that can be used in @Serializable annotations.
+ * Provides enhanced error reporting with precise location information when color parsing fails.
+ */
+class LocationAwareColorSerializer : KSerializer<Color> {
+    private val delegate = ColorSerializer.withLocationAwareExceptions()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: Color,
+    ) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): Color = delegate.deserialize(decoder)
 }

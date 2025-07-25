@@ -17,7 +17,7 @@ import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.tooltip_navigation_drawer_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -130,7 +130,7 @@ data class NavigationDrawerTrait(
 }
 
 object NavigationDrawerTypeSerializer :
-    FallbackEnumSerializer<NavigationDrawerType>(NavigationDrawerType::class)
+    LocationAwareFallbackEnumSerializer<NavigationDrawerType>(NavigationDrawerType::class)
 
 @Serializable(NavigationDrawerTypeSerializer::class)
 enum class NavigationDrawerType {

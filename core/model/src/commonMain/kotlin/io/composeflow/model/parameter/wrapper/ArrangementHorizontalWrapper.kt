@@ -1,10 +1,11 @@
 package io.composeflow.model.parameter.wrapper
 
 import androidx.compose.foundation.layout.Arrangement
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import kotlinx.serialization.Serializable
 
-object ArrangementHorizontalWrapperSerializer : FallbackEnumSerializer<ArrangementHorizontalWrapper>(ArrangementHorizontalWrapper::class)
+object ArrangementHorizontalWrapperSerializer :
+    LocationAwareFallbackEnumSerializer<ArrangementHorizontalWrapper>(ArrangementHorizontalWrapper::class)
 
 @Serializable(ArrangementHorizontalWrapperSerializer::class)
 enum class ArrangementHorizontalWrapper(
@@ -16,9 +17,4 @@ enum class ArrangementHorizontalWrapper(
     SpaceEvenly(Arrangement.SpaceEvenly),
     SpaceBetween(Arrangement.SpaceBetween),
     SpaceAround(Arrangement.SpaceAround),
-    ;
-
-    companion object {
-        fun fromArrangement(arrangement: Arrangement.Horizontal?) = entries.firstOrNull { it.arrangement == arrangement } ?: Start
-    }
 }

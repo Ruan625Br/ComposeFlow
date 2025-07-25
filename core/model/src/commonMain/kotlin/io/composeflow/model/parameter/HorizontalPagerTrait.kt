@@ -1,5 +1,4 @@
 package io.composeflow.model.parameter
-
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -42,7 +41,7 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.DpSerializer
+import io.composeflow.serializer.LocationAwareDpSerializer
 import io.composeflow.tooltip_horizontal_pager_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -54,9 +53,9 @@ import org.jetbrains.compose.resources.StringResource
 @Serializable
 @SerialName("HorizontalPagerTrait")
 data class HorizontalPagerTrait(
-    @Serializable(with = DpSerializer::class)
+    @Serializable(with = LocationAwareDpSerializer::class)
     val contentPadding: Dp? = null,
-    @Serializable(with = DpSerializer::class)
+    @Serializable(with = LocationAwareDpSerializer::class)
     val pageSpacing: Dp? = null,
     val reverseLayout: Boolean? = null,
     val snapPositionWrapper: SnapPositionWrapper = SnapPositionWrapper.Start,

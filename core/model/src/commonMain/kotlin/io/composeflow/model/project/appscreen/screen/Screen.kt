@@ -79,8 +79,8 @@ import io.composeflow.model.state.StateId
 import io.composeflow.model.state.StateResult
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.random
-import io.composeflow.serializer.FallbackMutableStateListSerializer
-import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.LocationAwareMutableStateSerializer
 import io.composeflow.serializer.decodeFromStringWithFallback
 import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.adaptive.ProvideDeviceSizeDp
@@ -97,7 +97,6 @@ import io.composeflow.util.toPackageName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.encodeToString
 import kotlin.uuid.Uuid
 
 typealias ScreenId = String
@@ -107,7 +106,7 @@ typealias ScreenId = String
 data class Screen(
     override val id: String = Uuid.random().toString(),
     override val name: String,
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val rootNode: MutableState<ComposeNode> =
         mutableStateOf(
             ComposeNode(
@@ -120,19 +119,19 @@ data class Screen(
     /**
      * If set to true, this Screen is visible in the Navigation.
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val showOnNavigation: MutableState<Boolean> = mutableStateOf(true),
     /**
      * Title in the TopAppBar
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val title: MutableState<String> = mutableStateOf(name),
     /**
      * Displayed label in the Navigation
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val label: MutableState<String> = mutableStateOf(name),
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val icon: MutableState<ImageVectorHolder> =
         mutableStateOf(
             Filled.entries.toTypedArray().random(),
@@ -140,17 +139,17 @@ data class Screen(
     /**
      * The default destination when the app is launched
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val isDefault: MutableState<Boolean> = mutableStateOf(false),
     /**
      * Set to true when this screen is active in the UI Builder
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val isSelected: MutableState<Boolean> = mutableStateOf(false),
     /**
      * ComposeNode that represents the TopAppBar specific to this Screen.
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val topAppBarNode: MutableState<ComposeNode?> =
         mutableStateOf(
             ComposeNode(
@@ -177,21 +176,21 @@ data class Screen(
     /**
      * ComposeNode that represents the TopAppBar specific to this Screen.
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val bottomAppBarNode: MutableState<ComposeNode?> = mutableStateOf(null),
     /**
      * ComposeNode that represents the NavigationDrawer
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val navigationDrawerNode: MutableState<ComposeNode?> =
         mutableStateOf(null),
     /**
      * ComposeNode that represents the FAB
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val fabNode: MutableState<ComposeNode?> =
         mutableStateOf(null),
-    @Serializable(FallbackMutableStateListSerializer::class)
+    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
     override val parameters: MutableList<ParameterWrapper<*>> = mutableStateListEqualsOverrideOf(),
     private val stateHolderImpl: StateHolderImpl = StateHolderImpl(),
 ) : StateHolder,

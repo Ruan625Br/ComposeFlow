@@ -42,7 +42,7 @@ import io.composeflow.model.state.WriteableState
 import io.composeflow.model.type.ComposeFlowType
 import io.composeflow.model.validator.ComposeStateValidator
 import io.composeflow.model.validator.TextFieldValidator
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.tooltip_textfield_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -174,7 +174,7 @@ data class TextFieldTrait(
         val alpha = MemberName("androidx.compose.ui.draw", "alpha")
         label?.let {
             codeBlockBuilder.addStatement(
-                """label = { 
+                """label = {
                 %M(""",
                 text,
             )
@@ -187,8 +187,8 @@ data class TextFieldTrait(
                 ),
             )
             codeBlockBuilder.addStatement(
-                """, 
-                  modifier = %M.%M(0.7f)) 
+                """,
+                  modifier = %M.%M(0.7f))
                 },""",
                 modifier,
                 alpha,
@@ -196,7 +196,7 @@ data class TextFieldTrait(
         }
         placeholder?.let {
             codeBlockBuilder.addStatement(
-                """placeholder = { 
+                """placeholder = {
                 %M(""",
                 text,
             )
@@ -209,8 +209,8 @@ data class TextFieldTrait(
                 ),
             )
             codeBlockBuilder.addStatement(
-                """, 
-                  modifier = %M.%M(0.7f)) 
+                """,
+                  modifier = %M.%M(0.7f))
                 },""",
                 modifier,
                 alpha,
@@ -253,8 +253,8 @@ data class TextFieldTrait(
                     """colors = %M.colors(
                     focusedIndicatorColor = %M.Transparent,
                     unfocusedIndicatorColor = %M.Transparent,
-                    disabledIndicatorColor = %M.Transparent, 
-                    errorIndicatorColor = %M.Transparent, 
+                    disabledIndicatorColor = %M.Transparent,
+                    errorIndicatorColor = %M.Transparent,
                     ),""",
                     TextFieldColorsWrapper.Default.toMemberName(),
                     MemberHolder.AndroidX.Ui.Color,
@@ -625,7 +625,7 @@ data class TextFieldTrait(
         }
 }
 
-object TextFieldTypeSerializer : FallbackEnumSerializer<TextFieldType>(
+object TextFieldTypeSerializer : LocationAwareFallbackEnumSerializer<TextFieldType>(
     TextFieldType::class,
 )
 

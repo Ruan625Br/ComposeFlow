@@ -7,7 +7,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TileMode
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import kotlinx.serialization.Serializable
 
 val defaultBrushWrapper =
@@ -62,6 +62,7 @@ data class BrushWrapper(
                     )
                 }
             }
+
             BrushType.HorizontalGradient -> {
                 if (colorStops != null && colorStops.size == resolvedColors.size) {
                     Brush.horizontalGradient(
@@ -75,6 +76,7 @@ data class BrushWrapper(
                     )
                 }
             }
+
             BrushType.VerticalGradient -> {
                 if (colorStops != null && colorStops.size == resolvedColors.size) {
                     Brush.verticalGradient(
@@ -88,6 +90,7 @@ data class BrushWrapper(
                     )
                 }
             }
+
             BrushType.RadialGradient -> {
                 if (colorStops != null && colorStops.size == resolvedColors.size) {
                     Brush.radialGradient(
@@ -105,6 +108,7 @@ data class BrushWrapper(
                     )
                 }
             }
+
             BrushType.SweepGradient -> {
                 if (colorStops != null && colorStops.size == resolvedColors.size) {
                     Brush.sweepGradient(
@@ -152,15 +156,25 @@ data class BrushWrapper(
                 }
 
                 if (startX != 0f || startY != 0f) {
-                    builder.add(", start = %M(${startX}f, ${startY}f)", MemberName("androidx.compose.ui.geometry", "Offset"))
+                    builder.add(
+                        ", start = %M(${startX}f, ${startY}f)",
+                        MemberName("androidx.compose.ui.geometry", "Offset"),
+                    )
                 }
                 if (endX != Float.POSITIVE_INFINITY || endY != Float.POSITIVE_INFINITY) {
-                    builder.add(", end = %M(${endX}f, ${endY}f)", MemberName("androidx.compose.ui.geometry", "Offset"))
+                    builder.add(
+                        ", end = %M(${endX}f, ${endY}f)",
+                        MemberName("androidx.compose.ui.geometry", "Offset"),
+                    )
                 }
                 if (tileMode != null) {
-                    builder.add(", tileMode = %M.${tileMode.toTileMode()}", MemberName("androidx.compose.ui.graphics", "TileMode"))
+                    builder.add(
+                        ", tileMode = %M.${tileMode.toTileMode()}",
+                        MemberName("androidx.compose.ui.graphics", "TileMode"),
+                    )
                 }
             }
+
             BrushType.HorizontalGradient -> {
                 builder.add("%M.horizontalGradient(", brushMember)
 
@@ -182,9 +196,13 @@ data class BrushWrapper(
                 }
 
                 if (tileMode != null) {
-                    builder.add(", tileMode = %M.${tileMode.toTileMode()}", MemberName("androidx.compose.ui.graphics", "TileMode"))
+                    builder.add(
+                        ", tileMode = %M.${tileMode.toTileMode()}",
+                        MemberName("androidx.compose.ui.graphics", "TileMode"),
+                    )
                 }
             }
+
             BrushType.VerticalGradient -> {
                 builder.add("%M.verticalGradient(", brushMember)
 
@@ -206,9 +224,13 @@ data class BrushWrapper(
                 }
 
                 if (tileMode != null) {
-                    builder.add(", tileMode = %M.${tileMode.toTileMode()}", MemberName("androidx.compose.ui.graphics", "TileMode"))
+                    builder.add(
+                        ", tileMode = %M.${tileMode.toTileMode()}",
+                        MemberName("androidx.compose.ui.graphics", "TileMode"),
+                    )
                 }
             }
+
             BrushType.RadialGradient -> {
                 builder.add("%M.radialGradient(", brushMember)
 
@@ -230,15 +252,22 @@ data class BrushWrapper(
                 }
 
                 if (centerX != 0.5f || centerY != 0.5f) {
-                    builder.add(", center = %M(${centerX}f, ${centerY}f)", MemberName("androidx.compose.ui.geometry", "Offset"))
+                    builder.add(
+                        ", center = %M(${centerX}f, ${centerY}f)",
+                        MemberName("androidx.compose.ui.geometry", "Offset"),
+                    )
                 }
                 if (radius != Float.POSITIVE_INFINITY) {
                     builder.add(", radius = ${radius}f")
                 }
                 if (tileMode != null) {
-                    builder.add(", tileMode = %M.${tileMode.toTileMode()}", MemberName("androidx.compose.ui.graphics", "TileMode"))
+                    builder.add(
+                        ", tileMode = %M.${tileMode.toTileMode()}",
+                        MemberName("androidx.compose.ui.graphics", "TileMode"),
+                    )
                 }
             }
+
             BrushType.SweepGradient -> {
                 builder.add("%M.sweepGradient(", brushMember)
 
@@ -260,7 +289,10 @@ data class BrushWrapper(
                 }
 
                 if (centerX != 0.5f || centerY != 0.5f) {
-                    builder.add(", center = %M(${centerX}f, ${centerY}f)", MemberName("androidx.compose.ui.geometry", "Offset"))
+                    builder.add(
+                        ", center = %M(${centerX}f, ${centerY}f)",
+                        MemberName("androidx.compose.ui.geometry", "Offset"),
+                    )
                 }
             }
         }
@@ -275,7 +307,7 @@ data class BrushWrapper(
     }
 }
 
-object BrushTypeSerializer : FallbackEnumSerializer<BrushType>(BrushType::class)
+object BrushTypeSerializer : LocationAwareFallbackEnumSerializer<BrushType>(BrushType::class)
 
 @Serializable(BrushTypeSerializer::class)
 enum class BrushType(

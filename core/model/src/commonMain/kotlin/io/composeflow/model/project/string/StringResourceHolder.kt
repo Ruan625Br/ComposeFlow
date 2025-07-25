@@ -3,8 +3,8 @@ package io.composeflow.model.project.string
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.MutableStateListSerializer
-import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.serializer.LocationAwareMutableStateListSerializer
+import io.composeflow.serializer.LocationAwareMutableStateSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -23,12 +23,15 @@ private fun String.escapeXml(): String =
 @Serializable
 @SerialName("StringResourceHolder")
 data class StringResourceHolder(
-    @Serializable(with = MutableStateListSerializer::class)
+    @Serializable(with = LocationAwareMutableStateListSerializer::class)
     val stringResources: MutableList<StringResource> = mutableStateListEqualsOverrideOf(),
-    @Serializable(MutableStateSerializer::class)
+    @Serializable(LocationAwareMutableStateSerializer::class)
     val defaultLocale: MutableState<StringResource.Locale> = mutableStateOf(StringResource.Locale("en")),
-    @Serializable(with = MutableStateListSerializer::class)
-    val supportedLocales: MutableList<StringResource.Locale> = mutableStateListEqualsOverrideOf(defaultLocale.value),
+    @Serializable(with = LocationAwareMutableStateListSerializer::class)
+    val supportedLocales: MutableList<StringResource.Locale> =
+        mutableStateListEqualsOverrideOf(
+            defaultLocale.value,
+        ),
 ) {
     /**
      * Generates strings.xml content for each supported locale.

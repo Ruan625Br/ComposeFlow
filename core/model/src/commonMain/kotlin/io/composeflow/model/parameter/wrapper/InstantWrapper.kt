@@ -5,7 +5,6 @@ package io.composeflow.model.parameter.wrapper
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.asClassName
-import io.composeflow.serializer.FallbackInstantSerializer
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -17,7 +16,7 @@ import kotlin.time.Instant
 
 @Serializable
 data class InstantWrapper(
-    @Serializable(FallbackInstantSerializer::class)
+    @Serializable(LocationAwareShapeWrapperSerializer::class)
     val instant: Instant? = null,
 ) {
     @Transient
@@ -41,7 +40,8 @@ data class InstantWrapper(
     fun asString(): String {
         // TODO: Other candidates
         return instant?.let {
-            val kotlinxInstant = kotlinx.datetime.Instant.fromEpochMilliseconds(it.toEpochMilliseconds())
+            val kotlinxInstant =
+                kotlinx.datetime.Instant.fromEpochMilliseconds(it.toEpochMilliseconds())
             kotlinxInstant.format(dateFormat)
         } ?: ""
     }

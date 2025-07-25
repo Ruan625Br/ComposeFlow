@@ -55,8 +55,8 @@ import io.composeflow.model.project.issue.Issue
 import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.BrushProperty
 import io.composeflow.model.property.ColorProperty
-import io.composeflow.serializer.DpNonNegativeSerializer
-import io.composeflow.serializer.DpSerializer
+import io.composeflow.serializer.LocationAwareDpNonNegativeSerializer
+import io.composeflow.serializer.LocationAwareDpSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -160,7 +160,8 @@ sealed class ModifierWrapper(
         override fun toModifier(): Modifier =
             Modifier.composed {
                 // Check if we have a brush first
-                val resolvedBrush = (brushWrapper as? BrushProperty.BrushIntrinsicValue)?.value?.getBrush()
+                val resolvedBrush =
+                    (brushWrapper as? BrushProperty.BrushIntrinsicValue)?.value?.getBrush()
 
                 if (resolvedBrush != null) {
                     Modifier.background(
@@ -235,7 +236,7 @@ sealed class ModifierWrapper(
     @Serializable
     @SerialName("Border")
     data class Border(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val width: Dp,
         val colorWrapper: AssignableProperty =
             ColorProperty.ColorIntrinsicValue(
@@ -333,7 +334,7 @@ a color and a shape and clip it"""
     @Serializable
     @SerialName("Height")
     data class Height(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val height: Dp,
     ) : ModifierWrapper() {
         override fun toModifier(): Modifier = Modifier.height(height = height)
@@ -452,9 +453,9 @@ a color and a shape and clip it"""
     @Serializable
     @SerialName("Offset")
     data class Offset(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val x: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val y: Dp = 0.dp,
     ) : ModifierWrapper() {
         override fun toModifier(): Modifier = Modifier.offset(x = x, y = y)
@@ -487,13 +488,13 @@ a color and a shape and clip it"""
     @Serializable
     @SerialName("Padding")
     data class Padding(
-        @Serializable(with = DpNonNegativeSerializer::class)
+        @Serializable(with = LocationAwareDpNonNegativeSerializer::class)
         val start: Dp = 0.dp,
-        @Serializable(with = DpNonNegativeSerializer::class)
+        @Serializable(with = LocationAwareDpNonNegativeSerializer::class)
         val top: Dp = 0.dp,
-        @Serializable(with = DpNonNegativeSerializer::class)
+        @Serializable(with = LocationAwareDpNonNegativeSerializer::class)
         val end: Dp = 0.dp,
-        @Serializable(with = DpNonNegativeSerializer::class)
+        @Serializable(with = LocationAwareDpNonNegativeSerializer::class)
         val bottom: Dp = 0.dp,
     ) : ModifierWrapper() {
         constructor(all: Dp) : this(start = all, top = all, end = all, bottom = all)
@@ -680,7 +681,7 @@ scale factors along the horizontal and vertical axis respectively"""
     @Serializable
     @SerialName("Shadow")
     data class Shadow(
-        @Serializable(DpSerializer::class)
+        @Serializable(LocationAwareDpSerializer::class)
         val elevation: Dp = 0.dp,
         val shapeWrapper: ShapeWrapper = ShapeWrapper.Rectangle,
     ) : ModifierWrapper() {
@@ -713,9 +714,9 @@ scale factors along the horizontal and vertical axis respectively"""
     @Serializable
     @SerialName("Size")
     data class Size(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val width: Dp = Dp.Unspecified,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val height: Dp = Dp.Unspecified,
     ) : ModifierWrapper() {
         constructor(size: Dp) : this(width = size, height = size)
@@ -818,7 +819,7 @@ scale factors along the horizontal and vertical axis respectively"""
     @Serializable
     @SerialName("Width")
     data class Width(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         val width: Dp,
     ) : ModifierWrapper() {
         override fun toModifier(): Modifier = Modifier.width(width = width)

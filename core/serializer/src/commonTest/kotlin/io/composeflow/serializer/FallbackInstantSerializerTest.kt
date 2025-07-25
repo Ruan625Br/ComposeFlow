@@ -12,7 +12,7 @@ import kotlin.time.Instant
 class FallbackInstantSerializerTest {
     @Serializable
     data class TestData(
-        @Serializable(with = FallbackInstantSerializer::class)
+        @Serializable(with = LocationAwareFallbackInstantSerializer::class)
         val timestamp: Instant,
     )
 
@@ -50,7 +50,8 @@ class FallbackInstantSerializerTest {
 
     @Test
     fun roundTripSerialization_validInstant_shouldMatchOriginal() {
-        val original = TestData(timestamp = Instant.fromEpochSeconds(1640995200)) // 2022-01-01T00:00:00Z
+        val original =
+            TestData(timestamp = Instant.fromEpochSeconds(1640995200)) // 2022-01-01T00:00:00Z
         val jsonString = json.encodeToString(original)
         val decoded = json.decodeFromString<TestData>(jsonString)
 

@@ -72,8 +72,8 @@ import io.composeflow.model.state.StateId
 import io.composeflow.model.state.StateResult
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.remove_component
-import io.composeflow.serializer.FallbackMutableStateListSerializer
-import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.LocationAwareMutableStateSerializer
 import io.composeflow.tooltip_component_trait
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
@@ -106,12 +106,12 @@ const val COMPONENT_KEY_NAME = "componentKey"
 data class Component(
     override val id: ComponentId = Uuid.random().toString(),
     override val name: String,
-    @Serializable(MutableStateSerializer::class)
+    @Serializable(LocationAwareMutableStateSerializer::class)
     val componentRoot: MutableState<ComposeNode> =
         mutableStateOf(
             ComposeNode(),
         ),
-    @Serializable(FallbackMutableStateListSerializer::class)
+    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
     override val parameters: MutableList<ParameterWrapper<*>> = mutableStateListEqualsOverrideOf(),
     private val stateHolderImpl: StateHolderImpl = StateHolderImpl(),
 ) : PaletteDraggable,

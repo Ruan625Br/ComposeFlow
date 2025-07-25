@@ -14,7 +14,7 @@ import io.composeflow.formatter.suppressRedundantVisibilityModifier
 import io.composeflow.kotlinpoet.MemberHolder
 import io.composeflow.model.enumwrapper.TextStyleWrapper
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
-import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateMapSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -32,7 +32,7 @@ fun FontHolder.copyContents(args: FontHolder) {
 @Serializable
 @SerialName("FontHolder")
 data class FontHolder(
-    @Serializable(FallbackMutableStateMapSerializer::class)
+    @Serializable(LocationAwareFallbackMutableStateMapSerializer::class)
     val textStyleOverrides: TextStyleOverrides = mutableStateMapOf(),
     // Intentionally var so that overwriting them are easy
     var primaryFontFamily: FontFamilyWrapper = defaultFontFamily,

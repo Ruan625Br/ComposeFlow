@@ -33,7 +33,7 @@ import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.property.StringProperty
 import io.composeflow.model.property.asBooleanValue
 import io.composeflow.model.type.ComposeFlowType
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.tooltip_button_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -353,5 +353,5 @@ enum class ButtonType {
 
     abstract fun toMemberName(): MemberName
 
-    object Serializer : FallbackEnumSerializer<ButtonType>(ButtonType::class)
+    object Serializer : LocationAwareFallbackEnumSerializer<ButtonType>(ButtonType::class)
 }

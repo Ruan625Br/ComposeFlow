@@ -301,82 +301,105 @@ class LlmRepository(
                 estimatedSize += toolArg.composeNodeYaml.length
                 estimatedSize += 20 // indexToDrop
             }
+
             is ToolArgs.RemoveComposeNodeArgs -> {
                 estimatedSize += toolArg.composeNodeId.length
             }
+
             is ToolArgs.AddModifierArgs -> {
                 estimatedSize += toolArg.composeNodeId.length
                 estimatedSize += toolArg.modifierYaml.length
             }
+
             is ToolArgs.UpdateModifierArgs -> {
                 estimatedSize += toolArg.composeNodeId.length
                 estimatedSize += toolArg.modifierYaml.length
                 estimatedSize += 20 // index
             }
+
             is ToolArgs.RemoveModifierArgs -> {
                 estimatedSize += toolArg.composeNodeId.length
                 estimatedSize += 20 // index
             }
+
             is ToolArgs.SwapModifiersArgs -> {
                 estimatedSize += toolArg.composeNodeId.length
                 estimatedSize += 40 // fromIndex + toIndex
             }
+
             is ToolArgs.MoveComposeNodeToContainerArgs -> {
                 estimatedSize += toolArg.composeNodeId.length
                 estimatedSize += toolArg.containerNodeId.length
                 estimatedSize += 20 // index
             }
+
             is ToolArgs.AddAppStateArgs -> {
                 estimatedSize += toolArg.appStateYaml.length
             }
+
             is ToolArgs.DeleteAppStateArgs -> {
                 estimatedSize += toolArg.appStateId.length
             }
+
             is ToolArgs.UpdateAppStateArgs -> {
                 estimatedSize += toolArg.appStateYaml.length
             }
+
             is ToolArgs.UpdateCustomDataTypeListDefaultValuesArgs -> {
                 estimatedSize += toolArg.appStateId.length
                 estimatedSize += toolArg.defaultValuesYaml.length
             }
+
             is ToolArgs.GetAppStateArgs -> {
                 estimatedSize += toolArg.appStateId.length
             }
+
             is ToolArgs.AddDataTypeArgs -> {
                 estimatedSize += toolArg.dataTypeYaml.length
             }
+
             is ToolArgs.DeleteDataTypeArgs -> {
                 estimatedSize += toolArg.dataTypeId.length
             }
+
             is ToolArgs.UpdateDataTypeArgs -> {
                 estimatedSize += toolArg.dataTypeYaml.length
             }
+
             is ToolArgs.AddDataFieldArgs -> {
                 estimatedSize += toolArg.dataTypeId.length
                 estimatedSize += toolArg.dataFieldYaml.length
             }
+
             is ToolArgs.DeleteDataFieldArgs -> {
                 estimatedSize += toolArg.dataTypeId.length
                 estimatedSize += toolArg.dataFieldId.length
             }
+
             is ToolArgs.AddCustomEnumArgs -> {
                 estimatedSize += toolArg.customEnumYaml.length
             }
+
             is ToolArgs.DeleteCustomEnumArgs -> {
                 estimatedSize += toolArg.customEnumId.length
             }
+
             is ToolArgs.UpdateCustomEnumArgs -> {
                 estimatedSize += toolArg.customEnumYaml.length
             }
+
             is ToolArgs.GetDataTypeArgs -> {
                 estimatedSize += toolArg.dataTypeId.length
             }
+
             is ToolArgs.GetCustomEnumArgs -> {
                 estimatedSize += toolArg.customEnumId.length
             }
+
             is ToolArgs.GetScreenDetailsArgs -> {
                 estimatedSize += toolArg.screenId.length
             }
+
             is ToolArgs.ListAppStatesArgs,
             is ToolArgs.ListDataTypesArgs,
             is ToolArgs.ListCustomEnumsArgs,
@@ -385,6 +408,7 @@ class LlmRepository(
                 // These have minimal content but potentially large results
                 estimatedSize += 50
             }
+
             is ToolArgs.FakeArgs -> {
                 estimatedSize += toolArg.fakeString.length
             }

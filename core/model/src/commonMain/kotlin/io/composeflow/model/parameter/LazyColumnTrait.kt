@@ -1,5 +1,4 @@
 package io.composeflow.model.parameter
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyColumn
@@ -28,7 +27,7 @@ import io.composeflow.model.parameter.wrapper.ArrangementVerticalWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.DpSerializer
+import io.composeflow.serializer.LocationAwareDpSerializer
 import io.composeflow.tooltip_lazy_column_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -40,7 +39,7 @@ import org.jetbrains.compose.resources.StringResource
 @SerialName("LazyColumnTrait")
 @Serializable
 data class LazyColumnTrait(
-    @Serializable(with = DpSerializer::class)
+    @Serializable(with = LocationAwareDpSerializer::class)
     val contentPadding: Dp? = null,
     val reverseLayout: Boolean? = null,
     val verticalArrangement: ArrangementVerticalWrapper? = null,

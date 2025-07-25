@@ -2077,11 +2077,11 @@ import androidx.compose.material.icons.outlined.ZoomInMap
 import androidx.compose.material.icons.outlined.ZoomOut
 import androidx.compose.material.icons.outlined.ZoomOutMap
 import androidx.compose.ui.graphics.vector.ImageVector
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-object OutlinedSerializer : FallbackEnumSerializer<Outlined>(Outlined::class)
+object OutlinedSerializer : LocationAwareFallbackEnumSerializer<Outlined>(Outlined::class)
 
 /**
  * Enum of Outlined icons from material-icons-core and material-icons-extended libraries.

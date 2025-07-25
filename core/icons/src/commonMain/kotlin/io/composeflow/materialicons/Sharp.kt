@@ -51,11 +51,11 @@ import androidx.compose.material.icons.sharp.Star
 import androidx.compose.material.icons.sharp.ThumbUp
 import androidx.compose.material.icons.sharp.Warning
 import androidx.compose.ui.graphics.vector.ImageVector
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
-object SharpSerializer : FallbackEnumSerializer<Sharp>(Sharp::class)
+object SharpSerializer : LocationAwareFallbackEnumSerializer<Sharp>(Sharp::class)
 
 /**
  * Enum of Sharp icons from material-icons-core and material-icons-extended libraries

@@ -1,5 +1,4 @@
 package io.composeflow.model.parameter.wrapper
-
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,8 +8,10 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
-import io.composeflow.serializer.DpSerializer
-import io.composeflow.serializer.FallbackSealedSerializer
+import io.composeflow.model.parameter.wrapper.LocationAwareShapeWrapperSerializer
+import io.composeflow.serializer.LocationAwareDpSerializer
+import io.composeflow.serializer.LocationAwareFallbackSealedSerializer
+import io.composeflow.serializer.withLocationAwareExceptions
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.PolymorphicSerializer
 import kotlinx.serialization.SerialName
@@ -23,7 +24,7 @@ import kotlinx.serialization.modules.polymorphic
 
 object ShapeWrapperSerializer : KSerializer<ShapeWrapper> {
     private val delegate =
-        FallbackSealedSerializer(
+        LocationAwareFallbackSealedSerializer(
             defaultInstance = ShapeWrapper.Rectangle,
             serializer = PolymorphicSerializer(ShapeWrapper::class),
         )
@@ -39,6 +40,25 @@ object ShapeWrapperSerializer : KSerializer<ShapeWrapper> {
     ) = delegate.serialize(encoder, value)
 }
 
+/**
+ * Location-aware ShapeWrapperSerializer that provides enhanced error reporting with precise location information
+ * when shape parsing fails. This helps with debugging YAML files containing invalid shape definitions.
+ */
+class LocationAwareShapeWrapperSerializer : KSerializer<ShapeWrapper> {
+    private val delegate = ShapeWrapperSerializer.withLocationAwareExceptions()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ShapeWrapper,
+    ) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): ShapeWrapper = delegate.deserialize(decoder)
+}
+
 val shapeWrapperModule =
     SerializersModule {
         polymorphic(ShapeWrapper::class) {
@@ -52,7 +72,7 @@ val shapeWrapperModule =
 /**
  * The wrapper class for [Shape].
  */
-@Serializable(ShapeWrapperSerializer::class)
+@Serializable(LocationAwareShapeWrapperSerializer::class)
 sealed interface ShapeWrapper {
     @Serializable
     @SerialName("Rectangle")
@@ -81,13 +101,13 @@ sealed interface ShapeWrapper {
     @Serializable
     @SerialName("RoundedCorner")
     data class RoundedCorner(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val topStart: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val topEnd: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val bottomEnd: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val bottomStart: Dp = 0.dp,
     ) : ShapeWrapper,
         CornerValueHolder {
@@ -131,13 +151,13 @@ sealed interface ShapeWrapper {
     @Serializable
     @SerialName("CutCorner")
     data class CutCorner(
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val topStart: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val topEnd: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val bottomEnd: Dp = 0.dp,
-        @Serializable(with = DpSerializer::class)
+        @Serializable(with = LocationAwareDpSerializer::class)
         override val bottomStart: Dp = 0.dp,
     ) : ShapeWrapper,
         CornerValueHolder {

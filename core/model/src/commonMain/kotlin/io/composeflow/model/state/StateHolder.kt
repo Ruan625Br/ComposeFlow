@@ -3,7 +3,7 @@ package io.composeflow.model.state
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.MutableStateListSerializer
+import io.composeflow.serializer.LocationAwareMutableStateListSerializer
 import io.composeflow.util.generateUniqueName
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -49,7 +49,7 @@ interface StateHolder {
 @Serializable
 @SerialName("StateHolderImpl")
 data class StateHolderImpl(
-    @Serializable(MutableStateListSerializer::class)
+    @Serializable(LocationAwareMutableStateListSerializer::class)
     val states: MutableList<ReadableState> = mutableStateListEqualsOverrideOf(),
 ) : StateHolder {
     init {

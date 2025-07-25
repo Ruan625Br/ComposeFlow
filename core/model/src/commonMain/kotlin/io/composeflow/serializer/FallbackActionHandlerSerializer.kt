@@ -57,3 +57,22 @@ object FallbackActionHandlerSerializer : KSerializer<ActionHandler> {
             ActionHandlerImpl()
         }
 }
+
+/**
+ * Location-aware FallbackActionHandlerSerializer class that can be used in @Serializable annotations.
+ * Provides enhanced error reporting with precise location information when ActionHandler parsing fails.
+ */
+class LocationAwareFallbackActionHandlerSerializer : KSerializer<ActionHandler> {
+    private val delegate = FallbackActionHandlerSerializer.withLocationAwareExceptions()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: ActionHandler,
+    ) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): ActionHandler = delegate.deserialize(decoder)
+}

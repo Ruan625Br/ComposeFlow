@@ -33,7 +33,7 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.type.ComposeFlowType
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.tooltip_fab_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -326,7 +326,7 @@ data class FabTrait(
     }
 }
 
-object FabElevationWrapperSerializer : FallbackEnumSerializer<FabElevationWrapper>(
+object FabElevationWrapperSerializer : LocationAwareFallbackEnumSerializer<FabElevationWrapper>(
     FabElevationWrapper::class,
 )
 
@@ -336,7 +336,7 @@ enum class FabElevationWrapper {
     Lowered,
 }
 
-object FabPositionWrapperSerializer : FallbackEnumSerializer<FabPositionWrapper>(
+object FabPositionWrapperSerializer : LocationAwareFallbackEnumSerializer<FabPositionWrapper>(
     FabPositionWrapper::class,
 )
 
@@ -346,7 +346,7 @@ enum class FabPositionWrapper {
     Center,
 }
 
-object FabTypeSerializer : FallbackEnumSerializer<FabType>(FabType::class)
+object FabTypeSerializer : LocationAwareFallbackEnumSerializer<FabType>(FabType::class)
 
 @Serializable(FabTypeSerializer::class)
 enum class FabType {

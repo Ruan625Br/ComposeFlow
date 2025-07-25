@@ -4,7 +4,7 @@ import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.graphics.Color
 import com.squareup.kotlinpoet.PropertySpec
 import io.composeflow.kotlinpoet.ClassHolder
-import io.composeflow.serializer.ColorSerializer
+import io.composeflow.serializer.LocationAwareColorSerializer
 import io.composeflow.serializer.asString
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -15,77 +15,77 @@ import kotlinx.serialization.Serializable
 @Serializable
 @SerialName("ColorSchemeWrapper")
 data class ColorSchemeWrapper(
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val primary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onPrimary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val primaryContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onPrimaryContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val inversePrimary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val secondary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onSecondary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val secondaryContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onSecondaryContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val tertiary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onTertiary: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val tertiaryContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onTertiaryContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val background: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onBackground: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surface: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onSurface: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceVariant: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onSurfaceVariant: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceTint: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val inverseSurface: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val inverseOnSurface: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val error: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onError: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val errorContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val onErrorContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val outline: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val outlineVariant: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val scrim: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceBright: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceDim: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceContainer: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceContainerHigh: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceContainerHighest: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceContainerLow: Color,
-    @Serializable(ColorSerializer::class)
+    @Serializable(LocationAwareColorSerializer::class)
     val surfaceContainerLowest: Color,
 ) {
     fun toColorScheme(): ColorScheme =

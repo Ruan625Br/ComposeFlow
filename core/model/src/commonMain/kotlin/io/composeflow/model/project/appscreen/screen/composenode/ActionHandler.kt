@@ -6,8 +6,8 @@ import io.composeflow.model.action.ActionNode
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.parameter.TextFieldTrait
 import io.composeflow.model.project.Project
-import io.composeflow.serializer.FallbackMutableStateListSerializer
-import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateMapSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -31,10 +31,10 @@ sealed interface ActionHandler {
 @Serializable
 @SerialName("ActionHandlerImpl")
 class ActionHandlerImpl : ActionHandler {
-    @Serializable(with = FallbackMutableStateMapSerializer::class)
+    @Serializable(with = LocationAwareFallbackMutableStateMapSerializer::class)
     override var actionsMap: MutableMap<
         ActionType,
-        @Serializable(with = FallbackMutableStateListSerializer::class)
+        @Serializable(with = LocationAwareFallbackMutableStateListSerializer::class)
         MutableList<ActionNode>,
     > = mutableStateMapOf()
 

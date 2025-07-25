@@ -1,5 +1,4 @@
 package io.composeflow.model.parameter.lazylist
-
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
@@ -8,7 +7,7 @@ import androidx.compose.ui.unit.dp
 import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.kotlinpoet.ClassHolder
 import io.composeflow.kotlinpoet.MemberHolder
-import io.composeflow.serializer.DpSerializer
+import io.composeflow.serializer.LocationAwareDpSerializer
 import io.composeflow.ui.propertyeditor.DropdownItem
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -23,7 +22,7 @@ sealed interface LazyGridCells : DropdownItem {
     @Serializable
     @SerialName("Adaptive")
     data class Adaptive(
-        @Serializable(DpSerializer::class)
+        @Serializable(LocationAwareDpSerializer::class)
         val minSize: Dp = 100.dp,
     ) : LazyGridCells {
         @Composable
@@ -63,7 +62,7 @@ sealed interface LazyGridCells : DropdownItem {
     @Serializable
     @SerialName("FixedSize")
     data class FixedSize(
-        @Serializable(DpSerializer::class)
+        @Serializable(LocationAwareDpSerializer::class)
         val size: Dp = 100.dp,
     ) : LazyGridCells {
         @Composable

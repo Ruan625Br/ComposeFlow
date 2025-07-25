@@ -39,8 +39,8 @@ import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.issue.NavigatableDestination
 import io.composeflow.model.state.AppState
 import io.composeflow.override.mutableStateListEqualsOverrideOf
-import io.composeflow.serializer.MutableStateListSerializer
-import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.serializer.LocationAwareMutableStateListSerializer
+import io.composeflow.serializer.LocationAwareMutableStateSerializer
 import io.composeflow.util.generateUniqueName
 import io.composeflow.util.toKotlinFileName
 import kotlinx.serialization.SerialName
@@ -56,7 +56,7 @@ val screenRouteClass = ClassName(packageName = "", SCREEN_ROUTE)
 @Serializable
 @SerialName("ScreenHolder")
 data class ScreenHolder(
-    @Serializable(with = MutableStateListSerializer::class)
+    @Serializable(with = LocationAwareMutableStateListSerializer::class)
     val screens: MutableList<Screen> =
         mutableStateListEqualsOverrideOf(
             Screen(
@@ -69,9 +69,9 @@ data class ScreenHolder(
     /**
      * Set to true if the Navigation should be visible
      */
-    @Serializable(with = MutableStateSerializer::class)
+    @Serializable(with = LocationAwareMutableStateSerializer::class)
     val showNavigation: MutableState<Boolean> = mutableStateOf(true),
-    @Serializable(MutableStateSerializer::class)
+    @Serializable(LocationAwareMutableStateSerializer::class)
     val loginScreenId: MutableState<ScreenId?> =
         mutableStateOf(
             null,
@@ -79,7 +79,7 @@ data class ScreenHolder(
     var pendingDestination: NavigatableDestination? = null,
     var pendingDestinationContext: DestinationContext? = null,
 ) {
-    @Serializable(MutableStateSerializer::class)
+    @Serializable(LocationAwareMutableStateSerializer::class)
     val editedComponent = mutableStateOf<Component?>(null)
 
     fun currentEditable(): CanvasEditable = editedComponent.value ?: currentScreen()

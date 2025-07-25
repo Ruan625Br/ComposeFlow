@@ -20,7 +20,7 @@ import kotlinx.serialization.encoding.Encoder
  *  Falls back to the built-in serializer when the MutableStateMap cannot be deserialized.
  */
 @OptIn(ExperimentalSerializationApi::class)
-class FallbackMutableStateMapSerializer<K, V>(
+private class FallbackMutableStateMapSerializer<K, V>(
     private val keySerializer: KSerializer<K>,
     private val valueSerializer: KSerializer<V>,
 ) : KSerializer<MutableMap<K, V>> {
@@ -36,9 +36,37 @@ class FallbackMutableStateMapSerializer<K, V>(
 
     override fun deserialize(decoder: Decoder): MutableMap<K, V> =
         try {
-            MapSerializer(keySerializer, valueSerializer).deserialize(decoder).toMutableStateMapEqualsOverride()
+            MapSerializer(keySerializer, valueSerializer)
+                .deserialize(decoder)
+                .toMutableStateMapEqualsOverride()
         } catch (e: SerializationException) {
             Logger.e { "Failed to deserialize map: ${e.message}, returning empty map" }
             mapOf<K, V>().toMutableStateMapEqualsOverride()
         }
+}
+
+/**
+ * Location-aware FallbackMutableStateMapSerializer class that can be used in @Serializable annotations.
+ * Provides enhanced error reporting with precise location information when state map parsing fails.
+ */
+class LocationAwareFallbackMutableStateMapSerializer<K, V>(
+    keySerializer: KSerializer<K>,
+    valueSerializer: KSerializer<V>,
+) : KSerializer<MutableMap<K, V>> {
+    private val delegate =
+        FallbackMutableStateMapSerializer(
+            keySerializer,
+            valueSerializer,
+        ).withLocationAwareExceptions()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: MutableMap<K, V>,
+    ) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): MutableMap<K, V> = delegate.deserialize(decoder)
 }

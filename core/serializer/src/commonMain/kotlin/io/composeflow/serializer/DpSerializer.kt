@@ -15,11 +15,12 @@ import kotlinx.serialization.json.jsonPrimitive
 
 private const val UNSPECIFIED_KEYWORD = "unspecified"
 
-object DpNonNegativeSerializer : KSerializer<Dp> by InternalDpSerializer(allowNegative = false)
+object DpNonNegativeSerializer :
+    KSerializer<Dp> by InternalDpSerializer(allowNegative = false)
 
 object DpSerializer : KSerializer<Dp> by InternalDpSerializer(allowNegative = true)
 
-data class InternalDpSerializer(
+private data class InternalDpSerializer(
     val allowNegative: Boolean = true,
 ) : KSerializer<Dp> {
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("Dp", PrimitiveKind.FLOAT)
@@ -67,4 +68,42 @@ data class InternalDpSerializer(
                 }
             }
         }
+}
+
+/**
+ * Location-aware DpSerializer class that can be used in @Serializable annotations.
+ * Provides enhanced error reporting with precise location information when Dp parsing fails.
+ */
+class LocationAwareDpSerializer : KSerializer<Dp> {
+    private val delegate = DpSerializer.withLocationAwareExceptions()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: Dp,
+    ) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): Dp = delegate.deserialize(decoder)
+}
+
+/**
+ * Location-aware DpNonNegativeSerializer class that can be used in @Serializable annotations.
+ * Provides enhanced error reporting with precise location information when Dp parsing fails.
+ */
+class LocationAwareDpNonNegativeSerializer : KSerializer<Dp> {
+    private val delegate = DpNonNegativeSerializer.withLocationAwareExceptions()
+
+    override val descriptor: SerialDescriptor = delegate.descriptor
+
+    override fun serialize(
+        encoder: Encoder,
+        value: Dp,
+    ) {
+        delegate.serialize(encoder, value)
+    }
+
+    override fun deserialize(decoder: Decoder): Dp = delegate.deserialize(decoder)
 }

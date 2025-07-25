@@ -32,7 +32,7 @@ import io.composeflow.model.property.AssignableProperty
 import io.composeflow.model.property.ColorProperty
 import io.composeflow.model.property.PropertyContainer
 import io.composeflow.model.type.ComposeFlowType
-import io.composeflow.serializer.FallbackEnumSerializer
+import io.composeflow.serializer.LocationAwareFallbackEnumSerializer
 import io.composeflow.tooltip_icon_trait
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.modifierForCanvas
@@ -276,7 +276,8 @@ abstract class AbstractIconTrait(
     }
 }
 
-object IconAssetTypeSerializer : FallbackEnumSerializer<IconAssetType>(IconAssetType::class)
+object IconAssetTypeSerializer :
+    LocationAwareFallbackEnumSerializer<IconAssetType>(IconAssetType::class)
 
 @Serializable(IconAssetTypeSerializer::class)
 enum class IconAssetType {

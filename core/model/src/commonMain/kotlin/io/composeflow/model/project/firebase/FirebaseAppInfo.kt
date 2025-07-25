@@ -6,8 +6,8 @@ import androidx.compose.runtime.mutableStateOf
 import io.composeflow.firebase.WebAppWrapper
 import io.composeflow.firebase.management.AndroidAppWrapper
 import io.composeflow.firebase.management.IosAppWrapper
-import io.composeflow.serializer.FallbackMutableStateListSerializer
-import io.composeflow.serializer.MutableStateSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateListSerializer
+import io.composeflow.serializer.LocationAwareMutableStateSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -18,9 +18,9 @@ data class FirebaseAppInfo(
     val androidApp: AndroidAppWrapper? = null,
     val iOSApp: IosAppWrapper? = null,
     val webApp: WebAppWrapper? = null,
-    @Serializable(FallbackMutableStateListSerializer::class)
+    @Serializable(LocationAwareFallbackMutableStateListSerializer::class)
     val firestoreCollections: MutableList<FirestoreCollection> = mutableStateListOf(),
-    @Serializable(MutableStateSerializer::class)
+    @Serializable(LocationAwareMutableStateSerializer::class)
     val authenticationEnabled: MutableState<Boolean> = mutableStateOf(false),
 ) {
     fun getConnectedStatus(): FirebaseConnectedStatus =

@@ -1,8 +1,8 @@
 package io.composeflow.model.project.string
-
+import io.composeflow.model.project.string.LocationAwareLocaleSerializer
 import io.composeflow.override.mutableStateMapEqualsOverrideOf
 import io.composeflow.override.toMutableStateMapEqualsOverride
-import io.composeflow.serializer.FallbackMutableStateMapSerializer
+import io.composeflow.serializer.LocationAwareFallbackMutableStateMapSerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlin.uuid.Uuid
@@ -16,7 +16,7 @@ data class StringResource(
     val key: String,
     /** Optional description for the string resource. Can be used to provide context for translators. */
     val description: String? = null,
-    @Serializable(with = FallbackMutableStateMapSerializer::class)
+    @Serializable(with = LocationAwareFallbackMutableStateMapSerializer::class)
     val localizedValues: MutableMap<Locale, String> = mutableStateMapEqualsOverrideOf(),
 ) {
     // TODO: Replace Locale with an enum class to provide a list of languages and regions in the UI
@@ -25,7 +25,7 @@ data class StringResource(
 
     // Compose Multiplatform supports language and region qualifiers for resources.
     // https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-multiplatform-resources-setup.html#language-and-regional-qualifiers
-    @Serializable(with = LocaleSerializer::class)
+    @Serializable(with = LocationAwareLocaleSerializer::class)
     @SerialName("Locale")
     data class Locale(
         /** Two-letter ISO 639-1 language code */
