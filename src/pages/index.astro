@@ -7,6 +7,6 @@ const overviewEntry = await getEntry('docs', 'getting_started/overview');
 const { Content } = await overviewEntry.render();
 ---
 
-<StarlightPage frontmatter={overviewEntry.data}>
+<StarlightPage frontmatter={{ title: overviewEntry.data.title, description: overviewEntry.data.description }}>
   <Content />
 </StarlightPage>
