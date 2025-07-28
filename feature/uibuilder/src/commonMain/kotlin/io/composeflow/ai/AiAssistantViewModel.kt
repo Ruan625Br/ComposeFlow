@@ -15,7 +15,7 @@ import io.composeflow.ai_failed_to_generate_response
 import io.composeflow.ai_failed_to_generate_response_timeout
 import io.composeflow.ai_login_needed
 import io.composeflow.ai_preparing_architecture
-import io.composeflow.auth.FirebaseIdToken
+import io.composeflow.auth.AuthRepository
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.postProcessAfterAiGeneration
@@ -26,8 +26,10 @@ import io.composeflow.util.toKotlinFileName
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -40,10 +42,17 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class AiAssistantViewModel(
     projectCreationQuery: String = "",
-    private val firebaseIdTokenArg: FirebaseIdToken,
     private val llmRepository: LlmRepository = LlmRepository(),
     private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
+    private val authRepository: AuthRepository = AuthRepository(),
 ) : ViewModel() {
+    // Observe the firebaseIdToken flow from AuthRepository for automatic refresh
+    private val firebaseIdToken =
+        authRepository.firebaseIdToken.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
     private val _uiState = MutableStateFlow<AiAssistantUiState>(AiAssistantUiState.Idle)
     val uiState: StateFlow<AiAssistantUiState> = _uiState.asStateFlow()
 
@@ -55,14 +64,23 @@ class AiAssistantViewModel(
 
     init {
         if (projectCreationQuery.isNotBlank()) {
-            onSendProjectCreationQuery(projectCreationQuery)
+            // Wait for firebaseIdToken to be available before calling onSendProjectCreationQuery
+            viewModelScope.launch {
+                firebaseIdToken.collect { token ->
+                    if (token != null) {
+                        onSendProjectCreationQuery(projectCreationQuery)
+                        return@collect // Only call once
+                    }
+                }
+            }
         }
     }
 
     private fun onSendProjectCreationQuery(projectCreationQuery: String) {
         viewModelScope.launch {
-            val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
-            if (firebaseIdTokenRawValue == null) {
+            val rawToken = firebaseIdToken.value?.rawToken
+
+            if (rawToken == null) {
                 _messages.value +=
                     MessageModel(
                         messageOwner = MessageOwner.Ai,
@@ -83,7 +101,7 @@ class AiAssistantViewModel(
 
             val result =
                 llmRepository.createProject(
-                    firebaseIdToken = firebaseIdTokenRawValue,
+                    firebaseIdToken = rawToken,
                     promptString = projectCreationQuery,
                 )
 
@@ -198,7 +216,7 @@ class AiAssistantViewModel(
                     val originalPrompts = state.screenPrompts
                     val updatedPrompts = originalPrompts.toMutableList()
 
-                    val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+                    val firebaseIdTokenRawValue = firebaseIdToken.value?.rawToken
                     if (firebaseIdTokenRawValue == null) {
                         _messages.value +=
                             MessageModel(
@@ -479,7 +497,7 @@ class AiAssistantViewModel(
                     else -> ""
                 }
 
-            val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+            val firebaseIdTokenRawValue = firebaseIdToken.value?.rawToken
             if (firebaseIdTokenRawValue == null) {
                 _messages.value +=
                     MessageModel(

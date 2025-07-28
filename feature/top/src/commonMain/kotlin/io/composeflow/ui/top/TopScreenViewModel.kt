@@ -1,5 +1,6 @@
 package io.composeflow.ui.top
 
+import io.composeflow.auth.AuthRepository
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.project.LoadedProjectUiState
 import io.composeflow.model.project.Project
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
@@ -22,6 +24,7 @@ class TopScreenViewModel(
     private val firebaseIdToken: FirebaseIdToken,
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdToken),
     settingsRepository: SettingsRepository = SettingsRepository(),
+    authRepository: AuthRepository = AuthRepository(),
 ) : ViewModel() {
     private val _projectListUiState: MutableStateFlow<ProjectUiState> =
         MutableStateFlow(ProjectUiState.HasNotSelected.ProjectListLoading)
@@ -35,6 +38,11 @@ class TopScreenViewModel(
         )
 
     init {
+        // Trigger AuthRepository's firebaseIdToken flow on app launch to ensure token refresh
+        viewModelScope.launch {
+            authRepository.firebaseIdToken.take(1).collect { /* Token refresh triggered */ }
+        }
+
         loadProjectList()
 
         viewModelScope.launch {

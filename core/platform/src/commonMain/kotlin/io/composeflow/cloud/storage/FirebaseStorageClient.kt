@@ -52,6 +52,7 @@ class FirebaseStorageClient(
     ): Result<Unit, Throwable> =
         runCatching {
             withContext(ioDispatcher) {
+                // TODO: Consider a case when the token expires
                 val token =
                     authRepository.firebaseIdToken
                         .take(1)

@@ -10,6 +10,7 @@ import io.composeflow.ai_failed_to_generate_response
 import io.composeflow.ai_failed_to_generate_response_timeout
 import io.composeflow.ai_login_needed
 import io.composeflow.ai_response_stopped_by_user
+import io.composeflow.auth.AuthRepository
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.json.jsonSerializer
 import io.composeflow.model.project.Project
@@ -22,7 +23,9 @@ import io.composeflow.ui.EventResult
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
@@ -38,8 +41,16 @@ class AiChatDialogViewModel(
     private val llmRepository: LlmRepository = LlmRepository(),
     private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdTokenArg),
     private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
+    private val authRepository: AuthRepository = AuthRepository(),
     private val onAiAssistantUiStateUpdated: (AiAssistantUiState) -> Unit,
 ) : ViewModel() {
+    // Observe the firebaseIdToken flow from AuthRepository for automatic refresh
+    private val firebaseIdToken =
+        authRepository.firebaseIdToken.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.Eagerly,
+            initialValue = null,
+        )
     private val _messages = MutableStateFlow<List<MessageModel>>(emptyList())
     val messages = _messages.asStateFlow()
 
@@ -65,7 +76,7 @@ class AiChatDialogViewModel(
 
         generationJob =
             viewModelScope.launch {
-                val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+                val firebaseIdTokenRawValue = firebaseIdToken.value?.rawToken
                 if (firebaseIdTokenRawValue == null) {
                     _messages.value +=
                         MessageModel(

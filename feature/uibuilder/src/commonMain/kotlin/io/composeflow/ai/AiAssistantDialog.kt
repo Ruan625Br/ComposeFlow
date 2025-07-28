@@ -85,7 +85,6 @@ fun AiAssistantDialog(
     val viewModel =
         viewModel(modelClass = AiAssistantViewModel::class) {
             AiAssistantViewModel(
-                firebaseIdTokenArg = firebaseIdToken,
                 projectCreationQuery = projectCreationPrompt,
             )
         }

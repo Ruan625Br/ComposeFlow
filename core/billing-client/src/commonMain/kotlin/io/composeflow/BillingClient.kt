@@ -28,6 +28,7 @@ class BillingClient(
     suspend fun createPricingTableLink(): Result<String, Throwable> =
         runCatching {
             withContext(ioDispatcher) {
+                // TODO: Consider a case when the token expires
                 val token =
                     authRepository.firebaseIdToken
                         .take(1)
