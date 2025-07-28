@@ -54,6 +54,7 @@ import androidx.compose.ui.window.rememberComponentRectPositionProvider
 import io.composeflow.Res
 import io.composeflow.ai.subaction.ScreenPromptsCreatedContent
 import io.composeflow.ai_generating_response
+import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
@@ -80,9 +81,11 @@ fun AiAssistantDialog(
     modifier: Modifier = Modifier,
     projectCreationPrompt: String = "",
 ) {
+    val firebaseIdToken = LocalFirebaseIdToken.current
     val viewModel =
         viewModel(modelClass = AiAssistantViewModel::class) {
             AiAssistantViewModel(
+                firebaseIdTokenArg = firebaseIdToken,
                 projectCreationQuery = projectCreationPrompt,
             )
         }

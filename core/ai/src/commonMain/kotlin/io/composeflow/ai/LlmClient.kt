@@ -32,6 +32,7 @@ class LlmClient(
             .build(),
 ) {
     suspend fun invokeCreateProject(
+        firebaseIdToken: String,
         promptString: String,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         retryCount: Int = 0,
@@ -57,17 +58,18 @@ class LlmClient(
                     .url(url)
                     .post(requestBody)
                     .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer $firebaseIdToken")
                     .build()
 
             withContext(dispatcher) {
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        val errorBody = response.body?.string()
+                        val errorBody = response.body.string()
                         Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
                         throw Exception("Unexpected code ${response.code}, $errorBody")
                     } else {
                         val responseBodyString =
-                            response.body?.string() ?: throw Exception("Response body is null")
+                            response.body.string()
                         try {
                             val aiResponseRawResponse =
                                 jsonSerializer.decodeFromString<OpenRouterResponseWrapper>(
@@ -85,6 +87,7 @@ class LlmClient(
                         } catch (e: SerializationException) {
                             Logger.e("Error during JSON deserialization: ${e.message}")
                             return@withContext invokeCreateProject(
+                                firebaseIdToken = firebaseIdToken,
                                 promptString = "$e. Fix the json parse error. Previously generated Json: $responseBodyString",
                                 dispatcher = dispatcher,
                                 retryCount = retryCount + 1,
@@ -96,6 +99,7 @@ class LlmClient(
         }
 
     suspend fun invokeGenerateScreen(
+        firebaseIdToken: String,
         promptString: String,
         dispatcher: CoroutineDispatcher = Dispatchers.IO,
         retryCount: Int = 0,
@@ -128,17 +132,18 @@ class LlmClient(
                     .url(url)
                     .post(requestBody)
                     .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer $firebaseIdToken")
                     .build()
 
             withContext(dispatcher) {
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        val errorBody = response.body?.string()
+                        val errorBody = response.body.string()
                         Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
                         throw Exception("Unexpected code ${response.code}, $errorBody")
                     } else {
                         val responseBodyString =
-                            response.body?.string() ?: throw Exception("Response body is null")
+                            response.body.string()
 
                         // Log the raw response for debugging
                         Logger.i("Raw response body: $responseBodyString")
@@ -160,6 +165,7 @@ class LlmClient(
                         } catch (e: SerializationException) {
                             Logger.e("Error during JSON deserialization: ${e.message}")
                             return@withContext invokeGenerateScreen(
+                                firebaseIdToken = firebaseIdToken,
                                 promptString = "$e. Fix the json parse error. Previously generated Json: $responseBodyString",
                                 dispatcher = dispatcher,
                                 retryCount = retryCount + 1,
@@ -171,6 +177,7 @@ class LlmClient(
         }
 
     suspend fun invokeHandleGeneralRequest(
+        firebaseIdToken: String,
         promptString: String,
         projectContextString: String,
         previousToolArgs: List<ToolArgs> = emptyList(),
@@ -199,17 +206,18 @@ class LlmClient(
                     .url(url)
                     .post(requestBody)
                     .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization", "Bearer $firebaseIdToken")
                     .build()
 
             withContext(dispatcher) {
                 client.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        val errorBody = response.body?.string()
+                        val errorBody = response.body.string()
                         Logger.e("LLM API call failed. Code: ${response.code}, Body: $errorBody. Request: $requestBody")
                         throw Exception("Unexpected code ${response.code}, $errorBody")
                     } else {
                         val responseBodyString =
-                            response.body?.string() ?: throw Exception("Response body is null")
+                            response.body.string()
 
                         // Log the raw response for debugging
                         Logger.i("Raw response body: $responseBodyString")
@@ -223,6 +231,7 @@ class LlmClient(
                         } catch (e: SerializationException) {
                             Logger.e("Error during JSON deserialization: ${e.message}")
                             return@withContext invokeHandleGeneralRequest(
+                                firebaseIdToken = firebaseIdToken,
                                 promptString =
                                     "Original prompt: $promptString. Error: $e. Fix the json parse error. " +
                                         "Previously generated Json: $responseBodyString",

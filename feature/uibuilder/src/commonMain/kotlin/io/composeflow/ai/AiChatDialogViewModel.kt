@@ -8,6 +8,7 @@ import io.composeflow.ai.openrouter.tools.ToolArgs
 import io.composeflow.ai.openrouter.tools.ToolExecutionStatus
 import io.composeflow.ai_failed_to_generate_response
 import io.composeflow.ai_failed_to_generate_response_timeout
+import io.composeflow.ai_login_needed
 import io.composeflow.ai_response_stopped_by_user
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.json.jsonSerializer
@@ -64,9 +65,21 @@ class AiChatDialogViewModel(
 
         generationJob =
             viewModelScope.launch {
+                val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+                if (firebaseIdTokenRawValue == null) {
+                    _messages.value +=
+                        MessageModel(
+                            messageOwner = MessageOwner.Ai,
+                            message = getString(Res.string.ai_login_needed),
+                            messageType = MessageType.ToolCallError,
+                            isFailed = true,
+                            createdAt = Clock.System.now(),
+                        )
+                    return@launch
+                }
+
                 aiAssistantUiState.isGenerating.value = true
                 onAiAssistantUiStateUpdated(aiAssistantUiState)
-
                 _messages.value +=
                     MessageModel(
                         messageOwner = MessageOwner.User,
@@ -80,6 +93,7 @@ class AiChatDialogViewModel(
                     while (isActive && (result as? ToolResponse.Success)?.response?.isConsideredComplete() != true) {
                         result =
                             llmRepository.handleToolRequest(
+                                firebaseIdToken = firebaseIdTokenRawValue,
                                 promptString = prompt,
                                 projectContext = project.asSummarizedContext(),
                                 previousToolArgs = previousToolArgs,

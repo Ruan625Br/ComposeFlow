@@ -23,6 +23,7 @@
     <string name="ai_prompt_suggestion_notes">A note-taking app with folders and rich text editing</string>
     <string name="ai_prompt_suggestion_recipes">A recipe app with ingredients, instructions, and ratings</string>
     <string name="ai_prompt_suggestion_chat">A chat messaging app with groups and media sharing</string>
+    <string name="ai_login_needed">You need to login in order to process the request</string>
     <string name="add_action">Add action</string>
     <string name="add_action_icon">Add a Action icon</string>
     <string name="add_app_state">Add app state</string>

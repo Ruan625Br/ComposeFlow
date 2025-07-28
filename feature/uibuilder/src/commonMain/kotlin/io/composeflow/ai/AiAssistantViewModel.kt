@@ -13,7 +13,9 @@ import io.composeflow.ai.openrouter.tools.ToolExecutionStatus
 import io.composeflow.ai.subaction.GeneratedScreenPrompt
 import io.composeflow.ai_failed_to_generate_response
 import io.composeflow.ai_failed_to_generate_response_timeout
+import io.composeflow.ai_login_needed
 import io.composeflow.ai_preparing_architecture
+import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.postProcessAfterAiGeneration
@@ -38,7 +40,8 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class AiAssistantViewModel(
     projectCreationQuery: String = "",
-    private val repository: LlmRepository = LlmRepository(),
+    private val firebaseIdTokenArg: FirebaseIdToken,
+    private val llmRepository: LlmRepository = LlmRepository(),
     private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
 ) : ViewModel() {
     private val _uiState = MutableStateFlow<AiAssistantUiState>(AiAssistantUiState.Idle)
@@ -58,6 +61,18 @@ class AiAssistantViewModel(
 
     private fun onSendProjectCreationQuery(projectCreationQuery: String) {
         viewModelScope.launch {
+            val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+            if (firebaseIdTokenRawValue == null) {
+                _messages.value +=
+                    MessageModel(
+                        messageOwner = MessageOwner.Ai,
+                        message = getString(Res.string.ai_login_needed),
+                        isFailed = true,
+                        createdAt = Clock.System.now(),
+                    )
+                return@launch
+            }
+
             _messages.value +=
                 MessageModel(
                     messageOwner = MessageOwner.User,
@@ -66,7 +81,11 @@ class AiAssistantViewModel(
                 )
             _uiState.value.isGenerating.value = true
 
-            val result = repository.createProject(promptString = projectCreationQuery)
+            val result =
+                llmRepository.createProject(
+                    firebaseIdToken = firebaseIdTokenRawValue,
+                    promptString = projectCreationQuery,
+                )
 
             _messages.value +=
                 MessageModel(
@@ -179,6 +198,17 @@ class AiAssistantViewModel(
                     val originalPrompts = state.screenPrompts
                     val updatedPrompts = originalPrompts.toMutableList()
 
+                    val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+                    if (firebaseIdTokenRawValue == null) {
+                        _messages.value +=
+                            MessageModel(
+                                messageOwner = MessageOwner.Ai,
+                                message = getString(Res.string.ai_login_needed),
+                                isFailed = true,
+                                createdAt = Clock.System.now(),
+                            )
+                        return@launch
+                    }
                     // Call prepare_architecture endpoint before generating screens
                     try {
                         val projectContext =
@@ -205,7 +235,8 @@ class AiAssistantViewModel(
                         // Dispatch tool results if successful
                         while ((architectureResponse as? ToolResponse.Success)?.response?.isConsideredComplete() != true) {
                             architectureResponse =
-                                repository.prepareArchitecture(
+                                llmRepository.prepareArchitecture(
+                                    firebaseIdToken = firebaseIdTokenRawValue,
                                     promptString = "Prepare architecture for screens: ${
                                         originalPrompts.joinToString(
                                             ", ",
@@ -332,7 +363,8 @@ class AiAssistantViewModel(
                                         do {
                                             try {
                                                 result =
-                                                    repository.createScreen(
+                                                    llmRepository.createScreen(
+                                                        firebaseIdToken = firebaseIdTokenRawValue,
                                                         promptString = promptString,
                                                         retryCount = retryCount,
                                                         requestId = prompt.id,
@@ -447,6 +479,17 @@ class AiAssistantViewModel(
                     else -> ""
                 }
 
+            val firebaseIdTokenRawValue = firebaseIdTokenArg.rawToken
+            if (firebaseIdTokenRawValue == null) {
+                _messages.value +=
+                    MessageModel(
+                        messageOwner = MessageOwner.Ai,
+                        message = getString(Res.string.ai_login_needed),
+                        isFailed = true,
+                        createdAt = Clock.System.now(),
+                    )
+                return@launch
+            }
             _uiState.value.isGenerating.value = true
 
             _messages.value +=
@@ -461,7 +504,8 @@ class AiAssistantViewModel(
                 var retryCount = 0
                 do {
                     result =
-                        repository.createScreen(
+                        llmRepository.createScreen(
+                            firebaseIdToken = firebaseIdTokenRawValue,
                             promptString = prompt,
                             retryCount = retryCount,
                         )

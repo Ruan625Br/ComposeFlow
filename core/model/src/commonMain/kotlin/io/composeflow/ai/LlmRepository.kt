@@ -21,6 +21,7 @@ class LlmRepository(
     }
 
     suspend fun createProject(
+        firebaseIdToken: String,
         promptString: String,
         retryCount: Int = 0,
     ): CreateProjectResult =
@@ -33,6 +34,7 @@ class LlmRepository(
             Logger.i("$promptString,  Retry count: $retryCount")
             val response =
                 client.invokeCreateProject(
+                    firebaseIdToken = firebaseIdToken,
                     promptString,
                 )
             response.mapBoth(
@@ -54,6 +56,7 @@ class LlmRepository(
         }
 
     suspend fun createScreen(
+        firebaseIdToken: String,
         promptString: String,
         retryCount: Int = 0,
         requestId: String? = null,
@@ -68,6 +71,7 @@ class LlmRepository(
             Logger.i("$promptString,  Retry count: $retryCount")
             val response =
                 client.invokeGenerateScreen(
+                    firebaseIdToken = firebaseIdToken,
                     promptString = promptString,
                     projectContextString = projectContext?.toContextString(),
                 )
@@ -140,6 +144,7 @@ class LlmRepository(
         }
 
     suspend fun handleToolRequest(
+        firebaseIdToken: String,
         promptString: String,
         projectContext: String,
         previousToolArgs: List<ToolArgs> = emptyList(),
@@ -161,6 +166,7 @@ class LlmRepository(
             Logger.i("$promptString,  Retry count: $retryCount")
             val response =
                 client.invokeHandleGeneralRequest(
+                    firebaseIdToken = firebaseIdToken,
                     promptString = promptString,
                     projectContextString = projectContext,
                     previousToolArgs = windowedToolArgs,
@@ -186,6 +192,7 @@ class LlmRepository(
         }
 
     suspend fun prepareArchitecture(
+        firebaseIdToken: String,
         promptString: String,
         projectContext: ProjectContext? = null,
         previousToolArgs: List<ToolArgs> = emptyList(),
@@ -203,6 +210,7 @@ class LlmRepository(
             Logger.i("Preparing architecture: $promptString, Retry count: $retryCount")
             val response =
                 client.invokeHandleGeneralRequest(
+                    firebaseIdToken = firebaseIdToken,
                     promptString = "Prepare the project architecture for the following: $promptString",
                     projectContextString = projectContext?.toContextString() ?: "",
                     previousToolArgs = windowedToolArgs,
