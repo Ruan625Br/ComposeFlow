@@ -57,7 +57,7 @@ data class GoogleOAuth2Client(
                     .build()
 
             okHttpClient.newCall(request).execute().use { response ->
-                response.body?.string()?.let {
+                response.body.string().let {
                     val jsonElement = Json.parseToJsonElement(it)
                     val error = jsonElement.jsonObject["error"]
                     if (error != null) {
@@ -73,7 +73,7 @@ data class GoogleOAuth2Client(
                         googleTokenResponse = googleTokenResponse,
                         rawToken = idToken,
                     )
-                } ?: throw IOException()
+                }
             }
         }
 
@@ -82,7 +82,10 @@ data class GoogleOAuth2Client(
             val mediaType = "application/json; charset=utf-8".toMediaType()
             val requestBody =
                 buildJsonObject {
-                    put("postBody", "id_token=${googleTokenResponse.id_token}&providerId=google.com")
+                    put(
+                        "postBody",
+                        "id_token=${googleTokenResponse.id_token}&providerId=google.com",
+                    )
                     put("requestUri", "http://127.0.0.1")
                     put("returnIdpCredential", true)
                     put("returnSecureToken", true)
@@ -96,7 +99,7 @@ data class GoogleOAuth2Client(
                     .build()
 
             okHttpClient.newCall(request).execute().use { response ->
-                response.body?.string()?.let {
+                response.body.string().let {
                     val withIdpResponse = Json.decodeFromString<SignInWithIdpResponse>(it)
                     val decodeIdToken = decodeIdToken(withIdpResponse.idToken)
                     val firebaseIdToken = Json.decodeFromString<FirebaseIdToken>(decodeIdToken)
@@ -104,7 +107,7 @@ data class GoogleOAuth2Client(
                         googleTokenResponse = googleTokenResponse,
                         rawToken = withIdpResponse.idToken,
                     )
-                } ?: throw IOException()
+                }
             }
         }
 

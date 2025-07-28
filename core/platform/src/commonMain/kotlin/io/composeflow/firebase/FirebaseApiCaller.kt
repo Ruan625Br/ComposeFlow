@@ -51,18 +51,20 @@ class FirebaseApiCaller(
                     Request
                         .Builder()
                         .url(url)
-                        .addHeader("Authorization", "Bearer ${refreshedTokenResponse?.access_token}")
-                        .addHeader("Content-Type", "application/json; charset=utf-8")
+                        .addHeader(
+                            "Authorization",
+                            "Bearer ${refreshedTokenResponse?.access_token}",
+                        ).addHeader("Content-Type", "application/json; charset=utf-8")
                         .get()
                         .build()
 
                 okhttpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        val errorBody = response.body?.string()
+                        val errorBody = response.body.string()
                         Logger.e("Get web Apps failed. Code: ${response.code}, Body: $errorBody")
                         null
                     } else {
-                        val responseBody = response.body?.string()
+                        val responseBody = response.body.string()
                         responseBody
                     }
                 }
@@ -189,9 +191,9 @@ class FirebaseApiCaller(
             withContext(ioDispatcher) {
                 okhttpClient.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
-                        response.isSuccessful
+                        true
                     } else {
-                        val errorBody = response.body?.string()
+                        val errorBody = response.body.string()
                         Logger.e("Check identity Platform Enabled failed. Code: ${response.code}, Body: $errorBody")
                         false
                     }
@@ -226,9 +228,9 @@ class FirebaseApiCaller(
             withContext(dispatcher) {
                 okhttpClient.newCall(request).execute().use { response ->
                     if (!response.isSuccessful) {
-                        val errorBody = response.body?.string()
+                        val errorBody = response.body.string()
                         Logger.e("API call failed. Code: ${response.code}, Body: $errorBody. Endpoint: $endPoint, Request: $requestBody")
-                        errorBody?.let {
+                        errorBody.let {
                             val operationResponse =
                                 jsonSerializer.decodeFromString<OperationResponse>(errorBody)
                             operationResponse.error?.let { error ->
@@ -239,12 +241,15 @@ class FirebaseApiCaller(
                                 "Project ID: \"${identifier.firebaseProjectId}\": API call failed. $endPoint, body: $requestBody",
                             )
                     } else {
-                        val responseBody = response.body?.string()
-                        responseBody?.let {
+                        val responseBody = response.body.string()
+                        responseBody.let {
                             if (isPrimitiveType(Response::class)) {
                                 responseBody as Response?
                             } else {
-                                jsonSerializer.decodeFromString(serializer<Response>(), responseBody)
+                                jsonSerializer.decodeFromString(
+                                    serializer<Response>(),
+                                    responseBody,
+                                )
                             }
                         }
                     }
@@ -270,20 +275,15 @@ class FirebaseApiCaller(
 
         return withContext(Dispatchers.IO) {
             okhttpClient.newCall(request).execute().use { response ->
-                val responseBody = response.body?.string()
+                val responseBody = response.body.string()
                 if (!response.isSuccessful) {
                     Logger.e("Failed to obtain access token. HTTP code: ${response.code}")
                     Logger.e("Response body: $responseBody")
                     return@withContext null
                 }
 
-                if (responseBody != null) {
-                    val tokenResponse = jsonSerializer.decodeFromString<TokenResponse>(responseBody)
-                    tokenResponse
-                } else {
-                    Logger.e("Response body is null")
-                    null
-                }
+                val tokenResponse = jsonSerializer.decodeFromString<TokenResponse>(responseBody)
+                tokenResponse
             }
         }
     }
