@@ -1,5 +1,24 @@
 # ComposeFlow
 
+**ComposeFlow** is a visual UI builder for Compose Multiplatform that allows developers to create fully working applications through an intuitive drag-and-drop interface. It generates complete, runnable Compose Multiplatform projects with clean Kotlin code and supports multiple platforms including Desktop, Android, iOS, and Web.
+
+## Key Features
+
+- **Full App Generation**: Create complete, runnable Compose Multiplatform applications, not just UI components
+- **Visual UI Builder**: Drag-and-drop interface for building complex UI layouts
+- **AI-Powered Code Generation**: Built-in Claude AI integration for intelligent code assistance
+- **Cross-Platform Support**: Generate apps for Desktop, Android, iOS, and Web platforms
+- **Real-time Preview**: See your UI changes instantly with live preview
+- **State Management**: Visual state management with automatic code generation
+- **Component Library**: Rich set of pre-built UI components and modifiers
+- **Theme Support**: Visual theme editor with Material Design integration
+- **Project Export**: Export fully functional Compose Multiplatform projects ready to build and deploy
+
+## Demo Videos
+
+- [AI Assistant - Add Navigation Drawer](assets/ai_assistant_add_nav_drawer.webm)
+- [AI Create Project](assets/ai_create_project.webm)
+
 ## Setting up your development environment
 
 To set up the environment, please consult
