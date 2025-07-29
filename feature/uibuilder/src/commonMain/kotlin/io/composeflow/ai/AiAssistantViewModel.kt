@@ -42,9 +42,10 @@ import kotlin.time.ExperimentalTime
 @OptIn(ExperimentalTime::class)
 class AiAssistantViewModel(
     projectCreationQuery: String = "",
+    initialMessage: String? = null,
+    authRepository: AuthRepository = AuthRepository(),
     private val llmRepository: LlmRepository = LlmRepository(),
     private val toolDispatcher: ToolDispatcher = ToolDispatcher(),
-    private val authRepository: AuthRepository = AuthRepository(),
 ) : ViewModel() {
     // Observe the firebaseIdToken flow from AuthRepository for automatic refresh
     private val firebaseIdToken =
@@ -73,6 +74,15 @@ class AiAssistantViewModel(
                     }
                 }
             }
+        }
+
+        initialMessage?.let {
+            _messages.value +=
+                MessageModel(
+                    messageOwner = MessageOwner.Ai,
+                    message = initialMessage,
+                    createdAt = Clock.System.now(),
+                )
         }
     }
 

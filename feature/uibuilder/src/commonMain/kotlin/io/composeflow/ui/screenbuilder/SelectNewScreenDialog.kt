@@ -40,6 +40,7 @@ import io.composeflow.add_new_screen
 import io.composeflow.ai.AiAssistantDialog
 import io.composeflow.ai.AiAssistantDialogCallbacks
 import io.composeflow.ai_add_screen_with_ai
+import io.composeflow.ai_screen_creation_placeholder
 import io.composeflow.cancel
 import io.composeflow.confirm
 import io.composeflow.custom.ComposeFlowIcons
@@ -165,6 +166,7 @@ fun SelectNewScreenDialog(
             },
             // This is only used from the initial project creation
             onConfirmProjectWithScreens = { _, _ -> },
+            initialMessage = stringResource(Res.string.ai_screen_creation_placeholder),
         )
     }
 }
