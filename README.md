@@ -1,10 +1,14 @@
 # ComposeFlow
 
-**ComposeFlow** is a visual UI builder for Compose Multiplatform that allows developers to create fully working applications through an intuitive drag-and-drop interface. It generates complete, runnable Compose Multiplatform projects with clean Kotlin code and supports multiple platforms including Desktop, Android, iOS, and Web.
+**ComposeFlow** is a visual UI builder for Compose Multiplatform that allows developers to create
+fully working applications through an intuitive drag-and-drop interface. It generates complete,
+runnable Compose Multiplatform projects with clean Kotlin code and supports multiple platforms
+including Desktop, Android, iOS, and Web.
 
 ## Key Features
 
-- **Full App Generation**: Create complete, runnable Compose Multiplatform applications, not just UI components
+- **Full App Generation**: Create complete, runnable Compose Multiplatform applications, not just UI
+  components
 - **Visual UI Builder**: Drag-and-drop interface for building complex UI layouts
 - **AI-Powered Code Generation**: Built-in Claude AI integration for intelligent code assistance
 - **Cross-Platform Support**: Generate apps for Desktop, Android, iOS, and Web platforms
@@ -12,7 +16,8 @@
 - **State Management**: Visual state management with automatic code generation
 - **Component Library**: Rich set of pre-built UI components and modifiers
 - **Theme Support**: Visual theme editor with Material Design integration
-- **Project Export**: Export fully functional Compose Multiplatform projects ready to build and deploy
+- **Project Export**: Export fully functional Compose Multiplatform projects ready to build and
+  deploy
 
 ## Demo Videos
 
@@ -73,12 +78,15 @@ Update the documents by following command.
 git submodule update --remote
 ```
 
-
 ## How to run
 
-Choose a run configuration for an appropriate target in Android Studio and run it.
+Choose a run configuration for an appropriate target in Android Studio and run it. You can either:
 
-![run-configurations.png](run-configurations.png)
+- Click the gutter icon next to the `./gradlew desktopApp:run` command in README
+  ![run-from-readme.png](/assets/run-from-readme.png)
+
+- Use the run configurations dropdown in the toolbar
+  ![run-configurations-as.png](/assets/run-configuration-as.png)
 
 ## Run desktop via Gradle
 
