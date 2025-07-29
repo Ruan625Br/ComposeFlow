@@ -5,6 +5,8 @@ fully working applications through an intuitive drag-and-drop interface. It gene
 runnable Compose Multiplatform projects with clean Kotlin code and supports multiple platforms
 including Desktop, Android, iOS, and Web.
 
+![composeflow-ui-editor.png](/assets/composeflow-ui-editor.png)
+
 ## Key Features
 
 - **Full App Generation**: Create complete, runnable Compose Multiplatform applications, not just UI
