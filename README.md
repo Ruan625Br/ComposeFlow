@@ -1,9 +1,6 @@
 # ComposeFlow
 
-**ComposeFlow** is a visual UI builder for Compose Multiplatform that allows developers to create
-fully working applications through an intuitive drag-and-drop interface. It generates complete,
-runnable Compose Multiplatform projects with clean Kotlin code and supports multiple platforms
-including Desktop, Android, iOS, and Web.
+**ComposeFlow** is a visual UI builder for Compose Multiplatform that empowers developers, entrepreneurs, designers, and product managers to create fully working applications through an intuitive drag-and-drop interface. It generates complete, runnable Compose Multiplatform projects with clean Kotlin code and supports multiple platforms including Desktop, Android, iOS, and Web.
 
 ![composeflow-ui-editor.png](/assets/composeflow-ui-editor.png)
 
