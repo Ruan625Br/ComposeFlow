@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,7 +75,7 @@ fun CellEditableText(
                     if (enabled) {
                         Modifier
                     } else {
-                        Modifier.alpha(ContentAlpha.disabled)
+                        Modifier.alpha(0.3f)
                     },
                 ),
         enabled = enabled,

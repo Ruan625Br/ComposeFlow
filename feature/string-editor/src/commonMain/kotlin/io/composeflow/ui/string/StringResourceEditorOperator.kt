@@ -4,9 +4,10 @@ import co.touchlab.kermit.Logger
 import io.composeflow.ksp.LlmParam
 import io.composeflow.ksp.LlmTool
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.string.ResourceLocale
 import io.composeflow.model.project.string.StringResource
 import io.composeflow.serializer.decodeFromStringWithFallback
-import io.composeflow.serializer.yamlDefaultSerializer
+import io.composeflow.serializer.encodeToString
 import io.composeflow.ui.EventResult
 import io.composeflow.util.generateUniqueName
 import kotlinx.serialization.encodeToString
@@ -130,73 +131,67 @@ class StringResourceEditorOperator {
             }
         }
 
-    fun addLocale(
+    fun updateSupportedLocales(
         project: Project,
-        locale: StringResource.Locale,
+        newLocales: List<ResourceLocale>,
     ): EventResult {
         val result = EventResult()
         try {
-            if (project.stringResourceHolder.supportedLocales.contains(locale)) {
-                result.errorMessages.add("Locale $locale already exists.")
-                return result
+            val defaultLocale = project.stringResourceHolder.defaultLocale.value
+            // Ensure default locale is always included
+            val localesWithDefault =
+                if (newLocales.contains(defaultLocale)) {
+                    newLocales
+                } else {
+                    listOf(defaultLocale) + newLocales
+                }
+
+            // Find locales to remove
+            val currentLocales = project.stringResourceHolder.supportedLocales.toSet()
+            val newLocalesSet = localesWithDefault.toSet()
+            val localesToRemove = currentLocales - newLocalesSet
+
+            // Remove old locales from string resources
+            if (localesToRemove.isNotEmpty()) {
+                project.stringResourceHolder.stringResources.forEach { resource ->
+                    localesToRemove.forEach { locale ->
+                        resource.localizedValues.remove(locale)
+                    }
+                }
             }
-            project.stringResourceHolder.supportedLocales.add(locale)
+
+            // Replace the supported locales list
+            project.stringResourceHolder.supportedLocales.clear()
+            project.stringResourceHolder.supportedLocales.addAll(localesWithDefault)
         } catch (e: Exception) {
-            Logger.e(e) { "Error adding locale" }
-            result.errorMessages.add("Failed to add locale: ${e.message}")
+            Logger.e(e) { "Error replacing supported locales" }
+            result.errorMessages.add("Failed to update supported locales: ${e.message}")
         }
         return result
     }
 
     @LlmTool(
-        name = "add_locale",
-        description = "Adds a new supported locale to the project for string localization.",
+        name = "update_supported_locales",
+        description = "Updates the entire list of supported locales with a new list. The default locale is always preserved.",
     )
-    fun onAddLocale(
+    fun onUpdateSupportedLocales(
         project: Project,
-        @LlmParam(description = "The language code (e.g., 'en', 'fr', 'es').")
-        language: String,
-        @LlmParam(description = "The optional region code (e.g., 'US', 'GB', 'MX'). Can be null.")
-        region: String?,
-    ): EventResult = addLocale(project, StringResource.Locale(language, region))
-
-    fun removeLocale(
-        project: Project,
-        locale: StringResource.Locale,
-    ): EventResult {
-        val result = EventResult()
+        @LlmParam(description = "YAML representation of the new list of supported locales.")
+        localesYaml: String,
+    ): EventResult =
         try {
-            if (locale == project.stringResourceHolder.defaultLocale.value) {
-                result.errorMessages.add("Cannot remove the default locale.")
-                return result
-            }
-            project.stringResourceHolder.supportedLocales.remove(locale)
-            // Remove this locale from all string resources
-            project.stringResourceHolder.stringResources.forEach { resource ->
-                resource.localizedValues.remove(locale)
-            }
+            val locales = decodeFromStringWithFallback<List<ResourceLocale>>(localesYaml)
+            updateSupportedLocales(project, locales)
         } catch (e: Exception) {
-            Logger.e(e) { "Error removing locale" }
-            result.errorMessages.add("Failed to remove locale: ${e.message}")
+            Logger.e(e) { "Error parsing locales YAML" }
+            EventResult().apply {
+                errorMessages.add("Failed to parse locales YAML: ${e.message}")
+            }
         }
-        return result
-    }
-
-    @LlmTool(
-        name = "remove_locale",
-        description = "Removes a supported locale from the project.",
-    )
-    fun onRemoveLocale(
-        project: Project,
-        @LlmParam(description = "The language code of the locale to remove.")
-        language: String,
-        @LlmParam(description = "The optional region code of the locale to remove. Can be null.")
-        region: String?,
-    ): EventResult = removeLocale(project, StringResource.Locale(language, region))
 
     fun setDefaultLocale(
         project: Project,
-        locale: StringResource.Locale,
+        locale: ResourceLocale,
     ): EventResult {
         val result = EventResult()
         try {
@@ -217,11 +212,22 @@ class StringResourceEditorOperator {
     )
     fun onSetDefaultLocale(
         project: Project,
-        @LlmParam(description = "The language code of the default locale.")
-        language: String,
-        @LlmParam(description = "The optional region code of the default locale. Can be null.")
-        region: String?,
-    ): EventResult = setDefaultLocale(project, StringResource.Locale(language, region))
+        @LlmParam(description = "The locale code to set as default (e.g., 'en-US', 'fr-FR', 'es-ES').")
+        localeCode: String,
+    ): EventResult {
+        val locale = ResourceLocale.fromString(localeCode)
+        return if (locale == null) {
+            EventResult().apply {
+                errorMessages.add(
+                    "Invalid locale code: $localeCode. Use one of the supported locales: ${
+                        ResourceLocale.entries.joinToString(", ") { it.toString() }
+                    }.",
+                )
+            }
+        } else {
+            setDefaultLocale(project, locale)
+        }
+    }
 
     @LlmTool(
         name = "list_string_resources",
@@ -230,7 +236,7 @@ class StringResourceEditorOperator {
     fun onListStringResources(project: Project): String =
         try {
             val resources = project.stringResourceHolder.stringResources
-            yamlDefaultSerializer.encodeToString(resources)
+            encodeToString(resources)
         } catch (e: Exception) {
             Logger.e(e) { "Error listing string resources" }
             "Error listing string resources: ${e.message}"
@@ -248,7 +254,7 @@ class StringResourceEditorOperator {
         try {
             val resource = project.stringResourceHolder.stringResources.find { it.id == stringResourceId }
             if (resource != null) {
-                yamlDefaultSerializer.encodeToString(resource)
+                encodeToString(resource)
             } else {
                 "String resource with ID $stringResourceId not found."
             }
@@ -264,7 +270,7 @@ class StringResourceEditorOperator {
     fun onGetSupportedLocales(project: Project): String =
         try {
             val locales = project.stringResourceHolder.supportedLocales
-            yamlDefaultSerializer.encodeToString(locales)
+            encodeToString(locales)
         } catch (e: Exception) {
             Logger.e(e) { "Error getting supported locales" }
             "Error getting supported locales: ${e.message}"

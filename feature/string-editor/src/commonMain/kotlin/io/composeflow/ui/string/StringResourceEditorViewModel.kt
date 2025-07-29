@@ -2,6 +2,7 @@ package io.composeflow.ui.string
 
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.string.ResourceLocale
 import io.composeflow.model.project.string.StringResource
 import io.composeflow.override.toMutableStateMapEqualsOverride
 import io.composeflow.repository.ProjectRepository
@@ -58,7 +59,7 @@ class StringResourceEditorViewModel(
 
     fun onUpdateStringResourceValue(
         resource: StringResource,
-        locale: StringResource.Locale,
+        locale: ResourceLocale,
         value: String,
     ) {
         val updatedResource =
@@ -81,31 +82,14 @@ class StringResourceEditorViewModel(
         }
     }
 
-    fun onAddLocale(
-        language: String,
-        region: String,
-    ) {
-        if (language.length == 2) {
-            val newLocale =
-                StringResource.Locale(
-                    language = language.lowercase(),
-                    region = region.uppercase().ifBlank { null },
-                )
-            val result = stringResourceEditorOperator.addLocale(project, newLocale)
-            if (result.errorMessages.isEmpty()) {
-                saveProject()
-            }
-        }
-    }
-
-    fun onRemoveLocale(locale: StringResource.Locale) {
-        val result = stringResourceEditorOperator.removeLocale(project, locale)
+    fun onUpdateSupportedLocales(newLocales: List<ResourceLocale>) {
+        val result = stringResourceEditorOperator.updateSupportedLocales(project, newLocales)
         if (result.errorMessages.isEmpty()) {
             saveProject()
         }
     }
 
-    fun onUpdateDefaultLocale(locale: StringResource.Locale) {
+    fun onUpdateDefaultLocale(locale: ResourceLocale) {
         val result = stringResourceEditorOperator.setDefaultLocale(project, locale)
         if (result.errorMessages.isEmpty()) {
             saveProject()

@@ -26,12 +26,9 @@ data class StringResourceHolder(
     @Serializable(with = MutableStateListSerializer::class)
     val stringResources: MutableList<StringResource> = mutableStateListEqualsOverrideOf(),
     @Serializable(MutableStateSerializer::class)
-    val defaultLocale: MutableState<StringResource.Locale> = mutableStateOf(StringResource.Locale("en")),
+    val defaultLocale: MutableState<ResourceLocale> = mutableStateOf(ResourceLocale.ENGLISH_US),
     @Serializable(with = MutableStateListSerializer::class)
-    val supportedLocales: MutableList<StringResource.Locale> =
-        mutableStateListEqualsOverrideOf(
-            defaultLocale.value,
-        ),
+    val supportedLocales: MutableList<ResourceLocale> = mutableStateListEqualsOverrideOf(defaultLocale.value),
 ) {
     /**
      * Generates strings.xml content for each supported locale.

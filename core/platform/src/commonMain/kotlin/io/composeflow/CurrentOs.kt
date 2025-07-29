@@ -1,7 +1,5 @@
 package io.composeflow
 
-import java.util.Locale
-
 enum class CurrentOs {
     Windows,
     Linux,
@@ -10,7 +8,7 @@ enum class CurrentOs {
 }
 
 val currentOs: CurrentOs by lazy {
-    val osName = System.getProperty("os.name").lowercase(Locale.getDefault())
+    val osName = System.getProperty("os.name").lowercase()
     if (osName.contains("win")) {
         CurrentOs.Windows
     } else if (osName.contains("nix") ||

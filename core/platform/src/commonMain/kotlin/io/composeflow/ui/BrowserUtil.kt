@@ -2,11 +2,10 @@ package io.composeflow.ui
 
 import java.awt.Desktop
 import java.net.URI
-import java.util.Locale
 
 fun openInBrowser(uri: URI) {
     val osName by lazy(LazyThreadSafetyMode.NONE) {
-        System.getProperty("os.name").lowercase(Locale.getDefault())
+        System.getProperty("os.name").lowercase()
     }
     val desktop = if (Desktop.isDesktopSupported()) Desktop.getDesktop() else null
 

@@ -1,6 +1,7 @@
 package io.composeflow.ui.string
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,13 +18,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.onClick
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CursorDropdownMenu
+import androidx.compose.material.LocalContentColor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -56,32 +61,35 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.action_add
-import io.composeflow.add_locale
-import io.composeflow.add_new_locale
 import io.composeflow.add_new_string_resource
 import io.composeflow.add_string_resource
+import io.composeflow.apply_change
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.cancel
 import io.composeflow.default_locale_label
 import io.composeflow.delete_string_resource
 import io.composeflow.delete_string_resource_confirmation
+import io.composeflow.edit_supported_locales
 import io.composeflow.model.project.Project
+import io.composeflow.model.project.string.ResourceLocale
 import io.composeflow.model.project.string.StringResource
 import io.composeflow.more_options
+import io.composeflow.no_locales_found_matching
 import io.composeflow.remove
 import io.composeflow.remove_locale
 import io.composeflow.remove_locale_confirmation
+import io.composeflow.search_locales_placeholder
+import io.composeflow.select_all
 import io.composeflow.set_as_default_locale
 import io.composeflow.string_resource_default_value_placeholder
 import io.composeflow.string_resource_description
 import io.composeflow.string_resource_description_placeholder
 import io.composeflow.string_resource_key
 import io.composeflow.string_resource_key_placeholder
-import io.composeflow.string_resource_language_code_placeholder
-import io.composeflow.string_resource_region_code_placeholder
 import io.composeflow.string_resources
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
@@ -109,8 +117,12 @@ fun StringResourceEditorScreen(
             onUpdateStringResourceDescription = viewModel::onUpdateStringResourceDescription,
             onUpdateStringResourceValue = viewModel::onUpdateStringResourceValue,
             onDeleteStringResource = viewModel::onDeleteStringResource,
-            onAddLocale = viewModel::onAddLocale,
-            onRemoveLocale = viewModel::onRemoveLocale,
+            onUpdateSupportedLocales = viewModel::onUpdateSupportedLocales,
+            onRemoveLocale = { locale ->
+                // When removing a single locale from the header menu, update the list without that locale
+                val currentLocales = project.stringResourceHolder.supportedLocales.toList()
+                viewModel.onUpdateSupportedLocales(currentLocales - locale)
+            },
             onUpdateDefaultLocale = viewModel::onUpdateDefaultLocale,
             modifier = Modifier.fillMaxSize(),
         )
@@ -123,16 +135,16 @@ private fun StringResourceEditorContent(
     onAddStringResource: (key: String, description: String, defaultValue: String) -> Unit,
     onUpdateStringResourceKey: (StringResource, String) -> Unit,
     onUpdateStringResourceDescription: (StringResource, String) -> Unit,
-    onUpdateStringResourceValue: (StringResource, StringResource.Locale, String) -> Unit,
+    onUpdateStringResourceValue: (StringResource, ResourceLocale, String) -> Unit,
     onDeleteStringResource: (StringResource) -> Unit,
-    onAddLocale: (language: String, region: String) -> Unit,
-    onRemoveLocale: (StringResource.Locale) -> Unit,
-    onUpdateDefaultLocale: (StringResource.Locale) -> Unit,
+    onUpdateSupportedLocales: (List<ResourceLocale>) -> Unit,
+    onRemoveLocale: (ResourceLocale) -> Unit,
+    onUpdateDefaultLocale: (ResourceLocale) -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var addResourceDialogOpen by remember { mutableStateOf(false) }
     var addLocaleDialogOpen by remember { mutableStateOf(false) }
-    var localeToDelete by remember { mutableStateOf<StringResource.Locale?>(null) }
+    var localeToDelete by remember { mutableStateOf<ResourceLocale?>(null) }
     var resourceToDelete by remember { mutableStateOf<StringResource?>(null) }
 
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
@@ -145,8 +157,8 @@ private fun StringResourceEditorContent(
                 // Default locale always comes first
                 a == defaultLocale -> -1
                 b == defaultLocale -> 1
-                // Otherwise sort alphabetically
-                else -> a.toString().compareTo(b.toString())
+                // Otherwise sort by ordinal value
+                else -> a.ordinal.compareTo(b.ordinal)
             }
         }
     Column(
@@ -160,26 +172,12 @@ private fun StringResourceEditorContent(
                 .padding(16.dp),
     ) {
         Column {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = stringResource(Res.string.string_resources),
-                    style = MaterialTheme.typography.titleLarge,
-                    modifier = Modifier.padding(top = 8.dp).padding(bottom = 16.dp),
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                TextButton(
-                    onClick = {
-                        addLocaleDialogOpen = true
-                    },
-                ) {
-                    Text(stringResource(Res.string.add_locale))
-                }
-            }
+            Text(
+                text = stringResource(Res.string.string_resources),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(top = 8.dp).padding(bottom = 16.dp),
+                color = MaterialTheme.colorScheme.onSurface,
+            )
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -195,7 +193,8 @@ private fun StringResourceEditorContent(
                     defaultLocale = defaultLocale,
                     onUpdateDefaultLocale = onUpdateDefaultLocale,
                     onRemoveLocale = { locale -> localeToDelete = locale },
-                    modifier = Modifier.width(tableWidthDp),
+                    onEditLocales = { addLocaleDialogOpen = true },
+                    modifier = Modifier.onSizeChanged { tableWidthPx = it.width },
                 )
 
                 TextButton(
@@ -210,10 +209,7 @@ private fun StringResourceEditorContent(
                 HorizontalDivider(modifier = Modifier.width(tableWidthDp))
 
                 LazyColumn(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .onSizeChanged { tableWidthPx = it.width },
+                    modifier = Modifier.weight(1f),
                 ) {
                     items(project.stringResourceHolder.stringResources) { resource ->
                         StringResourceTableRow(
@@ -253,9 +249,11 @@ private fun StringResourceEditorContent(
 
     if (addLocaleDialogOpen) {
         onAnyDialogIsShown()
-        AddNewLocaleDialog(
-            onAddLocale = { language, region ->
-                onAddLocale(language, region)
+        EditSupportedLocalesDialog(
+            currentLocales = supportedLocales,
+            defaultLocale = defaultLocale,
+            onUpdateLocales = { newLocales ->
+                onUpdateSupportedLocales(newLocales)
                 addLocaleDialogOpen = false
                 onAllDialogsClosed()
             },
@@ -269,7 +267,11 @@ private fun StringResourceEditorContent(
     localeToDelete?.let { locale ->
         onAnyDialogIsShown()
         SimpleConfirmationDialog(
-            text = stringResource(Res.string.remove_locale_confirmation, locale.toString()),
+            text =
+                stringResource(
+                    Res.string.remove_locale_confirmation,
+                    stringResource(locale.displayNameResource),
+                ),
             onConfirmClick = {
                 onRemoveLocale(locale)
                 localeToDelete = null
@@ -303,16 +305,17 @@ private fun StringResourceEditorContent(
 
 @Composable
 private fun StringResourceTableHeader(
-    supportedLocales: List<StringResource.Locale>,
-    defaultLocale: StringResource.Locale,
-    onUpdateDefaultLocale: (StringResource.Locale) -> Unit,
-    onRemoveLocale: (StringResource.Locale) -> Unit,
+    supportedLocales: List<ResourceLocale>,
+    defaultLocale: ResourceLocale,
+    onUpdateDefaultLocale: (ResourceLocale) -> Unit,
+    onRemoveLocale: (ResourceLocale) -> Unit,
+    onEditLocales: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    Column(modifier) {
+    Column(modifier.width(IntrinsicSize.Max)) {
         Row(Modifier.height(IntrinsicSize.Max)) {
             Box(
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.width(200.dp).fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Text(
@@ -324,7 +327,7 @@ private fun StringResourceTableHeader(
             }
             VerticalDivider()
             Box(
-                modifier = Modifier.width(200.dp),
+                modifier = Modifier.width(200.dp).fillMaxHeight(),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 Text(
@@ -341,10 +344,24 @@ private fun StringResourceTableHeader(
                     isDefault = locale == defaultLocale,
                     onSetAsDefault = { onUpdateDefaultLocale(locale) },
                     onRemove = { onRemoveLocale(locale) },
+                    modifier = Modifier.width(200.dp).fillMaxHeight(),
                 )
             }
             VerticalDivider()
-            Spacer(Modifier.width(40.dp))
+            Box(
+                modifier = Modifier.width(40.dp).fillMaxHeight(),
+                contentAlignment = Alignment.Center,
+            ) {
+                IconButton(
+                    onClick = onEditLocales,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Edit,
+                        contentDescription = stringResource(Res.string.edit_supported_locales),
+                        tint = MaterialTheme.colorScheme.secondary,
+                    )
+                }
+            }
         }
         HorizontalDivider()
     }
@@ -353,11 +370,11 @@ private fun StringResourceTableHeader(
 @Composable
 private fun StringResourceTableRow(
     resource: StringResource,
-    supportedLocales: List<StringResource.Locale>,
-    defaultLocale: StringResource.Locale,
+    supportedLocales: List<ResourceLocale>,
+    defaultLocale: ResourceLocale,
     onUpdateKey: (String) -> Unit,
     onUpdateDescription: (String) -> Unit,
-    onUpdateValue: (StringResource.Locale, String) -> Unit,
+    onUpdateValue: (ResourceLocale, String) -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -426,29 +443,30 @@ private fun StringResourceTableRow(
 
 @Composable
 private fun LocaleHeaderCell(
-    locale: StringResource.Locale,
+    locale: ResourceLocale,
     isDefault: Boolean,
     onSetAsDefault: () -> Unit,
     onRemove: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     var showDropdown by remember { mutableStateOf(false) }
 
     Row(
-        modifier = Modifier.width(200.dp).padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text =
                 buildString {
-                    append(locale.toString())
+                    append(stringResource(locale.displayNameResource))
                     if (isDefault) {
                         append(stringResource(Res.string.default_locale_label))
                     }
                 },
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.titleSmall,
+            modifier = Modifier.weight(1f),
         )
-        Spacer(modifier = Modifier.weight(1f))
         IconButton(
             onClick = { showDropdown = true },
             modifier = Modifier.size(20.dp),
@@ -488,7 +506,7 @@ private fun LocaleHeaderCell(
 
 @Composable
 private fun AddNewResourceDialog(
-    defaultLocale: StringResource.Locale,
+    defaultLocale: ResourceLocale,
     onAddResource: (key: String, description: String, defaultValue: String) -> Unit,
     onDismiss: () -> Unit,
 ) {
@@ -525,7 +543,14 @@ private fun AddNewResourceDialog(
                 SmallOutlinedTextField(
                     value = resourceDefaultValue,
                     onValueChange = { resourceDefaultValue = it },
-                    placeholder = { Text(stringResource(Res.string.string_resource_default_value_placeholder, defaultLocale.toString())) },
+                    placeholder = {
+                        Text(
+                            stringResource(
+                                Res.string.string_resource_default_value_placeholder,
+                                stringResource(defaultLocale.displayNameResource),
+                            ),
+                        )
+                    },
                     modifier =
                         Modifier
                             .fillMaxWidth()
@@ -554,51 +579,196 @@ private fun AddNewResourceDialog(
 }
 
 @Composable
-private fun AddNewLocaleDialog(
-    onAddLocale: (language: String, region: String) -> Unit,
+private fun EditSupportedLocalesDialog(
+    currentLocales: List<ResourceLocale>,
+    defaultLocale: ResourceLocale,
+    onUpdateLocales: (List<ResourceLocale>) -> Unit,
     onDismiss: () -> Unit,
 ) {
-    var localeLanguage by remember { mutableStateOf("") }
-    var localeRegion by remember { mutableStateOf("") }
+    val initialLocalesSet = remember(currentLocales) { currentLocales.toSet() }
+    var selectedLocales by remember(currentLocales) { mutableStateOf(currentLocales.toSet()) }
+    val hasChanges = selectedLocales != initialLocalesSet
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(Res.string.add_new_locale)) },
+        title = { Text(stringResource(Res.string.edit_supported_locales)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                val focusRequester = remember { FocusRequester() }
-                val focusManager = LocalFocusManager.current
+            Column {
+                var searchQuery by remember { mutableStateOf("") }
+
+                val allLocales = ResourceLocale.entries
+                val displayNames =
+                    allLocales.associateWith { locale ->
+                        stringResource(locale.displayNameResource)
+                    }
+                val filteredLocales =
+                    remember(searchQuery, displayNames) {
+                        if (searchQuery.isBlank()) {
+                            allLocales
+                        } else {
+                            allLocales.filter { locale ->
+                                displayNames[locale]?.startsWith(searchQuery, ignoreCase = true) == true ||
+                                    locale.languageCode.startsWith(searchQuery, ignoreCase = true) ||
+                                    locale.name.startsWith(searchQuery, ignoreCase = true)
+                            }
+                        }
+                    }
+
+                // Calculate if all visible non-default locales are selected
+                val visibleNonDefaultLocales = filteredLocales.filter { it != defaultLocale }
+                val allVisibleSelected =
+                    visibleNonDefaultLocales.isNotEmpty() &&
+                        visibleNonDefaultLocales.all { selectedLocales.contains(it) }
+
                 SmallOutlinedTextField(
-                    value = localeLanguage,
-                    onValueChange = { localeLanguage = it.lowercase() },
-                    placeholder = { Text(stringResource(Res.string.string_resource_language_code_placeholder)) },
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    placeholder = { Text(stringResource(Res.string.search_locales_placeholder)) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                    singleLine = true,
+                )
+
+                // Select/Deselect all locales
+                if (visibleNonDefaultLocales.isNotEmpty()) {
+                    Row(
+                        modifier =
+                            Modifier.align(Alignment.End).padding(start = 16.dp, end = 16.dp, bottom = 8.dp).onClick {
+                                selectedLocales =
+                                    if (allVisibleSelected) {
+                                        selectedLocales - visibleNonDefaultLocales.toSet()
+                                    } else {
+                                        selectedLocales + visibleNonDefaultLocales
+                                    }
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.select_all),
+                            textAlign = TextAlign.End,
+                            modifier = Modifier.padding(end = 8.dp),
+                        )
+                        Checkbox(
+                            checked = allVisibleSelected,
+                            onCheckedChange = { checked ->
+                                selectedLocales =
+                                    if (checked) {
+                                        selectedLocales + visibleNonDefaultLocales
+                                    } else {
+                                        selectedLocales - visibleNonDefaultLocales.toSet()
+                                    }
+                            },
+                        )
+                    }
+                }
+
+                LazyColumn(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .focusRequester(focusRequester)
-                            .consumeTabKeyEventForFocus(focusManager),
-                )
-                SmallOutlinedTextField(
-                    value = localeRegion,
-                    onValueChange = { localeRegion = it.uppercase() },
-                    placeholder = { Text(stringResource(Res.string.string_resource_region_code_placeholder)) },
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .consumeTabKeyEventForFocus(focusManager),
-                )
-                LaunchedEffect(Unit) {
-                    focusRequester.requestFocus()
+                            .height(400.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
+                    if (filteredLocales.isEmpty() && searchQuery.isNotBlank()) {
+                        item {
+                            Text(
+                                text = stringResource(Res.string.no_locales_found_matching, searchQuery),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp),
+                            )
+                        }
+                    } else {
+                        items(filteredLocales) { locale ->
+                            val isSelected = selectedLocales.contains(locale)
+                            val isDefault = locale == defaultLocale
+                            Surface(
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .clickable(enabled = !isDefault) {
+                                            selectedLocales =
+                                                if (isSelected) {
+                                                    selectedLocales - locale
+                                                } else {
+                                                    selectedLocales + locale
+                                                }
+                                        },
+                                color =
+                                    when {
+                                        isDefault -> MaterialTheme.colorScheme.surfaceVariant
+                                        isSelected -> MaterialTheme.colorScheme.primaryContainer
+                                        else -> MaterialTheme.colorScheme.surface
+                                    },
+                                shape = MaterialTheme.shapes.medium,
+                            ) {
+                                Row(
+                                    modifier =
+                                        Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = stringResource(locale.displayNameResource),
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            color =
+                                                if (isDefault) {
+                                                    LocalContentColor.current.copy(0.6f)
+                                                } else {
+                                                    LocalContentColor.current
+                                                },
+                                        )
+                                        Text(
+                                            text = locale.languageCode,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color =
+                                                when {
+                                                    isDefault -> LocalContentColor.current.copy(0.6f)
+                                                    isSelected -> MaterialTheme.colorScheme.onPrimaryContainer.copy(0.7f)
+                                                    else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                                },
+                                        )
+                                    }
+                                    if (isDefault) {
+                                        Text(
+                                            text = stringResource(Res.string.default_locale_label),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = LocalContentColor.current.copy(alpha = 0.6f),
+                                        )
+                                    } else {
+                                        Checkbox(
+                                            checked = isSelected,
+                                            onCheckedChange = { checked ->
+                                                selectedLocales =
+                                                    if (checked) {
+                                                        selectedLocales + locale
+                                                    } else {
+                                                        selectedLocales - locale
+                                                    }
+                                            },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    onAddLocale(localeLanguage, localeRegion)
+                    onUpdateLocales(selectedLocales.toList())
                 },
+                enabled = hasChanges,
             ) {
-                Text(stringResource(Res.string.action_add))
+                Text(stringResource(Res.string.apply_change))
             }
         },
         dismissButton = {

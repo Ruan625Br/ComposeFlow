@@ -22,7 +22,7 @@ class StringResourceHolderTest {
     fun testSingleStringResourceSingleLocale() {
         val holder = StringResourceHolder()
         holder.stringResources.add(
-            stringResourceOf("hello_world", "en" to "Hello World", description = "Greeting message shown on the main screen"),
+            stringResourceOf("hello_world", "en-US" to "Hello World", description = "Greeting message shown on the main screen"),
         )
 
         val resourceFiles = holder.generateStringResourceFiles()
@@ -42,15 +42,20 @@ class StringResourceHolderTest {
     @Test
     fun testMultipleStringResourcesMultipleLocales() {
         val holder = StringResourceHolder()
-        val spanishLocale = StringResource.Locale("es")
+        val spanishLocale = ResourceLocale.SPANISH_SPAIN
 
         holder.supportedLocales.add(spanishLocale)
 
         holder.stringResources.add(
-            stringResourceOf("hello", "en" to "Hello", "es" to "Hola", description = "Greeting message shown on the main screen"),
+            stringResourceOf("hello", "en-US" to "Hello", "es-ES" to "Hola", description = "Greeting message shown on the main screen"),
         )
         holder.stringResources.add(
-            stringResourceOf("goodbye", "en" to "Goodbye", "es" to "Adiós", description = "Farewell message shown on the logout screen"),
+            stringResourceOf(
+                "goodbye",
+                "en-US" to "Goodbye",
+                "es-ES" to "Adiós",
+                description = "Farewell message shown on the logout screen",
+            ),
         )
 
         val resourceFiles = holder.generateStringResourceFiles()
@@ -69,7 +74,7 @@ class StringResourceHolderTest {
         assertEquals(expectedEnglishXml, englishXml)
 
         // Test Spanish
-        val spanishXml = resourceFiles["composeApp/src/commonMain/composeResources/values-es/strings.xml"]!!
+        val spanishXml = resourceFiles["composeApp/src/commonMain/composeResources/values-es-rES/strings.xml"]!!
         val expectedSpanishXml =
             """
             <?xml version="1.0" encoding="utf-8"?>
@@ -84,7 +89,7 @@ class StringResourceHolderTest {
     @Test
     fun testEmptyStringValues() {
         val holder = StringResourceHolder()
-        holder.stringResources.add(stringResourceOf("empty_test", "en" to ""))
+        holder.stringResources.add(stringResourceOf("empty_test", "en-US" to ""))
 
         val resourceFiles = holder.generateStringResourceFiles()
         val englishXml = resourceFiles["composeApp/src/commonMain/composeResources/values/strings.xml"]!!
@@ -102,7 +107,7 @@ class StringResourceHolderTest {
     @Test
     fun testXmlEscaping() {
         val holder = StringResourceHolder()
-        holder.stringResources.add(stringResourceOf("special_chars", "en" to """Text with <special> & "quoted" 'chars'"""))
+        holder.stringResources.add(stringResourceOf("special_chars", "en-US" to """Text with <special> & "quoted" 'chars'"""))
 
         val resourceFiles = holder.generateStringResourceFiles()
         val englishXml = resourceFiles["composeApp/src/commonMain/composeResources/values/strings.xml"]!!
@@ -120,14 +125,14 @@ class StringResourceHolderTest {
     @Test
     fun testPartialTranslations() {
         val holder = StringResourceHolder()
-        val germanLocale = StringResource.Locale("de")
+        val germanLocale = ResourceLocale.GERMAN
 
         holder.supportedLocales.add(germanLocale)
 
         holder.stringResources.add(
-            stringResourceOf("hello", "en" to "Hello", "de" to "Hallo", description = "Greeting message shown on the main screen"),
+            stringResourceOf("hello", "en-US" to "Hello", "de" to "Hallo", description = "Greeting message shown on the main screen"),
         )
-        holder.stringResources.add(stringResourceOf("english_only", "en" to "English Only"))
+        holder.stringResources.add(stringResourceOf("english_only", "en-US" to "English Only"))
 
         val resourceFiles = holder.generateStringResourceFiles()
         assertEquals(2, resourceFiles.size)
@@ -159,11 +164,11 @@ class StringResourceHolderTest {
     @Test
     fun testNoTranslationsForLocale() {
         val holder = StringResourceHolder()
-        val italianLocale = StringResource.Locale("it")
+        val italianLocale = ResourceLocale.ITALIAN
 
         holder.supportedLocales.add(italianLocale)
 
-        holder.stringResources.add(stringResourceOf("test", "en" to "Test"))
+        holder.stringResources.add(stringResourceOf("test", "en-US" to "Test"))
 
         val resourceFiles = holder.generateStringResourceFiles()
 
@@ -188,23 +193,28 @@ class StringResourceHolderTest {
     @Test
     fun testRegionalLocales() {
         val holder = StringResourceHolder()
-        val usLocale = StringResource.Locale("en", "US")
-        val gbLocale = StringResource.Locale("en", "GB")
-        val frCaLocale = StringResource.Locale("fr", "CA")
+        val usLocale = ResourceLocale.ENGLISH_US
+        val gbLocale = ResourceLocale.ENGLISH_UK
+        val frCaLocale = ResourceLocale.FRENCH_CANADA
 
         holder.supportedLocales.add(usLocale)
         holder.supportedLocales.add(gbLocale)
         holder.supportedLocales.add(frCaLocale)
 
-        holder.stringResources.add(stringResourceOf("color", "en" to "Color", "en-rUS" to "Color", "en-rGB" to "Colour"))
+        holder.stringResources.add(stringResourceOf("color", "en-US" to "Color", "en-GB" to "Colour"))
         holder.stringResources.add(
-            stringResourceOf("greeting", "en" to "Hello", "fr-rCA" to "Bonjour", description = "Greeting message shown on the main screen"),
+            stringResourceOf(
+                "greeting",
+                "en-US" to "Hello",
+                "fr-CA" to "Bonjour",
+                description = "Greeting message shown on the main screen",
+            ),
         )
 
         val resourceFiles = holder.generateStringResourceFiles()
-        assertEquals(4, resourceFiles.size) // en (default), en-rUS, en-rGB, fr-rCA
+        assertEquals(3, resourceFiles.size) // en-US (default), en-rGB, fr-rCA
 
-        // Test English (default locale)
+        // Test US English (default locale - goes to values/)
         val englishXml = resourceFiles["composeApp/src/commonMain/composeResources/values/strings.xml"]!!
         val expectedEnglishXml =
             """
@@ -215,17 +225,6 @@ class StringResourceHolderTest {
             </resources>
             """.trimIndent() + "\n"
         assertEquals(expectedEnglishXml, englishXml)
-
-        // Test US English
-        val usXml = resourceFiles["composeApp/src/commonMain/composeResources/values-en-rUS/strings.xml"]!!
-        val expectedUsXml =
-            """
-            <?xml version="1.0" encoding="utf-8"?>
-            <resources>
-                <string name="color">Color</string>
-            </resources>
-            """.trimIndent() + "\n"
-        assertEquals(expectedUsXml, usXml)
 
         // Test British English
         val gbXml = resourceFiles["composeApp/src/commonMain/composeResources/values-en-rGB/strings.xml"]!!
@@ -253,12 +252,12 @@ class StringResourceHolderTest {
     @Test
     fun testCopyContents() {
         val source = StringResourceHolder()
-        source.defaultLocale.value = StringResource.Locale("fr")
+        source.defaultLocale.value = ResourceLocale.FRENCH_FRANCE
         source.supportedLocales.clear()
-        source.supportedLocales.add(StringResource.Locale("fr"))
-        source.supportedLocales.add(StringResource.Locale("en"))
+        source.supportedLocales.add(ResourceLocale.FRENCH_FRANCE)
+        source.supportedLocales.add(ResourceLocale.ENGLISH_US)
 
-        source.stringResources.add(stringResourceOf("test", "fr" to "Test"))
+        source.stringResources.add(stringResourceOf("test", "fr-FR" to "Test"))
 
         val target = StringResourceHolder()
         target.copyContents(source)
