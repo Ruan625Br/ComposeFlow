@@ -16,8 +16,13 @@
 
 ## Demo Videos
 
-- [AI Assistant - Add Navigation Drawer](assets/ai_assistant_add_nav_drawer.webm)
-- [AI Create Project](assets/ai_create_project.webm)
+Create an initial project from a prompt
+
+https://github.com/user-attachments/assets/4c59c4e6-e5d6-441d-a9c4-ce36b2b5e111
+
+Edit the project within the editor with AI assistant
+
+https://github.com/user-attachments/assets/b09cfa9c-7612-4a2e-9a3a-cfad3f4b454f
 
 ## Setting up your development environment
 
