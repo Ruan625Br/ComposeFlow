@@ -5,14 +5,31 @@ import co.touchlab.kermit.Logger
 import com.github.michaelbull.result.mapBoth
 import io.composeflow.ai.openrouter.tools.ToolArgs
 import io.composeflow.ai.openrouter.tools.ToolExecutionStatus
+import io.composeflow.di.ServiceLocator
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.createCopyOfNewName
+import io.composeflow.platform.getCacheDir
 import io.composeflow.serializer.decodeFromStringWithFallback
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeout
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
+
+/**
+ * If set to true, record the success and failed deserialization yaml for debugging purpose
+ */
+const val DEBUG_YAML = false
 
 class LlmRepository(
     private val client: LlmClient = LlmClient(),
+    private val ioDispatcher: CoroutineDispatcher =
+        ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
+            Dispatchers.IO
+        },
 ) {
     companion object {
         private const val MAX_RETRY_COUNT = 4
@@ -108,6 +125,16 @@ class LlmRepository(
                                     }
                                 }
 
+                                if (DEBUG_YAML) {
+                                    // Save successful YAML for comparison with failed cases
+                                    saveSuccessYamlForDebugging(
+                                        yamlContent = responseDetail.yamlContent,
+                                        promptString = promptString,
+                                        retryCount = retryCount,
+                                        requestId = requestId,
+                                    )
+                                }
+
                                 result =
                                     CreateScreenResponse.Success(
                                         screen = screen,
@@ -116,6 +143,18 @@ class LlmRepository(
                                     )
                             } catch (e: Exception) {
                                 Logger.w("Failed to parse the yaml. $e")
+
+                                if (DEBUG_YAML) {
+                                    // Save failed YAML for debugging
+                                    saveFailedYamlForDebugging(
+                                        yamlContent = responseDetail.yamlContent,
+                                        errorMessage = e.message ?: "Unknown error",
+                                        promptString = promptString,
+                                        retryCount = retryCount,
+                                        requestId = requestId,
+                                    )
+                                }
+
                                 result =
                                     CreateScreenResponse.Error(
                                         originalPrompt = promptString,
@@ -423,6 +462,135 @@ class LlmRepository(
         }
 
         return estimatedSize
+    }
+
+    /**
+     * Saves successful YAML content to local filesystem for comparison with failed cases.
+     * Files are saved in the cache directory under debug/success-yaml/
+     */
+    private suspend fun saveSuccessYamlForDebugging(
+        yamlContent: String,
+        promptString: String,
+        retryCount: Int,
+        requestId: String?,
+    ) {
+        withContext(ioDispatcher) {
+            try {
+                val debugDir =
+                    getCacheDir()
+                        .resolve("debug")
+                        .resolve("success-yaml")
+                debugDir.mkdirs()
+
+                val timestamp =
+                    Clock.System
+                        .now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .toString()
+                        .replace(":", "-")
+                        .replace(".", "-")
+
+                val filename =
+                    buildString {
+                        append("success-yaml-")
+                        append(timestamp)
+                        requestId?.let { append("-$it") }
+                        append("-retry$retryCount")
+                        append(".yaml")
+                    }
+
+                val yamlFile = debugDir.resolve(filename)
+                val metadataFile = debugDir.resolve("$filename.metadata.txt")
+
+                // Save the successful YAML content
+                yamlFile.writeText(yamlContent)
+
+                // Save metadata about the success
+                val metadata =
+                    buildString {
+                        appendLine("Successful YAML Debug Information")
+                        appendLine("=".repeat(50))
+                        appendLine("Timestamp: $timestamp")
+                        appendLine("Request ID: ${requestId ?: "N/A"}")
+                        appendLine("Retry Count: $retryCount")
+                        appendLine("Status: Successfully deserialized")
+                        appendLine("Original Prompt:")
+                        appendLine("-".repeat(20))
+                        appendLine(promptString)
+                        appendLine("-".repeat(20))
+                    }
+                metadataFile.writeText(metadata)
+
+                Logger.i("Saved successful YAML for comparison: ${yamlFile.absolutePath}")
+            } catch (e: Exception) {
+                Logger.w("Failed to save debug success YAML file: ${e.message}")
+            }
+        }
+    }
+
+    /**
+     * Saves failed YAML content to local filesystem for debugging purposes.
+     * Files are saved in the cache directory under debug/failed-yaml/
+     */
+    private suspend fun saveFailedYamlForDebugging(
+        yamlContent: String,
+        errorMessage: String,
+        promptString: String,
+        retryCount: Int,
+        requestId: String?,
+    ) {
+        withContext(ioDispatcher) {
+            try {
+                val debugDir =
+                    getCacheDir()
+                        .resolve("debug")
+                        .resolve("failed-yaml")
+                debugDir.mkdirs()
+
+                val timestamp =
+                    Clock.System
+                        .now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .toString()
+                        .replace(":", "-")
+                        .replace(".", "-")
+
+                val filename =
+                    buildString {
+                        append("failed-yaml-")
+                        append(timestamp)
+                        requestId?.let { append("-$it") }
+                        append("-retry$retryCount")
+                        append(".yaml")
+                    }
+
+                val yamlFile = debugDir.resolve(filename)
+                val metadataFile = debugDir.resolve("$filename.metadata.txt")
+
+                // Save the failed YAML content
+                yamlFile.writeText(yamlContent)
+
+                // Save metadata about the failure
+                val metadata =
+                    buildString {
+                        appendLine("Failed YAML Debug Information")
+                        appendLine("=".repeat(50))
+                        appendLine("Timestamp: $timestamp")
+                        appendLine("Request ID: ${requestId ?: "N/A"}")
+                        appendLine("Retry Count: $retryCount")
+                        appendLine("Error Message: $errorMessage")
+                        appendLine("Original Prompt:")
+                        appendLine("-".repeat(20))
+                        appendLine(promptString)
+                        appendLine("-".repeat(20))
+                    }
+                metadataFile.writeText(metadata)
+
+                Logger.i("Saved failed YAML for debugging: ${yamlFile.absolutePath}")
+            } catch (e: Exception) {
+                Logger.w("Failed to save debug YAML file: ${e.message}")
+            }
+        }
     }
 }
 

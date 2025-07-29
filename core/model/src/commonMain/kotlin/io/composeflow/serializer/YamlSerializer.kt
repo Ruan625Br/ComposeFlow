@@ -55,19 +55,30 @@ val yamlPropertyBasedSerializer =
 
 /**
  * Wrapper method that attempts to decode using yamlDefaultSerializer first,
- * and falls back to yamlPropertyBasedSerializer if a SerializationException occurs.
+ * and falls back to yamlPropertyBasedSerializer only if the exception indicates
+ * a missing 'type' property (property-based polymorphism issue).
+ * Other SerializationExceptions are re-thrown to avoid masking real issues.
  */
 @Suppress("deprecation")
 inline fun <reified T> decodeFromStringWithFallback(yamlContent: String): T =
     try {
         yamlDefaultSerializer.decodeFromString<T>(yamlContent)
     } catch (e: SerializationException) {
-        yamlPropertyBasedSerializer.decodeFromString<T>(yamlContent)
+        // Only fallback if the error is specifically about missing 'type' property
+        // which indicates the YAML might be using property-based polymorphism
+        if (e.message?.contains("Property 'type' is required but it is missing") == true) {
+            yamlPropertyBasedSerializer.decodeFromString<T>(yamlContent)
+        } else {
+            // Re-throw other serialization exceptions to avoid masking real issues
+            throw e
+        }
     }
 
 /**
  * Wrapper method that attempts to decode using yamlDefaultSerializer first,
- * and falls back to yamlPropertyBasedSerializer if a SerializationException occurs.
+ * and falls back to yamlPropertyBasedSerializer only if the exception indicates
+ * a missing 'type' property (property-based polymorphism issue).
+ * Other SerializationExceptions are re-thrown to avoid masking real issues.
  * This version takes a DeserializationStrategy for non-reified types.
  */
 @Suppress("deprecation")
@@ -78,7 +89,14 @@ fun <T> decodeFromStringWithFallback(
     try {
         yamlDefaultSerializer.decodeFromString(deserializer, yamlContent)
     } catch (e: SerializationException) {
-        yamlPropertyBasedSerializer.decodeFromString(deserializer, yamlContent)
+        // Only fallback if the error is specifically about missing 'type' property
+        // which indicates the YAML might be using property-based polymorphism
+        if (e.message?.contains("Property 'type' is required but it is missing") == true) {
+            yamlPropertyBasedSerializer.decodeFromString(deserializer, yamlContent)
+        } else {
+            // Re-throw other serialization exceptions to avoid masking real issues
+            throw e
+        }
     }
 
 /**
@@ -109,7 +127,9 @@ fun parseToYamlNode(yamlContent: String): YamlNode = yamlDefaultSerializer.parse
 /**
  * Decodes a YamlNode to the specified type with fallback support.
  * Attempts to decode using yamlDefaultSerializer first,
- * and falls back to yamlPropertyBasedSerializer if a SerializationException occurs.
+ * and falls back to yamlPropertyBasedSerializer only if the exception indicates
+ * a missing 'type' property (property-based polymorphism issue).
+ * Other SerializationExceptions are re-thrown to avoid masking real issues.
  */
 @Suppress("deprecation")
 fun <T> decodeFromYamlNodeWithFallback(
@@ -119,5 +139,12 @@ fun <T> decodeFromYamlNodeWithFallback(
     try {
         yamlDefaultSerializer.decodeFromYamlNode(deserializer, yamlNode)
     } catch (e: SerializationException) {
-        yamlPropertyBasedSerializer.decodeFromYamlNode(deserializer, yamlNode)
+        // Only fallback if the error is specifically about missing 'type' property
+        // which indicates the YAML might be using property-based polymorphism
+        if (e.message?.contains("Property 'type' is required but it is missing") == true) {
+            yamlPropertyBasedSerializer.decodeFromYamlNode(deserializer, yamlNode)
+        } else {
+            // Re-throw other serialization exceptions to avoid masking real issues
+            throw e
+        }
     }

@@ -713,6 +713,111 @@ sealed interface ScreenState<T> : State<T> {
     }
 
     @Serializable
+    @SerialName("IntScreenState")
+    data class IntScreenState(
+        override val id: StateId = Uuid.random().toString(),
+        override var name: String,
+        override val defaultValue: Int = 0,
+        override val userWritable: Boolean = true,
+        override val companionNodeId: String? = null,
+    ) : ScreenState<Int> {
+        override fun generateUpdateStateMethodToViewModel(context: GenerationContext): FunSpec {
+            val flowName = getFlowName(context)
+            return FunSpec
+                .builder(getUpdateMethodName(context))
+                .addParameter("newValue", Int::class)
+                .addStatement("_$flowName.value = newValue")
+                .build()
+        }
+
+        override fun generateUpdateStateCodeToViewModel(
+            project: Project,
+            context: GenerationContext,
+            readProperty: AssignableProperty,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            readProperty
+                .transformedCodeBlock(project, context, dryRun = dryRun)
+                .let { readExpression ->
+                    val expression =
+                        ComposeFlowType.IntType().convertCodeFromType(
+                            inputType = readProperty.valueType(project),
+                            codeBlock = readExpression,
+                        )
+                    builder.addStatement(
+                        """
+                    _${getFlowName(context)}.value = $expression
+                """,
+                    )
+                }
+            return builder.build()
+        }
+
+        override fun generateClearStateCodeToViewModel(context: GenerationContext): CodeBlock =
+            CodeBlock.of(
+                """
+                    _${getFlowName(context)}.value = $defaultValue
+                """,
+            )
+
+        override fun generateStatePropertiesToViewModel(
+            project: Project,
+            context: GenerationContext,
+        ): List<PropertySpec> {
+            val backingProperty =
+                PropertySpec
+                    .builder(
+                        "_${getFlowName(context)}",
+                        MutableStateFlow::class.parameterizedBy(Int::class),
+                    ).addModifiers(KModifier.PRIVATE)
+                    .initializer("""MutableStateFlow($defaultValue)""")
+                    .build()
+            val property =
+                PropertySpec
+                    .builder(
+                        getFlowName(context),
+                        StateFlow::class.parameterizedBy(Int::class),
+                    ).initializer("""_${getFlowName(context)}""")
+                    .build()
+            return listOf(
+                backingProperty,
+                property,
+            )
+        }
+
+        override fun generateReadBlock(
+            project: Project,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.addStatement(getReadVariableName(project, context))
+            return builder.build()
+        }
+
+        override fun generateWriteBlock(
+            project: Project,
+            canvasEditable: CanvasEditable,
+            context: GenerationContext,
+            dryRun: Boolean,
+        ): CodeBlock {
+            val builder = CodeBlock.builder()
+            builder.addStatement(
+                "${canvasEditable.viewModelName}.${getUpdateMethodName(context)}(it)",
+            )
+            return builder.build()
+        }
+
+        override fun valueType(
+            project: Project,
+            asNonList: Boolean,
+        ) = ComposeFlowType.IntType(isList = false)
+
+        override val isList: Boolean = false
+    }
+
+    @Serializable
     @SerialName("InstantScreenState")
     data class InstantScreenState(
         override val id: StateId = Uuid.random().toString(),

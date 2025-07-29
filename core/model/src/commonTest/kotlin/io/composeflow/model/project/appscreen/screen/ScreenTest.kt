@@ -3,8 +3,10 @@ package io.composeflow.model.project.appscreen.screen
 import io.composeflow.model.project.Project
 import io.composeflow.model.state.ScreenState
 import io.composeflow.model.state.StateHolderImpl
+import io.composeflow.serializer.decodeFromStringWithFallback
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class ScreenTest {
@@ -47,7 +49,8 @@ class ScreenTest {
         // Verify states were copied by checking the target's state count
         // Note: getStates returns all states including project states, so we check the actual added states
         val targetStates = target.getStates(Project(name = "test"))
-        val screenSpecificStates = targetStates.filter { it.name in listOf("screenState1", "screenState2") }
+        val screenSpecificStates =
+            targetStates.filter { it.name in listOf("screenState1", "screenState2") }
         assertEquals(2, screenSpecificStates.size)
         assertEquals("screenState1", screenSpecificStates[0].name)
         assertEquals("screenState2", screenSpecificStates[1].name)
@@ -83,9 +86,24 @@ class ScreenTest {
 
         // Add multiple different types of states to source
         val sourceStateHolder = StateHolderImpl()
-        sourceStateHolder.addState(ScreenState.StringScreenState(name = "str", defaultValue = "test"))
-        sourceStateHolder.addState(ScreenState.BooleanScreenState(name = "bool", defaultValue = false))
-        sourceStateHolder.addState(ScreenState.FloatScreenState(name = "float", defaultValue = 42.0f))
+        sourceStateHolder.addState(
+            ScreenState.StringScreenState(
+                name = "str",
+                defaultValue = "test",
+            ),
+        )
+        sourceStateHolder.addState(
+            ScreenState.BooleanScreenState(
+                name = "bool",
+                defaultValue = false,
+            ),
+        )
+        sourceStateHolder.addState(
+            ScreenState.FloatScreenState(
+                name = "float",
+                defaultValue = 42.0f,
+            ),
+        )
 
         target.copyContents(sourceStateHolder)
 
@@ -95,5 +113,38 @@ class ScreenTest {
         assertEquals("str", screenSpecificStates[0].name)
         assertEquals("bool", screenSpecificStates[1].name)
         assertEquals("float", screenSpecificStates[2].name)
+    }
+
+    @Test
+    fun testDeserializeFailedYamlForDebugging() {
+        // Read the failed YAML file for debugging purposes
+        val yamlContent = SCREEN_YAML_WITH_INT_SCREEN_STATE
+
+        // Attempt to deserialize using decodeFromStringWithFallback
+        val screen = decodeFromStringWithFallback<Screen>(yamlContent)
+
+        // Basic validation that the screen was deserialized successfully
+        assertNotNull(screen, "Screen should be successfully deserialized")
+        assertEquals("editProfileRoot", screen.id)
+        assertEquals("Edit Profile", screen.name)
+        assertEquals("Edit Profile", screen.title.value)
+        assertEquals("Edit Profile", screen.label.value)
+        assertEquals(false, screen.showOnNavigation.value)
+        assertEquals(false, screen.isDefault.value)
+        assertEquals(false, screen.isSelected.value)
+
+        // Verify root node exists and has expected properties
+        assertNotNull(screen.rootNode, "Root node should exist")
+        assertEquals("editProfileScreen", screen.rootNode.value.id)
+        assertEquals("Edit Profile", screen.rootNode.value.label.value)
+
+        // Verify the screen has the expected states
+        val project = Project(name = "test")
+        val states = screen.getStates(project)
+        val screenSpecificStates =
+            states.filter {
+                it.name in listOf("usernameValidation", "bioCharacterCount")
+            }
+        assertEquals(2, screenSpecificStates.size, "Should have 2 screen-specific states")
     }
 }
