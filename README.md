@@ -8,7 +8,7 @@
 
 - **Full App Generation**: Create complete, runnable Compose Multiplatform applications, not just UI
   components
-- **Visual UI Builder**: Drag-and-drop interface for building complex UI layouts
+- **Visual App Builder**: Drag-and-drop interface for building complex UI layouts
 - **AI-Powered Code Generation**: Built-in Claude AI integration for intelligent code assistance
 - **Cross-Platform Support**: Generate apps for Desktop, Android, iOS, and Web platforms
 - **Real-time Preview**: See your UI changes instantly with live preview
@@ -24,7 +24,7 @@ Create an initial project from a prompt
 
 https://github.com/user-attachments/assets/4c59c4e6-e5d6-441d-a9c4-ce36b2b5e111
 
-Edit the project within the editor with AI assistant
+Edit the project within the editor with AI agent
 
 https://github.com/user-attachments/assets/b09cfa9c-7612-4a2e-9a3a-cfad3f4b454f
 
