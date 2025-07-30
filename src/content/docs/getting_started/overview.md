@@ -18,17 +18,17 @@ ComposeFlow offers an intuitive visual interface that allows you to design user 
 - **Compose Multiplatform Support**: Build your app once and deploy it across Android, iOS, and Web platforms.
 - **Rich Component Library**: Access a wide range of pre-built UI components to accelerate your development process.
 - **Real-Time Preview**: Instantly see how your app looks and behaves as you design it.
-- **AI-Assisted Development**: Create and modify entire screens or project architecture using natural language descriptions through integrated AI assistants.
+- **AI-Assisted Development**: Create and modify entire screens or project architecture using natural language descriptions through integrated AI agents.
 
 ### AI-Assisted Development
 
-ComposeFlow includes powerful AI assistants that revolutionize how you build applications. Create and modify your entire project using natural language descriptions.
+ComposeFlow includes powerful AI agents that revolutionize how you build applications. Create and modify your entire project using natural language descriptions.
 
 - **AI Screen Creator**: Generate complete screens from scratch by describing what you want to build.
 - **AI Chat Interface**: Modify existing screens, create app states, data types, and implement cross-screen functionality through conversational commands.
 - **Project-Wide Intelligence**: AI understands your project context and can work with existing components, themes, and data structures.
 
-**Learn more**: See the [AI Assistant Guide](/guides/ai_assistant) for detailed instructions and best practices.
+**Learn more**: See the [AI Agent Guide](/guides/ai_agent) for detailed instructions and best practices.
 
 ### Native Mobile Application Deployment
 
