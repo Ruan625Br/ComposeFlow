@@ -38,6 +38,19 @@ these [instructions](https://github.com/JetBrains/compose-multiplatform-template
 
 ## Prerequisites
 
+### Configuration Setup
+
+1. Copy the configuration template:
+   ```bash
+   cp local.properties.template local.properties
+   ```
+
+2. Configure the required services in `local.properties`:
+   - Set up your own authentication service endpoint
+   - Configure LLM service for AI features 
+   - Add Firebase API key and Google Cloud Storage settings
+   - Add OAuth2 credentials for Google integration
+
 ### JetBrain's Runtime
 
 You need to install the [JBR](https://github.com/JetBrains/JetBrainsRuntime) (JetBrain's Runtime) to
