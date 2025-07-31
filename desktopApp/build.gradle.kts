@@ -9,8 +9,8 @@ plugins {
     id("io.compose.flow.kmp.library")
     id("io.compose.flow.compose.multiplatform")
     alias(libs.plugins.roborazzi)
-    id("io.sentry.jvm.gradle") version "3.14.0"
-    id("dev.hydraulic.conveyor") version "1.10"
+    id("io.sentry.jvm.gradle") version libs.versions.sentry.jvm.gradle
+    id("dev.hydraulic.conveyor") version libs.versions.conveyor
 }
 
 group = "io.composeflow"
@@ -24,6 +24,7 @@ kotlin {
         jvmMain.dependencies {
             implementation(libs.kermit)
             implementation(compose.desktop.currentOs)
+            implementation(project(":core:analytics"))
             implementation(project(":core:config"))
             implementation(project(":core:di"))
             implementation(project(":core:logger"))

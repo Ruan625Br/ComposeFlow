@@ -11,6 +11,7 @@ compose-adaptive-layout = "1.1.2"
 compose-color-picker = "0.7.0"
 compose-multiplatform = "1.8.2"
 compose-navigation = "2.8.0-alpha13"
+conveyor = "1.12"
 core-splashscreen = "1.0.1"
 coroutine = "1.10.2"
 dataStore = "1.1.7"
@@ -35,10 +36,12 @@ logback = "1.5.18"
 multiplatform-settings = "1.3.0"
 okhttp = "5.1.0"
 paging-multiplatform = "3.3.0-alpha02-0.5.1"
+posthog = "1.2.0"
 precompose = "1.6.2"
 reorderable = "0.9.6"
 roborazzi = "1.46.1"
 sentry = "8.17.0"
+sentry-jvm-gradle = "5.8.0"
 testparameterinjector = "1.18"
 xmlutil = "0.91.1"
 
@@ -136,6 +139,9 @@ buildconfig-plugin = "com.github.gmazzo.buildconfig:plugin:5.6.7"
 sentry = { module = "io.sentry:sentry", version.ref = "sentry" }
 sentry-compose = { module = "io.sentry:sentry-compose", version.ref = "sentry" }
 sentry-compose-desktop = { module = "io.sentry:sentry-compose-desktop", version.ref = "sentry" }
+
+# Analytics
+posthog-java = { module = "com.posthog.java:posthog", version.ref = "posthog" }
 
 # Logging
 slf4j-api = "org.slf4j:slf4j-api:2.0.17"

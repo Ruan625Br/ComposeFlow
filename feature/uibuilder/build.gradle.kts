@@ -14,6 +14,7 @@ kotlin {
         commonMain.dependencies {
             implementation(project(":ksp-llm-tools"))
             implementation(project(":core:ai"))
+            implementation(project(":core:analytics"))
             implementation(project(":core:config"))
             implementation(project(":core:di"))
             implementation(project(":core:icons"))

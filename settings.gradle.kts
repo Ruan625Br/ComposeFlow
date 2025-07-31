@@ -53,6 +53,7 @@ rootProject.name = "ComposeFlow"
 include(":desktopApp")
 include(":generate-jsonschema-cli")
 include(":core:ai")
+include(":core:analytics")
 include(":core:config")
 include(":core:di")
 include(":core:formatter")

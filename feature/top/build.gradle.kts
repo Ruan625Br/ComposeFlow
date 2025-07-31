@@ -12,6 +12,7 @@ kotlin {
     sourceSets {
         commonMain.dependencies {
             implementation(project(":core:ai"))
+            implementation(project(":core:analytics"))
             implementation(project(":core:di"))
             implementation(project(":core:formatter"))
             implementation(project(":core:kxs-ts-gen-core"))

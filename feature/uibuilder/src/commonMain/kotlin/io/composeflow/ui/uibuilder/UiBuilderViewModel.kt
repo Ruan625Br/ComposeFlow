@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import io.composeflow.MainViewUiState
 import io.composeflow.Res
+import io.composeflow.analytics.AnalyticsTracker
 import io.composeflow.asClassName
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.dynamic_items_is_used_only_once_warning
@@ -40,6 +41,7 @@ import io.composeflow.model.project.component.Component
 import io.composeflow.model.project.copy
 import io.composeflow.model.project.findCanvasEditableHavingNodeOrNull
 import io.composeflow.model.project.findComponentOrThrow
+import io.composeflow.model.project.findComposeNodeOrNull
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.replaceNode
 import io.composeflow.model.property.AssignableProperty
@@ -259,6 +261,18 @@ class UiBuilderViewModel(
             return eventResult
         }
 
+        // Track compose node deletion
+        try {
+            focusedNodes.forEach { node ->
+                AnalyticsTracker.trackComposeNodeDeleted(
+                    nodeType = node.label.value,
+                    count = 1,
+                )
+            }
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         val nodesToDelete =
             focusedNodes.map {
                 it.restoreInstance(sameId = true)
@@ -307,6 +321,19 @@ class UiBuilderViewModel(
         val focused = project.screenHolder.currentEditable().findFocusedNodes()
         val result = EventResult()
         val operationTargets = focused.map { it.getOperationTargetNode(project) }
+
+        // Track compose node copy
+        try {
+            if (operationTargets.isNotEmpty()) {
+                AnalyticsTracker.trackComposeNodeCopied(
+                    nodeType = operationTargets.joinToString(", ") { it.trait.value.toString() },
+                    count = operationTargets.size,
+                )
+            }
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         if (operationTargets.size == 1) {
             copiedNodes = operationTargets
             result.errorMessages.add("Copied ${operationTargets[0].displayName(project)}")
@@ -323,6 +350,19 @@ class UiBuilderViewModel(
             result.errorMessages.add("No Composable in clipboard")
             return result
         }
+
+        // Track compose node paste
+        try {
+            if (copiedNodes.isNotEmpty()) {
+                AnalyticsTracker.trackComposeNodePasted(
+                    nodeType = copiedNodes.joinToString(", ") { it.trait.value.toString() },
+                    count = copiedNodes.size,
+                )
+            }
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         copiedNodes.forEach { copied ->
             val container =
                 project.screenHolder
@@ -398,6 +438,18 @@ class UiBuilderViewModel(
                 )
             if (preValidationResult.errorMessages.isNotEmpty()) {
                 return@runBlocking preValidationResult
+            }
+
+            // Track compose node added
+            try {
+                val containerNode = project.findComposeNodeOrNull(containerNodeId)
+                AnalyticsTracker.trackComposeNodeAdded(
+                    nodeType = composeNode.trait.value.toString(),
+                    containerType = containerNode?.trait?.value?.toString(),
+                    source = "palette",
+                )
+            } catch (_: Exception) {
+                // Analytics is optional, don't fail on errors
             }
 
             recordOperation(
@@ -809,6 +861,16 @@ class UiBuilderViewModel(
     }
 
     fun onAddScreen(screen: Screen) {
+        // Track screen creation
+        try {
+            AnalyticsTracker.trackScreenCreated(
+                screenType = screen.javaClass.simpleName,
+                creationMethod = "manual",
+            )
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         recordOperation(
             project = project,
             userOperation =
@@ -838,11 +900,35 @@ class UiBuilderViewModel(
     }
 
     fun onSelectScreen(screen: Screen) {
+        // Track screen switching
+        try {
+            val fromScreen =
+                project.screenHolder
+                    .currentScreen()
+                    .label.value
+            AnalyticsTracker.trackScreenSwitched(
+                fromScreen = fromScreen,
+                toScreen = screen.label.value,
+            )
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         project.screenHolder.selectScreen(screen)
         saveProject(project)
     }
 
     fun onDeleteScreen(screen: Screen) {
+        // Track screen deletion
+        try {
+            AnalyticsTracker.trackScreenDeleted(
+                screenType = screen.label.value,
+                hadComponents = screen.getAllComposeNodes().isNotEmpty(),
+            )
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         recordOperation(
             project = project,
             userOperation =
@@ -1133,6 +1219,16 @@ class UiBuilderViewModel(
     }
 
     private fun saveProject(project: Project) {
+        // Track project save
+        try {
+            AnalyticsTracker.trackProjectSaved(
+                saveTrigger = "user_action",
+                autoSave = false,
+            )
+        } catch (_: Exception) {
+            // Analytics is optional, don't fail on errors
+        }
+
         viewModelScope.launch {
             projectRepository.updateProject(project)
         }
