@@ -15,6 +15,7 @@
 - **State Management**: Visual state management with automatic code generation
 - **Component Library**: Rich set of pre-built UI components and modifiers
 - **Theme Support**: Visual theme editor with Material Design integration
+- **Firebase Integration**: Seamless integration with Firebase for authentication, Firestore, and cloud services
 - **Project Export**: Export fully functional Compose Multiplatform projects ready to build and
   deploy
 
