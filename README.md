@@ -19,6 +19,8 @@
 - **Project Export**: Export fully functional Compose Multiplatform projects ready to build and
   deploy
 
+For detailed documentation and tutorials, visit: https://docs.composeflow.io/
+
 ## Demo Videos
 
 Create an initial project from a prompt
