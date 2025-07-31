@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
  * https://support.google.com/googleplay/android-developer/table/4419860?hl=en
  */
 @Serializable(with = ResourceLocaleSerializer::class)
-@SerialName("Locale")
+@SerialName("ResourceLocale")
 enum class ResourceLocale(
     val language: String,
     val region: String? = null,

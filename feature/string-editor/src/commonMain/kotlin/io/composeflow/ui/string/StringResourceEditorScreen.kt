@@ -455,6 +455,14 @@ private fun LocaleHeaderCell(
         modifier = modifier.padding(horizontal = 8.dp, vertical = 4.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        locale.flagEmoji?.let { flag ->
+            Text(
+                text = flag,
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.secondary,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+        }
         Text(
             text =
                 buildString {
@@ -710,10 +718,20 @@ private fun EditSupportedLocalesDialog(
                                         Modifier
                                             .fillMaxWidth()
                                             .padding(horizontal = 16.dp, vertical = 12.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = locale.flagEmoji.orEmpty(),
+                                        style = MaterialTheme.typography.headlineMedium,
+                                        color =
+                                            if (isDefault) {
+                                                LocalContentColor.current.copy(0.6f)
+                                            } else {
+                                                LocalContentColor.current
+                                            },
+                                        modifier = Modifier.width(44.dp),
+                                    )
+                                    Column {
                                         Text(
                                             text = stringResource(locale.displayNameResource),
                                             style = MaterialTheme.typography.bodyLarge,
@@ -735,6 +753,7 @@ private fun EditSupportedLocalesDialog(
                                                 },
                                         )
                                     }
+                                    Spacer(modifier = Modifier.weight(1f))
                                     if (isDefault) {
                                         Text(
                                             text = stringResource(Res.string.default_locale_label),

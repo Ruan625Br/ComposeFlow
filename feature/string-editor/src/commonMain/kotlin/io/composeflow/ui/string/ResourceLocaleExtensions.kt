@@ -106,3 +106,59 @@ val ResourceLocale.displayNameResource: StringResource
             ResourceLocale.VIETNAMESE -> Res.string.locale_name_vi
             ResourceLocale.ZULU -> Res.string.locale_name_zu
         }
+
+// See "Likely Subtags" data of Unicode CLDR for the list of language codes and their likely region code.
+// https://www.unicode.org/cldr/charts/47/supplemental/likely_subtags.html
+val ResourceLocale.flagEmoji: String?
+    get() =
+        when (this) {
+            ResourceLocale.AFRIKAANS -> "🇿🇦"
+            ResourceLocale.AMHARIC -> "🇪🇹"
+            ResourceLocale.BULGARIAN -> "🇧🇬"
+            ResourceLocale.CATALAN -> "🇪🇸"
+            ResourceLocale.CHINESE_HONG_KONG -> "🇭🇰"
+            ResourceLocale.CHINESE_PRC -> "🇨🇳"
+            ResourceLocale.CHINESE_TAIWAN -> "🇹🇼"
+            ResourceLocale.CROATIAN -> "🇭🇷"
+            ResourceLocale.CZECH -> "🇨🇿"
+            ResourceLocale.DANISH -> "🇩🇰"
+            ResourceLocale.DUTCH -> "🇳🇱"
+            ResourceLocale.ENGLISH_UK -> "🇬🇧"
+            ResourceLocale.ENGLISH_US -> "🇺🇸"
+            ResourceLocale.ESTONIAN -> "🇪🇪"
+            ResourceLocale.FILIPINO -> "🇵🇭"
+            ResourceLocale.FINNISH -> "🇫🇮"
+            ResourceLocale.FRENCH_CANADA -> "🇨🇦"
+            ResourceLocale.FRENCH_FRANCE -> "🇫🇷"
+            ResourceLocale.GERMAN -> "🇩🇪"
+            ResourceLocale.GREEK -> "🇬🇷"
+            ResourceLocale.HEBREW -> "🇮🇱"
+            ResourceLocale.HINDI -> "🇮🇳"
+            ResourceLocale.HUNGARIAN -> "🇭🇺"
+            ResourceLocale.ICELANDIC -> "🇮🇸"
+            ResourceLocale.INDONESIAN -> "🇮🇩"
+            ResourceLocale.ITALIAN -> "🇮🇹"
+            ResourceLocale.JAPANESE -> "🇯🇵"
+            ResourceLocale.KOREAN -> "🇰🇷"
+            ResourceLocale.LATVIAN -> "🇱🇻"
+            ResourceLocale.LITHUANIAN -> "🇱🇹"
+            ResourceLocale.MALAY -> "🇲🇾"
+            ResourceLocale.NORWEGIAN -> "🇳🇴"
+            ResourceLocale.POLISH -> "🇵🇱"
+            ResourceLocale.PORTUGUESE_BRAZIL -> "🇧🇷"
+            ResourceLocale.PORTUGUESE_PORTUGAL -> "🇵🇹"
+            ResourceLocale.ROMANIAN -> "🇷🇴"
+            ResourceLocale.RUSSIAN -> "🇷🇺"
+            ResourceLocale.SERBIAN -> "🇷🇸"
+            ResourceLocale.SLOVAK -> "🇸🇰"
+            ResourceLocale.SLOVENIAN -> "🇸🇮"
+            ResourceLocale.SPANISH_LATIN_AMERICA -> null
+            ResourceLocale.SPANISH_SPAIN -> "🇪🇸"
+            ResourceLocale.SWAHILI -> "🇹🇿"
+            ResourceLocale.SWEDISH -> "🇸🇪"
+            ResourceLocale.THAI -> "🇹🇭"
+            ResourceLocale.TURKISH -> "🇹🇷"
+            ResourceLocale.UKRAINIAN -> "🇺🇦"
+            ResourceLocale.VIETNAMESE -> "🇻🇳"
+            ResourceLocale.ZULU -> "🇿🇦"
+        }
