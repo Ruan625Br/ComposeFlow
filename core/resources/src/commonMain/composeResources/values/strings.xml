@@ -504,12 +504,13 @@ instead of in the canvas.</string>
 
     <!-- String Resource Editor -->
     <string name="action_add">Add</string>
-    <string name="edit_supported_locales">Edit Supported Locales</string>
     <string name="add_new_string_resource">Add New String Resource</string>
     <string name="add_string_resource">+ Add String Resource</string>
     <string name="default_locale_label"> (default)</string>
-    <string name="delete_string_resource">Delete String Resource</string>
     <string name="delete_string_resource_confirmation">Are you sure you want to delete the string resource "%1$s"?</string>
+    <string name="delete_string_resources">Delete strings</string>
+    <string name="delete_string_resources_confirmation">Are you sure you want to delete %1$d string resources?</string>
+    <string name="edit_supported_locales">Edit locales</string>
     <string name="more_options">More options</string>
     <string name="no_locales_found_matching">No locales found matching "%1$s"</string>
     <string name="remove_locale">Remove locale</string>
@@ -519,8 +520,10 @@ instead of in the canvas.</string>
     <string name="string_resource_default_value_placeholder">Default value (%1$s)</string>
     <string name="string_resource_description">Description</string>
     <string name="string_resource_description_placeholder">Description (optional)</string>
-    <string name="string_resource_key">Key</string>
+    <string name="string_resource_description_tooltip">An optional description explaining the purpose or context of this string resource,\nmainly used to provide guidance for translators.</string>
+    <string name="string_resource_key">Resource key</string>
     <string name="string_resource_key_placeholder">Resource key</string>
+    <string name="string_resource_key_tooltip">The unique identifier for this string resource, used to reference it in UI and other resources.</string>
     <string name="string_resources">String Resources</string>
 
     <!-- Locale display names -->
