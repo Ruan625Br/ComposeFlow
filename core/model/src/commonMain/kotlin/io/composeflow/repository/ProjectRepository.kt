@@ -91,4 +91,8 @@ class ProjectRepository(
     }
 
     suspend fun loadProjectIdList(): List<String> = projectSaver.loadProjectIdList(userId = firebaseIdToken.user_id)
+
+    companion object {
+        fun createAnonymous(): ProjectRepository = ProjectRepository(firebaseIdToken = FirebaseIdToken.Anonymouse)
+    }
 }

@@ -33,6 +33,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import io.composeflow.ai.AiChatDialog
 import io.composeflow.auth.LocalFirebaseIdToken
+import io.composeflow.auth.isAiEnabled
 import io.composeflow.model.ProvideNavigator
 import io.composeflow.model.TopLevelDestination
 import io.composeflow.ui.Tooltip
@@ -81,6 +82,8 @@ fun ProjectEditorContent(
     onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
 ) {
     val firebaseIdToken = LocalFirebaseIdToken.current
+    val isAiEnabled = isAiEnabled()
+
     val viewModel =
         viewModel(modelClass = ProjectEditorViewModel::class) {
             ProjectEditorViewModel(firebaseIdToken = firebaseIdToken, projectId = projectId)
@@ -100,16 +103,20 @@ fun ProjectEditorContent(
         }
     val showAiChatDialog = viewModel.showAiChatDialog.collectAsState().value
     val aiChatToggleVisibilityModifier =
-        Modifier.onPreviewKeyEvent { event ->
-            if (event.type == KeyEventType.KeyDown &&
-                event.key == Key.K &&
-                (event.isMetaPressed || event.isCtrlPressed)
-            ) {
-                viewModel.onToggleShowAiChatDialog()
-                true
-            } else {
-                false
+        if (isAiEnabled) {
+            Modifier.onPreviewKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
+                    event.key == Key.K &&
+                    (event.isMetaPressed || event.isCtrlPressed)
+                ) {
+                    viewModel.onToggleShowAiChatDialog()
+                    true
+                } else {
+                    false
+                }
             }
+        } else {
+            Modifier
         }
     Surface(
         modifier = aiChatToggleVisibilityModifier,
@@ -124,11 +131,13 @@ fun ProjectEditorContent(
             ProvideNavigator(navigator = projectEditorNavigator) {
                 Column {
                     onTitleBarLeftContentSet {
-                        LeftToolbar(
-                            onToggleVisibilityOfAiChatDialog = {
-                                viewModel.onToggleShowAiChatDialog()
-                            },
-                        )
+                        if (isAiEnabled) {
+                            LeftToolbar(
+                                onToggleVisibilityOfAiChatDialog = {
+                                    viewModel.onToggleShowAiChatDialog()
+                                },
+                            )
+                        }
                     }
                     onTitleBarRightContentSet {
                         RightToolbar(
@@ -223,7 +232,7 @@ fun ProjectEditorContent(
             }
         }
     }
-    if (showAiChatDialog) {
+    if (showAiChatDialog && isAiEnabled) {
         AiChatDialog(
             project = project,
             aiAssistantUiState = aiAssistantUiState,

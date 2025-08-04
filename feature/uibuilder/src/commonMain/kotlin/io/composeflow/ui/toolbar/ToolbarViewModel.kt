@@ -50,8 +50,15 @@ import org.jetbrains.annotations.VisibleForTesting
 import org.jetbrains.compose.resources.getString
 
 class ToolbarViewModel(
-    private val firebaseIdTokenArg: FirebaseIdToken,
-    private val projectRepository: ProjectRepository = ProjectRepository(firebaseIdTokenArg),
+    private val firebaseIdTokenArg: FirebaseIdToken?,
+    private val projectRepository: ProjectRepository =
+        if (firebaseIdTokenArg !=
+            null
+        ) {
+            ProjectRepository(firebaseIdTokenArg)
+        } else {
+            ProjectRepository.createAnonymous()
+        },
     private val authRepository: AuthRepository = AuthRepository(),
     private val firebaseApiCaller: FirebaseApiCaller = FirebaseApiCaller(),
     private val settingsRepository: SettingsRepository = SettingsRepository(),
@@ -258,7 +265,7 @@ class ToolbarViewModel(
                         obtainUpdatedFirebaseAppInfo(project.firebaseAppInfoHolder.firebaseAppInfo)
                     saveProject(project)
                     assertSynchronizer.syncFilesLocally(
-                        userId = firebaseIdTokenArg.user_id,
+                        userId = firebaseIdTokenArg?.user_id ?: "anonymous",
                         projectId = project.id,
                         assetFiles = project.getAssetFiles(),
                     )
@@ -366,7 +373,7 @@ class ToolbarViewModel(
                 obtainUpdatedFirebaseAppInfo(project.firebaseAppInfoHolder.firebaseAppInfo)
             saveProject(project)
             assertSynchronizer.syncFilesLocally(
-                userId = firebaseIdTokenArg.user_id,
+                userId = firebaseIdTokenArg?.user_id ?: "anonymous",
                 projectId = project.id,
                 assetFiles = project.getAssetFiles(),
             )

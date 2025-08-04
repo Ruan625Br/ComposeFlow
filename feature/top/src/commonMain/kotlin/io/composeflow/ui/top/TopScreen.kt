@@ -45,6 +45,7 @@ import com.seiko.imageloader.LocalImageLoader
 import com.seiko.imageloader.createDefault
 import io.composeflow.ProjectEditorView
 import io.composeflow.Res
+import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.formatter.ProvideCodeTheme
 import io.composeflow.log_out
@@ -72,16 +73,17 @@ fun TopScreen(
     onLogOut: () -> Unit,
     onTitleBarRightContentSet: (TitleBarContent) -> Unit,
     onTitleBarLeftContentSet: (TitleBarContent) -> Unit,
+    isAnonymous: Boolean = false,
 ) {
     // To reset the TitleBar content when the user navigates back to top screen
     onTitleBarLeftContentSet({})
     onTitleBarRightContentSet({})
 
-    val firebaseIdToken = LocalFirebaseIdToken.current
+    val firebaseIdToken = if (!isAnonymous) LocalFirebaseIdToken.current else null
     val viewModel =
         viewModel(
             modelClass = TopScreenViewModel::class,
-            keys = listOf(firebaseIdToken.user_id),
+            keys = listOf(firebaseIdToken?.user_id ?: "anonymous"),
         ) { TopScreenViewModel(firebaseIdToken) }
     val settings = viewModel.settings.collectAsState()
     val useComposeFlowDarkTheme =
@@ -132,6 +134,7 @@ fun TopScreen(
                                                 onLogOut = onLogOut,
                                                 projectUiState = projectUiState,
                                                 useComposeFlowDarkTheme = useComposeFlowDarkTheme,
+                                                isAnonymous = isAnonymous,
                                             )
 
                                         ProjectUiState.HasNotSelected.ProjectListLoading ->
@@ -143,6 +146,7 @@ fun TopScreen(
                                                 onLogOut = onLogOut,
                                                 projectUiState = ProjectUiState.HasNotSelected.ProjectListLoading,
                                                 useComposeFlowDarkTheme = useComposeFlowDarkTheme,
+                                                isAnonymous = isAnonymous,
                                             )
 
                                         is ProjectUiState.Selected -> {
@@ -195,6 +199,7 @@ private fun TopNavigationDrawerScreen(
     onLogOut: () -> Unit,
     projectUiState: ProjectUiState.HasNotSelected,
     useComposeFlowDarkTheme: Boolean,
+    isAnonymous: Boolean = false,
 ) {
     var selectedDestination by remember { mutableStateOf(TopDestination.Project) }
 
@@ -225,7 +230,11 @@ private fun TopNavigationDrawerScreen(
                 }
 
                 Spacer(Modifier.weight(1f))
-                UserProfileContainer(onLogOut = onLogOut)
+                if (!isAnonymous) {
+                    UserProfileContainer(onLogOut = onLogOut)
+                } else {
+                    AnonymousUserContainer(onLogOut = onLogOut)
+                }
                 Spacer(Modifier.size(16.dp))
             }
         },
@@ -275,35 +284,37 @@ private fun TopNavigationDrawerScreen(
 }
 
 @Composable
-private fun UserProfileContainer(onLogOut: () -> Unit) {
-    val firebaseIdToken = LocalFirebaseIdToken.current
+private fun AnonymousUserContainer(onLogOut: () -> Unit) {
     Column {
         Row(
             verticalAlignment = Alignment.Top,
             modifier = Modifier.wrapContentSize(),
         ) {
-            AsyncImage(
-                url = firebaseIdToken.picture,
-                contentDescription = stringResource(Res.string.profile_image),
+            Box(
                 modifier =
                     Modifier
                         .padding(all = 8.dp)
-                        .size(
-                            width = 48.dp,
-                            height = 48.dp,
-                        ).clip(shape = CircleShape)
-                        .hoverIconClickable(),
-            )
+                        .size(width = 48.dp, height = 48.dp)
+                        .clip(shape = CircleShape)
+                        .background(color = MaterialTheme.colorScheme.primary),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(
+                    text = "A",
+                    color = MaterialTheme.colorScheme.onPrimary,
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
             Column(
                 modifier = Modifier.wrapContentSize().padding(vertical = 8.dp),
             ) {
                 Text(
-                    text = firebaseIdToken.name,
+                    text = "Anonymous User",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
-                    text = firebaseIdToken.email,
+                    text = "Limited features available",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(top = 8.dp),
@@ -319,9 +330,65 @@ private fun UserProfileContainer(onLogOut: () -> Unit) {
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.Logout,
-                contentDescription = stringResource(Res.string.log_out),
+                contentDescription = "Back to login",
             )
-            Text(stringResource(Res.string.log_out))
+            Text("Back to login")
+        }
+    }
+}
+
+@Composable
+private fun UserProfileContainer(onLogOut: () -> Unit) {
+    val firebaseIdToken = LocalFirebaseIdToken.current
+    val signedInToken = firebaseIdToken as? FirebaseIdToken.SignedInToken
+
+    if (signedInToken != null) {
+        Column {
+            Row(
+                verticalAlignment = Alignment.Top,
+                modifier = Modifier.wrapContentSize(),
+            ) {
+                AsyncImage(
+                    url = signedInToken.picture,
+                    contentDescription = stringResource(Res.string.profile_image),
+                    modifier =
+                        Modifier
+                            .padding(all = 8.dp)
+                            .size(
+                                width = 48.dp,
+                                height = 48.dp,
+                            ).clip(shape = CircleShape)
+                            .hoverIconClickable(),
+                )
+                Column(
+                    modifier = Modifier.wrapContentSize().padding(vertical = 8.dp),
+                ) {
+                    Text(
+                        text = signedInToken.name,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = signedInToken.email,
+                        color = MaterialTheme.colorScheme.primary,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(top = 8.dp),
+                    )
+                }
+            }
+
+            TextButton(
+                onClick = {
+                    onLogOut()
+                },
+                modifier = Modifier.padding(start = 8.dp),
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.Logout,
+                    contentDescription = stringResource(Res.string.log_out),
+                )
+                Text(stringResource(Res.string.log_out))
+            }
         }
     }
 }

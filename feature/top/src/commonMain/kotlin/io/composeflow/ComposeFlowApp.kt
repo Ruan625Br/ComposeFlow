@@ -7,6 +7,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import io.composeflow.ui.ProvideOnShowSnackbar
@@ -49,6 +51,10 @@ fun ComposeFlowApp(
                     },
                     onTitleBarRightContentSet = onTitleBarRightContentSet,
                     onTitleBarLeftContentSet = onTitleBarLeftContentSet,
+                    onUseWithoutSignIn = appViewModel::onUseWithoutSignIn,
+                    loginUiStateProvider = {
+                        appViewModel.loginResultUiState.collectAsState().value
+                    },
                 )
             }
         }

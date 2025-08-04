@@ -1,5 +1,7 @@
 package io.composeflow.ui.login
 
+import androidx.compose.runtime.Composable
+import io.composeflow.LoginResultUiState
 import io.composeflow.ui.jewel.TitleBarContent
 import moe.tlaster.precompose.navigation.RouteBuilder
 import moe.tlaster.precompose.navigation.transition.NavTransition
@@ -11,6 +13,8 @@ fun RouteBuilder.loginScreen(
     onLogOut: () -> Unit,
     onTitleBarRightContentSet: (TitleBarContent) -> Unit = {},
     onTitleBarLeftContentSet: (TitleBarContent) -> Unit = {},
+    onUseWithoutSignIn: () -> Unit = {},
+    loginUiStateProvider: @Composable () -> LoginResultUiState,
     navTransition: NavTransition? = null,
 ) {
     scene(
@@ -22,6 +26,8 @@ fun RouteBuilder.loginScreen(
             onLogOut = onLogOut,
             onTitleBarRightContentSet = onTitleBarRightContentSet,
             onTitleBarLeftContentSet = onTitleBarLeftContentSet,
+            onUseWithoutSignIn = onUseWithoutSignIn,
+            loginUiState = loginUiStateProvider(),
         )
     }
 }

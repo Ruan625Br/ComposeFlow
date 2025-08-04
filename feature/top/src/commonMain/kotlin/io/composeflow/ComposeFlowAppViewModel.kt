@@ -8,9 +8,11 @@ import io.composeflow.datastore.LocalFirstProjectSaver
 import io.composeflow.datastore.ProjectSaver
 import io.composeflow.di.ServiceLocator
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import moe.tlaster.precompose.viewmodel.ViewModel
@@ -20,50 +22,66 @@ class ComposeFlowAppViewModel(
     private val authRepository: AuthRepository = AuthRepository(),
     private val projectSaver: ProjectSaver = LocalFirstProjectSaver(),
 ) : ViewModel() {
+    private val _isAnonymous = MutableStateFlow(false)
+    val isAnonymous: StateFlow<Boolean> = _isAnonymous.asStateFlow()
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val loginResultUiState: StateFlow<LoginResultUiState> =
-        authRepository.firebaseIdToken
-            .onEach { token ->
-                // Handle analytics user identification on authentication state changes
-                try {
-                    val analytics = ServiceLocator.get<Analytics>()
-                    if (token != null) {
+        combine(
+            authRepository.firebaseIdToken,
+            _isAnonymous,
+        ) { token, isAnonymous ->
+            when {
+                isAnonymous -> LoginResultUiState.Anonymous
+                token != null -> LoginResultUiState.Success(token)
+                else -> LoginResultUiState.NotStarted
+            }
+        }.onEach { state ->
+            // Handle analytics user identification on authentication state changes
+            try {
+                val analytics = ServiceLocator.get<Analytics>()
+                when (state) {
+                    is LoginResultUiState.Success -> {
                         // User logged in - identify user for analytics
                         // Only send non-PII data to comply with privacy practices
+                        val signedInToken = state.firebaseIdToken as? FirebaseIdToken.SignedInToken
                         analytics.identify(
-                            userId = token.user_id.hashCode().toString(),
+                            userId =
+                                state.firebaseIdToken.user_id
+                                    .hashCode()
+                                    .toString(),
                             properties =
                                 mapOf(
-                                    "email_verified" to token.email_verified,
+                                    "email_verified" to (signedInToken?.email_verified ?: false),
                                     "login_method" to "google",
                                 ),
                         )
                         AnalyticsTracker.trackUserLogin("google")
-                    } else {
+                    }
+                    is LoginResultUiState.Anonymous -> {
+                        // Anonymous user - track without identification
+                        AnalyticsTracker.trackUserLogin("anonymous")
+                    }
+                    else -> {
                         // User logged out - reset analytics
                         analytics.reset()
                     }
-                } catch (e: Exception) {
-                    // Analytics is optional, don't fail if not available
                 }
-            }.mapLatest {
-                when (it) {
-                    null -> {
-                        LoginResultUiState.NotStarted
-                    }
-
-                    else -> {
-                        LoginResultUiState.Success(it)
-                    }
-                }
-            }.stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = LoginResultUiState.Loading,
-            )
+            } catch (e: Exception) {
+                // Analytics is optional, don't fail if not available
+            }
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = LoginResultUiState.Loading,
+        )
 
     fun onGoogleSignClicked() {
         authRepository.startGoogleSignInFlow()
+    }
+
+    fun onUseWithoutSignIn() {
+        _isAnonymous.value = true
     }
 
     suspend fun onLogOut() {
@@ -76,6 +94,7 @@ class ComposeFlowAppViewModel(
 
         projectSaver.deleteCacheProjects()
         authRepository.logOut()
+        _isAnonymous.value = false
     }
 }
 
@@ -87,4 +106,6 @@ sealed interface LoginResultUiState {
     data class Success(
         val firebaseIdToken: FirebaseIdToken,
     ) : LoginResultUiState
+
+    data object Anonymous : LoginResultUiState
 }
