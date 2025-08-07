@@ -1,8 +1,6 @@
 package io.composeflow.appbuilder
 
 import co.touchlab.kermit.Logger
-import co.touchlab.kermit.SystemWriter
-import co.touchlab.kermit.loggerConfigInit
 import io.composeflow.appbuilder.wrapper.AdbWrapper
 import io.composeflow.appbuilder.wrapper.AndroidEmulatorWrapper
 import io.composeflow.appbuilder.wrapper.GradleCommandLineRunner
@@ -37,7 +35,7 @@ import kotlin.io.path.createTempDirectory
 
 object AppRunner {
     // TODO: Replace this with DI
-    var buildLogger = Logger(loggerConfigInit(SystemWriter()))
+    var buildLogger = Logger
     private val androidEmulatorWrapper = AndroidEmulatorWrapper()
     private val adbWrapper = AdbWrapper()
     private val xcodeToolsWrapper = XcodeCommandLineToolsWrapper(buildLogger)

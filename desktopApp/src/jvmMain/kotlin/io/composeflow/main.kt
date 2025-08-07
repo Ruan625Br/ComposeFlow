@@ -22,6 +22,7 @@ import io.composeflow.analytics.Analytics
 import io.composeflow.analytics.AnalyticsTracker
 import io.composeflow.analytics.createAnalytics
 import io.composeflow.di.ServiceLocator
+import io.composeflow.logger.InMemoryLogWriter
 import io.composeflow.logger.logger
 import io.composeflow.platform.CloudProjectSaverRunner
 import io.composeflow.ui.login.LOGIN_ROUTE
@@ -50,7 +51,7 @@ val updateController: SoftwareUpdateController? = SoftwareUpdateController.getIn
 val canDoOnlineUpdates get() = updateController?.canTriggerUpdateCheckUI() == SoftwareUpdateController.Availability.AVAILABLE
 
 fun main() {
-    Logger.setLogWriters(SystemWriter())
+    Logger.setLogWriters(SystemWriter(), InMemoryLogWriter())
 
     logger.info("release = ${BuildConfig.isRelease}")
     logger.info("Current directory = ${Paths.get("").toAbsolutePath()}")
@@ -90,23 +91,25 @@ fun main() {
         application {
             App(
                 onExitApplication = {
-                    Runtime.getRuntime().addShutdownHook(thread(start = false) {
-                        println("Exit application callback detected. Syncing project yaml before exiting...")
-                        runBlocking {
-                            CloudProjectSaverRunner.syncProjectYaml()
-                        }
-                        println("Sync completed.")
+                    Runtime.getRuntime().addShutdownHook(
+                        thread(start = false) {
+                            println("Exit application callback detected. Syncing project yaml before exiting...")
+                            runBlocking {
+                                CloudProjectSaverRunner.syncProjectYaml()
+                            }
+                            println("Sync completed.")
 
-                        // Shutdown analytics
-                        try {
-                            ServiceLocator.get<Analytics>().shutdown()
-                            println("Analytics shutdown completed.")
-                        } catch (e: Exception) {
-                            println("Error during analytics shutdown: ${e.message}")
-                        }
-                    })
+                            // Shutdown analytics
+                            try {
+                                ServiceLocator.get<Analytics>().shutdown()
+                                println("Analytics shutdown completed.")
+                            } catch (e: Exception) {
+                                println("Error during analytics shutdown: ${e.message}")
+                            }
+                        },
+                    )
                     exitApplication()
-                }
+                },
             )
         }
     } catch (e: Exception) {
@@ -134,11 +137,12 @@ fun App(onExitApplication: () -> Unit) {
         ) {
             ProvidePreComposeLocals {
                 ProvideOnboardingLayoutOffsets(
-                    offsets = OnboardingLayoutOffsets(
-                        titleBarHeight = 30.dp, // Jewel TitleBar default height
-                        navigationRailWidth = 40.dp, // From ProjectEditorView
-                        statusBarHeight = 24.dp // Estimated status bar height
-                    )
+                    offsets =
+                        OnboardingLayoutOffsets(
+                            titleBarHeight = 30.dp, // Jewel TitleBar default height
+                            navigationRailWidth = 40.dp, // From ProjectEditorView
+                            statusBarHeight = 24.dp, // Estimated status bar height
+                        ),
                 ) {
                     PreComposeApp {
                         val navigator = rememberNavigator()
@@ -151,7 +155,7 @@ fun App(onExitApplication: () -> Unit) {
                                 navigator.navigate(LOGIN_ROUTE)
                             },
                             titleBarRightContent = titleBarRightContent,
-                            titleBarLeftContent = titleBarLeftContent
+                            titleBarLeftContent = titleBarLeftContent,
                         )
                         val versionAskedToUpdate =
                             titleBarViewModel.versionAskedToUpdate.collectAsState().value
@@ -160,7 +164,7 @@ fun App(onExitApplication: () -> Unit) {
                                 logger.info("onShowUpdateDialog: $it")
                                 titleBarViewModel.onSaveVersionAskedToUpdate(it)
                             },
-                            versionAskedToUpdate = versionAskedToUpdate
+                            versionAskedToUpdate = versionAskedToUpdate,
                         )
 
                         ComposeFlowApp(
@@ -170,7 +174,7 @@ fun App(onExitApplication: () -> Unit) {
                             },
                             onTitleBarLeftContentSet = {
                                 titleBarViewModel.onTitleBarLeftContentSet(it)
-                            }
+                            },
                         )
                     }
                 }
@@ -197,13 +201,16 @@ private fun CheckForUpdateDialog(
                 remoteVersion = remoteVersionObj?.version ?: "Unknown"
                 logger.info("VersionAskedToUpdate : $versionAskedToUpdate")
                 logger.info("remoteVersionObj?.version : ${remoteVersionObj?.version}")
-                val versionHasNotAskedToUpdate = versionAskedToUpdate.version == null ||
-                    (remoteVersionObj?.version?.compareTo(versionAskedToUpdate.version)
-                        ?: 0) > 0
+                val versionHasNotAskedToUpdate =
+                    versionAskedToUpdate.version == null ||
+                        (
+                            remoteVersionObj?.version?.compareTo(versionAskedToUpdate.version)
+                                ?: 0
+                        ) > 0
 
                 updateAvailable =
                     (remoteVersionObj?.compareTo(updateController.currentVersion) ?: 0) > 0 &&
-                        versionHasNotAskedToUpdate
+                    versionHasNotAskedToUpdate
             } catch (e: Exception) {
                 remoteVersion = "Error: ${e.message}"
             }

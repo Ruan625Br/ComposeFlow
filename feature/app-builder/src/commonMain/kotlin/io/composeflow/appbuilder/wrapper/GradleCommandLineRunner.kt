@@ -75,7 +75,7 @@ class GradleCommandLineRunner(
             localJavaHomePath?.let {
                 val environment = processBuilder.environment()
                 environment["JAVA_HOME"] = it
-                logger.debug("JAVA_HOME is set for gradle wrapper : {}", it)
+                debug("JAVA_HOME is set for gradle wrapper : $it")
             }
 
             Logger.d("Executing command: ${processBuilder.command()}")
@@ -88,9 +88,10 @@ class GradleCommandLineRunner(
                     launch {
                         process.inputStream.bufferedReader().use { reader ->
                             reader.forEachLine { line ->
-                                buildLogger.d(line)
-                                logger.debug(line)
+                                verbose(line)
+
                                 if (line.isBuildSuccessful()) {
+                                    info("Gradle build completed successfully.")
                                     onStatusBarUiStateChanged(StatusBarUiState.Success(line))
                                 } else if (line.isJsBrowserRunSuccessful()) {
                                     val message = "Running at: ${
@@ -99,6 +100,7 @@ class GradleCommandLineRunner(
                                             "",
                                         )
                                     }"
+                                    info(message)
                                     onStatusBarUiStateChanged(
                                         StatusBarUiState.JsBrowserRunSuccess(
                                             message,
@@ -134,21 +136,21 @@ class GradleCommandLineRunner(
                                                 "",
                                             )
                                         }"
+                                        info(message)
                                         onStatusBarUiStateChanged(
                                             StatusBarUiState.JsBrowserRunSuccess(
                                                 message,
                                             ),
                                         )
                                     } else {
-                                        buildLogger.i(line)
+                                        verbose(line)
                                         onStatusBarUiStateChanged(StatusBarUiState.Loading(line))
                                     }
                                 } else {
                                     if (line.isBuildFailure()) {
                                         onStatusBarUiStateChanged(StatusBarUiState.Failure(line))
                                     }
-                                    buildLogger.e(line)
-                                    logger.error(line)
+                                    error(line)
                                 }
                             }
                         }
@@ -164,13 +166,41 @@ class GradleCommandLineRunner(
                 readStdErrJob?.cancelAndJoin()
                 readStdOutJob?.cancelAndJoin()
             } catch (e: CancellationException) {
-                logger.info("Task $task was canceled")
+                error("Task $task was canceled: ${e.message}")
                 process.destroy()
             } finally {
-                logger.info("Finally block in runTask. Cleaning up: $task")
+                info("Finally block in runTask. Cleaning up: $task")
                 process.destroyForcibly()
             }
         }
+    }
+
+    private fun verbose(message: String) {
+        buildLogger.v(message, tag = TAG)
+    }
+
+    private fun debug(message: String) {
+        buildLogger.d(message, tag = TAG)
+        logger.debug(message)
+    }
+
+    private fun info(message: String) {
+        buildLogger.i(message, tag = TAG)
+        logger.info(message)
+    }
+
+    private fun warn(message: String) {
+        buildLogger.w(message, tag = TAG)
+        logger.warn(message)
+    }
+
+    private fun error(message: String) {
+        buildLogger.e(message, tag = TAG)
+        logger.error(message)
+    }
+
+    companion object {
+        private val TAG = GradleCommandLineRunner::class.simpleName.toString()
     }
 }
 
