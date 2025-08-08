@@ -78,7 +78,7 @@ fun ConsolePanel() {
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            modifier = Modifier.width(100.dp),
+                            modifier = Modifier.width(80.dp),
                             text = log.formatTime(),
                             color = Color(0xFF8D6E63),
                         )

@@ -10,7 +10,7 @@ import moe.tlaster.precompose.navigation.NavHost
 import moe.tlaster.precompose.navigation.Navigator
 
 @Composable
-fun ProjectToolWindowsNavHost(
+fun ProjectToolWindowNavHost(
     navigator: Navigator,
     project: Project,
     modifier: Modifier = Modifier,

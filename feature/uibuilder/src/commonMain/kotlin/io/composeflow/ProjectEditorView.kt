@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -34,6 +35,7 @@ import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import io.composeflow.ai.AiChatDialog
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.auth.isAiEnabled
@@ -98,7 +100,9 @@ fun ProjectEditorContent(
     val aiAssistantUiState by viewModel.aiAssistantUiState.collectAsState()
 
     val projectEditorNavigator = rememberNavigator()
-    val bottomPanelNavigator = rememberNavigator("painel")
+    val toolWindowNavigator = rememberNavigator("toolWindow")
+
+    var hasToolWindowOpen by remember { mutableStateOf(true) }
 
     val currentDestination =
         TopLevelDestination.entries.firstOrNull {
@@ -110,10 +114,10 @@ fun ProjectEditorContent(
                     ?.route
         }
 
-    val currentDestinationBottomPanel =
+    val currentDestinationToolWindow =
         ToolWindowTopLevelDestination.entries.firstOrNull {
             it.route ==
-                bottomPanelNavigator.currentEntry
+                toolWindowNavigator.currentEntry
                     .collectAsState(null)
                     .value
                     ?.route
@@ -173,9 +177,9 @@ fun ProjectEditorContent(
                             )
                         }
 
-                        var selectedItemBottomPanel by remember(currentDestinationBottomPanel) {
+                        var selectedItemToolWindow by remember(currentDestinationToolWindow) {
                             mutableStateOf(
-                                currentDestinationBottomPanel?.ordinal ?: 0,
+                                currentDestinationToolWindow?.ordinal ?: 0,
                             )
                         }
                         Box(
@@ -239,13 +243,24 @@ fun ProjectEditorContent(
                             ) {
                                 ToolWindowTopLevelDestination.entries.forEachIndexed { index, item ->
                                     Tooltip(item.label) {
-                                        val selected = selectedItemBottomPanel == item.ordinal
-                                        val route = if (selected) EMPTY_ROUTE else item.route
-                                        val routeIndex = if (selected) -1 else index
+                                        val selected = selectedItemToolWindow == item.ordinal
+                                        val route = item.route
+                                        val routeIndex = item.ordinal
+                                        Logger.d("route: $route")
+                                        Logger.d("routeIndex: $routeIndex")
+                                        Logger.d("selected: $selected")
+                                        Logger.d("selectedItemToolWindow: $selectedItemToolWindow")
+                                        Logger.d("index: $index")
+                                        Logger.d("ordinal: ${item.ordinal}")
+                                        Logger.d("name: ${item.name}")
+                                        Logger.d("hasToolWindowOpen: $hasToolWindowOpen")
+
                                         SelectableIconButton(
-                                            selected = selected,
+                                            selected = selected && hasToolWindowOpen,
                                             onClick = {
-                                                bottomPanelNavigator.navigate(
+                                                hasToolWindowOpen = !(selected && hasToolWindowOpen)
+
+                                                toolWindowNavigator.navigate(
                                                     route,
                                                     options =
                                                         NavOptions(
@@ -255,7 +270,7 @@ fun ProjectEditorContent(
                                                                 ),
                                                         ),
                                                 )
-                                                selectedItemBottomPanel = routeIndex
+                                                selectedItemToolWindow = routeIndex
                                             },
                                             modifier =
                                                 Modifier
@@ -284,56 +299,47 @@ fun ProjectEditorContent(
                         }
                         VerticalDivider(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                            modifier = Modifier.fillMaxHeight().width(1.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxHeight()
+                                    .width(1.dp),
                         )
 
-                        if (selectedItemBottomPanel == -1) {
-                            ProjectEditorNavHost(
-                                navigator = projectEditorNavigator,
-                                project = project,
-                                aiAssistantUiState = aiAssistantUiState,
-                                onUpdateProject = viewModel::onUpdateProject,
-                                onToggleVisibilityOfAiChatDialog = viewModel::onToggleShowAiChatDialog,
-                                screenMaxSize = screenMaxSize,
-                            )
-                        } else {
-                            VerticalSplitLayout(
-                                initialDividerPosition = 600.dp,
-                                minRatio = 0.25f,
-                                maxRatio = 0.75f,
-                                first = { firstModifier ->
-                                    Column(
-                                        modifier =
-                                            firstModifier
-                                                .fillMaxSize()
-                                                .weight(1f),
-                                    ) {
-                                        ProjectEditorNavHost(
-                                            navigator = projectEditorNavigator,
-                                            project = project,
-                                            aiAssistantUiState = aiAssistantUiState,
-                                            onUpdateProject = viewModel::onUpdateProject,
-                                            onToggleVisibilityOfAiChatDialog = viewModel::onToggleShowAiChatDialog,
-                                            screenMaxSize = screenMaxSize,
-                                        )
-                                    }
-                                },
-                                second = { secondModifier ->
-                                    Column(
-                                        modifier = secondModifier,
-                                    ) {
-                                        ProjectToolWindowsNavHost(
-                                            navigator = bottomPanelNavigator,
+                        VerticalSplitLayout(
+                            initialDividerPosition = if (hasToolWindowOpen) (maxHeight - (maxHeight * 0.2f)).dp else maxHeight.dp,
+                            minRatio = 0.25f,
+                            maxRatio = if (hasToolWindowOpen) 0.94f else 1f,
+                            first = { firstModifier ->
+                                Box(modifier = firstModifier) {
+                                    ProjectEditorNavHost(
+                                        navigator = projectEditorNavigator,
+                                        project = project,
+                                        aiAssistantUiState = aiAssistantUiState,
+                                        onUpdateProject = viewModel::onUpdateProject,
+                                        onToggleVisibilityOfAiChatDialog = viewModel::onToggleShowAiChatDialog,
+                                        screenMaxSize = screenMaxSize,
+                                    )
+                                }
+                            },
+                            second = { secondModifier ->
+                                Box(
+                                    modifier =
+                                        secondModifier
+                                            .height(0.dp),
+                                ) {
+                                    if (hasToolWindowOpen) {
+                                        ProjectToolWindowNavHost(
+                                            navigator = toolWindowNavigator,
                                             project = project,
                                         )
                                     }
-                                },
-                            )
-                        }
+                                }
+                            },
+                        )
                     }
+                    HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
+                    StatusBar(uiState = statusBarUiState)
                 }
-                HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHigh)
-                StatusBar(uiState = statusBarUiState)
             }
         }
     }
