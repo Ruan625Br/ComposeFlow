@@ -243,7 +243,8 @@ data class Screen(
     override val composableName: String = "${name.asClassName()}Screen".toKotlinFileName()
 
     @Transient
-    private val composeNavigationName: String = "${name.asClassName()}Navigation".toKotlinFileName()
+    private val composeNavigationName: String =
+        "${name.asClassName()}Navigation".toKotlinFileName()
 
     @Transient
     override val viewModelFileName: String =

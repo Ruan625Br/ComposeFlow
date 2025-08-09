@@ -85,11 +85,11 @@ import io.composeflow.show_nav_drawer
 import io.composeflow.show_snackbar
 import io.composeflow.sign_in_with
 import io.composeflow.sign_out
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import org.jetbrains.compose.resources.stringResource
+import kotlin.time.Instant
 import kotlin.uuid.Uuid
 
 typealias ActionId = String
