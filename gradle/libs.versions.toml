@@ -44,6 +44,7 @@ sentry = "8.17.0"
 sentry-jvm-gradle = "5.8.0"
 testparameterinjector = "1.18"
 xmlutil = "0.91.1"
+vooft-compose-treeview = "0.2.2"
 
 [libraries]
 # AndroidX
@@ -174,6 +175,7 @@ conveyor-control = "dev.hydraulic.conveyor:conveyor-control:1.1"
 xmlutil-core = { module = "io.github.pdvrieze.xmlutil:core", version.ref = "xmlutil" }
 xmlutil-core-jdk = { module = "io.github.pdvrieze.xmlutil:core-jdk", version.ref = "xmlutil" }
 xmlutil-serialization-jvm = { module = "io.github.pdvrieze.xmlutil:serialization-jvm", version.ref = "xmlutil" }
+vooft-compose-treeview-core = { module = "io.github.vooft:compose-treeview-core", version.ref = "vooft-compose-treeview" }
 
 [plugins]
 roborazzi = { id = "io.github.takahirom.roborazzi", version = "1.46.1" }

@@ -22,15 +22,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.SpanStyle
@@ -51,20 +50,19 @@ import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
 import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.inspector.modifier.AddModifierDialog
-import io.composeflow.ui.jewel.MultipleSelectionLazyTree
 import io.composeflow.ui.modifier.hoverIconClickable
-import io.composeflow.ui.mousePointerEvents
 import io.composeflow.ui.popup.SingleTextInputDialog
 import io.composeflow.ui.uibuilder.UiBuilderContextMenuDropDown
+import io.github.vooft.compose.treeview.core.TreeViewStyle
+import io.github.vooft.compose.treeview.core.node.Branch
+import io.github.vooft.compose.treeview.core.node.BranchNode
+import io.github.vooft.compose.treeview.core.node.Leaf
+import io.github.vooft.compose.treeview.core.tree.TreeScope
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.jewel.foundation.lazy.SelectableLazyListState
 import org.jetbrains.jewel.foundation.lazy.tree.Tree
 import org.jetbrains.jewel.foundation.lazy.tree.TreeGeneratorScope
 import org.jetbrains.jewel.foundation.lazy.tree.TreeState
-import org.jetbrains.jewel.foundation.lazy.tree.buildTree
-import org.jetbrains.jewel.foundation.lazy.tree.rememberTreeState
 import org.jetbrains.jewel.ui.component.Tooltip
-import org.jetbrains.jewel.ui.component.styling.LocalLazyTreeStyle
 
 @Composable
 fun ComposeNodeTree(
@@ -95,10 +93,53 @@ fun ComposeNodeTree(
         }
     }
 
-    val tree =
-        if (editable is Screen) {
-            buildTree<ComposeNode> {
-                addNode(rootNode, rootNode.fallbackId) {
+    @Composable
+    fun TreeScope.addBranchNode(
+        node: ComposeNode,
+        children: @Composable (TreeScope.() -> Unit) = {},
+    ) {
+        Branch(
+            composeNode = node,
+            project = project,
+            composeNodeCallbacks = composeNodeCallbacks,
+            onShowActionTab = onShowActionTab,
+            onShowInspectorTab = onShowInspectorTab,
+            onFocusedStatusUpdated = onFocusedStatusUpdated,
+            onHoveredStatusUpdated = onHoveredStatusUpdated,
+            children = children,
+        )
+    }
+
+    @Composable
+    fun TreeScope.addLeafNode(node: ComposeNode) {
+        Leaf(
+            composeNode = node,
+            project = project,
+            composeNodeCallbacks = composeNodeCallbacks,
+            onShowActionTab = onShowActionTab,
+            onShowInspectorTab = onShowInspectorTab,
+            onFocusedStatusUpdated = onFocusedStatusUpdated,
+            onHoveredStatusUpdated = onHoveredStatusUpdated,
+        )
+    }
+
+    @Composable
+    fun TreeScope.addNodeRecursively(node: ComposeNode) {
+        addBranchNode(node) {
+            node.children.forEach { child ->
+                if (child.children.isNotEmpty()) {
+                    this.addNodeRecursively(child)
+                } else {
+                    addLeafNode(child)
+                }
+            }
+        }
+    }
+
+    val myTree =
+        io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode> {
+            if (editable is Screen) {
+                addBranchNode(rootNode) {
                     editable.navigationDrawerNode.value?.let { navDrawer ->
                         addNodeRecursively(navDrawer)
                     }
@@ -111,24 +152,31 @@ fun ComposeNodeTree(
                         addNodeRecursively(bottomAppBar)
                     }
                     editable.fabNode.value?.let { fabNode ->
-                        addLeaf(fabNode, id = fabNode.fallbackId)
+                        addLeafNode(fabNode)
                     }
                 }
-            }
-        } else {
-            buildTree {
-                addNodeRecursively(rootNode)
+            } else {
+                addBranchNode(rootNode)
             }
         }
+
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
-    val selectableLazyListState = remember { SelectableLazyListState(lazyListState) }
-    val treeState = rememberTreeState(selectableLazyListState = selectableLazyListState)
 
-    treeState.setFocus(focusedNodes)
+    myTree.setFocus(focusedNodes)
     var contextMenuExpanded by remember { mutableStateOf(false) }
     var addModifierDialogVisible by remember { mutableStateOf(false) }
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
+
+    val treeViewStyle =
+        TreeViewStyle<ComposeNode>(
+            toggleIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+            nodeSelectedBackgroundColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
+            nodeCollapsedIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+            nodeExpandedIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+            useHorizontalScroll = false,
+        )
+
     Column(
         modifier =
             modifier
@@ -138,194 +186,33 @@ fun ComposeNodeTree(
                     contextMenuExpanded = true
                 },
     ) {
-        MultipleSelectionLazyTree(
-            tree = tree,
-            treeState = treeState,
-            style = LocalLazyTreeStyle.current,
-            onSelectionChange = { selectedElements ->
-                if (selectedElements.isNotEmpty()) {
-                    // Check if any of the selected nodes are not currently focused
-                    val hasUnfocusedNodes = selectedElements.any { !it.data.isFocused.value }
+        TreeView(
+            modifier = Modifier.fillMaxWidth(),
+            tree = myTree,
+            project = project,
+            listState = lazyListState,
+            style = treeViewStyle,
+            onClick = { treeNode ->
+                val wasSelected = treeNode.isSelected
 
-                    if (hasUnfocusedNodes) {
-                        project.screenHolder.clearIsFocused()
-                        // Set focus on all selected nodes
-                        selectedElements.forEach { element ->
-                            element.data.setFocus()
-                        }
-                    }
+                myTree.clearSelection()
+
+                if (!wasSelected) {
+                    myTree.selectNode(treeNode)
+                    myTree.expandNode(treeNode)
+                }
+
+                if (!treeNode.content.isFocused.value) {
+                    project.screenHolder.clearIsFocused()
+                    treeNode.content.setFocus()
                 }
             },
-        ) {
-            val visibilityParams = it.data.visibilityParams.value
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .alpha(if (visibilityParams.visibleInUiBuilder) 1f else 0.5f)
-                        .mousePointerEvents(
-                            node = it.data,
-                            onFocusedStatusUpdated = onFocusedStatusUpdated,
-                            onHoveredStatusUpdated = onHoveredStatusUpdated,
-                        ),
-            ) {
-                Icon(
-                    imageVector =
-                        it.data.trait.value
-                            .icon(),
-                    contentDescription = "Tree node icon for ${it.data.displayName(project)}",
-                    tint = MaterialTheme.colorScheme.onSurface,
-                    modifier = Modifier.size(16.dp),
-                )
-                Text(
-                    it.data.displayName(project),
-                    color =
-                        if (it.data.generateTrackableIssues(project).isNotEmpty()) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            MaterialTheme.colorScheme.onSurface
-                        },
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center,
-                    modifier =
-                        Modifier
-                            .padding(horizontal = 8.dp),
-                )
-
-                val allActions = it.data.allActions()
-                if (allActions.isNotEmpty()) {
-                    val contentDesc =
-                        if (allActions.size == 1) {
-                            allActions[0].name
-                        } else {
-                            "${allActions.size} actions"
-                        }
-                    Tooltip({
-                        if (allActions.size == 1) {
-                            allActions[0].SimplifiedContent(project)
-                        } else {
-                            Column {
-                                Text(
-                                    "${allActions.size} actions",
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                )
-                                allActions.forEach { action ->
-                                    Text(
-                                        action.name,
-                                        color = MaterialTheme.colorScheme.onSurface,
-                                        style = MaterialTheme.typography.bodySmall,
-                                    )
-                                }
-                            }
-                        }
-                    }) {
-                        Icon(
-                            imageVector = Icons.Outlined.FlashOn,
-                            contentDescription = contentDesc,
-                            tint = MaterialTheme.colorScheme.tertiary,
-                            modifier =
-                                Modifier
-                                    .size(16.dp)
-                                    .hoverIconClickable()
-                                    .clickable {
-                                        onShowActionTab()
-                                    },
-                        )
-                    }
-                }
-                if (visibilityParams.nodeVisibilityValue() != NodeVisibility.AlwaysVisible ||
-                    !visibilityParams.formFactorVisibility.alwaysVisible()
-                ) {
-                    val contentDesc =
-                        "Visible if " +
-                            visibilityParams.visibilityCondition.transformedValueExpression(
-                                project,
-                            )
-                    Tooltip({
-                        Column {
-                            Text(
-                                buildAnnotatedString {
-                                    append("Visible if ")
-                                    withStyle(
-                                        style =
-                                            SpanStyle(
-                                                color = MaterialTheme.colorScheme.tertiary,
-                                            ),
-                                    ) {
-                                        append(
-                                            visibilityParams.visibilityCondition.transformedValueExpression(
-                                                project,
-                                            ),
-                                        )
-                                    }
-                                },
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                            if (!visibilityParams.formFactorVisibility.alwaysVisible()) {
-                                @Composable
-                                fun FormFactorIcon(
-                                    formFactorImageVector: ImageVector,
-                                    visible: Boolean,
-                                ) {
-                                    val iconModifier =
-                                        if (visible) {
-                                            Modifier
-                                        } else {
-                                            Modifier.alpha(0.3f)
-                                        }
-                                    ComposeFlowIcon(
-                                        imageVector = formFactorImageVector,
-                                        contentDescription = "",
-                                        modifier = Modifier.padding(2.dp).then(iconModifier),
-                                    )
-                                }
-                                Row {
-                                    FormFactorIcon(
-                                        Icons.Outlined.Smartphone,
-                                        visible = visibilityParams.formFactorVisibility.visibleInCompact,
-                                    )
-                                    FormFactorIcon(
-                                        Icons.Outlined.TabletMac,
-                                        visible = visibilityParams.formFactorVisibility.visibleInMedium,
-                                    )
-                                    FormFactorIcon(
-                                        Icons.Outlined.DesktopMac,
-                                        visible = visibilityParams.formFactorVisibility.visibleInExpanded,
-                                    )
-                                }
-                            }
-                        }
-                    }) {
-                        Icon(
-                            imageVector =
-                                if (visibilityParams.visibleInUiBuilder) {
-                                    Icons.Outlined.Visibility
-                                } else {
-                                    Icons.Outlined.VisibilityOff
-                                },
-                            contentDescription = contentDesc,
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier =
-                                Modifier
-                                    .size(16.dp)
-                                    .hoverIconClickable()
-                                    .clickable {
-                                        onShowInspectorTab()
-                                        composeNodeCallbacks.onVisibilityParamsUpdated(
-                                            it.data,
-                                            visibilityParams.copy(
-                                                visibleInUiBuilder = !visibilityParams.visibleInUiBuilder,
-                                            ),
-                                        )
-                                    },
-                        )
-                    }
-                }
-            }
-        }
+            onShowActionTab = onShowActionTab,
+            onShowInspectorTab = onShowInspectorTab,
+            onVisibilityParamsUpdated = { node, params ->
+                composeNodeCallbacks.onVisibilityParamsUpdated(node, params)
+            },
+        )
 
         if (contextMenuExpanded) {
             println("Context menu in ComposeNodeTree is expanded")
@@ -399,14 +286,15 @@ fun ComposeNodeTree(
         }
     }
 
-    if (focusedNodes.size == 1) {
-        LaunchedEffect(focusedNodes.firstOrNull()?.fallbackId) {
-            focusedNodes.firstOrNull()?.let { focused ->
-                val index = tree.findLazyListIndex(target = focused, treeState = treeState)
-                selectableLazyListState.scrollToItem(index, animateScroll = true)
-            }
-        }
-    }
+    /* if (focusedNodes.size == 1) {
+         LaunchedEffect(focusedNodes.firstOrNull()?.fallbackId) {
+             focusedNodes.firstOrNull()?.let { focused ->
+                 val index = tree.findLazyListIndex(target = focused, treeState = treeState)
+                 selectableLazyListState.scrollToItem(index, animateScroll = true)
+                 lazyListState.scrollToItem(index)
+             }
+         }
+     }*/
 }
 
 /**
@@ -426,9 +314,7 @@ private fun Tree<ComposeNode>.findLazyListIndex(
         if (target.fallbackId == next.id) {
             return result
         }
-        if (next is Tree.Element.Node &&
-            next.id in treeState.openNodes
-        ) {
+        if (next is Tree.Element.Node && next.id in treeState.openNodes) {
             queue.addAll(0, next.children.orEmpty())
         }
         result += 1
@@ -444,4 +330,273 @@ private fun TreeState.setFocus(nodes: List<ComposeNode>) {
     }
     // Set the selected keys to show all focused nodes as selected
     selectedKeys = nodes.map { it.fallbackId }
+}
+
+private fun io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
+    val currentSelected = selectedNodes.toMutableList()
+
+    composeNodes.forEach { node ->
+        expandNodes(node.findNodesUntilRoot())
+
+        if (currentSelected.none { it.content.fallbackId == node.fallbackId }) {
+            findNodeByFallbackId(node.fallbackId)?.let { currentSelected.add(it) }
+        }
+    }
+    clearSelection()
+    currentSelected.forEach { selectNode(it) }
+}
+
+private fun io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode>.findNodeByFallbackId(id: String) =
+    nodes.firstOrNull {
+        it.content.fallbackId == id
+    }
+
+private fun io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode>.expandNodes(composeNodes: List<ComposeNode>) {
+    val treeNodes = nodes.asSequence().filterIsInstance<BranchNode<ComposeNode>>()
+
+    composeNodes.forEach { node ->
+        treeNodes
+            .find { it.content.fallbackId == node.fallbackId }
+            ?.setExpanded(true, Int.MAX_VALUE)
+    }
+}
+
+@Composable
+private fun TreeScope.Branch(
+    composeNode: ComposeNode,
+    project: Project,
+    composeNodeCallbacks: ComposeNodeCallbacks,
+    onFocusedStatusUpdated: (ComposeNode) -> Unit,
+    onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
+    onShowActionTab: () -> Unit,
+    onShowInspectorTab: () -> Unit,
+    children: @Composable (TreeScope.() -> Unit) = {},
+) {
+    Branch(
+        content = composeNode,
+        customIcon = { treeNode ->
+            val node = treeNode.content
+            if (treeNode.isSelected) {
+                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+            node.visibilityParams.value
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                TreeNodeCustomIcon(treeNode.content, project)
+                TreeNodeCustomName(
+                    node = node,
+                    project = project,
+                    composeNodeCallbacks = composeNodeCallbacks,
+                    onShowActionTab = onShowActionTab,
+                    onShowInspectorTab = onShowInspectorTab,
+                )
+            }
+        },
+        customName = { treeNode -> },
+    ) {
+        children()
+    }
+}
+
+@Composable
+private fun TreeScope.Leaf(
+    composeNode: ComposeNode,
+    project: Project,
+    composeNodeCallbacks: ComposeNodeCallbacks,
+    onFocusedStatusUpdated: (ComposeNode) -> Unit,
+    onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
+    onShowActionTab: () -> Unit,
+    onShowInspectorTab: () -> Unit,
+) {
+    Leaf(
+        content = composeNode,
+        customIcon = { treeNode ->
+            val node = treeNode.content
+            if (treeNode.isSelected) {
+                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            }
+            node.visibilityParams.value
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                TreeNodeCustomIcon(treeNode.content, project)
+                TreeNodeCustomName(
+                    node = node,
+                    project = project,
+                    composeNodeCallbacks = composeNodeCallbacks,
+                    onShowActionTab = onShowActionTab,
+                    onShowInspectorTab = onShowInspectorTab,
+                )
+            }
+        },
+        customName = { treeNode -> },
+    )
+}
+
+@Composable
+private fun TreeNodeCustomIcon(
+    node: ComposeNode,
+    project: Project,
+) {
+    Icon(
+        imageVector = node.trait.value.icon(),
+        contentDescription = "Tree node icon for ${node.displayName(project)}",
+        tint = MaterialTheme.colorScheme.onSurface,
+        modifier = Modifier.size(16.dp),
+    )
+}
+
+@Composable
+private fun TreeNodeCustomName(
+    node: ComposeNode,
+    project: Project,
+    composeNodeCallbacks: ComposeNodeCallbacks,
+    onShowActionTab: () -> Unit,
+    onShowInspectorTab: () -> Unit,
+) {
+    val visibilityParams = node.visibilityParams.value
+
+    Text(
+        node.displayName(project),
+        color =
+            if (node.generateTrackableIssues(project).isNotEmpty()) {
+                MaterialTheme.colorScheme.error
+            } else {
+                MaterialTheme.colorScheme.onSurface
+            },
+        style = MaterialTheme.typography.bodySmall,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.padding(horizontal = 8.dp),
+    )
+
+    val allActions = node.allActions()
+    if (allActions.isNotEmpty()) {
+        val contentDesc =
+            if (allActions.size == 1) {
+                allActions[0].name
+            } else {
+                "${allActions.size} actions"
+            }
+        Tooltip({
+            if (allActions.size == 1) {
+                allActions[0].SimplifiedContent(project)
+            } else {
+                Column {
+                    Text(
+                        "${allActions.size} actions",
+                        color = MaterialTheme.colorScheme.tertiary,
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    allActions.forEach { action ->
+                        Text(
+                            action.name,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                }
+            }
+        }) {
+            Icon(
+                imageVector = Icons.Outlined.FlashOn,
+                contentDescription = contentDesc,
+                tint = MaterialTheme.colorScheme.tertiary,
+                modifier =
+                    Modifier.size(16.dp).hoverIconClickable().clickable {
+                        onShowActionTab()
+                    },
+            )
+        }
+    }
+    if (visibilityParams.nodeVisibilityValue() != NodeVisibility.AlwaysVisible || !visibilityParams.formFactorVisibility.alwaysVisible()) {
+        val contentDesc =
+            "Visible if " +
+                visibilityParams.visibilityCondition.transformedValueExpression(
+                    project,
+                )
+        Tooltip({
+            Column {
+                Text(
+                    buildAnnotatedString {
+                        append("Visible if ")
+                        withStyle(
+                            style =
+                                SpanStyle(
+                                    color = MaterialTheme.colorScheme.tertiary,
+                                ),
+                        ) {
+                            append(
+                                visibilityParams.visibilityCondition.transformedValueExpression(
+                                    project,
+                                ),
+                            )
+                        }
+                    },
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                if (!visibilityParams.formFactorVisibility.alwaysVisible()) {
+                    @Composable
+                    fun FormFactorIcon(
+                        formFactorImageVector: ImageVector,
+                        visible: Boolean,
+                    ) {
+                        val iconModifier =
+                            if (visible) {
+                                Modifier
+                            } else {
+                                Modifier.alpha(0.3f)
+                            }
+                        ComposeFlowIcon(
+                            imageVector = formFactorImageVector,
+                            contentDescription = "",
+                            modifier = Modifier.padding(2.dp).then(iconModifier),
+                        )
+                    }
+                    Row {
+                        FormFactorIcon(
+                            Icons.Outlined.Smartphone,
+                            visible = visibilityParams.formFactorVisibility.visibleInCompact,
+                        )
+                        FormFactorIcon(
+                            Icons.Outlined.TabletMac,
+                            visible = visibilityParams.formFactorVisibility.visibleInMedium,
+                        )
+                        FormFactorIcon(
+                            Icons.Outlined.DesktopMac,
+                            visible = visibilityParams.formFactorVisibility.visibleInExpanded,
+                        )
+                    }
+                }
+            }
+        }) {
+            Icon(
+                imageVector =
+                    if (visibilityParams.visibleInUiBuilder) {
+                        Icons.Outlined.Visibility
+                    } else {
+                        Icons.Outlined.VisibilityOff
+                    },
+                contentDescription = contentDesc,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier =
+                    Modifier.size(16.dp).hoverIconClickable().clickable {
+                        onShowInspectorTab()
+                        composeNodeCallbacks.onVisibilityParamsUpdated(
+                            node,
+                            visibilityParams.copy(
+                                visibleInUiBuilder = !visibilityParams.visibleInUiBuilder,
+                            ),
+                        )
+                    },
+            )
+        }
+    }
 }

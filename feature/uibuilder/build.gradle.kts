@@ -49,6 +49,7 @@ kotlin {
             implementation(libs.reorderable)
             implementation(libs.kaml)
             implementation(libs.splitpane)
+            implementation(libs.vooft.compose.treeview.core)
             api(libs.precompose)
             api(libs.precompose.viewmodel)
         }
