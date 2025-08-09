@@ -2,44 +2,24 @@ package io.composeflow.ui.nodetree
 
 import androidx.compose.foundation.PointerMatcher
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.onClick
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DesktopMac
-import androidx.compose.material.icons.outlined.FlashOn
-import androidx.compose.material.icons.outlined.Smartphone
-import androidx.compose.material.icons.outlined.TabletMac
-import androidx.compose.material.icons.outlined.Visibility
-import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerButton
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
-import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.component_name
-import io.composeflow.model.enumwrapper.NodeVisibility
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
@@ -48,21 +28,17 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNodeCall
 import io.composeflow.ui.CanvasNodeCallbacks
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
-import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.inspector.modifier.AddModifierDialog
-import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.popup.SingleTextInputDialog
 import io.composeflow.ui.uibuilder.UiBuilderContextMenuDropDown
 import io.github.vooft.compose.treeview.core.TreeViewStyle
 import io.github.vooft.compose.treeview.core.node.Branch
-import io.github.vooft.compose.treeview.core.node.BranchNode
 import io.github.vooft.compose.treeview.core.node.Leaf
 import io.github.vooft.compose.treeview.core.tree.TreeScope
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.jewel.foundation.lazy.tree.Tree
 import org.jetbrains.jewel.foundation.lazy.tree.TreeGeneratorScope
 import org.jetbrains.jewel.foundation.lazy.tree.TreeState
-import org.jetbrains.jewel.ui.component.Tooltip
 
 @Composable
 fun ComposeNodeTree(
@@ -94,52 +70,22 @@ fun ComposeNodeTree(
     }
 
     @Composable
-    fun TreeScope.addBranchNode(
-        node: ComposeNode,
-        children: @Composable (TreeScope.() -> Unit) = {},
-    ) {
-        Branch(
-            composeNode = node,
-            project = project,
-            composeNodeCallbacks = composeNodeCallbacks,
-            onShowActionTab = onShowActionTab,
-            onShowInspectorTab = onShowInspectorTab,
-            onFocusedStatusUpdated = onFocusedStatusUpdated,
-            onHoveredStatusUpdated = onHoveredStatusUpdated,
-            children = children,
-        )
-    }
-
-    @Composable
-    fun TreeScope.addLeafNode(node: ComposeNode) {
-        Leaf(
-            composeNode = node,
-            project = project,
-            composeNodeCallbacks = composeNodeCallbacks,
-            onShowActionTab = onShowActionTab,
-            onShowInspectorTab = onShowInspectorTab,
-            onFocusedStatusUpdated = onFocusedStatusUpdated,
-            onHoveredStatusUpdated = onHoveredStatusUpdated,
-        )
-    }
-
-    @Composable
     fun TreeScope.addNodeRecursively(node: ComposeNode) {
-        addBranchNode(node) {
+        Branch(node) {
             node.children.forEach { child ->
                 if (child.children.isNotEmpty()) {
                     this.addNodeRecursively(child)
                 } else {
-                    addLeafNode(child)
+                    Leaf(child)
                 }
             }
         }
     }
 
-    val myTree =
+    val tree =
         io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode> {
             if (editable is Screen) {
-                addBranchNode(rootNode) {
+                Branch(rootNode) {
                     editable.navigationDrawerNode.value?.let { navDrawer ->
                         addNodeRecursively(navDrawer)
                     }
@@ -152,18 +98,17 @@ fun ComposeNodeTree(
                         addNodeRecursively(bottomAppBar)
                     }
                     editable.fabNode.value?.let { fabNode ->
-                        addLeafNode(fabNode)
+                        Leaf(fabNode)
                     }
                 }
             } else {
-                addBranchNode(rootNode)
+                Branch(rootNode)
             }
         }
 
     val coroutineScope = rememberCoroutineScope()
     val lazyListState = rememberLazyListState()
 
-    myTree.setFocus(focusedNodes)
     var contextMenuExpanded by remember { mutableStateOf(false) }
     var addModifierDialogVisible by remember { mutableStateOf(false) }
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
@@ -186,26 +131,30 @@ fun ComposeNodeTree(
                     contextMenuExpanded = true
                 },
     ) {
+        /*   onSelectionChange = { selectedElements ->
+               if (selectedElements.isNotEmpty()) {
+                   // Check if any of the selected nodes are not currently focused
+                   val hasUnfocusedNodes = selectedElements.any { !it.data.isFocused.value }
+
+                   if (hasUnfocusedNodes) {
+                       project.screenHolder.clearIsFocused()
+                       // Set focus on all selected nodes
+                       selectedElements.forEach { element ->
+                           element.data.setFocus()
+                       }
+                   }
+               }
+           },*/
+
         TreeView(
             modifier = Modifier.fillMaxWidth(),
-            tree = myTree,
+            tree = tree,
             project = project,
             listState = lazyListState,
             style = treeViewStyle,
             onClick = { treeNode ->
-                val wasSelected = treeNode.isSelected
-
-                myTree.clearSelection()
-
-                if (!wasSelected) {
-                    myTree.selectNode(treeNode)
-                    myTree.expandNode(treeNode)
-                }
-
-                if (!treeNode.content.isFocused.value) {
-                    project.screenHolder.clearIsFocused()
-                    treeNode.content.setFocus()
-                }
+                project.screenHolder.clearIsFocused()
+                treeNode.content.setFocus()
             },
             onShowActionTab = onShowActionTab,
             onShowInspectorTab = onShowInspectorTab,
@@ -215,7 +164,6 @@ fun ComposeNodeTree(
         )
 
         if (contextMenuExpanded) {
-            println("Context menu in ComposeNodeTree is expanded")
             UiBuilderContextMenuDropDown(
                 project = project,
                 canvasNodeCallbacks = canvasNodeCallbacks,
@@ -286,6 +234,10 @@ fun ComposeNodeTree(
         }
     }
 
+    LaunchedEffect(focusedNodes, tree) {
+        tree.setFocus(focusedNodes)
+    }
+
     /* if (focusedNodes.size == 1) {
          LaunchedEffect(focusedNodes.firstOrNull()?.fallbackId) {
              focusedNodes.firstOrNull()?.let { focused ->
@@ -320,283 +272,4 @@ private fun Tree<ComposeNode>.findLazyListIndex(
         result += 1
     }
     return result
-}
-
-private fun TreeState.setFocus(nodes: List<ComposeNode>) {
-    nodes.forEach { node ->
-        if (!selectedKeys.contains(node.fallbackId)) {
-            openNodes(node.findNodesUntilRoot().map { it.fallbackId })
-        }
-    }
-    // Set the selected keys to show all focused nodes as selected
-    selectedKeys = nodes.map { it.fallbackId }
-}
-
-private fun io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
-    val currentSelected = selectedNodes.toMutableList()
-
-    composeNodes.forEach { node ->
-        expandNodes(node.findNodesUntilRoot())
-
-        if (currentSelected.none { it.content.fallbackId == node.fallbackId }) {
-            findNodeByFallbackId(node.fallbackId)?.let { currentSelected.add(it) }
-        }
-    }
-    clearSelection()
-    currentSelected.forEach { selectNode(it) }
-}
-
-private fun io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode>.findNodeByFallbackId(id: String) =
-    nodes.firstOrNull {
-        it.content.fallbackId == id
-    }
-
-private fun io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode>.expandNodes(composeNodes: List<ComposeNode>) {
-    val treeNodes = nodes.asSequence().filterIsInstance<BranchNode<ComposeNode>>()
-
-    composeNodes.forEach { node ->
-        treeNodes
-            .find { it.content.fallbackId == node.fallbackId }
-            ?.setExpanded(true, Int.MAX_VALUE)
-    }
-}
-
-@Composable
-private fun TreeScope.Branch(
-    composeNode: ComposeNode,
-    project: Project,
-    composeNodeCallbacks: ComposeNodeCallbacks,
-    onFocusedStatusUpdated: (ComposeNode) -> Unit,
-    onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
-    onShowActionTab: () -> Unit,
-    onShowInspectorTab: () -> Unit,
-    children: @Composable (TreeScope.() -> Unit) = {},
-) {
-    Branch(
-        content = composeNode,
-        customIcon = { treeNode ->
-            val node = treeNode.content
-            if (treeNode.isSelected) {
-                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f)
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
-            node.visibilityParams.value
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                TreeNodeCustomIcon(treeNode.content, project)
-                TreeNodeCustomName(
-                    node = node,
-                    project = project,
-                    composeNodeCallbacks = composeNodeCallbacks,
-                    onShowActionTab = onShowActionTab,
-                    onShowInspectorTab = onShowInspectorTab,
-                )
-            }
-        },
-        customName = { treeNode -> },
-    ) {
-        children()
-    }
-}
-
-@Composable
-private fun TreeScope.Leaf(
-    composeNode: ComposeNode,
-    project: Project,
-    composeNodeCallbacks: ComposeNodeCallbacks,
-    onFocusedStatusUpdated: (ComposeNode) -> Unit,
-    onHoveredStatusUpdated: (ComposeNode, Boolean) -> Unit,
-    onShowActionTab: () -> Unit,
-    onShowInspectorTab: () -> Unit,
-) {
-    Leaf(
-        content = composeNode,
-        customIcon = { treeNode ->
-            val node = treeNode.content
-            if (treeNode.isSelected) {
-                MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f)
-            } else {
-                MaterialTheme.colorScheme.surface
-            }
-            node.visibilityParams.value
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                TreeNodeCustomIcon(treeNode.content, project)
-                TreeNodeCustomName(
-                    node = node,
-                    project = project,
-                    composeNodeCallbacks = composeNodeCallbacks,
-                    onShowActionTab = onShowActionTab,
-                    onShowInspectorTab = onShowInspectorTab,
-                )
-            }
-        },
-        customName = { treeNode -> },
-    )
-}
-
-@Composable
-private fun TreeNodeCustomIcon(
-    node: ComposeNode,
-    project: Project,
-) {
-    Icon(
-        imageVector = node.trait.value.icon(),
-        contentDescription = "Tree node icon for ${node.displayName(project)}",
-        tint = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.size(16.dp),
-    )
-}
-
-@Composable
-private fun TreeNodeCustomName(
-    node: ComposeNode,
-    project: Project,
-    composeNodeCallbacks: ComposeNodeCallbacks,
-    onShowActionTab: () -> Unit,
-    onShowInspectorTab: () -> Unit,
-) {
-    val visibilityParams = node.visibilityParams.value
-
-    Text(
-        node.displayName(project),
-        color =
-            if (node.generateTrackableIssues(project).isNotEmpty()) {
-                MaterialTheme.colorScheme.error
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            },
-        style = MaterialTheme.typography.bodySmall,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(horizontal = 8.dp),
-    )
-
-    val allActions = node.allActions()
-    if (allActions.isNotEmpty()) {
-        val contentDesc =
-            if (allActions.size == 1) {
-                allActions[0].name
-            } else {
-                "${allActions.size} actions"
-            }
-        Tooltip({
-            if (allActions.size == 1) {
-                allActions[0].SimplifiedContent(project)
-            } else {
-                Column {
-                    Text(
-                        "${allActions.size} actions",
-                        color = MaterialTheme.colorScheme.tertiary,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
-                    allActions.forEach { action ->
-                        Text(
-                            action.name,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            style = MaterialTheme.typography.bodySmall,
-                        )
-                    }
-                }
-            }
-        }) {
-            Icon(
-                imageVector = Icons.Outlined.FlashOn,
-                contentDescription = contentDesc,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier =
-                    Modifier.size(16.dp).hoverIconClickable().clickable {
-                        onShowActionTab()
-                    },
-            )
-        }
-    }
-    if (visibilityParams.nodeVisibilityValue() != NodeVisibility.AlwaysVisible || !visibilityParams.formFactorVisibility.alwaysVisible()) {
-        val contentDesc =
-            "Visible if " +
-                visibilityParams.visibilityCondition.transformedValueExpression(
-                    project,
-                )
-        Tooltip({
-            Column {
-                Text(
-                    buildAnnotatedString {
-                        append("Visible if ")
-                        withStyle(
-                            style =
-                                SpanStyle(
-                                    color = MaterialTheme.colorScheme.tertiary,
-                                ),
-                        ) {
-                            append(
-                                visibilityParams.visibilityCondition.transformedValueExpression(
-                                    project,
-                                ),
-                            )
-                        }
-                    },
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-                if (!visibilityParams.formFactorVisibility.alwaysVisible()) {
-                    @Composable
-                    fun FormFactorIcon(
-                        formFactorImageVector: ImageVector,
-                        visible: Boolean,
-                    ) {
-                        val iconModifier =
-                            if (visible) {
-                                Modifier
-                            } else {
-                                Modifier.alpha(0.3f)
-                            }
-                        ComposeFlowIcon(
-                            imageVector = formFactorImageVector,
-                            contentDescription = "",
-                            modifier = Modifier.padding(2.dp).then(iconModifier),
-                        )
-                    }
-                    Row {
-                        FormFactorIcon(
-                            Icons.Outlined.Smartphone,
-                            visible = visibilityParams.formFactorVisibility.visibleInCompact,
-                        )
-                        FormFactorIcon(
-                            Icons.Outlined.TabletMac,
-                            visible = visibilityParams.formFactorVisibility.visibleInMedium,
-                        )
-                        FormFactorIcon(
-                            Icons.Outlined.DesktopMac,
-                            visible = visibilityParams.formFactorVisibility.visibleInExpanded,
-                        )
-                    }
-                }
-            }
-        }) {
-            Icon(
-                imageVector =
-                    if (visibilityParams.visibleInUiBuilder) {
-                        Icons.Outlined.Visibility
-                    } else {
-                        Icons.Outlined.VisibilityOff
-                    },
-                contentDescription = contentDesc,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier =
-                    Modifier.size(16.dp).hoverIconClickable().clickable {
-                        onShowInspectorTab()
-                        composeNodeCallbacks.onVisibilityParamsUpdated(
-                            node,
-                            visibilityParams.copy(
-                                visibleInUiBuilder = !visibilityParams.visibleInUiBuilder,
-                            ),
-                        )
-                    },
-            )
-        }
-    }
 }

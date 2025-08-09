@@ -1,7 +1,6 @@
 package io.composeflow.ui.nodetree
 
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -56,13 +55,14 @@ import io.github.vooft.compose.treeview.core.OnNodeClick
 import io.github.vooft.compose.treeview.core.TreeViewStyle
 import io.github.vooft.compose.treeview.core.node.BranchNode
 import io.github.vooft.compose.treeview.core.node.Node
+import io.github.vooft.compose.treeview.core.tree.Tree
 import io.github.vooft.compose.treeview.core.tree.extension.ExpandableTree
 import io.github.vooft.compose.treeview.core.tree.extension.SelectableTree
 import org.jetbrains.jewel.ui.component.Tooltip
 
 @Composable
 fun <T> TreeView(
-    tree: io.github.vooft.compose.treeview.core.tree.Tree<T>,
+    tree: Tree<T>,
     modifier: Modifier = Modifier,
     onClick: OnNodeClick<T>,
     project: Project,
@@ -167,10 +167,7 @@ private fun <T> TreeViewScope<T>.ToggleIcon(node: Node<T>) {
 private fun <T> TreeViewScope<T>.NodeContent(node: Node<T>) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier =
-            Modifier
-                .then(clickableNode(node))
-                .padding(style.nodePadding),
+        modifier = Modifier.padding(style.nodePadding),
     ) {
         with(node) {
             if (node.content is ComposeNode) {
@@ -373,19 +370,67 @@ internal fun <T> TreeViewScope<T>.ComposeNodeName(node: ComposeNode) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun <T> TreeViewScope<T>.clickableNode(node: Node<T>): Modifier =
-    if (onClick == null && onLongClick == null && onDoubleClick == null) {
-        Modifier // no click action, return a noop modifier
-    } else if (onLongClick == null && onDoubleClick == null) {
-        Modifier.clickable { onClick?.invoke(node) }
-    } else {
-        Modifier.combinedClickable(
-            onClick = { onClick?.invoke(node) },
-            onDoubleClick = { onDoubleClick?.invoke(node) },
-            onLongClick = { onLongClick?.invoke(node) },
-        )
+// poor performance
+fun <T> TreeViewScope<T>.clickableNode(node: Node<T>): Modifier =
+    Modifier.combinedClickable(
+        onClick = { onClick?.invoke(node) },
+      /*  onDoubleClick = { onDoubleClick?.invoke(node) },
+        onLongClick = { onLongClick?.invoke(node) },*/
+    )
+
+fun Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
+    println("Set focus")
+    val nodesToCollapse =
+        nodes
+            .asSequence()
+            .filterIsInstance<BranchNode<ComposeNode>>()
+            .filter { it.isExpanded }
+            .toMutableList()
+
+    val nodesToExpand = mutableSetOf<ComposeNode>()
+    val nodesToSelect = mutableSetOf<Node<ComposeNode>>()
+
+    composeNodes.forEach { composeNode ->
+        val ancestors = composeNode.findNodesUntilRoot(includeSelf = true)
+        nodesToExpand.addAll(ancestors)
+
+        findNodeByFallbackId(composeNode.fallbackId)?.let { node ->
+            nodesToSelect.add(node)
+        }
+    }
+
+    clearSelection()
+
+    nodesToSelect.forEach { selectNode(it) }
+
+    nodesToCollapse.removeAll { collapseNode ->
+        nodesToExpand.any { expandNode -> expandNode.fallbackId == collapseNode.content.fallbackId }
+    }
+
+    expandNodes(nodesToExpand.toList())
+
+    // collapseNodes(nodesToCollapse)
+}
+
+fun Tree<ComposeNode>.collapseNodes(composeNodes: List<BranchNode<ComposeNode>>) {
+    composeNodes.forEach { node ->
+        node.setExpanded(false, Int.MAX_VALUE)
+    }
+}
+
+fun Tree<ComposeNode>.expandNodes(composeNodes: List<ComposeNode>) {
+    val treeNodes = nodes.asSequence().filterIsInstance<BranchNode<ComposeNode>>()
+
+    composeNodes.forEach { node ->
+        treeNodes
+            .find { it.content.fallbackId == node.fallbackId }
+            ?.setExpanded(true, Int.MAX_VALUE)
+    }
+}
+
+fun Tree<ComposeNode>.findNodeByFallbackId(id: String) =
+    nodes.firstOrNull {
+        it.content.fallbackId == id
     }
 
 @ConsistentCopyVisibility
