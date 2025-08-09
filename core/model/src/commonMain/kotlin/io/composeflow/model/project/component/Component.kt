@@ -134,7 +134,8 @@ data class Component(
     override val viewModelFileName: String = name.capitalize(Locale.current) + "ViewModel"
 
     @Transient
-    override val viewModelName: String = name.replaceFirstChar { it.lowercase() } + "ViewModel"
+    override val viewModelName: String =
+        name.replaceFirstChar { it.lowercase() } + "ViewModel"
 
     fun asMemberName(project: Project): MemberName = MemberName(getPackageName(project), composableName)
 
@@ -311,9 +312,9 @@ data class Component(
         if (!isCtrlOrMetaPressed) {
             componentRoot.value.clearIsFocusedRecursively()
         }
-        componentRoot.value.findDeepestChildAtOrNull(eventPosition)?.let {
-            it.setFocus(toggleValue = isCtrlOrMetaPressed)
-        }
+        componentRoot.value
+            .findDeepestChildAtOrNull(eventPosition)
+            ?.setFocus(toggleValue = isCtrlOrMetaPressed)
     }
 
     override fun updateHoveredNode(eventPosition: Offset) {
