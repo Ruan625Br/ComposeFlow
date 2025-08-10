@@ -34,11 +34,9 @@ import io.composeflow.ui.uibuilder.UiBuilderContextMenuDropDown
 import io.github.vooft.compose.treeview.core.TreeViewStyle
 import io.github.vooft.compose.treeview.core.node.Branch
 import io.github.vooft.compose.treeview.core.node.Leaf
+import io.github.vooft.compose.treeview.core.tree.Tree
 import io.github.vooft.compose.treeview.core.tree.TreeScope
 import org.jetbrains.compose.resources.stringResource
-import org.jetbrains.jewel.foundation.lazy.tree.Tree
-import org.jetbrains.jewel.foundation.lazy.tree.TreeGeneratorScope
-import org.jetbrains.jewel.foundation.lazy.tree.TreeState
 
 @Composable
 fun ComposeNodeTree(
@@ -57,18 +55,6 @@ fun ComposeNodeTree(
     val rootNode = editable.getRootNode()
     val focusedNodes = project.screenHolder.findFocusedNodes()
 
-    fun TreeGeneratorScope<ComposeNode>.addNodeRecursively(node: ComposeNode) {
-        addNode(node, id = node.fallbackId) {
-            node.children.forEach { child ->
-                if (child.children.isNotEmpty()) {
-                    this.addNodeRecursively(child)
-                } else {
-                    addLeaf(child, id = child.fallbackId)
-                }
-            }
-        }
-    }
-
     @Composable
     fun TreeScope.addNodeRecursively(node: ComposeNode) {
         Branch(node) {
@@ -83,8 +69,8 @@ fun ComposeNodeTree(
     }
 
     val tree =
-        io.github.vooft.compose.treeview.core.tree.Tree<ComposeNode> {
-            if (editable is Screen) {
+        if (editable is Screen) {
+            Tree {
                 Branch(rootNode) {
                     editable.navigationDrawerNode.value?.let { navDrawer ->
                         addNodeRecursively(navDrawer)
@@ -101,8 +87,10 @@ fun ComposeNodeTree(
                         Leaf(fabNode)
                     }
                 }
-            } else {
-                Branch(rootNode)
+            }
+        } else {
+            Tree<ComposeNode> {
+                addNodeRecursively(rootNode)
             }
         }
 
@@ -131,21 +119,6 @@ fun ComposeNodeTree(
                     contextMenuExpanded = true
                 },
     ) {
-        /*   onSelectionChange = { selectedElements ->
-               if (selectedElements.isNotEmpty()) {
-                   // Check if any of the selected nodes are not currently focused
-                   val hasUnfocusedNodes = selectedElements.any { !it.data.isFocused.value }
-
-                   if (hasUnfocusedNodes) {
-                       project.screenHolder.clearIsFocused()
-                       // Set focus on all selected nodes
-                       selectedElements.forEach { element ->
-                           element.data.setFocus()
-                       }
-                   }
-               }
-           },*/
-
         TreeView(
             modifier = Modifier.fillMaxWidth(),
             tree = tree,
@@ -234,42 +207,18 @@ fun ComposeNodeTree(
         }
     }
 
-    LaunchedEffect(focusedNodes, tree) {
+    LaunchedEffect(focusedNodes) {
         tree.setFocus(focusedNodes)
     }
 
-    /* if (focusedNodes.size == 1) {
-         LaunchedEffect(focusedNodes.firstOrNull()?.fallbackId) {
-             focusedNodes.firstOrNull()?.let { focused ->
-                 val index = tree.findLazyListIndex(target = focused, treeState = treeState)
-                 selectableLazyListState.scrollToItem(index, animateScroll = true)
-                 lazyListState.scrollToItem(index)
-             }
-         }
-     }*/
-}
-
-/**
- * Find the corresponding index for a [target] node in the Tree.
- * When a node is closed, the children inside that node aren't included in the LazyTree.
- *
- * Thus, we need to find the corresponding index in the form of visible items.
- */
-private fun Tree<ComposeNode>.findLazyListIndex(
-    target: ComposeNode,
-    treeState: TreeState,
-): Int {
-    val queue = roots.toMutableList()
-    var result = 0
-    while (queue.isNotEmpty()) {
-        val next = queue.removeFirst()
-        if (target.fallbackId == next.id) {
-            return result
+    if (focusedNodes.size == 1) {
+        LaunchedEffect(focusedNodes.firstOrNull()?.fallbackId) {
+            focusedNodes.firstOrNull()?.let { focused ->
+                val index = tree.findLazyListIndex(target = focused)
+                if (index != -1) {
+                    lazyListState.scrollToItem(index)
+                }
+            }
         }
-        if (next is Tree.Element.Node && next.id in treeState.openNodes) {
-            queue.addAll(0, next.children.orEmpty())
-        }
-        result += 1
     }
-    return result
 }

@@ -38,7 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -58,6 +65,7 @@ import io.github.vooft.compose.treeview.core.node.Node
 import io.github.vooft.compose.treeview.core.tree.Tree
 import io.github.vooft.compose.treeview.core.tree.extension.ExpandableTree
 import io.github.vooft.compose.treeview.core.tree.extension.SelectableTree
+import org.jetbrains.jewel.foundation.modifier.onHover
 import org.jetbrains.jewel.ui.component.Tooltip
 
 @Composable
@@ -94,15 +102,27 @@ fun <T> TreeView(
         LazyColumn(
             state = listState,
             modifier =
-                modifier.fillMaxWidth().run {
-                    if (style.useHorizontalScroll) {
-                        horizontalScroll(rememberScrollState())
-                    } else {
-                        this
-                    }
-                },
+                modifier
+                    .fillMaxWidth()
+                    .run {
+                        if (style.useHorizontalScroll) {
+                            horizontalScroll(rememberScrollState())
+                        } else {
+                            this
+                        }
+                    }.onPreviewKeyEvent { event ->
+                        if (event.type == KeyEventType.KeyDown) {
+                            tree.handleKeyEvent(event, this)
+                            true
+                        } else {
+                            false
+                        }
+                    },
         ) {
-            items(tree.nodes, { it.key }) { node ->
+            items(
+                tree.nodes,
+                { (it.content as? ComposeNode)?.fallbackId.toString() + it.key },
+            ) { node ->
                 Node(node)
             }
         }
@@ -111,18 +131,42 @@ fun <T> TreeView(
 
 @Composable
 internal fun <T> TreeViewScope<T>.Node(node: Node<T>) {
+    val backgroundColor =
+        when {
+            node.content is ComposeNode -> {
+                val composeNode = node.content as ComposeNode
+                when {
+                    composeNode.isHovered.value && node.isSelected ->
+                        style.nodeSelectedBackgroundColor.copy(
+                            alpha = 0.4f,
+                        )
+
+                    composeNode.isHovered.value ->
+                        MaterialTheme.colorScheme.secondaryContainer.copy(
+                            alpha = 0.9f,
+                        )
+
+                    node.isSelected -> style.nodeSelectedBackgroundColor
+                    else -> Color.Unspecified
+                }
+            }
+
+            node.isSelected -> style.nodeSelectedBackgroundColor
+            else -> Color.Unspecified
+        }
+
     Box(
         modifier =
             Modifier
                 .padding(horizontal = 10.dp)
                 .fillMaxWidth()
-                .run {
-                    if (node.isSelected.not()) {
-                        clip(style.nodeShape)
-                    } else {
-                        background(style.nodeSelectedBackgroundColor, style.nodeShape)
+                .background(backgroundColor, style.nodeShape)
+                .then(clickableNode(node))
+                .onHover { isHovered ->
+                    (node.content as? ComposeNode)?.let { node ->
+                        node.isHovered.value = isHovered
                     }
-                }.then(clickableNode(node)),
+                },
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -370,12 +414,125 @@ internal fun <T> TreeViewScope<T>.ComposeNodeName(node: ComposeNode) {
     }
 }
 
+private fun <T> Tree<T>.handleKeyEvent(
+    event: KeyEvent,
+    scope: TreeViewScope<T>,
+): Boolean =
+    when (event.key) {
+        Key.DirectionUp -> {
+            selectPrevious(scope)
+        }
+
+        Key.DirectionDown -> {
+            selectNext(scope)
+        }
+
+        Key.DirectionLeft -> {
+            collapseSelected(scope)
+        }
+
+        Key.DirectionRight -> {
+            expandSelected(scope)
+        }
+
+        else -> false
+    }
+
+private fun <T> Tree<T>.selectPrevious(scope: TreeViewScope<T>): Boolean {
+    val selectedNode = selectedNodes.firstOrNull() ?: return false
+    val previousNode = nodes.getOrNull(nodes.indexOf(selectedNode) - 1) ?: return false
+
+    scope.onClick?.invoke(previousNode)
+    // selectNode(previousNode)
+    return true
+}
+
+private fun <T> Tree<T>.selectNext(scope: TreeViewScope<T>): Boolean {
+    val selectedNode = selectedNodes.lastOrNull() ?: return false
+    val nextNode = nodes.getOrNull(nodes.indexOf(selectedNode) + 1) ?: return false
+
+    scope.onClick?.invoke(nextNode)
+
+    return true
+}
+
+private fun <T> Tree<T>.collapseSelected(scope: TreeViewScope<T>): Boolean {
+    val selectedNode = selectedNodes.firstOrNull() ?: return false
+
+    return if (selectedNode is BranchNode) {
+        if (selectedNode.isExpanded) {
+            collapseNode(selectedNode)
+            true
+        } else {
+            val parent = findParent(selectedNode)
+            if (parent != null) {
+                scope.onClick?.invoke(parent)
+                false
+            } else {
+                false
+            }
+        }
+    } else {
+        val parent = findParent(selectedNode)
+        if (parent != null) {
+            scope.onClick?.invoke(parent)
+            false
+        } else {
+            false
+        }
+    }
+}
+
+private fun <T> Tree<T>.expandSelected(scope: TreeViewScope<T>): Boolean {
+    val selectedNode = selectedNodes.firstOrNull() ?: return false
+
+    if (selectedNode is BranchNode) {
+        return if (!selectedNode.isExpanded) {
+            expandNode(selectedNode)
+            true
+        } else {
+            val firstChild = findFirstChild(selectedNode)
+            if (firstChild != null) {
+                scope.onClick?.invoke(firstChild)
+                false
+            } else {
+                false
+            }
+        }
+    } else {
+        selectNext(scope)
+    }
+
+    return false
+}
+
+private fun <T> Tree<T>.findParent(node: Node<T>): Node<T>? {
+    val idx = nodes.indexOf(node)
+
+    for (i in idx - 1 downTo 0) {
+        if (nodes[i].depth < node.depth) return nodes[i]
+    }
+
+    return null
+}
+
+private fun <T> Tree<T>.findFirstChild(branch: BranchNode<T>): Node<T>? {
+    val idx = nodes.indexOf(branch)
+
+    for (i in idx + 1 until nodes.size) {
+        if (nodes[i].depth <= branch.depth) break
+        if (nodes[i].depth == branch.depth + 1) return nodes[i]
+    }
+
+    return null
+}
+
 // poor performance
 fun <T> TreeViewScope<T>.clickableNode(node: Node<T>): Modifier =
     Modifier.combinedClickable(
         onClick = { onClick?.invoke(node) },
-      /*  onDoubleClick = { onDoubleClick?.invoke(node) },
-        onLongClick = { onLongClick?.invoke(node) },*/
+    /*  onDoubleClick = { onDoubleClick?.invoke(node) },
+      onLongClick = { onLongClick?.invoke(node) },*/
     )
 
 fun Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
@@ -407,7 +564,7 @@ fun Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
         nodesToExpand.any { expandNode -> expandNode.fallbackId == collapseNode.content.fallbackId }
     }
 
-    expandNodes(nodesToExpand.toList())
+    // expandNodes(nodesToExpand.toList())
 
     // collapseNodes(nodesToCollapse)
 }
@@ -432,6 +589,30 @@ fun Tree<ComposeNode>.findNodeByFallbackId(id: String) =
     nodes.firstOrNull {
         it.content.fallbackId == id
     }
+
+fun Tree<ComposeNode>.expandedNodes() = nodes.filterIsInstance<BranchNode<ComposeNode>>().filter { it.isExpanded }
+
+fun Tree<ComposeNode>.findLazyListIndex(target: ComposeNode): Int {
+    val visibleNodes = mutableListOf<Node<ComposeNode>>()
+
+    fun addVisible(node: Node<ComposeNode>) {
+        visibleNodes.add(node)
+        if (node is BranchNode<ComposeNode> && node.isExpanded) {
+            val startIndex = nodes.indexOf(node) + 1
+            for (i in startIndex until nodes.size) {
+                val child = nodes[i]
+                if (child.depth <= node.depth) break
+                if (child.depth == node.depth + 1) {
+                    addVisible(child)
+                }
+            }
+        }
+    }
+
+    nodes.forEach { addVisible(it) }
+
+    return visibleNodes.indexOfFirst { it.content.fallbackId == target.fallbackId }
+}
 
 @ConsistentCopyVisibility
 @Immutable
