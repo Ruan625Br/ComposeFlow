@@ -1,6 +1,7 @@
 package io.composeflow.ui.nodetree
 
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -11,12 +12,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
@@ -38,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.key.Key
@@ -46,6 +49,7 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -61,6 +65,7 @@ import io.composeflow.ui.modifier.hoverIconClickable
 import io.github.vooft.compose.treeview.core.OnNodeClick
 import io.github.vooft.compose.treeview.core.TreeViewStyle
 import io.github.vooft.compose.treeview.core.node.BranchNode
+import io.github.vooft.compose.treeview.core.node.LeafNode
 import io.github.vooft.compose.treeview.core.node.Node
 import io.github.vooft.compose.treeview.core.tree.Tree
 import io.github.vooft.compose.treeview.core.tree.extension.ExpandableTree
@@ -119,12 +124,91 @@ fun <T> TreeView(
                         }
                     },
         ) {
-            items(
-                tree.nodes,
-                { (it.content as? ComposeNode)?.fallbackId.toString() + it.key },
-            ) { node ->
-                Node(node)
+            itemsIndexed(
+                items = tree.nodes,
+                key = { index, node ->
+                    (node.content as? ComposeNode)?.fallbackId.toString() + node.key
+                },
+                itemContent = { index, node ->
+                    NodeWithLines(
+                        node = node,
+                        index = index,
+                        nodes = tree.nodes,
+                    )
+                },
+            )
+        }
+    }
+}
+
+@Composable
+private fun <T> TreeViewScope<T>.NodeWithLines(
+    node: Node<T>,
+    index: Int,
+    nodes: List<Node<T>>,
+) {
+    val density = LocalDensity.current
+
+    with(density) {
+        val depth = node.depth
+        val indentWidth = 16.dp.toPx()
+        val strokeColor = Color.Gray
+        val strokeWidth = 1.dp.toPx()
+        val toggleIconHalfSize = style.toggleIconSize.toPx()
+
+        val nextNodes = nodes.drop(index + 1)
+
+        Box(
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(style.nodeIconSize),
+        ) {
+            Canvas(modifier = Modifier.matchParentSize()) {
+                val centerY = size.height / 2
+
+                for (level in 0 until depth) {
+                    val hasAncestorSiblingAtLevel = nextNodes.any { it.depth == level }
+
+                    if (hasAncestorSiblingAtLevel) {
+                        val x = level * indentWidth
+                        drawLine(
+                            color = strokeColor,
+                            start = Offset(x, 0f),
+                            end = Offset(x, size.height),
+                            strokeWidth = strokeWidth,
+                        )
+                    }
+                }
+
+                val hasNextSibling =
+                    nextNodes
+                        .takeWhile { it.depth >= depth }
+                        .any { it.depth == depth }
+                val xLine = depth * indentWidth
+
+                drawLine(
+                    color = strokeColor,
+                    start = Offset(xLine, 0f),
+                    end = Offset(xLine, if (hasNextSibling) size.height else centerY),
+                    strokeWidth = strokeWidth,
+                )
+
+                val endLineX =
+                    if (node is LeafNode<T>) {
+                        xLine + indentWidth + toggleIconHalfSize
+                    } else {
+                        xLine + indentWidth / 2 + (toggleIconHalfSize / 3)
+                    }
+                drawLine(
+                    color = strokeColor,
+                    start = Offset(xLine, centerY),
+                    end = Offset(endLineX, centerY),
+                    strokeWidth = strokeWidth,
+                )
             }
+
+            Node(node)
         }
     }
 }
@@ -459,51 +543,33 @@ private fun <T> Tree<T>.selectNext(scope: TreeViewScope<T>): Boolean {
 private fun <T> Tree<T>.collapseSelected(scope: TreeViewScope<T>): Boolean {
     val selectedNode = selectedNodes.firstOrNull() ?: return false
 
-    return if (selectedNode is BranchNode) {
-        if (selectedNode.isExpanded) {
-            collapseNode(selectedNode)
-            true
-        } else {
-            val parent = findParent(selectedNode)
-            if (parent != null) {
-                scope.onClick?.invoke(parent)
-                false
-            } else {
-                false
-            }
-        }
-    } else {
-        val parent = findParent(selectedNode)
-        if (parent != null) {
-            scope.onClick?.invoke(parent)
-            false
-        } else {
-            false
-        }
+    if (selectedNode is BranchNode && selectedNode.isExpanded) {
+        collapseNode(selectedNode)
+        return true
     }
+
+    val parent = findParent(selectedNode)
+    parent?.let {
+        scope.onClick?.invoke(parent)
+    }
+
+    return parent != null
 }
 
 private fun <T> Tree<T>.expandSelected(scope: TreeViewScope<T>): Boolean {
     val selectedNode = selectedNodes.firstOrNull() ?: return false
 
-    if (selectedNode is BranchNode) {
-        return if (!selectedNode.isExpanded) {
-            expandNode(selectedNode)
-            true
-        } else {
-            val firstChild = findFirstChild(selectedNode)
-            if (firstChild != null) {
-                scope.onClick?.invoke(firstChild)
-                false
-            } else {
-                false
-            }
-        }
-    } else {
-        selectNext(scope)
+    if (selectedNode is BranchNode && !selectedNode.isExpanded) {
+        expandNode(selectedNode)
+        return true
     }
 
-    return false
+    val branch = findFirstBranch(selectedNode)
+    branch?.let {
+        scope.onClick?.invoke(it)
+    }
+
+    return branch != null
 }
 
 private fun <T> Tree<T>.findParent(node: Node<T>): Node<T>? {
@@ -513,6 +579,16 @@ private fun <T> Tree<T>.findParent(node: Node<T>): Node<T>? {
         if (nodes[i].depth < node.depth) return nodes[i]
     }
 
+    return null
+}
+
+private fun <T> Tree<T>.findFirstBranch(node: Node<T>): BranchNode<T>? {
+    val index = nodes.indexOf(node)
+
+    for (i in index + 1 until nodes.size) {
+        // nodes[i].depth >= node.depth &&
+        if (nodes[i] is BranchNode) return nodes[i] as? BranchNode<T>
+    }
     return null
 }
 
