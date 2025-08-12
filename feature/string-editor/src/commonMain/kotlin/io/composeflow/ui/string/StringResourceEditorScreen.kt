@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Sync
 import androidx.compose.material.icons.outlined.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
@@ -95,6 +96,7 @@ import io.composeflow.model.project.Project
 import io.composeflow.model.project.string.ResourceLocale
 import io.composeflow.model.project.string.StringResource
 import io.composeflow.more_options
+import io.composeflow.needs_translation_update
 import io.composeflow.no_locales_found_matching
 import io.composeflow.remove
 import io.composeflow.remove_locale
@@ -110,7 +112,7 @@ import io.composeflow.string_resource_key
 import io.composeflow.string_resource_key_placeholder
 import io.composeflow.string_resource_key_tooltip
 import io.composeflow.string_resources
-import io.composeflow.translate_strings
+import io.composeflow.translate_selected_strings
 import io.composeflow.translating_strings
 import io.composeflow.ui.LocalOnAllDialogsClosed
 import io.composeflow.ui.LocalOnAnyDialogIsShown
@@ -119,6 +121,8 @@ import io.composeflow.ui.Tooltip
 import io.composeflow.ui.modifier.backgroundContainerNeutral
 import io.composeflow.ui.popup.SimpleConfirmationDialog
 import io.composeflow.ui.textfield.SmallOutlinedTextField
+import io.composeflow.update_translations
+import io.composeflow.updating_translations
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.compose.resources.stringResource
 
@@ -155,6 +159,7 @@ fun StringResourceEditorScreen(
             },
             onUpdateDefaultLocale = viewModel::onUpdateDefaultLocale,
             onTranslateStrings = viewModel::onTranslateStrings,
+            onTranslateNeedsUpdateStrings = viewModel::onTranslateNeedsUpdateStrings,
             modifier = Modifier.fillMaxSize(),
         )
     }
@@ -177,6 +182,7 @@ private fun StringResourceEditorContent(
     onRemoveLocale: (ResourceLocale) -> Unit,
     onUpdateDefaultLocale: (ResourceLocale) -> Unit,
     onTranslateStrings: () -> Unit,
+    onTranslateNeedsUpdateStrings: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     var addResourceDialogOpen by remember { mutableStateOf(false) }
@@ -234,14 +240,34 @@ private fun StringResourceEditorContent(
                 )
                 Spacer(modifier = Modifier.width(32.dp))
                 if (isAiEnabled()) {
-                    TranslateStringsButton(
-                        onClick = { onTranslateStrings() },
-                        enabled = selectedResourceIds.isNotEmpty() && supportedLocales.any { it != defaultLocale } && !isTranslating,
-                        isTranslating = isTranslating,
-                    )
+                    val hasResourcesNeedingUpdate = project.stringResourceHolder.stringResources.any { it.needsTranslationUpdate }
+                    val hasSelectedResources = selectedResourceIds.isNotEmpty()
+
+                    if (hasSelectedResources) {
+                        // Show "Translate Strings" button for selected resources
+                        TranslateStringsButton(
+                            onClick = { onTranslateStrings() },
+                            enabled = !isTranslating,
+                            isTranslating = isTranslating,
+                        )
+                    } else if (hasResourcesNeedingUpdate) {
+                        // Show "Update Translations" button for flagged resources
+                        UpdateTranslationsButton(
+                            onClick = { onTranslateNeedsUpdateStrings() },
+                            enabled = !isTranslating,
+                            isTranslating = isTranslating,
+                        )
+                    } else {
+                        // Show disabled "Update Translations" button when nothing to translate
+                        UpdateTranslationsButton(
+                            onClick = { },
+                            enabled = false,
+                            isTranslating = false,
+                        )
+                    }
                 } else {
                     Tooltip(stringResource(Res.string.ai_login_needed)) {
-                        TranslateStringsButton(
+                        UpdateTranslationsButton(
                             onClick = { },
                             enabled = false,
                             isTranslating = false,
@@ -463,7 +489,40 @@ private fun TranslateStringsButton(
                 if (isTranslating) {
                     stringResource(Res.string.translating_strings)
                 } else {
-                    stringResource(Res.string.translate_strings)
+                    stringResource(Res.string.translate_selected_strings)
+                },
+        )
+    }
+}
+
+@Composable
+private fun UpdateTranslationsButton(
+    onClick: () -> Unit,
+    enabled: Boolean,
+    isTranslating: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    TextButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier,
+        colors =
+            ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colorScheme.tertiary,
+            ),
+    ) {
+        Icon(
+            imageVector = Icons.Outlined.Sync,
+            contentDescription = null,
+            modifier = Modifier.size(20.dp),
+        )
+        Spacer(modifier = Modifier.width(4.dp))
+        Text(
+            text =
+                if (isTranslating) {
+                    stringResource(Res.string.updating_translations)
+                } else {
+                    stringResource(Res.string.update_translations)
                 },
         )
     }
@@ -607,16 +666,27 @@ private fun StringResourceTableDataRow(
                 )
             }
             VerticalDivider()
-            Box(
-                modifier = Modifier.width(keyColumnWidth).fillMaxHeight(),
-                contentAlignment = Alignment.CenterStart,
+            Row(
+                modifier = Modifier.width(keyColumnWidth).fillMaxHeight().padding(4.dp),
             ) {
                 CellEditableText(
                     initialText = resource.key,
                     onValueChange = onUpdateKey,
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface),
-                    modifier = Modifier.fillMaxWidth().padding(4.dp),
+                    modifier = Modifier.align(Alignment.CenterVertically).weight(1f),
                 )
+                if (resource.needsTranslationUpdate) {
+                    Tooltip(
+                        text = stringResource(Res.string.needs_translation_update),
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.Sync,
+                            contentDescription = stringResource(Res.string.needs_translation_update),
+                            tint = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.size(12.dp),
+                        )
+                    }
+                }
             }
             ColumnDivider()
             Box(
