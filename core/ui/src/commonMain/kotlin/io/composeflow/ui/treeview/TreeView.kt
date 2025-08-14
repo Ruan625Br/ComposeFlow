@@ -14,8 +14,6 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
@@ -95,24 +93,18 @@ fun <T> TreeView(
             )
         }
 
-    val focusRequester = remember { FocusRequester() }
-
     with(scope) {
         LazyColumn(
             state = listState,
             modifier =
-                modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester)
-                    .focusable()
-                    .onPreviewKeyEvent { event ->
-                        if (event.type == KeyEventType.KeyDown) {
-                            // TODO fix this
-                            tree.handleKeyEvent(event, this)
-                        } else {
-                            false
-                        }
-                    },
+                modifier.fillMaxWidth().focusable().onPreviewKeyEvent { event ->
+                    if (event.type == KeyEventType.KeyDown) {
+                        // TODO fix this
+                        tree.handleKeyEvent(event, this)
+                    } else {
+                        false
+                    }
+                },
         ) {
             itemsIndexed(
                 items = tree.nodes,
@@ -125,12 +117,10 @@ fun <T> TreeView(
                             node = node,
                             index = index,
                             nodes = tree.nodes,
-                            focusRequester = focusRequester,
                         )
                     } else {
                         Node(
                             node = node,
-                            focusRequester = focusRequester,
                         )
                     }
                 },

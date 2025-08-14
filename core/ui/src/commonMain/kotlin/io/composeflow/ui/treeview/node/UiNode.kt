@@ -5,6 +5,9 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.hoverable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,12 +18,13 @@ import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isCtrlPressed
@@ -31,14 +35,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import io.composeflow.ui.treeview.TreeViewScope
 import io.composeflow.ui.treeview.getNodeBackgroundColor
-import org.jetbrains.jewel.foundation.modifier.onHover
 
 @Composable
 fun <T> TreeViewScope<T>.NodeWithLines(
     node: Node<T>,
     index: Int,
     nodes: List<Node<T>>,
-    focusRequester: FocusRequester,
 ) {
     val density = LocalDensity.current
 
@@ -98,18 +100,20 @@ fun <T> TreeViewScope<T>.NodeWithLines(
 
             Node(
                 node = node,
-                focusRequester = focusRequester,
             )
         }
     }
 }
 
 @Composable
-internal fun <T> TreeViewScope<T>.Node(
-    node: Node<T>,
-    focusRequester: FocusRequester,
-) {
+internal fun <T> TreeViewScope<T>.Node(node: Node<T>) {
     val backgroundColor = getNodeBackgroundColor(node)
+    val interactionSource = remember { MutableInteractionSource() }
+    val isHovered by interactionSource.collectIsHoveredAsState()
+
+    LaunchedEffect(isHovered) {
+        onHover?.invoke(node, isHovered)
+    }
 
     Box(
         modifier =
@@ -117,11 +121,8 @@ internal fun <T> TreeViewScope<T>.Node(
                 .padding(horizontal = 10.dp)
                 .fillMaxWidth()
                 .background(backgroundColor, style.nodeShape)
-                .then(clickableNode(node, focusRequester))
-                .onHover { isHovered ->
-                    // TODO replace onHover
-                    onHover?.invoke(node, isHovered)
-                },
+                .then(clickableNode(node, interactionSource))
+                .hoverable(interactionSource),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -178,16 +179,18 @@ private fun <T> TreeViewScope<T>.NodeContent(node: Node<T>) {
 // TODO change this and implement long and double click
 fun <T> TreeViewScope<T>.clickableNode(
     node: Node<T>,
-    focusRequester: FocusRequester,
+    interactionSource: MutableInteractionSource,
 ): Modifier =
     Modifier
-        .clickable { }
-        .pointerInput(node.key) {
+        .clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = {},
+        ).pointerInput(node.key) {
             awaitPointerEventScope {
                 while (true) {
                     val event = awaitPointerEvent()
                     if (event.type == PointerEventType.Press) {
-                        focusRequester.requestFocus()
                         val isCtrlPressed = event.keyboardModifiers.isCtrlPressed
                         val isShiftPressed = event.keyboardModifiers.isShiftPressed
 

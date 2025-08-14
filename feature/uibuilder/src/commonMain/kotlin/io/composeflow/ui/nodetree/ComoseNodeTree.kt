@@ -29,6 +29,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.ColorFilter
@@ -315,7 +316,7 @@ fun Tree<ComposeNode>.findLazyListIndex(target: ComposeNode): Int {
     return visibleNodes.indexOfFirst { it.content.fallbackId == target.fallbackId }
 }
 
-fun Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
+suspend fun Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
     clearSelection()
 
     composeNodes.forEach { composeNode ->
@@ -327,13 +328,15 @@ fun Tree<ComposeNode>.setFocus(composeNodes: List<ComposeNode>) {
     }
 }
 
-fun Tree<ComposeNode>.expandPathToNode(node: ComposeNode) {
-    // TODO fix this
+suspend fun Tree<ComposeNode>.expandPathToNode(node: ComposeNode) {
     val path = node.findNodesUntilRoot(includeSelf = true)
     path.reversed().forEach { composeNodeInPath ->
+
         val treeNode = findNodeByFallbackId(composeNodeInPath.fallbackId)
+
         if (treeNode is BranchNode && !treeNode.isExpanded) {
-            treeNode.setExpanded(true, Int.MAX_VALUE)
+            expandNode(treeNode)
+            withFrameNanos { }
         }
     }
 }
