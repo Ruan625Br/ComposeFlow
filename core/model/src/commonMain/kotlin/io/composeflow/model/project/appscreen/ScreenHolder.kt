@@ -235,7 +235,7 @@ data class ScreenHolder(
     ): FileSpecWithDirectory {
         val fileSpecBuilder = FileSpec.builder("", "AppNavHost")
         val funSpecBuilder = FunSpec.builder("AppNavHost").addAnnotation(Composable::class)
-        val defaultScreen = screens.first { it.isDefault.value }
+        val defaultScreen = screens.firstOrNull { it.isDefault.value } ?: screens.first()
         val loginScreen = getLoginScreen()
         if (loginScreen != null) {
             val authenticatedUserName = "authenticatedUser"
