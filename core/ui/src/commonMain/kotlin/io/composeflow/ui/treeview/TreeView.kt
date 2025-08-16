@@ -1,8 +1,12 @@
 package io.composeflow.ui.treeview
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -12,11 +16,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
@@ -26,6 +34,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.times
+import androidx.compose.ui.zIndex
+import co.touchlab.kermit.Logger
 import io.composeflow.ui.treeview.node.Node
 import io.composeflow.ui.treeview.node.NodeWithLines
 import io.composeflow.ui.treeview.node.extension.HoverableNode
@@ -77,6 +88,7 @@ fun <T> TreeView(
     onLongClick: OnNodeClick<T> = tree::toggleSelection,
     onHover: OnNodeHover<T> = ::onNodeHover,
     style: TreeViewStyle<T> = TreeViewStyle(),
+    dragAndDropState: DragDropNodeState<T>? = null,
     listState: LazyListState = rememberLazyListState(),
 ) {
     val scope =
@@ -97,31 +109,58 @@ fun <T> TreeView(
         LazyColumn(
             state = listState,
             modifier =
-                modifier.fillMaxWidth().focusable().onPreviewKeyEvent { event ->
-                    if (event.type == KeyEventType.KeyDown) {
-                        // TODO fix this
-                        tree.handleKeyEvent(event, this)
-                    } else {
-                        false
-                    }
-                },
+                modifier
+                    .fillMaxWidth()
+                    .let { mod -> dragAndDropState?.let { mod.dragNodeContainer(it) } ?: mod }
+                    .focusable(),
+                    /*.onPreviewKeyEvent { event ->
+                        if (event.type == KeyEventType.KeyDown) {
+                            // TODO fix this
+                            tree.handleKeyEvent(event, this)
+                        } else {
+                            false
+                        }
+                    }*/
         ) {
             itemsIndexed(
                 items = tree.nodes,
                 key = { index, node ->
                     node.key
                 },
+                contentType = { index, node ->
+                    DraggableNodeItem(index, node)
+                },
                 itemContent = { index, node ->
-                    if (style.showLines) {
-                        NodeWithLines(
-                            node = node,
-                            index = index,
-                            nodes = tree.nodes,
-                        )
-                    } else {
-                        Node(
-                            node = node,
-                        )
+                    val isDragging = dragAndDropState?.draggingNodeKey == node.key
+
+                    Box(
+                        modifier =
+                            Modifier
+                                .graphicsLayer {
+                                    if (isDragging) translationY = dragAndDropState?.delta ?: 0f
+                                }.zIndex(if (isDragging) 1f else 0f),
+                    ) {
+                        if (style.showLines) {
+                            NodeWithLines(
+                                node = node,
+                                index = index,
+                                nodes = tree.nodes,
+                            )
+                        } else {
+                            Node(node = node)
+                        }
+
+                        if (dragAndDropState?.targetNodeKey == node.key) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .align(Alignment.BottomCenter)
+                                        .fillMaxWidth()
+                                        .padding(start = node.depth * style.toggleIconSize)
+                                        .height(2.dp)
+                                        .background(style.colors.hovered),
+                            )
+                        }
                     }
                 },
             )

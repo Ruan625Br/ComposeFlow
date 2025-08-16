@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerButton
@@ -40,10 +41,14 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import io.composeflow.Res
 import io.composeflow.component_name
 import io.composeflow.model.enumwrapper.NodeVisibility
 import io.composeflow.model.modifier.ModifierWrapper
+import io.composeflow.model.parameter.ColumnTrait
+import io.composeflow.model.parameter.LazyRowTrait
+import io.composeflow.model.parameter.RowTrait
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -64,8 +69,10 @@ import io.composeflow.ui.treeview.node.Branch
 import io.composeflow.ui.treeview.node.BranchNode
 import io.composeflow.ui.treeview.node.Leaf
 import io.composeflow.ui.treeview.node.Node
+import io.composeflow.ui.treeview.rememberDragDropNodeState
 import io.composeflow.ui.treeview.tree.Tree
 import io.composeflow.ui.treeview.tree.TreeScope
+import io.composeflow.ui.treeview.tree.findParent
 import io.composeflow.ui.uibuilder.UiBuilderContextMenuDropDown
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.jewel.ui.component.Tooltip
@@ -178,6 +185,47 @@ fun ComposeNodeTree(
             useHorizontalScroll = false,
         )
 
+    val dragDropNodeState =
+        rememberDragDropNodeState(
+            lazyListState = lazyListState,
+            tree = tree,
+            draggableItemsNum = tree.nodes.size,
+            onMove = { fromIndex, toIndex ->
+                Logger.d("onMove: $fromIndex -> $toIndex")
+                val fromNode = tree.nodes[fromIndex]
+                val toNode = tree.nodes[toIndex]
+                val fromCompose = fromNode.content
+                val toCompose = tree.findParent(toNode)?.content ?: toNode.content
+
+                Logger.d { "Node pos: ${fromCompose.boundsInWindow.value.topLeft}" }
+
+                val dropPosition =
+                    when {
+                        toCompose.trait.value is LazyRowTrait -> {
+                            toCompose
+                                .boundsInWindow.value.topLeft
+                        }
+                        toCompose.trait.value is ColumnTrait -> {
+                            Offset(
+                                toCompose.boundsInWindow.value.topLeft.x,
+                                toCompose.boundsInWindow.value.bottomLeft.y,
+                            )
+                        }
+                        else -> toCompose.boundsInWindow.value.center
+                    }
+
+                canvasNodeCallbacks
+                    .onNodeDropToPosition(
+                        dropPosition,
+                        fromCompose,
+                    )
+
+                // onnNodeDropToPosition:  Offset(712.7, 652.5) valida
+                //  onNodeDropToPosition:  Offset(-96.0, 0.0) invalida
+                Logger.d("onMoveCompose: ${fromCompose.fallbackId} -> \n ->->->${toCompose.fallbackId}")
+            },
+        )
+
     Column(
         modifier =
             modifier
@@ -191,6 +239,7 @@ fun ComposeNodeTree(
             modifier = Modifier.fillMaxWidth(),
             tree = tree,
             listState = lazyListState,
+            dragAndDropState = dragDropNodeState,
             style = treeViewStyle,
             onClick = { treeNode, isCtrlPressed, isShitPressed ->
                 project.screenHolder.clearIsFocused()

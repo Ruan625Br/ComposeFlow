@@ -137,7 +137,7 @@ private fun <T> Tree<T>.expandSelected(scope: TreeViewScope<T>): Boolean {
     return branch != null
 }
 
-private fun <T> Tree<T>.findParent(node: Node<T>): Node<T>? {
+fun <T> Tree<T>.findParent(node: Node<T>): Node<T>? {
     val idx = nodes.indexOf(node)
 
     for (i in idx - 1 downTo 0) {

@@ -14,6 +14,7 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import co.touchlab.kermit.Logger
 import io.composeflow.MainViewUiState
 import io.composeflow.Res
 import io.composeflow.analytics.AnalyticsTracker
@@ -484,6 +485,9 @@ class UiBuilderViewModel(
         val result = EventResult()
         if (node.isPositionWithinBounds(dropPosition)) {
             return result
+        }
+        Logger.d {
+            "onNodeDropToPosition:  $dropPosition\nfromNode: ${node.fallbackId}\ntoNode: ${draggedNode?.fallbackId}"
         }
         dropTarget?.let {
             if (it == node) {
