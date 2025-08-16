@@ -8,10 +8,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCompositionContext
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.isCtrlPressed
-import androidx.compose.ui.input.key.isShiftPressed
 import androidx.compose.ui.input.key.key
-import co.touchlab.kermit.Logger
 import io.composeflow.ui.treeview.TreeViewScope
 import io.composeflow.ui.treeview.node.BranchNode
 import io.composeflow.ui.treeview.node.Node
@@ -83,9 +80,6 @@ private fun <T> Tree<T>.selectPrevious(
     val selectedNode = selectedNodes.firstOrNull() ?: return false
     val previousNode = nodes.getOrNull(nodes.indexOf(selectedNode) - 1) ?: return false
 
-    val isCtrlPressed = event.isCtrlPressed
-    val isShiftPressed = event.isShiftPressed
-
     scope.onClick?.invoke(previousNode, false, false)
 
     return true
@@ -97,8 +91,6 @@ private fun <T> Tree<T>.selectNext(
 ): Boolean {
     val selectedNode = selectedNodes.lastOrNull() ?: return false
     val nextNode = nodes.getOrNull(nodes.indexOf(selectedNode) + 1) ?: return false
-    val isCtrlPressed = event.isCtrlPressed
-    val isShiftPressed = event.isShiftPressed
 
     scope.onClick?.invoke(nextNode, false, false)
 

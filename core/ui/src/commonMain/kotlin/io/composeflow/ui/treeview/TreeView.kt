@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -35,7 +36,6 @@ import io.composeflow.ui.treeview.tree.handleKeyEvent
 data class TreeViewStyle<T>(
     val toggleIcon: NodeIcon<T> = { rememberVectorPainter(Icons.Default.ChevronRight) },
     val toggleIconSize: Dp = 16.dp,
-    val toggleIconColorFilter: ColorFilter? = null,
     val toggleShape: Shape = CircleShape,
     val toggleIconRotationDegrees: Float = 90f,
     val nodeIconSize: Dp = 16.dp,
@@ -43,9 +43,7 @@ data class TreeViewStyle<T>(
     val nodeShape: Shape = RoundedCornerShape(size = 4.dp),
     val colors: TreeViewColors = TreeViewColors(),
     val nodeCollapsedIcon: NodeIcon<T> = { null },
-    val nodeCollapsedIconColorFilter: ColorFilter? = null,
     val nodeExpandedIcon: NodeIcon<T> = nodeCollapsedIcon,
-    val nodeExpandedIconColorFilter: ColorFilter? = nodeCollapsedIconColorFilter,
     val nodeNameStartPadding: Dp = 0.dp,
     val nodeNameTextStyle: TextStyle = DefaultNodeTextStyle,
     val useHorizontalScroll: Boolean = true,
@@ -66,6 +64,9 @@ data class TreeViewColors(
     val hovered: Color = selected.copy(0.9f),
     val hoveredSelected: Color = selected.copy(alpha = 0.4f),
     val stroke: Color = Color.Gray,
+    val toggleIconColorFilter: ColorFilter? = null,
+    val nodeCollapsedIconColorFilter: ColorFilter? = null,
+    val nodeExpandedIconColorFilter: ColorFilter? = nodeCollapsedIconColorFilter,
 )
 
 @Composable
@@ -76,7 +77,21 @@ fun <T> TreeView(
     onDoubleClick: OnNodeClick<T> = tree::onNodeClick,
     onLongClick: OnNodeClick<T> = tree::toggleSelection,
     onHover: OnNodeHover<T> = ::onNodeHover,
-    style: TreeViewStyle<T> = TreeViewStyle(),
+    style: TreeViewStyle<T> =
+        TreeViewStyle(
+            colors =
+                TreeViewColors(
+                    selected = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
+                    hovered =
+                        MaterialTheme.colorScheme.secondaryContainer.copy(
+                            alpha = 0.9f,
+                        ),
+                    toggleIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                    nodeCollapsedIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                    nodeExpandedIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
+                ),
+            useHorizontalScroll = false,
+        ),
     listState: LazyListState = rememberLazyListState(),
 ) {
     val scope =

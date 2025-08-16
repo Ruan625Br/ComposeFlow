@@ -149,7 +149,7 @@ private fun <T> TreeViewScope<T>.ToggleIcon(node: Node<T>) {
         Image(
             painter = toggleIcon,
             contentDescription = if (node.isExpanded) "Collapse node" else "Expand node",
-            colorFilter = style.toggleIconColorFilter,
+            colorFilter = style.colors.toggleIconColorFilter,
             modifier =
                 Modifier
                     .clip(style.toggleShape)
@@ -203,15 +203,17 @@ fun <T> TreeViewScope<T>.clickableNode(
 @Composable
 internal fun <T> TreeViewScope<T>.DefaultNodeIcon(node: Node<T>) {
     val (icon, colorFilter) =
-        if (node is BranchNode && node.isExpanded) {
-            style.nodeExpandedIcon(node) to style.nodeExpandedIconColorFilter
-        } else {
-            style.nodeCollapsedIcon(node) to style.nodeCollapsedIconColorFilter
+        when {
+            node is BranchNode && node.isExpanded -> {
+                style.nodeExpandedIcon(node) to style.colors.nodeExpandedIconColorFilter
+            }
+            else -> {
+                style.nodeCollapsedIcon(node) to style.colors.nodeCollapsedIconColorFilter
+            }
         }
-
-    if (icon != null) {
+    icon?.let {
         Image(
-            painter = icon,
+            painter = it,
             colorFilter = colorFilter,
             contentDescription = node.name,
         )

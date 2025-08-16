@@ -7,7 +7,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -32,7 +31,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.PointerButton
 import androidx.compose.ui.text.SpanStyle
@@ -57,9 +55,7 @@ import io.composeflow.ui.inspector.modifier.AddModifierDialog
 import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.popup.SingleTextInputDialog
 import io.composeflow.ui.treeview.TreeView
-import io.composeflow.ui.treeview.TreeViewColors
 import io.composeflow.ui.treeview.TreeViewScope
-import io.composeflow.ui.treeview.TreeViewStyle
 import io.composeflow.ui.treeview.node.Branch
 import io.composeflow.ui.treeview.node.BranchNode
 import io.composeflow.ui.treeview.node.Leaf
@@ -161,23 +157,6 @@ fun ComposeNodeTree(
     var addModifierDialogVisible by remember { mutableStateOf(false) }
     var convertToComponentNode by remember { mutableStateOf<ComposeNode?>(null) }
 
-    // TODO adjust this to work like MaterialThemes
-    val treeViewStyle =
-        TreeViewStyle<ComposeNode>(
-            toggleIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            colors =
-                TreeViewColors(
-                    selected = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.8f),
-                    hovered =
-                        MaterialTheme.colorScheme.secondaryContainer.copy(
-                            alpha = 0.9f,
-                        ),
-                ),
-            nodeCollapsedIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            nodeExpandedIconColorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-            useHorizontalScroll = false,
-        )
-
     Column(
         modifier =
             modifier
@@ -188,10 +167,8 @@ fun ComposeNodeTree(
                 },
     ) {
         TreeView(
-            modifier = Modifier.fillMaxWidth(),
             tree = tree,
             listState = lazyListState,
-            style = treeViewStyle,
             onClick = { treeNode, isCtrlPressed, isShitPressed ->
                 project.screenHolder.clearIsFocused()
 
@@ -417,11 +394,11 @@ private fun TreeViewScope<ComposeNode>.ComposeNodeIcon(
     project: Project,
 ) {
     val colorFilter =
-        if (node is BranchNode && node.isExpanded) {
-            style.nodeExpandedIconColorFilter
-        } else {
-            style.nodeCollapsedIconColorFilter
+        when {
+            node is BranchNode && node.isExpanded -> style.colors.nodeExpandedIconColorFilter
+            else -> style.colors.nodeCollapsedIconColorFilter
         }
+
     val composeNode = node.content
 
     Image(
