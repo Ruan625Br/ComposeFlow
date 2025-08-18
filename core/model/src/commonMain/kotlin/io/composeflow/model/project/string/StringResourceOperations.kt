@@ -1,5 +1,6 @@
 package io.composeflow.model.project.string
 
+import androidx.annotation.VisibleForTesting
 import io.composeflow.override.toMutableStateMapEqualsOverride
 import io.composeflow.util.generateUniqueName
 import io.composeflow.util.toComposeResourceName
@@ -10,6 +11,35 @@ import kotlinx.serialization.Serializable
 // for managing string resources.
 
 private const val UNKNOWN_ERROR_MESSAGE = "Unknown error"
+
+private val nonAlphaNumericRegex = Regex("[^a-z0-9_]")
+private val underscoresRegex = Regex("_+")
+
+@VisibleForTesting
+fun StringResource.inferKeyIfEmpty(): String =
+    key.ifEmpty {
+        val englishValue =
+            localizedValues
+                .filterKeys { it.language == "en" }
+                .values
+                .firstOrNull { it.isNotBlank() }
+                ?: return@ifEmpty key
+
+        val normalized =
+            englishValue
+                .take(50)
+                .lowercase()
+                .replace(nonAlphaNumericRegex, "_")
+                .replace(underscoresRegex, "_")
+                .trim('_')
+
+        // If truncated mid-word, trim to last incomplete word
+        if (englishValue.length > 50) {
+            normalized.substringBeforeLast('_')
+        } else {
+            normalized
+        }
+    }
 
 /**
  * Adds string resources to the holder, generating unique keys if necessary.
@@ -27,7 +57,7 @@ fun StringResourceHolder.addStringResources(stringResources: List<StringResource
         try {
             val newKey =
                 generateUniqueName(
-                    stringResource.key.toComposeResourceName(),
+                    stringResource.inferKeyIfEmpty().toComposeResourceName(),
                     existingKeys,
                 )
             val newResource =
