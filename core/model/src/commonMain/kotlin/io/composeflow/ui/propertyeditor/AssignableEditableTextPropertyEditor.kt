@@ -64,8 +64,9 @@ fun AssignableEditableTextPropertyEditor(
     var stringResourceDialogOpen by remember { mutableStateOf(false) }
     val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
     val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-    val textFieldEnabled =
-        editable && (initialProperty is IntrinsicProperty<*> || initialProperty == null)
+    val propertyValueEditable =
+        initialProperty is IntrinsicProperty<*> || initialProperty is StringProperty.ValueFromStringResource
+    val textFieldEnabled = editable && (propertyValueEditable || initialProperty == null)
 
     val resolvedLeadingIcon =
         if (leadingIcon != null) {
@@ -83,8 +84,6 @@ fun AssignableEditableTextPropertyEditor(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
     ) {
-        // TODO Support directly editing the text of the string resource.
-        //      https://github.com/ComposeFlow/ComposeFlow/issues/77
         EditableTextProperty(
             enabled = textFieldEnabled,
             onValidValueChanged = {
