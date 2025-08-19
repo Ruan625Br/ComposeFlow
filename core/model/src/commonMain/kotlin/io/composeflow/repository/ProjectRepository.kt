@@ -2,14 +2,11 @@
 
 package io.composeflow.repository
 
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.stringPreferencesKey
 import com.github.michaelbull.result.Result
 import com.github.michaelbull.result.runCatching
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.datastore.LocalFirstProjectSaver
+import io.composeflow.datastore.PlatformDataStore
 import io.composeflow.datastore.ProjectSaver
 import io.composeflow.di.ServiceLocator
 import io.composeflow.model.project.Project
@@ -25,15 +22,18 @@ import kotlinx.coroutines.flow.map
 class ProjectRepository(
     private val firebaseIdToken: FirebaseIdToken,
     private val projectSaver: ProjectSaver = LocalFirstProjectSaver(),
-    private val dataStore: DataStore<Preferences> = ServiceLocator.getOrPut { getOrCreateDataStore() },
+    private val dataStore: PlatformDataStore = ServiceLocator.getOrPut { getOrCreateDataStore() },
 ) {
-    private val editingProjectKey = stringPreferencesKey("editing_project")
+    private val editingProjectKey = "editing_project"
 
     val editingProject: Flow<Project> =
-        dataStore.data.map { preference ->
-            preference[editingProjectKey]?.let { decodeFromStringWithFallback<Project>(it) }
-                ?: Project()
-        }
+        dataStore
+            .observeString(editingProjectKey)
+            .map { projectJson ->
+                projectJson?.let {
+                    decodeFromStringWithFallback<Project>(it)
+                } ?: Project()
+            }
 
     suspend fun createProject(
         projectName: String,
@@ -84,10 +84,8 @@ class ProjectRepository(
             syncWithCloud = syncWithCloud,
         )
 
-        // Save the project to DataStore, too so that Flow
-        dataStore.edit {
-            it[editingProjectKey] = encodeToString(project)
-        }
+        // Save the project to DataStore - the observeString Flow will automatically emit the update
+        dataStore.putString(editingProjectKey, encodeToString(project))
     }
 
     suspend fun loadProjectIdList(): List<String> = projectSaver.loadProjectIdList(userId = firebaseIdToken.user_id)

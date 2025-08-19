@@ -544,8 +544,8 @@ class LlmRepository(
                         append(".yaml")
                     }
 
-                val yamlFile = debugDir.resolve(filename)
-                val metadataFile = debugDir.resolve("$filename.metadata.txt")
+                val yamlFile = debugDir.resolve(filename).toFile()
+                val metadataFile = debugDir.resolve("$filename.metadata.txt").toFile()
 
                 // Save the successful YAML content
                 yamlFile.writeText(yamlContent)
@@ -609,8 +609,8 @@ class LlmRepository(
                         append(".yaml")
                     }
 
-                val yamlFile = debugDir.resolve(filename)
-                val metadataFile = debugDir.resolve("$filename.metadata.txt")
+                val yamlFile = debugDir.resolve(filename).toFile()
+                val metadataFile = debugDir.resolve("$filename.metadata.txt").toFile()
 
                 // Save the failed YAML content
                 yamlFile.writeText(yamlContent)

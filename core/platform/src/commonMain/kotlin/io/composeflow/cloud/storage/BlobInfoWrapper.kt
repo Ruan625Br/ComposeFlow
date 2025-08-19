@@ -1,6 +1,5 @@
 package io.composeflow.cloud.storage
 
-import com.google.cloud.storage.BlobInfo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -24,7 +23,7 @@ data class BlobInfoWrapper(
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (javaClass != other?.javaClass) return false
+        if (other == null || this::class != other::class) return false
 
         other as BlobInfoWrapper
 
@@ -56,22 +55,6 @@ data class BlobInfoWrapper(
         result = 31 * result + (deleteTime?.hashCode() ?: 0)
         return result
     }
-}
-
-@OptIn(ExperimentalTime::class)
-fun BlobInfo.toKotlinWrapper(contentBytes: ByteArray? = null): BlobInfoWrapper {
-    val split = blobId.name.split("/")
-    return BlobInfoWrapper(
-        blobId = blobId.toKotlinWrapper(),
-        fileName = split.last(),
-        folderName = if (split.size >= 2) split[split.size - 2] else "",
-        mediaLink = mediaLink,
-        contentBytes = contentBytes,
-        size = size,
-        createTime = createTimeOffsetDateTime?.toKotlinxInstant(),
-        updateTime = updateTimeOffsetDateTime?.toKotlinxInstant(),
-        deleteTime = deleteTimeOffsetDateTime?.toKotlinxInstant(),
-    )
 }
 
 @OptIn(ExperimentalTime::class)
