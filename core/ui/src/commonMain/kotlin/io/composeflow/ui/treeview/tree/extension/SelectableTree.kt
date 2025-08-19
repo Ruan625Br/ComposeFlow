@@ -13,7 +13,7 @@ interface SelectableTree<T> {
 
     fun handleMultipleSelection(
         node: Node<T>,
-        isCtrlPressed: Boolean,
+        isCtrlOrMetaPressed: Boolean,
         isShiftPressed: Boolean,
     ): List<Node<T>>
 
@@ -50,13 +50,13 @@ internal class SelectableTreeHandler<T>(
 
     override fun handleMultipleSelection(
         node: Node<T>,
-        isCtrlPressed: Boolean,
+        isCtrlOrMetaPressed: Boolean,
         isShiftPressed: Boolean,
     ): List<Node<T>> {
         val currentlySelected = selectedNodes.toMutableList()
 
         return when {
-            isCtrlPressed && isShiftPressed -> {
+            isCtrlOrMetaPressed && isShiftPressed -> {
                 val lastSelected = currentlySelected.lastOrNull() ?: node
                 val currentIndex = nodes.indexOf(node)
                 val lastIndex = nodes.indexOf(lastSelected)
@@ -82,7 +82,7 @@ internal class SelectableTreeHandler<T>(
 
                 nodes.subList(start, end + 1)
             }
-            isCtrlPressed -> {
+            isCtrlOrMetaPressed -> {
                 if (currentlySelected.contains(node)) {
                     currentlySelected.remove(node)
                 } else {

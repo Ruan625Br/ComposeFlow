@@ -169,10 +169,10 @@ fun ComposeNodeTree(
         TreeView(
             tree = tree,
             listState = lazyListState,
-            onClick = { treeNode, isCtrlPressed, isShitPressed ->
+            onClick = { treeNode, isCtrlOrMetaPressed, isShitPressed ->
                 project.screenHolder.clearIsFocused()
 
-                val nodes = tree.handleMultipleSelection(treeNode, isCtrlPressed, isShitPressed)
+                val nodes = tree.handleMultipleSelection(treeNode, isCtrlOrMetaPressed, isShitPressed)
                 nodes.forEach {
                     it.content.setFocus()
                 }

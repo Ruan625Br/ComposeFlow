@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.isCtrlPressed
+import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -191,10 +192,11 @@ fun <T> TreeViewScope<T>.clickableNode(
                 while (true) {
                     val event = awaitPointerEvent()
                     if (event.type == PointerEventType.Press) {
-                        val isCtrlPressed = event.keyboardModifiers.isCtrlPressed
+                        val modifiers = event.keyboardModifiers
+                        val isCtrlOrMetaPressed = modifiers.isCtrlPressed || modifiers.isMetaPressed
                         val isShiftPressed = event.keyboardModifiers.isShiftPressed
 
-                        onClick?.invoke(node, isCtrlPressed, isShiftPressed)
+                        onClick?.invoke(node, isCtrlOrMetaPressed, isShiftPressed)
                     }
                 }
             }
