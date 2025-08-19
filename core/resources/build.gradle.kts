@@ -5,7 +5,11 @@ plugins {
 }
 
 kotlin {
-    jvm("desktop")
+    jvm()
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
     sourceSets {
         commonMain.dependencies {
             implementation(compose.components.resources)

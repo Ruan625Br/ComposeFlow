@@ -6,6 +6,13 @@ import com.github.michaelbull.result.runCatching
 import io.composeflow.auth.AuthRepository
 import io.composeflow.auth.FirebaseIdToken
 import io.composeflow.di.ServiceLocator
+import io.composeflow.http.KtorClientFactory
+import io.ktor.client.request.header
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.last
@@ -14,16 +21,13 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import okhttp3.RequestBody.Companion.toRequestBody
 
 class BillingClient(
     private val authRepository: AuthRepository = AuthRepository(),
-    private val okHttpClient: OkHttpClient = OkHttpClient(),
+    private val httpClient: io.ktor.client.HttpClient = KtorClientFactory.create(),
     private val ioDispatcher: CoroutineDispatcher =
         ServiceLocator.getOrPutWithKey(ServiceLocator.KEY_IO_DISPATCHER) {
-            Dispatchers.IO
+            Dispatchers.Default
         },
     private val endpoint: String = BuildConfig.BILLING_ENDPOINT,
 ) {
@@ -54,34 +58,26 @@ class BillingClient(
                         }
                     }
 
-                val requestBuilder =
-                    okhttp3.Request
-                        .Builder()
-                        .url("$endpoint/createPricingTableLink")
-                        .addHeader("Authorization", "Bearer $token")
-                        .addHeader("Content-Type", "application/json; charset=utf-8")
-                val requestBodyString = "{}"
-                val jsonMediaType = "application/json; charset=utf-8".toMediaType()
-                requestBuilder.post(requestBodyString.toRequestBody(jsonMediaType))
-
-                val request = requestBuilder.build()
-
-                okHttpClient.newCall(request).execute().use { response ->
-                    response.body.string().let { body ->
-                        val jsonElement = Json.parseToJsonElement(body)
-
-                        val error = jsonElement.jsonObject["error"]
-                        if (error != null) {
-                            val code = error.jsonObject["code"]
-                            val message = error.jsonObject["message"]
-                            throw Exception("code: $code, message: $message")
-                        }
-
-                        val url =
-                            jsonElement.jsonObject["pricingTableUrl"]?.jsonPrimitive?.content
-                        return@withContext url
+                val response =
+                    httpClient.post("$endpoint/createPricingTableLink") {
+                        header(HttpHeaders.Authorization, "Bearer $token")
+                        header(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        setBody("{}")
                     }
+
+                val body = response.bodyAsText()
+                val jsonElement = Json.parseToJsonElement(body)
+
+                val error = jsonElement.jsonObject["error"]
+                if (error != null) {
+                    val code = error.jsonObject["code"]
+                    val message = error.jsonObject["message"]
+                    throw Exception("code: $code, message: $message")
                 }
+
+                val url =
+                    jsonElement.jsonObject["pricingTableUrl"]?.jsonPrimitive?.content
+                return@withContext url
             } ?: throw Exception("No res")
         }
 }

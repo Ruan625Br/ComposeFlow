@@ -4,8 +4,12 @@ plugins {
 
 kotlin {
     jvm()
+    @OptIn(org.jetbrains.kotlin.gradle.ExperimentalWasmDsl::class)
+    wasmJs {
+        browser()
+    }
     sourceSets {
-        commonMain.dependencies {
+        jvmMain.dependencies {
             implementation(libs.logback.classic)
             implementation(libs.logback.core)
             implementation(libs.slf4j.api)

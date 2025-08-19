@@ -32,6 +32,7 @@ kotlinx-serialization = "1.9.0"
 # Intentionall keeping this version to run format that takes a String
 ktlint = "0.39.0"
 ktor = "3.2.2"
+ktorClientLogging = "3.2.3"
 logback = "1.5.18"
 multiplatform-settings = "1.3.0"
 okhttp = "5.1.0"
@@ -54,6 +55,7 @@ androidx-core-splashscreen = { module = "androidx.core:core-splashscreen", versi
 # com.google
 kotlin-compile-testing = { module = "com.github.tschuchortdev:kotlin-compile-testing", version.ref = "kotlinCompileTesting" }
 kotlin-compile-testing-ksp = { module = "com.github.tschuchortdev:kotlin-compile-testing-ksp", version.ref = "kotlinCompileTestingKsp" }
+ktor-client-logging = { module = "io.ktor:ktor-client-logging", version.ref = "ktorClientLogging" }
 symbol-processing-api = { module = "com.google.devtools.ksp:symbol-processing-api", version.ref = "ksp" }
 testparameterinjector = { module = "com.google.testparameterinjector:test-parameter-injector", version.ref = "testparameterinjector" }
 
@@ -89,9 +91,10 @@ richeditor-compose = "com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13"
 datastore-core-okio = { group = "androidx.datastore", name = "datastore-core-okio", version.ref = "dataStore" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "dataStore" }
 datastore-preferences-core = { group = "androidx.datastore", name = "datastore-preferences-core", version.ref = "dataStore" }
-http4k-core = { group = "org.http4k", name = "http4k-core" }
-http4k-server-netty = { module = "org.http4k:http4k-server-netty" }
 ktor-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktor" }
+ktor-server-core = { module = "io.ktor:ktor-server-core", version.ref = "ktor" }
+ktor-server-cio = { module = "io.ktor:ktor-server-cio", version.ref = "ktor" }
+ktor-server-content-negotiation = { module = "io.ktor:ktor-server-content-negotiation", version.ref = "ktor" }
 ktor-client-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
 ktor-client-js = { module = "io.ktor:ktor-client-js", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-cio", version.ref = "ktor" }
@@ -102,6 +105,7 @@ kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serializa
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-jsonpath = "io.github.nomisrev:kotlinx-serialization-jsonpath:1.0.0"
 kotlin-result = "com.michael-bull.kotlin-result:kotlin-result:2.0.1"
+ktor-utils = "io.ktor:ktor-utils:3.2.3"
 kaml = "com.charleskorn.kaml:kaml:0.85.0"
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp" }
 multiplatform-settings = { module = "com.russhwolf:multiplatform-settings", version.ref = "multiplatform-settings" }

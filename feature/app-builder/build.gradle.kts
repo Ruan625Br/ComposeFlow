@@ -4,7 +4,7 @@ plugins {
 }
 
 kotlin {
-    jvm("desktop")
+    jvm()
 
     sourceSets {
         commonMain.dependencies {
@@ -56,7 +56,6 @@ tasks {
                     "logback-core",
                     "google-cloud",
                     "gradle-tooling",
-                    "http4k",
                     "material-kolor",
                     "reorderable",
                     "roborazzi",
