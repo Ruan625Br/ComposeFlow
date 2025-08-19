@@ -172,7 +172,8 @@ fun ComposeNodeTree(
             onClick = { treeNode, isCtrlOrMetaPressed, isShitPressed ->
                 project.screenHolder.clearIsFocused()
 
-                val nodes = tree.handleMultipleSelection(treeNode, isCtrlOrMetaPressed, isShitPressed)
+                val nodes =
+                    tree.handleMultipleSelection(treeNode, isCtrlOrMetaPressed, isShitPressed)
                 nodes.forEach {
                     it.content.setFocus()
                 }

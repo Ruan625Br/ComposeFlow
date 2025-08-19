@@ -177,10 +177,10 @@ private fun <T> TreeViewScope<T>.NodeContent(node: Node<T>) {
     }
 }
 
-// TODO change this and implement long and double click
 fun <T> TreeViewScope<T>.clickableNode(
     node: Node<T>,
     interactionSource: MutableInteractionSource,
+    doubleClickThreshold: Long = 300L,
 ): Modifier =
     Modifier
         .clickable(
@@ -189,14 +189,26 @@ fun <T> TreeViewScope<T>.clickableNode(
             onClick = {},
         ).pointerInput(node.key) {
             awaitPointerEventScope {
+                var lastClickTime = 0L
+
                 while (true) {
                     val event = awaitPointerEvent()
-                    if (event.type == PointerEventType.Press) {
-                        val modifiers = event.keyboardModifiers
-                        val isCtrlOrMetaPressed = modifiers.isCtrlPressed || modifiers.isMetaPressed
-                        val isShiftPressed = event.keyboardModifiers.isShiftPressed
 
-                        onClick?.invoke(node, isCtrlOrMetaPressed, isShiftPressed)
+                    if (event.type == PointerEventType.Press) {
+                        val now = System.currentTimeMillis()
+
+                        val isDoubleClick = (now - lastClickTime) < doubleClickThreshold
+
+                        if (isDoubleClick) {
+                            onDoubleClick?.invoke(node)
+                        } else {
+                            val modifiers = event.keyboardModifiers
+                            val ctrlOrMeta = modifiers.isCtrlPressed || modifiers.isMetaPressed
+                            val shift = modifiers.isShiftPressed
+                            onClick?.invoke(node, ctrlOrMeta, shift)
+                        }
+
+                        lastClickTime = now
                     }
                 }
             }
@@ -209,6 +221,7 @@ internal fun <T> TreeViewScope<T>.DefaultNodeIcon(node: Node<T>) {
             node is BranchNode && node.isExpanded -> {
                 style.nodeExpandedIcon(node) to style.colors.nodeExpandedIconColorFilter
             }
+
             else -> {
                 style.nodeCollapsedIcon(node) to style.colors.nodeCollapsedIconColorFilter
             }

@@ -67,7 +67,7 @@ fun <T> Tree<T>.handleKeyEvent(
         }
 
         Key.DirectionRight -> {
-            expandSelected(scope)
+            handleRightKey(scope)
         }
 
         else -> false
@@ -113,7 +113,7 @@ private fun <T> Tree<T>.collapseSelected(scope: TreeViewScope<T>): Boolean {
     return parent != null
 }
 
-private fun <T> Tree<T>.expandSelected(scope: TreeViewScope<T>): Boolean {
+private fun <T> Tree<T>.handleRightKey(scope: TreeViewScope<T>): Boolean {
     val selectedNode = selectedNodes.firstOrNull() ?: return false
 
     if (selectedNode is BranchNode && !selectedNode.isExpanded) {
@@ -121,12 +121,19 @@ private fun <T> Tree<T>.expandSelected(scope: TreeViewScope<T>): Boolean {
         return true
     }
 
-    val branch = findFirstBranch(selectedNode)
-    branch?.let {
+    val next =
+        if (selectedNode is BranchNode) {
+            findFirstChild(selectedNode) ?: findNextNode(selectedNode)
+        } else {
+            findNextNode(selectedNode)
+        }
+
+    next?.let {
         scope.onClick?.invoke(it, false, false)
+        return true
     }
 
-    return branch != null
+    return false
 }
 
 private fun <T> Tree<T>.findParent(node: Node<T>): Node<T>? {
@@ -149,7 +156,7 @@ private fun <T> Tree<T>.findFirstBranch(node: Node<T>): BranchNode<T>? {
     return null
 }
 
-private fun <T> Tree<T>.findFirstChild(branch: BranchNode<T>): Node<T>? {
+fun <T> Tree<T>.findFirstChild(branch: BranchNode<T>): Node<T>? {
     val idx = nodes.indexOf(branch)
 
     for (i in idx + 1 until nodes.size) {
@@ -159,3 +166,13 @@ private fun <T> Tree<T>.findFirstChild(branch: BranchNode<T>): Node<T>? {
 
     return null
 }
+
+fun <T> Tree<T>.findLastChild(node: Node<T>): Node<T>? {
+    val index = nodes.indexOf(node)
+    for (i in index + 1 until nodes.size) {
+        if (nodes[i].depth <= node.depth) break
+    }
+    return node
+}
+
+fun <T> Tree<T>.findNextNode(current: Node<T>): Node<T>? = nodes.getOrNull(nodes.indexOf(current) + 1)
