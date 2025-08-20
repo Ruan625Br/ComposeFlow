@@ -265,7 +265,7 @@ fun ComposeNodeTree(
             focusedNodes.firstOrNull()?.let { focused ->
                 val index = tree.findLazyListIndex(target = focused)
                 if (index != -1) {
-                    lazyListState.scrollToItem(index)
+                    lazyListState.animateScrollToItem(index)
                 }
             }
         }
