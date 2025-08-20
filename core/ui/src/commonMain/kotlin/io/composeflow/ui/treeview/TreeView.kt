@@ -63,7 +63,7 @@ data class TreeViewColors(
     val selected: Color = Color.LightGray.copy(alpha = 0.8f),
     val hovered: Color = selected.copy(0.9f),
     val hoveredSelected: Color = selected.copy(alpha = 0.4f),
-    val stroke: Color = Color.Gray,
+    val stroke: Color = Color.Gray.copy(alpha = 0.2f),
     val toggleIconColorFilter: ColorFilter? = null,
     val nodeCollapsedIconColorFilter: ColorFilter? = null,
     val nodeExpandedIconColorFilter: ColorFilter? = nodeCollapsedIconColorFilter,

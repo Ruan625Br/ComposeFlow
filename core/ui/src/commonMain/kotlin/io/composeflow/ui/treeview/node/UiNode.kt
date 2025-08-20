@@ -51,11 +51,13 @@ fun <T> TreeViewScope<T>.NodeWithLines(
         val strokeColor = style.colors.stroke
         val strokeWidth = 1.dp.toPx()
         val toggleIconHalfSize = style.toggleIconSize.toPx()
+        val verticalPadding = 2.dp.toPx()
 
         val nextNodes = nodes.drop(index + 1)
+        val prevNodes = nodes.take(index)
 
         Box(
-            modifier = Modifier.fillMaxWidth().height(24.dp), // move to style
+            modifier = Modifier.fillMaxWidth().height(24.dp),
         ) {
             Canvas(modifier = Modifier.matchParentSize()) {
                 val centerY = size.height / 2
@@ -76,12 +78,17 @@ fun <T> TreeViewScope<T>.NodeWithLines(
 
                 val hasNextSibling =
                     nextNodes.takeWhile { it.depth >= depth }.any { it.depth == depth }
+                val hasPrevSibling =
+                    prevNodes.reversed().takeWhile { it.depth >= depth }.any { it.depth == depth }
+
                 val xLine = depth * indentWidth
+                val startY = if (hasPrevSibling) 0f else verticalPadding
+                val endY = if (hasNextSibling) size.height else centerY
 
                 drawLine(
                     color = strokeColor,
-                    start = Offset(xLine, 0f),
-                    end = Offset(xLine, if (hasNextSibling) size.height else centerY),
+                    start = Offset(xLine, startY),
+                    end = Offset(xLine, endY),
                     strokeWidth = strokeWidth,
                 )
 
