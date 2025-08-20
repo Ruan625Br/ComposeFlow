@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
 import androidx.compose.ui.input.pointer.isCtrlPressed
 import androidx.compose.ui.input.pointer.isMetaPressed
 import androidx.compose.ui.input.pointer.isShiftPressed
@@ -36,6 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
 import io.composeflow.ui.treeview.TreeViewScope
 import io.composeflow.ui.treeview.getNodeBackgroundColor
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 @Composable
 fun <T> TreeViewScope<T>.NodeWithLines(
@@ -187,7 +191,7 @@ private fun <T> TreeViewScope<T>.NodeContent(node: Node<T>) {
 fun <T> TreeViewScope<T>.clickableNode(
     node: Node<T>,
     interactionSource: MutableInteractionSource,
-    doubleClickThreshold: Long = 300L,
+    doubleClickThreshold: Long = 250L,
 ): Modifier =
     Modifier
         .clickable(
@@ -195,27 +199,41 @@ fun <T> TreeViewScope<T>.clickableNode(
             indication = null,
             onClick = {},
         ).pointerInput(node.key) {
-            awaitPointerEventScope {
-                var lastClickTime = 0L
+            coroutineScope {
+                awaitPointerEventScope {
+                    var lastClickTime = 0L
+                    var clickJob: Job? = null
 
-                while (true) {
-                    val event = awaitPointerEvent()
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull() ?: continue
 
-                    if (event.type == PointerEventType.Press) {
-                        val now = System.currentTimeMillis()
+                        if (change.isConsumed) continue
 
-                        val isDoubleClick = (now - lastClickTime) < doubleClickThreshold
+                        if (change.changedToUpIgnoreConsumed()) {
+                            val now = System.currentTimeMillis()
+                            val timeSinceLast = now - lastClickTime
 
-                        if (isDoubleClick) {
-                            onDoubleClick?.invoke(node)
-                        } else {
                             val modifiers = event.keyboardModifiers
                             val ctrlOrMeta = modifiers.isCtrlPressed || modifiers.isMetaPressed
                             val shift = modifiers.isShiftPressed
-                            onClick?.invoke(node, ctrlOrMeta, shift)
-                        }
 
-                        lastClickTime = now
+                            clickJob?.cancel()
+
+                            if (timeSinceLast < doubleClickThreshold) {
+                                onDoubleClick?.invoke(node)
+                                lastClickTime = 0L
+                            } else {
+                                clickJob =
+                                    launch {
+                                        delay(doubleClickThreshold)
+                                        onClick?.invoke(node, ctrlOrMeta, shift)
+                                    }
+                                lastClickTime = now
+                            }
+
+                            change.consume()
+                        }
                     }
                 }
             }
