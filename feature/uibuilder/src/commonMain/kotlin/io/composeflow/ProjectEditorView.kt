@@ -1,17 +1,19 @@
 package io.composeflow
 
-import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
@@ -20,7 +22,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -47,10 +51,6 @@ import moe.tlaster.precompose.navigation.PopUpTo
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.viewmodel.viewModel
 import org.jetbrains.jewel.ui.component.Icon
-import org.jetbrains.jewel.ui.component.SelectableIconButton
-import org.jetbrains.jewel.ui.component.styling.LocalIconButtonStyle
-import org.jetbrains.jewel.ui.painter.hints.Stroke
-import org.jetbrains.jewel.ui.painter.rememberResourcePainterProvider
 
 const val MAIN_VIEW_TEST_TAG = "MainView"
 
@@ -105,10 +105,7 @@ fun ProjectEditorContent(
     val aiChatToggleVisibilityModifier =
         if (isAiEnabled) {
             Modifier.onPreviewKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown &&
-                    event.key == Key.K &&
-                    (event.isMetaPressed || event.isCtrlPressed)
-                ) {
+                if (event.type == KeyEventType.KeyDown && event.key == Key.K && (event.isMetaPressed || event.isCtrlPressed)) {
                     viewModel.onToggleShowAiChatDialog()
                     true
                 } else {
@@ -155,12 +152,8 @@ fun ProjectEditorContent(
                                 currentDestination?.ordinal ?: 0,
                             )
                         }
-                        Column(
-                            modifier =
-                                Modifier
-                                    .width(40.dp)
-                                    .fillMaxHeight()
-                                    .background(color = MaterialTheme.colorScheme.surface),
+                        NavigationRail(
+                            modifier = Modifier.width(40.dp).fillMaxHeight(),
                         ) {
                             TopLevelDestination.entries.forEachIndexed { index, item ->
                                 @Suppress("KotlinConstantConditions")
@@ -170,7 +163,13 @@ fun ProjectEditorContent(
                                     }
                                 }
                                 Tooltip(item.label) {
-                                    SelectableIconButton(
+                                    NavigationRailItem(
+                                        modifier =
+                                            Modifier
+                                                .size(40.dp)
+                                                .padding(5.dp)
+                                                .clip(MaterialTheme.shapes.extraSmall)
+                                                .testTag("$NAVIGATION_RAIL_TEST_TAG/${item.name}"),
                                         selected = selectedItem == item.ordinal,
                                         onClick = {
                                             projectEditorNavigator.navigate(
@@ -185,27 +184,19 @@ fun ProjectEditorContent(
                                             )
                                             selectedItem = index
                                         },
-                                        modifier =
-                                            Modifier
-                                                .size(40.dp)
-                                                .padding(5.dp)
-                                                .testTag("$NAVIGATION_RAIL_TEST_TAG/${item.name}"),
-                                    ) { state ->
-                                        val tint by LocalIconButtonStyle.current.colors.foregroundFor(
-                                            state,
-                                        )
-                                        val painterProvider =
-                                            rememberResourcePainterProvider(
-                                                item.iconPath,
-                                                Icons::class.java,
-                                            )
-                                        val painter by painterProvider.getPainter(
-                                            org.jetbrains.jewel.ui.painter.hints
-                                                .Size(20),
-                                            Stroke(tint),
-                                        )
-                                        Icon(painter = painter, "icon")
-                                    }
+                                        icon = {
+                                            Box(
+                                                modifier = Modifier.fillMaxSize(),
+                                                contentAlignment = Alignment.Center,
+                                            ) {
+                                                Icon(
+                                                    modifier = Modifier.size(20.dp),
+                                                    imageVector = item.icon,
+                                                    contentDescription = "icon",
+                                                )
+                                            }
+                                        },
+                                    )
                                 }
                             }
                         }
