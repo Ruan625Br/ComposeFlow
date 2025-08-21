@@ -15,7 +15,7 @@ fun <T> TreeScope.Leaf(
     key: Any,
     customIcon: NodeComponent<T>? = null,
     customName: NodeComponent<T>? = null,
-    name: String = content.toString(),
+    name: String = "",
 ) {
     key(key) {
         val (isSelected, setSelected) = rememberSaveable(key) { mutableStateOf(false) }
@@ -48,7 +48,7 @@ fun <T> TreeScope.Branch(
     key: Any,
     customIcon: NodeComponent<T>? = null,
     customName: NodeComponent<T>? = null,
-    name: String = content.toString(),
+    name: String = "",
     children: @Composable TreeScope.() -> Unit = {},
 ) {
     key(key) {
