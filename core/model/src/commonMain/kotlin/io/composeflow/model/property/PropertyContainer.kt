@@ -17,12 +17,12 @@ data class PropertyContainer(
         project: Project,
         composeNode: ComposeNode,
     ): List<TrackableIssue> {
-        if (assignableProperty is ValueFromCompanionState) return emptyList()
-        val transformedType =
-            assignableProperty?.transformedValueType(project) ?: return emptyList()
+        if (assignableProperty == null || assignableProperty is ValueFromCompanionState) {
+            return emptyList()
+        }
         return buildList {
             project.findCanvasEditableHavingNodeOrNull(composeNode)?.let { canvasEditable ->
-                if (transformedType is ComposeFlowType.UnknownType) {
+                assignableProperty.generateIssues(project, acceptableType).forEach { issue ->
                     add(
                         TrackableIssue(
                             destinationContext =
@@ -30,25 +30,7 @@ data class PropertyContainer(
                                     canvasEditableId = canvasEditable.id,
                                     composeNodeId = composeNode.id,
                                 ),
-                            issue =
-                                Issue.ResolvedToUnknownType(
-                                    property = assignableProperty,
-                                ),
-                        ),
-                    )
-                } else if (!acceptableType.isAbleToAssign(transformedType)) {
-                    add(
-                        TrackableIssue(
-                            destinationContext =
-                                DestinationContext.UiBuilderScreen(
-                                    canvasEditableId = canvasEditable.id,
-                                    composeNodeId = composeNode.id,
-                                ),
-                            issue =
-                                Issue.ResolvedToTypeNotAssignable(
-                                    property = assignableProperty,
-                                    acceptableType = acceptableType,
-                                ),
+                            issue = issue,
                         ),
                     )
                 }

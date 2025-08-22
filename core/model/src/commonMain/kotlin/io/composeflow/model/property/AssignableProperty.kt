@@ -2,6 +2,7 @@
 
 package io.composeflow.model.property
 
+import androidx.annotation.CallSuper
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Brush
 import androidx.compose.material.icons.outlined.ColorLens
@@ -20,7 +21,6 @@ import com.squareup.kotlinpoet.CodeBlock
 import com.squareup.kotlinpoet.MemberName
 import com.squareup.kotlinpoet.ParameterSpec
 import io.composeflow.ComposeScreenConstant
-import io.composeflow.Res
 import io.composeflow.ViewModelConstant
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.Dbms
@@ -28,8 +28,6 @@ import io.composeflow.custom.composeflowicons.Firebase
 import io.composeflow.editor.validator.FloatValidator
 import io.composeflow.editor.validator.IntValidator
 import io.composeflow.editor.validator.ValidateResult
-import io.composeflow.invalid_reference
-import io.composeflow.invalid_type
 import io.composeflow.kotlinpoet.ClassHolder
 import io.composeflow.kotlinpoet.GeneratedPlace
 import io.composeflow.kotlinpoet.GenerationContext
@@ -62,6 +60,7 @@ import io.composeflow.model.project.findLocalStateOrNull
 import io.composeflow.model.project.findParameterOrNull
 import io.composeflow.model.project.findParameterOrThrow
 import io.composeflow.model.project.firebase.CollectionId
+import io.composeflow.model.project.issue.Issue
 import io.composeflow.model.project.string.StringResourceId
 import io.composeflow.model.project.string.stringResourceDefaultValue
 import io.composeflow.model.project.string.updateStringResourceDefaultLocaleValue
@@ -94,7 +93,6 @@ import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
-import org.jetbrains.compose.resources.stringResource
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -253,6 +251,40 @@ sealed interface AssignableProperty {
      */
     fun isIdentical(other: AssignableProperty): Boolean = this == other
 
+    /**
+     * Generates validation issues for this assignable property.
+     *
+     * This method is designed to be overridden by derived classes to perform
+     * property-specific validation. Derived classes should call the super implementation
+     * and add their own validation issues to the result.
+     *
+     * @param project The project context used for validation
+     * @param acceptableType The expected type that this property should be compatible with
+     * @return List of validation issues found for this property
+     */
+    @CallSuper
+    fun generateIssues(
+        project: Project,
+        acceptableType: ComposeFlowType,
+    ): List<Issue> =
+        buildList {
+            val transformedValueType = transformedValueType(project)
+            if (transformedValueType is ComposeFlowType.UnknownType) {
+                add(
+                    Issue.ResolvedToUnknownType(
+                        property = this@AssignableProperty,
+                    ),
+                )
+            } else if (!acceptableType.isAbleToAssign(transformedValueType)) {
+                add(
+                    Issue.ResolvedToTypeNotAssignable(
+                        property = this@AssignableProperty,
+                        acceptableType = acceptableType,
+                    ),
+                )
+            }
+        }
+
     @Composable
     fun Editor(
         project: Project,
@@ -398,8 +430,7 @@ sealed interface StringProperty : AssignableProperty {
         val stringResourceId: StringResourceId,
     ) : AssignablePropertyBase(),
         StringProperty {
-        override fun valueExpression(project: Project): String =
-            project.stringResourceHolder.stringResourceDefaultValue(stringResourceId).orEmpty()
+        override fun valueExpression(project: Project): String = textFromStringResource(project)
 
         override fun generateCodeBlock(
             project: Project,
@@ -423,11 +454,30 @@ sealed interface StringProperty : AssignableProperty {
             }
         }
 
-        override fun displayText(project: Project): String =
-            project.stringResourceHolder.stringResourceDefaultValue(stringResourceId).orEmpty()
+        override fun displayText(project: Project): String = textFromStringResource(project)
 
         override fun isDependent(sourceId: String): Boolean =
             stringResourceId == sourceId || super<AssignablePropertyBase>.isDependent(sourceId)
+
+        private fun textFromStringResource(project: Project): String =
+            project.stringResourceHolder.stringResourceDefaultValue(stringResourceId) ?: "[Invalid]"
+
+        override fun generateIssues(
+            project: Project,
+            acceptableType: ComposeFlowType,
+        ): List<Issue> =
+            super<AssignablePropertyBase>.generateIssues(project, acceptableType) +
+                buildList {
+                    val stringResourceIds =
+                        project.stringResourceHolder.stringResources
+                            .map { it.id }
+                            .toSet()
+                    if (stringResourceId !in stringResourceIds) {
+                        add(
+                            Issue.InvalidResourceReference(resourceType = "string"),
+                        )
+                    }
+                }
     }
 
     @Composable
@@ -2274,14 +2324,9 @@ fun AssignableProperty.getErrorMessage(
     project: Project,
     acceptableType: ComposeFlowType,
 ): String? {
-    val transformedValueType = transformedValueType(project)
-    val errorText =
-        if (transformedValueType is ComposeFlowType.UnknownType) {
-            stringResource(Res.string.invalid_reference)
-        } else if (!acceptableType.isAbleToAssign(transformedValueType)) {
-            stringResource(Res.string.invalid_type)
-        } else {
-            null
+    val messages =
+        generateIssues(project, acceptableType).map { issue ->
+            issue.errorMessage(project)
         }
-    return errorText
+    return messages.joinToString().takeIf { it.isNotEmpty() }
 }
