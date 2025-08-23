@@ -1,30 +1,19 @@
 package io.composeflow
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationRail
-import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -39,18 +28,14 @@ import io.composeflow.ai.AiChatDialog
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.auth.isAiEnabled
 import io.composeflow.model.ProvideNavigator
-import io.composeflow.model.TopLevelDestination
-import io.composeflow.ui.Tooltip
 import io.composeflow.ui.jewel.TitleBarContent
+import io.composeflow.ui.navigationrail.LeftNavigationRail
 import io.composeflow.ui.statusbar.StatusBar
 import io.composeflow.ui.statusbar.StatusBarViewModel
 import io.composeflow.ui.toolbar.LeftToolbar
 import io.composeflow.ui.toolbar.RightToolbar
-import moe.tlaster.precompose.navigation.NavOptions
-import moe.tlaster.precompose.navigation.PopUpTo
 import moe.tlaster.precompose.navigation.rememberNavigator
 import moe.tlaster.precompose.viewmodel.viewModel
-import org.jetbrains.jewel.ui.component.Icon
 
 const val MAIN_VIEW_TEST_TAG = "MainView"
 
@@ -92,15 +77,6 @@ fun ProjectEditorContent(
     val aiAssistantUiState by viewModel.aiAssistantUiState.collectAsState()
 
     val projectEditorNavigator = rememberNavigator()
-    val currentDestination =
-        TopLevelDestination.entries.firstOrNull {
-            it.route ==
-                projectEditorNavigator.currentEntry
-                    .collectAsState(null)
-                    .value
-                    ?.route
-                    ?.route
-        }
     val showAiChatDialog = viewModel.showAiChatDialog.collectAsState().value
     val aiChatToggleVisibilityModifier =
         if (isAiEnabled) {
@@ -147,59 +123,9 @@ fun ProjectEditorContent(
                     }
 
                     Row(modifier = Modifier.weight(1f).fillMaxWidth()) {
-                        var selectedItem by remember(currentDestination) {
-                            mutableStateOf(
-                                currentDestination?.ordinal ?: 0,
-                            )
-                        }
-                        NavigationRail(
-                            modifier = Modifier.width(40.dp).fillMaxHeight(),
-                        ) {
-                            TopLevelDestination.entries.forEachIndexed { index, item ->
-                                @Suppress("KotlinConstantConditions")
-                                if (BuildConfig.isRelease) {
-                                    if (item == TopLevelDestination.StringEditor) {
-                                        return@forEachIndexed
-                                    }
-                                }
-                                Tooltip(item.label) {
-                                    NavigationRailItem(
-                                        modifier =
-                                            Modifier
-                                                .size(40.dp)
-                                                .padding(5.dp)
-                                                .clip(MaterialTheme.shapes.extraSmall)
-                                                .testTag("$NAVIGATION_RAIL_TEST_TAG/${item.name}"),
-                                        selected = selectedItem == item.ordinal,
-                                        onClick = {
-                                            projectEditorNavigator.navigate(
-                                                item.route,
-                                                options =
-                                                    NavOptions(
-                                                        popUpTo =
-                                                            PopUpTo(
-                                                                route = item.route,
-                                                            ),
-                                                    ),
-                                            )
-                                            selectedItem = index
-                                        },
-                                        icon = {
-                                            Box(
-                                                modifier = Modifier.fillMaxSize(),
-                                                contentAlignment = Alignment.Center,
-                                            ) {
-                                                Icon(
-                                                    modifier = Modifier.size(20.dp),
-                                                    imageVector = item.icon,
-                                                    contentDescription = "icon",
-                                                )
-                                            }
-                                        },
-                                    )
-                                }
-                            }
-                        }
+                        LeftNavigationRail(
+                            navigator = projectEditorNavigator,
+                        )
                         VerticalDivider(
                             color = MaterialTheme.colorScheme.surfaceContainerHigh,
                             modifier =
