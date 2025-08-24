@@ -2,15 +2,16 @@ package io.composeflow.model.datatype
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.asTypeName
 import io.composeflow.asClassName
+import io.composeflow.kotlinpoet.wrapper.AnnotationSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.ClassNameWrapper
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.FunSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.KModifierWrapper
+import io.composeflow.kotlinpoet.wrapper.ParameterSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.PropertySpecWrapper
+import io.composeflow.kotlinpoet.wrapper.TypeSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.asTypeNameWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.findDataTypeOrNull
 import io.composeflow.model.project.firebase.FirestoreCollection
@@ -61,11 +62,8 @@ data class DataType(
         }
     }
 
-    fun asKotlinPoetClassName(project: Project): ClassName = ClassName("${project.packageName}.$DATA_TYPE_PACKAGE", name.asClassName())
-
-//    fun findDataFieldOrNull(fieldName: String): DataField? {
-//        return fields.firstOrNull { it.variableName == fieldName }
-//    }
+    fun asKotlinPoetClassName(project: Project): ClassNameWrapper =
+        ClassNameWrapper.get("${project.packageName}.$DATA_TYPE_PACKAGE", name.asClassName())
 
     fun findDataFieldOrNullByVariableName(fieldName: String): DataField? = fields.find { it.variableName == fieldName }
 
@@ -74,46 +72,45 @@ data class DataType(
     /**
      * Generates a TypeSpec for the data class that represents this data type.
      */
-    fun generateDataClassSpec(project: Project): TypeSpec? {
+    fun generateDataClassSpec(project: Project): TypeSpecWrapper? {
         if (!isValid()) return null
 
-        val constructorSpecBuilder = FunSpec.constructorBuilder()
+        val constructorSpecBuilder = FunSpecWrapper.constructorBuilder()
         val typeSpecBuilder =
-            TypeSpec
+            TypeSpecWrapper
                 .classBuilder(name.asClassName())
-                .addModifiers(KModifier.DATA)
-                .addAnnotation(Serializable::class)
+                .addModifiers(KModifierWrapper.DATA)
+                .addAnnotation(AnnotationSpecWrapper.get(Serializable::class))
 
         if (this.findMatchingFirestoreCollection(project) != null) {
             constructorSpecBuilder.addParameter(
-                ParameterSpec
-                    .builder(FIRESTORE_DOCUMENT_ID, String::class.asTypeName())
+                ParameterSpecWrapper
+                    .builder(FIRESTORE_DOCUMENT_ID, String::class.asTypeNameWrapper())
                     .defaultValue("\"\"")
                     .build(),
             )
             typeSpecBuilder.addProperty(
-                PropertySpec
+                PropertySpecWrapper
                     .builder(
                         name = FIRESTORE_DOCUMENT_ID,
-                        type = String::class.asTypeName(),
+                        type = String::class.asTypeNameWrapper(),
                     ).initializer(FIRESTORE_DOCUMENT_ID)
                     .build(),
             )
         }
         fields.forEach {
             val constructorParameterBuilder =
-                ParameterSpec.builder(
+                ParameterSpecWrapper.builder(
                     name = it.variableName,
                     type = it.fieldType.type().asKotlinPoetTypeName(project),
                 )
-            it.fieldType.defaultValueAsCodeBlock(project).let { defaultCodeBlock ->
-                constructorParameterBuilder.defaultValue(defaultCodeBlock)
-            }
+            val defaultCodeBlock = it.fieldType.defaultValueAsCodeBlock(project)
+            constructorParameterBuilder.defaultValue(defaultCodeBlock)
             constructorSpecBuilder.addParameter(
                 constructorParameterBuilder.build(),
             )
             typeSpecBuilder.addProperty(
-                PropertySpec
+                PropertySpecWrapper
                     .builder(
                         name = it.variableName,
                         type = it.fieldType.type().asKotlinPoetTypeName(project),
@@ -152,8 +149,8 @@ data class DataTypeDefaultValue(
     val defaultFields: MutableList<FieldDefaultValue> = mutableListOf(),
 )
 
-fun List<DataTypeDefaultValue>.generateCodeBlock(project: Project): CodeBlock {
-    val builder = CodeBlock.builder()
+fun List<DataTypeDefaultValue>.generateCodeBlock(project: Project): CodeBlockWrapper {
+    val builder = CodeBlockWrapper.builder()
     if (isEmpty()) {
         builder.add("\"[]\"")
         return builder.build()
@@ -165,7 +162,8 @@ fun List<DataTypeDefaultValue>.generateCodeBlock(project: Project): CodeBlock {
         entry.defaultFields.forEach { field ->
             val dataField = dataType.findDataFieldOrNull(field.fieldId)
             dataField?.let {
-                builder.add("${dataField.variableName} = %L,", field.defaultValue.asCodeBlock())
+                val fieldCodeBlock = field.defaultValue.asCodeBlock()
+                builder.add("${dataField.variableName} = %L,", fieldCodeBlock)
             }
         }
         builder.add("),")

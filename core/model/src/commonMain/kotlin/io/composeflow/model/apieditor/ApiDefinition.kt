@@ -2,16 +2,16 @@ package io.composeflow.model.apieditor
 
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.PropertySpec
 import io.composeflow.asClassName
 import io.composeflow.asVariableName
 import io.composeflow.kotlinpoet.ClassHolder
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.FunSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.KModifierWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
+import io.composeflow.kotlinpoet.wrapper.PropertySpecWrapper
+import io.composeflow.kotlinpoet.wrapper.parameterizedBy
 import io.composeflow.model.project.COMPOSEFLOW_PACKAGE
 import io.composeflow.model.project.issue.DestinationContext
 import io.composeflow.model.project.issue.Issue
@@ -42,23 +42,23 @@ data class ApiDefinition(
 ) {
     fun isValid(): Boolean = exampleJsonResponse != null && generateTrackableIssue().isEmpty()
 
-    fun generateCodeBlock(): CodeBlock {
+    fun generateCodeBlock(): CodeBlockWrapper {
         val authCodeBlock = authorization.generateCodeBlock()
-        val builder = CodeBlock.builder()
+        val builder = CodeBlockWrapper.builder()
         builder.add(
-            CodeBlock.of(
+            CodeBlockWrapper.of(
                 "%M(",
-                MemberName("${COMPOSEFLOW_PACKAGE}.model.apieditor", "ApiDefinition"),
+                MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.model.apieditor", "ApiDefinition"),
             ),
         )
         builder.add("""name = "${name.asVariableName().trim()}",""")
         builder.add(
-            CodeBlock.of(
+            CodeBlockWrapper.of(
                 "method = %M.${method.name},",
-                MemberName("${COMPOSEFLOW_PACKAGE}.model.apieditor", "Method"),
+                MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.model.apieditor", "Method"),
             ),
         )
-        val headersBlockBuilder = CodeBlock.builder().add(headers.generateCodeBlock())
+        val headersBlockBuilder = CodeBlockWrapper.builder().add(headers.generateCodeBlock())
         authCodeBlock?.let {
             headersBlockBuilder.add(""""${HttpHeaders.Authorization}" to "$it",""")
         }
@@ -82,12 +82,12 @@ data class ApiDefinition(
 
     private fun updateApiResultFunName(): String = "update" + name.asClassName().capitalize(Locale.current) + "Result"
 
-    fun generateInitApiResultInViewModelFunSpec(): FunSpec {
+    fun generateInitApiResultInViewModelFunSpec(): FunSpecWrapper {
         val funSpecBuilder =
-            FunSpec
+            FunSpecWrapper
                 .builder("init${name.asClassName().capitalize(Locale.current)}")
                 .addCode(
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         """${updateApiResultFunName()}()
                     """,
                     ),
@@ -95,7 +95,7 @@ data class ApiDefinition(
         return funSpecBuilder.build()
     }
 
-    fun generateUpdateApiResultFunSpec(): FunSpec {
+    fun generateUpdateApiResultFunSpec(): FunSpecWrapper {
         val argumentString =
             buildString {
                 parameters.forEachIndexed { index, parameter ->
@@ -106,9 +106,9 @@ data class ApiDefinition(
                 }
             }
         val funSpecBuilder =
-            FunSpec
+            FunSpecWrapper
                 .builder(updateApiResultFunName())
-                .addModifiers(KModifier.PRIVATE)
+                .addModifiers(KModifierWrapper.PRIVATE)
                 .addCode(
                     """
             %M.%M {
@@ -132,7 +132,7 @@ data class ApiDefinition(
         return funSpecBuilder.build()
     }
 
-    fun generateCallApiFunSpec(): FunSpec {
+    fun generateCallApiFunSpec(): FunSpecWrapper {
         val argumentString =
             buildString {
                 parameters.forEachIndexed { index, parameter ->
@@ -143,7 +143,7 @@ data class ApiDefinition(
                 }
             }
         val funSpecBuilder =
-            FunSpec
+            FunSpecWrapper
                 .builder(callApiFunName())
                 .addCode("${updateApiResultFunName()}($argumentString)")
         parameters.forEach {
@@ -152,18 +152,18 @@ data class ApiDefinition(
         return funSpecBuilder.build()
     }
 
-    fun generateApiResultFunSpec(): FunSpec {
+    fun generateApiResultFunSpec(): FunSpecWrapper {
         val funSpecBuilder =
-            FunSpec
+            FunSpecWrapper
                 .builder(createApiResultFunName())
-                .addModifiers(KModifier.PRIVATE)
-                .addModifiers(KModifier.SUSPEND)
+                .addModifiers(KModifierWrapper.PRIVATE)
+                .addModifiers(KModifierWrapper.SUSPEND)
                 .returns(
                     ClassHolder.Kotlinx.Serialization.JsonElement,
                 )
 
         with(funSpecBuilder) {
-            addCode("return %M(", MemberName("${COMPOSEFLOW_PACKAGE}.api", "callApi"))
+            addCode("return %M(", MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.api", "callApi"))
             addCode(generateCodeBlock())
             addCode(",")
             exampleJsonResponse?.let {
@@ -179,24 +179,24 @@ data class ApiDefinition(
         return funSpecBuilder.build()
     }
 
-    fun generateApiResultFlowProperties(): List<PropertySpec> {
+    fun generateApiResultFlowProperties(): List<PropertySpecWrapper> {
         val dataResultType =
             ClassHolder.ComposeFlow.DataResult
                 .parameterizedBy(ClassHolder.Kotlinx.Serialization.JsonElement)
         val backingProperty =
-            PropertySpec
+            PropertySpecWrapper
                 .builder(
                     "_${apiResultName()}",
                     ClassHolder.Coroutines.Flow.MutableStateFlow
                         .parameterizedBy(dataResultType),
-                ).addModifiers(KModifier.PRIVATE)
+                ).addModifiers(KModifierWrapper.PRIVATE)
                 .initializer(
                     "%T(%T.Idle)",
                     ClassHolder.Coroutines.Flow.MutableStateFlow,
                     ClassHolder.ComposeFlow.DataResult,
                 ).build()
         val property =
-            PropertySpec
+            PropertySpecWrapper
                 .builder(
                     apiResultName(),
                     ClassHolder.Coroutines.Flow.StateFlow

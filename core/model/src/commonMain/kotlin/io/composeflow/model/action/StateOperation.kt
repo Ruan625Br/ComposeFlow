@@ -4,9 +4,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.ParameterSpec
 import io.composeflow.Res
 import io.composeflow.ViewModelConstant
 import io.composeflow.add_value
@@ -14,6 +11,10 @@ import io.composeflow.asVariableName
 import io.composeflow.clear_value
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.FunSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.ParameterSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.asTypeNameWrapper
 import io.composeflow.model.datatype.DataFieldId
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -130,19 +131,19 @@ sealed interface StateOperation {
             dryRun: Boolean,
         ) {
             val funSpecBuilder =
-                FunSpec.builder(
+                FunSpecWrapper.builder(
                     getUpdateMethodName(
                         project = project,
                         context = context,
                         writeState = writeState,
                     ),
                 )
-            readProperty.generateParameterSpec(project)?.let {
-                funSpecBuilder.addParameter(it)
+            readProperty.generateParameterSpec(project)?.let { paramSpec: ParameterSpecWrapper ->
+                funSpecBuilder.addParameter(paramSpec)
             }
 
             val wrapCodeBlock =
-                readProperty.generateWrapWithViewModelBlock(project, CodeBlock.of(""))
+                readProperty.generateWrapWithViewModelBlock(project, CodeBlockWrapper.of(""))
             val updateStateCodeBlock =
                 writeState.generateUpdateStateCodeToViewModel(
                     project,
@@ -208,7 +209,7 @@ sealed interface StateOperation {
             dryRun: Boolean,
         ) {
             val funSpecBuilder =
-                FunSpec.builder(
+                FunSpecWrapper.builder(
                     getUpdateMethodName(
                         project = project,
                         context = context,
@@ -259,7 +260,7 @@ sealed interface StateOperation {
             dryRun: Boolean,
         ) {
             val funSpecBuilder =
-                FunSpec.builder(
+                FunSpecWrapper.builder(
                     getUpdateMethodName(
                         project = project,
                         context = context,
@@ -433,8 +434,12 @@ sealed interface StateOperationForDataType : StateOperation {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
             val funSpecBuilder =
-                FunSpec.builder(
-                    getUpdateMethodName(project = project, context = context, writeState = writeState),
+                FunSpecWrapper.builder(
+                    getUpdateMethodName(
+                        project = project,
+                        context = context,
+                        writeState = writeState,
+                    ),
                 )
 
             val updateString =
@@ -454,9 +459,11 @@ sealed interface StateOperationForDataType : StateOperation {
                                 }
                         }
 
-                        readProperty.generateParameterSpec(project)?.let {
-                            funSpecBuilder.addParameter(it)
-                        }
+                        readProperty
+                            .generateParameterSpec(project)
+                            ?.let { paramSpec: ParameterSpecWrapper ->
+                                funSpecBuilder.addParameter(paramSpec)
+                            }
                     }
                 }
 
@@ -548,7 +555,7 @@ sealed interface StateOperationForList : StateOperation {
             dryRun: Boolean,
         ) {
             val funSpecBuilder =
-                FunSpec.builder(
+                FunSpecWrapper.builder(
                     getUpdateMethodName(
                         project = project,
                         context = context,
@@ -556,8 +563,8 @@ sealed interface StateOperationForList : StateOperation {
                     ),
                 )
             if (writeState !is ListAppState) return
-            readProperty.generateParameterSpec(project)?.let {
-                funSpecBuilder.addParameter(it)
+            readProperty.generateParameterSpec(project)?.let { paramSpec: ParameterSpecWrapper ->
+                funSpecBuilder.addParameter(paramSpec)
             }
             context.addFunction(
                 funSpecBuilder
@@ -654,8 +661,12 @@ sealed interface StateOperationForList : StateOperation {
             val dataType = project.findDataTypeOrThrow(dataTypeId)
 
             val funSpecBuilder =
-                FunSpec.builder(
-                    getUpdateMethodName(project = project, context = context, writeState = writeState),
+                FunSpecWrapper.builder(
+                    getUpdateMethodName(
+                        project = project,
+                        context = context,
+                        writeState = writeState,
+                    ),
                 )
 
             val updateString =
@@ -675,9 +686,11 @@ sealed interface StateOperationForList : StateOperation {
                             )
                         }
 
-                        readProperty.generateParameterSpec(project)?.let {
-                            funSpecBuilder.addParameter(it)
-                        }
+                        readProperty
+                            .generateParameterSpec(project)
+                            ?.let { paramSpec: ParameterSpecWrapper ->
+                                funSpecBuilder.addParameter(paramSpec)
+                            }
                     }
                 }
 
@@ -774,7 +787,7 @@ sealed interface StateOperationForList : StateOperation {
             }
 
             readProperty.transformedCodeBlock(project, context, dryRun = dryRun).let { codeBlock ->
-                val funSpecBuilder =
+                val baseFunSpec =
                     writeState.generateUpdateValueAtIndexFunBuilder(
                         project = project,
                         context = context,
@@ -793,11 +806,14 @@ sealed interface StateOperationForList : StateOperation {
                                     codeBlock = codeBlock,
                                 ),
                     )
-                readProperty.generateParameterSpec(project)?.let {
-                    funSpecBuilder.addParameter(it)
-                }
+                val finalFunSpec =
+                    readProperty
+                        .generateParameterSpec(project)
+                        ?.let { paramSpec: ParameterSpecWrapper ->
+                            baseFunSpec.toBuilder().addParameter(paramSpec).build()
+                        } ?: baseFunSpec
                 context.addFunction(
-                    funSpecBuilder.build(),
+                    finalFunSpec,
                     dryRun,
                 )
             }
@@ -889,11 +905,19 @@ sealed interface StateOperationForList : StateOperation {
 
             val indexToUpdate = "indexToUpdate"
             val funSpecBuilder =
-                FunSpec
+                FunSpecWrapper
                     .builder(
-                        getUpdateMethodName(project = project, context = context, writeState = writeState),
+                        getUpdateMethodName(
+                            project = project,
+                            context = context,
+                            writeState = writeState,
+                        ),
                     ).addParameter(
-                        ParameterSpec.builder(name = indexToUpdate, Int::class).build(),
+                        ParameterSpecWrapper
+                            .builder(
+                                name = indexToUpdate,
+                                Int::class.asTypeNameWrapper(),
+                            ).build(),
                     )
 
             val item = "item"
@@ -903,7 +927,7 @@ sealed interface StateOperationForList : StateOperation {
                         val dataField = dataType.findDataFieldOrNull(properties.dataFieldId)
 
                         dataField?.let {
-                            val readCodeBlock: CodeBlock =
+                            val readCodeBlock: CodeBlockWrapper =
                                 when (properties.fieldUpdateType) {
                                     FieldUpdateType.ClearValue ->
                                         dataField.fieldType.defaultValueAsCodeBlock(
@@ -912,7 +936,7 @@ sealed interface StateOperationForList : StateOperation {
 
                                     FieldUpdateType.ToggleValue -> {
                                         when (dataField.fieldType.type()) {
-                                            is ComposeFlowType.BooleanType -> CodeBlock.of("!$item.${dataField.variableName}")
+                                            is ComposeFlowType.BooleanType -> CodeBlockWrapper.of("!$item.${dataField.variableName}")
                                             else -> throw IllegalArgumentException()
                                         }
                                     }
@@ -939,16 +963,18 @@ sealed interface StateOperationForList : StateOperation {
                             context,
                             dryRun = dryRun,
                         )
-                        properties.assignableProperty.generateParameterSpec(project)?.let {
-                            funSpecBuilder.addParameter(it)
-                        }
+                        properties.assignableProperty
+                            .generateParameterSpec(project)
+                            ?.let { paramSpec: ParameterSpecWrapper ->
+                                funSpecBuilder.addParameter(paramSpec)
+                            }
                     }
                 }
 
             funSpecBuilder.addCode(
                 """
                 val list = ${writeState.getFlowName(context)}.value.toMutableList()
-                if ($indexToUpdate < 0 || $indexToUpdate >= list.size) return     
+                if ($indexToUpdate < 0 || $indexToUpdate >= list.size) return
                 %M.%M {
                     val $item = list[$indexToUpdate]
                     list.set($indexToUpdate, $item.copy($updateString))
@@ -1067,7 +1093,7 @@ sealed interface StateOperationForList : StateOperation {
             dryRun: Boolean,
         ) {
             val funSpecBuilder =
-                FunSpec.builder(
+                FunSpecWrapper.builder(
                     getUpdateMethodName(
                         project = project,
                         context = context,
@@ -1127,7 +1153,7 @@ sealed interface StateOperationForList : StateOperation {
             dryRun: Boolean,
         ) {
             val funSpecBuilder =
-                FunSpec.builder(
+                FunSpecWrapper.builder(
                     getUpdateMethodName(
                         project = project,
                         context = context,

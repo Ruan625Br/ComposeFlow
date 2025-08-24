@@ -17,7 +17,7 @@ object LibraryData {
             Library("compose-multiplatform", "org.jetbrains.compose", "1.8.0"),
             Library("compose-navigation", "org.jetbrains.androidx.navigation", "2.8.0-alpha10"),
             Library("compose-adaptive", "org.jetbrains.compose.material3.adaptive", "1.0.0-alpha01"),
-            Library("compose-color-picker", "com.godaddy.android.colorpicker", "0.7.0"),
+            Library("compose-color-picker", "com.github.skydoves", "1.1.2"),
             Library("compose-shimmer", "com.valentinilk.shimmer", "1.3.0"),
             Library("image-loader", "io.github.qdsfdhvh", "1.10.0"),
             Library("compose-code-editor", "com.github.qawaz.compose-code-editor", "v3.1.1"),
@@ -47,7 +47,7 @@ object LibraryData {
             Library("kmpauth-firebase", "io.github.mirzemehdi", "2.1.0-alpha02"),
             Library("kmpauth-google", "io.github.mirzemehdi", "2.1.0-alpha02"),
             // UI Libraries
-            Library("reorderable", "org.burnoutcrew.composereorderable", "0.9.6"),
+            Library("reorderable", "sh.calvin.reorderable", "3.0.0"),
             Library("richeditor-compose", "com.mohamedrejeb.richeditor", "1.0.0-rc05-k2"),
             Library("material-kolor", "com.materialkolor", "1.6.1"),
             Library("filekit-compose", "io.github.vinceglb", "0.6.3"),

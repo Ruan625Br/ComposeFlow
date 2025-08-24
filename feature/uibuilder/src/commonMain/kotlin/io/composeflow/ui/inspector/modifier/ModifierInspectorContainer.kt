@@ -42,15 +42,19 @@ import io.composeflow.ui.modifier.hoverIconClickable
 import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.utils.TreeExpander
 import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableCollectionItemScope
 
-val LocalModifierReorderAllowed = compositionLocalOf { false }
+val LocalReorderableCollectionItemScope =
+    compositionLocalOf<ReorderableCollectionItemScope?> { null }
 
 @Composable
 fun ProvideModifierReorderAllowed(
-    reorderAllowed: Boolean,
+    reorderableCollectionItemScope: ReorderableCollectionItemScope,
     content: @Composable () -> Unit,
 ) {
-    CompositionLocalProvider(LocalModifierReorderAllowed providesDefault reorderAllowed) {
+    CompositionLocalProvider(
+        LocalReorderableCollectionItemScope providesDefault reorderableCollectionItemScope,
+    ) {
         content()
     }
 }
@@ -73,15 +77,31 @@ fun ModifierInspectorContainer(
                 .padding(end = 8.dp)
                 .animateContentSize(keyframes { durationMillis = 100 }),
     ) {
-        ModifierInspectorHeaderRow(
-            expanded = expanded,
-            wrapper = wrapper,
-            onExpandButtonClicked = { expanded = !expanded },
-            onDeleteButtonClicked = {
-                composeNodeCallbacks.onModifierRemovedAt(node, modifierIndex)
-            },
-            onVisibilityToggleClicked = onVisibilityToggleClicked,
-        )
+        val reorderScope = LocalReorderableCollectionItemScope.current
+        if (reorderScope != null) {
+            with(reorderScope) {
+                ModifierInspectorHeaderRow(
+                    expanded = expanded,
+                    wrapper = wrapper,
+                    onExpandButtonClicked = { expanded = !expanded },
+                    onDeleteButtonClicked = {
+                        composeNodeCallbacks.onModifierRemovedAt(node, modifierIndex)
+                    },
+                    onVisibilityToggleClicked = onVisibilityToggleClicked,
+                    modifier = Modifier.draggableHandle(),
+                )
+            }
+        } else {
+            ModifierInspectorHeaderRow(
+                expanded = expanded,
+                wrapper = wrapper,
+                onExpandButtonClicked = { expanded = !expanded },
+                onDeleteButtonClicked = {
+                    composeNodeCallbacks.onModifierRemovedAt(node, modifierIndex)
+                },
+                onVisibilityToggleClicked = onVisibilityToggleClicked,
+            )
+        }
 
         if (expanded) {
             content()
@@ -96,11 +116,12 @@ fun ModifierInspectorHeaderRow(
     onExpandButtonClicked: () -> Unit,
     onDeleteButtonClicked: () -> Unit,
     onVisibilityToggleClicked: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier =
-            Modifier
+            modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(8.dp))
                 .clickable {
@@ -146,8 +167,8 @@ fun ModifierInspectorHeaderRow(
             }
         }
 
-        val reorderAllowed = LocalModifierReorderAllowed.current
-        if (reorderAllowed) {
+        val reorderScope = LocalReorderableCollectionItemScope.current
+        if (reorderScope != null) {
             ComposeFlowIcon(
                 imageVector = Icons.Outlined.DragIndicator,
                 contentDescription = null,

@@ -6,12 +6,12 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.NavigationDrawer
 import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
 import io.composeflow.model.modifier.generateModifierCode
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
@@ -107,12 +107,12 @@ data class NavigationDrawerTrait(
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         codeBlockBuilder.add(
-            CodeBlock.of(
+            CodeBlockWrapper.of(
                 "%M(",
-                MemberName("androidx.compose.material3", "ModalDrawerSheet"),
+                MemberNameWrapper.get("androidx.compose.material3", "ModalDrawerSheet"),
             ),
         )
         codeBlockBuilder.add(
@@ -135,12 +135,12 @@ object NavigationDrawerTypeSerializer :
 @Serializable(NavigationDrawerTypeSerializer::class)
 enum class NavigationDrawerType {
     Default {
-        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "ModalNavigationDrawer")
+        override fun toMemberName(): MemberNameWrapper = MemberNameWrapper.get("androidx.compose.material3", "ModalNavigationDrawer")
     },
     Dismissible {
-        override fun toMemberName(): MemberName = MemberName("androidx.compose.material3", "DismissibleNavigationDrawer")
+        override fun toMemberName(): MemberNameWrapper = MemberNameWrapper.get("androidx.compose.material3", "DismissibleNavigationDrawer")
     },
     ;
 
-    abstract fun toMemberName(): MemberName
+    abstract fun toMemberName(): MemberNameWrapper
 }

@@ -17,8 +17,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import com.valentinilk.shimmer.shimmer
 import io.composeflow.Res
 import io.composeflow.asVariableName
@@ -27,6 +25,8 @@ import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.image_from_network
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
 import io.composeflow.model.enumwrapper.ContentScaleWrapper
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
@@ -117,7 +117,7 @@ data class ImageTrait(
                 contentScaleWrapper,
                 ComposeFlowType.Enum(
                     isList = false,
-                    enumClass = ContentScaleWrapper::class.java,
+                    enumClass = ContentScaleWrapper::class,
                 ),
             ),
         )
@@ -135,8 +135,8 @@ data class ImageTrait(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         when (assetType) {
             ImageAssetType.Network -> {
                 codeBlockBuilder.add("url = ")
@@ -154,11 +154,11 @@ data class ImageTrait(
             ImageAssetType.Asset -> {
                 blobInfoWrapper?.let { blob ->
                     codeBlockBuilder.add(
-                        CodeBlock.of(
+                        CodeBlockWrapper.of(
                             "bitmap = %M(%M.drawable.%M),",
                             MemberHolder.JetBrains.imageResource,
                             MemberHolder.ComposeFlow.Res,
-                            MemberName(
+                            MemberNameWrapper.get(
                                 COMPOSEFLOW_PACKAGE,
                                 blob.fileName.asVariableName().substringBeforeLast("."),
                             ),
@@ -170,7 +170,7 @@ data class ImageTrait(
 
         codeBlockBuilder.addStatement("""contentDescription = "",""")
         alignmentWrapper?.let {
-            val alignmentMember = MemberName("androidx.compose.ui", "Alignment")
+            val alignmentMember = MemberNameWrapper.get("androidx.compose.ui", "Alignment")
             codeBlockBuilder.addStatement("alignment = %M.${it.name},", alignmentMember)
         }
         contentScaleWrapper?.let {
@@ -312,15 +312,15 @@ data class ImageTrait(
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         if (assetType == ImageAssetType.Asset && blobInfoWrapper?.mediaLink == null) {
             return codeBlockBuilder.build()
         }
 
         val imageMember =
             when (assetType) {
-                ImageAssetType.Network -> MemberName("${COMPOSEFLOW_PACKAGE}.ui", "AsyncImage")
+                ImageAssetType.Network -> MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.ui", "AsyncImage")
                 ImageAssetType.Asset -> MemberHolder.AndroidX.Foundation.Image
             }
         codeBlockBuilder.addStatement(

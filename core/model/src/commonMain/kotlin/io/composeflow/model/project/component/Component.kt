@@ -31,23 +31,24 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FileSpec
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.asTypeName
 import io.composeflow.ComposeScreenConstant
 import io.composeflow.Res
 import io.composeflow.ViewModelConstant
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.ComposeLogo
 import io.composeflow.edit_component
-import io.composeflow.formatter.suppressRedundantVisibilityModifier
 import io.composeflow.kotlinpoet.FileSpecWithDirectory
 import io.composeflow.kotlinpoet.GeneratedPlace
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.AnnotationSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.FileSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.FunSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
+import io.composeflow.kotlinpoet.wrapper.ParameterSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.asTypeNameWrapper
+import io.composeflow.kotlinpoet.wrapper.suppressRedundantVisibilityModifier
 import io.composeflow.model.palette.PaletteDraggable
 import io.composeflow.model.palette.PaletteNodeCallbacks
 import io.composeflow.model.palette.PaletteRenderParams
@@ -137,7 +138,7 @@ data class Component(
     override val viewModelName: String =
         name.replaceFirstChar { it.lowercase() } + "ViewModel"
 
-    fun asMemberName(project: Project): MemberName = MemberName(getPackageName(project), composableName)
+    fun asMemberName(project: Project): MemberNameWrapper = MemberNameWrapper.get(getPackageName(project), composableName)
 
     @Composable
     fun Thumbnail(
@@ -362,10 +363,14 @@ data class Component(
         stateId: StateId,
     ): ReadableState? = getStates(project).firstOrNull { it.id == stateId }
 
-    override fun removeState(stateId: StateId): Boolean =
-        stateHolderImpl.states.removeIf {
-            it.id == stateId
+    override fun removeState(stateId: StateId): Boolean {
+        val toRemove = stateHolderImpl.states.find { it.id == stateId }
+        return if (toRemove != null) {
+            stateHolderImpl.states.remove(toRemove)
+        } else {
+            false
         }
+    }
 
     override fun updateState(readableState: ReadableState) {
         val index = stateHolderImpl.states.indexOfFirst { it.id == readableState.id }
@@ -394,34 +399,34 @@ data class Component(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): FileSpec {
+    ): FileSpecWrapper {
         val fileBuilder =
-            FileSpec
+            FileSpecWrapper
                 .builder(getPackageName(project), composableName)
                 .addImport("androidx.compose.runtime", "getValue")
                 .addImport("androidx.compose.runtime", "setValue")
-        val funSpecBuilder = FunSpec.builder(composableName).addAnnotation(Composable::class)
+        val funSpecBuilder = FunSpecWrapper.builder(composableName).addAnnotation(AnnotationSpecWrapper.get(Composable::class))
         parameters.forEach {
             funSpecBuilder.addParameter(it.generateArgumentParameterSpec(project))
         }
         funSpecBuilder.addParameter(
-            ParameterSpec
-                .builder("modifier", Modifier::class)
-                .defaultValue("%T", Modifier::class)
+            ParameterSpecWrapper
+                .builder("modifier", Modifier::class.asTypeNameWrapper())
+                .defaultValue("%T", Modifier::class.asTypeNameWrapper())
                 .build(),
         )
         // Key to distinguish the ViewModel to avoid the same ViewModel is reused across
         // multiple component invocations.
         funSpecBuilder.addParameter(
-            ParameterSpec
+            ParameterSpecWrapper
                 .builder(
                     COMPONENT_KEY_NAME,
-                    String::class.asTypeName().copy(nullable = true),
+                    String::class.asTypeNameWrapper().copy(nullable = true),
                 ).defaultValue("null")
                 .build(),
         )
 
-        getAllActions(project).distinctBy { it.generateArgumentParameterSpec(project) }.forEach {
+        getAllActions(project).distinctBy { it.argumentName(project) }.forEach {
             it.generateArgumentParameterSpec(project)?.let { parameterSpec ->
                 funSpecBuilder.addParameter(parameterSpec)
             }
@@ -541,7 +546,7 @@ data class Component(
                 }
             }
 
-        val codeBlockBuilder = CodeBlock.builder()
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         // Wrap by Column to apply the modifier from the argument
         codeBlockBuilder.addStatement(
             "%M(modifier = modifier) {",

@@ -1,15 +1,15 @@
 package io.composeflow.template
 
+import androidx.annotation.VisibleForTesting
 import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.serializer.decodeFromStringWithFallback
 import io.composeflow.template.ScreenTemplates.createNewScreen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import org.jetbrains.annotations.VisibleForTesting
 
 object ScreenTemplates {
-    private val scope = CoroutineScope(Dispatchers.IO)
+    private val scope = CoroutineScope(Dispatchers.Default)
 
     init {
         scope.launch {
@@ -71,9 +71,8 @@ object ScreenTemplates {
     fun createNewScreen(screenTemplatePair: ScreenTemplatePair): Screen = loadScreenTemplate(screenTemplatePair.resourcePath)
 
     private fun loadScreenTemplate(fileName: String): Screen {
-        val yaml = object {}.javaClass.getResourceAsStream(fileName)
-        check(yaml != null)
-        val newYaml = replaceUuids(yaml.reader().readText())
+        val yamlContent = ResourceLoader.loadResourceAsText(fileName)
+        val newYaml = replaceUuids(yamlContent)
         return decodeFromStringWithFallback<Screen>(newYaml)
     }
 }

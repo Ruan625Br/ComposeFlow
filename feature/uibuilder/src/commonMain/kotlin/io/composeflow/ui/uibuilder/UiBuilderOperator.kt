@@ -6,7 +6,6 @@ import io.composeflow.can_not_add_this_node
 import io.composeflow.ksp.LlmParam
 import io.composeflow.ksp.LlmTool
 import io.composeflow.model.modifier.ModifierWrapper
-import io.composeflow.model.palette.Constraint.Companion.CANT_DROP_NODE
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.BottomAppBarTrait
 import io.composeflow.model.parameter.FabTrait
@@ -17,7 +16,6 @@ import io.composeflow.model.project.appscreen.screen.Screen
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.model.project.appscreen.screen.composenode.getOperationTargetNode
 import io.composeflow.serializer.decodeFromStringWithFallback
-import io.composeflow.swap
 import io.composeflow.ui.EventResult
 import io.composeflow.ui.UiBuilderHelper
 import io.composeflow.ui.UiBuilderHelper.addNodeToCanvasEditable
@@ -42,10 +40,7 @@ class UiBuilderOperator {
         val containerNode = project.screenHolder.currentEditable().findNodeById(containerNodeId)
         if (containerNode == null) {
             eventResult.errorMessages.add(
-                String.format(
-                    "Container node with ID %s not found.",
-                    containerNodeId,
-                ),
+                "Container node with ID $containerNodeId not found.",
             )
             return eventResult
         }
@@ -56,10 +51,7 @@ class UiBuilderOperator {
         }
         if (!containerNode.trait.value.isDroppable()) {
             eventResult.errorMessages.add(
-                String.format(
-                    CANT_DROP_NODE,
-                    containerNode.trait.value.iconText(),
-                ),
+                "You can't drop a node to ${containerNode.trait.value.iconText()}",
             )
             return eventResult
         }
@@ -412,7 +404,9 @@ class UiBuilderOperator {
                 return result
             }
 
-            node.modifierList.swap(fromIndex, toIndex)
+            // Use move operation instead of swap for reorderable compatibility
+            val item = node.modifierList.removeAt(fromIndex)
+            node.modifierList.add(toIndex, item)
         } catch (e: Exception) {
             Logger.e(e) { "Error swapping modifiers at indices $fromIndex and $toIndex" }
             result.errorMessages.add("Error swappigng modifiers at indices $fromIndex and $toIndex: ${e.message}")

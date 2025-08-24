@@ -17,9 +17,6 @@ import androidx.compose.material.icons.outlined.ToggleOff
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.ParameterSpec
 import io.composeflow.ComposeScreenConstant
 import io.composeflow.ViewModelConstant
 import io.composeflow.custom.ComposeFlowIcons
@@ -33,6 +30,9 @@ import io.composeflow.kotlinpoet.GeneratedPlace
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.KOTLINPOET_COLUMN_LIMIT
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
+import io.composeflow.kotlinpoet.wrapper.ParameterSpecWrapper
 import io.composeflow.model.apieditor.ApiId
 import io.composeflow.model.apieditor.isList
 import io.composeflow.model.datatype.DataFieldType
@@ -162,7 +162,7 @@ sealed interface AssignableProperty {
      * For example, when the property is only available at Compose screen, when the property needs
      * to be read from ViewModel, that parameter needs to be passed to the method in the ViewModel.
      */
-    fun generateParameterSpec(project: Project): ParameterSpec? = null
+    fun generateParameterSpec(project: Project): ParameterSpecWrapper? = null
 
     /**
      * Generate CodeBlock that represents this property.
@@ -178,7 +178,7 @@ sealed interface AssignableProperty {
         context: GenerationContext,
         writeType: ComposeFlowType = valueType(project),
         dryRun: Boolean,
-    ): CodeBlock
+    ): CodeBlockWrapper
 
     /**
      * Generates the CodeBlock if the action that triggers the action needs to be wrapped with
@@ -204,16 +204,16 @@ sealed interface AssignableProperty {
      */
     fun generateWrapWithComposableBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock? = null
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper? = null
 
     /**
      * Counter part of the code block that needs to be placed in the ViewModel
      */
     fun generateWrapWithViewModelBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock? = null
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper? = null
 
     /**
      * Generate CodeBlock that represents this property including the transformations by using
@@ -230,7 +230,7 @@ sealed interface AssignableProperty {
         context: GenerationContext,
         writeType: ComposeFlowType = transformedValueType(project),
         dryRun: Boolean,
-    ): CodeBlock
+    ): CodeBlockWrapper
 
     fun addReadProperty(
         project: Project,
@@ -343,7 +343,7 @@ abstract class AssignablePropertyBase : AssignableProperty {
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
+    ): CodeBlockWrapper {
         var result = generateCodeBlock(project, context, dryRun = dryRun)
         if (isTransformed) {
             return writeType.convertCodeFromType(transformedValueType(project), result)
@@ -364,7 +364,7 @@ abstract class AssignablePropertyBase : AssignableProperty {
 sealed interface IntrinsicProperty<T> {
     val value: T
 
-    fun asCodeBlock(): CodeBlock
+    fun asCodeBlock(): CodeBlockWrapper
 }
 
 @Serializable
@@ -389,14 +389,14 @@ sealed interface StringProperty : AssignableProperty {
 
         override fun displayText(project: Project): String = value
 
-        override fun asCodeBlock(): CodeBlock =
+        override fun asCodeBlock(): CodeBlockWrapper =
             if (value.contains("\n") || value.contains("\r") || value.length >= KOTLINPOET_COLUMN_LIMIT) {
                 // It looks like Kotlinpoet's column limit is hard-coded as 100.
                 // That means a string more than 100 characters can be translated as multiline
                 // string unintentionally.
-                CodeBlock.of("\"\"\"%L\"\"\"", value)
+                CodeBlockWrapper.of("\"\"\"%L\"\"\"", value)
             } else {
-                CodeBlock.of("\"%L\"", value)
+                CodeBlockWrapper.of("\"%L\"", value)
             }
     }
 
@@ -413,10 +413,10 @@ sealed interface StringProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of(
+        ): CodeBlockWrapper =
+            CodeBlockWrapper.of(
                 """%M(jsonElement, "$jsonPath", replaceQuotation = true)""",
-                MemberName("${COMPOSEFLOW_PACKAGE}.util", "selectString"),
+                MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.util", "selectString"),
             )
 
         override fun valueExpression(project: Project) = "[JsonPath: $jsonPath]"
@@ -437,20 +437,20 @@ sealed interface StringProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val stringResource = project.stringResourceHolder.stringResources.find { it.id == stringResourceId }
             return if (stringResource != null && stringResource.key.isNotBlank()) {
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "%M(%M.string.%M)",
                     MemberHolder.JetBrains.stringResource,
                     MemberHolder.ComposeFlow.Res,
-                    MemberName(
+                    MemberNameWrapper.get(
                         COMPOSEFLOW_PACKAGE,
                         stringResource.key,
                     ),
                 )
             } else {
-                CodeBlock.of("\"\"")
+                CodeBlockWrapper.of("\"\"")
             }
         }
 
@@ -541,7 +541,7 @@ sealed interface DocumentIdProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("")
+        ): CodeBlockWrapper = CodeBlockWrapper.of("")
     }
 
     /**
@@ -564,7 +564,7 @@ sealed interface DocumentIdProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("")
+        ): CodeBlockWrapper = CodeBlockWrapper.of("")
     }
 
     @Composable
@@ -628,7 +628,7 @@ sealed interface IntProperty : AssignableProperty {
             dryRun: Boolean,
         ) = asCodeBlock()
 
-        override fun asCodeBlock(): CodeBlock = CodeBlock.of("$value")
+        override fun asCodeBlock(): CodeBlockWrapper = CodeBlockWrapper.of("$value")
     }
 
     @Serializable
@@ -642,10 +642,10 @@ sealed interface IntProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val lazyList = project.findComposeNodeOrThrow(lazyListNodeId)
             val codeBlock =
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "${
                         lazyList.trait.value.iconText().replaceSpaces()
                             .replaceFirstChar { it.lowercase() }
@@ -731,7 +731,7 @@ sealed interface FloatProperty : AssignableProperty {
             dryRun: Boolean,
         ) = asCodeBlock()
 
-        override fun asCodeBlock(): CodeBlock = CodeBlock.of("${value}f")
+        override fun asCodeBlock(): CodeBlockWrapper = CodeBlockWrapper.of("${value}f")
     }
 
     @Composable
@@ -795,7 +795,7 @@ sealed interface BooleanProperty : AssignableProperty {
             dryRun: Boolean,
         ) = asCodeBlock()
 
-        override fun asCodeBlock(): CodeBlock = CodeBlock.of("$value")
+        override fun asCodeBlock(): CodeBlockWrapper = CodeBlockWrapper.of("$value")
     }
 
     @Composable
@@ -848,7 +848,7 @@ sealed interface BooleanProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock = throw IllegalStateException("Empty property isn't able to generate code")
+        ): CodeBlockWrapper = throw IllegalStateException("Empty property isn't able to generate code")
     }
 }
 
@@ -874,7 +874,7 @@ sealed interface ColorProperty : AssignableProperty {
             dryRun: Boolean,
         ) = asCodeBlock()
 
-        override fun asCodeBlock(): CodeBlock = value.generateCode()
+        override fun asCodeBlock(): CodeBlockWrapper = value.generateCode()
     }
 
     @Composable
@@ -928,7 +928,7 @@ sealed interface BrushProperty : AssignableProperty {
             dryRun: Boolean,
         ) = asCodeBlock()
 
-        override fun asCodeBlock(): CodeBlock = value.generateCode()
+        override fun asCodeBlock(): CodeBlockWrapper = value.generateCode()
     }
 
     @Composable
@@ -980,9 +980,9 @@ sealed interface InstantProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock = asCodeBlock()
+        ): CodeBlockWrapper = asCodeBlock()
 
-        override fun asCodeBlock(): CodeBlock = value.generateCode()
+        override fun asCodeBlock(): CodeBlockWrapper = value.generateCode()
     }
 
     @Composable
@@ -1076,21 +1076,21 @@ data class ValueFromState(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        val state = project.findLocalStateOrNull(readFromStateId) ?: return CodeBlock.of("")
+    ): CodeBlockWrapper {
+        val state = project.findLocalStateOrNull(readFromStateId) ?: return CodeBlockWrapper.of("")
         val codeBlock =
             when (context.generatedPlace) {
                 GeneratedPlace.ComposeScreen ->
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         state.getReadVariableName(
                             project,
                             context,
                         ),
                     )
 
-                GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
+                GeneratedPlace.ViewModel -> CodeBlockWrapper.of("${state.getFlowName(context)}.value")
                 GeneratedPlace.Unspecified ->
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         state.getReadVariableName(
                             project,
                             context,
@@ -1223,21 +1223,21 @@ data class ValueFromCompanionState(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        val state = companionState ?: return CodeBlock.of("")
+    ): CodeBlockWrapper {
+        val state = companionState ?: return CodeBlockWrapper.of("")
         val codeBlock =
             when (context.generatedPlace) {
                 GeneratedPlace.ComposeScreen ->
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         state.getReadVariableName(
                             project,
                             context,
                         ),
                     )
 
-                GeneratedPlace.ViewModel -> CodeBlock.of("${state.getFlowName(context)}.value")
+                GeneratedPlace.ViewModel -> CodeBlockWrapper.of("${state.getFlowName(context)}.value")
                 GeneratedPlace.Unspecified ->
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         state.getReadVariableName(
                             project,
                             context,
@@ -1348,13 +1348,13 @@ data class ValueFromDynamicItem(
         }
     }
 
-    override fun generateParameterSpec(project: Project): ParameterSpec? {
+    override fun generateParameterSpec(project: Project): ParameterSpecWrapper? {
         val type = valueType(project)
         val composeNode = project.findComposeNodeOrNull(composeNodeId)
         return if (type is ComposeFlowType.UnknownType || composeNode == null) {
             null
         } else {
-            ParameterSpec
+            ParameterSpecWrapper
                 .builder(
                     name =
                         "${
@@ -1374,8 +1374,8 @@ data class ValueFromDynamicItem(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val composeNode = project.findComposeNodeOrNull(composeNodeId) ?: return builder.build()
 
         return when (context.generatedPlace) {
@@ -1388,7 +1388,7 @@ data class ValueFromDynamicItem(
                         fieldType.fieldName(
                             project,
                         )
-                CodeBlock.of(valueExpression)
+                CodeBlockWrapper.of(valueExpression)
             }
 
             GeneratedPlace.ViewModel -> {
@@ -1400,7 +1400,7 @@ data class ValueFromDynamicItem(
                         fieldNameAsViewModel(
                             fieldType.fieldName(project),
                         )
-                CodeBlock.of(valueExpression)
+                CodeBlockWrapper.of(valueExpression)
             }
         }
     }
@@ -1477,7 +1477,7 @@ data class ValueFromGlobalProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock = readableState.generateReadBlock(project, context, dryRun)
+    ): CodeBlockWrapper = readableState.generateReadBlock(project, context, dryRun)
 }
 
 @Serializable
@@ -1498,7 +1498,7 @@ sealed interface CustomDataTypeProperty : AssignableProperty {
             context: GenerationContext,
             writeType: ComposeFlowType,
             dryRun: Boolean,
-        ): CodeBlock = throw IllegalStateException("Invalid call")
+        ): CodeBlockWrapper = throw IllegalStateException("Invalid call")
 
         override fun valueExpression(project: Project): String = createDisplayText(project)
 
@@ -1564,7 +1564,7 @@ data class EnumProperty(
 ) : AssignablePropertyBase(),
     AssignableProperty,
     IntrinsicProperty<EnumWrapper> {
-    override fun valueType(project: Project) = ComposeFlowType.Enum(enumClass = value.enumValue().declaringJavaClass)
+    override fun valueType(project: Project) = ComposeFlowType.Enum(enumClass = value.enumValue()::class)
 
     override fun getEnumValue() = value.enumValue()
 
@@ -1573,9 +1573,9 @@ data class EnumProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock = asCodeBlock()
+    ): CodeBlockWrapper = asCodeBlock()
 
-    override fun asCodeBlock(): CodeBlock = value.asCodeBlock()
+    override fun asCodeBlock(): CodeBlockWrapper = value.asCodeBlock()
 
     override fun valueExpression(project: Project): String = value.enumValue().name
 
@@ -1622,9 +1622,9 @@ data class CustomEnumValuesProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        val customEnum = project.findCustomEnumOrNull(customEnumId) ?: return CodeBlock.of("")
-        return CodeBlock.of(
+    ): CodeBlockWrapper {
+        val customEnum = project.findCustomEnumOrNull(customEnumId) ?: return CodeBlockWrapper.of("")
+        return CodeBlockWrapper.of(
             """%T.entries.map { it.name }""",
             customEnum.asKotlinPoetClassName(project),
         )
@@ -1662,15 +1662,15 @@ data class FirestoreCollectionProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
+    ): CodeBlockWrapper {
         context
             .getCurrentComposableContext()
             .addDependency(viewModelConstant = ViewModelConstant.firestore)
-        val builder = CodeBlock.builder()
+        val builder = CodeBlockWrapper.builder()
         val firestoreCollection =
             project.findFirestoreCollectionOrNull(collectionId) ?: return builder.build()
         // result is wrapped in a data class as `data class Ready<T>(val result: List<T>) : QueryResult<T>`
-        return CodeBlock.of("${firestoreCollection.getReadVariableName(project)}.result")
+        return CodeBlockWrapper.of("${firestoreCollection.getReadVariableName(project)}.result")
     }
 
     override fun valueExpression(project: Project): String = asText(project)
@@ -1679,9 +1679,9 @@ data class FirestoreCollectionProperty(
 
     override fun generateWrapWithComposableBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val firestoreCollection =
             project.findFirestoreCollectionOrNull(collectionId) ?: return builder.build()
         val readVariableName = firestoreCollection.getReadVariableName(project)
@@ -1715,9 +1715,9 @@ data class FirestoreCollectionProperty(
 
     override fun generateWrapWithViewModelBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val firestoreCollection =
             project.findFirestoreCollectionOrNull(collectionId) ?: return builder.build()
         val readVariableName = firestoreCollection.getReadVariableName(project)
@@ -1772,48 +1772,48 @@ data class ApiResultProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val apiDefinition =
             apiId?.let { project.findApiDefinitionOrNull(apiId) } ?: return builder.build()
 
         return when (apiDefinition.exampleJsonResponse?.jsonElement) {
             is JsonArray -> {
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "($apiResultName.result as %T)",
                     ClassHolder.Kotlinx.Serialization.JsonArray,
                 )
             }
 
             is JsonObject -> {
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "($apiResultName.result as %T)",
                     ClassHolder.Kotlinx.Serialization.JsonObject,
                 )
             }
 
             is JsonPrimitive -> {
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "($apiResultName.result as %T)",
                     ClassHolder.Kotlinx.Serialization.JsonPrimitive,
                 )
             }
 
             JsonNull -> {
-                CodeBlock.of(apiResultName)
+                CodeBlockWrapper.of(apiResultName)
             }
 
             null -> {
-                CodeBlock.of(apiResultName)
+                CodeBlockWrapper.of(apiResultName)
             }
         }
     }
 
     override fun generateWrapWithComposableBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val apiDefinition =
             apiId?.let { project.findApiDefinitionOrNull(apiId) } ?: return builder.build()
 
@@ -1847,9 +1847,9 @@ data class ApiResultProperty(
 
     override fun generateWrapWithViewModelBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val apiDefinition =
             apiId?.let { project.findApiDefinitionOrNull(apiId) } ?: return builder.build()
 
@@ -1906,7 +1906,7 @@ data class ComposableParameterProperty(
             "[param: ${getParameterFieldName(project)}]"
         } ?: "[Invalid]"
 
-    override fun generateParameterSpec(project: Project): ParameterSpec? {
+    override fun generateParameterSpec(project: Project): ParameterSpecWrapper? {
         val parameter = project.findParameterOrNull(parameterId) ?: return null
         return parameter.generateArgumentParameterSpec(project)
     }
@@ -1916,7 +1916,7 @@ data class ComposableParameterProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
+    ): CodeBlockWrapper {
         val parameter = project.findParameterOrThrow(parameterId)
         val parameterFieldName =
             if (context.generatedPlace == GeneratedPlace.ComposeScreen) {
@@ -1949,12 +1949,12 @@ data class ComposableParameterProperty(
                     }
                 writeType.convertCodeFromType(
                     type,
-                    CodeBlock.of(parameterFieldName),
+                    CodeBlockWrapper.of(parameterFieldName),
                 )
             } else {
                 writeType.convertCodeFromType(
                     parameter.parameterType,
-                    CodeBlock.of(parameterFieldName),
+                    CodeBlockWrapper.of(parameterFieldName),
                 )
             }
         return codeBlock
@@ -2022,7 +2022,7 @@ data object EmptyProperty : AssignablePropertyBase() {
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock = CodeBlock.of("")
+    ): CodeBlockWrapper = CodeBlockWrapper.of("")
 }
 
 /**
@@ -2090,7 +2090,7 @@ data class FunctionScopeParameterProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock = CodeBlock.of(variableName + dataFieldType.fieldName(project))
+    ): CodeBlockWrapper = CodeBlockWrapper.of(variableName + dataFieldType.fieldName(project))
 }
 
 @Serializable
@@ -2115,8 +2115,8 @@ data class ConditionalProperty(
 
     override fun generateWrapWithComposableBlock(
         project: Project,
-        insideContent: CodeBlock,
-    ): CodeBlock? {
+        insideContent: CodeBlockWrapper,
+    ): CodeBlockWrapper? {
         val a = listOf(defaultValue, ifThen.ifExpression, ifThen.thenValue)
         val b =
             elseIfBlocks.map {
@@ -2130,7 +2130,7 @@ data class ConditionalProperty(
             (a + b + c)
                 .filter {
                     it.generateWrapWithComposableBlock(project, insideContent) != null
-                }.fold(initial = null as CodeBlock?) { acc, element ->
+                }.fold(initial = null as CodeBlockWrapper?) { acc, element ->
                     element.generateWrapWithComposableBlock(project, acc ?: insideContent)
                 }
         return result
@@ -2190,8 +2190,8 @@ data class ConditionalProperty(
         context: GenerationContext,
         writeType: ComposeFlowType,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         builder.add("if (")
         builder.add(
             ifThen.ifExpression.transformedCodeBlock(

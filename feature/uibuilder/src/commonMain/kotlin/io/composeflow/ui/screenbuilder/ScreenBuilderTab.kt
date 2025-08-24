@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CursorDropdownMenu
 import androidx.compose.material.icons.Icons
@@ -76,11 +77,9 @@ import io.composeflow.ui.propertyeditor.BasicEditableTextProperty
 import io.composeflow.ui.propertyeditor.BooleanPropertyEditor
 import io.composeflow.ui.reorderable.ComposeFlowReorderableItem
 import io.composeflow.ui.utils.TreeExpander
-import org.burnoutcrew.reorderable.detectReorder
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun ScreenBuilderTab(
@@ -108,31 +107,33 @@ fun ScreenBuilderTab(
             onAddScreen = onAddScreen,
         )
 
+        val lazyListState = rememberLazyListState()
         val reorderableLazyListState =
-            rememberReorderableLazyListState(onMove = { from, to ->
+            rememberReorderableLazyListState(lazyListState) { from, to ->
                 onScreensSwapped(from.index, to.index)
-            })
+            }
 
         LazyColumn(
-            state = reorderableLazyListState.listState,
-            modifier =
-                Modifier
-                    .reorderable(reorderableLazyListState)
-                    .detectReorder(reorderableLazyListState),
+            state = lazyListState,
+            modifier = Modifier,
         ) {
-            itemsIndexed(items = project.screenHolder.screens) { i, screen ->
-                val rowModifier =
-                    if (project.screenHolder.currentEditable() == screen) {
-                        Modifier
-                    } else {
-                        Modifier.alpha(
-                            0.5f,
-                        )
-                    }
+            itemsIndexed(
+                items = project.screenHolder.screens,
+                key = { _, screen -> screen },
+            ) { i, screen ->
                 ComposeFlowReorderableItem(
                     index = i,
                     reorderableLazyListState = reorderableLazyListState,
+                    key = screen,
                 ) {
+                    val rowModifier =
+                        if (project.screenHolder.currentEditable() == screen) {
+                            Modifier
+                        } else {
+                            Modifier.alpha(
+                                0.5f,
+                            )
+                        }
                     ScreenInfoPanel(
                         screen = screen,
                         numOfScreens = project.screenHolder.screens.size,
@@ -142,7 +143,7 @@ fun ScreenBuilderTab(
                         onCopyScreen = onCopyScreen,
                         onSelectScreen = onSelectScreen,
                         onScreenUpdated = onScreenUpdated,
-                        modifier = rowModifier,
+                        modifier = rowModifier.draggableHandle(),
                     )
                 }
             }

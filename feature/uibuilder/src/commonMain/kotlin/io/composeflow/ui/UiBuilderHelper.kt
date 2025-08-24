@@ -1,7 +1,6 @@
 package io.composeflow.ui
 
 import io.composeflow.model.palette.Constraint.Companion.ONLY_SCREEN_IS_ALLOWED
-import io.composeflow.model.palette.Constraint.Companion.SAME_NODE_EXISTS_IN_SCREEN
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.parameter.BottomAppBarTrait
 import io.composeflow.model.parameter.FabTrait
@@ -28,10 +27,7 @@ object UiBuilderHelper {
                 (composeNode.trait.value is BottomAppBarTrait && currentEditable.bottomAppBarNode.value != null) ||
                 (composeNode.trait.value is NavigationDrawerTrait && currentEditable.navigationDrawerNode.value != null)
             ) {
-                return String.format(
-                    SAME_NODE_EXISTS_IN_SCREEN,
-                    composeNode.trait.value.iconText(),
-                )
+                return "${composeNode.trait.value.iconText()} is already included in the screen"
             }
         }
         return null

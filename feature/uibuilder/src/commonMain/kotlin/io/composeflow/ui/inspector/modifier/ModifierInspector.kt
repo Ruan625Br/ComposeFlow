@@ -1,6 +1,5 @@
 package io.composeflow.ui.inspector.modifier
 
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -10,6 +9,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Add
@@ -26,9 +27,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.unit.dp
 import io.composeflow.Res
 import io.composeflow.add_new_modifier
@@ -44,14 +42,12 @@ import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.modifier.hoverOverlay
 import io.composeflow.ui.popup.PositionCustomizablePopup
+import io.composeflow.ui.reorderable.ComposeFlowReorderableItem
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.ReorderableLazyListState
-import org.burnoutcrew.reorderable.detectReorder
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
 import org.jetbrains.compose.resources.stringResource
+import sh.calvin.reorderable.ReorderableLazyListState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 fun LazyListScope.modifierInspector(
     project: Project,
@@ -235,35 +231,13 @@ fun SingleModifierInspector(
             } else {
                 Modifier
             }
-        reorderableLazyListState?.let {
-            ReorderableItem(
-                reorderableLazyListState,
-                key = "modifier-$i",
-                index = i,
-            ) { isDragging ->
-                val elevation = animateDpAsState(if (isDragging) 16.dp else 0.dp)
-                val backgroundColor =
-                    if (isDragging) {
-                        MaterialTheme.colorScheme.secondaryContainer.copy(
-                            alpha = 0.8f,
-                        )
-                    } else {
-                        MaterialTheme.colorScheme.surface
-                    }
-                val clipShape =
-                    if (isDragging) RoundedCornerShape(16.dp) else RectangleShape
-                Column(
-                    modifier =
-                        Modifier
-                            .clip(clipShape)
-                            .shadow(elevation.value)
-                            .background(backgroundColor)
-                            .then(highlight),
-                ) {
-                    content()
-                }
+        if (reorderableLazyListState != null) {
+            Column(
+                modifier = highlight.then(issueContainer),
+            ) {
+                content()
             }
-        } ?: run {
+        } else {
             if (issues.isNotEmpty()) {
                 Tooltip(issues.first().errorMessage(project)) {
                     Column(
@@ -607,109 +581,124 @@ fun EditModifierDialog(
     modifier: Modifier = Modifier,
 ) {
     val focusedNodes = project.screenHolder.findFocusedNodes()
-    if (focusedNodes.isEmpty()) {
-    } else if (focusedNodes.size > 1) {
-    } else {
-        val composeNode = focusedNodes.first()
-        PositionCustomizablePopup(
-            onDismissRequest = onCloseDialog,
-        ) {
-            Surface(
-                modifier = modifier.size(width = 420.dp, height = 460.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer,
-            ) {
-                val reorderableLazyListState =
-                    rememberReorderableLazyListState(onMove = { from, to ->
-                        project.screenHolder.findFocusedNodes().firstOrNull()?.let {
-                            composeNodeCallbacks.onModifierSwapped(it, from.index, to.index)
-                        }
-                    })
-                Column {
-                    var addModifierDialogVisible by remember { mutableStateOf(false) }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(
-                            text = "Modifiers",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
-                        )
+    when {
+        focusedNodes.isEmpty() -> {
+        }
 
-                        ComposeFlowIconButton(
-                            onClick = {
-                                addModifierDialogVisible = true
-                            },
-                            modifier =
-                                Modifier
-                                    .padding(start = 16.dp)
-                                    .hoverOverlay(),
-                        ) {
-                            val contentDesc = stringResource(Res.string.add_new_modifier)
-                            Tooltip(contentDesc) {
-                                ComposeFlowIcon(
-                                    imageVector = Icons.Outlined.Add,
-                                    contentDescription = contentDesc,
-                                    tint = MaterialTheme.colorScheme.onSurface,
+        focusedNodes.size > 1 -> {
+        }
+
+        else -> {
+            val composeNode = focusedNodes.first()
+            PositionCustomizablePopup(
+                onDismissRequest = onCloseDialog,
+            ) {
+                Surface(
+                    modifier = modifier.size(width = 420.dp, height = 460.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                ) {
+                    val lazyListState = rememberLazyListState()
+                    val reorderableLazyListState =
+                        rememberReorderableLazyListState(lazyListState) { from, to ->
+                            if (from.index != to.index) {
+                                // Use the composeNode that's already in scope
+                                composeNodeCallbacks.onModifierSwapped(composeNode, from.index, to.index)
+                            }
+                        }
+                    Column {
+                        var addModifierDialogVisible by remember { mutableStateOf(false) }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "Modifiers",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                            )
+
+                            ComposeFlowIconButton(
+                                onClick = {
+                                    addModifierDialogVisible = true
+                                },
+                                modifier =
+                                    Modifier
+                                        .padding(start = 16.dp)
+                                        .hoverOverlay(),
+                            ) {
+                                val contentDesc = stringResource(Res.string.add_new_modifier)
+                                Tooltip(contentDesc) {
+                                    ComposeFlowIcon(
+                                        imageVector = Icons.Outlined.Add,
+                                        contentDescription = contentDesc,
+                                        tint = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                }
+                            }
+
+                            val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
+                            val onAllDialogsClosed = LocalOnAllDialogsClosed.current
+                            if (addModifierDialogVisible) {
+                                onAnyDialogIsShown()
+                                val modifiers =
+                                    ModifierWrapper
+                                        .values()
+                                        .filter { modifier ->
+                                            composeNode.parentNode?.let {
+                                                modifier.hasValidParent(it.trait.value)
+                                            } ?: true
+                                        }.mapIndexed { i, modifier ->
+                                            i to modifier
+                                        }
+
+                                AddModifierDialog(
+                                    modifiers = modifiers,
+                                    onModifierSelected = {
+                                        addModifierDialogVisible = false
+                                        composeNodeCallbacks.onModifierAdded(
+                                            composeNode,
+                                            modifiers[it].second,
+                                        )
+                                        onAllDialogsClosed()
+                                    },
+                                    onCloseClick = {
+                                        addModifierDialogVisible = false
+                                        onAllDialogsClosed()
+                                    },
                                 )
                             }
                         }
 
-                        val onAnyDialogIsShown = LocalOnAnyDialogIsShown.current
-                        val onAllDialogsClosed = LocalOnAllDialogsClosed.current
-                        if (addModifierDialogVisible) {
-                            onAnyDialogIsShown()
-                            val modifiers =
-                                ModifierWrapper
-                                    .values()
-                                    .filter { modifier ->
-                                        composeNode.parentNode?.let {
-                                            modifier.hasValidParent(it.trait.value)
-                                        } ?: true
-                                    }.mapIndexed { i, modifier ->
-                                        i to modifier
-                                    }
-
-                            AddModifierDialog(
-                                modifiers = modifiers,
-                                onModifierSelected = {
-                                    addModifierDialogVisible = false
-                                    composeNodeCallbacks.onModifierAdded(
-                                        composeNode,
-                                        modifiers[it].second,
-                                    )
-                                    onAllDialogsClosed()
-                                },
-                                onCloseClick = {
-                                    addModifierDialogVisible = false
-                                    onAllDialogsClosed()
-                                },
-                            )
-                        }
-                    }
-
-                    ProvideModifierReorderAllowed(reorderAllowed = true) {
                         LazyColumn(
-                            state = reorderableLazyListState.listState,
-                            modifier =
-                                Modifier
-                                    .reorderable(reorderableLazyListState)
-                                    .detectReorder(reorderableLazyListState),
+                            state = lazyListState,
+                            modifier = Modifier,
                         ) {
-                            composeNode.modifierList.forEachIndexed { i, chain ->
-
-                                val onVisibilityToggleClicked = {
-                                    chain.visible.value = !chain.visible.value
-                                    composeNodeCallbacks.onModifierUpdatedAt(composeNode, i, chain)
-                                }
-                                item {
-                                    SingleModifierInspector(
-                                        project = project,
-                                        composeNode = composeNode,
-                                        i = i,
-                                        chain = chain,
-                                        composeNodeCallbacks = composeNodeCallbacks,
-                                        onVisibilityToggleClicked = onVisibilityToggleClicked,
-                                        reorderableLazyListState = reorderableLazyListState,
-                                    )
+                            itemsIndexed(
+                                composeNode.modifierList,
+                                key = { index, modifier -> modifier },
+                            ) { i, chain ->
+                                ComposeFlowReorderableItem(
+                                    index = i,
+                                    reorderableLazyListState,
+                                    key = chain,
+                                ) {
+                                    ProvideModifierReorderAllowed(reorderableCollectionItemScope = this) {
+                                        val onVisibilityToggleClicked = {
+                                            chain.visible.value = !chain.visible.value
+                                            composeNodeCallbacks.onModifierUpdatedAt(
+                                                composeNode,
+                                                i,
+                                                chain,
+                                            )
+                                        }
+                                        SingleModifierInspector(
+                                            project = project,
+                                            composeNode = composeNode,
+                                            i = i,
+                                            chain = chain,
+                                            composeNodeCallbacks = composeNodeCallbacks,
+                                            onVisibilityToggleClicked = onVisibilityToggleClicked,
+                                            reorderableLazyListState = reorderableLazyListState,
+                                        )
+                                    }
                                 }
                             }
                         }

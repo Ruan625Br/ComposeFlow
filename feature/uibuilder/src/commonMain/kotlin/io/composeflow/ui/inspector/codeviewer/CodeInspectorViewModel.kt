@@ -6,7 +6,7 @@ import com.wakaztahir.codeeditor.model.CodeLang
 import com.wakaztahir.codeeditor.prettify.PrettifyParser
 import com.wakaztahir.codeeditor.theme.CodeTheme
 import com.wakaztahir.codeeditor.utils.parseCodeAsAnnotatedString
-import io.composeflow.formatter.Formatter
+import io.composeflow.formatter.FormatterWrapper
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
@@ -31,13 +31,17 @@ class CodeInspectorViewModel(
                     CodeInspectorUiState.Loading
                 } else {
                     val parser = PrettifyParser()
+                    val codeBlock =
+                        node.generateCode(
+                            project = project,
+                            context = GenerationContext(),
+                            dryRun = true,
+                        )
                     val code =
-                        Formatter.format(
-                            node.generateCode(
-                                project = project,
-                                context = GenerationContext(),
-                                dryRun = true,
-                            ),
+                        FormatterWrapper.formatCodeBlock(
+                            codeBlock = codeBlock,
+                            withImports = false,
+                            isScript = true,
                         )
                     codeMap.putIfAbsent(
                         code,

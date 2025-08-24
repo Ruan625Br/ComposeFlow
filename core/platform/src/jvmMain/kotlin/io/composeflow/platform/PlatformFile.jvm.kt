@@ -17,6 +17,8 @@ actual class PlatformFile(
 
     actual val name: String get() = file.name
 
+    actual val path: String get() = file.path
+
     fun toFile(): File = file
 
     fun toPath() = file.toPath()

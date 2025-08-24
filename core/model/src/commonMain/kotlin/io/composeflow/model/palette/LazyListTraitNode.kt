@@ -1,9 +1,9 @@
 package io.composeflow.model.palette
 
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
 import io.composeflow.model.modifier.generateModifierCode
 import io.composeflow.model.parameter.LazyListTrait
 import io.composeflow.model.parameter.lazylist.LazyListChildParams
@@ -18,13 +18,13 @@ object LazyListTraitNode {
         project: Project,
         node: ComposeNode,
         context: GenerationContext,
-        itemsIndexedMember: MemberName,
-        lazyListMember: MemberName,
+        itemsIndexedMember: MemberNameWrapper,
+        lazyListMember: MemberNameWrapper,
         // Two itemsIndexed exists between LazyList and LazyGrid
         lazyListParams: LazyListTrait,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         val allParamsEmpty = lazyListParams.areAllParamsEmpty() && node.modifierList.isEmpty()
         if (allParamsEmpty) {
             codeBlockBuilder.addStatement("%M {", lazyListMember)
@@ -68,7 +68,7 @@ object LazyListTraitNode {
                         when (dynamicItem) {
                             is ApiResultProperty -> {
                                 codeBlockBuilder.add(
-                                    CodeBlock.of(
+                                    CodeBlockWrapper.of(
                                         "%M(",
                                         MemberHolder.AndroidX.Lazy.itemsIndexed,
                                     ),

@@ -15,10 +15,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
 import io.composeflow.model.enumwrapper.FontStyleWrapper
 import io.composeflow.model.enumwrapper.TextAlignWrapper
 import io.composeflow.model.enumwrapper.TextDecorationWrapper
@@ -69,27 +69,27 @@ data class TextTrait(
             PropertyContainer(
                 "FontStyle",
                 fontStyle,
-                ComposeFlowType.Enum(enumClass = FontStyleWrapper::class.java),
+                ComposeFlowType.Enum(enumClass = FontStyleWrapper::class),
             ),
             PropertyContainer(
                 "Text decoration",
                 textDecoration,
-                ComposeFlowType.Enum(enumClass = TextDecorationWrapper::class.java),
+                ComposeFlowType.Enum(enumClass = TextDecorationWrapper::class),
             ),
             PropertyContainer(
                 "Text align",
                 textAlign,
-                ComposeFlowType.Enum(enumClass = TextAlignWrapper::class.java),
+                ComposeFlowType.Enum(enumClass = TextAlignWrapper::class),
             ),
             PropertyContainer(
                 "Overflow",
                 overflow,
-                ComposeFlowType.Enum(enumClass = TextOverflowWrapper::class.java),
+                ComposeFlowType.Enum(enumClass = TextOverflowWrapper::class),
             ),
             PropertyContainer(
                 "TextStyle",
                 textStyleWrapper,
-                ComposeFlowType.Enum(enumClass = TextStyleWrapper::class.java),
+                ComposeFlowType.Enum(enumClass = TextStyleWrapper::class),
             ),
         )
 
@@ -143,8 +143,8 @@ data class TextTrait(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         codeBlockBuilder.add("text = ")
         if (parseHtml == true) {
             codeBlockBuilder.add(
@@ -155,7 +155,7 @@ data class TextTrait(
                     ComposeFlowType.StringType(),
                     dryRun = dryRun,
                 ),
-                MemberName("${COMPOSEFLOW_PACKAGE}.util", "toRichHtmlString", isExtension = true),
+                MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.util", "toRichHtmlString", isExtension = true),
             )
         } else {
             codeBlockBuilder.add(
@@ -296,9 +296,9 @@ data class TextTrait(
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
-        val textMember = MemberName("androidx.compose.material3", "Text")
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
+        val textMember = MemberNameWrapper.get("androidx.compose.material3", "Text")
         codeBlockBuilder.addStatement("%M(", textMember)
         codeBlockBuilder.add(
             generateParamsCode(

@@ -2,13 +2,21 @@ package io.composeflow.model.type
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.AnnotatedString
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.asTypeName
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.TypeNameWrapper
+import io.composeflow.kotlinpoet.wrapper.asTypeNameWrapper
+import io.composeflow.kotlinpoet.wrapper.parameterizedBy
 import io.composeflow.model.datatype.DataTypeId
 import io.composeflow.model.datatype.EmptyDataType
+import io.composeflow.model.enumwrapper.ContentScaleWrapper
 import io.composeflow.model.enumwrapper.EnumWrapper
+import io.composeflow.model.enumwrapper.FontStyleWrapper
+import io.composeflow.model.enumwrapper.NodeVisibility
+import io.composeflow.model.enumwrapper.TextAlignWrapper
+import io.composeflow.model.enumwrapper.TextDecorationWrapper
+import io.composeflow.model.enumwrapper.TextFieldColorsWrapper
+import io.composeflow.model.enumwrapper.TextOverflowWrapper
+import io.composeflow.model.enumwrapper.TextStyleWrapper
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.findDataTypeOrNull
 import io.composeflow.model.project.findDataTypeOrThrow
@@ -30,6 +38,7 @@ import io.composeflow.serializer.ClassSerializer
 import io.composeflow.ui.propertyeditor.DropdownTextDisplayable
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
 import kotlin.uuid.Uuid
 
 @Serializable
@@ -70,12 +79,12 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
     fun defaultValue(): AssignableProperty
 
-    fun asKotlinPoetTypeName(project: Project): TypeName
+    fun asKotlinPoetTypeName(project: Project): TypeNameWrapper
 
     fun ComposeFlowType.convertCodeFromType(
         inputType: ComposeFlowType,
-        codeBlock: CodeBlock,
-    ): CodeBlock {
+        codeBlock: CodeBlockWrapper,
+    ): CodeBlockWrapper {
         if (!isAbleToAssign(inputType)) {
             return codeBlock
         }
@@ -134,30 +143,30 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun defaultValue(): AssignableProperty = StringProperty.StringIntrinsicValue()
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
-                List::class.asTypeName().parameterizedBy(String::class.asTypeName())
+                List::class.asTypeNameWrapper().parameterizedBy(String::class.asTypeNameWrapper())
             } else {
-                String::class.asTypeName()
+                String::class.asTypeNameWrapper()
             }
 
         override fun ComposeFlowType.convertCodeFromType(
             inputType: ComposeFlowType,
-            codeBlock: CodeBlock,
-        ): CodeBlock {
+            codeBlock: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             if (!isAbleToAssign(inputType)) {
                 return codeBlock
             }
             return if (inputType is StringType && inputType.isList == this.isList) {
                 codeBlock
             } else if (inputType is StringType && isList && !inputType.isList) {
-                val builder = CodeBlock.builder()
+                val builder = CodeBlockWrapper.builder()
                 builder.add("listOf(")
                 builder.add(codeBlock)
                 builder.add(")")
                 return builder.build()
             } else {
-                val builder = CodeBlock.builder()
+                val builder = CodeBlockWrapper.builder()
                 builder.add("(")
                 builder.add(codeBlock)
                 builder.add(")")
@@ -218,11 +227,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun defaultValue(): AssignableProperty = BooleanProperty.BooleanIntrinsicValue()
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
-                List::class.asTypeName().parameterizedBy(Boolean::class.asTypeName())
+                List::class.asTypeNameWrapper().parameterizedBy(Boolean::class.asTypeNameWrapper())
             } else {
-                Boolean::class.asTypeName()
+                Boolean::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -248,13 +257,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun ComposeFlowType.convertCodeFromType(
             inputType: ComposeFlowType,
-            codeBlock: CodeBlock,
-        ): CodeBlock {
+            codeBlock: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             if (!isAbleToAssign(inputType)) {
                 return codeBlock
             }
             return if (inputType == FloatType(isList = false)) {
-                CodeBlock.of("$codeBlock.toFloat()")
+                CodeBlockWrapper.of("$codeBlock.toFloat()")
             } else {
                 codeBlock
             }
@@ -276,11 +285,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
-                List::class.asTypeName().parameterizedBy(Int::class.asTypeName())
+                List::class.asTypeNameWrapper().parameterizedBy(Int::class.asTypeNameWrapper())
             } else {
-                Int::class.asTypeName()
+                Int::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -306,13 +315,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun ComposeFlowType.convertCodeFromType(
             inputType: ComposeFlowType,
-            codeBlock: CodeBlock,
-        ): CodeBlock {
+            codeBlock: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             if (!isAbleToAssign(inputType)) {
                 return codeBlock
             }
             return if (inputType == IntType(isList = false)) {
-                CodeBlock.of("$codeBlock.toInt()")
+                CodeBlockWrapper.of("$codeBlock.toInt()")
             } else {
                 codeBlock
             }
@@ -334,11 +343,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
-                List::class.asTypeName().parameterizedBy(Float::class.asTypeName())
+                List::class.asTypeNameWrapper().parameterizedBy(Float::class.asTypeNameWrapper())
             } else {
-                Float::class.asTypeName()
+                Float::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -377,13 +386,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
                 List::class
-                    .asTypeName()
-                    .parameterizedBy(androidx.compose.ui.graphics.Color::class.asTypeName())
+                    .asTypeNameWrapper()
+                    .parameterizedBy(androidx.compose.ui.graphics.Color::class.asTypeNameWrapper())
             } else {
-                androidx.compose.ui.graphics.Color::class.asTypeName()
+                androidx.compose.ui.graphics.Color::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -422,13 +431,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
                 List::class
-                    .asTypeName()
-                    .parameterizedBy(androidx.compose.ui.graphics.Brush::class.asTypeName())
+                    .asTypeNameWrapper()
+                    .parameterizedBy(androidx.compose.ui.graphics.Brush::class.asTypeNameWrapper())
             } else {
-                androidx.compose.ui.graphics.Brush::class.asTypeName()
+                androidx.compose.ui.graphics.Brush::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -467,13 +476,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
                 List::class
-                    .asTypeName()
-                    .parameterizedBy(kotlinx.datetime.Instant::class.asTypeName())
+                    .asTypeNameWrapper()
+                    .parameterizedBy(kotlin.time.Instant::class.asTypeNameWrapper())
             } else {
-                kotlinx.datetime.Instant::class.asTypeName()
+                kotlin.time.Instant::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -536,11 +545,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = false
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper {
             val className =
                 dataTypeId.let { project.findDataTypeOrThrow(it).asKotlinPoetClassName(project) }
             return if (isList) {
-                List::class.asTypeName().parameterizedBy(className)
+                List::class.asTypeNameWrapper().parameterizedBy(className)
             } else {
                 className
             }
@@ -553,7 +562,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
     data class Enum<E : kotlin.Enum<E>>(
         override val isList: Boolean = false,
         @Serializable(ClassSerializer::class)
-        val enumClass: Class<E>,
+        val enumClass: KClass<E>,
     ) : ComposeFlowType {
         override fun isAbleToAssign(
             type: ComposeFlowType,
@@ -574,10 +583,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
             listAware: Boolean,
         ): String {
             val typeName =
-                enumClass.name
-                    .split(".")
-                    .last()
-                    .replace("Wrapper", "")
+                (enumClass.qualifiedName ?: enumClass.simpleName)
+                    ?.split(".")
+                    ?.last()
+                    ?.replace("Wrapper", "")
+                    ?: "Enum"
             return if (listAware) {
                 if (isList) "List<$typeName>" else typeName
             } else {
@@ -591,11 +601,11 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = false
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
-                List::class.asTypeName().parameterizedBy(Int::class.asTypeName())
+                List::class.asTypeNameWrapper().parameterizedBy(Int::class.asTypeNameWrapper())
             } else {
-                Int::class.asTypeName()
+                Int::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -634,10 +644,10 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = false
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName {
-            val className = JsonElementType::class.asTypeName()
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper {
+            val className = JsonElementType::class.asTypeNameWrapper()
             return if (isList) {
-                List::class.asTypeName().parameterizedBy(className)
+                List::class.asTypeNameWrapper().parameterizedBy(className)
             } else {
                 className
             }
@@ -679,13 +689,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
                 List::class
-                    .asTypeName()
-                    .parameterizedBy(AnyType::class.asTypeName())
+                    .asTypeNameWrapper()
+                    .parameterizedBy(AnyType::class.asTypeNameWrapper())
             } else {
-                AnyType::class.asTypeName()
+                AnyType::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -739,13 +749,13 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = true
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName =
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper =
             if (isList) {
                 List::class
-                    .asTypeName()
-                    .parameterizedBy(String::class.asTypeName())
+                    .asTypeNameWrapper()
+                    .parameterizedBy(String::class.asTypeNameWrapper())
             } else {
-                String::class.asTypeName()
+                String::class.asTypeNameWrapper()
             }
 
         @Composable
@@ -773,7 +783,7 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
 
         override fun isPrimitive() = false
 
-        override fun asKotlinPoetTypeName(project: Project): TypeName = Nothing::class.asTypeName()
+        override fun asKotlinPoetTypeName(project: Project): TypeNameWrapper = Nothing::class.asTypeNameWrapper()
 
         @Composable
         override fun asDropdownText(): AnnotatedString = AnnotatedString("Unknown")
@@ -798,11 +808,24 @@ sealed interface ComposeFlowType : DropdownTextDisplayable {
     }
 }
 
-private fun <E : Enum<E>> Class<E>.getFirstEnumValue(): E? = enumConstants?.firstOrNull()
+private fun <E : Enum<E>> KClass<E>.getFirstEnumValue(): E? {
+    // Handle known EnumWrapper types
+    return when (this.simpleName) {
+        "TextDecorationWrapper" -> TextDecorationWrapper.None as? E
+        "TextStyleWrapper" -> TextStyleWrapper.DisplayLarge as? E
+        "FontStyleWrapper" -> FontStyleWrapper.Normal as? E
+        "TextAlignWrapper" -> TextAlignWrapper.Left as? E
+        "TextOverflowWrapper" -> TextOverflowWrapper.Clip as? E
+        "ContentScaleWrapper" -> ContentScaleWrapper.Crop as? E
+        "TextFieldColorsWrapper" -> TextFieldColorsWrapper.Default as? E
+        "NodeVisibility" -> NodeVisibility.AlwaysVisible as? E
+        else -> null
+    }
+}
 
 fun ComposeFlowType.convertCodeFromType(
     inputType: ComposeFlowType,
-    codeBlock: CodeBlock,
-): CodeBlock = this.convertCodeFromType(inputType, codeBlock)
+    codeBlock: CodeBlockWrapper,
+): CodeBlockWrapper = this.convertCodeFromType(inputType, codeBlock)
 
 val emptyDocumentIdType = ComposeFlowType.DocumentIdType(Uuid.random().toString())

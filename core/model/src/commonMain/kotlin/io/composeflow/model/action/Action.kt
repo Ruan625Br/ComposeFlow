@@ -13,16 +13,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.KModifier
-import com.squareup.kotlinpoet.LambdaTypeName
-import com.squareup.kotlinpoet.MemberName
-import com.squareup.kotlinpoet.ParameterSpec
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.squareup.kotlinpoet.PropertySpec
-import com.squareup.kotlinpoet.UNIT
-import com.squareup.kotlinpoet.asTypeName
 import io.composeflow.ComposeScreenConstant
 import io.composeflow.Res
 import io.composeflow.ViewModelConstant
@@ -38,7 +28,18 @@ import io.composeflow.firestore_update_document
 import io.composeflow.information
 import io.composeflow.kotlinpoet.ClassHolder
 import io.composeflow.kotlinpoet.GenerationContext
-import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.MemberHolderWrapper
+import io.composeflow.kotlinpoet.wrapper.ClassNameWrapper
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.FunSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.KModifierWrapper
+import io.composeflow.kotlinpoet.wrapper.LambdaTypeNameWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
+import io.composeflow.kotlinpoet.wrapper.ParameterSpecWrapper
+import io.composeflow.kotlinpoet.wrapper.PropertySpecWrapper
+import io.composeflow.kotlinpoet.wrapper.UNIT
+import io.composeflow.kotlinpoet.wrapper.asTypeNameWrapper
+import io.composeflow.kotlinpoet.wrapper.parameterizedBy
 import io.composeflow.model.InspectorTabDestination
 import io.composeflow.model.apieditor.ApiId
 import io.composeflow.model.datatype.FilterExpression
@@ -48,7 +49,6 @@ import io.composeflow.model.project.ParameterId
 import io.composeflow.model.project.Project
 import io.composeflow.model.project.appscreen.SCREEN_ROUTE
 import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
-import io.composeflow.model.project.appscreen.screenRouteClass
 import io.composeflow.model.project.component.COMPONENT_KEY_NAME
 import io.composeflow.model.project.component.Component
 import io.composeflow.model.project.component.ComponentId
@@ -107,7 +107,7 @@ sealed interface Action {
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock? = null
+    ): CodeBlockWrapper? = null
 
     /**
      * Generate the CodeBlock when the action is initialized.
@@ -120,14 +120,14 @@ sealed interface Action {
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-        vararg additionalCodeBlocks: CodeBlock = arrayOf(),
-    ): CodeBlock? = null
+        vararg additionalCodeBlocks: CodeBlockWrapper = arrayOf(),
+    ): CodeBlockWrapper? = null
 
     fun argumentName(project: Project): String? = null
 
-    fun generateArgumentParameterSpec(project: Project): ParameterSpec? = null
+    fun generateArgumentParameterSpec(project: Project): ParameterSpecWrapper? = null
 
-    fun generateNavigationInitializationBlock(): CodeBlock? = null
+    fun generateNavigationInitializationBlock(): CodeBlockWrapper? = null
 
     /**
      * Generates the CodeBlock if the action that triggers the action needs to be wrapped with
@@ -139,7 +139,7 @@ sealed interface Action {
      *      // Composable that triggers the action
      * }
      */
-    fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock? = null
+    fun generateWrapWithComposableBlock(insideContent: CodeBlockWrapper): CodeBlockWrapper? = null
 
     /**
      * Adds methods or properties to the given [context].
@@ -260,9 +260,9 @@ sealed interface Navigation : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val targetScreen = project.screenHolder.screens.firstOrNull { it.id == screenId }
-            val builder = CodeBlock.builder()
+            val builder = CodeBlockWrapper.builder()
             targetScreen?.let {
                 val argString =
                     if (targetScreen.parameters.isEmpty()) {
@@ -318,23 +318,24 @@ sealed interface Navigation : Action {
 
         override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateToRoute.name
 
-        override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
+        override fun generateArgumentParameterSpec(project: Project): ParameterSpecWrapper =
             argumentName(project).let { argumentName ->
-                ParameterSpec
+                ParameterSpecWrapper
                     .builder(
                         argumentName,
-                        LambdaTypeName.get(
+                        LambdaTypeNameWrapper.get(
+                            receiver = null,
                             parameters =
-                                arrayOf(
-                                    ParameterSpec.unnamed(screenRouteClass),
+                                listOf(
+                                    ParameterSpecWrapper.unnamed(ClassNameWrapper.get("", SCREEN_ROUTE)),
                                 ),
                             returnType = UNIT,
                         ),
                     ).build()
             }
 
-        override fun generateNavigationInitializationBlock(): CodeBlock {
-            val builder = CodeBlock.builder()
+        override fun generateNavigationInitializationBlock(): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.addStatement(
                 """{
                 navController.navigate(it)
@@ -373,27 +374,27 @@ sealed interface Navigation : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.addStatement("${argumentName(project)}()")
             return builder.build()
         }
 
         override fun argumentName(project: Project): String = ComposeScreenConstant.onNavigateBack.name
 
-        override fun generateArgumentParameterSpec(project: Project): ParameterSpec =
+        override fun generateArgumentParameterSpec(project: Project): ParameterSpecWrapper =
             argumentName(project).let { argumentName ->
-                ParameterSpec
+                ParameterSpecWrapper
                     .builder(
                         argumentName,
-                        LambdaTypeName.get(
+                        LambdaTypeNameWrapper.get(
                             returnType = UNIT,
                         ),
                     ).build()
             }
 
-        override fun generateNavigationInitializationBlock(): CodeBlock {
-            val builder = CodeBlock.builder()
+        override fun generateNavigationInitializationBlock(): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.add(
                 """{
                 navController.navigateUp()
@@ -483,8 +484,8 @@ sealed interface StateAction : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             // CanvasEditable that has this action
             val editable =
                 project
@@ -641,8 +642,8 @@ data class CallApi(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val apiDefinition = project.findApiDefinitionOrNull(apiId)
         apiDefinition?.let {
             val argumentString =
@@ -755,9 +756,9 @@ data class ShowConfirmationDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-        vararg additionalCodeBlocks: CodeBlock,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+        vararg additionalCodeBlocks: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val composableContext = context.getCurrentComposableContext()
         val variableName =
             composableContext.getOrAddIdentifier(
@@ -770,9 +771,9 @@ data class ShowConfirmationDialog(
                 if ($variableName) {
                     %M(
                         positiveText = """,
-            MemberHolder.AndroidX.Runtime.remember,
-            MemberHolder.AndroidX.Runtime.mutableStateOf,
-            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "ConfirmationDialog"),
+            MemberHolderWrapper.AndroidX.Runtime.remember,
+            MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+            MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "ConfirmationDialog"),
         )
         builder.add(
             positiveText.transformedCodeBlock(
@@ -811,12 +812,15 @@ data class ShowConfirmationDialog(
         )
         builder.add("title = ")
         builder.add(
-            title?.transformedCodeBlock(project, context, dryRun = dryRun) ?: CodeBlock.of(""),
+            title?.transformedCodeBlock(project, context, dryRun = dryRun)
+                ?: CodeBlockWrapper.of(""),
         )
         builder.addStatement(",")
         builder.add("message = ")
         builder.add(
-            message?.transformedCodeBlock(project, context, dryRun = dryRun) ?: CodeBlock.of(""),
+            message?.transformedCodeBlock(project, context, dryRun = dryRun) ?: CodeBlockWrapper.of(
+                "",
+            ),
         )
         builder.addStatement(",")
         builder.addStatement(")") // Close ConfirmationDialog
@@ -828,8 +832,8 @@ data class ShowConfirmationDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         builder.addStatement("$dialogOpenVariableName = true")
         return builder.build()
     }
@@ -897,9 +901,9 @@ data class ShowInformationDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-        vararg additionalCodeBlocks: CodeBlock,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+        vararg additionalCodeBlocks: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         val composableContext = context.getCurrentComposableContext()
         val dialogVariableName =
             composableContext.getOrAddIdentifier(
@@ -934,9 +938,9 @@ data class ShowInformationDialog(
                     )
                 }
             """,
-            MemberHolder.AndroidX.Runtime.remember,
-            MemberHolder.AndroidX.Runtime.mutableStateOf,
-            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "InformationDialog"),
+            MemberHolderWrapper.AndroidX.Runtime.remember,
+            MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+            MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "InformationDialog"),
         )
         return builder.build()
     }
@@ -945,8 +949,8 @@ data class ShowInformationDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         builder.addStatement("$dialogOpenVariableName = true")
         return builder.build()
     }
@@ -1057,9 +1061,9 @@ data class ShowCustomDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-        vararg additionalCodeBlocks: CodeBlock,
-    ): CodeBlock {
-        val component = findComponentOrNull(project) ?: return CodeBlock.of("")
+        vararg additionalCodeBlocks: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val component = findComponentOrNull(project) ?: return CodeBlockWrapper.of("")
         val composableContext = context.getCurrentComposableContext()
         val dialogOpenVariableName =
             composableContext.addComposeFileVariable(
@@ -1068,7 +1072,7 @@ data class ShowCustomDialog(
                 dryRun = dryRun,
             )
 
-        val paramBuilder = CodeBlock.builder()
+        val paramBuilder = CodeBlockWrapper.builder()
         paramsMap.forEach {
             val parameter = project.findParameterOrThrow(it.key)
             val assignableProperty = it.value
@@ -1082,7 +1086,7 @@ data class ShowCustomDialog(
             )
             paramBuilder.addStatement(",")
         }
-        val componentBuilder = CodeBlock.builder()
+        val componentBuilder = CodeBlockWrapper.builder()
         val componentInvocationCount = context.componentCountMap[component.name] ?: 0
         context.componentCountMap[component.name] = componentInvocationCount + 1
         componentBuilder.addStatement(
@@ -1094,7 +1098,7 @@ data class ShowCustomDialog(
             component.asMemberName(project),
         )
 
-        val builder = CodeBlock.builder()
+        val builder = CodeBlockWrapper.builder()
         builder.addStatement(
             """
                 var $dialogOpenVariableName by %M { %M(false) }
@@ -1109,9 +1113,9 @@ data class ShowCustomDialog(
                     )
                 }
             """,
-            MemberHolder.AndroidX.Runtime.remember,
-            MemberHolder.AndroidX.Runtime.mutableStateOf,
-            MemberName("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "CustomDialog"),
+            MemberHolderWrapper.AndroidX.Runtime.remember,
+            MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+            MemberNameWrapper.get("${COMPOSEFLOW_PACKAGE}.ui.dialogs", "CustomDialog"),
         )
         return builder.build()
     }
@@ -1120,8 +1124,8 @@ data class ShowCustomDialog(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         findComponentOrNull(project) ?: builder.build()
 
         builder.addStatement("$dialogOpenVariableName = true")
@@ -1173,9 +1177,9 @@ data class ShowBottomSheet(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-        vararg additionalCodeBlocks: CodeBlock,
-    ): CodeBlock {
-        val component = findComponentOrNull(project) ?: return CodeBlock.of("")
+        vararg additionalCodeBlocks: CodeBlockWrapper,
+    ): CodeBlockWrapper {
+        val component = findComponentOrNull(project) ?: return CodeBlockWrapper.of("")
 
         val composableContext = context.getCurrentComposableContext()
         val bottomSheetOpenVariableName =
@@ -1192,7 +1196,7 @@ data class ShowBottomSheet(
                 dryRun = dryRun,
             )
 
-        val paramBuilder = CodeBlock.builder()
+        val paramBuilder = CodeBlockWrapper.builder()
         paramsMap.forEach {
             val parameter = project.findParameterOrThrow(it.key)
             val assignableProperty = it.value
@@ -1206,7 +1210,7 @@ data class ShowBottomSheet(
             )
             paramBuilder.addStatement(",")
         }
-        val componentBuilder = CodeBlock.builder()
+        val componentBuilder = CodeBlockWrapper.builder()
         val componentInvocationCount = context.componentCountMap[component.name] ?: 0
         context.componentCountMap[component.name] = componentInvocationCount + 1
         componentBuilder.addStatement(
@@ -1218,7 +1222,7 @@ data class ShowBottomSheet(
             component.asMemberName(project),
         )
 
-        val builder = CodeBlock.builder()
+        val builder = CodeBlockWrapper.builder()
         builder.addStatement(
             """
                 var $bottomSheetOpenVariableName by %M { %M(false) }
@@ -1234,10 +1238,10 @@ data class ShowBottomSheet(
                     }
                 }
             """,
-            MemberHolder.AndroidX.Runtime.remember,
-            MemberHolder.AndroidX.Runtime.mutableStateOf,
-            MemberName("androidx.compose.material3", "rememberModalBottomSheetState"),
-            MemberName("androidx.compose.material3", "ModalBottomSheet"),
+            MemberHolderWrapper.AndroidX.Runtime.remember,
+            MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+            MemberNameWrapper.get("androidx.compose.material3", "rememberModalBottomSheetState"),
+            MemberNameWrapper.get("androidx.compose.material3", "ModalBottomSheet"),
         )
         return builder.build()
     }
@@ -1246,8 +1250,8 @@ data class ShowBottomSheet(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         findComponentOrNull(project) ?: return builder.build()
 
         builder.addStatement("$bottomSheetOpenVariableName = true")
@@ -1302,7 +1306,7 @@ data class ShowNavigationDrawer(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
+    ): CodeBlockWrapper {
         val screenHavingThisAction =
             project.screenHolder.screens.firstOrNull { screen ->
                 screen.getAllComposeNodes().firstOrNull { node ->
@@ -1311,9 +1315,13 @@ data class ShowNavigationDrawer(
                     }
                 } != null
             }
-        if (screenHavingThisAction?.navigationDrawerNode?.value == null) return CodeBlock.of("")
+        if (screenHavingThisAction?.navigationDrawerNode?.value == null) {
+            return CodeBlockWrapper.of(
+                "",
+            )
+        }
 
-        val builder = CodeBlock.builder()
+        val builder = CodeBlockWrapper.builder()
         screenHavingThisAction.let {
             builder.addStatement(
                 """
@@ -1323,7 +1331,7 @@ data class ShowNavigationDrawer(
                }
            }
         """,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.Coroutines.launch,
             )
         }
         return builder.build()
@@ -1396,26 +1404,26 @@ sealed interface ShowMessaging : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-            vararg additionalCodeBlocks: CodeBlock,
-        ): CodeBlock {
+            vararg additionalCodeBlocks: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                 id = "$id-$snackbarOpenVariableName",
                 initialIdentifier = snackbarOpenVariableName,
-                MemberHolder.ComposeFlow.LocalOnShowsnackbar,
+                MemberHolderWrapper.ComposeFlow.LocalOnShowsnackbar,
             )
             // Initialize the uriHandler once in the compose file instead of initializing it in
             // every action
-            return CodeBlock.of("")
+            return CodeBlockWrapper.of("")
         }
 
         override fun generateActionTriggerCodeBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val actionLabel =
                 actionLabel?.transformedCodeBlock(project, context, dryRun = dryRun) ?: "null"
-            return CodeBlock.of(
+            return CodeBlockWrapper.of(
                 """${ComposeScreenConstant.coroutineScope.name}.%M {
                 $snackbarOpenVariableName(${
                     message.transformedCodeBlock(
@@ -1426,7 +1434,7 @@ sealed interface ShowMessaging : Action {
                 }, $actionLabel)
             }
         """,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.Coroutines.launch,
             )
         }
 
@@ -1453,17 +1461,17 @@ sealed interface YearRangeSelectableAction : Action {
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val builder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val builder = CodeBlockWrapper.builder()
         builder.addStatement(
             "val $stateVariableName = %M(",
-            MemberHolder.Material3.rememberDatePickerState,
+            MemberHolderWrapper.Material3.rememberDatePickerState,
         )
         val minYear = minSelectableYear.value
         val maxYear = maxSelectableYear.value
         if (minYear != null && maxYear != null) {
             builder.add(
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "yearRange = %T(${
                         minYear.transformedCodeBlock(
                             project,
@@ -1471,34 +1479,34 @@ sealed interface YearRangeSelectableAction : Action {
                             dryRun = dryRun,
                         )
                     }, ${maxYear.transformedCodeBlock(project, context, dryRun = dryRun)}),",
-                    IntRange::class.asTypeName(),
+                    IntRange::class.asTypeNameWrapper(),
                 ),
             )
         }
         if (onlyPastDates.value) {
             builder.add(
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     """
             selectableDates = object : %M {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     return utcTimeMillis <= %T.System.now().toEpochMilliseconds()
                 }
             },""",
-                    MemberHolder.Material3.SelectableDates,
+                    MemberHolderWrapper.Material3.SelectableDates,
                     ClassHolder.Kotlinx.DateTime.Clock,
                 ),
             )
         }
         if (!onlyPastDates.value && onlyFutureDates.value) {
             builder.add(
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     """
             selectableDates = object : %M {
                 override fun isSelectableDate(utcTimeMillis: Long): Boolean {
                     return utcTimeMillis >= %T.System.now().toEpochMilliseconds()
                 }
             },""",
-                    MemberHolder.Material3.SelectableDates,
+                    MemberHolderWrapper.Material3.SelectableDates,
                     ClassHolder.Kotlinx.DateTime.Clock,
                 ),
             )
@@ -1582,9 +1590,9 @@ sealed interface DateOrTimePicker : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-            vararg additionalCodeBlocks: CodeBlock,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+            vararg additionalCodeBlocks: CodeBlockWrapper,
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             val composableContext = context.getCurrentComposableContext()
             val dialogOpenVariableName =
                 composableContext.addComposeFileVariable(
@@ -1599,7 +1607,8 @@ sealed interface DateOrTimePicker : Action {
                     dryRun = dryRun,
                 )
 
-            val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
+            val state =
+                project.findLocalStateOrNull(companionStateId) ?: return builder.build()
             if (state !is WriteableState) return builder.build()
             builder.add(
                 generateRememberDatePickerState(
@@ -1654,29 +1663,29 @@ sealed interface DateOrTimePicker : Action {
                     }
                 }
             """,
-                MemberHolder.AndroidX.Runtime.remember,
-                MemberHolder.AndroidX.Runtime.mutableStateOf,
-                MemberHolder.Material3.DatePickerDialog,
-                MemberHolder.AndroidX.Layout.Column,
-                MemberHolder.AndroidX.Layout.Row,
-                MemberHolder.Material3.OutlinedButton,
-                Instant::class.asTypeName(),
-                MemberHolder.Material3.Text,
-                MemberHolder.JetBrains.stringResource,
-                MemberHolder.ComposeFlow.Res,
-                MemberHolder.ComposeFlow.String.confirm,
-                MemberHolder.AndroidX.Layout.Spacer,
-                MemberHolder.AndroidX.Ui.Modifier,
-                MemberHolder.AndroidX.Layout.size,
-                MemberHolder.AndroidX.Layout.Spacer,
-                MemberHolder.AndroidX.Ui.Modifier,
-                MemberHolder.AndroidX.Layout.size,
-                MemberHolder.Material3.TextButton,
-                MemberHolder.Material3.Text,
-                MemberHolder.JetBrains.stringResource,
-                MemberHolder.ComposeFlow.Res,
-                MemberHolder.ComposeFlow.String.cancel,
-                MemberHolder.Material3.DatePicker,
+                MemberHolderWrapper.AndroidX.Runtime.remember,
+                MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+                MemberHolderWrapper.Material3.DatePickerDialog,
+                MemberHolderWrapper.AndroidX.Layout.Column,
+                MemberHolderWrapper.AndroidX.Layout.Row,
+                MemberHolderWrapper.Material3.OutlinedButton,
+                Instant::class.asTypeNameWrapper(),
+                MemberHolderWrapper.Material3.Text,
+                MemberHolderWrapper.JetBrains.stringResource,
+                MemberHolderWrapper.ComposeFlow.Res,
+                MemberHolderWrapper.ComposeFlow.String.confirm,
+                MemberHolderWrapper.AndroidX.Layout.Spacer,
+                MemberHolderWrapper.AndroidX.Ui.Modifier,
+                MemberHolderWrapper.AndroidX.Layout.size,
+                MemberHolderWrapper.AndroidX.Layout.Spacer,
+                MemberHolderWrapper.AndroidX.Ui.Modifier,
+                MemberHolderWrapper.AndroidX.Layout.size,
+                MemberHolderWrapper.Material3.TextButton,
+                MemberHolderWrapper.Material3.Text,
+                MemberHolderWrapper.JetBrains.stringResource,
+                MemberHolderWrapper.ComposeFlow.Res,
+                MemberHolderWrapper.ComposeFlow.String.cancel,
+                MemberHolderWrapper.Material3.DatePicker,
             )
             return builder.build()
         }
@@ -1685,8 +1694,8 @@ sealed interface DateOrTimePicker : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.addStatement("$dialogOpenVariableName = true")
             return builder.build()
         }
@@ -1770,9 +1779,9 @@ sealed interface DateOrTimePicker : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-            vararg additionalCodeBlocks: CodeBlock,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+            vararg additionalCodeBlocks: CodeBlockWrapper,
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             val composableContext = context.getCurrentComposableContext()
             val dateDialogOpenVariableName =
                 composableContext.addComposeFileVariable(
@@ -1800,7 +1809,8 @@ sealed interface DateOrTimePicker : Action {
                     dryRun = dryRun,
                 )
 
-            val state = project.findLocalStateOrNull(companionStateId) ?: return builder.build()
+            val state =
+                project.findLocalStateOrNull(companionStateId) ?: return builder.build()
             if (state !is WriteableState) return builder.build()
 
             builder.add(
@@ -1853,36 +1863,36 @@ sealed interface DateOrTimePicker : Action {
                     }
                 }
             """,
-                MemberHolder.Material3.rememberTimePickerState,
-                MemberHolder.AndroidX.Runtime.remember,
-                MemberHolder.AndroidX.Runtime.mutableStateOf,
-                MemberHolder.AndroidX.Runtime.remember,
-                MemberHolder.AndroidX.Runtime.mutableStateOf,
-                MemberHolder.Material3.DatePickerDialog,
-                MemberHolder.AndroidX.Layout.Column,
-                MemberHolder.AndroidX.Layout.Row,
-                MemberHolder.Material3.OutlinedButton,
-                MemberHolder.Material3.Text,
-                MemberHolder.JetBrains.stringResource,
-                MemberHolder.ComposeFlow.Res,
-                MemberHolder.ComposeFlow.String.confirm,
-                MemberHolder.AndroidX.Layout.Spacer,
-                MemberHolder.AndroidX.Ui.Modifier,
-                MemberHolder.AndroidX.Layout.size,
-                MemberHolder.AndroidX.Layout.Spacer,
-                MemberHolder.AndroidX.Ui.Modifier,
-                MemberHolder.AndroidX.Layout.size,
-                MemberHolder.Material3.TextButton,
-                MemberHolder.Material3.Text,
-                MemberHolder.JetBrains.stringResource,
-                MemberHolder.ComposeFlow.Res,
-                MemberHolder.ComposeFlow.String.cancel,
-                MemberHolder.Material3.DatePicker,
+                MemberHolderWrapper.Material3.rememberTimePickerState,
+                MemberHolderWrapper.AndroidX.Runtime.remember,
+                MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+                MemberHolderWrapper.AndroidX.Runtime.remember,
+                MemberHolderWrapper.AndroidX.Runtime.mutableStateOf,
+                MemberHolderWrapper.Material3.DatePickerDialog,
+                MemberHolderWrapper.AndroidX.Layout.Column,
+                MemberHolderWrapper.AndroidX.Layout.Row,
+                MemberHolderWrapper.Material3.OutlinedButton,
+                MemberHolderWrapper.Material3.Text,
+                MemberHolderWrapper.JetBrains.stringResource,
+                MemberHolderWrapper.ComposeFlow.Res,
+                MemberHolderWrapper.ComposeFlow.String.confirm,
+                MemberHolderWrapper.AndroidX.Layout.Spacer,
+                MemberHolderWrapper.AndroidX.Ui.Modifier,
+                MemberHolderWrapper.AndroidX.Layout.size,
+                MemberHolderWrapper.AndroidX.Layout.Spacer,
+                MemberHolderWrapper.AndroidX.Ui.Modifier,
+                MemberHolderWrapper.AndroidX.Layout.size,
+                MemberHolderWrapper.Material3.TextButton,
+                MemberHolderWrapper.Material3.Text,
+                MemberHolderWrapper.JetBrains.stringResource,
+                MemberHolderWrapper.ComposeFlow.Res,
+                MemberHolderWrapper.ComposeFlow.String.cancel,
+                MemberHolderWrapper.Material3.DatePicker,
             )
 
             // Code to open TimePicker
             builder.add(
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     """
     if ($timeDialogOpenVariableName) {
         %M(
@@ -1928,35 +1938,43 @@ sealed interface DateOrTimePicker : Action {
         }
     }
                 """,
-                    MemberHolder.AndroidX.Ui.Dialog,
-                    MemberHolder.Material3.Card,
-                    MemberHolder.Material3.MaterialTheme,
-                    MemberHolder.AndroidX.Layout.Column,
-                    MemberHolder.AndroidX.Ui.Modifier,
-                    MemberHolder.AndroidX.Layout.padding,
-                    MemberHolder.Material3.TimePicker,
-                    MemberHolder.AndroidX.Ui.Modifier,
-                    MemberHolder.AndroidX.Ui.Alignment,
-                    MemberHolder.AndroidX.Layout.Row,
-                    MemberHolder.AndroidX.Layout.Arrangement,
-                    MemberHolder.AndroidX.Layout.Spacer,
-                    MemberHolder.AndroidX.Ui.Modifier,
-                    MemberHolder.Material3.TextButton,
-                    MemberHolder.Material3.Text,
-                    MemberHolder.JetBrains.stringResource,
-                    MemberHolder.ComposeFlow.Res,
-                    MemberHolder.ComposeFlow.String.cancel,
-                    MemberHolder.AndroidX.Layout.Spacer,
-                    MemberHolder.AndroidX.Ui.Modifier,
-                    MemberHolder.AndroidX.Layout.width,
-                    MemberHolder.Material3.OutlinedButton,
-                    Instant::class.asTypeName(),
-                    MemberName("${COMPOSEFLOW_PACKAGE}.util", "setHour", isExtension = true),
-                    MemberName("${COMPOSEFLOW_PACKAGE}.util", "setMinute", isExtension = true),
-                    MemberHolder.Material3.Text,
-                    MemberHolder.JetBrains.stringResource,
-                    MemberHolder.ComposeFlow.Res,
-                    MemberHolder.ComposeFlow.String.confirm,
+                    MemberHolderWrapper.AndroidX.Ui.Dialog,
+                    MemberHolderWrapper.Material3.Card,
+                    MemberHolderWrapper.Material3.MaterialTheme,
+                    MemberHolderWrapper.AndroidX.Layout.Column,
+                    MemberHolderWrapper.AndroidX.Ui.Modifier,
+                    MemberHolderWrapper.AndroidX.Layout.padding,
+                    MemberHolderWrapper.Material3.TimePicker,
+                    MemberHolderWrapper.AndroidX.Ui.Modifier,
+                    MemberHolderWrapper.AndroidX.Ui.Alignment,
+                    MemberHolderWrapper.AndroidX.Layout.Row,
+                    MemberHolderWrapper.AndroidX.Layout.Arrangement,
+                    MemberHolderWrapper.AndroidX.Layout.Spacer,
+                    MemberHolderWrapper.AndroidX.Ui.Modifier,
+                    MemberHolderWrapper.Material3.TextButton,
+                    MemberHolderWrapper.Material3.Text,
+                    MemberHolderWrapper.JetBrains.stringResource,
+                    MemberHolderWrapper.ComposeFlow.Res,
+                    MemberHolderWrapper.ComposeFlow.String.cancel,
+                    MemberHolderWrapper.AndroidX.Layout.Spacer,
+                    MemberHolderWrapper.AndroidX.Ui.Modifier,
+                    MemberHolderWrapper.AndroidX.Layout.width,
+                    MemberHolderWrapper.Material3.OutlinedButton,
+                    Instant::class.asTypeNameWrapper(),
+                    MemberNameWrapper.get(
+                        "${COMPOSEFLOW_PACKAGE}.util",
+                        "setHour",
+                        isExtension = true,
+                    ),
+                    MemberNameWrapper.get(
+                        "${COMPOSEFLOW_PACKAGE}.util",
+                        "setMinute",
+                        isExtension = true,
+                    ),
+                    MemberHolderWrapper.Material3.Text,
+                    MemberHolderWrapper.JetBrains.stringResource,
+                    MemberHolderWrapper.ComposeFlow.Res,
+                    MemberHolderWrapper.ComposeFlow.String.confirm,
                 ),
             )
 
@@ -1967,8 +1985,8 @@ sealed interface DateOrTimePicker : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.addStatement("$dateDialogOpenVariableName = true")
             return builder.build()
         }
@@ -2043,24 +2061,24 @@ sealed interface Share : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-            vararg additionalCodeBlocks: CodeBlock,
-        ): CodeBlock {
+            vararg additionalCodeBlocks: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                 id = "$id-$uriHandlerName",
                 initialIdentifier = uriHandlerName,
-                MemberHolder.AndroidX.Platform.LocalUriHandler,
+                MemberHolderWrapper.AndroidX.Platform.LocalUriHandler,
             )
             // Initialize the uriHandler once in the compose file instead of initializing it in
             // every action
-            return CodeBlock.of("")
+            return CodeBlockWrapper.of("")
         }
 
         override fun generateActionTriggerCodeBlock(
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of(
+        ): CodeBlockWrapper =
+            CodeBlockWrapper.of(
                 """$uriHandlerName.openUri(${
                     url.transformedCodeBlock(
                         project,
@@ -2113,10 +2131,10 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock = CodeBlock.of("this@GoogleButtonUiContainerFirebase.onClick()")
+        ): CodeBlockWrapper = CodeBlockWrapper.of("this@GoogleButtonUiContainerFirebase.onClick()")
 
-        override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
-            val builder = CodeBlock.builder()
+        override fun generateWrapWithComposableBlock(insideContent: CodeBlockWrapper): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
 
             // The signed in user is managed by dev.gitlive.firebase.Firebase.auth.
             // So onResult doesn't have to do anything
@@ -2124,7 +2142,10 @@ sealed interface Auth : Action {
                 """
                 %M(onResult = {}) {
             """,
-                MemberName("com.mmk.kmpauth.firebase.google", "GoogleButtonUiContainerFirebase"),
+                MemberNameWrapper.get(
+                    "com.mmk.kmpauth.firebase.google",
+                    "GoogleButtonUiContainerFirebase",
+                ),
             )
             builder.add(insideContent)
             builder.addStatement("}")
@@ -2192,22 +2213,22 @@ sealed interface Auth : Action {
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
-        private fun generateCreateUserFlowProperties(): List<PropertySpec> {
+        private fun generateCreateUserFlowProperties(): List<PropertySpecWrapper> {
             val backingProperty =
-                PropertySpec
+                PropertySpecWrapper
                     .builder(
                         "_$signInStateName",
                         ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
                             ClassHolder.ComposeFlow.EventResultState,
                         ),
-                    ).addModifiers(KModifier.PRIVATE)
+                    ).addModifiers(KModifierWrapper.PRIVATE)
                     .initializer(
                         "%T(%T.NotStarted)",
                         ClassHolder.Coroutines.Flow.MutableStateFlow,
                         ClassHolder.ComposeFlow.EventResultState,
                     ).build()
             val property =
-                PropertySpec
+                PropertySpecWrapper
                     .builder(
                         signInStateName,
                         ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
@@ -2225,13 +2246,13 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-            vararg additionalCodeBlocks: CodeBlock,
-        ): CodeBlock {
+            vararg additionalCodeBlocks: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                     id = "${id}_$snackbarOpenVariableName",
                     snackbarOpenVariableName,
-                    MemberHolder.ComposeFlow.LocalOnShowsnackbar,
+                    MemberHolderWrapper.ComposeFlow.LocalOnShowsnackbar,
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
 
@@ -2245,11 +2266,21 @@ sealed interface Auth : Action {
                     )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec
+                FunSpecWrapper
                     .builder(signInStateViewModelFunName)
-                    .addParameter(ParameterSpec.builder("email", String::class).build())
-                    .addParameter(ParameterSpec.builder("password", String::class).build())
-                    .addCode(
+                    .addParameter(
+                        ParameterSpecWrapper
+                            .builder(
+                                "email",
+                                String::class.asTypeNameWrapper(),
+                            ).build(),
+                    ).addParameter(
+                        ParameterSpecWrapper
+                            .builder(
+                                "password",
+                                String::class.asTypeNameWrapper(),
+                            ).build(),
+                    ).addCode(
                         """%M.%M {
             _$signInStateName.value = %T.Loading
             try {
@@ -2260,11 +2291,11 @@ sealed interface Auth : Action {
                 _$signInStateName.value = %T.Error(e.message ?: "Unknown error")
             }
         }""",
-                        MemberHolder.PreCompose.viewModelScope,
-                        MemberHolder.Coroutines.launch,
+                        MemberHolderWrapper.PreCompose.viewModelScope,
+                        MemberHolderWrapper.Coroutines.launch,
                         ClassHolder.ComposeFlow.EventResultState,
-                        MemberHolder.Firebase.Firebase,
-                        MemberHolder.Firebase.auth,
+                        MemberHolderWrapper.Firebase.Firebase,
+                        MemberHolderWrapper.Firebase.auth,
                         ClassHolder.ComposeFlow.EventResultState,
                         ClassHolder.ComposeFlow.EventResultState,
                     ).build(),
@@ -2272,7 +2303,7 @@ sealed interface Auth : Action {
             )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec
+                FunSpecWrapper
                     .builder(resetEventResultFunName)
                     .addCode(
                         "_$signInStateName.value = %T.NotStarted",
@@ -2285,7 +2316,7 @@ sealed interface Auth : Action {
                 context.getCurrentComposableContext().addProperty(it, dryRun = dryRun)
             }
 
-            val builder = CodeBlock.builder()
+            val builder = CodeBlockWrapper.builder()
             builder.add(
                 """
     val $signInStateName by ${currentEditable.viewModelName}.$signInStateName.%M()
@@ -2306,13 +2337,13 @@ sealed interface Auth : Action {
         }
     }
             """,
-                MemberHolder.AndroidX.Runtime.collectAsState,
+                MemberHolderWrapper.AndroidX.Runtime.collectAsState,
                 ClassHolder.ComposeFlow.EventResultState,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.Coroutines.launch,
                 ClassHolder.ComposeFlow.EventResultState,
                 ClassHolder.ComposeFlow.EventResultState,
                 ClassHolder.ComposeFlow.EventResultState,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.Coroutines.launch,
             )
             return builder.build()
         }
@@ -2321,17 +2352,17 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val currentEditable = context.getCurrentComposableContext().canvasEditable
-            return CodeBlock.of(
+            return CodeBlockWrapper.of(
                 """${currentEditable.viewModelName}.$signInStateViewModelFunName(
                 ${email.transformedCodeBlock(project, context, dryRun = dryRun)},
                 ${password.transformedCodeBlock(project, context, dryRun = dryRun)})""",
             )
         }
 
-        override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
-            val builder = CodeBlock.builder()
+        override fun generateWrapWithComposableBlock(insideContent: CodeBlockWrapper): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.add(
                 """
                 if ($signInStateName == %T.Loading) {
@@ -2339,10 +2370,10 @@ sealed interface Auth : Action {
                 } else {
             """,
                 ClassHolder.ComposeFlow.EventResultState,
-                MemberHolder.Material3.CircularProgressIndicator,
-                MemberHolder.AndroidX.Ui.Modifier,
-                MemberHolder.AndroidX.Layout.size,
-                MemberHolder.AndroidX.Ui.dp,
+                MemberHolderWrapper.Material3.CircularProgressIndicator,
+                MemberHolderWrapper.AndroidX.Ui.Modifier,
+                MemberHolderWrapper.AndroidX.Layout.size,
+                MemberHolderWrapper.AndroidX.Ui.dp,
             )
             builder.add(insideContent)
             builder.add(
@@ -2416,22 +2447,22 @@ sealed interface Auth : Action {
         override fun asActionNode(actionNodeId: ActionNodeId?): ActionNode =
             ActionNode.Simple(id = actionNodeId ?: Uuid.random().toString(), action = this)
 
-        private fun generateCreateUserFlowProperties(): List<PropertySpec> {
+        private fun generateCreateUserFlowProperties(): List<PropertySpecWrapper> {
             val backingProperty =
-                PropertySpec
+                PropertySpecWrapper
                     .builder(
                         "_$createStateName",
                         ClassHolder.Coroutines.Flow.MutableStateFlow.parameterizedBy(
                             ClassHolder.ComposeFlow.EventResultState,
                         ),
-                    ).addModifiers(KModifier.PRIVATE)
+                    ).addModifiers(KModifierWrapper.PRIVATE)
                     .initializer(
                         "%T(%T.NotStarted)",
                         ClassHolder.Coroutines.Flow.MutableStateFlow,
                         ClassHolder.ComposeFlow.EventResultState,
                     ).build()
             val property =
-                PropertySpec
+                PropertySpecWrapper
                     .builder(
                         createStateName,
                         ClassHolder.Coroutines.Flow.StateFlow.parameterizedBy(
@@ -2449,13 +2480,13 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-            vararg additionalCodeBlocks: CodeBlock,
-        ): CodeBlock {
+            vararg additionalCodeBlocks: CodeBlockWrapper,
+        ): CodeBlockWrapper {
             val snackbarOpenVariableName =
                 context.getCurrentComposableContext().addCompositionLocalVariableEntryIfNotPresent(
                     id = "$id-$snackbarOpenVariableName",
                     snackbarOpenVariableName,
-                    MemberHolder.ComposeFlow.LocalOnShowsnackbar,
+                    MemberHolderWrapper.ComposeFlow.LocalOnShowsnackbar,
                 )
             val currentEditable = context.getCurrentComposableContext().canvasEditable
 
@@ -2469,11 +2500,21 @@ sealed interface Auth : Action {
                     )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec
+                FunSpecWrapper
                     .builder(createStateViewModelFunName)
-                    .addParameter(ParameterSpec.builder("email", String::class).build())
-                    .addParameter(ParameterSpec.builder("password", String::class).build())
-                    .addCode(
+                    .addParameter(
+                        ParameterSpecWrapper
+                            .builder(
+                                "email",
+                                String::class.asTypeNameWrapper(),
+                            ).build(),
+                    ).addParameter(
+                        ParameterSpecWrapper
+                            .builder(
+                                "password",
+                                String::class.asTypeNameWrapper(),
+                            ).build(),
+                    ).addCode(
                         """%M.%M {
             _$createStateName.value = %T.Loading
             try {
@@ -2484,11 +2525,11 @@ sealed interface Auth : Action {
                 _$createStateName.value = %T.Error(e.message ?: "Unknown error")
             }
         }""",
-                        MemberHolder.PreCompose.viewModelScope,
-                        MemberHolder.Coroutines.launch,
+                        MemberHolderWrapper.PreCompose.viewModelScope,
+                        MemberHolderWrapper.Coroutines.launch,
                         ClassHolder.ComposeFlow.EventResultState,
-                        MemberHolder.Firebase.Firebase,
-                        MemberHolder.Firebase.auth,
+                        MemberHolderWrapper.Firebase.Firebase,
+                        MemberHolderWrapper.Firebase.auth,
                         ClassHolder.ComposeFlow.EventResultState,
                         ClassHolder.ComposeFlow.EventResultState,
                     ).build(),
@@ -2496,7 +2537,7 @@ sealed interface Auth : Action {
             )
 
             context.getCurrentComposableContext().addFunction(
-                FunSpec
+                FunSpecWrapper
                     .builder(resetEventResultFunName)
                     .addCode(
                         "_$createStateName.value = %T.NotStarted",
@@ -2509,7 +2550,7 @@ sealed interface Auth : Action {
                 context.getCurrentComposableContext().addProperty(it, dryRun = dryRun)
             }
 
-            val builder = CodeBlock.builder()
+            val builder = CodeBlockWrapper.builder()
             builder.add(
                 """
     val $createStateName by ${currentEditable.viewModelName}.$createStateName.%M()
@@ -2530,13 +2571,13 @@ sealed interface Auth : Action {
         }
     }
             """,
-                MemberHolder.AndroidX.Runtime.collectAsState,
+                MemberHolderWrapper.AndroidX.Runtime.collectAsState,
                 ClassHolder.ComposeFlow.EventResultState,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.Coroutines.launch,
                 ClassHolder.ComposeFlow.EventResultState,
                 ClassHolder.ComposeFlow.EventResultState,
                 ClassHolder.ComposeFlow.EventResultState,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.Coroutines.launch,
             )
             return builder.build()
         }
@@ -2545,17 +2586,17 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val currentEditable = context.getCurrentComposableContext().canvasEditable
-            return CodeBlock.of(
+            return CodeBlockWrapper.of(
                 """${currentEditable.viewModelName}.$createStateViewModelFunName(
                 ${email.transformedCodeBlock(project, context, dryRun = dryRun)},
                 ${password.transformedCodeBlock(project, context, dryRun = dryRun)})""",
             )
         }
 
-        override fun generateWrapWithComposableBlock(insideContent: CodeBlock): CodeBlock {
-            val builder = CodeBlock.builder()
+        override fun generateWrapWithComposableBlock(insideContent: CodeBlockWrapper): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             builder.add(
                 """
                 if ($createStateName == %T.Loading) {
@@ -2563,10 +2604,10 @@ sealed interface Auth : Action {
                 } else {
             """,
                 ClassHolder.ComposeFlow.EventResultState,
-                MemberHolder.Material3.CircularProgressIndicator,
-                MemberHolder.AndroidX.Ui.Modifier,
-                MemberHolder.AndroidX.Layout.size,
-                MemberHolder.AndroidX.Ui.dp,
+                MemberHolderWrapper.Material3.CircularProgressIndicator,
+                MemberHolderWrapper.AndroidX.Ui.Modifier,
+                MemberHolderWrapper.AndroidX.Layout.size,
+                MemberHolderWrapper.AndroidX.Ui.dp,
             )
             builder.add(insideContent)
             builder.add(
@@ -2606,15 +2647,15 @@ sealed interface Auth : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock =
-            CodeBlock.of(
+        ): CodeBlockWrapper =
+            CodeBlockWrapper.of(
                 """${ComposeScreenConstant.coroutineScope.name}.%M {
             %M.%M.signOut()
         }
         """,
-                MemberHolder.Coroutines.launch,
-                MemberHolder.Firebase.Firebase,
-                MemberHolder.Firebase.auth,
+                MemberHolderWrapper.Coroutines.launch,
+                MemberHolderWrapper.Firebase.Firebase,
+                MemberHolderWrapper.Firebase.auth,
             )
 
         override fun hasSuspendFunction(): Boolean = true
@@ -2737,7 +2778,7 @@ sealed interface FirestoreAction : Action {
                     initial = "onSave${dataType.className}ToFirestore",
                 )
 
-            val funSpecBuilder = FunSpec.builder(updateMethodName)
+            val funSpecBuilder = FunSpecWrapper.builder(updateMethodName)
 
             context
                 .getCurrentComposableContext()
@@ -2773,8 +2814,8 @@ sealed interface FirestoreAction : Action {
                 }
             """,
                 dataType.asKotlinPoetClassName(project),
-                MemberHolder.PreCompose.viewModelScope,
-                MemberHolder.Coroutines.launch,
+                MemberHolderWrapper.PreCompose.viewModelScope,
+                MemberHolderWrapper.Coroutines.launch,
             )
             context.addFunction(funSpecBuilder.build(), dryRun = dryRun)
         }
@@ -2783,8 +2824,8 @@ sealed interface FirestoreAction : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
                     ?: return builder.build()
@@ -2910,7 +2951,7 @@ sealed interface FirestoreAction : Action {
                     id = "$id-$updateMethodName",
                     initial = "onUpdate${dataType.className}Document",
                 )
-            val funSpecBuilder = FunSpec.builder(updateMethodName)
+            val funSpecBuilder = FunSpecWrapper.builder(updateMethodName)
 
             context
                 .getCurrentComposableContext()
@@ -2954,7 +2995,7 @@ sealed interface FirestoreAction : Action {
                 funSpecBuilder.addStatement("}")
 
                 funSpecBuilder.addCode(
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         """%M.%M {
                     collection.snapshots.%M().documents.forEach { document ->
                         val entity = document.data(%T.serializer())
@@ -2962,9 +3003,9 @@ sealed interface FirestoreAction : Action {
                     }
                 }
                 """,
-                        MemberHolder.PreCompose.viewModelScope,
-                        MemberHolder.Coroutines.launch,
-                        MemberHolder.Coroutines.Flow.first,
+                        MemberHolderWrapper.PreCompose.viewModelScope,
+                        MemberHolderWrapper.Coroutines.launch,
+                        MemberHolderWrapper.Coroutines.Flow.first,
                         dataType.asKotlinPoetClassName(project),
                     ),
                 )
@@ -2976,8 +3017,8 @@ sealed interface FirestoreAction : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
-            val builder = CodeBlock.builder()
+        ): CodeBlockWrapper {
+            val builder = CodeBlockWrapper.builder()
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
             firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
@@ -3123,7 +3164,7 @@ sealed interface FirestoreAction : Action {
                     id = "$id-$updateMethodName",
                     initial = "onDelete${dataType.className}Document",
                 )
-            val funSpecBuilder = FunSpec.builder(updateMethodName)
+            val funSpecBuilder = FunSpecWrapper.builder(updateMethodName)
 
             context
                 .getCurrentComposableContext()
@@ -3140,20 +3181,22 @@ sealed interface FirestoreAction : Action {
             )
             filterExpression?.let {
                 funSpecBuilder.addStatement(".where {")
-                funSpecBuilder.addCode(it.generateCodeBlock(project, context, dryRun = dryRun))
+                funSpecBuilder.addCode(
+                    it.generateCodeBlock(project, context, dryRun = dryRun),
+                )
                 funSpecBuilder.addStatement("}")
 
                 funSpecBuilder.addCode(
-                    CodeBlock.of(
+                    CodeBlockWrapper.of(
                         """%M.%M {
                     collection.snapshots.%M().documents.forEach { document ->
                         document.reference.delete()
                     }
                 }
                 """,
-                        MemberHolder.PreCompose.viewModelScope,
-                        MemberHolder.Coroutines.launch,
-                        MemberHolder.Coroutines.Flow.first,
+                        MemberHolderWrapper.PreCompose.viewModelScope,
+                        MemberHolderWrapper.Coroutines.launch,
+                        MemberHolderWrapper.Coroutines.Flow.first,
                     ),
                 )
             }
@@ -3164,12 +3207,12 @@ sealed interface FirestoreAction : Action {
             project: Project,
             context: GenerationContext,
             dryRun: Boolean,
-        ): CodeBlock {
+        ): CodeBlockWrapper {
             val firestoreCollection =
                 collectionId?.let { project.findFirestoreCollectionOrNull(it) }
             val dataType =
                 firestoreCollection?.dataTypeId?.let { project.findDataTypeOrNull(it) }
-                    ?: return CodeBlock.of("")
+                    ?: return CodeBlockWrapper.of("")
 
             val paramString =
                 buildString {
@@ -3187,7 +3230,7 @@ sealed interface FirestoreAction : Action {
                         }
                     }
                 }
-            val builder = CodeBlock.builder()
+            val builder = CodeBlockWrapper.builder()
             val currentEditable = context.getCurrentComposableContext().canvasEditable
             val updateMethodName =
                 context.getCurrentComposableContext().generateUniqueFunName(

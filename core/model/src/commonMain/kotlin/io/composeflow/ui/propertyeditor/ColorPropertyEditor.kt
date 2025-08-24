@@ -40,15 +40,15 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.colorspace.ColorSpaces
 import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.DialogWindow
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
-import com.godaddy.android.colorpicker.ClassicColorPicker
-import com.godaddy.android.colorpicker.HsvColor
+import com.github.skydoves.colorpicker.compose.AlphaSlider
+import com.github.skydoves.colorpicker.compose.AlphaTile
+import com.github.skydoves.colorpicker.compose.HsvColorPicker
+import com.github.skydoves.colorpicker.compose.rememberColorPickerController
 import io.composeflow.Res
 import io.composeflow.cancel
 import io.composeflow.confirm
@@ -65,32 +65,53 @@ import io.composeflow.ui.icon.ComposeFlowIcon
 import io.composeflow.ui.icon.ComposeFlowIconButton
 import io.composeflow.ui.labeledbox.LabeledBorderBox
 import io.composeflow.ui.modifier.hoverIconClickable
+import io.composeflow.ui.popup.PositionCustomizablePopup
 import io.composeflow.ui.textfield.SmallOutlinedTextField
 import org.jetbrains.compose.resources.stringResource
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 // Helper functions for hex color conversion
-private fun Color.toHexString(): String {
+private fun Int.toHexString(): String = this.toString(16).padStart(2, '0').uppercase()
+
+private fun Color.toHexString(includeAlpha: Boolean = true): String {
+    val alpha = (alpha * 255).toInt()
     val red = (red * 255).toInt()
     val green = (green * 255).toInt()
     val blue = (blue * 255).toInt()
-    return String.format("#%02X%02X%02X", red, green, blue)
+    return if (includeAlpha && alpha < 255) {
+        "#${alpha.toHexString()}${red.toHexString()}${green.toHexString()}${blue.toHexString()}"
+    } else {
+        "#${red.toHexString()}${green.toHexString()}${blue.toHexString()}"
+    }
 }
 
-private fun String.toColorOrNull(): Color? {
-    return try {
+private fun String.toColorOrNull(): Color? =
+    try {
         val hex = if (startsWith("#")) substring(1) else this
-        if (hex.length != 6) return null
 
-        val red = hex.substring(0, 2).toInt(16) / 255f
-        val green = hex.substring(2, 4).toInt(16) / 255f
-        val blue = hex.substring(4, 6).toInt(16) / 255f
+        when (hex.length) {
+            6 -> {
+                // RGB format
+                val red = hex.substring(0, 2).toInt(16) / 255f
+                val green = hex.substring(2, 4).toInt(16) / 255f
+                val blue = hex.substring(4, 6).toInt(16) / 255f
+                Color(red = red, green = green, blue = blue)
+            }
 
-        Color(red = red, green = green, blue = blue)
+            8 -> {
+                // ARGB format
+                val alpha = hex.substring(0, 2).toInt(16) / 255f
+                val red = hex.substring(2, 4).toInt(16) / 255f
+                val green = hex.substring(4, 6).toInt(16) / 255f
+                val blue = hex.substring(6, 8).toInt(16) / 255f
+                Color(red = red, green = green, blue = blue, alpha = alpha)
+            }
+
+            else -> null
+        }
     } catch (e: Exception) {
         null
     }
-}
 
 @Composable
 fun ColorPropertyEditor(
@@ -196,26 +217,27 @@ private fun ColorPropertyDialog(
     onCloseClick: () -> Unit,
     includeThemeColor: Boolean,
 ) {
-    DialogWindow(
-        onCloseRequest = {
+    PositionCustomizablePopup(
+        onDismissRequest = {
             onCloseClick()
         },
-        state =
-            rememberDialogState(
-                position = WindowPosition(Alignment.TopCenter),
-                size = DpSize(800.dp, if (includeThemeColor) 900.dp else 480.dp),
-            ),
-        title = "Select color",
-        undecorated = true,
-        onKeyEvent = {
-            if (it.key == Key.Escape) {
+        onKeyEvent = { keyEvent ->
+            if (keyEvent.type == KeyEventType.KeyDown && keyEvent.key == Key.Escape) {
                 onCloseClick()
                 true
             } else {
                 false
             }
         },
-        content = {
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(
+                        width = 800.dp,
+                        height = if (includeThemeColor) 900.dp else 480.dp,
+                    ),
+        ) {
             ColorPropertyDialogContent(
                 initialColor = initialColor,
                 onThemeColorSelected = onThemeColorSelected,
@@ -223,8 +245,8 @@ private fun ColorPropertyDialog(
                 onColorUpdated = onColorUpdated,
                 includeThemeColor = includeThemeColor,
             )
-        },
-    )
+        }
+    }
 }
 
 @Composable
@@ -252,31 +274,71 @@ fun ColorPropertyDialogContent(
             )
 
             val resolvedColor = initialColor?.getColor()
-            var currentColor by remember(resolvedColor) {
-                mutableStateOf(HsvColor.from(resolvedColor ?: Color.Unspecified))
+            val controller = rememberColorPickerController()
+
+            // Set initial color only once
+            remember(resolvedColor) {
+                controller.selectByColor(resolvedColor ?: Color.Unspecified, fromUser = false)
             }
 
-            Row {
-                ClassicColorPicker(
-                    color = currentColor,
-                    modifier =
-                        Modifier
-                            .width(540.dp)
-                            .height(260.dp)
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                    onColorChanged = { hsvColor: HsvColor ->
-                        // Triggered when the color changes, do something with the newly picked color here!
-                        currentColor = hsvColor
-                    },
-                )
+            // Observe the selected color from the controller
+            val selectedColor by controller.selectedColor
 
-                val previewColor = currentColor.toColor().convert(ColorSpaces.Srgb)
-                ColorPreviewInfo(
-                    color = previewColor,
-                    onColorChanged = { newColor ->
-                        currentColor = HsvColor.from(newColor)
-                    },
-                )
+            Column {
+                Row {
+                    HsvColorPicker(
+                        controller = controller,
+                        modifier =
+                            Modifier
+                                .width(400.dp)
+                                .height(260.dp)
+                                .padding(start = 24.dp, top = 16.dp, bottom = 8.dp),
+                    )
+
+                    val previewColor = selectedColor.convert(ColorSpaces.Srgb)
+
+                    ColorPreviewInfo(
+                        color = previewColor,
+                        onColorChanged = { newColor ->
+                            controller.selectByColor(newColor, fromUser = true)
+                        },
+                    )
+                }
+
+                // Alpha slider
+                Column(
+                    modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+                ) {
+                    Text(
+                        text = "Alpha",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(bottom = 4.dp),
+                    )
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        AlphaSlider(
+                            controller = controller,
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .height(24.dp)
+                                    .padding(end = 16.dp),
+                        )
+
+                        // Alpha tile to show the color with transparency
+                        AlphaTile(
+                            controller = controller,
+                            modifier =
+                                Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(4.dp)),
+                        )
+                    }
+                }
             }
 
             if (includeThemeColor) {
@@ -364,7 +426,7 @@ fun ColorPropertyDialogContent(
                 }
                 OutlinedButton(
                     onClick = {
-                        onColorUpdated(currentColor.toColor())
+                        onColorUpdated(selectedColor)
                         onCloseClick()
                     },
                     modifier = Modifier.padding(end = 16.dp),
@@ -421,7 +483,7 @@ fun ColorPreviewInfo(
                         .fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
                 singleLine = true,
-                placeholder = { Text("#RRGGBB") },
+                placeholder = { Text("#RRGGBB or #AARRGGBB") },
             )
             Spacer(Modifier.height(8.dp))
         }

@@ -15,9 +15,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.window.core.layout.WindowWidthSizeClass
 import com.charleskorn.kaml.YamlNode
-import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.eachEquals
 import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
 import io.composeflow.model.IdMap
 import io.composeflow.model.createNewIdIfNotPresent
 import io.composeflow.model.enumwrapper.NodeVisibility
@@ -531,7 +531,7 @@ data class ComposeNode(
                 }
             }
         }
-        modifierList.removeIf { it is ModifierWrapper.ZIndex }
+        modifierList.removeAll { it is ModifierWrapper.ZIndex }
         modifierList.add(ModifierWrapper.ZIndex(maxZIndex + 1))
     }
 
@@ -548,7 +548,7 @@ data class ComposeNode(
                 }
             }
         }
-        modifierList.removeIf { it is ModifierWrapper.ZIndex }
+        modifierList.removeAll { it is ModifierWrapper.ZIndex }
         modifierList.add(ModifierWrapper.ZIndex(minZIndex - 1))
     }
 
@@ -664,8 +664,8 @@ data class ComposeNode(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         val visibilityParams = visibilityParams.value
         if (visibilityParams.alwaysVisible()) {
             codeBlockBuilder.add(

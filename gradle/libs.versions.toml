@@ -8,7 +8,7 @@ kotlinCompileTesting = "1.6.0"
 kotlinCompileTestingKsp = "1.6.0"
 ksp = "2.2.0-2.0.2"
 compose-adaptive-layout = "1.1.2"
-compose-color-picker = "0.7.0"
+compose-color-picker = "1.1.2"
 compose-multiplatform = "1.8.2"
 compose-navigation = "2.8.0-alpha13"
 conveyor = "1.12"
@@ -39,7 +39,7 @@ okhttp = "5.1.0"
 paging-multiplatform = "3.3.0-alpha02-0.5.1"
 posthog = "1.2.0"
 precompose = "1.6.2"
-reorderable = "0.9.6"
+reorderable = "3.0.0"
 roborazzi = "1.46.1"
 sentry = "8.17.0"
 sentry-jvm-gradle = "5.8.0"
@@ -78,13 +78,13 @@ precompose-koin = { module = "moe.tlaster:precompose-koin", version.ref = "preco
 precompose-viewmodel = { module = "moe.tlaster:precompose-viewmodel", version.ref = "precompose" }
 
 # UI
-compose-color-picker = { module = "com.godaddy.android.colorpicker:compose-color-picker", version.ref = "compose-color-picker" }
+compose-color-picker = { module = "com.github.skydoves:colorpicker-compose", version.ref = "compose-color-picker" }
 # Coil has an issue that images are not displayed on web https://github.com/coil-kt/coil/issues/2786
 # Using alternative until that is fixed.
 compose-image-loader = "io.github.qdsfdhvh:image-loader:1.10.0"
 paging-common = { module = "app.cash.paging:paging-common", version.ref = "paging-multiplatform" }
 paging-compose = { module = "app.cash.paging:paging-compose-common", version.ref = "paging-multiplatform" }
-reorderable = { module = "org.burnoutcrew.composereorderable:reorderable", version.ref = "reorderable" }
+reorderable = { module = "sh.calvin.reorderable:reorderable", version.ref = "reorderable" }
 richeditor-compose = "com.mohamedrejeb.richeditor:richeditor-compose:1.0.0-rc13"
 
 # Data
@@ -103,7 +103,7 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "kto
 ktor-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
-kotlinx-serialization-jsonpath = "io.github.nomisrev:kotlinx-serialization-jsonpath:1.0.0"
+kotlinx-serialization-jsonpath = "io.github.nomisrev:kotlinx-serialization-jsonpath:2.0.0-alpha.1"
 kotlin-result = "com.michael-bull.kotlin-result:kotlin-result:2.0.1"
 ktor-utils = "io.ktor:ktor-utils:3.2.3"
 kaml = "com.charleskorn.kaml:kaml:0.85.0"

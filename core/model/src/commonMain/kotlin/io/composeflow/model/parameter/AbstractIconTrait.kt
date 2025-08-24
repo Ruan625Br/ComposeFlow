@@ -9,14 +9,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import io.composeflow.Res
 import io.composeflow.asVariableName
 import io.composeflow.auth.LocalFirebaseIdToken
 import io.composeflow.cloud.storage.BlobInfoWrapper
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
 import io.composeflow.materialicons.ImageVectorHolder
 import io.composeflow.materialicons.Outlined
 import io.composeflow.materialicons.asCodeBlock
@@ -198,8 +198,8 @@ abstract class AbstractIconTrait(
         project: Project,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         when (assetType) {
             IconAssetType.Material -> {
                 imageVectorHolder?.let { holder ->
@@ -227,11 +227,11 @@ abstract class AbstractIconTrait(
                     if (blob.fileName.endsWith(".xml")) {
                         // Vector drawables
                         codeBlockBuilder.add(
-                            CodeBlock.of(
+                            CodeBlockWrapper.of(
                                 "imageVector = %M(%M.drawable.%M),",
                                 MemberHolder.JetBrains.vectorResource,
                                 MemberHolder.ComposeFlow.Res,
-                                MemberName(
+                                MemberNameWrapper.get(
                                     COMPOSEFLOW_PACKAGE,
                                     blob.fileName.asVariableName().removeSuffix(".xml"),
                                 ),
@@ -239,11 +239,11 @@ abstract class AbstractIconTrait(
                         )
                     } else {
                         codeBlockBuilder.add(
-                            CodeBlock.of(
+                            CodeBlockWrapper.of(
                                 "bitmap = %M(%M.drawable.%M),",
                                 MemberHolder.JetBrains.imageResource,
                                 MemberHolder.ComposeFlow.Res,
-                                MemberName(
+                                MemberNameWrapper.get(
                                     COMPOSEFLOW_PACKAGE,
                                     blob.fileName.asVariableName().substringBeforeLast("."),
                                 ),

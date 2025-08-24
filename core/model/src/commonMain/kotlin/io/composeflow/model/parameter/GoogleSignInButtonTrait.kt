@@ -6,15 +6,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mmk.kmpauth.uihelper.google.GoogleSignInButton
-import com.mmk.kmpauth.uihelper.google.GoogleSignInButtonIconOnly
-import com.squareup.kotlinpoet.CodeBlock
-import com.squareup.kotlinpoet.MemberName
 import io.composeflow.Res
 import io.composeflow.custom.ComposeFlowIcons
 import io.composeflow.custom.composeflowicons.Google
 import io.composeflow.kotlinpoet.GenerationContext
 import io.composeflow.kotlinpoet.MemberHolder
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
+import io.composeflow.kotlinpoet.wrapper.MemberNameWrapper
 import io.composeflow.model.action.ActionType
 import io.composeflow.model.modifier.ModifierWrapper
 import io.composeflow.model.modifier.generateModifierCode
@@ -25,6 +23,8 @@ import io.composeflow.model.project.appscreen.screen.composenode.ComposeNode
 import io.composeflow.override.mutableStateListEqualsOverrideOf
 import io.composeflow.tooltip_google_sign_in_button_trait
 import io.composeflow.ui.CanvasNodeCallbacks
+import io.composeflow.ui.button.GoogleSignInButton
+import io.composeflow.ui.button.GoogleSignInButtonIconOnly
 import io.composeflow.ui.modifierForCanvas
 import io.composeflow.ui.zoomablecontainer.ZoomableContainerStateHolder
 import kotlinx.serialization.SerialName
@@ -41,22 +41,22 @@ data class GoogleSignInButtonTrait(
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
-        val codeBlockBuilder = CodeBlock.builder()
+    ): CodeBlockWrapper {
+        val codeBlockBuilder = CodeBlockWrapper.builder()
         codeBlockBuilder.addStatement("onClick = {")
         node.actionsMap[ActionType.OnClick]?.forEach {
             codeBlockBuilder.add(it.generateCodeBlock(project, context, dryRun = dryRun))
         }
         codeBlockBuilder.addStatement("},")
 
-        val validateResultBuilder = CodeBlock.builder()
+        val validateResultBuilder = CodeBlockWrapper.builder()
         val validatorNodes =
             node.getDependentValidatorNodesForActionType(project, ActionType.OnClick)
         validatorNodes.forEachIndexed { index, validatorNode ->
             val validateResultName =
                 validatorNode.getCompanionStateOrNull(project)?.getValidateResultName(context)
             validateResultBuilder.add(
-                CodeBlock.of(
+                CodeBlockWrapper.of(
                     "$validateResultName.%M()",
                     MemberHolder.ComposeFlow.isSuccess,
                 ),
@@ -132,14 +132,17 @@ data class GoogleSignInButtonTrait(
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock {
+    ): CodeBlockWrapper {
         val buttonMember =
             if (iconOnly) {
-                MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButtonIconOnly")
+                MemberNameWrapper.get(
+                    "com.mmk.kmpauth.uihelper.google",
+                    "GoogleSignInButtonIconOnly",
+                )
             } else {
-                MemberName("com.mmk.kmpauth.uihelper.google", "GoogleSignInButton")
+                MemberNameWrapper.get("com.mmk.kmpauth.uihelper.google", "GoogleSignInButton")
             }
-        val builder = CodeBlock.builder()
+        val builder = CodeBlockWrapper.builder()
         builder.add("%M(", buttonMember)
         builder.add(
             generateParamsCode(

@@ -6,9 +6,9 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import com.squareup.kotlinpoet.CodeBlock
 import io.composeflow.Res
 import io.composeflow.kotlinpoet.GenerationContext
+import io.composeflow.kotlinpoet.wrapper.CodeBlockWrapper
 import io.composeflow.model.palette.PaletteRenderParams
 import io.composeflow.model.palette.TraitCategory
 import io.composeflow.model.project.Project
@@ -78,7 +78,7 @@ data object TabContentTrait : ComposeTrait {
         node: ComposeNode,
         context: GenerationContext,
         dryRun: Boolean,
-    ): CodeBlock =
+    ): CodeBlockWrapper =
         ColumnTrait().generateCode(
             project = project,
             node,
