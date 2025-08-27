@@ -100,15 +100,7 @@ fun LeftNavigationRail(navigator: Navigator) {
                             modifier = Modifier.fillMaxSize(),
                             contentAlignment = Alignment.Center,
                         ) {
-                            val icon =
-                                when {
-                                    isSelected ->
-                                        item.icon.tint(
-                                            Color.White.copy(alpha = 1.0f),
-                                        )
-
-                                    else -> item.icon
-                                }
+                            val icon = if (isSelected) item.icon.tint(Color.White) else item.icon
                             Icon(
                                 modifier = Modifier.size(20.dp),
                                 imageVector = icon,
@@ -122,10 +114,7 @@ fun LeftNavigationRail(navigator: Navigator) {
     }
 }
 
-private fun ImageVector.tint(
-    strokeTint: Color,
-    fillTint: Color = Color.Transparent,
-): ImageVector {
+private fun ImageVector.tint(color: Color): ImageVector {
     val backgroundPalette =
         listOf(
             Color(0xFFFF43454A),
@@ -172,7 +161,7 @@ private fun ImageVector.tint(
                 val strokeValue = (node.stroke as? SolidColor)?.value
 
                 val palette =
-                    backgroundPalette.associateWith { fillTint } + strokeColors.associateWith { strokeTint }
+                    backgroundPalette.associateWith { Color.Transparent } + strokeColors.associateWith { color }
 
                 val newFill =
                     if (fillValue != null) {
